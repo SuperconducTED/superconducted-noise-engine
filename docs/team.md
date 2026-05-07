@@ -5,7 +5,7 @@
 | Name | Role | Primary modules |
 | --- | --- | --- |
 | Dr. Fırat Akba | Faculty advisor | Reviews `docs/architecture.md` and architectural ADRs |
-| Mert Efe Şensoy | Project student leads | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger |
+| Mert Efe Şensoy | CS junior | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger |
 | Burak Öztekin | CS&EE senior | `fuzzy/tsk.py` (LOCKED), `fuzzy/fuzzification.py`, `integration/aer_factory.py`, `benchmarks/harness.py` |
 | Baha Jarad | CS&EE junior | `calibration/poller.py`, `calibration/storage.py`, `calibration/features.py` |
 | Yiğit Arda Kaderoğlu | CS sophomore | `fuzzy/membership.py`, `fuzzy/squashing.py`, `benchmarks/circuits.py` |
@@ -44,7 +44,7 @@
   reference to an ADR in `docs/decisions.md` if the change touches the
   locked math.
 - **Cross-cutting changes** (CI, pyproject, requirements, ABCs in
-  `interfaces.py`) need both leads' approval.
+  `interfaces.py`) need both Dr. Fırat Akba' and Mert Efe Şensoy's approval.
 - If you're unsure who owns a file, look in this table or ask in chat
   before opening a PR.
 
