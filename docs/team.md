@@ -4,35 +4,35 @@
 
 | Name | Role | Primary modules |
 | --- | --- | --- |
-| Two leads | Project leads | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger |
+| Dr. Fırat Akba | Faculty advisor | Reviews `docs/architecture.md` and architectural ADRs |
+| Mert Efe Şensoy | Project student leads | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger |
 | Burak Öztekin | CS&EE senior | `fuzzy/tsk.py` (LOCKED), `fuzzy/fuzzification.py`, `integration/aer_factory.py`, `benchmarks/harness.py` |
 | Baha Jarad | CS&EE junior | `calibration/poller.py`, `calibration/storage.py`, `calibration/features.py` |
 | Yiğit Arda Kaderoğlu | CS sophomore | `fuzzy/membership.py`, `fuzzy/squashing.py`, `benchmarks/circuits.py` |
 | Bengisu | Math junior | `fuzzy/defuzzification.py`, `channels/kraus.py` (LOCKED, co-owned), `benchmarks/metrics.py` |
-| Fırat Akba | Faculty advisor | Reviews `docs/architecture.md` and architectural ADRs |
 
 ## Module ownership
 
 | Module | Primary owner | Secondary reviewer |
 | --- | --- | --- |
-| `interfaces.py`, `types.py` | Two leads (joint) | — |
-| `calibration/poller.py` | Baha Jarad | Two leads |
-| `calibration/storage.py` | Baha Jarad | Two leads |
+| `interfaces.py`, `types.py` | Dr. Fırat Akba | Mert Efe Şensoy |
+| `calibration/poller.py` | Baha Jarad | Mert Efe Şensoy |
+| `calibration/storage.py` | Baha Jarad | Mert Efe Şensoy |
 | `calibration/features.py` | Baha Jarad | Bengisu |
 | `fuzzy/membership.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
-| `fuzzy/tsk.py` (LOCKED) | Burak Öztekin | Two leads + Bengisu |
+| `fuzzy/tsk.py` (LOCKED) | Burak Öztekin | Mert Efe Şensoy + Bengisu |
 | `fuzzy/defuzzification.py` | Bengisu | Burak Öztekin |
-| `fuzzy/fuzzification.py` | Burak Öztekin | Two leads |
+| `fuzzy/fuzzification.py` | Burak Öztekin | Mert Efe Şensoy |
 | `fuzzy/squashing.py` | Yiğit Arda Kaderoğlu | Bengisu |
 | `channels/kraus.py` (LOCKED) | Bengisu | Burak Öztekin |
-| `integration/aer_factory.py` | Burak Öztekin | Two leads |
+| `integration/aer_factory.py` | Burak Öztekin | Mert Efe Şensoy |
 | `benchmarks/circuits.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
-| `benchmarks/metrics.py` | Bengisu | Two leads |
-| `benchmarks/harness.py` | Burak Öztekin | Two leads |
+| `benchmarks/metrics.py` | Bengisu | Mert Efe Şensoy |
+| `benchmarks/harness.py` | Burak Öztekin | Mert Efe Şensoy |
 | `tests/*` | Owner of the implementation under test | — |
-| `docs/architecture.md` | Two leads | Fırat Akba |
-| `docs/decisions.md` (ADR ledger) | Two leads | — |
-| CI / pyproject / requirements | Two leads | — |
+| `docs/architecture.md` | Dr. Fırat Akba | Mert Efe Şensoy |
+| `docs/decisions.md` (ADR ledger) | Dr. Fırat Akba | Mert Efe Şensoy |
+| CI / pyproject / requirements | Dr. Fırat Akba | Mert Efe Şensoy |
 
 ## How ownership works
 
