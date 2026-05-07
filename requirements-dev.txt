@@ -1,0 +1,10 @@
+# Pinned development tooling. Inherits runtime pins from requirements.txt.
+-r requirements.txt
+
+pytest==9.0.3
+pytest-cov==7.1.0
+# mypy 2.0.0 was released 2026-05-06; we stay on the latest stable 1.x line
+# until 2.0 has shaken out. Re-evaluate via ADR after a few weeks.
+mypy==1.20.2
+ruff==0.15.12
+ipykernel==7.2.0

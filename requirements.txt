@@ -1,0 +1,9 @@
+# Pinned runtime dependencies. Update via discussion + ADR; CI installs from
+# this file so changes are reproducible across the team.
+qiskit==2.4.1
+qiskit-aer==0.17.2
+qiskit-ibm-runtime==0.46.1
+# numpy 2.4.0 was YANKED on PyPI; always pin to 2.4.1 or later.
+numpy==2.4.4
+scipy==1.17.1
+python-dotenv==1.1.1
