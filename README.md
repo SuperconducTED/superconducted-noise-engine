@@ -62,13 +62,13 @@ your chosen cadence. Recommended: every 4 hours.
 
 ### Polling failure modes
 
-| Symptom | Cause | Resolution |
-| --- | --- | --- |
-| Exit 1, `IBMNotAuthorizedError` in log | Missing or invalid `IBM_QUANTUM_TOKEN` | Regenerate the token at quantum.cloud.ibm.com and update `.env`. |
-| Exit 1, channel error | `IBM_QUANTUM_CHANNEL` does not match account | Try `ibm_quantum_platform` (default) or `ibm_quantum` (legacy). |
-| Snapshot skipped, `NotImplementedError` | Access tier rejects historical queries | Set `IBM_QUANTUM_INSTANCE` to your hub/group/project, or omit `--historical`. |
-| Backend unavailable | Backend not in your allow-list | Check your IBM Quantum account's available backends. |
-| Exit 1, retries exhausted | Transient HTTP failure beyond retry budget | Re-run; if persistent, raise `SUPERCONDUCTED_HTTP_RETRIES`. |
+| Symptom                                  | Cause                                          | Resolution                                                                        |
+| ---------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------- |
+| Exit 1,`IBMNotAuthorizedError` in log  | Missing or invalid `IBM_QUANTUM_TOKEN`       | Regenerate the token at quantum.cloud.ibm.com and update `.env`.                |
+| Exit 1, channel error                    | `IBM_QUANTUM_CHANNEL` does not match account | Try `ibm_quantum_platform` (default) or `ibm_quantum` (legacy).               |
+| Snapshot skipped,`NotImplementedError` | Access tier rejects historical queries         | Set `IBM_QUANTUM_INSTANCE` to your hub/group/project, or omit `--historical`. |
+| Backend unavailable                      | Backend not in your allow-list                 | Check your IBM Quantum account's available backends.                              |
+| Exit 1, retries exhausted                | Transient HTTP failure beyond retry budget     | Re-run; if persistent, raise `SUPERCONDUCTED_HTTP_RETRIES`.                     |
 
 Never commit a real token. `.env` is gitignored; `.env.example` is the
 template.
@@ -77,6 +77,9 @@ template.
 
 Five contributors plus a faculty advisor. See [docs/team.md](docs/team.md) for
 the roster and module ownership table.
+
+
+test test
 
 ## License
 
