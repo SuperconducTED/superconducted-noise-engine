@@ -6,9 +6,14 @@ on:
     - cron: '5 * * * *'
   workflow_dispatch:
 
+concurrency:
+  group: calibration-poll
+  cancel-in-progress: false
+
 jobs:
   poll:
     runs-on: ubuntu-latest
+    timeout-minutes: 55
     permissions:
       contents: write
     steps:
