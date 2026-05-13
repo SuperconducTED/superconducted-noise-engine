@@ -13,7 +13,7 @@ concurrency:
 jobs:
   poll:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: 10
     permissions:
       contents: write
     steps:
@@ -37,17 +37,24 @@ jobs:
           IBM_QUANTUM_TOKEN: ${{ secrets.IBM_QUANTUM_TOKEN }}
         run: superconducted-poll --backend ibm_brisbane
 
+      - name: Verify poller produced snapshots
+        run: |
+          test -n "$(ls -A data/calibration/ibm_brisbane 2>/dev/null)" || {
+            echo "::error::poller produced no files"
+            exit 1
+          }
+
       # Snapshots are pushed to the dedicated calibration-data branch.
       - name: Commit snapshot to calibration-data branch
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           mkdir -p /tmp/staging
-          cp -r data/calibration/* /tmp/staging/ 2>/dev/null || true
+          cp -r data/calibration/* /tmp/staging/
           git fetch origin calibration-data
           git checkout -B calibration-data origin/calibration-data
           mkdir -p snapshots/$(date -u +%Y-%m)
-          mv /tmp/staging/* snapshots/$(date -u +%Y-%m)/ 2>/dev/null || true
+          mv /tmp/staging/* snapshots/$(date -u +%Y-%m)/
           git add snapshots/
           git diff --cached --quiet \
             && echo 'No new snapshots' \

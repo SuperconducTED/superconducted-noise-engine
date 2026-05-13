@@ -83,3 +83,7 @@ From ticket #002's "Open Questions / Discussion Points":
 - `docs/team.md` for the module ownership table covering the calibration files this change deploys.
 - `src/superconducted/calibration/poller.py` and `src/superconducted/calibration/storage.py` (locked; this change does not touch them).
 - `CLAUDE.md` in the repository root for coding conventions, do-not-modify zones, and secret-hygiene rules.
+
+## Review follow-ups
+
+- PR #7 review: added a `Verify poller produced snapshots` step (fails loudly on zero-file runs, drops `|| true` from `cp`/`mv` so I/O errors surface) and tightened `timeout-minutes` from 55 to 10 to prevent a hang from starving the next scheduled tick through the `concurrency` group.
