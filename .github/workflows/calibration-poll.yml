@@ -21,7 +21,10 @@ jobs:
           cache: 'pip'
 
       - name: Install package
-        run: pip install -e .
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e . --no-deps
 
       # The poller reads one secret from the environment.
       - name: Run poller
