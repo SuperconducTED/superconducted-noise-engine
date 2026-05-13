@@ -149,7 +149,7 @@ CPTP-by-construction. With γ ∈ [0,1] for amplitude damping and
 - `superconducted-poll --help` — prints usage and exits 0
 
 For end-to-end polling against real IBM hardware, populate `.env` and
-run `superconducted-poll --backend ibm_brisbane`.
+run `superconducted-poll --backend ibm_fez`.
 
 ## Related docs
 

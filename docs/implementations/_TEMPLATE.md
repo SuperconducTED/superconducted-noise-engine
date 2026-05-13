@@ -44,7 +44,7 @@ Concrete, runnable steps. Examples:
 
 - `pytest tests/test_my_module.py -v`
 - `mypy --strict src/superconducted/my_module.py`
-- `superconducted-poll --backend ibm_brisbane --data-dir /tmp/test`
+- `superconducted-poll --backend ibm_fez --data-dir /tmp/test`
 
 ## Related docs
 
