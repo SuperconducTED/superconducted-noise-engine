@@ -37,7 +37,7 @@ jobs:
           mkdir -p /tmp/staging
           cp -r data/calibration/* /tmp/staging/ 2>/dev/null || true
           git fetch origin calibration-data
-          git checkout calibration-data
+          git checkout -B calibration-data origin/calibration-data
           mkdir -p snapshots/$(date -u +%Y-%m)
           mv /tmp/staging/* snapshots/$(date -u +%Y-%m)/ 2>/dev/null || true
           git add snapshots/
