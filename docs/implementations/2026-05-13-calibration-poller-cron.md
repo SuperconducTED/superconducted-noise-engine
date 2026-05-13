@@ -12,7 +12,7 @@ ANFIS training requires at least 630 historical IBM Quantum calibration snapshot
 
 | File | One-sentence description |
 | --- | --- |
-| `.github/workflows/calibration-poll.yml` | Hourly cron workflow that runs `superconducted-poll --backend ibm_brisbane` and pushes the produced snapshot to the orphan `calibration-data` branch. |
+| `.github/workflows/calibration-poll.yml` | Hourly cron workflow that runs `superconducted-poll --backend ibm_fez` and pushes the produced snapshot to the orphan `calibration-data` branch. |
 | `docs/implementations/2026-05-13-calibration-poller-cron.md` | This file. |
 
 ## Implementation approach
@@ -42,7 +42,7 @@ N/A: purely structural deployment wrapper. No formulas, statistical tests, or nu
 
 **`contents: write` on the workflow-scoped `GITHUB_TOKEN`, no PAT.** This is the minimum permission needed to push to the same repository from within Actions. A personal access token would expand scope without buying anything and would tie token rotation to a specific maintainer.
 
-**Single backend (`ibm_brisbane`) at launch.** Ticket #002 explicitly defers multi-backend polling to a follow-up. Starting with one backend keeps the first 24 hours of operation easy to verify, and any schema or rate-limit surprises surface against a single, well-understood device.
+**Single backend (`ibm_fez`) at launch.** Ticket #002 explicitly defers multi-backend polling to a follow-up. Starting with one backend keeps the first 24 hours of operation easy to verify, and any schema or rate-limit surprises surface against a single, well-understood device.
 
 ## Verification
 
@@ -61,7 +61,7 @@ Escalation thresholds:
 
 The following are explicitly deferred to separate tickets per ticket #002:
 
-- Multi-backend polling. Start with `ibm_brisbane`; add other devices once the pipeline is proven stable.
+- Multi-backend polling. Start with `ibm_fez`; add other devices once the pipeline is proven stable.
 - Old-snapshot rotation or cleanup. The dataset is the deliverable; every snapshot is retained.
 - Migration to S3 or a separate data repository. The orphan branch is sufficient through paper submission.
 - Slack or Discord notifications on workflow failure. GitHub's built-in failure notifications cover the early monitoring need.
@@ -72,7 +72,7 @@ The following are explicitly deferred to separate tickets per ticket #002:
 
 From ticket #002's "Open Questions / Discussion Points":
 
-1. Multiple backends from day one, or `ibm_brisbane` only until the pipeline is stable? Current decision: start with one. Revisit after the 24-hour verification window.
+1. Multiple backends from day one, or `ibm_fez` only until the pipeline is stable? Current decision: start with one. Revisit after the 24-hour verification window.
 2. Should snapshots eventually move to a separate private repository for reproducibility-artifact reasons before paper submission? Probably yes, but not now.
 3. Slack or Discord notification on workflow failure? Not yet. Add only if cron skips become a real operational pain point.
 4. Should the poller also ingest the arXiv:2410.00916 calibration tables as a cold-start corpus? Flagged as a follow-up research task; out of scope for ticket #002.
