@@ -1,0 +1,62 @@
+# Hourly calibration poller for IBM Quantum backends (ticket #002).
+name: Calibration Polling
+
+on:
+  schedule:
+    - cron: '5 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: calibration-poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # Python 3.12 matches pyproject.toml requires-python floor.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e . --no-deps
+
+      # The poller reads one secret from the environment.
+      - name: Run poller
+        env:
+          IBM_QUANTUM_TOKEN: ${{ secrets.IBM_QUANTUM_TOKEN }}
+        run: superconducted-poll --backend ibm_brisbane
+
+      - name: Verify poller produced snapshots
+        run: |
+          test -n "$(ls -A data/calibration/ibm_brisbane 2>/dev/null)" || {
+            echo "::error::poller produced no files"
+            exit 1
+          }
+
+      # Snapshots are pushed to the dedicated calibration-data branch.
+      - name: Commit snapshot to calibration-data branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          mkdir -p /tmp/staging
+          cp -r data/calibration/* /tmp/staging/
+          git fetch origin calibration-data
+          git checkout -B calibration-data origin/calibration-data
+          mkdir -p snapshots/$(date -u +%Y-%m)
+          mv /tmp/staging/* snapshots/$(date -u +%Y-%m)/
+          git add snapshots/
+          git diff --cached --quiet \
+            && echo 'No new snapshots' \
+            || git commit -m "calibration: $(date -u +%Y-%m-%dT%H:%MZ) ibm_brisbane"
+          git push origin calibration-data
