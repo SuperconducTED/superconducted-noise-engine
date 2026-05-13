@@ -87,3 +87,4 @@ From ticket #002's "Open Questions / Discussion Points":
 ## Review follow-ups
 
 - PR #7 review: added a `Verify poller produced snapshots` step (fails loudly on zero-file runs, drops `|| true` from `cp`/`mv` so I/O errors surface) and tightened `timeout-minutes` from 55 to 10 to prevent a hang from starving the next scheduled tick through the `concurrency` group.
+- Post-merge failure fix: `Commit snapshot` step was using `mv` to move a directory onto an existing non-empty directory, failing on every run after the first. Replaced with `mkdir -p` plus `mv` of the snapshot file(s) only.
