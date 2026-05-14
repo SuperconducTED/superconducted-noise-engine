@@ -15,7 +15,7 @@ from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel
 from superconducted.benchmarks.circuits import qft_circuit
 
-from superconducted.integration.aer_factory import FuzzyNoiseModel, FuzzyNoiseModelEnsemble
+from superconducted.integration.aer_factory import FuzzyNoiseModelEnsemble
 
 SHOTS_PER_MEMBER = 1024
 ENSEMBLE_SIZES = [1, 8, 16]
