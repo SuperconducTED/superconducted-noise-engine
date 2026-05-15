@@ -21,15 +21,13 @@ SHOTS_PER_MEMBER = 1024
 ENSEMBLE_SIZES = [1, 8, 16]
 
 
-def run_ensemble(
-    circuit: QuantumCircuit, members: list[Any], shots: int
-) -> dict[str, int]:
+def run_ensemble(circuit: QuantumCircuit, members: list[Any], shots: int) -> dict[str, int]:
     counts: dict[str, int] = {}
     for nm in members:
         prepared_circuit = circuit
         actual_noise_model = nm
 
-        if hasattr(nm, 'prepare'):
+        if hasattr(nm, "prepare"):
             try:
                 prep_out = nm.prepare(circuit)
                 if isinstance(prep_out, tuple):
@@ -97,7 +95,7 @@ def main() -> None:
 
     prep_circ = circuit
     prep_nm = single_member
-    if hasattr(single_member, 'prepare'):
+    if hasattr(single_member, "prepare"):
         try:
             out = single_member.prepare(circuit)
             prep_circ, prep_nm = out if isinstance(out, tuple) else (circuit, out)
