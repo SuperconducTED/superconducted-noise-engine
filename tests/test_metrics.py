@@ -28,7 +28,7 @@ def make_counts(counts_dict: dict[str, int]) -> SimulationResult:
     )
 
 
-def make_state(matrix: list[list[complex]]) -> SimulationResult:
+def make_state(matrix: list[list[float | complex]]) -> SimulationResult:
     """Builds a real SimulationResult instance from a density matrix."""
     m = np.array(matrix, dtype=np.complex128)
     return SimulationResult(shots=SHOTS_FOR_STATE_MODE, backend_label="test", density_matrix=m)

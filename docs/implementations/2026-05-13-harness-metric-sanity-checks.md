@@ -6,13 +6,8 @@ The core benchmarking metrics (Hellinger Distance, KL Divergence, State Fidelity
 ## What Changed
 | Module | Change |
 | :--- | :--- |
-<<<<<<< HEAD
-| `tests/test_harness_validation.py` | Added 10 boundary/property tests for all core metrics. |
-| `docs/implementations/` | Added this mathematical detail and implementation document. |
-=======
 | `tests/test_metrics.py` | Added 15 boundary/property tests for all core metrics. |
 | `docs/implementations/2026-05-13-harness-metric-sanity-checks.md` | Added this mathematical detail and implementation document. |
->>>>>>> f1769fb (Add mathematical validation document and reintroduce metric sanity tests)
 
 ## Implementation Approach
 We introduced a dedicated test suite using `pytest` to evaluate the metric classes in an isolated environment. The tests supply predetermined input distributions and quantum states to verify that the computed outputs match theoretical expectations.
@@ -30,6 +25,7 @@ $$H(P, Q) = \frac{1}{\sqrt{2}} \sqrt{\sum_i (\sqrt{p_i} - \sqrt{q_i})^2}$$
 **2. Kullback-Leibler (KL) Divergence**
 Measures how one probability distribution $P$ diverges from a second, expected probability distribution $Q$.
 $$D_{KL}(P \parallel Q) = \sum_x P(x) \log\left(\frac{P(x)}{Q(x)}\right)$$
+Implementation uses additive smoothing $p' = \max(p, \epsilon)$ with $\epsilon = 10^{-12}$ so $\log(0)$ stays finite; the divergence reported is on the smoothed distributions, not the raw counts.
 - Validated Identity: $D_{KL}(P \parallel P) = 0.0$
 - Validated Asymmetry: $D_{KL}(P \parallel Q) \neq D_{KL}(Q \parallel P)$
 
@@ -44,11 +40,7 @@ $$F(\rho, \sigma) = \left( \text{Tr} \sqrt{\sqrt{\rho} \sigma \sqrt{\rho}} \righ
 Assesses the goodness of fit.
 $$R^2 = 1 - \frac{\sum_i (y_i - f_i)^2}{\sum_i (y_i - \bar{y})^2}$$
 - Validated Perfect Match: $R^2 = 1.0$
-<<<<<<< HEAD
-- Validated Constant Mismatch Fallback: Returns $0.0$ when reference is uniform and output deviates.
-=======
 - Validated Constant Mismatch Fallback: Returns $0.0$ when reference is constant on the joint support (so ss_tot = 0) and engine differs.
->>>>>>> f1769fb (Add mathematical validation document and reintroduce metric sanity tests)
 
 ## Design Decisions
 - **Isolated testing:** We directly instantiate metric classes without invoking the full simulation runtime to isolate mathematical logic from engine overhead.
@@ -57,8 +49,4 @@ $$R^2 = 1 - \frac{\sum_i (y_i - f_i)^2}{\sum_i (y_i - \bar{y})^2}$$
 All mathematical constraints were verified via `pytest` passing successfully.
 
 ## Related Docs
-<<<<<<< HEAD
-- This document replaces the deprecated `docs/findings/harness-validation.md`.
-=======
-- ADR-002 (Aer Factory/Ensemble) in `docs/decisions.md`.
->>>>>>> f1769fb (Add mathematical validation document and reintroduce metric sanity tests)
+- N/A — additive test coverage only; no ADR-locked decision is revisited by this change.
