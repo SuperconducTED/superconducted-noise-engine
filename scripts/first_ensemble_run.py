@@ -1,46 +1,46 @@
 """Smoke-runs AerSimulator against an empty noise model for sanity-check timing."""
 
 import time
-from datetime import datetime, timezone
-from typing import Dict, List
+from datetime import datetime
 
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
-from superconducted.benchmarks.circuits import qft_circuit
 
-# Gerçek Sınıfların İçe Aktarılması
-from superconducted.types import CalibrationSnapshot
-from superconducted.integration.aer_factory import FuzzyNoiseModel, FuzzyNoiseModelEnsemble
+from superconducted.benchmarks.circuits import qft_circuit
 from superconducted.calibration.features import BasicCalibrationVectorizer
-from superconducted.fuzzy.tsk import TSKRuleBase
-from superconducted.fuzzy.defuzzification import WeightedAverageDefuzzifier
-from superconducted.fuzzy.squashing import ProbabilityClip
-from superconducted.fuzzy.membership import GaussianMF
 from superconducted.channels.kraus import KrausChannelProjector, NoOpNormalization
+from superconducted.fuzzy.defuzzification import WeightedAverageDefuzzifier
 from superconducted.fuzzy.fuzzification import PostGateFuzzification
+from superconducted.fuzzy.membership import GaussianMF
+from superconducted.fuzzy.squashing import ProbabilityClip
+from superconducted.fuzzy.tsk import TSKRuleBase
+from superconducted.integration.aer_factory import FuzzyNoiseModel, FuzzyNoiseModelEnsemble
+from superconducted.types import CalibrationSnapshot
 
 SHOTS_PER_MEMBER = 1024
 ENSEMBLE_SIZES = [1, 8, 16]
 
 
 def run_ensemble(
-    circuit: QuantumCircuit, members: List[FuzzyNoiseModel], shots: int
-) -> Dict[str, int]:
+    circuit: QuantumCircuit, members: list[FuzzyNoiseModel], shots: int
+) -> dict[str, int]:
     """Runs a list of prepared FuzzyNoiseModels on AerSimulator and aggregates counts."""
-    counts: Dict[str, int] = {}
-    
-    # Copilot Optimizasyonu: Simülatörü döngü dışında 1 kez yaratıyoruz
+    counts: dict[str, int] = {}
+
+    # Allocate the simulator once so each member reuses the same backend.
     sim = AerSimulator()
 
     for nm in members:
-        # Devrelerin birbirini kirletmemesi için .copy() kullanıyoruz
+        # Use .copy() so per-member prepare() does not mutate the original circuit.
         prep_out = nm.prepare(circuit.copy())
-        prepared_circuit, actual_noise_model = prep_out if isinstance(prep_out, tuple) else (circuit, prep_out)
+        prepared_circuit, actual_noise_model = (
+            prep_out if isinstance(prep_out, tuple) else (circuit, prep_out)
+        )
 
         # Decompose high-level gates (e.g. QFTGate) into Aer's basis before run()
         transpiled_circuit = transpile(prepared_circuit, backend=sim)
 
-        # Modele özel noise_model'i doğrudan run() içine veriyoruz
+        # Pass the member-specific noise_model directly into the simulator run.
         result = sim.run(transpiled_circuit, shots=shots, noise_model=actual_noise_model).result()
 
         for k, v in result.get_counts().items():
@@ -48,14 +48,18 @@ def run_ensemble(
     return counts
 
 
-def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> List[FuzzyNoiseModel]:
+def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> list[FuzzyNoiseModel]:
     """Constructs a FuzzyNoiseModelEnsemble using real concrete dependencies."""
     vectorizer = BasicCalibrationVectorizer()
 
-    # Vectorizer çıktı boyutunu snapshot'tan belirliyoruz.
+    # Determine feature dimension from the snapshot.
     try:
         dummy_features = vectorizer.extract(snapshot)
-        feature_dim = dummy_features.shape[0] if hasattr(dummy_features, "shape") else len(dummy_features)
+        feature_dim = (
+            dummy_features.shape[0]
+            if hasattr(dummy_features, "shape")
+            else len(dummy_features)
+        )
     except Exception:
         feature_dim = 1
 
@@ -84,7 +88,7 @@ def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> List[FuzzyN
 def main() -> None:
     snapshot = CalibrationSnapshot(
         backend="ibm_fez",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(datetime.UTC),
         schema_version="1.0",
         properties={
             "qubits": [
