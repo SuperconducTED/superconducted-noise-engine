@@ -14,7 +14,10 @@ from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel
 
+<<<<<<< HEAD
 from superconducted.benchmarks.circuits import qft_circuit
+=======
+>>>>>>> 9bd3bdb1a0635b398daab5a3c294b9f5e231cabc
 from superconducted.integration.aer_factory import FuzzyNoiseModelEnsemble
 
 SHOTS_PER_MEMBER = 1024
@@ -62,6 +65,7 @@ def generate_safe_ensemble(snapshot: dict[str, Any], n: int) -> list[Any]:
     args = (snapshot, dummy, dummy, dummy, dummy, dummy, dummy)
 
     try:
+<<<<<<< HEAD
         try:
             ensemble_iter = FuzzyNoiseModelEnsemble(*args, n=n)
         except TypeError as e:
@@ -70,6 +74,10 @@ def generate_safe_ensemble(snapshot: dict[str, Any], n: int) -> list[Any]:
             else:
                 raise
 
+=======
+        ensemble_iter = FuzzyNoiseModelEnsemble(*args)
+        
+>>>>>>> 9bd3bdb1a0635b398daab5a3c294b9f5e231cabc
         members = list(itertools.islice(ensemble_iter, n))
         if not members:
             raise ValueError("Ensemble boş döndü.")
