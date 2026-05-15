@@ -1,82 +1,106 @@
-"""First ensemble run Aer integration walkthrough.
+"""Smoke-runs AerSimulator against an empty noise model for sanity-check timing."""
 
-Verifies the FuzzyNoiseModel ensemble plumbing on a degenerate
-(identical-models) ensemble before variance injection is wired in.
-"""
-
-import itertools
 import time
-from typing import Any
-from unittest.mock import MagicMock
+from datetime import datetime, timezone
+from typing import Dict, List
 
-import numpy as np
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
-from qiskit_aer.noise import NoiseModel
-
 from superconducted.benchmarks.circuits import qft_circuit
-from superconducted.integration.aer_factory import FuzzyNoiseModelEnsemble
+
+# Gerçek Sınıfların İçe Aktarılması
+from superconducted.types import CalibrationSnapshot
+from superconducted.integration.aer_factory import FuzzyNoiseModel, FuzzyNoiseModelEnsemble
+from superconducted.calibration.features import BasicCalibrationVectorizer
+from superconducted.fuzzy.tsk import TSKRuleBase
+from superconducted.fuzzy.defuzzification import WeightedAverageDefuzzifier
+from superconducted.fuzzy.squashing import ProbabilityClip
+from superconducted.fuzzy.membership import GaussianMF
+from superconducted.channels.kraus import KrausChannelProjector, NoOpNormalization
+from superconducted.fuzzy.fuzzification import PostGateFuzzification
 
 SHOTS_PER_MEMBER = 1024
 ENSEMBLE_SIZES = [1, 8, 16]
 
 
-def run_ensemble(circuit: QuantumCircuit, members: list[Any], shots: int) -> dict[str, int]:
-    counts: dict[str, int] = {}
+def run_ensemble(
+    circuit: QuantumCircuit, members: List[FuzzyNoiseModel], shots: int
+) -> Dict[str, int]:
+    """Runs a list of prepared FuzzyNoiseModels on AerSimulator and aggregates counts."""
+    counts: Dict[str, int] = {}
+    
+    # Copilot Optimizasyonu: Simülatörü döngü dışında 1 kez yaratıyoruz
+    sim = AerSimulator()
+
     for nm in members:
-        prepared_circuit = circuit
-        actual_noise_model = nm
+        # Devrelerin birbirini kirletmemesi için .copy() kullanıyoruz
+        prep_out = nm.prepare(circuit.copy())
+        prepared_circuit, actual_noise_model = prep_out if isinstance(prep_out, tuple) else (circuit, prep_out)
 
-        if hasattr(nm, "prepare"):
-            try:
-                prep_out = nm.prepare(circuit)
-                if isinstance(prep_out, tuple):
-                    prepared_circuit, actual_noise_model = prep_out
-                else:
-                    actual_noise_model = prep_out
-            except Exception:
-                actual_noise_model = NoiseModel()
-
-        if not isinstance(actual_noise_model, NoiseModel):
-            actual_noise_model = NoiseModel()
-
-        sim = AerSimulator(noise_model=actual_noise_model)
-
-        # KILIT COZUM: QFT gibi yuksek seviye devreleri simulatorun
-        # anlayacagi temel kapilara ceviriyoruz
+        # Decompose high-level gates (e.g. QFTGate) into Aer's basis before run()
         transpiled_circuit = transpile(prepared_circuit, backend=sim)
 
-        result = sim.run(transpiled_circuit, shots=shots).result()
+        # Modele özel noise_model'i doğrudan run() içine veriyoruz
+        result = sim.run(transpiled_circuit, shots=shots, noise_model=actual_noise_model).result()
 
         for k, v in result.get_counts().items():
             counts[k] = counts.get(k, 0) + v
     return counts
 
 
-def generate_safe_ensemble(snapshot: dict[str, Any], n: int) -> list[Any]:
-    dummy = MagicMock()
-    dummy.extract.return_value = np.array([])
+def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> List[FuzzyNoiseModel]:
+    """Constructs a FuzzyNoiseModelEnsemble using real concrete dependencies."""
+    vectorizer = BasicCalibrationVectorizer()
 
-    args = (snapshot, dummy, dummy, dummy, dummy, dummy, dummy)
-
+    # Vectorizer çıktı boyutunu snapshot'tan belirliyoruz.
     try:
-        ensemble_iter = FuzzyNoiseModelEnsemble(*args)
-
-        members = list(itertools.islice(ensemble_iter, n))
-        if not members:
-            raise ValueError("Ensemble boş döndü.")
-
-        return members
-
+        dummy_features = vectorizer.extract(snapshot)
+        feature_dim = dummy_features.shape[0] if hasattr(dummy_features, "shape") else len(dummy_features)
     except Exception:
-        return [NoiseModel() for _ in range(n)]
+        feature_dim = 1
+
+    mfs_list: list[list[GaussianMF]] = []
+    for _ in range(max(1, feature_dim)):
+        mfs_list.append(
+            [
+                GaussianMF(center=0.0, sigma=0.02),
+                GaussianMF(center=0.01, sigma=0.02),
+            ]
+        )
+
+    ensemble_iter = FuzzyNoiseModelEnsemble(
+        calibration=snapshot,
+        feature_extractor=vectorizer,
+        rule_base=TSKRuleBase.from_grid(per_input_mfs=mfs_list, output_dim=2),
+        defuzzifier=WeightedAverageDefuzzifier(),
+        squashing=ProbabilityClip(),
+        channel_projector=KrausChannelProjector(NoOpNormalization()),
+        fuzzification_strategy=PostGateFuzzification(),
+        ensemble_size=n,
+    )
+    return list(ensemble_iter)
 
 
 def main() -> None:
-    snapshot: dict[str, Any] = {}
-    circuit = qft_circuit(3)
+    snapshot = CalibrationSnapshot(
+        backend="ibm_fez",
+        timestamp=datetime.now(timezone.utc),
+        schema_version="1.0",
+        properties={
+            "qubits": [
+                [
+                    {"name": "T1", "value": 50e-6},
+                    {"name": "T2", "value": 50e-6},
+                    {"name": "readout_error", "value": 0.01},
+                ]
+            ]
+        },
+        target={},
+        configuration={},
+    )
+    circuit = qft_circuit(1)
 
-    print("--- Ensemble Scaling Tests ---")
+    print("--- Ensemble Scaling Tests (Real Concretes) ---")
     for n in ENSEMBLE_SIZES:
         members = generate_safe_ensemble(snapshot, n)
 
@@ -92,25 +116,12 @@ def main() -> None:
     single_member = generate_safe_ensemble(snapshot, 1)[0]
 
     t0_sanity = time.perf_counter()
+    prep_out = single_member.prepare(circuit.copy())
+    prep_circ, prep_nm = prep_out if isinstance(prep_out, tuple) else (circuit, single_member)
 
-    prep_circ = circuit
-    prep_nm = single_member
-    if hasattr(single_member, "prepare"):
-        try:
-            out = single_member.prepare(circuit)
-            prep_circ, prep_nm = out if isinstance(out, tuple) else (circuit, out)
-        except Exception:
-            prep_nm = NoiseModel()
-
-    if not isinstance(prep_nm, NoiseModel):
-        prep_nm = NoiseModel()
-
-    sim_sanity = AerSimulator(noise_model=prep_nm)
-
-    # KILIT COZUM: Sanity Check icin de transpile ediyoruz
+    sim_sanity = AerSimulator()
     transpiled_sanity = transpile(prep_circ, backend=sim_sanity)
-
-    result_sanity = sim_sanity.run(transpiled_sanity, shots=8192).result()
+    result_sanity = sim_sanity.run(transpiled_sanity, shots=8192, noise_model=prep_nm).result()
     sanity_counts = result_sanity.get_counts()
     elapsed_sanity = time.perf_counter() - t0_sanity
 
