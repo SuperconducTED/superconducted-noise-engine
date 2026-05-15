@@ -13,14 +13,10 @@ The architecture has evolved significantly from the initial skeleton. The ensemb
 * **Expected Hook Signature:** The hook will likely reside in the injected fuzzy modules, expecting a method signature similar to `def extract(self, snapshot: CalibrationSnapshot) -> np.ndarray:` where the variance sampling math will occur before yielding the concrete `FuzzyNoiseModel`.
 
 ## 3. Latency Observations (Wall-Clock Scaling)
-For the 1-qubit QFT benchmark circuit (shots=1024 per member), the wall-clock execution times are as follows. *(Note: This run is degenerate-by-design per ADR-015, using real concrete components but identical models for sanity-check timing)*:
-* **N=1:** 6.84s
-* **N=8:** 0.64s
-* **N=16:** 1.31s
-* **Sanity Check (Single Member, 8192 shots):** 0.08s
+The latency table that was previously published in this section was produced by a degenerate run that exercised empty `NoiseModel()` instances rather than the full fuzzy-noise pipeline. That happened because the harness substituted mocked/stubbed components and a pair of broad except/fallbacks allowed execution to continue with empty models. Those measured numbers are therefore invalid for drawing architectural conclusions about the ensemble.
 
-*Observation:* The extremely high latency for N=1 (6.84s) is due to the initialization and compilation (transpile) overhead of Qiskit Aer on the first run. Once the backend is initialized, the scaling from N=8 (0.64s) to N=16 (1.31s) shows almost perfectly linear scaling, indicating that Aer does not internally parallelize across different noise model instances and the Python-level iteration dominates the elapsed time.
+Action: re-run the scaling measurements with the real bootstrap components wired (see the verification steps in the implementation record). Only measurements obtained after wiring the real `BasicCalibrationVectorizer`, `TSKRuleBase.from_grid(...)`, `WeightedAverageDefuzzifier`, `ProbabilityClip`, `KrausChannelProjector`, and `PostGateFuzzification` should be used to inform latency claims.
 
 ## 4. Surprises and Risks
-* **Strict Dependency Injection:** The most significant surprise was the `FuzzyNoiseModelEnsemble.__init__` signature. It requires 7 injected components—`calibration`, `feature_extractor`, `rule_base`, `defuzzifier`, `squashing`, `channel_projector`, and `fuzzification_strategy`—with an optional `ensemble_size` and `rng` parameters. The pre-meeting architecture document implied a simpler factory method. This strict DI means any downstream benchmarking script must instantiate and pass all fuzzy components, which adds significant boilerplate, and readers should use `ensemble_size` (rather than a required positional `n`) to control N.
+* **Strict Dependency Injection:** The `FuzzyNoiseModelEnsemble.__init__` takes the `calibration` plus six fuzzy components (`feature_extractor`, `rule_base`, `defuzzifier`, `squashing`, `channel_projector`, `fuzzification_strategy`) as its required injected dependencies. In addition it exposes optional parameters `ensemble_size` (defaults to 32) and `rng` (defaults to None). Note: earlier text misstated the positional argument count; the correct surprise for readers is the strict DI surface and the presence of optional sizing/rng parameters rather than an always-positional `n`.
 * **Transpilation Requirement:** When passing high-level circuits (like QFT) to the `AerSimulator` equipped with our custom noise models, an explicit `transpile(circuit, backend=sim)` step is mandatory before `sim.run()`, otherwise Aer throws an `unknown instruction` error.
