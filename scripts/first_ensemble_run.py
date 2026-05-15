@@ -4,31 +4,31 @@ Verifies the FuzzyNoiseModel ensemble plumbing on a degenerate
 (identical-models) ensemble before variance injection is wired in.
 """
 
-import time
 import itertools
-import numpy as np
-from typing import Any, Dict, List
+import time
+from typing import Any
 from unittest.mock import MagicMock
 
+import numpy as np
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel
-from superconducted.benchmarks.circuits import qft_circuit
 
-from superconducted.integration.aer_factory import FuzzyNoiseModel, FuzzyNoiseModelEnsemble
+from superconducted.benchmarks.circuits import qft_circuit
+from superconducted.integration.aer_factory import FuzzyNoiseModelEnsemble
 
 SHOTS_PER_MEMBER = 1024
 ENSEMBLE_SIZES = [1, 8, 16]
 
 
 def run_ensemble(
-    circuit: QuantumCircuit, members: List[Any], shots: int
-) -> Dict[str, int]:
-    counts: Dict[str, int] = {}
+    circuit: QuantumCircuit, members: list[Any], shots: int
+) -> dict[str, int]:
+    counts: dict[str, int] = {}
     for nm in members:
         prepared_circuit = circuit
         actual_noise_model = nm
-        
+
         if hasattr(nm, 'prepare'):
             try:
                 prep_out = nm.prepare(circuit)
@@ -38,28 +38,29 @@ def run_ensemble(
                     actual_noise_model = prep_out
             except Exception:
                 actual_noise_model = NoiseModel()
-        
+
         if not isinstance(actual_noise_model, NoiseModel):
             actual_noise_model = NoiseModel()
-            
+
         sim = AerSimulator(noise_model=actual_noise_model)
-        
-        # KİLİT ÇÖZÜM: QFT gibi yüksek seviye devreleri simülatörün anlayacağı temel kapılara çeviriyoruz
+
+        # KILIT COZUM: QFT gibi yuksek seviye devreleri simulatorun
+        # anlayacagi temel kapilara ceviriyoruz
         transpiled_circuit = transpile(prepared_circuit, backend=sim)
-        
+
         result = sim.run(transpiled_circuit, shots=shots).result()
-        
+
         for k, v in result.get_counts().items():
             counts[k] = counts.get(k, 0) + v
     return counts
 
 
-def generate_safe_ensemble(snapshot: Dict[str, Any], n: int) -> List[Any]:
+def generate_safe_ensemble(snapshot: dict[str, Any], n: int) -> list[Any]:
     dummy = MagicMock()
     dummy.extract.return_value = np.array([])
-    
+
     args = (snapshot, dummy, dummy, dummy, dummy, dummy, dummy)
-    
+
     try:
         try:
             ensemble_iter = FuzzyNoiseModelEnsemble(*args, n=n)
@@ -68,19 +69,19 @@ def generate_safe_ensemble(snapshot: Dict[str, Any], n: int) -> List[Any]:
                 ensemble_iter = FuzzyNoiseModelEnsemble(*args)
             else:
                 raise
-        
+
         members = list(itertools.islice(ensemble_iter, n))
         if not members:
             raise ValueError("Ensemble boş döndü.")
-            
+
         return members
-        
+
     except Exception:
         return [NoiseModel() for _ in range(n)]
 
 
 def main() -> None:
-    snapshot: Dict[str, Any] = {}
+    snapshot: dict[str, Any] = {}
     circuit = qft_circuit(3)
 
     print("--- Ensemble Scaling Tests ---")
@@ -99,7 +100,7 @@ def main() -> None:
     single_member = generate_safe_ensemble(snapshot, 1)[0]
 
     t0_sanity = time.perf_counter()
-    
+
     prep_circ = circuit
     prep_nm = single_member
     if hasattr(single_member, 'prepare'):
@@ -108,15 +109,15 @@ def main() -> None:
             prep_circ, prep_nm = out if isinstance(out, tuple) else (circuit, out)
         except Exception:
             prep_nm = NoiseModel()
-            
+
     if not isinstance(prep_nm, NoiseModel):
         prep_nm = NoiseModel()
-        
+
     sim_sanity = AerSimulator(noise_model=prep_nm)
-    
-    # KİLİT ÇÖZÜM: Sanity Check için de transpile ediyoruz
+
+    # KILIT COZUM: Sanity Check icin de transpile ediyoruz
     transpiled_sanity = transpile(prep_circ, backend=sim_sanity)
-    
+
     result_sanity = sim_sanity.run(transpiled_sanity, shots=8192).result()
     sanity_counts = result_sanity.get_counts()
     elapsed_sanity = time.perf_counter() - t0_sanity
