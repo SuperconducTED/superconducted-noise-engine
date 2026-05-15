@@ -62,13 +62,7 @@ def generate_safe_ensemble(snapshot: dict[str, Any], n: int) -> list[Any]:
     args = (snapshot, dummy, dummy, dummy, dummy, dummy, dummy)
 
     try:
-        try:
-            ensemble_iter = FuzzyNoiseModelEnsemble(*args, n=n)
-        except TypeError as e:
-            if "unexpected keyword argument" in str(e):
-                ensemble_iter = FuzzyNoiseModelEnsemble(*args)
-            else:
-                raise
+        ensemble_iter = FuzzyNoiseModelEnsemble(*args)
 
         members = list(itertools.islice(ensemble_iter, n))
         if not members:
