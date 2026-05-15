@@ -1,7 +1,10 @@
 """Smoke-runs AerSimulator against an empty noise model for sanity-check timing."""
 
+from __future__ import annotations
+
 import time
-from datetime import datetime
+from datetime import UTC, datetime
+from typing import Final
 
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
@@ -14,63 +17,55 @@ from superconducted.fuzzy.fuzzification import PostGateFuzzification
 from superconducted.fuzzy.membership import GaussianMF
 from superconducted.fuzzy.squashing import ProbabilityClip
 from superconducted.fuzzy.tsk import TSKRuleBase
-from superconducted.integration.aer_factory import FuzzyNoiseModel, FuzzyNoiseModelEnsemble
+from superconducted.integration.aer_factory import (
+    FuzzyNoiseModel,
+    FuzzyNoiseModelEnsemble,
+)
 from superconducted.types import CalibrationSnapshot
 
-SHOTS_PER_MEMBER = 1024
-ENSEMBLE_SIZES = [1, 8, 16]
+SHOTS_PER_MEMBER: Final[int] = 1024
+ENSEMBLE_SIZES: Final[list[int]] = [1, 8, 16]
 
 
 def run_ensemble(
     circuit: QuantumCircuit, members: list[FuzzyNoiseModel], shots: int
 ) -> dict[str, int]:
-    """Runs a list of prepared FuzzyNoiseModels on AerSimulator and aggregates counts."""
+    """Run each ensemble member and aggregate counts into a single dictionary.
+
+    The simulator is allocated once and reused for all members to avoid
+    unnecessary backend construction overhead.
+    """
     counts: dict[str, int] = {}
 
-    # Allocate the simulator once so each member reuses the same backend.
     sim = AerSimulator()
 
     for nm in members:
-        # Use .copy() so per-member prepare() does not mutate the original circuit.
-        prep_out = nm.prepare(circuit.copy())
-        prepared_circuit, actual_noise_model = (
-            prep_out if isinstance(prep_out, tuple) else (circuit, prep_out)
-        )
-
-        # Decompose high-level gates (e.g. QFTGate) into Aer's basis before run()
+        prepared_circuit, actual_noise_model = nm.prepare(circuit.copy())
         transpiled_circuit = transpile(prepared_circuit, backend=sim)
-
-        # Pass the member-specific noise_model directly into the simulator run.
         result = sim.run(transpiled_circuit, shots=shots, noise_model=actual_noise_model).result()
-
         for k, v in result.get_counts().items():
             counts[k] = counts.get(k, 0) + v
     return counts
 
 
 def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> list[FuzzyNoiseModel]:
-    """Constructs a FuzzyNoiseModelEnsemble using real concrete dependencies."""
-    vectorizer = BasicCalibrationVectorizer()
+    """Construct a `FuzzyNoiseModelEnsemble` with conservative default MFs.
 
-    # Determine feature dimension from the snapshot.
+    Uses the `BasicCalibrationVectorizer` to infer the input dimension from
+    the provided snapshot and builds a small grid of Gaussian MFs per input.
+    """
+    vectorizer = BasicCalibrationVectorizer()
     try:
         dummy_features = vectorizer.extract(snapshot)
         feature_dim = (
-            dummy_features.shape[0]
-            if hasattr(dummy_features, "shape")
-            else len(dummy_features)
+            dummy_features.shape[0] if hasattr(dummy_features, "shape") else len(dummy_features)
         )
     except Exception:
         feature_dim = 1
 
     mfs_list: list[list[GaussianMF]] = []
     for _ in range(max(1, feature_dim)):
-        mfs_list.append(
-            [
-                GaussianMF(center=0.0, sigma=0.02),
-                GaussianMF(center=0.01, sigma=0.02),
-            ]
-        )
+        mfs_list.append([GaussianMF(center=0.0, sigma=0.02), GaussianMF(center=0.01, sigma=0.02)])
 
     ensemble_iter = FuzzyNoiseModelEnsemble(
         calibration=snapshot,
@@ -88,7 +83,7 @@ def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> list[FuzzyN
 def main() -> None:
     snapshot = CalibrationSnapshot(
         backend="ibm_fez",
-        timestamp=datetime.now(datetime.UTC),
+        timestamp=datetime.now(UTC),
         schema_version="1.0",
         properties={
             "qubits": [
@@ -102,33 +97,28 @@ def main() -> None:
         target={},
         configuration={},
     )
+
     circuit = qft_circuit(1)
 
     print("--- Ensemble Scaling Tests (Real Concretes) ---")
     for n in ENSEMBLE_SIZES:
         members = generate_safe_ensemble(snapshot, n)
-
         t0 = time.perf_counter()
         counts = run_ensemble(circuit, members, SHOTS_PER_MEMBER)
         elapsed = time.perf_counter() - t0
-
         total_shots = n * SHOTS_PER_MEMBER
         print(f"N={n} elapsed={elapsed:.2f}s total_shots={total_shots}")
         print(f"  counts: {counts}\n")
 
     print("--- Sanity Check (Single Member, 8192 Shots) ---")
     single_member = generate_safe_ensemble(snapshot, 1)[0]
-
     t0_sanity = time.perf_counter()
-    prep_out = single_member.prepare(circuit.copy())
-    prep_circ, prep_nm = prep_out if isinstance(prep_out, tuple) else (circuit, single_member)
-
+    prep_circ, prep_nm = single_member.prepare(circuit.copy())
     sim_sanity = AerSimulator()
     transpiled_sanity = transpile(prep_circ, backend=sim_sanity)
     result_sanity = sim_sanity.run(transpiled_sanity, shots=8192, noise_model=prep_nm).result()
     sanity_counts = result_sanity.get_counts()
     elapsed_sanity = time.perf_counter() - t0_sanity
-
     print(f"Sanity Run elapsed={elapsed_sanity:.2f}s total_shots=8192")
     print(f"  counts: {sanity_counts}")
 
