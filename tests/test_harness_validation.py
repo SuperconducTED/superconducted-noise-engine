@@ -2,7 +2,6 @@ from collections import Counter
 
 import numpy as np
 import pytest
-from superconducted.types import SimulationResult
 
 from superconducted.benchmarks.metrics import (
     HellingerDistance,
@@ -10,6 +9,7 @@ from superconducted.benchmarks.metrics import (
     R2Score,
     StateFidelity,
 )
+from superconducted.types import SimulationResult
 
 # --- HELPER FUNCTIONS ---
 
