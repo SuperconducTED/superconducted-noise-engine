@@ -2,7 +2,7 @@ from collections import Counter
 
 import numpy as np
 import pytest
-from superconducted.noise_engine.results import SimulationResult
+from superconducted.types import SimulationResult
 
 from superconducted.benchmarks.metrics import (
     HellingerDistance,
