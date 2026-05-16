@@ -163,9 +163,7 @@ def _format_error(
     field_name: str,
     detail: str,
 ) -> str:
-    return (
-        f"{path}: qubit {qubit_index} field {field_name!r}: {detail}"
-    )
+    return f"{path}: qubit {qubit_index} field {field_name!r}: {detail}"
 
 
 def _parse_value(
@@ -189,8 +187,7 @@ def _parse_value(
                 path,
                 qubit_index,
                 field_name,
-                f"expected unit {expected_unit!r}, got {actual_unit!r} "
-                f"(value={raw_value!r})",
+                f"expected unit {expected_unit!r}, got {actual_unit!r} (value={raw_value!r})",
             )
         )
 
@@ -268,9 +265,7 @@ def load_snapshot(path: str | pathlib.Path) -> ParsedCalibrationSnapshot:
                 field_name=field_name,
             )
             if was_null:
-                explicit_null_counts[field_name] = (
-                    explicit_null_counts.get(field_name, 0) + 1
-                )
+                explicit_null_counts[field_name] = explicit_null_counts.get(field_name, 0) + 1
             if was_nan:
                 nan_counts[field_name] = nan_counts.get(field_name, 0) + 1
             field_values[field_name] = value
