@@ -14,19 +14,8 @@ The architecture has evolved significantly from the initial skeleton. The ensemb
 
 ## 3. Latency Observations (Wall-Clock Scaling)
 
---- Ensemble Scaling Tests (Real Concretes) ---
-N=1 elapsed=0.08s total_shots=1024
-  counts: {'00': 237, '10': 287, '11': 227, '01': 273}
-
-N=8 elapsed=0.70s total_shots=8192
-  counts: {'01': 2029, '00': 1998, '10': 2083, '11': 2082}
-
-N=16 elapsed=1.33s total_shots=16384
-  counts: {'01': 4172, '10': 4096, '00': 3983, '11': 4133}
-
---- Sanity Check (Single Member, 8192 Shots) ---
-Sanity Run elapsed=0.09s total_shots=8192
-  counts: {'01': 1996, '10': 2096, '00': 2025, '11': 2075}
+### Previous (Invalid) Measurement
+The latency table that was originally published was produced by a degenerate run that exercised empty `NoiseModel()` instances rather than the full fuzzy-noise pipeline. That happened because the harness substituted mocked/stubbed components and broad except/fallbacks allowed execution to continue with empty models. Those measured numbers are therefore **invalid** for architectural conclusions.
 
 ### Current Measurement (Real Bootstrap Components)
 After wiring the real fuzzy-noise pipeline (May 17, 2026) with:
