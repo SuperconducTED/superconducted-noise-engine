@@ -48,12 +48,14 @@ readout_error, prob_meas0_prep1, prob_meas1_prep0 -> "" (dimensionless)
 the loader either records the field as absent (no entry in `by_name`)
 or validates the entry's `unit` against the expected one. A unit
 mismatch is a hard `CalibrationParseError` — silent unit drift would
-corrupt every downstream computation. A present-with-null `value` is
-recorded under `MissingnessStats.explicit_null` and surfaced as `None`
-on the typed dataclass, because consumers treat the two
-indistinguishably. A NaN `value` is preserved as `float('nan')` and
-counted under `MissingnessStats.nan_present`; the Skip-strategy
-aggregators drop it from the mean.
+corrupt every downstream computation. `MissingnessStats` carries one
+`FieldMissingness(absent, explicit_null, nan_present)` triple per
+tracked field. A present-with-null `value` increments the field's
+`explicit_null` counter and surfaces as `None` on the typed dataclass,
+because consumers treat absent and explicit-null indistinguishably. A
+NaN `value` is preserved as `float('nan')` and increments the field's
+`nan_present` counter; the Skip-strategy aggregators drop it from the
+mean.
 
 Time fields are scaled to SI seconds at load (`*1e-6` for `us`,
 `*1e-9` for `ns`); dimensionless fields are passed through. The
@@ -150,3 +152,17 @@ Manual fixture regeneration recipe lives in
   future fuzzy treatment lands here)
 - GitHub issue #9 (the originating bug report)
 - Locked-file ticket: #002 (`poller.py`, `storage.py`)
+
+## Known follow-up work
+
+- `_parse_value` in `loader.py` and `_coerce_finite_float` + the inline
+  Nduv walk in `BasicCalibrationVectorizer.extract` (`features.py`)
+  parse the same IBM JSON shape with subtly different semantics: the
+  loader treats a unit mismatch as fatal (`CalibrationParseError`),
+  while the vectorizer silently drops non-finite values. This
+  duplication is acceptable for the bootstrap but should converge.
+- Planned approach: have `BasicCalibrationVectorizer` consume
+  `ParsedCalibrationSnapshot` (the typed form from the new loader)
+  rather than the raw `dict`. A single Nduv-walk in `loader.py` then
+  feeds both the new aggregators and the existing vectorizer. This
+  work belongs in ADR-013's follow-up rather than ADR-017.

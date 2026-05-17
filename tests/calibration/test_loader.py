@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import math
 import pathlib
+from datetime import UTC, datetime
 from typing import Any
 
 import pytest
@@ -95,16 +96,16 @@ def test_other_qubits_have_populated_t1_and_t2() -> None:
 def test_missingness_stats_count_one_absent_t1_and_t2() -> None:
     snapshot = load_snapshot(FIXTURE)
     m = snapshot.missingness
-    assert m.t1_absent == 1
-    assert m.t2_absent == 1
-    assert m.readout_error_absent == 0
-    assert m.readout_length_absent == 0
+    assert m.t1.absent == 1
+    assert m.t2.absent == 1
+    assert m.readout_error.absent == 0
+    assert m.readout_length.absent == 0
 
 
 def test_missingness_stats_explicit_null_is_separate_counter(
     tmp_path: pathlib.Path,
 ) -> None:
-    """A field with a JSON-null value increments explicit_null, not *_absent."""
+    """A field with a JSON-null value increments explicit_null, not absent."""
     qubits = [_full_qubit_nduvs()]
     # Replace T1 value with explicit null.
     for nduv in qubits[0]:
@@ -114,8 +115,8 @@ def test_missingness_stats_explicit_null_is_separate_counter(
 
     snapshot = load_snapshot(path)
     assert snapshot.qubits[0].t1_seconds is None
-    assert snapshot.missingness.t1_absent == 0
-    assert snapshot.missingness.explicit_null.get("T1") == 1
+    assert snapshot.missingness.t1.absent == 0
+    assert snapshot.missingness.t1.explicit_null == 1
 
 
 def test_distinguishes_absent_null_and_nan(tmp_path: pathlib.Path) -> None:
@@ -145,9 +146,9 @@ def test_distinguishes_absent_null_and_nan(tmp_path: pathlib.Path) -> None:
     assert snapshot.qubits[3].t1_seconds == pytest.approx(300.0e-6)
 
     m = snapshot.missingness
-    assert m.t1_absent == 1
-    assert m.explicit_null.get("T1") == 1
-    assert m.nan_present.get("T1") == 1
+    assert m.t1.absent == 1
+    assert m.t1.explicit_null == 1
+    assert m.t1.nan_present == 1
 
 
 def test_unit_conversion_us_to_seconds(tmp_path: pathlib.Path) -> None:
@@ -184,6 +185,67 @@ def test_unexpected_unit_raises_parse_error_with_context(
     assert "'T1'" in message
     assert "'ms'" in message
     assert "'us'" in message
+
+
+def test_load_exemplar_returns_tz_aware_datetime() -> None:
+    snapshot = load_snapshot(FIXTURE)
+    expected = datetime(2026, 5, 13, 12, 13, 22, tzinfo=UTC)
+    assert snapshot.timestamp == expected
+    assert snapshot.timestamp.tzinfo is not None
+
+
+def test_load_raises_on_missing_timestamp(tmp_path: pathlib.Path) -> None:
+    payload = _synth_snapshot([_full_qubit_nduvs()])
+    del payload["timestamp"]
+    del payload["properties"]["last_update_date"]
+    path = _write(tmp_path, payload)
+
+    with pytest.raises(CalibrationParseError) as excinfo:
+        load_snapshot(path)
+    message = str(excinfo.value)
+    assert str(path) in message
+    assert "timestamp" in message
+
+
+def test_load_raises_on_invalid_timestamp_string(tmp_path: pathlib.Path) -> None:
+    payload = _synth_snapshot([_full_qubit_nduvs()])
+    payload["timestamp"] = "not a date"
+    payload["properties"]["last_update_date"] = "not a date"
+    path = _write(tmp_path, payload)
+
+    with pytest.raises(CalibrationParseError) as excinfo:
+        load_snapshot(path)
+    message = str(excinfo.value)
+    assert str(path) in message
+    assert "not a date" in message
+
+
+def test_load_raises_on_non_dict_properties(tmp_path: pathlib.Path) -> None:
+    payload: dict[str, Any] = {
+        "backend": "fake_backend",
+        "timestamp": "2026-05-13T12:13:22+00:00",
+        "schema_version": "1.0.0",
+        "properties": "oops",
+    }
+    path = _write(tmp_path, payload)
+
+    with pytest.raises(CalibrationParseError) as excinfo:
+        load_snapshot(path)
+    message = str(excinfo.value)
+    assert str(path) in message
+    assert "'properties' must be a dict" in message
+
+
+def test_load_raises_on_non_list_qubits(tmp_path: pathlib.Path) -> None:
+    payload = _synth_snapshot([_full_qubit_nduvs()])
+    payload["properties"]["qubits"] = "oops"
+    path = _write(tmp_path, payload)
+
+    with pytest.raises(CalibrationParseError) as excinfo:
+        load_snapshot(path)
+    message = str(excinfo.value)
+    assert str(path) in message
+    assert "'properties.qubits' must be a list" in message
 
 
 def test_dimensionless_field_is_passthrough(tmp_path: pathlib.Path) -> None:

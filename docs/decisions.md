@@ -314,10 +314,11 @@ fuzzification layer (ADR-007 / ADR-009) to land first.
 per-qubit field as `Optional[float]`. A field is `None` when the Nduv
 entry is absent from the raw JSON *or* present with a JSON-null value;
 a field is `float('nan')` when the Nduv entry is present with a NaN
-value. `MissingnessStats` on the snapshot carries three disjoint
-per-field counters (`*_absent`, `explicit_null`, `nan_present`) so the
-distinction is preserved for diagnostics and for the eventual migration
-to a fuzzy treatment. The mean-aggregate features
+value. `MissingnessStats` on the snapshot carries one
+`FieldMissingness` per tracked field; each `FieldMissingness` has
+three disjoint counters (`absent`, `explicit_null`, `nan_present`) so
+the distinction is preserved for diagnostics and for the eventual
+migration to a fuzzy treatment. The mean-aggregate features
 (`mean_t1`, `mean_t2`) exclude `None` and NaN entries from the average
 and return `None` when no qubit has a usable value, rather than
 raising — the caller decides whether to skip the snapshot.
@@ -330,3 +331,13 @@ through the eventual fuzzy layer is a follow-up. The existing
 `BasicCalibrationVectorizer.extract` predates this ADR and remains
 unchanged: it consumes the raw `properties` dict directly and is
 unaffected as long as at least one qubit per field has a finite value.
+
+`mean_t1` and `mean_t2` are currently free module-level functions in
+`features.py`, not implementations of `CalibrationFeatureExtractor`.
+This is intentional for the bootstrap: the Skip strategy reduces to a
+one-liner arithmetic mean over `Optional[float]`, and wrapping it in an
+ABC subclass would add layering without changing behaviour. A
+follow-up will introduce
+`SkipStrategyVectorizer(CalibrationFeatureExtractor)` once a second
+consumer pattern emerges (e.g. when ANFIS training begins consuming
+vectorized features alongside the mean aggregates).

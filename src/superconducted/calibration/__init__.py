@@ -5,6 +5,7 @@ from __future__ import annotations
 from .features import BasicCalibrationVectorizer, mean_t1, mean_t2
 from .loader import (
     CalibrationParseError,
+    FieldMissingness,
     MissingnessStats,
     ParsedCalibrationSnapshot,
     ParsedQubitCalibration,
@@ -17,6 +18,7 @@ __all__ = [
     "BasicCalibrationVectorizer",
     "CalibrationParseError",
     "CalibrationStorage",
+    "FieldMissingness",
     "MissingnessStats",
     "ParsedCalibrationSnapshot",
     "ParsedQubitCalibration",

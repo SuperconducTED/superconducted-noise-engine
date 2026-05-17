@@ -10,11 +10,13 @@ from __future__ import annotations
 
 import math
 import pathlib
+from datetime import UTC, datetime
 
 import pytest
 
 from superconducted.calibration.features import mean_t1, mean_t2
 from superconducted.calibration.loader import (
+    FieldMissingness,
     MissingnessStats,
     ParsedCalibrationSnapshot,
     ParsedQubitCalibration,
@@ -46,6 +48,9 @@ def _qubit(
     )
 
 
+_ZERO_FIELD = FieldMissingness(absent=0, explicit_null=0, nan_present=0)
+
+
 def _snapshot(
     qubits: list[ParsedQubitCalibration],
     *,
@@ -53,15 +58,15 @@ def _snapshot(
 ) -> ParsedCalibrationSnapshot:
     if missingness is None:
         missingness = MissingnessStats(
-            t1_absent=0,
-            t2_absent=0,
-            readout_error_absent=0,
-            readout_length_absent=0,
-            prob_meas0_prep1_absent=0,
-            prob_meas1_prep0_absent=0,
+            t1=_ZERO_FIELD,
+            t2=_ZERO_FIELD,
+            readout_error=_ZERO_FIELD,
+            readout_length=_ZERO_FIELD,
+            prob_meas0_prep1=_ZERO_FIELD,
+            prob_meas1_prep0=_ZERO_FIELD,
         )
     return ParsedCalibrationSnapshot(
-        timestamp="2026-05-13T12:13:22+00:00",
+        timestamp=datetime(2026, 5, 13, 12, 13, 22, tzinfo=UTC),
         backend_name="fake",
         qubits=tuple(qubits),
         missingness=missingness,
@@ -93,18 +98,17 @@ def test_mean_t1_skips_nan_with_separate_accounting() -> None:
             _qubit(2, t1=200e-6),
         ],
         missingness=MissingnessStats(
-            t1_absent=0,
-            t2_absent=0,
-            readout_error_absent=0,
-            readout_length_absent=0,
-            prob_meas0_prep1_absent=0,
-            prob_meas1_prep0_absent=0,
-            nan_present={"T1": 1},
+            t1=FieldMissingness(absent=0, explicit_null=0, nan_present=1),
+            t2=_ZERO_FIELD,
+            readout_error=_ZERO_FIELD,
+            readout_length=_ZERO_FIELD,
+            prob_meas0_prep1=_ZERO_FIELD,
+            prob_meas1_prep0=_ZERO_FIELD,
         ),
     )
     result = mean_t1(snapshot)
     assert result == pytest.approx(150e-6)
-    assert snapshot.missingness.nan_present.get("T1") == 1
+    assert snapshot.missingness.t1.nan_present == 1
 
 
 def test_mean_t2_skips_missing_qubits() -> None:
