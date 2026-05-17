@@ -1,10 +1,19 @@
-"""Smoke-runs AerSimulator against an empty noise model for sanity-check timing."""
+"""Smoke-run harness for AerSimulator against a synthetic fuzzy noise ensemble.
+
+This script exercises the end-to-end fuzzy pipeline from a calibration
+snapshot through feature extraction, TSK rule-base construction, and Aer
+noise-model synthesis.
+"""
 
 from __future__ import annotations
 
+import argparse
+import json
 import time
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Final
+import numpy as np
 
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
@@ -24,7 +33,7 @@ from superconducted.integration.aer_factory import (
 from superconducted.types import CalibrationSnapshot
 
 SHOTS_PER_MEMBER: Final[int] = 1024
-ENSEMBLE_SIZES: Final[list[int]] = [1, 8, 16]
+ENSEMBLE_SIZES: Final[tuple[int, ...]] = (1, 8, 16)
 
 
 def run_ensemble(
@@ -32,8 +41,9 @@ def run_ensemble(
 ) -> dict[str, int]:
     """Run each ensemble member and aggregate counts into a single dictionary.
 
-    The simulator is allocated once and reused for all members to avoid
-    unnecessary backend construction overhead.
+    Aggregation is performed as a bootstrap point estimate: per-member counts
+    are summed and the total shot count is preserved, matching the current
+    ADR-016 bootstrap semantics for ensemble aggregation.
     """
     counts: dict[str, int] = {}
 
@@ -48,6 +58,21 @@ def run_ensemble(
     return counts
 
 
+def _default_mfs_for_feature(feature_name: str) -> list[GaussianMF]:
+    # Use feature-specific numeric ranges instead of a single shared grid.
+    # This avoids treating T1/T2 and readout_error as if they were on the
+    # same [0, 0.01] scale.
+    feature_scales: dict[str, tuple[float, float]] = {
+        "mean_T1": (0.0, 100e-6),
+        "mean_T2": (0.0, 100e-6),
+        "mean_readout_error": (0.0, 0.1),
+    }
+    lo, hi = feature_scales.get(feature_name, (0.0, 1.0))
+    span = hi - lo
+    overlap = span * 0.25
+    return [GaussianMF(center=lo, sigma=overlap), GaussianMF(center=lo + span * 0.5, sigma=overlap)]
+
+
 def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> list[FuzzyNoiseModel]:
     """Construct a `FuzzyNoiseModelEnsemble` with conservative default MFs.
 
@@ -55,22 +80,25 @@ def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> list[FuzzyN
     the provided snapshot and builds a small grid of Gaussian MFs per input.
     """
     vectorizer = BasicCalibrationVectorizer()
-    try:
-        dummy_features = vectorizer.extract(snapshot)
-        feature_dim = (
-            dummy_features.shape[0] if hasattr(dummy_features, "shape") else len(dummy_features)
+    # Let `extract` raise if the snapshot is invalid; don't silently
+    # fallback to a noisy one-dimensional default which masks problems.
+    dummy_features = vectorizer.extract(snapshot)
+    if dummy_features.shape[0] != vectorizer.output_dim:
+        raise ValueError(
+            "BasicCalibrationVectorizer returned unexpected feature dimension "
+            f"{dummy_features.shape[0]}; expected {vectorizer.output_dim}"
         )
-    except Exception:
-        feature_dim = 1
 
     mfs_list: list[list[GaussianMF]] = []
-    for _ in range(max(1, feature_dim)):
-        mfs_list.append([GaussianMF(center=0.0, sigma=0.02), GaussianMF(center=0.01, sigma=0.02)])
+    for feature_name in vectorizer.feature_names:
+        mfs_list.append(_default_mfs_for_feature(feature_name))
 
     ensemble_iter = FuzzyNoiseModelEnsemble(
         calibration=snapshot,
         feature_extractor=vectorizer,
-        rule_base=TSKRuleBase.from_grid(per_input_mfs=mfs_list, output_dim=2),
+        rule_base=TSKRuleBase.from_grid(
+            per_input_mfs=mfs_list, output_dim=2, consequent_init="random", rng=np.random.default_rng(0)
+        ),
         defuzzifier=WeightedAverageDefuzzifier(),
         squashing=ProbabilityClip(),
         channel_projector=KrausChannelProjector(NoOpNormalization()),
@@ -80,8 +108,22 @@ def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> list[FuzzyN
     return list(ensemble_iter)
 
 
-def main() -> None:
-    snapshot = CalibrationSnapshot(
+def _load_snapshot(path: Path) -> CalibrationSnapshot:
+    with path.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+    timestamp = datetime.fromisoformat(data["timestamp"].replace("Z", "+00:00"))
+    return CalibrationSnapshot(
+        backend=str(data["backend"]),
+        timestamp=timestamp,
+        schema_version=str(data["schema_version"]),
+        properties=dict(data["properties"]),
+        target=data.get("target"),
+        configuration=data.get("configuration"),
+    )
+
+
+def _synthetic_snapshot() -> CalibrationSnapshot:
+    return CalibrationSnapshot(
         backend="ibm_fez",
         timestamp=datetime.now(UTC),
         schema_version="1.0",
@@ -98,11 +140,46 @@ def main() -> None:
         configuration={},
     )
 
-    circuit = qft_circuit(1)
+
+def _build_arg_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="python3 scripts/first_ensemble_run.py",
+        description="Smoke-run AerSimulator against a synthetic fuzzy noise ensemble.",
+    )
+    parser.add_argument(
+        "--snapshot",
+        type=Path,
+        default=None,
+        help="Path to a JSON-formatted CalibrationSnapshot file.",
+    )
+    parser.add_argument(
+        "--qubits",
+        type=int,
+        default=2,
+        help="Number of qubits for the QFT circuit (default: 2).",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> None:
+    parser = _build_arg_parser()
+    args = parser.parse_args(argv)
+
+    if args.qubits <= 0:
+        raise ValueError(f"--qubits must be positive; got {args.qubits}")
+
+    snapshot = _load_snapshot(args.snapshot) if args.snapshot else _synthetic_snapshot()
+
+    circuit = qft_circuit(args.qubits)
 
     print("--- Ensemble Scaling Tests (Real Concretes) ---")
     for n in ENSEMBLE_SIZES:
         members = generate_safe_ensemble(snapshot, n)
+        # Warmup to amortize cold start (simulator construction, transpile)
+        sim_warm = AerSimulator()
+        prep_circ_w, prep_nm_w = members[0].prepare(circuit.copy())
+        transpiled_w = transpile(prep_circ_w, backend=sim_warm)
+        sim_warm.run(transpiled_w, shots=1, noise_model=prep_nm_w).result()
         t0 = time.perf_counter()
         counts = run_ensemble(circuit, members, SHOTS_PER_MEMBER)
         elapsed = time.perf_counter() - t0

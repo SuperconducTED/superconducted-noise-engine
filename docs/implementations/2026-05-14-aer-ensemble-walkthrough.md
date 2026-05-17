@@ -20,7 +20,7 @@ per-member sampling). See `docs/decisions.md` for the ADR text.
 
 | File | One-sentence description |
 | --- | --- |
-| `scripts/first_ensemble_run.py` | Rewrote the smoke harness to wire real bootstrap concretes (vectorizer, rule-base, defuzzifier, squashing, channel projector, fuzzification strategy); removed mocked fallbacks and explicit Any leaks; pass `ensemble_size` explicitly. |
+| `scripts/first_ensemble_run.py` | Rewrote the smoke harness to wire real bootstrap concretes and feature-specific MF scaling; added `--snapshot` and `--qubits` CLI args; removed mocked fallbacks; use feature_names from vectorizer instead of hardcoded dimension assumptions. |
 | `docs/findings/aer-integration-walkthrough.md` | Marked prior latency numbers as invalid-by-mock, corrected the ensemble signature description, and added an explicit re-run action. |
 | `docs/implementations/2026-05-14-aer-ensemble-walkthrough.md` | This implementation record. |
 
@@ -30,20 +30,16 @@ The goal was to ensure the smoke harness exercises the real fuzzy-noise
 pipeline end-to-end and that failures surface loudly when the
 integration is broken. To achieve this:
 
-- Use real concrete implementations that exist in `src/superconducted`:
-  - `BasicCalibrationVectorizer`
-  - `TSKRuleBase.from_grid(...)`
-  - `WeightedAverageDefuzzifier`
-  - `ProbabilityClip`
-  - `KrausChannelProjector(NoOpNormalization())`
-  - `PostGateFuzzification()`
-- Construct a typed `CalibrationSnapshot` rather than an untyped `dict` so
-  `BasicCalibrationVectorizer.extract(snapshot)` is exercised.
-- Remove broad `except Exception` fallbacks that returned empty
-  `NoiseModel()` instances; allow exceptions to propagate so CI and
-  local runs fail loudly and the author can fix the integration.
-- Pass `ensemble_size=n` explicitly to `FuzzyNoiseModelEnsemble` and avoid
-  slicing the iterator afterward.
+- Use real concrete implementations with feature-specific MF scaling:
+  - `BasicCalibrationVectorizer` (output_dim=3: mean_T1, mean_T2, mean_readout_error)
+  - `_default_mfs_for_feature(feature_name)` — per-feature numeric ranges (e.g., T1/T2 in ~50µs, readout_error in 0.01)
+  - `TSKRuleBase.from_grid(..., consequent_init="random", rng=np.random.default_rng(0))` for non-zero initialization
+  - `WeightedAverageDefuzzifier`, `ProbabilityClip`, `KrausChannelProjector(NoOpNormalization())`, `PostGateFuzzification`
+- Construct a typed `CalibrationSnapshot` (with optional `--snapshot` file loading or synthetic default) so
+  `BasicCalibrationVectorizer.extract(snapshot)` is exercised; raise on invalid snapshots rather than fall back.
+- Remove broad `except Exception` fallbacks; validate feature dimension via `vectorizer.output_dim`.
+- Add CLI arguments: `--snapshot PATH` (optional JSON file) and `--qubits N` (default 2) for multi-qubit transpilation testing.
+- Implement warmup runs (1 shot before timing) to amortize cold-start overhead from simulator construction and transpile.
 
 This follows ADR-002 (the factory/ensemble pattern is the supported
 integration) and ADR-015 (the ensemble may be degenerate for sanity
@@ -92,8 +88,10 @@ mypy --config-file pyproject.toml src/superconducted
    `CalibrationStorage` helper when available):
 
 ```bash
-python3 scripts/first_ensemble_run.py
+python3 scripts/first_ensemble_run.py --snapshot /path/to/snapshot.json --qubits 2
 ```
+
+If no snapshot is supplied, the harness falls back to a synthetic default snapshot for local smoke testing. The default QFT workload uses 2 qubits to exercise multi-qubit transpilation and error installation.
 
 Observe that the harness constructs `FuzzyNoiseModel` instances and
 that no broad except/fallback is taken. If the run raises an exception,
