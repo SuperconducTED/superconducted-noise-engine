@@ -13,8 +13,8 @@ import time
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Final
-import numpy as np
 
+import numpy as np
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
 
@@ -97,7 +97,10 @@ def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> list[FuzzyN
         calibration=snapshot,
         feature_extractor=vectorizer,
         rule_base=TSKRuleBase.from_grid(
-            per_input_mfs=mfs_list, output_dim=2, consequent_init="random", rng=np.random.default_rng(0)
+            per_input_mfs=mfs_list,
+            output_dim=2,
+            consequent_init="random",
+            rng=np.random.default_rng(0),
         ),
         defuzzifier=WeightedAverageDefuzzifier(),
         squashing=ProbabilityClip(),

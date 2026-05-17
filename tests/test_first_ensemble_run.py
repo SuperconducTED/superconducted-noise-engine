@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Any
 
 from qiskit import QuantumCircuit
-
 from scripts.first_ensemble_run import _load_snapshot, run_ensemble
 
 
@@ -38,8 +37,12 @@ class DummySimulator:
 
 def test_run_ensemble_aggregates_counts(monkeypatch: Any) -> None:
     expected_counts = [{"0": 10, "1": 5}, {"0": 3, "1": 2, "2": 1}]
-    monkeypatch.setattr("scripts.first_ensemble_run.AerSimulator", lambda: DummySimulator(list(expected_counts)))
-    monkeypatch.setattr("scripts.first_ensemble_run.transpile", lambda circuit, backend=None: circuit)
+    monkeypatch.setattr(
+        "scripts.first_ensemble_run.AerSimulator", lambda: DummySimulator(list(expected_counts))
+    )
+    monkeypatch.setattr(
+        "scripts.first_ensemble_run.transpile", lambda circuit, backend=None: circuit
+    )
 
     members = [DummyMember({}), DummyMember({})]
     actual = run_ensemble(QuantumCircuit(1), members, shots=1024)
