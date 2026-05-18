@@ -2,14 +2,30 @@
 
 from __future__ import annotations
 
-from .features import BasicCalibrationVectorizer
+from .features import BasicCalibrationVectorizer, mean_t1, mean_t2
+from .loader import (
+    CalibrationParseError,
+    FieldMissingness,
+    MissingnessStats,
+    ParsedCalibrationSnapshot,
+    ParsedQubitCalibration,
+    load_snapshot,
+)
 from .poller import fetch_snapshot, main, poll_once
 from .storage import CalibrationStorage
 
 __all__ = [
     "BasicCalibrationVectorizer",
+    "CalibrationParseError",
     "CalibrationStorage",
+    "FieldMissingness",
+    "MissingnessStats",
+    "ParsedCalibrationSnapshot",
+    "ParsedQubitCalibration",
     "fetch_snapshot",
+    "load_snapshot",
     "main",
+    "mean_t1",
+    "mean_t2",
     "poll_once",
 ]
