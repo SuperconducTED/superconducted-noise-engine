@@ -106,8 +106,9 @@ Observe that the harness constructs `FuzzyNoiseModel` instances and
 that no broad except/fallback is taken. If the run raises an exception,
 fix the integration rather than masking it.
 
-4. Re-run the measurements and update
-   `docs/findings/aer-integration-walkthrough.md` with the new numbers.
+4. ✅ Completed: measurements re-run and
+   `docs/findings/aer-integration-walkthrough.md` updated with
+   mean-aggregated, simulator-hoisted numbers (rounds 3 and 4).
 
 ## Related docs
 

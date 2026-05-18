@@ -25,7 +25,7 @@ After wiring the real fuzzy-noise pipeline (May 17, 2026) with:
 - Real defuzzifier, squashing, channel projector, fuzzification strategy
 - One shared `AerSimulator()` hoisted to `main()` and warmed (1 shot) before each timed loop
 
-Numbers below captured on commit `<commit-sha>` after the simulator-hoist refactor, on local 2-qubit QFT with synthetic snapshot (single core, no GPU):
+Numbers below captured on commit `4006f6c` after the simulator-hoist refactor.
 
 | Ensemble Size | Elapsed (s) | Total Shots | Avg per Member |
 | --- | --- | --- | --- |
