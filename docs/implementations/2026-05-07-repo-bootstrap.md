@@ -155,5 +155,3 @@ run `superconducted-poll --backend ibm_fez`.
 
 - All ADRs in [`docs/decisions.md`](../decisions.md).
 - [`docs/architecture.md`](../architecture.md).
-- [`CLAUDE.md`](../../CLAUDE.md) (operational instructions for future
-  sessions).

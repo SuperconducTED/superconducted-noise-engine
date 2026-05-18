@@ -273,3 +273,90 @@ class IntervalGaussianMF(MembershipFunction):
     @property
     def is_interval_type2(self) -> bool:
         return True
+
+
+class TanhSigmoidMF(MembershipFunction):
+    """Sigmoidal membership function based on the hyperbolic tangent (tanh).
+
+    mu(x) = (tanh(slope * (x - center)) + 1) / 2. Parameter vector [center, slope].
+    """
+
+    def __init__(self, center: float, slope: float) -> None:
+        if slope == 0:
+            raise ValueError(f"TanhSigmoidMF requires slope != 0; got {slope}")
+        self._center = float(center)
+        self._slope = float(slope)
+
+    def degree(self, x: float) -> MembershipDegree:
+        """Evaluates the membership degree for a given input x."""
+        value = (math.tanh(self._slope * (float(x) - self._center)) + 1.0) / 2.0
+        return MembershipDegree.crisp(value)
+
+    def parameters(self) -> npt.NDArray[np.float64]:
+        return np.array([self._center, self._slope], dtype=np.float64)
+
+    def set_parameters(self, params: npt.NDArray[np.float64]) -> None:
+        if params.shape != (2,):
+            raise ValueError(f"TanhSigmoidMF expects 2 params; got shape {params.shape}")
+        slope = float(params[1])
+        if slope == 0:
+            raise ValueError(f"TanhSigmoidMF requires slope != 0; got {slope}")
+        self._center = float(params[0])
+        self._slope = slope
+
+    @property
+    def parameter_count(self) -> int:
+        return 2
+
+    @property
+    def is_interval_type2(self) -> bool:
+        return False
+
+
+class TanhBellMF(MembershipFunction):
+    """Bell-shaped membership function created from the difference of two tanh functions.
+
+    mu(x) = (tanh(slope * (x - left)) - tanh(slope * (x - right))) / 2.
+    Parameter vector [left, right, slope].
+    """
+
+    def __init__(self, left: float, right: float, slope: float) -> None:
+        if slope == 0:
+            raise ValueError(f"TanhBellMF requires slope != 0; got {slope}")
+        if left >= right:
+            raise ValueError(f"TanhBellMF requires left < right; got left={left}, right={right}")
+        self._left = float(left)
+        self._right = float(right)
+        self._slope = float(slope)
+
+    def degree(self, x: float) -> MembershipDegree:
+        """Evaluates the membership degree for a given input x."""
+        delta_l = math.tanh(self._slope * (float(x) - self._left))
+        delta_r = math.tanh(self._slope * (float(x) - self._right))
+        value = (delta_l - delta_r) / 2.0
+        return MembershipDegree.crisp(value)
+
+    def parameters(self) -> npt.NDArray[np.float64]:
+        return np.array([self._left, self._right, self._slope], dtype=np.float64)
+
+    def set_parameters(self, params: npt.NDArray[np.float64]) -> None:
+        if params.shape != (3,):
+            raise ValueError(f"TanhBellMF expects 3 params; got shape {params.shape}")
+        left = float(params[0])
+        right = float(params[1])
+        slope = float(params[2])
+        if slope == 0:
+            raise ValueError(f"TanhBellMF requires slope != 0; got {slope}")
+        if left >= right:
+            raise ValueError(f"TanhBellMF requires left < right; got left={left}, right={right}")
+        self._left = left
+        self._right = right
+        self._slope = slope
+
+    @property
+    def parameter_count(self) -> int:
+        return 3
+
+    @property
+    def is_interval_type2(self) -> bool:
+        return False

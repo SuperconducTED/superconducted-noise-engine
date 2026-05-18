@@ -8,7 +8,9 @@ import pytest
 from superconducted.fuzzy.membership import (
     GaussianMF,
     IntervalGaussianMF,
+    TanhBellMF,
     TanhMF,
+    TanhSigmoidMF,
     TrapezoidalMF,
     TriangularMF,
 )
@@ -134,3 +136,56 @@ class TestIntervalGaussianMF:
         mf2 = IntervalGaussianMF(center=0.0, sigma_low=0.1, sigma_high=0.2)
         mf2.set_parameters(params)
         assert np.allclose(mf2.parameters(), params)
+
+
+class TestTanhSigmoidMF:
+    def test_tanh_sigmoid_range(self) -> None:
+        """Test that TanhSigmoidMF outputs are bounded within (0, 1) and exactly 0.5 at center."""
+        mf = TanhSigmoidMF(center=5.0, slope=1.0)
+        # Check the interval midpoint value
+        assert 0.0 <= mf.degree(5.0).midpoint <= 1.0
+        assert mf.degree(5.0).midpoint == pytest.approx(0.5)
+
+    def test_tanh_sigmoid_monotonicity(self) -> None:
+        """Test that a positive slope results in a monotonically increasing function."""
+        mf = TanhSigmoidMF(center=0.0, slope=2.0)
+        assert mf.degree(-1.0).midpoint < mf.degree(0.0).midpoint < mf.degree(1.0).midpoint
+
+    def test_tanh_sigmoid_extreme_inputs(self) -> None:
+        """Test asymptotic behavior at extreme limits."""
+        mf = TanhSigmoidMF(center=0.0, slope=1.0)
+        assert mf.degree(100.0).midpoint == pytest.approx(1.0, abs=1e-5)
+        assert mf.degree(-100.0).midpoint == pytest.approx(0.0, abs=1e-5)
+
+    def test_tanh_sigmoid_invalid_slope(self) -> None:
+        """Test that setting an invalid zero slope raises a ValueError."""
+        with pytest.raises(ValueError):
+            TanhSigmoidMF(center=2.0, slope=0.0)
+
+
+class TestTanhBellMF:
+    def test_tanh_bell_range_and_peak(self) -> None:
+        """Test range compliance and that the midpoint approaches 1 for wide spans."""
+        mf = TanhBellMF(left=2.0, right=8.0, slope=2.0)
+        midpoint_val = mf.degree(5.0).midpoint
+        assert 0.0 <= midpoint_val <= 1.0
+        assert midpoint_val == pytest.approx(1.0, abs=1e-2)
+
+    def test_tanh_bell_symmetry(self) -> None:
+        """Test that the bell function is symmetric around its midpoint."""
+        mf = TanhBellMF(left=2.0, right=8.0, slope=1.5)
+        assert mf.degree(4.0).midpoint == pytest.approx(mf.degree(6.0).midpoint)
+        assert mf.degree(1.0).midpoint == pytest.approx(mf.degree(9.0).midpoint)
+
+    def test_tanh_bell_extremes(self) -> None:
+        """Test decay behavior outside the transitions."""
+        mf = TanhBellMF(left=-2.0, right=2.0, slope=1.0)
+        assert mf.degree(100.0).midpoint == pytest.approx(0.0, abs=1e-5)
+        assert mf.degree(-100.0).midpoint == pytest.approx(0.0, abs=1e-5)
+
+    def test_tanh_bell_invalid_params(self) -> None:
+        """Test parameter validation rules for slope and boundaries."""
+        with pytest.raises(ValueError):
+            TanhBellMF(left=5.0, right=5.0, slope=1.0)
+        with pytest.raises(ValueError):
+            TanhBellMF(left=2.0, right=8.0, slope=0.0)
