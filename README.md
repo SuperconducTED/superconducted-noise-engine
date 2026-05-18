@@ -54,7 +54,7 @@ idempotent: existing snapshot files are skipped.
 ```bash
 cp .env.example .env
 # Edit .env and paste your IBM_QUANTUM_TOKEN
-superconducted-poll --backend ibm_brisbane
+superconducted-poll --backend ibm_fez
 ```
 
 Add a cron entry (POSIX) or Task Scheduler entry (Windows) to invoke it on

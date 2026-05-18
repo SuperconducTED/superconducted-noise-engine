@@ -17,6 +17,7 @@ import numpy.typing as npt
 
 from ..interfaces import CalibrationFeatureExtractor
 from ..types import CalibrationSnapshot
+from .loader import ParsedCalibrationSnapshot
 
 _DEFAULT_SCHEMA_VERSION: str = "1.0.0"
 _FEATURE_NAMES: tuple[str, ...] = ("mean_T1", "mean_T2", "mean_readout_error")
@@ -88,3 +89,38 @@ class BasicCalibrationVectorizer(CalibrationFeatureExtractor):
             ],
             dtype=np.float64,
         )
+
+
+def mean_t1(snapshot: ParsedCalibrationSnapshot) -> float | None:
+    """Mean T1 (seconds) across qubits with a usable T1 value.
+
+    Skip strategy per ADR-017: per-qubit T1 values that are ``None``
+    (Nduv entry absent or explicitly null in the source JSON) or NaN
+    are excluded from the average. ``snapshot.missingness`` carries the
+    counts so callers can report on what was dropped. Returns ``None``
+    when no qubit has a usable T1, rather than raising — let the caller
+    decide whether to skip the snapshot.
+    """
+    values = [
+        q.t1_seconds
+        for q in snapshot.qubits
+        if q.t1_seconds is not None and not math.isnan(q.t1_seconds)
+    ]
+    if not values:
+        return None
+    return sum(values) / len(values)
+
+
+def mean_t2(snapshot: ParsedCalibrationSnapshot) -> float | None:
+    """Mean T2 (seconds) across qubits with a usable T2 value.
+
+    See :func:`mean_t1` for the skip-strategy contract; T2 mirrors it.
+    """
+    values = [
+        q.t2_seconds
+        for q in snapshot.qubits
+        if q.t2_seconds is not None and not math.isnan(q.t2_seconds)
+    ]
+    if not values:
+        return None
+    return sum(values) / len(values)
