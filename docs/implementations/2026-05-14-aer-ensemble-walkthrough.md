@@ -14,13 +14,14 @@ unsupported data. The workflow requires a durable implementation note
 that documents what changed, why, and how verification was performed.
 
 Related ADRs: ADR-002 (Factory/Ensemble pattern), ADR-015 (deferred
-per-member sampling). See `docs/decisions.md` for the ADR text.
+per-member sampling), ADR-016 (mean aggregation at bootstrap). See
+`docs/decisions.md` for the ADR text.
 
 ## What changed
 
 | File | One-sentence description |
 | --- | --- |
-| `scripts/first_ensemble_run.py` | Rewrote the smoke harness to wire real bootstrap concretes and feature-specific MF scaling; added `--snapshot` and `--qubits` CLI args; removed mocked fallbacks; use feature_names from vectorizer instead of hardcoded dimension assumptions. |
+| `scripts/first_ensemble_run.py` | Rewrote the smoke harness to wire real bootstrap concretes and feature-specific MF scaling; added `--snapshot` and `--qubits` CLI args; removed mocked fallbacks; use feature_names from vectorizer instead of hardcoded dimension assumptions. Aligned `run_ensemble` count aggregation to ADR-016 mean (was sum, surfaced in round 3 review); added explicit raises on unknown feature names, empty ensembles, and degenerate (identity) channels. |
 | `docs/findings/aer-integration-walkthrough.md` | Marked prior latency numbers as invalid-by-mock, corrected the ensemble signature description, and added an explicit re-run action. |
 | `docs/implementations/2026-05-14-aer-ensemble-walkthrough.md` | This implementation record. |
 
@@ -48,8 +49,16 @@ silent mocks/fallbacks).
 
 ## Mathematical / Statistical details
 
-N/A — the change is structural and about integration correctness and
-verification, not new numeric algorithms.
+Counts are mean-aggregated across ensemble members per ADR-016:
+`run_ensemble` accumulates per-member `dict[str, int]` counts and
+returns `round(total[k] / N)` for each observed bin. With
+`rng=default_rng(0)` and ADR-015 deferred, members are currently
+identical and the mean equals a single member's behavior — this is
+the documented current state, not a smoke-harness deviation. Per-key
+independent rounding can leave `sum(returned.values())` differing
+from `shots` by at most one count per bin; the canonical engine in
+`superconducted.benchmarks.harness` carries `shots * len(members)`
+in `SimulationResult.shots` instead.
 
 ## Design decisions
 

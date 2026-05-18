@@ -39,23 +39,36 @@ ENSEMBLE_SIZES: Final[tuple[int, ...]] = (1, 8, 16)
 def run_ensemble(
     circuit: QuantumCircuit, members: list[FuzzyNoiseModel], shots: int
 ) -> dict[str, int]:
-    """Run each ensemble member and aggregate counts into a single dictionary.
+    """Run each ensemble member and mean-aggregate counts per ADR-016.
 
-    Aggregation is performed as a bootstrap point estimate: per-member counts
-    are summed and the total shot count is preserved, matching the current
-    ADR-016 bootstrap semantics for ensemble aggregation.
+    With rng=default_rng(0) and ADR-015 deferred, members are currently
+    identical and the mean equals a single member's behavior. This is
+    the documented current state, not a smoke-harness deviation.
+
+    Per-key independent rounding can leave sum(returned.values()) differing
+    from `shots` by at most one count per bin in tie/fractional cases.
+    The benchmark harness in superconducted.benchmarks.harness preserves
+    the count total via SimulationResult.shots = shots * len(members);
+    this dict-returning smoke wrapper accepts the small drift.
     """
-    counts: dict[str, int] = {}
+    if not members:
+        raise ValueError("Cannot run with an empty ensemble")
 
     sim = AerSimulator()
 
+    per_member: list[dict[str, int]] = []
     for nm in members:
         prepared_circuit, actual_noise_model = nm.prepare(circuit.copy())
         transpiled_circuit = transpile(prepared_circuit, backend=sim)
         result = sim.run(transpiled_circuit, shots=shots, noise_model=actual_noise_model).result()
-        for k, v in result.get_counts().items():
-            counts[k] = counts.get(k, 0) + v
-    return counts
+        per_member.append(dict(result.get_counts()))
+
+    totals: dict[str, int] = {}
+    for d in per_member:
+        for k, v in d.items():
+            totals[k] = totals.get(k, 0) + v
+    n = len(per_member)
+    return {k: round(v / n) for k, v in totals.items()}
 
 
 def _default_mfs_for_feature(feature_name: str) -> list[GaussianMF]:
@@ -67,7 +80,11 @@ def _default_mfs_for_feature(feature_name: str) -> list[GaussianMF]:
         "mean_T2": (0.0, 100e-6),
         "mean_readout_error": (0.0, 0.1),
     }
-    lo, hi = feature_scales.get(feature_name, (0.0, 1.0))
+    if feature_name not in feature_scales:
+        raise ValueError(
+            f"unknown feature {feature_name!r}; known features: {list(feature_scales)}"
+        )
+    lo, hi = feature_scales[feature_name]
     span = hi - lo
     overlap = span * 0.25
     return [GaussianMF(center=lo, sigma=overlap), GaussianMF(center=lo + span * 0.5, sigma=overlap)]
@@ -108,7 +125,15 @@ def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> list[FuzzyN
         fuzzification_strategy=PostGateFuzzification(),
         ensemble_size=n,
     )
-    return list(ensemble_iter)
+    members = list(ensemble_iter)
+    for member in members:
+        crisp = member.crisp_params
+        if crisp.size < 2 or not np.any(crisp[:2] > 0):
+            raise ValueError(
+                "Degenerate (identity) channel; bootstrap consequents are zero per ADR-014. "
+                "Use consequent_init='random' or annotate timings as installation overhead."
+            )
+    return members
 
 
 def _load_snapshot(path: Path) -> CalibrationSnapshot:
@@ -186,8 +211,7 @@ def main(argv: list[str] | None = None) -> None:
         t0 = time.perf_counter()
         counts = run_ensemble(circuit, members, SHOTS_PER_MEMBER)
         elapsed = time.perf_counter() - t0
-        total_shots = n * SHOTS_PER_MEMBER
-        print(f"N={n} elapsed={elapsed:.2f}s total_shots={total_shots}")
+        print(f"N={n} elapsed={elapsed:.2f}s members={n} shots_per_member={SHOTS_PER_MEMBER}")
         print(f"  counts: {counts}\n")
 
     print("--- Sanity Check (Single Member, 8192 Shots) ---")

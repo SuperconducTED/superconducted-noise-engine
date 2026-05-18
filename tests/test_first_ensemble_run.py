@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+import pytest
 from qiskit import QuantumCircuit
 from scripts.first_ensemble_run import _load_snapshot, run_ensemble
 
@@ -36,7 +37,7 @@ class DummySimulator:
 
 
 def test_run_ensemble_aggregates_counts(monkeypatch: Any) -> None:
-    expected_counts = [{"0": 10, "1": 5}, {"0": 3, "1": 2, "2": 1}]
+    expected_counts = [{"0": 9, "1": 6}, {"0": 3, "1": 0}]
     monkeypatch.setattr(
         "scripts.first_ensemble_run.AerSimulator", lambda: DummySimulator(list(expected_counts))
     )
@@ -47,7 +48,43 @@ def test_run_ensemble_aggregates_counts(monkeypatch: Any) -> None:
     members = [DummyMember({}), DummyMember({})]
     actual = run_ensemble(QuantumCircuit(1), members, shots=1024)
 
-    assert actual == {"0": 13, "1": 7, "2": 1}
+    assert actual == {"0": 6, "1": 3}
+
+
+def test_default_mfs_for_feature_raises_on_unknown() -> None:
+    from scripts.first_ensemble_run import _default_mfs_for_feature
+
+    with pytest.raises(ValueError, match="unknown feature"):
+        _default_mfs_for_feature("not_a_feature")
+
+
+@pytest.mark.slow
+def test_run_ensemble_real_aer_one_qubit() -> None:
+    """End-to-end pipeline: fuzzy snapshot -> FuzzyNoiseModel -> Aer.
+
+    Closes the gap left by test_run_ensemble_aggregates_counts, which
+    only verifies aggregation via DummySimulator monkeypatching.
+    """
+    from scripts.first_ensemble_run import (
+        _synthetic_snapshot,
+        generate_safe_ensemble,
+    )
+
+    snapshot = _synthetic_snapshot()
+    members = generate_safe_ensemble(snapshot, n=1)
+    assert len(members) == 1
+
+    qc = QuantumCircuit(1)
+    qc.h(0)
+    qc.measure_all()
+
+    _, prepared_nm = members[0].prepare(qc.copy())
+    assert prepared_nm.noise_instructions, (
+        "expected non-empty noise_instructions on prepared NoiseModel"
+    )
+
+    counts = run_ensemble(qc, members, shots=256)
+    assert sum(counts.values()) > 0
 
 
 def test_load_snapshot(tmp_path: Path) -> None:
