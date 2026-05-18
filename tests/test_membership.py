@@ -162,6 +162,7 @@ class TestTanhSigmoidMF:
         with pytest.raises(ValueError):
             TanhSigmoidMF(center=2.0, slope=0.0)
 
+
 class TestTanhBellMF:
     def test_tanh_bell_range_and_peak(self) -> None:
         """Test range compliance and that the midpoint approaches 1 for wide spans."""
