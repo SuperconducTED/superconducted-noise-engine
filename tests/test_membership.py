@@ -139,30 +139,6 @@ class TestIntervalGaussianMF:
 
 
 class TestTanhSigmoidMF:
-    def test_tanh_sigmoid_range(self, /) -> None:  # Add self here
-        """Test that TanhSigmoidMF outputs are bounded within (0, 1) and exactly 0.5 at center."""
-        mf = TanhSigmoidMF(center=5.0, slope=1.0)
-        assert 0.0 <= mf.degree(5.0).value <= 1.0
-        assert mf.degree(5.0).value == pytest.approx(0.5)
-
-    def test_tanh_sigmoid_monotonicity(self) -> None:  # Add self here
-        """Test that a positive slope results in a monotonically increasing function."""
-        mf = TanhSigmoidMF(center=0.0, slope=2.0)
-        assert mf.degree(-1.0).value < mf.degree(0.0).value < mf.degree(1.0).value
-
-    def test_tanh_sigmoid_extreme_inputs(self) -> None:  # Add self here
-        """Test asymptotic behavior at extreme limits."""
-        mf = TanhSigmoidMF(center=0.0, slope=1.0)
-        assert mf.degree(100.0).value == pytest.approx(1.0, abs=1e-5)
-        assert mf.degree(-100.0).value == pytest.approx(0.0, abs=1e-5)
-
-    def test_tanh_sigmoid_invalid_slope(self) -> None:  # Add self here
-        """Test that setting an invalid zero slope raises a ValueError."""
-        with pytest.raises(ValueError):
-            TanhSigmoidMF(center=2.0, slope=0.0)
-
-
-class TestTanhSigmoidMF:
     def test_tanh_sigmoid_range(self) -> None:
         """Test that TanhSigmoidMF outputs are bounded within (0, 1) and exactly 0.5 at center."""
         mf = TanhSigmoidMF(center=5.0, slope=1.0)
