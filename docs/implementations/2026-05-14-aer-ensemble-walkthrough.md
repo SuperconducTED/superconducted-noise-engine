@@ -21,7 +21,7 @@ per-member sampling), ADR-016 (mean aggregation at bootstrap). See
 
 | File | One-sentence description |
 | --- | --- |
-| `scripts/first_ensemble_run.py` | Rewrote the smoke harness to wire real bootstrap concretes and feature-specific MF scaling; added `--snapshot` and `--qubits` CLI args; removed mocked fallbacks; use feature_names from vectorizer instead of hardcoded dimension assumptions. Aligned `run_ensemble` count aggregation to ADR-016 mean (was sum, surfaced in round 3 review); added explicit raises on unknown feature names, empty ensembles, and degenerate (identity) channels. |
+| `scripts/first_ensemble_run.py` | Rewrote the smoke harness to wire real bootstrap concretes and feature-specific MF scaling; added `--snapshot` and `--qubits` CLI args; removed mocked fallbacks; use feature_names from vectorizer instead of hardcoded dimension assumptions. Aligned `run_ensemble` count aggregation to ADR-016 mean (was sum, surfaced in round 3 review); added explicit raises on unknown feature names, empty ensembles, and degenerate (identity) channels. Hoisted `AerSimulator()` to `main()` and threaded it through `run_ensemble`, so the warmup amortizes the instance that's actually timed (round 4 review). |
 | `docs/findings/aer-integration-walkthrough.md` | Marked prior latency numbers as invalid-by-mock, corrected the ensemble signature description, and added an explicit re-run action. |
 | `docs/implementations/2026-05-14-aer-ensemble-walkthrough.md` | This implementation record. |
 

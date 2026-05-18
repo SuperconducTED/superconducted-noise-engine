@@ -37,9 +37,16 @@ ENSEMBLE_SIZES: Final[tuple[int, ...]] = (1, 8, 16)
 
 
 def run_ensemble(
-    circuit: QuantumCircuit, members: list[FuzzyNoiseModel], shots: int
+    members: list[FuzzyNoiseModel],
+    circuit: QuantumCircuit,
+    shots: int,
+    simulator: AerSimulator,
 ) -> dict[str, int]:
     """Run each ensemble member and mean-aggregate counts per ADR-016.
+
+    The ``simulator`` is caller-owned so the caller can warm it before
+    timing and share one instance across calls (the smoke harness does
+    this to keep the warmup meaningful).
 
     With rng=default_rng(0) and ADR-015 deferred, members are currently
     identical and the mean equals a single member's behavior. This is
@@ -54,13 +61,13 @@ def run_ensemble(
     if not members:
         raise ValueError("Cannot run with an empty ensemble")
 
-    sim = AerSimulator()
-
     per_member: list[dict[str, int]] = []
     for nm in members:
         prepared_circuit, actual_noise_model = nm.prepare(circuit.copy())
-        transpiled_circuit = transpile(prepared_circuit, backend=sim)
-        result = sim.run(transpiled_circuit, shots=shots, noise_model=actual_noise_model).result()
+        transpiled_circuit = transpile(prepared_circuit, backend=simulator)
+        result = simulator.run(
+            transpiled_circuit, shots=shots, noise_model=actual_noise_model
+        ).result()
         per_member.append(dict(result.get_counts()))
 
     totals: dict[str, int] = {}
@@ -200,16 +207,21 @@ def main(argv: list[str] | None = None) -> None:
 
     circuit = qft_circuit(args.qubits)
 
+    # One AerSimulator instance shared across the warmup and every timed
+    # run_ensemble call below, so the warmup actually amortizes the C++
+    # init of the instance that gets measured (round 4 review).
+    simulator = AerSimulator()
+
     print("--- Ensemble Scaling Tests (Real Concretes) ---")
     for n in ENSEMBLE_SIZES:
         members = generate_safe_ensemble(snapshot, n)
-        # Warmup to amortize cold start (simulator construction, transpile)
-        sim_warm = AerSimulator()
+        # Warmup the shared AerSimulator instance to amortize C++ init out of
+        # the timed run_ensemble calls below.
         prep_circ_w, prep_nm_w = members[0].prepare(circuit.copy())
-        transpiled_w = transpile(prep_circ_w, backend=sim_warm)
-        sim_warm.run(transpiled_w, shots=1, noise_model=prep_nm_w).result()
+        transpiled_w = transpile(prep_circ_w, backend=simulator)
+        simulator.run(transpiled_w, shots=1, noise_model=prep_nm_w).result()
         t0 = time.perf_counter()
-        counts = run_ensemble(circuit, members, SHOTS_PER_MEMBER)
+        counts = run_ensemble(members, circuit, SHOTS_PER_MEMBER, simulator)
         elapsed = time.perf_counter() - t0
         print(f"N={n} elapsed={elapsed:.2f}s members={n} shots_per_member={SHOTS_PER_MEMBER}")
         print(f"  counts: {counts}\n")
@@ -218,9 +230,8 @@ def main(argv: list[str] | None = None) -> None:
     single_member = generate_safe_ensemble(snapshot, 1)[0]
     t0_sanity = time.perf_counter()
     prep_circ, prep_nm = single_member.prepare(circuit.copy())
-    sim_sanity = AerSimulator()
-    transpiled_sanity = transpile(prep_circ, backend=sim_sanity)
-    result_sanity = sim_sanity.run(transpiled_sanity, shots=8192, noise_model=prep_nm).result()
+    transpiled_sanity = transpile(prep_circ, backend=simulator)
+    result_sanity = simulator.run(transpiled_sanity, shots=8192, noise_model=prep_nm).result()
     sanity_counts = result_sanity.get_counts()
     elapsed_sanity = time.perf_counter() - t0_sanity
     print(f"Sanity Run elapsed={elapsed_sanity:.2f}s total_shots=8192")

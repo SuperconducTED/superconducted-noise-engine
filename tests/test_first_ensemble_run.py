@@ -39,14 +39,12 @@ class DummySimulator:
 def test_run_ensemble_aggregates_counts(monkeypatch: Any) -> None:
     expected_counts = [{"0": 9, "1": 6}, {"0": 3, "1": 0}]
     monkeypatch.setattr(
-        "scripts.first_ensemble_run.AerSimulator", lambda: DummySimulator(list(expected_counts))
-    )
-    monkeypatch.setattr(
         "scripts.first_ensemble_run.transpile", lambda circuit, backend=None: circuit
     )
 
+    sim = DummySimulator(list(expected_counts))
     members = [DummyMember({}), DummyMember({})]
-    actual = run_ensemble(QuantumCircuit(1), members, shots=1024)
+    actual = run_ensemble(members, QuantumCircuit(1), shots=1024, simulator=sim)
 
     assert actual == {"0": 6, "1": 3}
 
@@ -65,6 +63,7 @@ def test_run_ensemble_real_aer_one_qubit() -> None:
     Closes the gap left by test_run_ensemble_aggregates_counts, which
     only verifies aggregation via DummySimulator monkeypatching.
     """
+    from qiskit_aer import AerSimulator
     from scripts.first_ensemble_run import (
         _synthetic_snapshot,
         generate_safe_ensemble,
@@ -83,7 +82,8 @@ def test_run_ensemble_real_aer_one_qubit() -> None:
         "expected non-empty noise_instructions on prepared NoiseModel"
     )
 
-    counts = run_ensemble(qc, members, shots=256)
+    sim = AerSimulator()
+    counts = run_ensemble(members, qc, shots=256, simulator=sim)
     assert sum(counts.values()) > 0
 
 

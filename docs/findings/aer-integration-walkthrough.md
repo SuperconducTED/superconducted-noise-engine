@@ -23,17 +23,17 @@ After wiring the real fuzzy-noise pipeline (May 17, 2026) with:
 - Feature-specific MF grids (T1/T2 in 0–100µs range, readout_error in 0–0.1 range)
 - `TSKRuleBase.from_grid(..., consequent_init="random", rng=np.random.default_rng(0))`
 - Real defuzzifier, squashing, channel projector, fuzzification strategy
-- Warmup run (1 shot) before timing loop to amortize cold start
+- One shared `AerSimulator()` hoisted to `main()` and warmed (1 shot) before each timed loop
 
-Measured on local 2-qubit QFT with synthetic snapshot (single core, no GPU):
+Numbers below captured on commit `<commit-sha>` after the simulator-hoist refactor, on local 2-qubit QFT with synthetic snapshot (single core, no GPU):
 
 | Ensemble Size | Elapsed (s) | Total Shots | Avg per Member |
 | --- | --- | --- | --- |
-| N=1 | 0.08 | 1,024 | 0.08s/member |
-| N=8 | 0.68 | 8,192 | 0.085s/member |
-| N=16 | 1.35 | 16,384 | 0.084s/member |
+| N=1 | 0.07 | 1,024 | 0.07s/member |
+| N=8 | 0.91 | 8,192 | 0.114s/member |
+| N=16 | 1.89 | 16,384 | 0.118s/member |
 
-Observation: per-member time is ~0.08s, dominated by simulator setup and transpilation rather than fuzzy computation. The overhead from constructing the ensemble is O(N), as expected for independent member runs.
+Observation: with the simulator hoisted, the warmup amortizes one cold start out of the timed loop. The N=1 entry runs the already-warmed first member at ~0.07s; for N=8 and N=16 subsequent members cost ~0.12s each (per-member transpile plus a fresh `NoiseModel` install on the shared simulator). Total elapsed scales O(N) in members, as expected for independent member runs.
 
 ## 4. Surprises and Risks
 * **Strict Dependency Injection:** The `FuzzyNoiseModelEnsemble.__init__` takes the `calibration` plus six fuzzy components (`feature_extractor`, `rule_base`, `defuzzifier`, `squashing`, `channel_projector`, `fuzzification_strategy`) as its required injected dependencies. In addition it exposes optional parameters `ensemble_size` (defaults to 32) and `rng` (defaults to None). Note: earlier text misstated the positional argument count; the correct surprise for readers is the strict DI surface and the presence of optional sizing/rng parameters rather than an always-positional `n`.
