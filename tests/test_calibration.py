@@ -28,7 +28,6 @@ from superconducted.calibration.storage import (
 )
 from superconducted.types import CalibrationSnapshot
 
-
 # --- Storage --------------------------------------------------------------
 
 
