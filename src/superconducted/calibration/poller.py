@@ -465,6 +465,8 @@ def main(argv: Iterable[str] | None = None) -> int:
 
         load_dotenv()
     except ImportError:
+        # Optional dependency: continue without loading a .env file.
+        # Environment variables from the OS are still used as usual.
         pass
 
     parser = _build_arg_parser()
