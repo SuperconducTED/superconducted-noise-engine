@@ -109,8 +109,10 @@ the contribution rather than a thin wrapper.
 common for plateau-with-uncertain-edges. The advisor recommended a
 tanh-based shape for first-priority empirical testing.
 
-**Decision (current)**: Bootstrap ships all four T1 shapes plus
-`IntervalGaussianMF`. Empirical work to pick the winner is deferred.
+**Decision (current)**: Bootstrap ships the T1 shapes Gaussian,
+triangular, trapezoidal, and bell, plus `IntervalGaussianMF`,
+`TanhSigmoidMF`, and `TanhBellMF`. Empirical work to pick the winner is
+deferred.
 
 **Consequences**: All shapes are interchangeable behind
 `MembershipFunction`. The trainer (when written) operates on the flat
