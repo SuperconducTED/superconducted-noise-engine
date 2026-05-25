@@ -148,9 +148,9 @@ All four of Issue #6's requested ADR drafts are now produced. Additionally, ADR-
 
 | Metric | Count |
 | --- | --- |
-| ADRs reviewed | 17 |
+| ADRs reviewed | 16 |
 | ADRs patched in place | 2 (ADR-006, ADR-016) |
-| New ADRs drafted | 5 (ADR-018, ADR-019, ADR-020, ADR-021, ADR-022) |
+| New ADRs drafted | 6 (ADR-017, ADR-018, ADR-019, ADR-020, ADR-021, ADR-022) |
 | PRs reviewed | 9 (8 merged + 1 open) |
 | Issues reviewed | 7 |
 | Commits surveyed | 54 |
