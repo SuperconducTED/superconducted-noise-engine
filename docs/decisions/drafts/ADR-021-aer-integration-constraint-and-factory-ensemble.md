@@ -28,8 +28,10 @@ identified.
 5. `channel_projector: ChannelProjector`
 6. `fuzzification_strategy: FuzzificationStrategy`
 
-Plus a `CalibrationSnapshot` and optional `ensemble_size` (default 32)
-and `rng`.
+It also receives a `CalibrationSnapshot`.
+ `FuzzyNoiseModelEnsemble` (the factory) takes the optional
+ `ensemble_size` (default 32) and `rng` used to create multiple
+ `FuzzyNoiseModel` instances.
 
 The inference pipeline executed at construction is:
 
