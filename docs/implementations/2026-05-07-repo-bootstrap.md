@@ -17,7 +17,6 @@ ANFIS training could begin accumulating immediately.
 | `.gitignore` | Standard Python excludes plus `.env` and `data/*` (with `.gitkeep` exception). |
 | `.env.example` | Template for `IBM_QUANTUM_TOKEN`, `IBM_QUANTUM_CHANNEL`, retry knobs. |
 | `README.md` | Public-facing overview, quick start, polling failure modes. |
-| `CLAUDE.md` | Operational instructions for future Claude sessions: hard constraints, open decisions, locked zones, "before you write code" checklist. |
 | `pyproject.toml` | PEP 621 metadata, hatchling backend, `[tool.ruff]` / `[tool.mypy]` / `[tool.pytest.ini_options]`. |
 | `requirements.txt`, `requirements-dev.txt` | Pinned runtime + dev environments. |
 | `.github/workflows/ci.yml` | Lint + format + type-check + test on Python 3.11 / 3.12. |
