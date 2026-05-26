@@ -1,4 +1,4 @@
-# ❯ Follow-Up Issues from First ADR Cycle Audit
+# Follow-Up Issues from First ADR Cycle Audit
 
 **Date**: 2026-05-25
 **Source**: `docs/audits/2026-05-25-first-cycle-audit.md`
@@ -7,7 +7,7 @@ These issue drafts are queued for filing. Each includes a title, body, and sugge
 
 ---
 
-## ❯ 1 ADR-016 text/implementation alignment
+## 1 ADR-016 text/implementation alignment
 
 **Labels**: `area:benchmarks`, `type:docs`
 
@@ -23,7 +23,7 @@ The smoke script `scripts/first_ensemble_run.py:run_ensemble` truly mean-aggrega
 
 ---
 
-## ❯ 2 Harness module docstring drift
+## 2 Harness module docstring drift
 
 **Labels**: `area:benchmarks`, `type:docs`
 
@@ -33,7 +33,7 @@ The smoke script `scripts/first_ensemble_run.py:run_ensemble` truly mean-aggrega
 
 ---
 
-## ❯ 3 Architecture.md ADR-016 table
+## 3 Architecture.md ADR-016 table
 
 **Labels**: `type:docs`
 
@@ -43,7 +43,7 @@ The smoke script `scripts/first_ensemble_run.py:run_ensemble` truly mean-aggrega
 
 ---
 
-## ❯ 4 Implementation doc stale cron timing
+## 4 Implementation doc stale cron timing
 
 **Labels**: `area:calibration`, `type:docs`
 
@@ -53,7 +53,7 @@ The smoke script `scripts/first_ensemble_run.py:run_ensemble` truly mean-aggrega
 
 ---
 
-## ❯ 5 ADR-018 formalization
+## 5 ADR-018 formalization
 
 **Labels**: `area:fuzzy`, `type:docs`
 
@@ -68,7 +68,7 @@ Acceptance criteria:
 
 ---
 
-## ❯ 6 Nduv-walk convergence
+## 6 Nduv-walk convergence
 
 **Labels**: `area:calibration`, `type:enhancement`
 
@@ -80,7 +80,7 @@ This falls under ADR-013 scope (calibration feature engineering). Convergence co
 
 ---
 
-## ❯ 7 Circuit-mutation safety documentation
+## 7 Circuit-mutation safety documentation
 
 **Labels**: `area:integration`, `type:docs`
 
@@ -92,7 +92,7 @@ This contract is currently enforced by code review (PR #13 blocker) but is not d
 
 ---
 
-## ❯ 8 Snapshot timestamp type inconsistency
+## 8 Snapshot timestamp type inconsistency
 
 **Labels**: `area:calibration`, `type:enhancement`
 

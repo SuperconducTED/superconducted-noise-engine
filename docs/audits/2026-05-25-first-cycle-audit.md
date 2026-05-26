@@ -1,4 +1,4 @@
-# ❯ First ADR Cycle Audit
+# First ADR Cycle Audit
 
 **Date**: 2026-05-25
 **Scope**: ADR-001 through ADR-017 · 8 merged PRs + 1 open PR · 7 issues · 54 commits on `main` · 5 implementation docs.
@@ -6,7 +6,7 @@
 
 ---
 
-## ❯ 1 Per-ADR Drift Table
+## 1 Per-ADR Drift Table
 
 | ADR | Still Accurate? | Drift Summary | Action |
 | --- | --- | --- | --- |
@@ -30,7 +30,7 @@
 
 ---
 
-## ❯ 2 Per-PR Unrecorded-Decision Table
+## 2 Per-PR Unrecorded-Decision Table
 
 | PR | Title | Decisions Surfaced | ADR Candidate? | ADR Target or Reason Not |
 | --- | --- | --- | --- | --- |
@@ -46,7 +46,7 @@
 
 ---
 
-## ❯ 3 Per-Issue Pending-Decision Table
+## 3 Per-Issue Pending-Decision Table
 
 | Issue | Status | Decision Shape | Pending Decision | Tracking Action |
 | --- | --- | --- | --- | --- |
@@ -60,7 +60,7 @@
 
 ---
 
-## ❯ 4 Commit-Cluster Themes
+## 4 Commit-Cluster Themes
 
 | Cluster | Hash Range | Date Range | Theme |
 | --- | --- | --- | --- |
@@ -72,7 +72,7 @@
 
 ---
 
-## ❯ 5 Implementation-Doc Cross-Reference
+## 5 Implementation-Doc Cross-Reference
 
 | Document | Date | PR | ADR References | Notes |
 | --- | --- | --- | --- | --- |
@@ -84,9 +84,9 @@
 
 ---
 
-## ❯ 6 New Threads Synthesis
+## 6 New Threads Synthesis
 
-### ❯ 6a Aggregation semantics inconsistency
+### 6a Aggregation semantics inconsistency
 
 Three descriptions of ensemble aggregation exist in the codebase, and they do not agree:
 
@@ -97,15 +97,15 @@ Three descriptions of ensemble aggregation exist in the codebase, and they do no
 
 Follow-up issue queued to resolve: either update text to describe sum-with-scaled-shots, or refactor `harness.py` to true mean.
 
-### ❯ 6b Nduv-walk duplication
+### 6b Nduv-walk duplication
 
 `BasicCalibrationVectorizer.extract` (predating ADR-017) and `loader._parse_value` (landing with ADR-017) parse the same IBM calibration JSON with different traversal logic. The vectorizer walks `properties.qubits[i]` and matches by `name`; the loader walks the same structure and matches by `name` and `unit`. Both produce correct results but the duplicated parsing is a maintenance risk. Tracked as a follow-up issue under ADR-013 scope.
 
-### ❯ 6c Tanh slope convention
+### 6c Tanh slope convention
 
 `TanhMF._validate` (`fuzzy/membership.py:179-186`) enforces `slope_left > 0` and `slope_right > 0` at construction. Non-positive slopes invert or collapse the raw tanh window; the `clip(0, 1)` on line 194 then masks the invalid parameterization by clamping degenerate output to zero, hiding a configuration error rather than surfacing it. PR #14 proposes two new tanh-based MFs (`TanhSigmoidMF`, `TanhBellMF`) that face the same constraint. Draft ADR-018 formalizes this convention.
 
-### ❯ 6d Project-level conventions (not ADR-worthy)
+### 6d Project-level conventions (not ADR-worthy)
 
 Five durable conventions emerged from review threads across multiple PRs:
 
@@ -119,7 +119,7 @@ Five durable conventions emerged from review threads across multiple PRs:
 
 5. **Transpilation required before `AerSimulator.run()` with custom noise** (PR #13). High-level circuits (QFT, `efficient_su2`) require explicit `transpile(circuit, backend=sim)` before running against custom noise models. Aer raises `unknown instruction` on un-transpiled high-level gates.
 
-### ❯ 6e Issue #6 ADR draft coverage
+### 6e Issue #6 ADR draft coverage
 
 Issue #6 requests four new ADR drafts. This audit assessed each and produced drafts where evidence supports formalization:
 
@@ -134,7 +134,7 @@ All four of Issue #6's requested ADR drafts are now produced. Additionally, ADR-
 
 ---
 
-## ❯ 7 Ambiguities Surfaced for Human Review
+## 7 Ambiguities Surfaced for Human Review
 
 1. **ADR-016 resolution direction**: Refactor `harness.py:simulate_engine` to true mean-aggregation, or update ADR-016 text (and `architecture.md`, docstring) to accurately describe sum-with-scaled-shots? The current probability-equivalence holds only under normalized metrics.
 
@@ -144,7 +144,7 @@ All four of Issue #6's requested ADR drafts are now produced. Additionally, ADR-
 
 ---
 
-## ❯ Summary
+## Summary
 
 | Metric | Count |
 | --- | --- |
