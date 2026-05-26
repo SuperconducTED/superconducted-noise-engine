@@ -25,7 +25,7 @@ counts, and noise configurations, producing non-comparable results.
    from the `calibration-data` branch (timestamp and backend recorded
    in the results table).
 3. **Fixed shot count**: 4096 shots per ensemble member, ensemble
-   size N = 8, matching the harness default.
+   size N = 8, chosen for runtime.
 4. **All four metrics**: Report Hellinger, KL, fidelity, and R-squared
    for each (MF shape, circuit) pair.
 5. **Baseline**: Gaussian MF with the bootstrap `from_grid` default
