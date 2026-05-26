@@ -30,9 +30,8 @@
 | `benchmarks/metrics.py` | Bengisu | Mert Efe Şensoy |
 | `benchmarks/harness.py` | Burak Öztekin | Mert Efe Şensoy |
 | `tests/*` | Owner of the implementation under test | — |
-| `docs/architecture.md` | Mert Efe Şensoy | Dr. Fırat Akba (review) |
-| `docs/decisions.md` (ADR ledger) | Mert Efe Şensoy | Dr. Fırat Akba (review) |
-| CI / pyproject / requirements | Mert Efe Şensoy | Burak Öztekin |
+| `docs/architecture.md` | Dr. Fırat Akba | Mert Efe Şensoy |
+| `docs/decisions.md` (ADR ledger) | Dr. Fırat Akba | Mert Efe Şensoy |
 
 ## How ownership works
 
