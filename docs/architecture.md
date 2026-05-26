@@ -8,12 +8,17 @@ the code change.
 ## Goal
 
 Bracket real IBM-hardware behavior across calibration cycles with
-interval-valued predictions. The competing benchmark is Bautra et al.
-2026 (~0.686% fidelity deviation vs. real hardware on a fixed
-calibration). SuperconducTED's distinctive contribution is
-*transferability* across calibration cycles — Bautra and SimDisQ do not
-address calibration drift, which is exactly what an Interval Type-2
-fuzzy framing handles natively.
+interval-valued predictions. Crisp calibration-based noise models
+(including those produced by current Qiskit Aer workflows) match
+hardware tightly on the calibration snapshot they were tuned on and
+degrade silently when calibration drifts. SuperconducTED's research
+aim is *transferability across calibration cycles* · a fuzzy inference
+layer over calibration features produces a noise model ensemble whose
+aggregated output is designed to track hardware behavior as the
+underlying calibration evolves.
+
+The pipeline supports both Type-1 and Interval Type-2 inference paths.
+ADR-009 records the empirical winner selection as still open.
 
 ## The 6-stage pipeline
 
@@ -124,9 +129,8 @@ snapshots so the team accumulates the ≥630 historical records needed
 for ANFIS training (≈ 126 trainable parameters × 5× rule of thumb).
 
 - **Cadence**: cron-driven; one invocation per polling round. The
-  script does NOT schedule itself. Recommended bootstrap cadence: every
-  4 hours per backend. IBM updates calibration tables roughly that
-  often.
+  script does NOT schedule itself. Cadence in cycle 1: hourly via GitHub Actions cron against ibm_fez . IBM updates calibration tables roughly that
+  often. 
 - **Idempotency**: filename-based via UTC ISO-compact timestamps.
   `O_CREAT|O_EXCL` makes the write race-safe across concurrent cron
   invocations.
