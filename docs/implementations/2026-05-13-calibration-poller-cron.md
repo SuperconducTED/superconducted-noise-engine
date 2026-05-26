@@ -36,7 +36,7 @@ N/A: purely structural deployment wrapper. No formulas, statistical tests, or nu
 
 ## Design decisions
 
-**Cron at minute :37, not :00 or :05.** GitHub Actions cron is best-effort, and the :00 and :05 slot is heavily oversubscribed across the GitHub fleet. Schedules at :00 or :05 carry a noticeably higher skip probability. Shifting to :37 puts this workflow into a quieter slot at negligible cost to data freshness.
+**Cron at minute :37, not :00 or :05.** GitHub Actions cron is best-effort, and the :00 and :05 slots are heavily oversubscribed across the GitHub fleet. Schedules at :00 or :05 carry a noticeably higher skip probability. Shifting to :37 puts this workflow into a quieter slot at negligible cost to data freshness.
 
 **Orphan branch over a directory in `main`.** Snapshots are research data, not source code. Committing them on `main` would balloon the working repository, pollute `git log` for code reviewers, and make a future migration to a dedicated data repository or S3 strictly harder. The orphan `calibration-data` branch keeps the snapshot history cleanly separated and easy to relocate later.
 
