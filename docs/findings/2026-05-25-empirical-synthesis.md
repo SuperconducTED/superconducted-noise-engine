@@ -51,9 +51,9 @@ The Skip strategy produces correct arithmetic means by excluding missing and NaN
 |----------|--------------------|--------------------|
 | Absent | Key does not appear | `None` |
 | Explicit null | Key exists with `null` | `None` |
-| NaN | Key exists with `NaN` float | `None` |
+| NaN | Key exists with `NaN` float | `float('nan')` |
 
-All three categories collapse to `None` on the typed `Optional[float]` field, but the distinction is preserved in `MissingnessStats` for downstream analysis. Time fields are scaled to SI seconds at load time (1e-6 for microsecond sources, 1e-9 for nanosecond sources). Unit mismatches raise `CalibrationParseError` rather than silently drifting.
+Absent and explicit-null values collapse to `None` on the typed field, while `NaN` is preserved as `float('nan')`; the distinction among all three categories is also preserved in `MissingnessStats` for downstream analysis. Time fields are scaled to SI seconds at load time (1e-6 for microsecond sources, 1e-9 for nanosecond sources). Unit mismatches raise `CalibrationParseError` rather than silently drifting.
 
 ### Mean Aggregation Under Degenerate Ensemble
 
