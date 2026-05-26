@@ -10,17 +10,19 @@ Fuzzy-logic noise engine for Qiskit Aer-based quantum computer emulators.
 ## Why this exists
 
 Qiskit Aer's `NoiseModel` accepts crisp scalar parameters (T1, T2, gate error,
-readout error) but cannot represent the *epistemic* uncertainty introduced by
+readout error) but cannot represent the epistemic uncertainty introduced by
 calibration drift between IBM hardware updates. SuperconducTED wraps Aer with a
 Takagi-Sugeno-Kang (TSK) fuzzy inference layer that ingests IBM calibration
-snapshots and produces an ensemble of crisp `NoiseModel` instances sampled from
-a fuzzy uncertainty envelope. Aggregated simulation across the ensemble yields
-interval-valued predictions that bracket real hardware behavior across
-calibration cycles.
+snapshots and produces noise model ensembles parameterized by fuzzy rules over
+calibration features. The research aim is interval-valued simulation output
+that tracks hardware behavior across calibration cycles, with the fuzzy layer
+providing principled uncertainty quantification absent from point-estimate
+calibration-based twins.
 
-The reference benchmark is Bautra et al. 2026 (~0.686% fidelity deviation vs.
-real IBM hardware). SuperconducTED's transferability across calibration cycles
-is the primary IT2-aligned differentiator that Bautra/SimDisQ do not address.
+The system is in research preview · cycle 1 delivered the end-to-end pipeline
+and architectural validation, cycle 2 will deliver trained membership functions
+and non-degenerate ensemble execution. See [docs/state-of-the-project/](docs/state-of-the-project/)
+for current status and [docs/decisions.md](docs/decisions.md) for the ADR ledger.
 
 ## Architecture at a glance
 
