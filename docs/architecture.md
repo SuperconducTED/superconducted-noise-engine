@@ -129,8 +129,7 @@ snapshots so the team accumulates the ≥630 historical records needed
 for ANFIS training (≈ 126 trainable parameters × 5× rule of thumb).
 
 - **Cadence**: cron-driven; one invocation per polling round. The
-  script does NOT schedule itself. Cadence in cycle 1: hourly via GitHub Actions cron against ibm_fez . IBM updates calibration tables roughly that
-  often. 
+  script does NOT schedule itself. Cadence in cycle 1: hourly via GitHub Actions cron against ibm_fez . IBM updates calibration tables roughly that often. 
 - **Idempotency**: filename-based via UTC ISO-compact timestamps.
   `O_CREAT|O_EXCL` makes the write race-safe across concurrent cron
   invocations.
