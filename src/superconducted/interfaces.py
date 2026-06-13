@@ -126,23 +126,19 @@ class RuleBase(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def n_rules(self) -> int:
-        raise NotImplementedError
+    def n_rules(self) -> int: ...
 
     @property
     @abc.abstractmethod
-    def input_dim(self) -> int:
-        raise NotImplementedError
+    def input_dim(self) -> int: ...
 
     @property
     @abc.abstractmethod
-    def output_dim(self) -> int:
-        raise NotImplementedError
+    def output_dim(self) -> int: ...
 
     @property
     @abc.abstractmethod
-    def is_interval_type2(self) -> bool:
-        raise NotImplementedError
+    def is_interval_type2(self) -> bool: ...
 
 
 class Defuzzifier(abc.ABC):
@@ -207,8 +203,7 @@ class BenchmarkMetric(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def name(self) -> str:
-        pass
+    def name(self) -> str: ...
 
     @abc.abstractmethod
     def compute(self, engine: SimulationResult, reference: SimulationResult) -> float: ...
