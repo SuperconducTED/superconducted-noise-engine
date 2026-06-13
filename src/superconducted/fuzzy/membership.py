@@ -318,11 +318,16 @@ class TanhBellMF(MembershipFunction):
 
     mu(x) = (tanh(slope * (x - left)) - tanh(slope * (x - right))) / 2.
     Parameter vector [left, right, slope].
+
+    The slope must be strictly positive: with ``left < right`` a negative
+    slope inverts the bell so that ``degree`` returns values near ``-1``
+    between ``left`` and ``right``, violating the ``[0, 1]`` membership
+    invariant (unlike ``TanhMF``, ``degree`` here does not clip).
     """
 
     def __init__(self, left: float, right: float, slope: float) -> None:
-        if slope == 0:
-            raise ValueError(f"TanhBellMF requires slope != 0; got {slope}")
+        if slope <= 0:
+            raise ValueError(f"TanhBellMF requires slope > 0; got {slope}")
         if left >= right:
             raise ValueError(f"TanhBellMF requires left < right; got left={left}, right={right}")
         self._left = float(left)
@@ -345,8 +350,8 @@ class TanhBellMF(MembershipFunction):
         left = float(params[0])
         right = float(params[1])
         slope = float(params[2])
-        if slope == 0:
-            raise ValueError(f"TanhBellMF requires slope != 0; got {slope}")
+        if slope <= 0:
+            raise ValueError(f"TanhBellMF requires slope > 0; got {slope}")
         if left >= right:
             raise ValueError(f"TanhBellMF requires left < right; got left={left}, right={right}")
         self._left = left

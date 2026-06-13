@@ -189,3 +189,7 @@ class TestTanhBellMF:
             TanhBellMF(left=5.0, right=5.0, slope=1.0)
         with pytest.raises(ValueError):
             TanhBellMF(left=2.0, right=8.0, slope=0.0)
+        # A negative slope inverts the bell and yields degrees near -1
+        # between left and right, so slope > 0 is required.
+        with pytest.raises(ValueError):
+            TanhBellMF(left=2.0, right=8.0, slope=-1.0)
