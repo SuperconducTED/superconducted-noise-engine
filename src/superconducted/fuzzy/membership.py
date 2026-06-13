@@ -300,7 +300,6 @@ class TanhSigmoidMF(MembershipFunction):
             raise ValueError(f"TanhSigmoidMF requires slope > 0; got {slope}")
 
     def degree(self, x: float) -> MembershipDegree:
-        """Evaluates the membership degree for a given input x."""
         value = (math.tanh(self._slope * (float(x) - self._center)) + 1.0) / 2.0
         return MembershipDegree.crisp(value)
 
@@ -331,9 +330,9 @@ class TanhBellMF(MembershipFunction):
     Parameter vector [left, right, slope].
 
     The slope must be strictly positive: with ``left < right`` a negative
-    slope inverts the bell so that ``degree`` returns values near ``-1``
-    between ``left`` and ``right``, violating the ``[0, 1]`` membership
-    invariant (unlike ``TanhMF``, ``degree`` here does not clip).
+    slope inverts the bell so that the raw value falls near ``-1`` between
+    ``left`` and ``right``, which would raise via ``MembershipDegree``'s
+    ``0 <= low <= high <= 1`` invariant.
     """
 
     def __init__(self, left: float, right: float, slope: float) -> None:
@@ -350,9 +349,9 @@ class TanhBellMF(MembershipFunction):
             raise ValueError(f"TanhBellMF requires left < right; got left={left}, right={right}")
 
     def degree(self, x: float) -> MembershipDegree:
-        """Evaluates the membership degree for a given input x."""
-        delta_l = math.tanh(self._slope * (float(x) - self._left))
-        delta_r = math.tanh(self._slope * (float(x) - self._right))
+        x = float(x)
+        delta_l = math.tanh(self._slope * (x - self._left))
+        delta_r = math.tanh(self._slope * (x - self._right))
         value = (delta_l - delta_r) / 2.0
         return MembershipDegree.crisp(value)
 

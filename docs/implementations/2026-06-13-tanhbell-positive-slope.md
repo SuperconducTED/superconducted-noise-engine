@@ -3,10 +3,12 @@
 ## Problem / Motivation
 
 `TanhBellMF` validated only `slope == 0`, silently accepting a negative
-slope. Because `TanhBellMF.degree` (unlike `TanhMF.degree`) does **not**
-clip its output, a negative slope inverts the bell and produces membership
-degrees near `-1` between `left` and `right`, violating the `[0, 1]`
-membership invariant. The existing `test_tanh_bell_invalid_params` covered
+slope. A negative slope inverts the bell so that the raw value falls near
+`-1` between `left` and `right`; constructing the resulting
+`MembershipDegree` would raise via its `0 <= low <= high <= 1` invariant
+(`types.py:31`), turning a meaningless parameterization into a late,
+opaque failure instead of a guard at the call site. The existing
+`test_tanh_bell_invalid_params` covered
 `slope == 0` but not the negative case, so the gap was untested. This was
 raised as review feedback on the `feature/baha-tanh-mf` branch.
 
@@ -38,8 +40,9 @@ The bell is `μ(x) = (tanh(s·(x − L)) − tanh(s·(x − R))) / 2` with `L < 
   `s·(x − R) < 0 → tanh ≈ −1`, so `μ ≈ (1 − (−1))/2 = 1`. Outside `[L, R]`
   both terms share a sign and the difference decays to `0`. Range `⊆ [0, 1]`.
 - For `s < 0` and `L < x < R`: the two tanh signs flip, giving
-  `μ ≈ (−1 − 1)/2 = −1`. Since `degree` does not clip, this leaks out of
-  range. Hence `s > 0` is the correct precondition.
+  `μ ≈ (−1 − 1)/2 = −1`. This sub-zero value cannot form a valid
+  `MembershipDegree` (it raises on the `0 <= low` bound), so `s > 0` is
+  the correct precondition.
 
 ## Design decisions
 
