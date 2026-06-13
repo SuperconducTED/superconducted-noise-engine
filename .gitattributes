@@ -1,0 +1,6 @@
+# Normalize all text files to LF in the repository and on checkout.
+# `text=auto` lets Git auto-detect text vs binary and store text as LF in the index;
+# `eol=lf` forces LF in the working tree on every platform, overriding any
+# contributor's local core.autocrlf setting. This prevents the CRLF/LF churn that
+# made membership.py / test_membership.py appear as full-file rewrites.
+* text=auto eol=lf
