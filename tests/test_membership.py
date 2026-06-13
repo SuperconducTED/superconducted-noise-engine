@@ -158,9 +158,34 @@ class TestTanhSigmoidMF:
         assert mf.degree(-100.0).midpoint == pytest.approx(0.0, abs=1e-5)
 
     def test_tanh_sigmoid_invalid_slope(self) -> None:
-        """Test that setting an invalid zero slope raises a ValueError."""
+        """Both zero and negative slopes are rejected (slope > 0 required)."""
         with pytest.raises(ValueError):
             TanhSigmoidMF(center=2.0, slope=0.0)
+        with pytest.raises(ValueError):
+            TanhSigmoidMF(center=2.0, slope=-1.0)
+
+    def test_tanh_sigmoid_set_parameters_validates(self) -> None:
+        """``set_parameters`` enforces the same ``slope > 0`` guard."""
+        mf = TanhSigmoidMF(center=0.0, slope=1.0)
+        with pytest.raises(ValueError):
+            mf.set_parameters(np.array([2.0, 0.0], dtype=np.float64))
+        with pytest.raises(ValueError):
+            mf.set_parameters(np.array([2.0, -1.0], dtype=np.float64))
+
+    def test_tanh_sigmoid_is_t1(self) -> None:
+        """The tanh sigmoid is a crisp, Type-1 membership function."""
+        mf = TanhSigmoidMF(center=0.0, slope=1.0)
+        assert mf.degree(0.5).is_crisp
+        assert not mf.is_interval_type2
+
+    def test_tanh_sigmoid_parameters_round_trip(self) -> None:
+        """``parameters()`` and ``set_parameters()`` are inverse operations."""
+        mf = TanhSigmoidMF(center=1.5, slope=2.0)
+        params = mf.parameters()
+        assert params.shape == (2,)
+        assert np.allclose(params, [1.5, 2.0])
+        mf.set_parameters(np.array([-3.0, 0.5], dtype=np.float64))
+        assert np.allclose(mf.parameters(), [-3.0, 0.5])
 
 
 class TestTanhBellMF:
@@ -169,7 +194,9 @@ class TestTanhBellMF:
         mf = TanhBellMF(left=2.0, right=8.0, slope=2.0)
         midpoint_val = mf.degree(5.0).midpoint
         assert 0.0 <= midpoint_val <= 1.0
-        assert midpoint_val == pytest.approx(1.0, abs=1e-2)
+        # Closed form at x=5: (tanh(6) - tanh(-6)) / 2 = 0.99998771..., so the
+        # gap to 1 is ~1.23e-5 -- well within 1e-4.
+        assert midpoint_val == pytest.approx(1.0, abs=1e-4)
 
     def test_tanh_bell_symmetry(self) -> None:
         """Test that the bell function is symmetric around its midpoint."""
@@ -193,3 +220,26 @@ class TestTanhBellMF:
         # between left and right, so slope > 0 is required.
         with pytest.raises(ValueError):
             TanhBellMF(left=2.0, right=8.0, slope=-1.0)
+
+    def test_tanh_bell_set_parameters_validates(self) -> None:
+        """``set_parameters`` re-enforces ``slope > 0`` and ``left < right``."""
+        mf = TanhBellMF(left=2.0, right=8.0, slope=1.0)
+        with pytest.raises(ValueError):
+            mf.set_parameters(np.array([2.0, 8.0, -1.0], dtype=np.float64))
+        with pytest.raises(ValueError):
+            mf.set_parameters(np.array([8.0, 2.0, 1.0], dtype=np.float64))
+
+    def test_tanh_bell_is_t1(self) -> None:
+        """The tanh bell is a crisp, Type-1 membership function."""
+        mf = TanhBellMF(left=2.0, right=8.0, slope=1.0)
+        assert mf.degree(5.0).is_crisp
+        assert not mf.is_interval_type2
+
+    def test_tanh_bell_parameters_round_trip(self) -> None:
+        """``parameters()`` and ``set_parameters()`` are inverse operations."""
+        mf = TanhBellMF(left=2.0, right=8.0, slope=1.5)
+        params = mf.parameters()
+        assert params.shape == (3,)
+        assert np.allclose(params, [2.0, 8.0, 1.5])
+        mf.set_parameters(np.array([-1.0, 4.0, 0.5], dtype=np.float64))
+        assert np.allclose(mf.parameters(), [-1.0, 4.0, 0.5])

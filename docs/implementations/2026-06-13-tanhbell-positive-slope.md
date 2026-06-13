@@ -24,9 +24,11 @@ Tightened the guard in both validation sites (constructor and
 `MembershipFunction` ABC from `slope == 0` to `slope <= 0`, with the error
 message updated to `requires slope > 0`. No change to `degree`, parameter
 layout, or `parameter_count` — the contract is unchanged, only enforced
-correctly. `TanhSigmoidMF` is intentionally left as `slope != 0`: it is a
-monotonic sigmoid that stays in `[0, 1]` for either sign of slope, so only
-`TanhBellMF` requires strict positivity.
+correctly. At the time of this change `TanhSigmoidMF` was left as
+`slope != 0` — it stays in `[0, 1]` for either sign of slope, so it did
+not share the bell's `[0, 1]` violation. That guard was subsequently
+tightened to `slope > 0` as well, for orientation consistency rather than
+correctness — see `2026-06-13-tanh-sigmoid-positive-slope.md`.
 
 ## Mathematical / Statistical details
 
@@ -54,4 +56,8 @@ MF in this module behaves.
 
 ## Related docs
 
-- `docs/decisions.md` (membership-function contracts)
+- `2026-06-13-tanh-sigmoid-positive-slope.md` — applies the same
+  `slope > 0` convention to `TanhSigmoidMF`.
+- ADR-006 (membership function shape, **Open**) in `docs/decisions.md`.
+  The `slope > 0` convention enforced here is being recorded as ADR-018
+  (new ADR, separate PR), not by amending the Open ADR-006.

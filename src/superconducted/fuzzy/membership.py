@@ -279,13 +279,25 @@ class TanhSigmoidMF(MembershipFunction):
     """Sigmoidal membership function based on the hyperbolic tangent (tanh).
 
     mu(x) = (tanh(slope * (x - center)) + 1) / 2. Parameter vector [center, slope].
+
+    The slope must be strictly positive. A zero slope collapses the
+    function to the constant ``0.5`` (no information), and a negative slope
+    flips its orientation into a monotonically *decreasing* curve. We pin
+    ``slope > 0`` so the parameter sign is meaningful and consistent with
+    the other tanh shapes (``TanhMF``, ``TanhBellMF``): membership rises
+    with the argument and the gradient sign is well defined for the ANFIS
+    trainer.
     """
 
     def __init__(self, center: float, slope: float) -> None:
-        if slope == 0:
-            raise ValueError(f"TanhSigmoidMF requires slope != 0; got {slope}")
+        self._validate(slope)
         self._center = float(center)
         self._slope = float(slope)
+
+    @staticmethod
+    def _validate(slope: float) -> None:
+        if slope <= 0:
+            raise ValueError(f"TanhSigmoidMF requires slope > 0; got {slope}")
 
     def degree(self, x: float) -> MembershipDegree:
         """Evaluates the membership degree for a given input x."""
@@ -299,8 +311,7 @@ class TanhSigmoidMF(MembershipFunction):
         if params.shape != (2,):
             raise ValueError(f"TanhSigmoidMF expects 2 params; got shape {params.shape}")
         slope = float(params[1])
-        if slope == 0:
-            raise ValueError(f"TanhSigmoidMF requires slope != 0; got {slope}")
+        self._validate(slope)
         self._center = float(params[0])
         self._slope = slope
 
@@ -326,13 +337,17 @@ class TanhBellMF(MembershipFunction):
     """
 
     def __init__(self, left: float, right: float, slope: float) -> None:
+        self._validate(left, right, slope)
+        self._left = float(left)
+        self._right = float(right)
+        self._slope = float(slope)
+
+    @staticmethod
+    def _validate(left: float, right: float, slope: float) -> None:
         if slope <= 0:
             raise ValueError(f"TanhBellMF requires slope > 0; got {slope}")
         if left >= right:
             raise ValueError(f"TanhBellMF requires left < right; got left={left}, right={right}")
-        self._left = float(left)
-        self._right = float(right)
-        self._slope = float(slope)
 
     def degree(self, x: float) -> MembershipDegree:
         """Evaluates the membership degree for a given input x."""
@@ -350,10 +365,7 @@ class TanhBellMF(MembershipFunction):
         left = float(params[0])
         right = float(params[1])
         slope = float(params[2])
-        if slope <= 0:
-            raise ValueError(f"TanhBellMF requires slope > 0; got {slope}")
-        if left >= right:
-            raise ValueError(f"TanhBellMF requires left < right; got left={left}, right={right}")
+        self._validate(left, right, slope)
         self._left = left
         self._right = right
         self._slope = slope
