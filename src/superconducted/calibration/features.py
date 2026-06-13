@@ -19,6 +19,7 @@ from ..interfaces import CalibrationFeatureExtractor
 from ..types import CalibrationSnapshot
 from .loader import ParsedCalibrationSnapshot
 
+_DEFAULT_SCHEMA_VERSION: str = "1.0.0"
 _FEATURE_NAMES: tuple[str, ...] = ("mean_T1", "mean_T2", "mean_readout_error")
 
 
