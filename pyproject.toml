@@ -89,6 +89,15 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --strict-markers"
+filterwarnings = [
+    # Third-party deprecation from qiskit-ibm-runtime (>=0.42): merely
+    # discovering the IBMFractionalTranslationPlugin via stevedore entry
+    # points during transpile() emits this. We only use AerSimulator and
+    # never invoke the plugin, so it is not actionable here. Keyed on the
+    # stable class name rather than the full message so wording changes
+    # across runtime versions don't slip the filter.
+    "ignore:.*IBMFractionalTranslationPlugin is deprecated.*:DeprecationWarning",
+]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
 ]
