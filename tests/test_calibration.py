@@ -28,9 +28,6 @@ from superconducted.calibration.storage import (
 )
 from superconducted.types import CalibrationSnapshot
 
-UTC = UTC
-
-
 # --- Storage --------------------------------------------------------------
 
 
