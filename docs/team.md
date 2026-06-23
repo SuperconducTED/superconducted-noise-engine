@@ -32,7 +32,6 @@
 | `tests/*` | Owner of the implementation under test | — |
 | `docs/architecture.md` | Dr. Fırat Akba | Mert Efe Şensoy |
 | `docs/decisions.md` (ADR ledger) | Dr. Fırat Akba | Mert Efe Şensoy |
-| CI / pyproject / requirements | Dr. Fırat Akba | Mert Efe Şensoy |
 
 ## How ownership works
 
@@ -43,8 +42,7 @@
   the primary owner and the secondary reviewer to sign off, plus a
   reference to an ADR in `docs/decisions.md` if the change touches the
   locked math.
-- **Cross-cutting changes** (CI, pyproject, requirements, ABCs in
-  `interfaces.py`) need both Dr. Fırat Akba' and Mert Efe Şensoy's approval.
+- **Cross-cutting changes** (CI, pyproject, requirements, ABCs in interfaces.py) need Mert Efe Şensoy's approval plus one additional contributor/reviewer (Burak or Bengisu). Architectural changes that touch ADR ledger semantics additionally request review from Dr. Fırat Akba.
 - If you're unsure who owns a file, look in this table or ask in chat
   before opening a PR.
 

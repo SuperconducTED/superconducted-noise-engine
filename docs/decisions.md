@@ -118,6 +118,19 @@ deferred.
 `MembershipFunction`. The trainer (when written) operates on the flat
 parameter vector.
 
+> Revisited · 2026-05-25 · The bootstrap `TanhMF` implementation
+> (`fuzzy/membership.py:179-186`) already enforces positive slopes via
+> `_validate`. Non-positive slopes invert or collapse the raw tanh
+> window; the `clip(0, 1)` then masks the invalid parameterization by
+> clamping degenerate output to zero, hiding a configuration error
+> rather than surfacing it. This constraint is not documented in the
+> original ADR-006 text. See draft ADR-018
+> (`docs/decisions/drafts/ADR-018-tanh-slope-positive-convention.md`)
+> for formalization. Status remains Open.
+
+> See ADR-018 for the slope-positivity convention that extends this
+> decision for `TanhSigmoidMF` and `TanhBellMF`.
+
 ---
 
 ## ADR-007 — Fuzzification placement
@@ -290,6 +303,21 @@ delivers actual per-member variation worth bracketing.
 estimates, not intervals. Move past that once the ensemble is
 non-trivial.
 
+> Revisited · 2026-05-25 · The text above says "mean-aggregates counts."
+> The canonical harness (`benchmarks/harness.py:simulate_engine`) does
+> element-wise sum via `Counter.update()` with
+> `shots = shots_per_member * len(members)`. This is
+> probability-equivalent to mean-aggregation under current normalized
+> metrics (Hellinger, KL, fidelity, R-squared), which divide by total
+> counts. It is not mean-aggregation of raw counts. The smoke script
+> (`scripts/first_ensemble_run.py:run_ensemble`) truly mean-aggregates
+> via `round(v / n)`, and per-key rounding can leave
+> `sum(returned.values())` differing from `shots` by up to one count
+> per bin. The `harness.py` module docstring (line 3) and
+> `docs/architecture.md` (line 161) also describe the behavior as
+> "mean" — these are tracked as follow-up issues since they are outside
+> `docs/decisions.md`. Status remains Deferred.
+
 ---
 
 ## ADR-017 — Missing per-qubit calibration fields: Skip strategy
@@ -343,3 +371,100 @@ follow-up will introduce
 `SkipStrategyVectorizer(CalibrationFeatureExtractor)` once a second
 consumer pattern emerges (e.g. when ANFIS training begins consuming
 vectorized features alongside the mean aggregates).
+
+---
+
+## ADR-018 — Tanh membership-function slope positivity convention
+
+**Status**: Accepted.
+
+**Context**: PR #14 added `TanhSigmoidMF` (`center`, `slope`) and
+`TanhBellMF` (`left`, `right`, `slope`) to
+`src/superconducted/fuzzy/membership.py`, extending the tanh-based MF
+family enumerated in ADR-006. Both shapes are parameterized so that
+`slope <= 0` is degenerate or actively dangerous:
+
+- `TanhSigmoidMF.degree`: `mu(x) = (tanh(slope * (x - center)) + 1) / 2`.
+  At `slope = 0` this collapses to the constant `0.5` everywhere — the
+  shape carries no information. A negative slope flips the monotonic
+  direction of the sigmoid silently.
+- `TanhBellMF.degree`: `mu(x) = (tanh(slope * (x - left)) - tanh(slope
+  * (x - right))) / 2`. With `left < right`, a non-positive slope
+  inverts the bell and drives the raw value toward `-1`, which violates
+  `MembershipDegree`'s `0 <= low <= high <= 1` invariant — this is not
+  a cosmetic issue, it raises downstream.
+
+An earlier draft of this ADR (`docs/decisions/drafts/ADR-018-tanh-slope-positive-convention.md`,
+status Draft, written against the proposed PR #14 design) framed the
+risk as `clip(0, 1)` silently masking an invalid configuration. The
+merged implementation took the stronger position: reject at
+construction time rather than clip and mask.
+
+**Decision**: Both `TanhSigmoidMF` and `TanhBellMF` require strictly
+positive slope — `slope > 0`, not `slope >= 0` — because zero is
+exactly as degenerate as negative (it destroys the shape rather than
+inverting it) and is rejected by the same check, not a separate one.
+`_validate` raises `ValueError` on `slope <= 0` and `TanhBellMF._validate`
+additionally rejects `left >= right`. Both checks run again inside
+`set_parameters`, so a valid MF cannot be mutated into an invalid one
+after construction. No clipping is implemented anywhere in either
+class; out-of-domain parameters are a construction-time error, not a
+runtime silent clamp. Pinning the sign also keeps gradient direction
+well-defined for the future ANFIS trainer (ADR-014) — a parameter
+whose sign can flip the shape's orientation has no consistent gradient
+semantics.
+
+Neither shape has a plateau parameter. Unlike `TrapezoidalMF`, which
+encodes "plateau with uncertain edges" via an explicit flat-top region
+(ADR-006), `TanhSigmoidMF` and `TanhBellMF` are smooth single-valued
+tanh curves with no flat segment — saturation is asymptotic, not a
+hard plateau. `TanhBellMF`'s peak at band center is therefore strictly
+below `1.0` for any finite slope: at `slope = 2.0` and a span
+(`right - left`) of `6`, the closed-form peak is
+`(tanh(6) - tanh(-6)) / 2 ≈ 0.99998771`, and the gap from `1.0` grows
+as `slope * (right - left)` shrinks. This sub-unit-peak behavior is
+documented and tested at the `slope = 2.0` case
+(`tests/test_membership.py:194-200`); no test exercises a small-slope
+case where the gap from `1.0` is large, which is a gap in coverage, not
+in the decision.
+
+Both classes report `is_interval_type2 -> False`. They are Type-1 MFs
+only — neither exposes an upper/lower footprint-of-uncertainty pair or
+an `is_upper`-style parameter, in contrast to `IntervalGaussianMF`.
+Whether either tanh shape gets an IT2 variant is unresolved and tracked
+under ADR-009 (T1 vs IT2), not here.
+
+**Consequences**: The ANFIS trainer (ADR-014), when implemented, must
+constrain the premise-parameter search space for any tanh-based MF to
+positive slopes — a log-space or exponentiated reparameterization keeps
+gradient-based optimization inside the valid domain during training,
+rather than relying on post-hoc clamping. Any future tanh-based MF
+subclass is expected to follow the same strict-positive convention and
+to re-validate in `set_parameters`. The rule base (`TSKRuleBase`)
+itself is unaffected — this is a premise-parameter constraint, not a
+consequent or rule-structure change.
+
+**Source**: PR #14 (merged to `main`; commits `ccdade0`, `07ee487`),
+review thread on `membership.py` (Copilot flagged the `set_parameters`
+validation gap; human review identified the `MembershipDegree`
+invariant violation as a blocker, resolved by adding the strict checks
+above), `tests/test_membership.py` (`test_tanh_sigmoid_invalid_slope`,
+`test_tanh_sigmoid_set_parameters_validates`,
+`test_tanh_bell_invalid_params`), Issue #2. Supersedes the Draft-status
+text in `docs/decisions/drafts/ADR-018-tanh-slope-positive-convention.md`.
+
+> See ADR-006 for the broader MF-shape enumeration this ADR extends.
+> Revisited · 2026-05-25 · The text above says "mean-aggregates counts."
+> The canonical harness (`benchmarks/harness.py:simulate_engine`) does
+> element-wise sum via `Counter.update()` with
+> `shots = shots_per_member * len(members)`. This is
+> probability-equivalent to mean-aggregation under current normalized
+> metrics (Hellinger, KL, fidelity, R-squared), which divide by total
+> counts. It is not mean-aggregation of raw counts. The smoke script
+> (`scripts/first_ensemble_run.py:run_ensemble`) truly mean-aggregates
+> via `round(v / n)`, and per-key rounding can leave
+> `sum(returned.values())` differing from `shots` by up to one count
+> per bin. The `harness.py` module docstring (line 3) and
+> `docs/architecture.md` (line 161) also describe the behavior as
+> "mean" — these are tracked as follow-up issues since they are outside
+> `docs/decisions.md`. Status remains Deferred.
