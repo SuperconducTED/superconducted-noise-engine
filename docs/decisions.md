@@ -180,8 +180,7 @@ construction lands.
 IT2 (Interval Type-2) carries an explicit footprint of uncertainty that
 is the natural fit for "epistemic uncertainty in calibration drift."
 
-**Decision (current)**: Both supported. Bootstrap concrete `IntervalGaussianMF`
-demonstrates IT2 inference end-to-end. Empirical winner TBD.
+**Decision (current)**: Prefer IT2 provisionally while keeping T1 supported. Bootstrap concrete `IntervalGaussianMF` already demonstrates IT2 inference end-to-end and ties the choice to the variance-injection point in `src/superconducted/integration/aer_factory.py`; T1 remains supported as the simpler fallback. This direction is provisional pending the ADR-019 MF-shape ablation, with empirical confirmation cited as the plan estimate ~2026-07-19 rather than a measured figure. Confirm if ADR-019 shows IT2's explicit uncertainty envelope materially improves calibration-drift robustness versus T1; overturn if the ablation shows no such benefit or if T1 simplicity is more defensible. Downstream: ADR-011, ADR-015, and ADR-021 follow once this direction reaches Accepted and are out of scope here.
 
 **Consequences**: `MembershipDegree` carries low/high; `RuleFiringResult`
 carries optional lower/upper bound arrays; `NieTanDefuzzifier` handles
