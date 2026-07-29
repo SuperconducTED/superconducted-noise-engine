@@ -117,7 +117,7 @@ triangular, trapezoidal, and bell, plus `IntervalGaussianMF`,
 `MembershipFunction`. The trainer (when written) operates on the flat
 parameter vector.
 
-> Revisit (1): tanh slope positivity is governed by ADR-018, which is Accepted in the ledger.
+> Revisited · 2026-05-25 · Tanh slope positivity is governed by ADR-018, which is Accepted in the ledger.
 
 > See ADR-018 for the slope-positivity convention that extends this
 > decision for `TanhSigmoidMF` and `TanhBellMF`.
