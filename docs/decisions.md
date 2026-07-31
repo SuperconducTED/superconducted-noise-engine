@@ -110,7 +110,7 @@ common for plateau-with-uncertain-edges. The advisor recommended a
 tanh-based shape for first-priority empirical testing.
 
 **Decision (current)**: Bootstrap ships the T1 shapes Gaussian,
-triangular, trapezoidal, and bell, plus `IntervalGaussianMF`,
+triangular, trapezoidal, and `TanhMF`, plus `IntervalGaussianMF`,
 `TanhSigmoidMF`, and `TanhBellMF`. Empirical-winner selection among these shapes is handed off to ADR-019 (MF-shape ablation).
 
 **Consequences**: All shapes are interchangeable behind
