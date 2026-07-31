@@ -103,34 +103,24 @@ the contribution rather than a thin wrapper.
 
 ## ADR-006 — Membership function shape
 
-**Status**: Open.
+**Status**: Accepted.
 
 **Context**: Gaussian and triangular MFs are baseline; trapezoidal is
 common for plateau-with-uncertain-edges. The advisor recommended a
 tanh-based shape for first-priority empirical testing.
 
 **Decision (current)**: Bootstrap ships the T1 shapes Gaussian,
-triangular, trapezoidal, and bell, plus `IntervalGaussianMF`,
-`TanhSigmoidMF`, and `TanhBellMF`. Empirical work to pick the winner is
-deferred.
+triangular, trapezoidal, and `TanhMF`, plus `IntervalGaussianMF`,
+`TanhSigmoidMF`, and `TanhBellMF`. Empirical-winner selection among these shapes is handed off to ADR-019 (MF-shape ablation).
 
 **Consequences**: All shapes are interchangeable behind
 `MembershipFunction`. The trainer (when written) operates on the flat
 parameter vector.
 
-> Revisited · 2026-05-25 · The bootstrap `TanhMF` implementation
-> (`fuzzy/membership.py:179-186`) already enforces positive slopes via
-> `_validate`. Non-positive slopes invert or collapse the raw tanh
-> window; the `clip(0, 1)` then masks the invalid parameterization by
-> clamping degenerate output to zero, hiding a configuration error
-> rather than surfacing it. This constraint is not documented in the
-> original ADR-006 text. See draft ADR-018
-> (`docs/decisions/drafts/ADR-018-tanh-slope-positive-convention.md`)
-> for formalization. Status remains Open.
+> Revisited · 2026-05-25 · Tanh slope positivity is governed by ADR-018, which is Accepted in the ledger.
 
 > See ADR-018 for the slope-positivity convention that extends this
 > decision for `TanhSigmoidMF` and `TanhBellMF`.
-
 ---
 
 ## ADR-007 — Fuzzification placement
