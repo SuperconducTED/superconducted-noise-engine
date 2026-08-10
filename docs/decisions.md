@@ -222,7 +222,7 @@ whether the rule base is IT2.
 
 ## ADR-012 — Squashing / output activation
 
-**Status**: Open.
+**Status**: Accepted.
 
 **Context**: TSK output is a real-valued vector. Downstream channel
 parameters often need [0, 1] (probabilities). Identity, clip, and
