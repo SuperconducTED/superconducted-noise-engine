@@ -186,17 +186,33 @@ the IT2 closed form.
 
 ## ADR-010 — Rule count and input variables
 
-**Status**: Open.
+**Status**: Accepted.
 
 **Context**: The pre-meeting baseline was a 3×3×3 grid (27 rules) over
-three input dimensions. Which three is itself open.
+three input dimensions. Which three those are is now settled: `mean_T1`,
+`mean_T2`, and `mean_readout_error`.
 
-**Decision (current)**: `BasicCalibrationVectorizer` outputs (mean_T1,
-mean_T2, mean_readout_error) — the three currently most defensible
-parameters per the team's domain knowledge.
+**Decision (current)**: The baseline rule grid is 3×3×3 — 27 rules, one
+per Cartesian-product combination as built by `TSKRuleBase.from_grid`
+(`prod_i K_i` rules for `K_i` MFs on input `i`; `K_i = 3` on each of the
+3 dimensions gives 3 × 3 × 3 = 27). The three input dimensions are
+`mean_T1`, `mean_T2`, and `mean_readout_error`, as produced by
+`BasicCalibrationVectorizer` (`output_dim` 3) — the three currently most
+defensible parameters per the team's domain knowledge. `from_grid` is
+already parameterized per dimension, so a different arity is a
+configuration change at the call site, not a code change to the LOCKED
+`fuzzy/tsk.py`. This ADR ratifies the baseline only; ADR-013 remains free
+to propose and compare alternative dimension sets against it.
 
 **Consequences**: Adding more inputs is a `from_grid` argument away.
 Adding more rules per input is the same.
+
+> Ratified · 2026-08-19 · Both halves confirmed by reading the shipped
+> code: `_FEATURE_NAMES` (`calibration/features.py:23`) for the three
+> dimensions, and the `itertools.product` construction in `from_grid`
+> (`fuzzy/tsk.py:185-224`) for the 27-rule arity. The LOCKED `tsk.py` was
+> read, not modified; Burak Öztekin signed off as its primary owner. See
+> `docs/implementations/2026-08-19-adr-010-closure.md`.
 
 ---
 
