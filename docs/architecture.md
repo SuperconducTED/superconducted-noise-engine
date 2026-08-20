@@ -157,7 +157,7 @@ for ANFIS training (≈ 126 trainable parameters × 5× rule of thumb).
 | ADR-007 Fuzzification placement | `FuzzificationStrategy` | PostGate (Aer default) | Pre / Between (deferred) |
 | ADR-008 Normalization | `NormalizationStrategy` | NoOp (CPTP-by-construction) | CPTPProjection (SDP), DerivativeBased (deferred) |
 | ADR-009 T1 vs IT2 | `MembershipFunction.is_interval_type2` | T1 | IT2 (`IntervalGaussianMF`) |
-| ADR-010 Rule count | `RuleBase` | 27 (3×3×3 grid) | TBD |
+| ADR-010 Rule count | `RuleBase` | 27 (3×3×3 grid) · instantiated by `scripts/first_ensemble_run.py` | TBD |
 | ADR-011 Defuzzification | `Defuzzifier` | T1 weighted average / IT2 Nie-Tan | TBD |
 | ADR-012 Squashing | `SquashingStrategy` | ProbabilityClip | Identity, Sigmoid |
 | ADR-013 Calibration features | `CalibrationFeatureExtractor` | BasicCalibrationVectorizer | per-qubit, drift-aware (deferred) |
