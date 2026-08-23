@@ -101,3 +101,59 @@ This contract is currently enforced by code review (PR #13 blocker) but is not d
 Recommended: either unify on one representation, or document the intentional divergence (archival form vs. runtime form) in ADR-020.
 
 **References**: `src/superconducted/calibration/loader.py` (`ParsedCalibrationSnapshot`), `src/superconducted/types.py` (`CalibrationSnapshot`), PR #16 review (mertefesensoy minor).
+
+---
+
+## 9 Smoke script builds a 2×2×2 grid, not the ratified 3×3×3
+
+**Labels**: `area:fuzzy`, `type:bug`
+
+ADR-010 is now **Accepted** and ratifies a 3×3×3 (27-rule) baseline grid. The only in-repo runtime construction of that grid does not match it: `scripts/first_ensemble_run.py:_default_mfs_for_feature` (line 97) returns **two** `GaussianMF` objects per feature, so `TSKRuleBase.from_grid` receives `K_i = 2` on each of the 3 dimensions and builds `2 × 2 × 2 = 8` rules, not 27.
+
+This is genuine drift between the ratified decision and the shipped smoke script, found while confirming ADR-010 (issue #24). It was deliberately **not** fixed in that closure, which was scoped to the ledger.
+
+**Resolution options**:
+- (A) Add a third `GaussianMF` per feature in `_default_mfs_for_feature` so the smoke script instantiates the ratified 27-rule baseline.
+- (B) Keep 8 rules in the smoke script for speed and document explicitly, in both the function docstring and ADR-010, that the smoke script uses a deliberately reduced grid and is not the baseline.
+
+Note the `from_grid` call site itself needs no change either way — `per_input_mfs` is a plain argument, so this is a configuration fix, not a change to the LOCKED `fuzzy/tsk.py`.
+
+**References**: ADR-010 in `docs/decisions.md`, `scripts/first_ensemble_run.py:81-97` and `:123-128`, `docs/implementations/2026-08-19-adr-010-closure.md`.
+
+---
+
+## 10 architecture.md ADR-010 row still reads TBD
+
+**Labels**: `type:docs`
+
+`docs/architecture.md` line 160 reads `| ADR-010 Rule count | RuleBase | 27 (3×3×3 grid) | TBD |`. With ADR-010 now Accepted, the post-decision column should carry the ratified value (27 rules over `mean_T1`, `mean_T2`, `mean_readout_error`) rather than `TBD`.
+
+Out of scope for the ADR-010 closure, which was restricted to `docs/decisions.md` plus its own record.
+
+**References**: `docs/architecture.md:160`, ADR-010 in `docs/decisions.md`.
+
+---
+
+## 11 No regression test pins the ratified 27-rule grid
+
+**Labels**: `area:fuzzy`, `type:test`
+
+`tests/test_tsk.py:test_from_grid_cartesian_product` (line 67) exercises a `2 × 3 = 6` grid only. Nothing in the test suite asserts the now-ratified `3 × 3 × 3 = 27` baseline, so a future change to `from_grid` could break the ratified arity without a red test.
+
+A test asserting `n_rules == 27`, `input_dim == 3`, and 27 pairwise-distinct antecedent tuples would pin it. Such a test lives in `tests/`, so it does **not** touch the LOCKED `fuzzy/tsk.py` and does not require the two-owner lock procedure — but it does need the test-file owner (the owner of the implementation under test, per `docs/team.md` line 32).
+
+**References**: `tests/test_tsk.py:67`, `src/superconducted/fuzzy/tsk.py:185-224`, ADR-010 in `docs/decisions.md`.
+
+---
+
+## 12 Stale ADR-010 references after the closure
+
+**Labels**: `type:docs`
+
+Three references to ADR-010 went stale when it moved to Accepted:
+
+- `docs/state-of-the-project/2026-05-25-bootstrap-to-cycle-1.md` line 48 still lists ADR-010 as `Open`.
+- Issue #24's body cites ADR-010 at `docs/decisions.md` lines 192-205; after the ADR-006 closure (PR #26) and the ADR-009 memo (PR #27) the entry actually began at line 187. Line-number citations in issue bodies drift as the ledger grows — prefer anchoring by ADR heading.
+- Item 6 above cites `src/superconducted/calibration/vectorizer.py`, a path that does not exist; the file is `src/superconducted/calibration/features.py`.
+
+**References**: `docs/state-of-the-project/2026-05-25-bootstrap-to-cycle-1.md:48`, `docs/decisions.md`, issue #24, item 6 of this file.
