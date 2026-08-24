@@ -45,7 +45,7 @@ manual parameterization provides non-trivial MF parameters for each
 candidate shape. The protocol must be re-evaluated if the metric set
 changes (e.g., if trace distance or diamond norm is added).
 
-> Gate status · as-of 2026-06-30 · Prerequisite (a) is CLEARED: PR #14
+> Gate status · as-of 2026-08-20 · Prerequisite (a) is CLEARED: PR #14
 > merged to `main` (commits `ccdade0`, `07ee487`), landing
 > `TanhSigmoidMF` and `TanhBellMF`; ADR-018 is Accepted in
 > `docs/decisions.md`. Prerequisite (b) is PENDING: neither the ADR-014

@@ -28,9 +28,11 @@ divergence. No code changed.
 | File | One-sentence description |
 | --- | --- |
 | `docs/decisions.md` | Removed the misplaced `ADR-016` revisit note (14 lines) from the trailing blockquote of the `ADR-018` entry; the `ADR-006` cross-reference line is retained. |
-| `docs/decisions/drafts/ADR-019-mf-ablation-methodology.md` | Appended a dated `Gate status · as-of 2026-06-30` blockquote after Consequences recording prerequisite `(a)` CLEARED and `(b)` PENDING; status stays Open. |
-| `docs/roadmap/2026-05-25-cycle-2-plan.md` | Appended a dated `Reconciliation update · as-of 2026-06-30` section plus a `P2` follow-up row; the 2026-05-25 body is untouched. |
+| `docs/decisions/drafts/ADR-019-mf-ablation-methodology.md` | Appended a dated `Gate status · as-of 2026-08-20` blockquote after Consequences recording prerequisite `(a)` CLEARED and `(b)` PENDING; status stays Open. |
+| `docs/roadmap/2026-05-25-cycle-2-plan.md` | Appended a dated `Reconciliation update · as-of 2026-08-20` section plus a `P2` follow-up row; the 2026-05-25 body is untouched. |
 | `docs/implementations/2026-08-20-cycle2-governance-reconciliation.md` | This document. |
+| `docs/evidence/pr-32-burak-desktop/2026-08-20-verification.md` | Burak's desktop re-run of the four guards and the two content checks; records the resolution of the pytest-count expectation. |
+| `docs/numerical-claims.md` | Added `NC-021` registering the full test-suite size (149) so verification runbooks cite a source rather than a recalled figure. |
 
 ## Implementation approach
 
@@ -82,9 +84,6 @@ for the bell), including the sub-unit-peak consequence.
   underlying mean-vs-sum aggregation question is gated on `ADR-015` per
   the plan. Recorded as a `P2` row in the plan's reconciliation
   follow-up table so it survives this PR being merged and closed.
-- **Repository-local git identity set** (`MERT EFE ŞENSOY
-  <sensoymertefe@gmail.com>`) so commits are attributed correctly
-  without disturbing the machine's global config.
 
 ## Verification
 
@@ -105,13 +104,20 @@ Runnable checks (no code changed; these are guard re-runs):
 - `ruff check .`
 - `ruff format --check .`
 - `mypy --strict src/superconducted`
-- `pytest tests/test_membership.py`
+- `pytest tests/test_membership.py` — 34 passed
+- `pytest tests/ -q` — 149 passed. The count is registered as `NC-021`;
+  cite that row rather than recalling a figure. An earlier runbook for
+  this PR asserted 152, which had no source and was wrong.
 - `grep -n "mean-aggregates counts" docs/decisions.md` — expect exactly
-  two hits, both within the `ADR-016` entry.
+  two hits, both within the `ADR-016` entry. Assert the count and the
+  containing entry, not absolute line numbers: `docs/decisions.md`
+  shifts whenever an ADR entry is added above them.
 
 ## Related docs
 
 - `ADR-016`, `ADR-018`, `ADR-006` in `docs/decisions.md`
 - `docs/decisions/drafts/ADR-019-mf-ablation-methodology.md`
 - `docs/roadmap/2026-05-25-cycle-2-plan.md`
+- `docs/evidence/pr-32-burak-desktop/2026-08-20-verification.md`
+- `docs/numerical-claims.md` (`NC-021`)
 - Issue #20; PR #14 (commits `ccdade0`, `07ee487`)
