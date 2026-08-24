@@ -47,7 +47,7 @@ The audit reviewed all 16 original ADRs against current code and documentation. 
 | ADR-009 | Open | T1 and IT2 both supported · empirical winner TBD |
 | ADR-010 | Open | BasicCalibrationVectorizer with three-input 3×3×3 rule grid baseline |
 | ADR-011 | Open | Weighted-average defuzzification (T1) and Nie-Tan closed form (IT2) |
-| ADR-012 | Accepted | Three squashing strategies · ProbabilityClip is the noise probability default by the pipeline convention|
+| ADR-012 | Open | Three squashing strategies · ProbabilityClip is bootstrap default |
 | ADR-013 | Deferred | BasicCalibrationVectorizer only · richer extractors need 630+ snapshots |
 | ADR-014 | Deferred | TSK trainer deferred until 630-snapshot floor and target-distribution definition |
 | ADR-015 | Deferred | Ensemble per-member perturbation deferred · three candidate approaches identified |
@@ -102,3 +102,28 @@ See `docs/team.md` for the full contributor list and module ownership map.
 - Empirical findings synthesis · `docs/findings/2026-05-25-empirical-synthesis.md`
 - Cycle 2 plan and roadmap · `docs/roadmap/2026-05-25-cycle-2-plan.md`
 - Questions for Dr. Akba · `docs/advisor/2026-05-25-questions-for-akba.md`
+
+## Ledger reconciliation · as-of 2026-08-19
+
+Everything above this heading is the 2026-05-25 snapshot and is left
+unedited. The `ADR Cycle Summary` table above records status **as of
+2026-05-25** and is deliberately not corrected in place. This section
+records the ledger statuses that changed on `main` after that date.
+Facts verified against `docs/decisions.md` on the ADR-012 closure
+branch after merging `main` at `dfee09c`; that is the as-of date above.
+
+| ADR | 2026-05-25 snapshot | Current in `docs/decisions.md` | Closed by |
+|-----|---------------------|--------------------------------|-----------|
+| ADR-006 | Open | **Accepted** | PR #26 · MF shapes shipped, empirical-winner selection handed to ADR-019 |
+| ADR-010 | Open | **Accepted** | PR #30 · 3×3×3 baseline rule grid and its three input dimensions ratified |
+| ADR-012 | Open | **Accepted** | This PR · `ProbabilityClip` ratified as the noise-probability default, set at pipeline construction |
+| ADR-018 | Draft | **Accepted** | PR #14 · tanh slope-positivity convention formalized |
+
+All four rows above were still carrying their pre-closure status in the
+snapshot table. No other row has drifted: every remaining ADR status in
+the table still matches `docs/decisions.md`.
+
+The broader post-merge verification sweep across the ledger, the cycle-2
+plan, and `docs/architecture.md` is tracked separately in issue #25
+(Cycle 2 Opening Closeout · Phase 0 Hygiene Sweep) and is not attempted
+here.

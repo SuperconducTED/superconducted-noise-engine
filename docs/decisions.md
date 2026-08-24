@@ -242,20 +242,24 @@ sigmoid each have trade-offs.
 **Decision**: `ProbabilityClip` is the default strategy to squash
 outputs for the noise probability. The options `IdentitySquashing` and
 `SigmoidSquashing` can still be used depending on the pipeline.
-`SigmoidSquashing` is kept as the alternative for the SGD trainer
-(ADR-014). The default is determined at the pipeline construction time
-and not the module level (`squashing.py`).
+`SigmoidSquashing` is kept as the differentiable path for the SGD
+trainer (ADR-014). The default is determined at pipeline construction
+time and not at the module level (`squashing.py`).
 
-**Consequences**: Strategy is selectable per pipeline; noise probability
-pipelines usually are constructed using `ProbabilityClip`.
+**Consequences**: Strategy is selectable per pipeline. Noise-probability
+pipelines are constructed with `ProbabilityClip` unless the pipeline
+explicitly selects another strategy.
 
-> Revisited · 2026-08-19 · The code is confirmed to match these agreed decisions:
-> `src/superconducted/fuzzy/squashing.py:28`
-> `ProbabilityClip` as clipping for inference, and line 40
-> `SigmoidSquashing` as the differentiable SGD-friendly path
-> `src/superconducted/integration/aer_factory.py:72` and line 136 explicitly 
-> requires a `SquashingStrategy`, confirming that the default is a
-> pipeline convention rather than a module constant.
+> Revisited · 2026-08-19 · The code is confirmed to match this decision:
+>
+> - `src/superconducted/fuzzy/squashing.py:28` · `ProbabilityClip`
+>   clips into `[0, 1]` for inference.
+> - `src/superconducted/fuzzy/squashing.py:40` · `SigmoidSquashing` is
+>   the differentiable, SGD-friendly path.
+> - `src/superconducted/integration/aer_factory.py:72` and `:136` ·
+>   both require an explicit `SquashingStrategy`, confirming the default
+>   is a pipeline convention rather than a module constant.
+
 ---
 
 ## ADR-013 — Calibration feature engineering
