@@ -132,8 +132,8 @@ Two further discrepancies are recorded here but not treated as drift:
   they exist only as drafts under `docs/decisions/drafts/`. The statuses
   the snapshot records for them are therefore not ledger-backed.
 
-Neither discrepancy is resolved here. The broader post-merge verification
-sweep across the ledger, the cycle-2 plan, and `docs/architecture.md` —
-including whether ADR-019 through ADR-022 should be promoted from drafts
-into the ledger — is tracked separately in issue #25 (Cycle 2 Opening
-Closeout · Phase 0 Hygiene Sweep).
+Neither discrepancy is resolved here. Whether ADR-019 through ADR-022 should
+be promoted from drafts into the ledger — or stop being assigned statuses at
+all — is tracked in issue #37. The broader post-merge verification sweep
+across the ledger, the cycle-2 plan, and `docs/architecture.md` is tracked
+separately in issue #25 (Cycle 2 Opening Closeout · Phase 0 Hygiene Sweep).

@@ -68,6 +68,7 @@ to make that failure mode structurally hard to repeat.
 | NC-019 | Default shot count per ensemble member, ablation protocol | 4096 | `docs/decisions/drafts/ADR-019-mf-ablation-methodology.md` | 2026-05-25 | |
 | NC-020 | Benchmark circuits in ablation suite | 4 | `docs/decisions/drafts/ADR-019-mf-ablation-methodology.md` | 2026-05-25 | Random Clifford · GHZ · QFT · efficient_su2 |
 | NC-021 | Full test-suite size | 149 | `python -m pytest tests/ -q --collect-only`, run on `main` at `981f324` and on `46d90bc` | 2026-08-24 | Added after a runbook cited an unsourced `152` · cite this row in verification runbooks rather than recalling a count |
+| NC-022 | ADR statuses drifted from the 2026-05-25 snapshot table | 4 | Each `ADR Cycle Summary` row in `docs/state-of-the-project/2026-05-25-bootstrap-to-cycle-1.md` compared against its `**Status**` line in `docs/decisions.md` at `dfee09c` | 2026-08-24 | ADR-006, ADR-010, ADR-012, ADR-018 · excludes ADR-019 through ADR-022, which have no ledger entry to drift from (see issue #37) |
 
 ## Retired claims
 
