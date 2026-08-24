@@ -465,17 +465,3 @@ above), `tests/test_membership.py` (`test_tanh_sigmoid_invalid_slope`,
 text in `docs/decisions/drafts/ADR-018-tanh-slope-positive-convention.md`.
 
 > See ADR-006 for the broader MF-shape enumeration this ADR extends.
-> Revisited · 2026-05-25 · The text above says "mean-aggregates counts."
-> The canonical harness (`benchmarks/harness.py:simulate_engine`) does
-> element-wise sum via `Counter.update()` with
-> `shots = shots_per_member * len(members)`. This is
-> probability-equivalent to mean-aggregation under current normalized
-> metrics (Hellinger, KL, fidelity, R-squared), which divide by total
-> counts. It is not mean-aggregation of raw counts. The smoke script
-> (`scripts/first_ensemble_run.py:run_ensemble`) truly mean-aggregates
-> via `round(v / n)`, and per-key rounding can leave
-> `sum(returned.values())` differing from `shots` by up to one count
-> per bin. The `harness.py` module docstring (line 3) and
-> `docs/architecture.md` (line 161) also describe the behavior as
-> "mean" — these are tracked as follow-up issues since they are outside
-> `docs/decisions.md`. Status remains Deferred.
