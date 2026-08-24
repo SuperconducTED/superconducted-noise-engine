@@ -47,7 +47,7 @@ The audit reviewed all 16 original ADRs against current code and documentation. 
 | ADR-009 | Open | T1 and IT2 both supported · empirical winner TBD |
 | ADR-010 | Open | BasicCalibrationVectorizer with three-input 3×3×3 rule grid baseline |
 | ADR-011 | Open | Weighted-average defuzzification (T1) and Nie-Tan closed form (IT2) |
-| ADR-012 | Open | Three squashing strategies · ProbabilityClip is bootstrap default |
+| ADR-012 | Accepted | Three squashing strategies · ProbabilityClip is the noise probability default by the pipeline convention|
 | ADR-013 | Deferred | BasicCalibrationVectorizer only · richer extractors need 630+ snapshots |
 | ADR-014 | Deferred | TSK trainer deferred until 630-snapshot floor and target-distribution definition |
 | ADR-015 | Deferred | Ensemble per-member perturbation deferred · three candidate approaches identified |
