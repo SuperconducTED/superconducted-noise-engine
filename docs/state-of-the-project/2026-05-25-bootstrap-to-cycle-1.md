@@ -120,10 +120,20 @@ branch after merging `main` at `dfee09c`; that is the as-of date above.
 | ADR-018 | Draft | **Accepted** | PR #14 · tanh slope-positivity convention formalized |
 
 All four rows above were still carrying their pre-closure status in the
-snapshot table. No other row has drifted: every remaining ADR status in
-the table still matches `docs/decisions.md`.
+snapshot table. Of the remaining rows, ADR-001 through ADR-005, ADR-007,
+ADR-009, ADR-011, and ADR-014 through ADR-017 still match the ledger.
 
-The broader post-merge verification sweep across the ledger, the cycle-2
-plan, and `docs/architecture.md` is tracked separately in issue #25
-(Cycle 2 Opening Closeout · Phase 0 Hygiene Sweep) and is not attempted
-here.
+Two further discrepancies are recorded here but not treated as drift:
+
+- ADR-008 and ADR-013 read `Deferred` in the snapshot where
+  `docs/decisions.md` reads `Open / Deferred`. This is a snapshot
+  simplification, not a status change.
+- ADR-019 through ADR-022 have no entry in `docs/decisions.md` at all —
+  they exist only as drafts under `docs/decisions/drafts/`. The statuses
+  the snapshot records for them are therefore not ledger-backed.
+
+Neither discrepancy is resolved here. The broader post-merge verification
+sweep across the ledger, the cycle-2 plan, and `docs/architecture.md` —
+including whether ADR-019 through ADR-022 should be promoted from drafts
+into the ledger — is tracked separately in issue #25 (Cycle 2 Opening
+Closeout · Phase 0 Hygiene Sweep).
