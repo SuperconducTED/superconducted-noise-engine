@@ -103,34 +103,24 @@ the contribution rather than a thin wrapper.
 
 ## ADR-006 — Membership function shape
 
-**Status**: Open.
+**Status**: Accepted.
 
 **Context**: Gaussian and triangular MFs are baseline; trapezoidal is
 common for plateau-with-uncertain-edges. The advisor recommended a
 tanh-based shape for first-priority empirical testing.
 
 **Decision (current)**: Bootstrap ships the T1 shapes Gaussian,
-triangular, trapezoidal, and bell, plus `IntervalGaussianMF`,
-`TanhSigmoidMF`, and `TanhBellMF`. Empirical work to pick the winner is
-deferred.
+triangular, trapezoidal, and `TanhMF`, plus `IntervalGaussianMF`,
+`TanhSigmoidMF`, and `TanhBellMF`. Empirical-winner selection among these shapes is handed off to ADR-019 (MF-shape ablation).
 
 **Consequences**: All shapes are interchangeable behind
 `MembershipFunction`. The trainer (when written) operates on the flat
 parameter vector.
 
-> Revisited · 2026-05-25 · The bootstrap `TanhMF` implementation
-> (`fuzzy/membership.py:179-186`) already enforces positive slopes via
-> `_validate`. Non-positive slopes invert or collapse the raw tanh
-> window; the `clip(0, 1)` then masks the invalid parameterization by
-> clamping degenerate output to zero, hiding a configuration error
-> rather than surfacing it. This constraint is not documented in the
-> original ADR-006 text. See draft ADR-018
-> (`docs/decisions/drafts/ADR-018-tanh-slope-positive-convention.md`)
-> for formalization. Status remains Open.
+> Revisited · 2026-05-25 · Tanh slope positivity is governed by ADR-018, which is Accepted in the ledger.
 
 > See ADR-018 for the slope-positivity convention that extends this
 > decision for `TanhSigmoidMF` and `TanhBellMF`.
-
 ---
 
 ## ADR-007 — Fuzzification placement
@@ -180,8 +170,13 @@ construction lands.
 IT2 (Interval Type-2) carries an explicit footprint of uncertainty that
 is the natural fit for "epistemic uncertainty in calibration drift."
 
-**Decision (current)**: Both supported. Bootstrap concrete `IntervalGaussianMF`
-demonstrates IT2 inference end-to-end. Empirical winner TBD.
+**Decision (current)**: Prefer IT2 provisionally while keeping T1 supported.
+Bootstrap concrete `IntervalGaussianMF` already demonstrates IT2 inference end-to-end, and
+this direction aligns with uncertainty being realized at ensemble construction time in
+`src/superconducted/integration/aer_factory.py` (see module docstring; per-member sampling is deferred to ADR-015).
+This direction is provisional pending the ADR-019 MF-shape ablation; empirical confirmation is planned (target ~2026-07-19), not yet measured.
+Confirm if ADR-019 shows IT2's explicit uncertainty envelope materially improves calibration-drift robustness versus T1; overturn if the ablation shows no such benefit or if T1 simplicity is more defensible.
+Downstream: ADR-011, ADR-015, and ADR-021 follow once this direction reaches Accepted and are out of scope here.
 
 **Consequences**: `MembershipDegree` carries low/high; `RuleFiringResult`
 carries optional lower/upper bound arrays; `NieTanDefuzzifier` handles
@@ -191,17 +186,33 @@ the IT2 closed form.
 
 ## ADR-010 — Rule count and input variables
 
-**Status**: Open.
+**Status**: Accepted.
 
 **Context**: The pre-meeting baseline was a 3×3×3 grid (27 rules) over
-three input dimensions. Which three is itself open.
+three input dimensions. Which three those are is now settled: `mean_T1`,
+`mean_T2`, and `mean_readout_error`.
 
-**Decision (current)**: `BasicCalibrationVectorizer` outputs (mean_T1,
-mean_T2, mean_readout_error) — the three currently most defensible
-parameters per the team's domain knowledge.
+**Decision (current)**: The baseline rule grid is 3×3×3 — 27 rules, one
+per Cartesian-product combination as built by `TSKRuleBase.from_grid`
+(`prod_i K_i` rules for `K_i` MFs on input `i`; `K_i = 3` on each of the
+3 dimensions gives 3 × 3 × 3 = 27). The three input dimensions are
+`mean_T1`, `mean_T2`, and `mean_readout_error`, as produced by
+`BasicCalibrationVectorizer` (`output_dim` 3) — the three currently most
+defensible parameters per the team's domain knowledge. `from_grid` is
+already parameterized per dimension, so a different arity is a
+configuration change at the call site, not a code change to the LOCKED
+`fuzzy/tsk.py`. This ADR ratifies the baseline only; ADR-013 remains free
+to propose and compare alternative dimension sets against it.
 
 **Consequences**: Adding more inputs is a `from_grid` argument away.
 Adding more rules per input is the same.
+
+> Ratified · 2026-08-19 · Both halves confirmed by reading the shipped
+> code: `_FEATURE_NAMES` (`calibration/features.py:23`) for the three
+> dimensions, and the `itertools.product` construction in `from_grid`
+> (`fuzzy/tsk.py:185-224`) for the 27-rule arity. The LOCKED `tsk.py` was
+> read, not modified; Burak Öztekin signed off as its primary owner. See
+> `docs/implementations/2026-08-19-adr-010-closure.md`.
 
 ---
 
@@ -465,17 +476,3 @@ above), `tests/test_membership.py` (`test_tanh_sigmoid_invalid_slope`,
 text in `docs/decisions/drafts/ADR-018-tanh-slope-positive-convention.md`.
 
 > See ADR-006 for the broader MF-shape enumeration this ADR extends.
-> Revisited · 2026-05-25 · The text above says "mean-aggregates counts."
-> The canonical harness (`benchmarks/harness.py:simulate_engine`) does
-> element-wise sum via `Counter.update()` with
-> `shots = shots_per_member * len(members)`. This is
-> probability-equivalent to mean-aggregation under current normalized
-> metrics (Hellinger, KL, fidelity, R-squared), which divide by total
-> counts. It is not mean-aggregation of raw counts. The smoke script
-> (`scripts/first_ensemble_run.py:run_ensemble`) truly mean-aggregates
-> via `round(v / n)`, and per-key rounding can leave
-> `sum(returned.values())` differing from `shots` by up to one count
-> per bin. The `harness.py` module docstring (line 3) and
-> `docs/architecture.md` (line 161) also describe the behavior as
-> "mean" — these are tracked as follow-up issues since they are outside
-> `docs/decisions.md`. Status remains Deferred.

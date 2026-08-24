@@ -45,5 +45,14 @@ manual parameterization provides non-trivial MF parameters for each
 candidate shape. The protocol must be re-evaluated if the metric set
 changes (e.g., if trace distance or diamond norm is added).
 
+> Gate status · as-of 2026-08-20 · Prerequisite (a) is CLEARED: PR #14
+> merged to `main` (commits `ccdade0`, `07ee487`), landing
+> `TanhSigmoidMF` and `TanhBellMF`; ADR-018 is Accepted in
+> `docs/decisions.md`. Prerequisite (b) is PENDING: neither the ADR-014
+> trainer nor a manual parameterization has yet produced non-trivial MF
+> parameters for the candidate shapes, so the manual path is not open.
+> The two prerequisites are conjunctive — with (b) outstanding the
+> ablation remains blocked and this ADR stays Open.
+
 **Source**: Issue #2 (tanh MF implementation), Issue #6 (ADR curation
 scope), Dr. Akba's recommendation recorded in Issue #2 body.
