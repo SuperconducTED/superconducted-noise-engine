@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import math
+import random
+
 import numpy as np
 import pytest
 
@@ -103,6 +106,46 @@ class TestTanhMF:
             TanhMF(left=1.0, right=0.0, slope_left=1.0, slope_right=1.0)
         with pytest.raises(ValueError):
             TanhMF(left=0.0, right=1.0, slope_left=-1.0, slope_right=1.0)
+
+    def test_asymmetric_slopes_floor_negative_tail(self) -> None:
+        """The floor in ``degree()`` is load-bearing, not dead code (ADR-023).
+
+        ``_validate`` accepts unequal slopes, and unequal slopes drive the
+        raw difference negative on one tail. Without the floor,
+        ``MembershipDegree`` would raise for a parameterization the class
+        itself declares valid.
+        """
+        mf = TanhMF(left=0.0, right=1.0, slope_left=10.0, slope_right=0.1)
+        raw = 0.5 * (math.tanh(10.0 * (-1.0 - 0.0)) - math.tanh(0.1 * (-1.0 - 1.0)))
+        assert raw == pytest.approx(-0.401312, abs=1e-6)
+        assert mf.degree(-1.0).midpoint == 0.0
+
+    def test_in_domain_value_is_not_floored(self) -> None:
+        """The floor touches the tails only — in-domain values pass through."""
+        mf = TanhMF(left=0.0, right=1.0, slope_left=10.0, slope_right=0.1)
+        raw = 0.5 * (math.tanh(10.0 * (0.5 - 0.0)) - math.tanh(0.1 * (0.5 - 1.0)))
+        assert raw > 0.0
+        assert mf.degree(0.5).midpoint == pytest.approx(raw)
+
+    def test_degree_in_unit_interval_for_valid_params(self) -> None:
+        """No ``_validate``-passing parameterization escapes ``[0, 1]``.
+
+        Seeded so the case set is reproducible. Slopes are drawn
+        log-uniformly to cover extreme ratios, which is where the raw
+        difference goes most negative.
+        """
+        rng = random.Random(20260820)
+        for _ in range(2000):
+            left = rng.uniform(-50.0, 50.0)
+            right = left + rng.uniform(1e-3, 100.0)
+            mf = TanhMF(
+                left=left,
+                right=right,
+                slope_left=math.exp(rng.uniform(-8.0, 8.0)),
+                slope_right=math.exp(rng.uniform(-8.0, 8.0)),
+            )
+            for x in (left - 200.0, left, 0.5 * (left + right), right, right + 200.0):
+                assert 0.0 <= mf.degree(x).midpoint <= 1.0
 
 
 class TestIntervalGaussianMF:
