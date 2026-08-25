@@ -121,6 +121,10 @@ parameter vector.
 
 > See ADR-018 for the slope-positivity convention that extends this
 > decision for `TanhSigmoidMF` and `TanhBellMF`.
+> See ADR-023 for the output-range convention and `TanhMF`'s floor
+> exemption. The 2026-05-25 revisit note removed by PR #26 had two
+> halves: the slope half is governed by ADR-018 as the line above says,
+> and the clip half is resolved in ADR-023.
 ---
 
 ## ADR-007 — Fuzzification placement
@@ -465,3 +469,111 @@ above), `tests/test_membership.py` (`test_tanh_sigmoid_invalid_slope`,
 text in `docs/decisions/drafts/ADR-018-tanh-slope-positive-convention.md`.
 
 > See ADR-006 for the broader MF-shape enumeration this ADR extends.
+> See ADR-023 for how the reject-don't-clip convention applies to
+> `TanhMF`, the one MF that is a documented exemption from it.
+
+---
+
+## ADR-023 — Membership-function output range: floor exemption for `TanhMF`
+
+**Status**: Accepted.
+
+**Context**: ADR-018 states that for the tanh shapes it governs, "no
+clipping is implemented anywhere in either class" and out-of-domain
+parameters are a construction-time error. `TanhMF` — the bootstrap tanh
+shape enumerated in ADR-006, a different class from `TanhSigmoidMF` and
+`TanhBellMF` — clamped its `degree()` output into `[0, 1]`. It was the
+only MF in `src/superconducted/fuzzy/membership.py` that clamped at all.
+
+Until PR #26 (`049b336`) the ADR-006 entry carried a revisit note
+flagging this. That note was replaced with a one-line handoff to
+ADR-018, but ADR-018 governs only `TanhSigmoidMF` and `TanhBellMF` and
+says nothing about `TanhMF` or about clamping inside `degree()`. The
+slope half of the deleted note was genuinely delegated; the clip half
+was dropped. This entry resolves the dropped half.
+
+The deleted note's stated rationale was that the clip "masks the invalid
+parameterization by clamping degenerate output to zero, hiding a
+configuration error." That rationale does not survive checking.
+`TanhMF._validate` already rejects `left >= right` and non-positive
+slopes, so invalid parameterizations never reach `degree()`. What the
+clamp actually handles is the analytic range of the shape itself under
+*valid* parameters.
+
+**Mathematics**: For `raw(x) = 0.5 * (tanh(s_L * (x - L)) - tanh(s_R * (x - R)))`,
+`_validate` requires `L < R`, `s_L > 0`, and `s_R > 0`. It does not
+require `s_L == s_R`, and unequal slopes make the raw value negative on
+one tail:
+
+```
+raw(x) < 0  <=>  s_L * (x - L) < s_R * (x - R)
+            <=>  x beyond  x* = (s_L * L - s_R * R) / (s_L - s_R)
+```
+
+- `s_L > s_R` gives `x* < L`: negative on the far-left tail.
+- `s_L < s_R` gives `x* > R`: negative on the far-right tail.
+- `s_L == s_R` is the only safe case — `x - L > x - R` and `tanh` is
+  monotone, so `raw >= 0` everywhere.
+
+The infimum is `-0.5`, approached as `s_L / s_R -> infinity` with `x`
+just below `L`; it is not attained. Measured worst case over 400,000
+randomized `_validate`-passing parameterizations: `-0.4996`. A concrete
+case: `L=0, R=1, s_L=10, s_R=0.1` at `x = -1` gives `raw = -0.4013`.
+
+The upper bound needs no clamp. `raw = 0.5 * (a - b)` with `a < 1` and
+`b > -1` gives `raw < 1` strictly; in float64 it saturates at exactly
+`1.0` once `|arg| >= ~20` rounds `tanh` to `±1`, but it never exceeds
+`1.0`. A `min(1.0, ...)` term is therefore provably dead code.
+
+**Decision**: `TanhMF.degree()` keeps a floor, `max(0.0, raw)`, and is a
+documented exemption from ADR-018's reject-don't-clip convention. The
+dead upper clamp is removed and the class docstring's formula is
+corrected from `clip(..., 0, 1)` to `max(..., 0)`.
+
+The convention is scoped precisely: **reject-don't-clip governs
+parameters, not a shape's analytic range.** Invalid parameters must
+raise at construction, and `TanhMF._validate` already does that.
+Projecting a valid shape's tail back onto `[0, 1]` is a different
+operation and is permitted.
+
+The two alternatives were rejected on their consequences:
+
+- *Remove the floor and let `MembershipDegree` raise.* `degree()` would
+  then raise `ValueError` in the tails for any asymmetric-slope MF the
+  class itself accepts. That is a live defect, not a cleanup.
+- *Keep the floor but tighten `_validate` to require `s_L == s_R`.*
+  This deletes the asymmetric-edge shape family that ADR-006 ships and
+  that the ADR-019 ablation is meant to compare.
+
+**Consequences**: The floor introduces a zero-gradient region wherever
+`raw < 0` — beyond `x*`, in one tail. The ADR-014 trainer must treat
+this the same way ADR-018 already requires for slope sign: keep the
+premise-parameter search inside the region where the shape is
+informative, rather than relying on gradient signal from a saturated
+tail. This is the pathology ADR-012 names for `ProbabilityClip` one
+layer down, and ratifying `SigmoidSquashing` as the differentiable
+output path does not remove it upstream.
+
+If an end-to-end differentiable pipeline later makes the floor
+unacceptable, the correct fix is to change the shape, not to delete the
+floor: a product of sigmoids, `sigma(s_L * (x - L)) * sigma(-s_R * (x - R))`,
+is bounded in `(0, 1)` by construction and needs no projection. That
+would be an ADR-006 shape change with ablation consequences, so it is
+not taken here.
+
+Any future MF whose analytic range can leave `[0, 1]` under parameters
+its own `_validate` accepts must either be reshaped or receive an
+explicit exemption in this entry. Silent clamping in a new shape is not
+covered by this decision.
+
+**Source**: Issue #28 (surfaced while confirming ADR-018 against `main`
+for Issue #20), PR #26 (`049b336`) which removed the clip half of
+ADR-006's revisit note, ADR-018 (the convention this exempts from),
+ADR-012 (`ProbabilityClip`'s zero-gradient note),
+`tests/test_membership.py`
+(`test_asymmetric_slopes_floor_negative_tail`,
+`test_in_domain_value_is_not_floored`,
+`test_degree_in_unit_interval_for_valid_params`).
+
+> See ADR-006 for the shape enumeration and ADR-018 for the
+> construction-time convention this entry scopes.
