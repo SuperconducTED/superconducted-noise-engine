@@ -137,3 +137,30 @@ be promoted from drafts into the ledger — or stop being assigned statuses at
 all — is tracked in issue #37. The broader post-merge verification sweep
 across the ledger, the cycle-2 plan, and `docs/architecture.md` is tracked
 separately in issue #25 (Cycle 2 Opening Closeout · Phase 0 Hygiene Sweep).
+
+---
+
+## Ledger reconciliation · as-of 2026-08-26
+
+Everything above this heading is left unedited, including the `as-of
+2026-08-19` section. This section records what changed on `main` between
+those two dates and supersedes the two "not treated as drift" bullets above.
+
+| Item | As-of 2026-08-19 | As-of 2026-08-26 | Changed by |
+|------|------------------|------------------|------------|
+| ADR-019 – ADR-022 | No ledger entry; drafts only | Promoted into `docs/decisions.md` · ADR-019 `Open`, ADR-020 / 021 / 022 `Accepted` | `d7ee18b` · issue #37 now closed |
+| ADR-023 | Did not exist | Present and `Accepted` — `TanhMF` output-range floor exemption | `768cd86` (PR #33) |
+| ADR-006 · ADR-010 decision label | `Decision (current)` on an `Accepted` entry | `Decision` | This PR · issue #41 · status and decision text unchanged |
+
+Consequences for the section above:
+
+- The bullet stating that ADR-019 through ADR-022 "have no entry in
+  `docs/decisions.md` at all" was true at `dfee09c` and is **no longer true**.
+  They are ledger-backed as of `d7ee18b`.
+- Issue #37 is closed. Issue #25 (Phase 0 Hygiene Sweep) remains open and still
+  owns the broader post-merge sweep.
+- The ADR-008 / ADR-013 `Deferred` vs `Open / Deferred` snapshot simplification
+  is unchanged and is still not treated as drift.
+
+NC-022 (drift count = 4) is a measurement pinned to `dfee09c` and is not
+restated here; see its Notes column in `docs/numerical-claims.md`.
