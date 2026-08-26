@@ -35,6 +35,41 @@ from superconducted.types import CalibrationSnapshot
 SHOTS_PER_MEMBER: Final[int] = 1024
 ENSEMBLE_SIZES: Final[tuple[int, ...]] = (1, 8, 16)
 
+# ADR-010 ratifies a 3x3x3 (27-rule) baseline grid. `from_grid` builds
+# prod_i K_i rules, so K_i must be 3 on each of the three feature
+# dimensions produced by `BasicCalibrationVectorizer`.
+MFS_PER_FEATURE: Final[int] = 3
+
+# Two candidate center layouts for those three MFs, kept side by side so
+# they can be compared empirically (see scripts/compare_mf_placement.py
+# and Issue #31). Both use the same sigma, so the comparison isolates
+# placement.
+#   endpoint · centers at lo, lo + span/2, hi
+#             mu == 1 exactly at both range extremes; widest gap between
+#             adjacent centers, so the weakest interior coverage.
+#   interior · centers at the midpoints of equal thirds
+#             uniform spacing, best worst-case coverage; nothing peaks at
+#             the extremes.
+MF_PLACEMENT_ENDPOINT: Final[str] = "endpoint"
+MF_PLACEMENT_INTERIOR: Final[str] = "interior"
+MF_PLACEMENTS: Final[tuple[str, ...]] = (MF_PLACEMENT_ENDPOINT, MF_PLACEMENT_INTERIOR)
+
+# Upper bound on the deterministic consequent-seed search. Empirically the
+# first or second seed is viable; 64 is a generous ceiling that still fails
+# fast if the degeneracy is structural rather than a bad draw.
+CONSEQUENT_SEED_SEARCH_LIMIT: Final[int] = 64
+
+# Provisional. Issue #31 chose Option A (the endpoint layout) as the fix;
+# the comparison script reports which layout wins on which metric, and
+# flipping this constant is the whole cost of changing the decision.
+DEFAULT_MF_PLACEMENT: Final[str] = MF_PLACEMENT_ENDPOINT
+
+FEATURE_SCALES: Final[dict[str, tuple[float, float]]] = {
+    "mean_T1": (0.0, 100e-6),
+    "mean_T2": (0.0, 100e-6),
+    "mean_readout_error": (0.0, 0.1),
+}
+
 
 def run_ensemble(
     members: list[FuzzyNoiseModel],
@@ -78,31 +113,51 @@ def run_ensemble(
     return {k: round(v / n) for k, v in totals.items()}
 
 
-def _default_mfs_for_feature(feature_name: str) -> list[GaussianMF]:
-    # Use feature-specific numeric ranges instead of a single shared grid.
-    # This avoids treating T1/T2 and readout_error as if they were on the
-    # same [0, 0.01] scale.
-    feature_scales: dict[str, tuple[float, float]] = {
-        "mean_T1": (0.0, 100e-6),
-        "mean_T2": (0.0, 100e-6),
-        "mean_readout_error": (0.0, 0.1),
-    }
-    if feature_name not in feature_scales:
-        raise ValueError(
-            f"unknown feature {feature_name!r}; known features: {list(feature_scales)}"
-        )
-    lo, hi = feature_scales[feature_name]
-    span = hi - lo
-    overlap = span * 0.25
-    return [GaussianMF(center=lo, sigma=overlap), GaussianMF(center=lo + span * 0.5, sigma=overlap)]
+def mf_centers(lo: float, hi: float, placement: str = DEFAULT_MF_PLACEMENT) -> tuple[float, ...]:
+    """Return the three Gaussian centers for one feature range.
 
-
-def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> list[FuzzyNoiseModel]:
-    """Construct a `FuzzyNoiseModelEnsemble` with conservative default MFs.
-
-    Uses the `BasicCalibrationVectorizer` to infer the input dimension from
-    the provided snapshot and builds a small grid of Gaussian MFs per input.
+    ``placement`` selects between the two layouts under comparison in
+    Issue #31. Both return ``MFS_PER_FEATURE`` centers spanning
+    ``[lo, hi]``; they differ only in where those centers sit.
     """
+    if placement not in MF_PLACEMENTS:
+        raise ValueError(f"unknown placement {placement!r}; known: {list(MF_PLACEMENTS)}")
+    span = hi - lo
+    if placement == MF_PLACEMENT_ENDPOINT:
+        return (lo, lo + span * 0.5, hi)
+    return (lo + span / 6.0, lo + span * 0.5, lo + span * 5.0 / 6.0)
+
+
+def _default_mfs_for_feature(
+    feature_name: str, placement: str = DEFAULT_MF_PLACEMENT
+) -> list[GaussianMF]:
+    """Three Gaussian MFs covering one feature's physical range.
+
+    Three, not two: ADR-010 ratifies a 3x3x3 (27-rule) baseline and
+    `from_grid` multiplies the per-input MF counts, so two MFs per feature
+    silently produced an 8-rule grid (Issue #31). The previous two-MF
+    version also left the upper half of every range uncovered — no MF was
+    centered at or near ``hi`` — which mattered because long T1/T2 and high
+    readout error are exactly the calibration states the noise model must
+    discriminate.
+
+    Feature-specific numeric ranges are used rather than one shared grid,
+    so T1/T2 (seconds) and readout_error (dimensionless) are not treated as
+    if they were on the same scale.
+    """
+    if feature_name not in FEATURE_SCALES:
+        raise ValueError(
+            f"unknown feature {feature_name!r}; known features: {list(FEATURE_SCALES)}"
+        )
+    lo, hi = FEATURE_SCALES[feature_name]
+    sigma = (hi - lo) * 0.25
+    return [GaussianMF(center=c, sigma=sigma) for c in mf_centers(lo, hi, placement)]
+
+
+def _ensemble_for_seed(
+    snapshot: CalibrationSnapshot, n: int, placement: str, seed: int
+) -> list[FuzzyNoiseModel]:
+    """Build the ensemble for one consequent-init seed, with no viability check."""
     vectorizer = BasicCalibrationVectorizer()
     # Let `extract` raise if the snapshot is invalid; don't silently
     # fallback to a noisy one-dimensional default which masks problems.
@@ -115,7 +170,7 @@ def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> list[FuzzyN
 
     mfs_list: list[list[GaussianMF]] = []
     for feature_name in vectorizer.feature_names:
-        mfs_list.append(_default_mfs_for_feature(feature_name))
+        mfs_list.append(_default_mfs_for_feature(feature_name, placement))
 
     ensemble_iter = FuzzyNoiseModelEnsemble(
         calibration=snapshot,
@@ -124,7 +179,7 @@ def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> list[FuzzyN
             per_input_mfs=mfs_list,
             output_dim=2,
             consequent_init="random",
-            rng=np.random.default_rng(0),
+            rng=np.random.default_rng(seed),
         ),
         defuzzifier=WeightedAverageDefuzzifier(),
         squashing=ProbabilityClip(),
@@ -132,14 +187,72 @@ def generate_safe_ensemble(snapshot: CalibrationSnapshot, n: int) -> list[FuzzyN
         fuzzification_strategy=PostGateFuzzification(),
         ensemble_size=n,
     )
-    members = list(ensemble_iter)
+    return list(ensemble_iter)
+
+
+def _is_degenerate(members: list[FuzzyNoiseModel]) -> bool:
+    """True if any member collapses to an identity (no-op) channel."""
     for member in members:
         crisp = member.crisp_params
         if crisp.size < 2 or not np.any(crisp[:2] > 0):
-            raise ValueError(
-                "Degenerate (identity) channel; bootstrap consequents are zero per ADR-014. "
-                "Use consequent_init='random' or annotate timings as installation overhead."
-            )
+            return True
+    return False
+
+
+def generate_safe_ensemble_with_seed(
+    snapshot: CalibrationSnapshot,
+    n: int,
+    placement: str = DEFAULT_MF_PLACEMENT,
+    seed_limit: int = CONSEQUENT_SEED_SEARCH_LIMIT,
+) -> tuple[list[FuzzyNoiseModel], int]:
+    """Build the ensemble and report which consequent seed produced it.
+
+    `consequent_init="random"` draws consequents from a zero-mean Gaussian,
+    so the sign of the defuzzified output is a property of the draw, not of
+    the design. A draw whose first two crisp parameters are all non-positive
+    yields an identity channel, which makes the smoke run measure nothing.
+
+    Rather than hard-coding a seed that happens to work — which is what the
+    script did until Issue #31, and which silently broke the moment the grid
+    grew from 8 rules to the ratified 27 — this walks seeds `0, 1, 2, ...`
+    in order and returns the first non-degenerate ensemble. The search is
+    deterministic, so the chosen seed is reproducible on any machine, and it
+    self-heals when the grid or the feature set changes again.
+
+    Raises `ValueError` if no seed below `seed_limit` yields a viable
+    ensemble, which would mean the degeneracy is structural rather than a
+    bad draw.
+    """
+    if seed_limit <= 0:
+        raise ValueError(f"seed_limit must be positive; got {seed_limit}")
+
+    for seed in range(seed_limit):
+        members = _ensemble_for_seed(snapshot, n, placement, seed)
+        if not _is_degenerate(members):
+            return members, seed
+
+    raise ValueError(
+        f"No consequent seed below {seed_limit} produced a non-degenerate channel "
+        f"for placement {placement!r} with {MFS_PER_FEATURE} MFs per feature. "
+        "That points at a structural problem (zero consequents per ADR-014, or a "
+        "feature vector that fires no rule), not an unlucky draw."
+    )
+
+
+def generate_safe_ensemble(
+    snapshot: CalibrationSnapshot, n: int, placement: str = DEFAULT_MF_PLACEMENT
+) -> list[FuzzyNoiseModel]:
+    """Construct a `FuzzyNoiseModelEnsemble` with conservative default MFs.
+
+    Uses the `BasicCalibrationVectorizer` to infer the input dimension from
+    the provided snapshot and builds the ratified 3x3x3 grid of Gaussian MFs:
+    `MFS_PER_FEATURE` MFs on each of the vectorizer's three features, which
+    `from_grid` expands to 27 rules (ADR-010).
+
+    See `generate_safe_ensemble_with_seed` for the consequent-seed search;
+    use that directly if you need to report which seed was used.
+    """
+    members, _seed = generate_safe_ensemble_with_seed(snapshot, n, placement)
     return members
 
 
@@ -193,6 +306,15 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         default=2,
         help="Number of qubits for the QFT circuit (default: 2).",
     )
+    parser.add_argument(
+        "--mf-placement",
+        choices=MF_PLACEMENTS,
+        default=DEFAULT_MF_PLACEMENT,
+        help=(
+            "Gaussian center layout per feature "
+            f"(default: {DEFAULT_MF_PLACEMENT}). See scripts/compare_mf_placement.py."
+        ),
+    )
     return parser
 
 
@@ -214,7 +336,8 @@ def main(argv: list[str] | None = None) -> None:
 
     print("--- Ensemble Scaling Tests (Real Concretes) ---")
     for n in ENSEMBLE_SIZES:
-        members = generate_safe_ensemble(snapshot, n)
+        members, consequent_seed = generate_safe_ensemble_with_seed(snapshot, n, args.mf_placement)
+        print(f"  [n={n}] mf_placement={args.mf_placement} consequent_seed={consequent_seed}")
         # Warmup the shared AerSimulator instance to amortize C++ init out of
         # the timed run_ensemble calls below.
         prep_circ_w, prep_nm_w = members[0].prepare(circuit.copy())

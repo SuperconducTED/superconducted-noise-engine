@@ -9,6 +9,17 @@ docs (especially `docs/architecture.md`).
 (known to be needed, not yet decided), Superseded (replaced by a later
 ADR — link to its successor).
 
+An ADR that settles one half of a question while leaving another half in
+flux carries a **split status** naming both halves (see ADR-021), and
+splits its decision text into a `**Decision (Accepted)**` part and a
+`**Decision (Open)**` part so the locked half is unambiguous.
+
+Some ADRs are authored as standalone files under `docs/decisions/drafts/`
+before landing here. **This ledger is canonical.** A draft that has been
+promoted stays in `drafts/` as the authoring record, and the promoted
+entry says so. An ID that appears only in `drafts/` has not been decided
+and must not be cited elsewhere as though it carried a status.
+
 ---
 
 ## ADR-001 — TSK over Mamdani
@@ -121,6 +132,10 @@ parameter vector.
 
 > See ADR-018 for the slope-positivity convention that extends this
 > decision for `TanhSigmoidMF` and `TanhBellMF`.
+> See ADR-023 for the output-range convention and `TanhMF`'s floor
+> exemption. The 2026-05-25 revisit note removed by PR #26 had two
+> halves: the slope half is governed by ADR-018 as the line above says,
+> and the clip half is resolved in ADR-023.
 ---
 
 ## ADR-007 — Fuzzification placement
@@ -480,3 +495,407 @@ above), `tests/test_membership.py` (`test_tanh_sigmoid_invalid_slope`,
 text in `docs/decisions/drafts/ADR-018-tanh-slope-positive-convention.md`.
 
 > See ADR-006 for the broader MF-shape enumeration this ADR extends.
+
+---
+
+## ADR-019 — Membership function ablation methodology
+
+**Status**: Open.
+
+**Context**: The advisor (Dr. Akba) recommended a tanh-based MF shape
+as first-priority empirical test against the Gaussian baseline. Four T1
+shapes are implemented at bootstrap (Gaussian, Triangular, Trapezoidal,
+Tanh) plus `IntervalGaussianMF` for the IT2 path. ADR-006 defers the
+empirical winner selection.
+
+Issue #2 specifies `TanhSigmoidMF` and `TanhBellMF` as additional
+candidates. The full ablation requires a comparison protocol that is
+reproducible and covers the metrics formalized in the benchmark harness
+(Hellinger distance, KL divergence, state fidelity, R-squared).
+
+No ablation protocol is currently documented. Without one, each
+contributor would run ad-hoc comparisons with different circuits, shot
+counts, and noise configurations, producing non-comparable results.
+
+**Decision (current)**: The ablation protocol for MF shape selection is:
+
+1. **Fixed benchmark suite**: Use the four existing benchmark circuits
+   (random Clifford, GHZ, QFT, `efficient_su2` ansatz).
+2. **Fixed calibration snapshot**: Use a single representative snapshot
+   from the `calibration-data` branch (timestamp and backend recorded
+   in the results table).
+3. **Fixed shot count**: 4096 shots per ensemble member, ensemble
+   size N = 8, chosen for runtime.
+4. **All four metrics**: Report Hellinger, KL, fidelity, and R-squared
+   for each (MF shape, circuit) pair.
+5. **Baseline**: Gaussian MF with the bootstrap `from_grid` default
+   parameterization.
+6. **Reproducibility**: Fixed random seed. Script committed to
+   `scripts/`. Results table committed to `docs/findings/`.
+
+The winner is the shape that minimizes Hellinger distance (primary) and
+maximizes fidelity (secondary) across the benchmark suite relative to a
+real-hardware reference distribution. If no real-hardware reference is
+available at comparison time, the comparison is against an Aer
+simulation with the same circuit and a known-good noise model.
+
+**Consequences**: The ablation is blocked until (a) PR #14 lands
+`TanhSigmoidMF` and `TanhBellMF`, and (b) the trainer (ADR-014) or a
+manual parameterization provides non-trivial MF parameters for each
+candidate shape. The protocol must be re-evaluated if the metric set
+changes (e.g., if trace distance or diamond norm is added).
+
+> Gate status · as-of 2026-08-20 · Prerequisite (a) is CLEARED: PR #14
+> merged to `main` (commits `ccdade0`, `07ee487`), landing
+> `TanhSigmoidMF` and `TanhBellMF`; ADR-018 is Accepted in
+> `docs/decisions.md`. Prerequisite (b) is PENDING: neither the ADR-014
+> trainer nor a manual parameterization has yet produced non-trivial MF
+> parameters for the candidate shapes, so the manual path is not open.
+> The two prerequisites are conjunctive — with (b) outstanding the
+> ablation remains blocked and this ADR stays Open.
+
+**Source**: Issue #2 (tanh MF implementation), Issue #6 (ADR curation
+scope), Dr. Akba's recommendation recorded in Issue #2 body.
+
+> Promoted from draft to the ledger · 2026-08-24 · issue #37. The draft at
+> `docs/decisions/drafts/ADR-019-mf-ablation-methodology.md` is retained as the
+> authoring record; this ledger entry is canonical.
+
+---
+
+## ADR-020 — Calibration snapshot schema and storage
+
+**Status**: Accepted.
+
+**Context**: ANFIS training requires at least 630 historical IBM Quantum
+calibration snapshots. No public bulk archive exists. The team must
+accumulate snapshots from a live backend at hourly cadence, starting
+from zero. Every day of delay is a day of dataset that cannot be
+recovered before paper submission (Issue #3).
+
+The snapshot storage must satisfy three constraints: (1) it must not
+bloat the main branch's git history, (2) it must be relocatable to S3 or
+a separate repository pre-submission without breaking consumers, and
+(3) it must preserve the full IBM `properties()` JSON for future schema
+evolution.
+
+**Decision**: Snapshots are stored on an orphan branch
+`calibration-data` in the same repository. The branch has no common
+ancestor with `main`. Directory layout:
+
+    calibration-data/
+      snapshots/
+        YYYY-MM/
+          <backend>/
+            <ISO8601-timestamp>.json
+
+Each snapshot file is the raw JSON returned by
+`QiskitRuntimeService().backend(name).properties()`, written atomically
+via `O_CREAT|O_EXCL` by `calibration/storage.py`. The poller runs as a
+GitHub Actions cron workflow (`.github/workflows/calibration-poll.yml`)
+on a mid-hour schedule (currently `:37`, per Issue #15).
+
+The workflow authenticates via `IBM_QUANTUM_TOKEN` in GitHub Secrets,
+uses `GITHUB_TOKEN` with `contents:write` scope (no PAT), and serializes
+concurrent runs via a `concurrency` group with `cancel-in-progress:
+false`.
+
+**Consequences**:
+
+- Main-branch `git clone --single-branch` is unaffected by snapshot
+  accumulation.
+- Consumers that need snapshots must fetch the `calibration-data` branch
+  explicitly or read from a future S3 mirror.
+- The JSON schema is IBM-defined and may change without notice. The
+  typed loader (ADR-017) validates units at parse time and raises
+  `CalibrationParseError` on schema drift.
+- Multi-backend support is deferred. The current workflow polls a single
+  backend (currently `ibm_fez`, switched from `ibm_brisbane` in PR #8).
+
+**Source**: Issue #3 (deployment scope), PR #7 (implementation),
+PR #8 (backend switch), Issue #15 / PR #17 (cron timing).
+
+> Promoted from draft to the ledger · 2026-08-24 · issue #37. The draft at
+> `docs/decisions/drafts/ADR-020-calibration-snapshot-schema-and-storage.md` is retained as the
+> authoring record; this ledger entry is canonical.
+
+---
+
+## ADR-021 — Aer integration constraint and Factory/Ensemble pattern
+
+**Status**: Accepted on the constraint · Open on variance-injection design.
+
+**Context**: Qiskit Aer's `NoiseModel.to_dict()` is called once during
+`AerSimulator.run()` and the C++ controller takes over
+(`qiskit_aer/backends/backend_utils.py:cpp_execute_circuits()`). Once
+the payload is handed to C++, Python execution halts until the entire
+batch of shots completes. There is no per-shot Python callback, no
+`_quantum_error_for_instruction` hook, no `_sample_noise` re-entry
+point.
+
+ADR-002 establishes the Factory/Ensemble pattern as the only correct
+response to this constraint. This ADR extends ADR-002 by documenting
+the implementation contract, the dependency-injection architecture, and
+the variance-injection plug-in points that Burak's integration
+walkthrough (PR #13, `docs/findings/aer-integration-walkthrough.md`)
+identified.
+
+**Decision (Accepted) · Integration contract**:
+
+`FuzzyNoiseModel` is constructed with six injected dependencies:
+
+1. `feature_extractor: CalibrationFeatureExtractor`
+2. `rule_base: RuleBase`
+3. `defuzzifier: Defuzzifier`
+4. `squashing: SquashingStrategy`
+5. `channel_projector: ChannelProjector`
+6. `fuzzification_strategy: FuzzificationStrategy`
+
+It also receives a `CalibrationSnapshot`.
+ `FuzzyNoiseModelEnsemble` (the factory) takes the optional
+ `ensemble_size` (default 32) and `rng` used to create multiple
+ `FuzzyNoiseModel` instances.
+
+The inference pipeline executed at construction is:
+
+    features = feature_extractor.extract(calibration)
+    firing   = rule_base.evaluate(features)
+    raw      = defuzzifier.defuzzify(firing)
+    crisp    = squashing.squash(raw)
+
+The resulting `crisp_params` are stashed and reused by every
+`prepare()` call.
+
+`FuzzyNoiseModel.prepare(circuit)` contract:
+- **Input**: `QuantumCircuit`
+- **Output**: `tuple[QuantumCircuit, NoiseModel]` (fresh noise model
+  with errors installed via `channel_projector.project(crisp_params,
+  gate_name, qubits)`)
+- **Idempotency**: Repeated calls return fresh `NoiseModel` instances;
+  no state accumulation on `self`
+- **Circuit mutation**: The returned circuit may differ from input
+  (pre/between-gate fuzzification per ADR-007 transforms the circuit).
+  Callers MUST pass `circuit.copy()` to maintain ensemble-member
+  isolation.
+
+`FuzzyNoiseModelEnsemble.__iter__` yields `ensemble_size` instances of
+`FuzzyNoiseModel`, each constructed with the same shared dependencies.
+At bootstrap, all members are identical (degenerate ensemble per
+ADR-015).
+
+**Decision (Open) · Variance-injection plug-in points**:
+
+When ADR-015 resolves, per-member variance will plug in at one or more
+of these locations inside `FuzzyNoiseModelEnsemble.__iter__`:
+
+1. **Input-vector perturbation**: Perturb the
+   `feature_extractor.extract(calibration)` output before passing to
+   `rule_base.evaluate()`. Jiggle calibration features per member.
+
+2. **Premise-MF perturbation**: Construct a per-member `RuleBase` with
+   perturbed MF parameters (drawn from training-time variance, once
+   ADR-014 delivers trained MFs).
+
+3. **IT2 footprint sampling**: Sample from the IT2 uncertainty envelope
+   within `RuleBase.evaluate()` or at member construction time,
+   depending on whether the sampled MF is a property of the per-member
+   rule base or computed on demand (depends on ADR-009 resolution).
+
+The choice among these mechanisms is deferred until ADR-009 (T1 vs IT2)
+and ADR-014 (trained MFs with meaningful variance) resolve. This ADR
+records the plug-in architecture so the decision can be made without
+refactoring the ensemble factory.
+
+**Consequences**:
+
+- Ensemble construction requires wiring six ABC implementations. This
+  strict DI surface is intentional for testability but makes factory
+  construction non-trivial.
+- Callers of `prepare()` must pass `circuit.copy()` to prevent mutation
+  leakage. This convention is enforced by code review (PR #13 blocker).
+- High-level circuits (QFT, `efficient_su2`) require explicit
+  `transpile(circuit, backend=sim)` before `AerSimulator.run()` with
+  custom noise models. Aer raises `unknown instruction` on
+  un-transpiled high-level gates.
+- Ensemble latency scales O(N) in members (per-member transpile plus
+  fresh `NoiseModel` install). Simulator hoisting amortizes cold-start.
+- Bootstrap measurements require non-zero consequent initialization
+  (`consequent_init="random"`) to exercise real pipeline work. Zero
+  consequents produce identity channels that mask pipeline latency.
+
+**Source**: Issue #4 (Aer walkthrough scope), PR #13 (implementation),
+`docs/findings/aer-integration-walkthrough.md` (findings),
+`src/superconducted/integration/aer_factory.py` (code).
+
+> Promoted from draft to the ledger · 2026-08-24 · issue #37. The draft at
+> `docs/decisions/drafts/ADR-021-aer-integration-constraint-and-factory-ensemble.md` is retained as the
+> authoring record; this ledger entry is canonical.
+
+---
+
+## ADR-022 — Benchmark validation criteria
+
+**Status**: Accepted.
+
+**Context**: The benchmark harness computes four metrics (Hellinger
+distance, KL divergence, state fidelity, R-squared) to compare the
+fuzzy noise engine's output against a reference simulation. Every later
+result the team produces rests on these numbers being correct. A
+function that silently mis-computes Hellinger distance would invalidate
+every comparison run by every teammate and every plot in the paper.
+
+Issue #5 established that the harness needed validation tests that check
+the numbers themselves, not just that the code runs without crashing.
+
+**Decision**: Every metric in the benchmark harness must be validated
+against the following standing property set:
+
+1. **Identity**: `metric(P, P)` returns the metric's self-similarity
+   baseline (0 for distance metrics, 1 for fidelity/R-squared).
+2. **Symmetry or asymmetry**: Symmetric metrics (Hellinger) must satisfy
+   `metric(P, Q) == metric(Q, P)`. Asymmetric metrics (KL) must have a
+   test asserting `metric(P, Q) != metric(Q, P)` on a non-trivial
+   example.
+3. **Bounds**: Hellinger and fidelity output in [0, 1]. KL output >= 0.
+4. **Monotonicity**: With Aer's depolarizing noise model, increasing
+   depolarizing probability p must monotonically increase distance
+   metrics and monotonically decrease fidelity.
+5. **Determinism**: Same circuit + same noise model + same seed + same
+   shot count produces identical metric values across runs.
+6. **Reference value**: At least one hand-derivable scenario (e.g.,
+   single-qubit depolarizing channel with known p) verified within
+   shot-noise tolerance (3-sigma).
+
+Tests must use real `SimulationResult` frozen dataclasses, not
+`MagicMock`. This enforces value-object invariants and detects API drift
+between test fixtures and production objects.
+
+Any new metric added to the harness must satisfy all six properties
+before merge.
+
+**Consequences**:
+
+- The property set is the minimum bar. Additional tests (e.g., triangle
+  inequality for Hellinger) are encouraged but not required.
+- Probabilistic tests are inherently shot-based. Fixed seeds and
+  generous tolerances (3-sigma) prevent CI flakiness.
+- If a property test fails on first run and the cause is a real harness
+  bug, the bug is filed as a separate issue (not fixed in the validation
+  PR).
+- Real-hardware comparison tests are deferred until IBM backend access
+  is available for benchmarking.
+
+**Source**: Issue #5 (benchmark validation scope), PR #10
+(implementation), `docs/implementations/2026-05-13-harness-metric-sanity-checks.md`.
+
+> Promoted from draft to the ledger · 2026-08-24 · issue #37. The draft at
+> `docs/decisions/drafts/ADR-022-benchmark-validation-criteria.md` is retained as the
+> authoring record; this ledger entry is canonical.
+> See ADR-023 for how the reject-don't-clip convention applies to
+> `TanhMF`, the one MF that is a documented exemption from it.
+
+---
+
+## ADR-023 — Membership-function output range: floor exemption for `TanhMF`
+
+**Status**: Accepted.
+
+**Context**: ADR-018 states that for the tanh shapes it governs, "no
+clipping is implemented anywhere in either class" and out-of-domain
+parameters are a construction-time error. `TanhMF` — the bootstrap tanh
+shape enumerated in ADR-006, a different class from `TanhSigmoidMF` and
+`TanhBellMF` — clamped its `degree()` output into `[0, 1]`. It was the
+only MF in `src/superconducted/fuzzy/membership.py` that clamped at all.
+
+Until PR #26 (`049b336`) the ADR-006 entry carried a revisit note
+flagging this. That note was replaced with a one-line handoff to
+ADR-018, but ADR-018 governs only `TanhSigmoidMF` and `TanhBellMF` and
+says nothing about `TanhMF` or about clamping inside `degree()`. The
+slope half of the deleted note was genuinely delegated; the clip half
+was dropped. This entry resolves the dropped half.
+
+The deleted note's stated rationale was that the clip "masks the invalid
+parameterization by clamping degenerate output to zero, hiding a
+configuration error." That rationale does not survive checking.
+`TanhMF._validate` already rejects `left >= right` and non-positive
+slopes, so invalid parameterizations never reach `degree()`. What the
+clamp actually handles is the analytic range of the shape itself under
+*valid* parameters.
+
+**Mathematics**: For `raw(x) = 0.5 * (tanh(s_L * (x - L)) - tanh(s_R * (x - R)))`,
+`_validate` requires `L < R`, `s_L > 0`, and `s_R > 0`. It does not
+require `s_L == s_R`, and unequal slopes make the raw value negative on
+one tail:
+
+```
+raw(x) < 0  <=>  s_L * (x - L) < s_R * (x - R)
+            <=>  x beyond  x* = (s_L * L - s_R * R) / (s_L - s_R)
+```
+
+- `s_L > s_R` gives `x* < L`: negative on the far-left tail.
+- `s_L < s_R` gives `x* > R`: negative on the far-right tail.
+- `s_L == s_R` is the only safe case — `x - L > x - R` and `tanh` is
+  monotone, so `raw >= 0` everywhere.
+
+The infimum is `-0.5`, approached as `s_L / s_R -> infinity` with `x`
+just below `L`; it is not attained. Measured worst case over 400,000
+randomized `_validate`-passing parameterizations: `-0.4996`. A concrete
+case: `L=0, R=1, s_L=10, s_R=0.1` at `x = -1` gives `raw = -0.4013`.
+
+The upper bound needs no clamp. `raw = 0.5 * (a - b)` with `a < 1` and
+`b > -1` gives `raw < 1` strictly; in float64 it saturates at exactly
+`1.0` once `|arg| >= ~20` rounds `tanh` to `±1`, but it never exceeds
+`1.0`. A `min(1.0, ...)` term is therefore provably dead code.
+
+**Decision**: `TanhMF.degree()` keeps a floor, `max(0.0, raw)`, and is a
+documented exemption from ADR-018's reject-don't-clip convention. The
+dead upper clamp is removed and the class docstring's formula is
+corrected from `clip(..., 0, 1)` to `max(..., 0)`.
+
+The convention is scoped precisely: **reject-don't-clip governs
+parameters, not a shape's analytic range.** Invalid parameters must
+raise at construction, and `TanhMF._validate` already does that.
+Projecting a valid shape's tail back onto `[0, 1]` is a different
+operation and is permitted.
+
+The two alternatives were rejected on their consequences:
+
+- *Remove the floor and let `MembershipDegree` raise.* `degree()` would
+  then raise `ValueError` in the tails for any asymmetric-slope MF the
+  class itself accepts. That is a live defect, not a cleanup.
+- *Keep the floor but tighten `_validate` to require `s_L == s_R`.*
+  This deletes the asymmetric-edge shape family that ADR-006 ships and
+  that the ADR-019 ablation is meant to compare.
+
+**Consequences**: The floor introduces a zero-gradient region wherever
+`raw < 0` — beyond `x*`, in one tail. The ADR-014 trainer must treat
+this the same way ADR-018 already requires for slope sign: keep the
+premise-parameter search inside the region where the shape is
+informative, rather than relying on gradient signal from a saturated
+tail. This is the pathology ADR-012 names for `ProbabilityClip` one
+layer down, and ratifying `SigmoidSquashing` as the differentiable
+output path does not remove it upstream.
+
+If an end-to-end differentiable pipeline later makes the floor
+unacceptable, the correct fix is to change the shape, not to delete the
+floor: a product of sigmoids, `sigma(s_L * (x - L)) * sigma(-s_R * (x - R))`,
+is bounded in `(0, 1)` by construction and needs no projection. That
+would be an ADR-006 shape change with ablation consequences, so it is
+not taken here.
+
+Any future MF whose analytic range can leave `[0, 1]` under parameters
+its own `_validate` accepts must either be reshaped or receive an
+explicit exemption in this entry. Silent clamping in a new shape is not
+covered by this decision.
+
+**Source**: Issue #28 (surfaced while confirming ADR-018 against `main`
+for Issue #20), PR #26 (`049b336`) which removed the clip half of
+ADR-006's revisit note, ADR-018 (the convention this exempts from),
+ADR-012 (`ProbabilityClip`'s zero-gradient note),
+`tests/test_membership.py`
+(`test_asymmetric_slopes_floor_negative_tail`,
+`test_in_domain_value_is_not_floored`,
+`test_degree_in_unit_interval_for_valid_params`).
+
+> See ADR-006 for the shape enumeration and ADR-018 for the
+> construction-time convention this entry scopes.

@@ -154,12 +154,20 @@ class TanhMF(MembershipFunction):
 
     Constructed from a difference of two sigmoid-like tanh functions::
 
-        mu(x) = clip(0.5 * (tanh(s_L * (x - L)) - tanh(s_R * (x - R))), 0, 1)
+        mu(x) = max(0.5 * (tanh(s_L * (x - L)) - tanh(s_R * (x - R))), 0)
 
     With ``L < R`` and positive slopes the result peaks near 1 between
     ``L`` and ``R`` and decays to 0 outside; large slopes approach a
     rectangular pulse, small slopes approach a smooth bump. Parameter
     vector ``[left, right, slope_left, slope_right]``.
+
+    Unequal slopes drive the raw difference negative on one tail — the
+    far-left tail when ``s_L > s_R``, the far-right tail when
+    ``s_L < s_R`` — with an infimum of ``-0.5``. The ``max(..., 0)``
+    floor projects that tail back onto the valid membership range. It is
+    a documented exemption from ADR-018's reject-don't-clip convention;
+    see ADR-023. No upper clamp is applied: the raw value provably never
+    exceeds 1.
     """
 
     def __init__(
@@ -191,8 +199,13 @@ class TanhMF(MembershipFunction):
             math.tanh(self._slope_left * (x - self._left))
             - math.tanh(self._slope_right * (x - self._right))
         )
-        clipped = max(0.0, min(1.0, raw))
-        return MembershipDegree.crisp(clipped)
+        # Floor only, no ceiling. Unequal slopes push `raw` negative on one
+        # tail (infimum -0.5) even for parameters that pass `_validate`, so
+        # the floor is load-bearing. An upper clamp would be dead code:
+        # `raw < 1` analytically, saturating at exactly 1.0 in float64.
+        # ADR-023 records this as an exemption from ADR-018's convention.
+        floored = max(0.0, raw)
+        return MembershipDegree.crisp(floored)
 
     def parameters(self) -> npt.NDArray[np.float64]:
         return np.array(
