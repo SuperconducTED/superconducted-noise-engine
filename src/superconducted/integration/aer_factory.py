@@ -8,6 +8,13 @@ building N distinct :class:`FuzzyNoiseModel` instances drawn from the
 fuzzy uncertainty envelope and running :class:`AerSimulator` once per
 member.
 
+That invariant, and the Factory/Ensemble response to it, is ADR-002; any
+design proposing per-shot Python regeneration of noise channels is
+rejected on sight. ADR-021 extends ADR-002 with the dependency-injection
+contract this module implements — the six injected ABCs, the
+:meth:`FuzzyNoiseModel.prepare` contract, and the plug-in points where
+per-member variance will attach once ADR-015 resolves.
+
 Bootstrap status:
 
 - :class:`FuzzyNoiseModel.__init__` — full. Runs the pipeline
@@ -61,6 +68,11 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
     treat instances as NoiseModels for static analysis, but should always
     go through :meth:`prepare` rather than passing ``self`` directly to
     Aer (which would have no errors attached).
+
+    ADR-021 specifies this construction contract: the six injected
+    dependencies above are the swappable research axes, and the strict DI
+    surface is deliberate — it is what makes each axis independently
+    testable, at the cost of non-trivial factory construction.
     """
 
     def __init__(
@@ -105,6 +117,20 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
         strategies transform the circuit; post-gate leaves it untouched).
         The returned NoiseModel is fresh — repeated calls do not
         accumulate errors.
+
+        ADR-021 fixes this contract. Two parts of it are worth stating
+        explicitly:
+
+        - **Idempotency.** A fresh ``NoiseModel`` is built per call and no
+          state accumulates on ``self``, so repeated calls with the same
+          circuit are interchangeable.
+        - **Caller-side isolation.** Callers that reuse one circuit across
+          ensemble members should pass ``circuit.copy()``. Today this is a
+          forward-looking requirement rather than a live hazard: the only
+          implemented strategy, :class:`PostGateFuzzification`, returns the
+          *same* circuit object unmutated, and the pre/between strategies
+          that will transform it are still stubs pending ADR-007. Copying
+          now keeps callers correct when those land.
         """
 
         def error_provider(gate: Instruction, qubits: tuple[int, ...]) -> QuantumError | None:
@@ -125,6 +151,11 @@ class FuzzyNoiseModelEnsemble:
     footprint sampling — is deferred to ADR-015. Until that ADR lands the
     ensemble exists for API stability and to validate the
     aggregate-then-compare workflow.
+
+    ADR-021 records those three mechanisms as the plug-in points inside
+    :meth:`__iter__`, so ADR-015 can choose among them without refactoring
+    this factory. The choice additionally depends on ADR-009 (T1 vs IT2)
+    and ADR-014 (trained MFs with meaningful variance).
     """
 
     def __init__(
