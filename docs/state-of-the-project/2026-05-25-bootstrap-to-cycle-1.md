@@ -102,3 +102,65 @@ See `docs/team.md` for the full contributor list and module ownership map.
 - Empirical findings synthesis · `docs/findings/2026-05-25-empirical-synthesis.md`
 - Cycle 2 plan and roadmap · `docs/roadmap/2026-05-25-cycle-2-plan.md`
 - Questions for Dr. Akba · `docs/advisor/2026-05-25-questions-for-akba.md`
+
+## Ledger reconciliation · as-of 2026-08-19
+
+Everything above this heading is the 2026-05-25 snapshot and is left
+unedited. The `ADR Cycle Summary` table above records status **as of
+2026-05-25** and is deliberately not corrected in place. This section
+records the ledger statuses that changed on `main` after that date.
+Facts verified against `docs/decisions.md` on the ADR-012 closure
+branch after merging `main` at `dfee09c`; that is the as-of date above.
+
+| ADR | 2026-05-25 snapshot | Current in `docs/decisions.md` | Closed by |
+|-----|---------------------|--------------------------------|-----------|
+| ADR-006 | Open | **Accepted** | PR #26 · MF shapes shipped, empirical-winner selection handed to ADR-019 |
+| ADR-010 | Open | **Accepted** | PR #30 · 3×3×3 baseline rule grid and its three input dimensions ratified |
+| ADR-012 | Open | **Accepted** | This PR · `ProbabilityClip` ratified as the noise-probability default, set at pipeline construction |
+| ADR-018 | Draft | **Accepted** | PR #14 · tanh slope-positivity convention formalized |
+
+All four rows above were still carrying their pre-closure status in the
+snapshot table. Of the remaining rows, ADR-001 through ADR-005, ADR-007,
+ADR-009, ADR-011, and ADR-014 through ADR-017 still match the ledger.
+
+Two further discrepancies are recorded here but not treated as drift:
+
+- ADR-008 and ADR-013 read `Deferred` in the snapshot where
+  `docs/decisions.md` reads `Open / Deferred`. This is a snapshot
+  simplification, not a status change.
+- ADR-019 through ADR-022 have no entry in `docs/decisions.md` at all —
+  they exist only as drafts under `docs/decisions/drafts/`. The statuses
+  the snapshot records for them are therefore not ledger-backed.
+
+Neither discrepancy is resolved here. Whether ADR-019 through ADR-022 should
+be promoted from drafts into the ledger — or stop being assigned statuses at
+all — is tracked in issue #37. The broader post-merge verification sweep
+across the ledger, the cycle-2 plan, and `docs/architecture.md` is tracked
+separately in issue #25 (Cycle 2 Opening Closeout · Phase 0 Hygiene Sweep).
+
+---
+
+## Ledger reconciliation · as-of 2026-08-26
+
+Everything above this heading is left unedited, including the `as-of
+2026-08-19` section. This section records what changed on `main` between
+those two dates and supersedes the two "not treated as drift" bullets above.
+
+| Item | As-of 2026-08-19 | As-of 2026-08-26 | Changed by |
+|------|------------------|------------------|------------|
+| ADR-019 – ADR-022 | No ledger entry; drafts only | Promoted into `docs/decisions.md` · ADR-019 `Open`, ADR-020 / 021 / 022 `Accepted` | `d7ee18b` · issue #37 now closed |
+| ADR-023 | Did not exist | Present and `Accepted` — `TanhMF` output-range floor exemption | `768cd86` (PR #33) |
+| ADR-006 · ADR-010 decision label | `Decision (current)` on an `Accepted` entry | `Decision` | This PR · issue #41 · status and decision text unchanged |
+
+Consequences for the section above:
+
+- The bullet stating that ADR-019 through ADR-022 "have no entry in
+  `docs/decisions.md` at all" was true at `dfee09c` and is **no longer true**.
+  They are ledger-backed as of `d7ee18b`.
+- Issue #37 is closed. Issue #25 (Phase 0 Hygiene Sweep) remains open and still
+  owns the broader post-merge sweep.
+- The ADR-008 / ADR-013 `Deferred` vs `Open / Deferred` snapshot simplification
+  is unchanged and is still not treated as drift.
+
+NC-022 (drift count = 4) is a measurement pinned to `dfee09c` and is not
+restated here; see its Notes column in `docs/numerical-claims.md`.

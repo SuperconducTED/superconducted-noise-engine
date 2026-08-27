@@ -43,6 +43,18 @@ to make that failure mode structurally hard to repeat.
    They move to the `Retired` section at the bottom with the reason
    recorded. This is the audit trail.
 
+6. **Claims measured from this repository move with this repository.**
+   A claim whose source is a command run against this repo — test counts,
+   file counts, rule arities — is invalidated by any PR that changes what
+   that command returns. The PR that changes it updates the row's value,
+   source commit, and `Last verified` date in the same commit. Rule 3
+   already implies this; it is stated separately because NC-021 drifted by
+   17 across two PRs that had no reason to open this file, and a
+   verification runbook citing the stale row reported a regression that did
+   not exist (issues #40, #29). Runbooks citing a row of this kind must also
+   name the commit it was measured at, so a stale row surfaces as a visible
+   mismatch instead of a silent contradiction.
+
 ## Active claims
 
 | ID | Claim | Value | Source | Last verified | Notes |
@@ -67,7 +79,8 @@ to make that failure mode structurally hard to repeat.
 | NC-018 | Default ensemble size | 32 | `docs/decisions/drafts/ADR-021-aer-integration-constraint-and-factory-ensemble.md` | 2026-05-25 | Configurable · 8 used in ADR-019 ablation protocol |
 | NC-019 | Default shot count per ensemble member, ablation protocol | 4096 | `docs/decisions/drafts/ADR-019-mf-ablation-methodology.md` | 2026-05-25 | |
 | NC-020 | Benchmark circuits in ablation suite | 4 | `docs/decisions/drafts/ADR-019-mf-ablation-methodology.md` | 2026-05-25 | Random Clifford · GHZ · QFT · efficient_su2 |
-| NC-021 | Full test-suite size | 149 | `python -m pytest tests/ -q --collect-only`, run on `main` at `981f324` and on `46d90bc` | 2026-08-24 | Added after a runbook cited an unsourced `152` · cite this row in verification runbooks rather than recalling a count |
+| NC-021 | Full test-suite size | 166 | `python -m pytest tests/ --collect-only -q -o addopts=""` (tail line), run on `main` at `1873625` | 2026-08-26 | Was `149` at `981f324` · +17 from PR #33 (`768cd86`, `test_membership.py` 34 → 37) and PR #34 (`07fd9ec`, `test_first_ensemble_run.py` 4 → 18), neither of which updated this row · see Rule 6 · cite this row in verification runbooks rather than recalling a count, and state the commit it was measured at |
+| NC-022 | ADR statuses drifted from the 2026-05-25 snapshot table | 4 | Each `ADR Cycle Summary` row in `docs/state-of-the-project/2026-05-25-bootstrap-to-cycle-1.md` compared against its `**Status**` line in `docs/decisions.md` at `dfee09c` | 2026-08-24 | ADR-006, ADR-010, ADR-012, ADR-018 · excludes ADR-019 through ADR-022, which had no ledger entry to drift from at that commit · they were promoted into the ledger by `d7ee18b` and issue #37 is closed; the value stands as measured at `dfee09c` and is not restated for later commits |
 
 ## Retired claims
 

@@ -120,7 +120,7 @@ the contribution rather than a thin wrapper.
 common for plateau-with-uncertain-edges. The advisor recommended a
 tanh-based shape for first-priority empirical testing.
 
-**Decision (current)**: Bootstrap ships the T1 shapes Gaussian,
+**Decision**: Bootstrap ships the T1 shapes Gaussian,
 triangular, trapezoidal, and `TanhMF`, plus `IntervalGaussianMF`,
 `TanhSigmoidMF`, and `TanhBellMF`. Empirical-winner selection among these shapes is handed off to ADR-019 (MF-shape ablation).
 
@@ -136,6 +136,13 @@ parameter vector.
 > exemption. The 2026-05-25 revisit note removed by PR #26 had two
 > halves: the slope half is governed by ADR-018 as the line above says,
 > and the clip half is resolved in ADR-023.
+
+> Editorial · 2026-08-26 · The decision label here was normalized to
+> **Decision** to match this entry's Accepted (locked) status; it had
+> carried the provisional form reserved for Open and Deferred entries.
+> The decision text itself is unchanged — this records the label fix
+> only, not a revisit. See issue #41.
+
 ---
 
 ## ADR-007 — Fuzzification placement
@@ -207,7 +214,7 @@ the IT2 closed form.
 three input dimensions. Which three those are is now settled: `mean_T1`,
 `mean_T2`, and `mean_readout_error`.
 
-**Decision (current)**: The baseline rule grid is 3×3×3 — 27 rules, one
+**Decision**: The baseline rule grid is 3×3×3 — 27 rules, one
 per Cartesian-product combination as built by `TSKRuleBase.from_grid`
 (`prod_i K_i` rules for `K_i` MFs on input `i`; `K_i = 3` on each of the
 3 dimensions gives 3 × 3 × 3 = 27). The three input dimensions are
@@ -229,6 +236,13 @@ Adding more rules per input is the same.
 > read, not modified; Burak Öztekin signed off as its primary owner. See
 > `docs/implementations/2026-08-19-adr-010-closure.md`.
 
+
+> Editorial · 2026-08-26 · The decision label here was normalized to
+> **Decision** to match this entry's Accepted (locked) status; it had
+> carried the provisional form reserved for Open and Deferred entries.
+> The decision text itself is unchanged — this records the label fix
+> only, not a revisit. See issue #41.
+
 ---
 
 ## ADR-011 — Defuzzification method
@@ -248,17 +262,32 @@ whether the rule base is IT2.
 
 ## ADR-012 — Squashing / output activation
 
-**Status**: Open.
+**Status**: Accepted.
 
 **Context**: TSK output is a real-valued vector. Downstream channel
 parameters often need [0, 1] (probabilities). Identity, clip, and
 sigmoid each have trade-offs.
 
-**Decision (current)**: All three implemented. `ProbabilityClip` is the
-implicit default for noise-probability outputs. Sigmoid is preferred
-inside an SGD trainer (differentiable).
+**Decision**: `ProbabilityClip` is the default strategy to squash
+outputs for the noise probability. The options `IdentitySquashing` and
+`SigmoidSquashing` can still be used depending on the pipeline.
+`SigmoidSquashing` is kept as the differentiable path for the SGD
+trainer (ADR-014). The default is determined at pipeline construction
+time and not at the module level (`squashing.py`).
 
-**Consequences**: Strategy selectable per pipeline.
+**Consequences**: Strategy is selectable per pipeline. Noise-probability
+pipelines are constructed with `ProbabilityClip` unless the pipeline
+explicitly selects another strategy.
+
+> Revisited · 2026-08-19 · The code is confirmed to match this decision:
+>
+> - `src/superconducted/fuzzy/squashing.py:28` · `ProbabilityClip`
+>   clips into `[0, 1]` for inference.
+> - `src/superconducted/fuzzy/squashing.py:40` · `SigmoidSquashing` is
+>   the differentiable, SGD-friendly path.
+> - `src/superconducted/integration/aer_factory.py:72` and `:136` ·
+>   both require an explicit `SquashingStrategy`, confirming the default
+>   is a pipeline convention rather than a module constant.
 
 ---
 
