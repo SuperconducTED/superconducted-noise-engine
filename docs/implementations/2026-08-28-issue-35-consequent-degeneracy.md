@@ -180,6 +180,8 @@ genuinely the identity.
 
 ## Verification
 
+### Provisional (Mert's laptop, Python 3.13, 2026-08-28)
+
 ```
 python -m pytest tests/test_channel_viability.py -v      # 21 passed
 python -m pytest -q                                      # 187 passed
@@ -188,20 +190,60 @@ python -m mypy                                           # Success: 22 source fi
 PYTHONPATH=src python scripts/first_ensemble_run.py      # endpoint, consequent_seed=1
 ```
 
-All four were run on this branch on 2026-08-28. The smoke script still selects
-seed 1 for `endpoint`, unchanged from PR #34 — the refactor moved the
-definition without moving the behavior.
+All five were run on this branch. CI additionally passed on Python 3.11 and
+3.12. The smoke script still selects seed 1 for `endpoint`, unchanged from
+PR #34 — the refactor moved the definition without moving the behavior.
 
-To reproduce the 1/4 measurement independently of the test suite, the
-`test_degeneracy_rate_is_one_quarter` parametrization varies `k_per_input`
-(2, 3, 4) and the input vector; `_degeneracy_rate` builds from the primitives
-rather than from a `FuzzyNoiseModel`, so it isolates the three components
-that decide the sign.
+**These results are provisional.** Per project convention no laptop transcript
+is authoritative; the desktop re-run below is the record that counts.
 
-**Not verified here:** the run above is on a laptop. Per project convention,
-timing numbers require a re-run on Burak's desktop before they are quoted —
-though this change adds no timing claims, only the rate claims in NC-023 and
-NC-024, which are machine-independent.
+### Authoritative: desktop runbook
+
+Posted in full, at first-year-student detail, as a second comment on PR #44
+and repeated here so the durable record does not depend on GitHub. Run from a
+**fresh clone into a new directory with a new venv**, in PowerShell, at commit
+`5b36de0`.
+
+Every expectation is **differential** or **self-consistent** rather than an
+absolute count. That is deliberate: PR #29 pinned an absolute test count that
+had gone stale, and a correct verifier reported a regression that did not
+exist. An expectation that compares two values inside the same checkout cannot
+rot that way.
+
+| # | Command | Expected — the pass condition |
+| --- | --- | --- |
+| 1 | `git rev-parse HEAD` | `5b36de0f704fe0ac732f5cbe0459c270ed2cfe4b` |
+| 2 | `python -m ruff check .` | `All checks passed!` |
+| 3 | `python -m ruff format --check .` | no file listed as needing reformatting (**not** a file count — this PR adds a file) |
+| 4 | `python -m mypy --strict src/superconducted` | `Success: no issues found in 22 source files` |
+| 5 | `python -m pytest tests/ -q` | `0 failed` |
+| 6 | `python -m pytest tests/ --collect-only -q -o addopts=""` vs `Select-String -Path docs
+umerical-claims.md -Pattern "Full test-suite size"` | the two numbers **agree with each other**; the NC-021 prose names the commit it was measured at |
+| 7 | `python -m pytest tests/test_channel_viability.py -v` | `0 failed` |
+| 8 | `SuperOp` check of `project([0,0])` vs `project([0.2,0.1])` | `True` with `max|diff| = 0.0`, then `False` — exact arithmetic, so any difference is an environment finding |
+| 9 | 2000-seed degeneracy sweep, `endpoint` and `interior` | the two printed rates **equal each other**, both near `0.25` (laptop printed `0.242` for both — context, not the pass condition) |
+| 10 | `pytest ...::test_degeneracy_rate_is_one_quarter -v` | `0 failed` across 8-, 27-, and 64-rule grids plus a lopsided input vector |
+| 11 | mutate `params.flat[:2] > 0.0` → `>= 0.0`, rerun the file | **10 failed**, including all four rate parametrizations — proves the rate test measures the claim rather than decorating it |
+| 12 | `git checkout -- src/superconducted/integration/aer_factory.py` | `git status --short` prints nothing; suite returns to `0 failed` |
+| 13 | smoke script, both placements | `consequent_seed=1` / `consequent_seed=0`, **identical to PR #34** — a changed seed means the refactor was not behavior-preserving |
+| 14 | direct `n_rules` check | `27` (the ADR-010 gate, unchanged) |
+
+Step 11 is the one that carries weight: a suite that passes proves nothing
+unless it can fail, and the mutation is the one-character version of the bug
+this PR exists to prevent.
+
+The verification record lands at
+`docs/evidence/pr44-adr-024-viability/`, per the path convention adopted
+2026-08-24 — not the retired `docs/verification/` tree.
+
+### Open, pending lead sign-off
+
+ADR-024 is `Status: Open`. Clause 1 declines to modify `fuzzy/tsk.py`
+(Burak's module) and clause 2 encodes `channels/kraus.py`'s parameter contract
+from outside it (Bengisu's module), so both leads are asked to ratify or
+object in the PR thread. This change adds no timing claims — only NC-023 and
+NC-024, which are machine-independent — so the desktop run is a correctness
+baseline rather than a performance one.
 
 ## Related docs
 
