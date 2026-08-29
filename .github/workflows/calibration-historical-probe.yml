@@ -1,13 +1,22 @@
 # One-shot diagnostic for #45 Phase 2: can this account read historical
 # calibration properties, and is the Aug 7-17 / Aug 26-29 data recoverable?
 #
-# Manual trigger only. Makes exactly two read-only API calls and commits
+# Runs only when asked (manual dispatch, or a push to a probe/** branch). Makes
+# exactly two read-only API calls and commits
 # nothing. It runs here rather than on a workstation because IBM_QUANTUM_TOKEN
 # already lives in this repository's secrets — the probe deliberately does not
 # require the token to be copied anywhere new.
 name: Calibration Historical Probe
 
 on:
+  # workflow_dispatch alone is not enough: GitHub only accepts a dispatch for
+  # a workflow that already exists on the DEFAULT branch, so this could not be
+  # run from a feature branch. The push trigger on a namespaced branch makes
+  # the probe runnable before it merges — and afterwards, runnable by anyone
+  # without merge rights.
+  push:
+    branches:
+      - 'probe/**'
   workflow_dispatch:
     inputs:
       backend:
@@ -41,8 +50,9 @@ jobs:
       - name: Probe historical properties
         env:
           IBM_QUANTUM_TOKEN: ${{ secrets.IBM_QUANTUM_TOKEN }}
-          PROBE_BACKEND: ${{ inputs.backend }}
-          PROBE_DAYS_BACK: ${{ inputs.days_back }}
+          # inputs.* are empty on a push event, so fall back to the same defaults.
+          PROBE_BACKEND: ${{ inputs.backend || 'ibm_fez' }}
+          PROBE_DAYS_BACK: ${{ inputs.days_back || '7' }}
         run: |
           python scripts/probe_historical_properties.py \
             --backend "$PROBE_BACKEND" \
