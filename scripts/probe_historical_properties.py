@@ -68,6 +68,25 @@ def _last_update_date(properties: Any) -> datetime | None:
     return None
 
 
+def _probe_one(backend: object, t_now: datetime, days: float) -> tuple[str, datetime | None]:
+    """Query one depth. Returns (verdict, returned stamp or None)."""
+    requested = t_now - timedelta(days=days)
+    try:
+        historical = backend.properties(datetime=requested)  # type: ignore[attr-defined]
+    except NotImplementedError as exc:
+        return f"DENIED — NotImplementedError: {exc}", None
+    except Exception as exc:  # any failure is itself a probe result
+        return f"ERROR — {type(exc).__name__}: {exc}", None
+    if historical is None:
+        return "UNAVAILABLE — returned None", None
+    stamp = _last_update_date(historical)
+    if stamp is None:
+        return "MALFORMED — no last_update_date", None
+    if stamp >= t_now:
+        return "IGNORED — returned the current document", stamp
+    return "OK", stamp
+
+
 def main(argv: Iterable[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="probe-historical-properties",
@@ -77,8 +96,11 @@ def main(argv: Iterable[str] | None = None) -> int:
     parser.add_argument(
         "--days-back",
         type=float,
-        default=7.0,
-        help="How far back to request, in days. Keep under max_historical_days (30).",
+        nargs="+",
+        default=[7.0],
+        metavar="DAYS",
+        help="Depths to probe, in days. Several values map the retention window, "
+        "which is what decides how far a backfill sweep can reach.",
     )
     args = parser.parse_args(list(argv) if argv is not None else None)
 
@@ -105,35 +127,29 @@ def main(argv: Iterable[str] | None = None) -> int:
     if t_now is None:
         print("PROBE FAILED: current properties carry no last_update_date")
         return 1
-    print(f"current last_update_date    : {t_now.isoformat()}")
+    print(f"current last_update_date : {t_now.isoformat()}\n")
 
-    requested = t_now - timedelta(days=args.days_back)
-    print(f"requesting datetime=        : {requested.isoformat()}")
+    header = f"{'depth':>8}  {'requested':<25}  {'returned':<25}  verdict"
+    print(header)
+    print("-" * len(header))
 
-    try:
-        historical = backend.properties(datetime=requested)
-    except NotImplementedError as exc:
-        print(f"RESULT: DENIED — NotImplementedError: {exc}")
-        return 2
-    except Exception as exc:  # any failure is itself a probe result
-        print(f"PROBE FAILED: {type(exc).__name__}: {exc}")
-        return 1
+    any_ok = False
+    for days in sorted(args.days_back):
+        requested = t_now - timedelta(days=days)
+        verdict, stamp = _probe_one(backend, t_now, days)
+        if verdict == "OK":
+            any_ok = True
+            lag = requested - stamp if stamp else None
+            verdict = f"OK (document is {lag} older than the request)"
+        print(
+            f"{days:>7.1f}d  {requested.isoformat():<25}  "
+            f"{(stamp.isoformat() if stamp else '-'):<25}  {verdict}"
+        )
 
-    if historical is None:
-        print("RESULT: UNAVAILABLE — properties(datetime=...) returned None")
-        return 2
-
-    t_hist = _last_update_date(historical)
-    if t_hist is None:
-        print("PROBE FAILED: historical properties carry no last_update_date")
-        return 1
-    print(f"historical last_update_date : {t_hist.isoformat()}")
-    print(f"moved back by               : {t_now - t_hist}")
-
-    if t_hist < t_now:
-        print("RESULT: HISTORICAL ACCESS WORKS — backfill is feasible.")
+    if any_ok:
+        print("\nRESULT: HISTORICAL ACCESS WORKS — backfill is feasible at the depths marked OK.")
         return 0
-    print("RESULT: PARAMETER IGNORED — same document returned; backfill is impossible.")
+    print("\nRESULT: NO HISTORICAL ACCESS at any probed depth — the gaps are unrecoverable.")
     return 2
 
 
