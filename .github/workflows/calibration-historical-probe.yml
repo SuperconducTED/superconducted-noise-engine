@@ -1,0 +1,54 @@
+# One-shot diagnostic for #45 Phase 2: can this account read historical
+# calibration properties, and is the Aug 7-17 / Aug 26-29 data recoverable?
+#
+# Manual trigger only. Makes exactly two read-only API calls and commits
+# nothing. It runs here rather than on a workstation because IBM_QUANTUM_TOKEN
+# already lives in this repository's secrets — the probe deliberately does not
+# require the token to be copied anywhere new.
+name: Calibration Historical Probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      backend:
+        description: Backend to probe
+        default: ibm_fez
+        required: false
+      days_back:
+        description: How far back to request, in days (keep under 30)
+        default: '7'
+        required: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e . --no-deps
+
+      # Inputs go through the environment, never interpolated into the shell.
+      - name: Probe historical properties
+        env:
+          IBM_QUANTUM_TOKEN: ${{ secrets.IBM_QUANTUM_TOKEN }}
+          PROBE_BACKEND: ${{ inputs.backend }}
+          PROBE_DAYS_BACK: ${{ inputs.days_back }}
+        run: |
+          python scripts/probe_historical_properties.py \
+            --backend "$PROBE_BACKEND" \
+            --days-back "$PROBE_DAYS_BACK" 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          rc=${PIPESTATUS[0]}
+          echo "probe exit code: $rc" | tee -a "$GITHUB_STEP_SUMMARY"
+          # 0 = historical access works, 2 = definitively unavailable.
+          # Both are successful probes; only 1 means the probe itself broke.
+          [ "$rc" -eq 0 ] || [ "$rc" -eq 2 ]
