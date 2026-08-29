@@ -44,6 +44,7 @@ def _qubit(
         readout_error=0.01,
         prob_meas0_prep1=0.02,
         prob_meas1_prep0=0.015,
+        init_error=0.002,
         readout_length_seconds=1e-6,
     )
 
@@ -64,6 +65,7 @@ def _snapshot(
             readout_length=_ZERO_FIELD,
             prob_meas0_prep1=_ZERO_FIELD,
             prob_meas1_prep0=_ZERO_FIELD,
+            init_error=_ZERO_FIELD,
         )
     return ParsedCalibrationSnapshot(
         timestamp=datetime(2026, 5, 13, 12, 13, 22, tzinfo=UTC),
@@ -104,6 +106,7 @@ def test_mean_t1_skips_nan_with_separate_accounting() -> None:
             readout_length=_ZERO_FIELD,
             prob_meas0_prep1=_ZERO_FIELD,
             prob_meas1_prep0=_ZERO_FIELD,
+            init_error=_ZERO_FIELD,
         ),
     )
     result = mean_t1(snapshot)

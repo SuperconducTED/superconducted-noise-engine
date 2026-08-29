@@ -102,6 +102,23 @@ def test_missingness_stats_count_one_absent_t1_and_t2() -> None:
     assert m.readout_length.absent == 0
 
 
+def test_init_error_absent_before_the_schema_cutover() -> None:
+    """Pre-2026-08-04 snapshots carry no ``init_error`` at all — count it, don't fill it.
+
+    The fixture is a 2026-05-13 payload, so it predates IBM introducing the
+    field on 2026-08-04T00:52:30. Every one of the 156 qubits must surface
+    ``None`` and be counted absent. This pins the #45 decision to represent
+    the gap explicitly rather than impute it: a model fitted where
+    ``init_error`` *is* observed scores a negative out-of-sample R^2 twenty
+    days later, so there is no relation available to fill it with.
+    """
+    snapshot = load_snapshot(FIXTURE)
+    assert snapshot.missingness.init_error.absent == len(snapshot.qubits) == 156
+    assert snapshot.missingness.init_error.explicit_null == 0
+    assert snapshot.missingness.init_error.nan_present == 0
+    assert all(q.init_error is None for q in snapshot.qubits)
+
+
 def test_missingness_stats_explicit_null_is_separate_counter(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -267,6 +284,7 @@ def test_typed_qubit_construction_independent_of_loader() -> None:
         readout_error=0.01,
         prob_meas0_prep1=0.02,
         prob_meas1_prep0=0.015,
+        init_error=0.002,
         readout_length_seconds=1e-6,
     )
     assert q.index == 0
