@@ -212,6 +212,38 @@ class TestSerializeTarget:
         assert isinstance(result["operations"], list)
         assert len(result["operations"]) == 3
 
+    def test_operations_order_independent(self) -> None:
+        """Regression for #46: serialization must not leak iteration order.
+
+        Neither ``Target.operation_names`` nor ``qargs_for_operation_name``
+        guarantees an order, so two processes reading the *same* calibration
+        document produced byte-different JSON. That defeated the workflow's
+        ``git diff --cached --quiet`` no-op guard and committed 333 snapshot
+        rewrites carrying no new data. Both loops are varied below.
+        """
+
+        def make_target(op_names: list[str], sx_qargs: list[tuple[int, ...]]) -> MagicMock:
+            target = MagicMock()
+            target.num_qubits = 2
+            target.physical_qubits = [0, 1]
+            target.operation_names = op_names
+            qargs_by_name = {"x": [(0,), (1,)], "sx": sx_qargs, "cx": [(0, 1)]}
+            target.qargs_for_operation_name.side_effect = lambda name: qargs_by_name[name]
+            instr_props = MagicMock()
+            instr_props.duration = 35.6e-9
+            instr_props.error = 1e-3
+            target.__getitem__.return_value = instr_props
+            return target
+
+        # Same content, both loops permuted: outer (operation_names) and
+        # inner (qargs_for_operation_name).
+        first = serialize_target(make_target(["x", "sx", "cx"], [(0,), (1,)]))
+        second = serialize_target(make_target(["cx", "x", "sx"], [(1,), (0,)]))
+
+        assert first is not None
+        assert len(first["operations"]) == 5
+        assert json.dumps(first, sort_keys=True) == json.dumps(second, sort_keys=True)
+
 
 # --- CalibrationSnapshot validation --------------------------------------
 

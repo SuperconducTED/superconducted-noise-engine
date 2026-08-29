@@ -94,6 +94,12 @@ def serialize_target(target: Any) -> dict[str, Any] | None:
                     with contextlib.suppress(TypeError, ValueError):
                         entry["error"] = float(error)
             out["operations"].append(entry)
+    # Byte-stability guard (#46). Neither Target.operation_names nor
+    # qargs_for_operation_name guarantees iteration order, and the
+    # sort_keys=True in storage.py normalises mapping keys, not sequence
+    # elements — so without this sort the same calibration document
+    # serialises differently on every poll.
+    out["operations"].sort(key=lambda e: (e["name"], tuple(e["qargs"])))
     return out
 
 
