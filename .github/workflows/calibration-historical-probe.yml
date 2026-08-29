@@ -1,19 +1,20 @@
-# One-shot diagnostic for #45 Phase 2: can this account read historical
-# calibration properties, and is the Aug 7-17 / Aug 26-29 data recoverable?
+# Diagnostic for #45 Phase 2: can this account read historical calibration
+# properties, and how far back does the window reach? The answer decides
+# whether data lost to the scheduler outage is recoverable.
 #
 # Runs only when asked (manual dispatch, or a push to a probe/** branch). Makes
-# exactly two read-only API calls and commits
-# nothing. It runs here rather than on a workstation because IBM_QUANTUM_TOKEN
-# already lives in this repository's secrets — the probe deliberately does not
-# require the token to be copied anywhere new.
+# one read-only API call per probed depth and commits nothing. It runs here
+# rather than on a workstation because IBM_QUANTUM_TOKEN already lives in this
+# repository's secrets — the probe deliberately does not require the token to
+# be copied anywhere new.
 name: Calibration Historical Probe
 
 on:
-  # workflow_dispatch alone is not enough: GitHub only accepts a dispatch for
-  # a workflow that already exists on the DEFAULT branch, so this could not be
-  # run from a feature branch. The push trigger on a namespaced branch makes
-  # the probe runnable before it merges — and afterwards, runnable by anyone
-  # without merge rights.
+  # workflow_dispatch alone is not enough: GitHub only accepts a dispatch for a
+  # workflow that already exists on the DEFAULT branch, so this could not be run
+  # from a feature branch. The push trigger on a namespaced branch makes the
+  # probe runnable before it merges — and afterwards, runnable without merge
+  # rights.
   push:
     branches:
       - 'probe/**'
@@ -24,8 +25,8 @@ on:
         default: ibm_fez
         required: false
       days_back:
-        description: How far back to request, in days (keep under 30)
-        default: '7'
+        description: Space-separated depths in days, e.g. "1 7 30 45"
+        default: '1 3 7 14 21 28 30 35 45 60'
         required: false
 
 jobs:
@@ -52,13 +53,19 @@ jobs:
           IBM_QUANTUM_TOKEN: ${{ secrets.IBM_QUANTUM_TOKEN }}
           # inputs.* are empty on a push event, so fall back to the same defaults.
           PROBE_BACKEND: ${{ inputs.backend || 'ibm_fez' }}
-          PROBE_DAYS_BACK: ${{ inputs.days_back || '7' }}
+          PROBE_DAYS_BACK: ${{ inputs.days_back || '1 3 7 14 21 28 30 35 45 60' }}
         run: |
+          # days_back is a LIST, so it must word-split — hence unquoted below.
+          # Validate first so an unexpected value cannot become a glob or a flag.
+          case "$PROBE_DAYS_BACK" in
+            *[!0-9.\ ]*|'') echo "::error::days_back must be numbers and spaces"; exit 1 ;;
+          esac
+          set -f
           python scripts/probe_historical_properties.py \
             --backend "$PROBE_BACKEND" \
-            --days-back "$PROBE_DAYS_BACK" 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+            --days-back $PROBE_DAYS_BACK 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
           rc=${PIPESTATUS[0]}
           echo "probe exit code: $rc" | tee -a "$GITHUB_STEP_SUMMARY"
-          # 0 = historical access works, 2 = definitively unavailable.
+          # 0 = historical access works at >=1 depth, 2 = none at any depth.
           # Both are successful probes; only 1 means the probe itself broke.
           [ "$rc" -eq 0 ] || [ "$rc" -eq 2 ]
