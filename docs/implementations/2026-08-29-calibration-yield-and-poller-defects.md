@@ -109,6 +109,55 @@ Cadence is a **median, not a period** — the distribution is irregular (readout
 p10 2.5 h, p90 9.2 h), so these are expectations, not counts. A 5.83 h gap on
 2026-08-29 saw no advance at all.
 
+### Correction, 2026-08-30: the polling-sufficiency estimate above is too generous
+
+The section above derives a ~6/day floor and a ~8/day ceiling from the readout
+family's ~4 h publish cadence. Once the probe proved historical reads work, that
+model became testable against ground truth rather than assumption — and it does
+not survive.
+
+Enumerating 2026-08-27T08:18Z → 2026-08-30T08:18Z at a 1 h step
+([run 33301248740](https://github.com/SuperconducTED/superconducted-noise-engine/actions/runs/33301248740),
+73 queries, read-only; evidence in `evidence/PR-47-Evidence/`):
+
+| | |
+| --- | ---: |
+| distinct documents IBM served | 55 |
+| documents on `calibration-data` in the window | 11 |
+| held by us but **not** returned by the sweep | 2 |
+| **documents proven to exist** | **≥ 57** |
+| **capture rate** | **≤ 19.3%** |
+| **recoverable today** | **46** |
+| implied republication rate | ≥ 19 documents/day |
+| implied mean interval | ≤ 1.26 h |
+
+The 2 documents we hold that the sweep did not return prove the sweep
+**undercounts**: a 1 h step cannot see a document superseded before the next query
+lands. Aliasing does not explain all of it — a query at 22:18:47 should have
+returned `22:12:34` as the newest document older than it and returned `22:04:50`
+instead, so `updated_before` does not select purely on `last_update_date` and its
+exact semantics are uncharacterised. The error is one-directional, which is what
+makes the numbers usable: the true count is ≥ 57 and a finer step would find more,
+never fewer.
+
+**Why this does not contradict #45.** The two cadences measure different things.
+#45's ~4 h is the readout *parameter family's* own `date` fields; ≤1.26 h is
+*document* republication, and `last_update_date` advances whenever any part of the
+document changes, gate-level data included. Both hold simultaneously.
+
+**What it does revise.** "Above ~8 polls/day the extra polls are pure duplicates"
+is false at the document level — at ≥19 republications/day, 8 polls/day still
+misses most documents. The ~6/day figure survives only as a floor for catching
+*readout* changes, not as a sufficiency criterion.
+
+**What it does not establish.** These are document republications, not distinct
+device states. #45 measured 43.6% of captured snapshots as byte-identical in their
+qubit block to the previous one, so an unknown fraction of the 46 carries no new
+qubit information — and #45's central result (2.7× polling → 1.57× data) was
+measured in *states*, so the sublinearity of information yield is untouched.
+Converting 46 documents into a count of new device states requires fetching them
+and diffing the qubit blocks. That is the backfill, and it is the only way to know.
+
 ### Marginal information yield
 
 Splitting the archive at the 485-file mark: the first half added 313 distinct
