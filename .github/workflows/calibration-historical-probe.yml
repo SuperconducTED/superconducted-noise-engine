@@ -29,6 +29,12 @@ on:
         default: '1 3 7 14 21 28 30 35 45 60'
         required: false
 
+# Least privilege: the probe only checks out the repo and reads from IBM. It
+# commits nothing, so GITHUB_TOKEN never needs write. Explicit because the
+# repository default would otherwise apply (CodeQL actions/missing-workflow-permissions).
+permissions:
+  contents: read
+
 jobs:
   probe:
     runs-on: ubuntu-latest

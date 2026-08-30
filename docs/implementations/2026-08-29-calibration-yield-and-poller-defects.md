@@ -168,7 +168,7 @@ only rationale.
 
 ## Design decisions
 
-**The four #45 questions**, decided by the project owner on 2026-08-29:
+**The four #45 questions**, decided by the project owner across the 2026-08-29/30 session:
 
 1. **The 630 floor counts distinct device states.** 504/630 — not met. Follows
    the rule of thumb's own logic, since samples-per-parameter counts independent
