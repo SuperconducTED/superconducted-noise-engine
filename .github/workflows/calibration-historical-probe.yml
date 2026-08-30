@@ -69,23 +69,30 @@ jobs:
           # Both inputs are LISTS, so they must word-split — hence unquoted below.
           # Validate first so an unexpected value cannot become a glob or a flag.
           set -f
+          probe() { python scripts/probe_historical_properties.py --backend "$PROBE_BACKEND" "$@" 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"; return "${PIPESTATUS[0]}"; }
+
+          rc=0
           if [ -n "$PROBE_ENUMERATE" ]; then
             case "$PROBE_ENUMERATE" in
               *[!0-9.:TZ+-\ ]*|'') echo "::error::enumerate_window must be 'START_ISO END_ISO STEP_HOURS'"; exit 1 ;;
             esac
-            python scripts/probe_historical_properties.py \
-              --backend "$PROBE_BACKEND" \
-              --enumerate $PROBE_ENUMERATE 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+            probe --enumerate $PROBE_ENUMERATE || rc=$?
           else
             case "$PROBE_DAYS_BACK" in
               *[!0-9.\ ]*|'') echo "::error::days_back must be numbers and spaces"; exit 1 ;;
             esac
-            python scripts/probe_historical_properties.py \
-              --backend "$PROBE_BACKEND" \
-              --days-back $PROBE_DAYS_BACK 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+            probe --days-back $PROBE_DAYS_BACK || rc=$?
+            # A push carries no inputs, so also enumerate the recent window. That
+            # is the live question — which documents a polling gap actually missed
+            # — and answering it costs only read-only queries.
+            if [ "$GITHUB_EVENT_NAME" = push ] && [ "$rc" -eq 0 ]; then
+              echo "" | tee -a "$GITHUB_STEP_SUMMARY"
+              probe --enumerate "$(date -u -d '72 hours ago' +%Y-%m-%dT%H:%M:%SZ)" \
+                                "$(date -u +%Y-%m-%dT%H:%M:%SZ)" 1 || rc=$?
+            fi
           fi
-          rc=${PIPESTATUS[0]}
+
           echo "probe exit code: $rc" | tee -a "$GITHUB_STEP_SUMMARY"
-          # 0 = historical access works at >=1 depth, 2 = none at any depth.
-          # Both are successful probes; only 1 means the probe itself broke.
+          # 0 = worked, 2 = definitively unavailable. Both are successful probes;
+          # only 1 means the probe itself broke.
           [ "$rc" -eq 0 ] || [ "$rc" -eq 2 ]
