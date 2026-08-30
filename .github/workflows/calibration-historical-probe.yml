@@ -28,6 +28,10 @@ on:
         description: Space-separated depths in days, e.g. "1 7 30 45"
         default: '1 3 7 14 21 28 30 35 45 60'
         required: false
+      enumerate_window:
+        description: 'Instead of depths: "START_ISO END_ISO STEP_HOURS" to list every document IBM will serve for that window.'
+        default: ''
+        required: false
 
 # Least privilege: the probe only checks out the repo and reads from IBM. It
 # commits nothing, so GITHUB_TOKEN never needs write. Explicit because the
@@ -60,16 +64,26 @@ jobs:
           # inputs.* are empty on a push event, so fall back to the same defaults.
           PROBE_BACKEND: ${{ inputs.backend || 'ibm_fez' }}
           PROBE_DAYS_BACK: ${{ inputs.days_back || '1 3 7 14 21 28 30 35 45 60' }}
+          PROBE_ENUMERATE: ${{ inputs.enumerate_window }}
         run: |
-          # days_back is a LIST, so it must word-split — hence unquoted below.
+          # Both inputs are LISTS, so they must word-split — hence unquoted below.
           # Validate first so an unexpected value cannot become a glob or a flag.
-          case "$PROBE_DAYS_BACK" in
-            *[!0-9.\ ]*|'') echo "::error::days_back must be numbers and spaces"; exit 1 ;;
-          esac
           set -f
-          python scripts/probe_historical_properties.py \
-            --backend "$PROBE_BACKEND" \
-            --days-back $PROBE_DAYS_BACK 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ -n "$PROBE_ENUMERATE" ]; then
+            case "$PROBE_ENUMERATE" in
+              *[!0-9.:TZ+-\ ]*|'') echo "::error::enumerate_window must be 'START_ISO END_ISO STEP_HOURS'"; exit 1 ;;
+            esac
+            python scripts/probe_historical_properties.py \
+              --backend "$PROBE_BACKEND" \
+              --enumerate $PROBE_ENUMERATE 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            case "$PROBE_DAYS_BACK" in
+              *[!0-9.\ ]*|'') echo "::error::days_back must be numbers and spaces"; exit 1 ;;
+            esac
+            python scripts/probe_historical_properties.py \
+              --backend "$PROBE_BACKEND" \
+              --days-back $PROBE_DAYS_BACK 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
           rc=${PIPESTATUS[0]}
           echo "probe exit code: $rc" | tee -a "$GITHUB_STEP_SUMMARY"
           # 0 = historical access works at >=1 depth, 2 = none at any depth.

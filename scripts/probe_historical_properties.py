@@ -54,7 +54,7 @@ from typing import Any
 
 # Reused rather than reimplemented so the probe coerces timestamps exactly the
 # way the poller does; a divergence here would make the comparison meaningless.
-from superconducted.calibration.poller import DEFAULT_CHANNEL, _coerce_utc
+from superconducted.calibration.poller import DEFAULT_CHANNEL, _coerce_utc, _parse_iso_utc
 
 
 def _last_update_date(properties: Any) -> datetime | None:
@@ -87,6 +87,56 @@ def _probe_one(backend: object, t_now: datetime, days: float) -> tuple[str, date
     return "OK", stamp
 
 
+def _enumerate_window(backend: object, start_iso: str, end_iso: str, step_hours_s: str) -> int:
+    """Walk a window and report every distinct document the service will serve.
+
+    Because ``properties(datetime=T)`` returns the newest document *older than*
+    ``T``, stepping finer than the publish cadence enumerates the window: each
+    published document is the answer for at least one step. Distinct
+    ``last_update_date`` values are therefore the ground truth of what IBM
+    retains, and differencing them against the archived filenames says exactly
+    what a polling gap cost — no estimation from a median.
+    """
+    start = _parse_iso_utc(start_iso)
+    end = _parse_iso_utc(end_iso)
+    step = timedelta(hours=float(step_hours_s))
+    if step <= timedelta(0):
+        print("PROBE FAILED: step must be positive")
+        return 1
+    if start >= end:
+        print("PROBE FAILED: start must be before end")
+        return 1
+
+    seen: dict[datetime, int] = {}
+    queries = 0
+    t = start
+    while t <= end:
+        queries += 1
+        try:
+            doc = backend.properties(datetime=t)  # type: ignore[attr-defined]
+        except Exception as exc:  # any failure is itself a probe result
+            print(f"PROBE FAILED at {t.isoformat()}: {type(exc).__name__}: {exc}")
+            return 1
+        stamp = _last_update_date(doc) if doc is not None else None
+        if stamp is not None:
+            seen[stamp] = seen.get(stamp, 0) + 1
+        t += step
+
+    in_window = sorted(s for s in seen if start <= s <= end)
+    print(f"window   : {start.isoformat()} .. {end.isoformat()}")
+    print(f"step     : {step_hours_s}h   queries: {queries}")
+    print(f"distinct documents returned : {len(seen)}  ({len(in_window)} inside the window)")
+    print("\nlast_update_date values IBM will serve for this window:")
+    for s in in_window:
+        print(f"  {s.strftime('%Y%m%dT%H%M%S%f')}Z   {s.isoformat()}")
+    print(
+        "\nDiff these stamps against the archived filenames on calibration-data; "
+        "any listed here and absent there is a document the poller missed and can "
+        "still recover."
+    )
+    return 0
+
+
 def main(argv: Iterable[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="probe-historical-properties",
@@ -101,6 +151,15 @@ def main(argv: Iterable[str] | None = None) -> int:
         metavar="DAYS",
         help="Depths to probe, in days. Several values map the retention window, "
         "which is what decides how far a backfill sweep can reach.",
+    )
+    parser.add_argument(
+        "--enumerate",
+        nargs=3,
+        metavar=("START_ISO", "END_ISO", "STEP_HOURS"),
+        default=None,
+        help="Instead of probing depths, walk a window and list every distinct "
+        "last_update_date the service returns. Read-only: this is how you find out "
+        "exactly which documents a polling gap missed, before deciding to backfill.",
     )
     args = parser.parse_args(list(argv) if argv is not None else None)
 
@@ -118,6 +177,9 @@ def main(argv: Iterable[str] | None = None) -> int:
     print(f"backend : {args.backend}")
 
     backend = QiskitRuntimeService(**kwargs).backend(args.backend)
+
+    if args.enumerate:
+        return _enumerate_window(backend, *args.enumerate)
 
     current = backend.properties()
     if current is None:
