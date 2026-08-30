@@ -26,14 +26,23 @@ it happens.
 
 | File | One-sentence description |
 | --- | --- |
-| `src/superconducted/calibration/poller.py` | `serialize_target()` sorts `operations` before returning, so the same calibration document always serialises to the same bytes. |
-| `src/superconducted/calibration/loader.py` | `init_error` is now a first-class typed field with its own missingness counters, following the ADR-017 Skip pattern. |
-| `tests/test_calibration.py` | Regression test permuting both iteration orders in `serialize_target`; fails on the pre-fix code. |
+| `src/superconducted/calibration/poller.py` | `serialize_target()` sorts `operations` so a document always serialises to the same bytes; `fetch_snapshot()` refuses a historical response newer than the instant requested; `_coerce_utc` / `_parse_iso_utc` promoted to public `coerce_utc` / `parse_iso_utc`. |
+| `src/superconducted/calibration/loader.py` | `init_error` is a first-class typed field with its own missingness counters (ADR-017 Skip pattern); `ParsedQubitCalibration` is `kw_only`. |
+| `scripts/probe_historical_properties.py` | New: maps how far back historical properties can be read, and enumerates every document a window will serve. |
+| `scripts/canonical_snapshot_digest.py` | New: order-insensitive snapshot digest, so a pre-fix archived file compares equal to its post-fix re-serialisation. |
+| `.github/workflows/calibration-poll.yml` | Files by payload month, never overwrites an archived path, compares canonically to split `duplicate` from `collision`, appends a poll ledger, and accepts backfill inputs. |
+| `.github/workflows/calibration-historical-probe.yml` | New: read-only diagnostic for retention depth and window enumeration. |
+| `.github/workflows/ci.yml` | `mypy --strict` runs with no path argument so `[tool.mypy] files` is the single source of truth. |
+| `pyproject.toml` | Adds `scripts/probe_historical_properties.py` to mypy's checked set. |
+| `docs/decisions.md` | Adds ADR-024 (Accepted): `ledger/` and `collisions/` on the data branch, extending ADR-020. |
+| `docs/numerical-claims.md` | NC-012 gains its unit; NC-013 retired as NC-R002; NC-021 updated; NC-023..NC-028 added. |
+| `docs/implementations/2026-08-29-calibration-yield-and-poller-defects.md` | This document. |
+| `evidence/PR-47-Evidence/` | Row-level enumeration data and its provenance, committed because Actions logs expire at ~90 days. |
+| `tests/test_calibration.py` | `serialize_target` order-independence regression; two tests for the historical-response guard; one existing fixture corrected (see Design decisions). |
+| `tests/test_probe_historical_properties.py` | New: the probe's verdict table, sweep stepping and dedup, retry behaviour, and `main`'s exit codes. |
+| `tests/test_canonical_snapshot_digest.py` | New: reordering must not change the digest, a changed calibration value must. |
 | `tests/calibration/test_loader.py` | Asserts the pre-cutover fixture reports all 156 qubits' `init_error` as absent rather than filled. |
 | `tests/calibration/test_features_missing_fields.py` | Construction sites updated for the new required field. |
-| `.github/workflows/calibration-poll.yml` | Files by payload month, never overwrites an archived path, appends a poll ledger, and accepts backfill inputs. |
-| `.github/workflows/calibration-historical-probe.yml` | New read-only diagnostic that maps how far back historical properties can be read. |
-| `scripts/probe_historical_properties.py` | The probe itself: compares `last_update_date` values across a list of depths. |
 
 ## Implementation approach
 
@@ -275,11 +284,15 @@ interpreter is
 the repo `.venv` is built on the broken 3.13 stub and does not run.
 
 ```bash
-pytest tests/ -q                      # 168 passed
-ruff check .                          # All checks passed
-ruff format --check .                 # 81 files already formatted
-mypy --strict src/superconducted      # no issues in 22 source files
+pytest tests/ -q          # count: see NC-021 in docs/numerical-claims.md
+ruff check .              # All checks passed
+ruff format --check .     # all files already formatted
+mypy --strict             # no path argument: the set is [tool.mypy] files
 ```
+
+Cite NC-021 for the test count rather than restating it here — a number copied
+into prose is the drift Rule 6 exists to catch, and this document has already
+been through one round of it.
 
 The regression test is proven to catch the bug it guards, not merely to pass:
 comment out the `out["operations"].sort(...)` line and
