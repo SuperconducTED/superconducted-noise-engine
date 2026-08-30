@@ -66,16 +66,23 @@ jobs:
           PROBE_DAYS_BACK: ${{ inputs.days_back || '1 3 7 14 21 28 30 35 45 60' }}
           PROBE_ENUMERATE: ${{ inputs.enumerate_window }}
         run: |
-          # Both inputs are LISTS, so they must word-split — hence unquoted below.
+          # Inputs are LISTS, so they must word-split — hence unquoted below.
           # Validate first so an unexpected value cannot become a glob or a flag.
           set -f
           probe() { python scripts/probe_historical_properties.py --backend "$PROBE_BACKEND" "$@" 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"; return "${PIPESTATUS[0]}"; }
 
+          # The `-` MUST come last in the bracket expression. Written as `+-\ ` it
+          # is a reversed range (0x2B..0x20) and bash rejects every input, valid
+          # ones included — which is exactly the bug this shape prevents.
+          validate_window() {
+            case "$1" in
+              *[!0-9.:TZ+\ -]*|'') echo "::error::$2"; exit 1 ;;
+            esac
+          }
+
           rc=0
           if [ -n "$PROBE_ENUMERATE" ]; then
-            case "$PROBE_ENUMERATE" in
-              *[!0-9.:TZ+-\ ]*|'') echo "::error::enumerate_window must be 'START_ISO END_ISO STEP_HOURS'"; exit 1 ;;
-            esac
+            validate_window "$PROBE_ENUMERATE" "enumerate_window must be 'START_ISO END_ISO STEP_HOURS'"
             probe --enumerate $PROBE_ENUMERATE || rc=$?
           else
             case "$PROBE_DAYS_BACK" in
@@ -84,11 +91,13 @@ jobs:
             probe --days-back $PROBE_DAYS_BACK || rc=$?
             # A push carries no inputs, so also enumerate the recent window. That
             # is the live question — which documents a polling gap actually missed
-            # — and answering it costs only read-only queries.
+            # — and answering it costs only read-only queries. It goes through the
+            # same validate_window as the dispatch path so one code path is tested.
             if [ "$GITHUB_EVENT_NAME" = push ] && [ "$rc" -eq 0 ]; then
               echo "" | tee -a "$GITHUB_STEP_SUMMARY"
-              probe --enumerate "$(date -u -d '72 hours ago' +%Y-%m-%dT%H:%M:%SZ)" \
-                                "$(date -u +%Y-%m-%dT%H:%M:%SZ)" 1 || rc=$?
+              window="$(date -u -d '72 hours ago' +%Y-%m-%dT%H:%M:%SZ) $(date -u +%Y-%m-%dT%H:%M:%SZ) 1"
+              validate_window "$window" "generated window failed validation"
+              probe --enumerate $window || rc=$?
             fi
           fi
 

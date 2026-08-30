@@ -109,7 +109,7 @@ jobs:
           # indistinguishable from a stopped poller once the 90-day Actions run
           # retention expires — which is exactly what made #45 expensive.
           ledger="ledger/$(date -u +%Y-%m).tsv"
-          mkdir -p ledger
+          mkdir -p ledger collisions
           if [ ! -e "$ledger" ]; then
             printf 'poll_time_utc\tbackend\tlast_update_date\tdecision\n' > "$ledger"
           fi
@@ -119,17 +119,30 @@ jobs:
             stem=${base%.json}
             dest="snapshots/${stem:0:4}-${stem:4:2}/ibm_fez"
             mkdir -p "$dest"
-            if [ -e "$dest/$base" ]; then
-              decision=duplicate
-            else
+            if [ ! -e "$dest/$base" ]; then
               mv "$f" "$dest/"
               decision=new
               added=$((added + 1))
+            elif cmp -s "$f" "$dest/$base"; then
+              # Byte-identical: IBM has not republished. A true no-op.
+              decision=duplicate
+            else
+              # Same last_update_date, different bytes. A stamp collision does
+              # NOT prove the documents match: serialize_target reordering used
+              # to cause this, and with that fixed the remaining cases are real
+              # divergence -- which is what silently discarded five gate-level
+              # versions (#46 §3c). Keep the archived copy AND the new one.
+              sha=$(sha256sum "$f" | cut -c1-8)
+              coll="collisions/${stem:0:4}-${stem:4:2}/ibm_fez"
+              mkdir -p "$coll"
+              mv "$f" "$coll/$stem.$sha.json"
+              decision=collision
+              echo "::warning::$stem differs from the archived copy under the same stamp; preserved at $coll/$stem.$sha.json"
             fi
             printf '%s\t%s\t%s\t%s\n' "$poll_time" ibm_fez "$stem" "$decision" >> "$ledger"
           done
 
-          git add snapshots/ ledger/
+          git add snapshots/ ledger/ collisions/
           if git diff --cached --quiet; then
             echo '::warning::nothing staged - poller produced no payload'
           elif [ "$added" -gt 0 ]; then
