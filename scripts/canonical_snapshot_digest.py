@@ -20,10 +20,16 @@ which serialisation order was in force when each side was written. Everything
 else is already canonical — ``storage.py`` dumps with ``sort_keys=True``, and
 the nested lists inside ``properties`` arrive from IBM in a fixed order.
 
-Contract: reads only, prints only. ``--compare A B`` exits 0 when the two
-snapshots are the same document and 1 when they differ, so it can be used
-directly as a shell condition. With one or more paths and no ``--compare`` it
-prints ``<digest>  <path>`` per file.
+Contract: reads only, prints only. ``--compare A B`` exits **0** when the two
+snapshots are the same document, **1** when they differ, and **2** when either
+side could not be read or parsed — so it can be used directly as a shell
+condition, and "cannot tell" stays distinguishable from "they differ". That
+distinction is load-bearing: the poll workflow preserves the payload for both,
+but records `collision` for 1 and `collision-unreadable` for 2, so the ledger
+never claims a divergence it did not observe.
+
+With one or more paths and no ``--compare`` it prints ``<digest>  <path>`` per
+file and exits 0.
 """
 
 from __future__ import annotations
@@ -80,7 +86,8 @@ def main(argv: Iterable[str] | None = None) -> int:
     parser.add_argument(
         "--compare",
         action="store_true",
-        help="Treat the two paths as a pair: exit 0 if they are the same document, 1 if not.",
+        help="Treat the two paths as a pair: exit 0 if same document, 1 if different, "
+        "2 if either could not be read.",
     )
     parser.add_argument("paths", nargs="+", metavar="PATH")
     args = parser.parse_args(list(argv) if argv is not None else None)
@@ -90,7 +97,12 @@ def main(argv: Iterable[str] | None = None) -> int:
 
     try:
         digests = [canonical_digest(p) for p in args.paths]
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError) as exc:
+        # ValueError covers both json.JSONDecodeError and UnicodeDecodeError. The
+        # latter matters: without it a non-UTF-8 payload escapes as a traceback,
+        # the process exits 1, and the workflow reads that as "genuinely
+        # different" -- recording `collision` and warning that the payload
+        # differs from the archived copy when it was never compared at all.
         print(f"canonical-snapshot-digest: {exc}", file=sys.stderr)
         return 2
 

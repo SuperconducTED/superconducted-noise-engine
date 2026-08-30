@@ -100,6 +100,20 @@ class TestCli:
         a = _write(tmp_path, "a.json", _doc(OPS_A))
         assert main(["--compare", str(a), str(tmp_path / "missing.json")]) == 2
 
+    def test_non_utf8_file_exits_two_not_one(self, tmp_path: pathlib.Path) -> None:
+        """A byte sequence that is not UTF-8 must be "cannot tell", not "differs".
+
+        `UnicodeDecodeError` is raised by the *read*, before JSON parsing, so it
+        is neither `OSError` nor `JSONDecodeError`. Left uncaught it escaped as a
+        traceback and the process exited 1 — which the workflow reads as
+        genuinely different, recording `collision` and warning that the payload
+        differs from the archived copy when it was never compared.
+        """
+        a = _write(tmp_path, "a.json", _doc(OPS_A))
+        bad = tmp_path / "bad.json"
+        bad.write_bytes(b"\xff\xfe{")
+        assert main(["--compare", str(a), str(bad)]) == 2
+
     def test_invalid_json_exits_two(self, tmp_path: pathlib.Path) -> None:
         a = _write(tmp_path, "a.json", _doc(OPS_A))
         bad = tmp_path / "bad.json"
