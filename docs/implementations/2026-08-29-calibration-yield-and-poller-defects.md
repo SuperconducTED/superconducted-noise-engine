@@ -234,8 +234,12 @@ only rationale.
    not yet decided. The bias itself is measured and unchanged: 207 snapshots in
    00:00–07:00 UTC against 396 in 16:00–23:00 (1.9×; 4.1× at the extremes).
 4. **`init_error` is represented and counted, not dropped, restricted, or
-   imputed.** See the statistical section above; imputation and August-only were
-   eliminated on measurement, not preference.
+   imputed.** This is **ADR-017's Skip strategy applied to a new field**, not a new
+   policy: that ADR (Accepted) already weighed Skip against Impute and rejected Impute
+   for inventing data. What was genuinely open was whether `init_error` is different
+   enough to warrant an exception, given it is absent from 75% of the archive rather
+   than sporadically missing. The measurements below say no — imputation is not merely
+   inelegant here, it is unidentifiable — so ADR-017 stands and this field joins it.
 
 **The ledger commits on every poll, deliberately.** Because the ledger changes
 each run, polls observing nothing still produce a commit. The cost falls from
@@ -340,7 +344,13 @@ The recoverable loss is the scheduler outage from 2026-08-26 onward, where IBM
 ## Related docs
 
 - #45 — dataset yield analysis and the four decisions; #46 — `serialize_target` non-determinism
-- ADR-017 (`docs/decisions/drafts/`) — missing per-qubit field Skip strategy, the pattern `init_error` follows
-- ADR-020 (`docs/decisions/drafts/`) — calibration snapshot schema and storage
+- **ADR-017** (`docs/decisions.md`, Accepted) — the Skip strategy this work applies to
+  `init_error`. Its Decision already rejects Impute ("invents data and biases the aggregate
+  toward the population") and mandates `Optional[float]` plus `FieldMissingness` counters,
+  so the `init_error` treatment *follows* ADR-017 rather than deciding anything new; NC-026
+  confirms the ADR's reasoning holds for this field specifically.
+- **ADR-020** (`docs/decisions.md`, Accepted) — calibration snapshot schema and storage
+- **ADR-024** (`docs/decisions.md`, Accepted) — `ledger/` and `collisions/` on the data
+  branch; added by this work because ADR-020 fixes the layout and this extends it
 - ADR-014 (`docs/decisions.md`) — TSK trainer, gated on the floor this work re-specifies
 - `docs/numerical-claims.md` — NC-012 (the floor), NC-013 (superseded projection)

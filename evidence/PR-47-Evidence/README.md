@@ -24,14 +24,20 @@ served it and whether we hold it.
 Served side — the probe walks the window and records every distinct
 `last_update_date` the service returns:
 
+Run [33301248740](https://github.com/SuperconducTED/superconducted-noise-engine/actions/runs/33301248740)
+(73 queries, 1 h step) produced it. That run came from the **push trigger**, which
+enumerates the trailing 72 h automatically — `workflow_dispatch` only accepts workflows
+already on the default branch, so the dispatch form was not available before merge.
+
+Once merged, the equivalent explicit form is:
+
 ```bash
 gh workflow run calibration-historical-probe.yml \
   --repo SuperconducTED/superconducted-noise-engine \
   -f enumerate_window='2026-08-27T08:18:47Z 2026-08-30T08:18:47Z 1'
 ```
 
-Run [33301248740](https://github.com/SuperconducTED/superconducted-noise-engine/actions/runs/33301248740)
-(73 queries, 1 h step). Read-only; it writes nothing.
+Both paths run the same `validate_window` and the same script. Read-only; neither writes.
 
 Archive side — the filenames on the data branch, which are the payload's own
 `last_update_date`:
@@ -42,7 +48,7 @@ git ls-tree -r --name-only origin/calibration-data snapshots/2026-08/ibm_fez/ \
   | awk '$0 >= "20260827T081847000000Z" && $0 <= "20260830T081847000000Z"'
 ```
 
-## Caveat: 55 is a lower bound, not a census
+## Caveat: 57 is a lower bound, not a census
 
 Two documents we hold — `20260827T221234Z` and `20260828T182857Z` — were **not**
 returned by the sweep. A 1 h step cannot see a document that is superseded before

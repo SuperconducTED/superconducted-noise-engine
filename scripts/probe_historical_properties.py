@@ -48,46 +48,75 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import time
 from collections.abc import Iterable
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, Protocol
 
 # Reused rather than reimplemented so the probe coerces timestamps exactly the
 # way the poller does; a divergence here would make the comparison meaningless.
-from superconducted.calibration.poller import DEFAULT_CHANNEL, _coerce_utc, _parse_iso_utc
+from superconducted.calibration.poller import DEFAULT_CHANNEL, coerce_utc, parse_iso_utc
+
+
+class _PropertiesBackend(Protocol):
+    """The one backend method this probe uses, as a structural type.
+
+    Typed here rather than as ``object`` so the module can be checked under
+    ``mypy --strict`` without a blanket ``type: ignore`` on every call.
+    """
+
+    def properties(self, *, datetime: datetime | None = None) -> Any: ...
+
+
+# Matches the poller's default retry budget (SUPERCONDUCTED_HTTP_RETRIES).
+_RETRIES = 3
 
 
 def _last_update_date(properties: Any) -> datetime | None:
     """Extract ``last_update_date`` as tz-aware UTC, attribute first then dict."""
-    stamp = _coerce_utc(getattr(properties, "last_update_date", None))
+    stamp = coerce_utc(getattr(properties, "last_update_date", None))
     if stamp is not None:
         return stamp
     to_dict = getattr(properties, "to_dict", None)
     if callable(to_dict):
-        return _coerce_utc(to_dict().get("last_update_date"))
+        return coerce_utc(to_dict().get("last_update_date"))
     return None
 
 
-def _probe_one(backend: object, t_now: datetime, days: float) -> tuple[str, datetime | None]:
-    """Query one depth. Returns (verdict, returned stamp or None)."""
+def _probe_one(
+    backend: _PropertiesBackend, t_now: datetime, days: float
+) -> tuple[str, datetime, datetime | None]:
+    """Query one depth. Returns (verdict, instant requested, stamp returned).
+
+    The verdict must be judged against the *request*, not against "is it older
+    than now". A service that silently clamps to a retention floor — serving a
+    30-day-old document for a 60-day request — returns something older than now
+    and would otherwise score OK, which is exactly the claim a retention-depth
+    measurement is supposed to establish. ``CLAMPED`` separates "served the
+    window" from "served something, but not the window asked for".
+    """
     requested = t_now - timedelta(days=days)
     try:
-        historical = backend.properties(datetime=requested)  # type: ignore[attr-defined]
+        historical = backend.properties(datetime=requested)
     except NotImplementedError as exc:
-        return f"DENIED — NotImplementedError: {exc}", None
+        return f"DENIED — NotImplementedError: {exc}", requested, None
     except Exception as exc:  # any failure is itself a probe result
-        return f"ERROR — {type(exc).__name__}: {exc}", None
+        return f"ERROR — {type(exc).__name__}: {exc}", requested, None
     if historical is None:
-        return "UNAVAILABLE — returned None", None
+        return "UNAVAILABLE — returned None", requested, None
     stamp = _last_update_date(historical)
     if stamp is None:
-        return "MALFORMED — no last_update_date", None
+        return "MALFORMED — no last_update_date", requested, None
     if stamp >= t_now:
-        return "IGNORED — returned the current document", stamp
-    return "OK", stamp
+        return "IGNORED — returned the current document", requested, stamp
+    if stamp > requested:
+        return "CLAMPED — newer than the request; depth not served", requested, stamp
+    return "OK", requested, stamp
 
 
-def _enumerate_window(backend: object, start_iso: str, end_iso: str, step_hours_s: str) -> int:
+def _enumerate_window(
+    backend: _PropertiesBackend, start_iso: str, end_iso: str, step_hours_s: str
+) -> int:
     """Walk a window and report every distinct document the service will serve.
 
     Because ``properties(datetime=T)`` returns the newest document *older than*
@@ -97,8 +126,8 @@ def _enumerate_window(backend: object, start_iso: str, end_iso: str, step_hours_
     retains, and differencing them against the archived filenames says exactly
     what a polling gap cost — no estimation from a median.
     """
-    start = _parse_iso_utc(start_iso)
-    end = _parse_iso_utc(end_iso)
+    start = parse_iso_utc(start_iso)
+    end = parse_iso_utc(end_iso)
     step = timedelta(hours=float(step_hours_s))
     if step <= timedelta(0):
         print("PROBE FAILED: step must be positive")
@@ -109,14 +138,24 @@ def _enumerate_window(backend: object, start_iso: str, end_iso: str, step_hours_
 
     seen: dict[datetime, int] = {}
     queries = 0
+    failed_at: str | None = None
     t = start
     while t <= end:
         queries += 1
-        try:
-            doc = backend.properties(datetime=t)  # type: ignore[attr-defined]
-        except Exception as exc:  # any failure is itself a probe result
-            print(f"PROBE FAILED at {t.isoformat()}: {type(exc).__name__}: {exc}")
-            return 1
+        doc: Any = None
+        # A 30-day sweep is ~720 calls; losing all of them to one transient is
+        # not acceptable, so retry with the same backoff shape the poller uses.
+        for attempt in range(_RETRIES + 1):
+            try:
+                doc = backend.properties(datetime=t)
+                break
+            except Exception as exc:  # any failure is itself a probe result
+                if attempt == _RETRIES:
+                    failed_at = f"{t.isoformat()}: {type(exc).__name__}: {exc}"
+                    break
+                time.sleep(2.0**attempt)
+        if failed_at is not None:
+            break
         stamp = _last_update_date(doc) if doc is not None else None
         if stamp is not None:
             seen[stamp] = seen.get(stamp, 0) + 1
@@ -134,10 +173,21 @@ def _enumerate_window(backend: object, start_iso: str, end_iso: str, step_hours_
         "any listed here and absent there is a document the poller missed and can "
         "still recover."
     )
+    if failed_at is not None:
+        # The stamps above are still valid evidence — they are printed before
+        # this return precisely so a partial sweep is not wasted.
+        print(f"\nPROBE FAILED at {failed_at}")
+        print(f"Sweep stopped early at {t.isoformat()}; the window above is INCOMPLETE.")
+        return 1
     return 0
 
 
 def main(argv: Iterable[str] | None = None) -> int:
+    """Parse arguments, build the service, and run the requested probe mode.
+
+    Returns 0 when historical access is demonstrated, 2 when it is definitively
+    unavailable, and 1 when the probe itself failed and the question is still open.
+    """
     parser = argparse.ArgumentParser(
         prog="probe-historical-properties",
         description="Determine whether historical calibration properties are readable.",
@@ -197,12 +247,10 @@ def main(argv: Iterable[str] | None = None) -> int:
 
     any_ok = False
     for days in sorted(args.days_back):
-        requested = t_now - timedelta(days=days)
-        verdict, stamp = _probe_one(backend, t_now, days)
-        if verdict == "OK":
+        verdict, requested, stamp = _probe_one(backend, t_now, days)
+        if verdict == "OK" and stamp is not None:
             any_ok = True
-            lag = requested - stamp if stamp else None
-            verdict = f"OK (document is {lag} older than the request)"
+            verdict = f"OK (document is {requested - stamp} older than the request)"
         print(
             f"{days:>7.1f}d  {requested.isoformat():<25}  "
             f"{(stamp.isoformat() if stamp else '-'):<25}  {verdict}"

@@ -85,7 +85,11 @@ _UNIT_SCALE: Final[Mapping[str, float]] = {
 }
 
 
-@dataclass(frozen=True)
+# kw_only: `init_error` was inserted mid-struct (it belongs with the SPAM
+# probabilities, not appended after a duration), which would silently reorder
+# any positional construction. Every in-repo call site is already keyword-based;
+# this makes that a guarantee rather than a convention.
+@dataclass(frozen=True, kw_only=True)
 class ParsedQubitCalibration:
     """Typed view of one qubit's calibration entries.
 
