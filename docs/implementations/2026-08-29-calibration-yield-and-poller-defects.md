@@ -33,14 +33,15 @@ it happens.
 | `.github/workflows/calibration-poll.yml` | Files by payload month, never overwrites an archived path, compares canonically to split `duplicate` from `collision`, appends a poll ledger, and accepts backfill inputs. |
 | `.github/workflows/calibration-historical-probe.yml` | New: read-only diagnostic for retention depth and window enumeration. |
 | `.github/workflows/ci.yml` | `mypy --strict` runs with no path argument so `[tool.mypy] files` is the single source of truth. |
-| `pyproject.toml` | Adds `scripts/probe_historical_properties.py` to mypy's checked set. |
+| `pyproject.toml` | Puts the whole `scripts` directory in mypy's checked set, so a new script cannot escape it. |
 | `docs/decisions.md` | Adds ADR-024 (Accepted): `ledger/` and `collisions/` on the data branch, extending ADR-020. |
 | `docs/numerical-claims.md` | NC-012 gains its unit; NC-013 retired as NC-R002; NC-021 updated; NC-023..NC-028 added. |
 | `docs/implementations/2026-08-29-calibration-yield-and-poller-defects.md` | This document. |
 | `evidence/PR-47-Evidence/` | Row-level enumeration data and its provenance, committed because Actions logs expire at ~90 days. |
 | `tests/test_calibration.py` | `serialize_target` order-independence regression; two tests for the historical-response guard; one existing fixture corrected (see Design decisions). |
 | `tests/test_probe_historical_properties.py` | New: the probe's verdict table, sweep stepping and dedup, retry behaviour, and `main`'s exit codes. |
-| `tests/test_canonical_snapshot_digest.py` | New: reordering must not change the digest, a changed calibration value must. |
+| `tests/test_canonical_snapshot_digest.py` | New: reordering must not change the digest, a changed calibration value must, and an unreadable payload must be distinguishable from a differing one. |
+| `scripts/__init__.py` | New: package marker so `scripts` resolves unambiguously and `[tool.mypy] files` can name the directory rather than each file — not shipped in the wheel. |
 | `tests/calibration/test_loader.py` | Asserts the pre-cutover fixture reports all 156 qubits' `init_error` as absent rather than filled. |
 | `tests/calibration/test_features_missing_fields.py` | Construction sites updated for the new required field. |
 

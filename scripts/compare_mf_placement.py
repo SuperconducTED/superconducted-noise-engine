@@ -53,7 +53,6 @@ from scripts.first_ensemble_run import (
     _default_mfs_for_feature,
     mf_centers,
 )
-
 from superconducted.fuzzy.tsk import TSKRuleBase
 
 # Dense enough that the reported minima are stable to ~1e-6, small enough
