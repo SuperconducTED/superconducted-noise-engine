@@ -967,17 +967,28 @@ ADR-020 specifies; consumers that read only `snapshots/` are unaffected.
   only alongside a new snapshot, at the price of reintroducing the
   unattributable gap.
 - The ledger outlives Actions run retention, which is the point.
-- `collisions/` is expected to stay empty now that `serialize_target`
-  is byte-stable (#46). A non-empty tree is a signal worth
-  investigating, not routine churn, and the workflow emits a
-  `::warning::` for each one.
+- `collisions/` is expected to stay empty, and a non-empty tree is a
+  signal worth investigating rather than routine churn. That property
+  depends on the comparison being **canonical, not bytewise**. Byte
+  stability from #46 is not sufficient on its own: the archive predates
+  that fix, so every file written before it holds `target.operations`
+  unsorted, and `cmp` would classify the first re-observation of any
+  archived stamp as a collision — putting routine churn on precisely the
+  channel this tree reserves for real divergence. The workflow therefore
+  compares through `scripts/canonical_snapshot_digest.py`, which sorts
+  `operations` on both sides before hashing. Verified against a real
+  pre-fix snapshot: bytewise differs, canonically identical.
+- A payload that cannot be parsed for comparison is recorded as
+  `collision-unreadable` and preserved rather than discarded. Refusing to
+  decide is safer than guessing `duplicate`, which would drop data.
 - Partitioning both trees by month keeps each file small enough that
   the per-poll append does not accumulate into a large blob rewrite.
 
 **Source**: #45 (§5 unattributable gaps, and the 2026-08-30 enumeration
 showing `updated_before` does not select purely on `last_update_date`),
 #46 §3c (five gate-level versions lost under one stamp), ADR-020 (the
-layout this extends), `.github/workflows/calibration-poll.yml`.
+layout this extends), `.github/workflows/calibration-poll.yml`,
+`scripts/canonical_snapshot_digest.py`.
 
 > Extends ADR-020. `snapshots/` is unchanged; this entry adds
 > `ledger/` and `collisions/` alongside it.

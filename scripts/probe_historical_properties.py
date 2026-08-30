@@ -68,8 +68,9 @@ class _PropertiesBackend(Protocol):
     def properties(self, *, datetime: datetime | None = None) -> Any: ...
 
 
-# Matches the poller's default retry budget (SUPERCONDUCTED_HTTP_RETRIES).
-_RETRIES = 3
+# Reads the same knob as the poller, so raising it when transients persist
+# actually affects the sweep -- the one path (~720 calls) that needs it most.
+_RETRIES = int(os.environ.get("SUPERCONDUCTED_HTTP_RETRIES", "3"))
 
 
 def _last_update_date(properties: Any) -> datetime | None:

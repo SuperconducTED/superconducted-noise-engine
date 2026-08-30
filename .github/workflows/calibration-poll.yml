@@ -123,21 +123,35 @@ jobs:
               mv "$f" "$dest/"
               decision=new
               added=$((added + 1))
-            elif cmp -s "$f" "$dest/$base"; then
-              # Byte-identical: IBM has not republished. A true no-op.
-              decision=duplicate
             else
-              # Same last_update_date, different bytes. A stamp collision does
-              # NOT prove the documents match: serialize_target reordering used
-              # to cause this, and with that fixed the remaining cases are real
-              # divergence -- which is what silently discarded five gate-level
-              # versions (#46 §3c). Keep the archived copy AND the new one.
-              sha=$(sha256sum "$f" | cut -c1-8)
-              coll="collisions/${stem:0:4}-${stem:4:2}/ibm_fez"
-              mkdir -p "$coll"
-              mv "$f" "$coll/$stem.$sha.json"
-              decision=collision
-              echo "::warning::$stem differs from the archived copy under the same stamp; preserved at $coll/$stem.$sha.json"
+              # A stamp collision does NOT prove the documents match -- #46 §3c
+              # lost five gate-level versions under one stamp. But the
+              # comparison must be CANONICAL, not bytewise: the archive predates
+              # the serialize_target sort, so every pre-fix file holds
+              # target.operations unsorted and `cmp` would call every duplicate
+              # a collision. See scripts/canonical_snapshot_digest.py.
+              set +e
+              python scripts/canonical_snapshot_digest.py --compare "$f" "$dest/$base"
+              same=$?
+              set -e
+              if [ "$same" -eq 0 ]; then
+                # Same document. IBM has not republished; a true no-op.
+                decision=duplicate
+              else
+                # Genuinely different (1), or undecidable (2). Both preserve:
+                # keep the archived copy AND the new payload beside it.
+                sha=$(sha256sum "$f" | cut -c1-16)
+                coll="collisions/${stem:0:4}-${stem:4:2}/ibm_fez"
+                mkdir -p "$coll"
+                mv "$f" "$coll/$stem.$sha.json"
+                if [ "$same" -eq 2 ]; then
+                  decision=collision-unreadable
+                  echo "::warning::$stem could not be compared with the archived copy; preserved at $coll/$stem.$sha.json"
+                else
+                  decision=collision
+                  echo "::warning::$stem differs from the archived copy under the same stamp; preserved at $coll/$stem.$sha.json"
+                fi
+              fi
             fi
             printf '%s\t%s\t%s\t%s\n' "$poll_time" ibm_fez "$stem" "$decision" >> "$ledger"
           done

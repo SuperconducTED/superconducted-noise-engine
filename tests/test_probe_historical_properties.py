@@ -13,24 +13,11 @@ credential.
 
 from __future__ import annotations
 
-import importlib.util
-import pathlib
-import sys
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import pytest
-
-# The probe lives in scripts/, which is not a package.
-_SPEC = importlib.util.spec_from_file_location(
-    "probe_historical_properties",
-    pathlib.Path(__file__).resolve().parents[1] / "scripts" / "probe_historical_properties.py",
-)
-assert _SPEC is not None and _SPEC.loader is not None
-probe = importlib.util.module_from_spec(_SPEC)
-sys.modules["probe_historical_properties"] = probe
-_SPEC.loader.exec_module(probe)
-
+from scripts import probe_historical_properties as probe
 
 NOW = datetime(2026, 8, 29, 14, 6, 21, tzinfo=UTC)
 
@@ -212,3 +199,85 @@ class TestEnumerateWindow:
         )
         assert rc == 0
         assert calls["n"] > 1  # it retried rather than aborting
+
+
+class _StubService:
+    """Stands in for QiskitRuntimeService; hands back one prepared backend."""
+
+    def __init__(self, backend: _StubBackend) -> None:
+        self._backend = backend
+
+    def backend(self, name: str) -> _StubBackend:
+        return self._backend
+
+
+class TestMainExitCodes:
+    """`main`'s exit code is what calibration-historical-probe.yml gates on.
+
+    The workflow treats 0 and 2 as successful probes and only 1 as "the probe
+    broke", so an all-CLAMPED table must come back 2 rather than 0 — otherwise
+    a service that quietly stopped serving the requested depth would still
+    report HISTORICAL ACCESS WORKS.
+    """
+
+    @pytest.fixture
+    def install_backend(self, monkeypatch: pytest.MonkeyPatch) -> Any:
+        def _install(policy: Any) -> None:
+            import qiskit_ibm_runtime
+
+            backend = _StubBackend(policy)
+            monkeypatch.setattr(
+                qiskit_ibm_runtime,
+                "QiskitRuntimeService",
+                lambda **kwargs: _StubService(backend),
+            )
+
+        return _install
+
+    @staticmethod
+    def _policy(historical: Any) -> Any:
+        """Serve NOW for the current call, `historical` for a dated one."""
+
+        def policy(at: datetime | None) -> Any:
+            if at is None:
+                return _Props(NOW)
+            return historical(at) if callable(historical) else historical
+
+        return policy
+
+    def test_served_depth_exits_zero(self, install_backend: Any) -> None:
+        install_backend(self._policy(_Props(NOW - timedelta(days=90))))
+        assert probe.main(["--days-back", "60"]) == 0
+
+    def test_all_clamped_exits_two(self, install_backend: Any) -> None:
+        # 30-day-old document answering a 60-day request: older than now, but
+        # newer than the request, so the depth was not served.
+        install_backend(self._policy(_Props(NOW - timedelta(days=30))))
+        assert probe.main(["--days-back", "60"]) == 2
+
+    def test_ignored_exits_two(self, install_backend: Any) -> None:
+        install_backend(self._policy(_Props(NOW)))
+        assert probe.main(["--days-back", "7"]) == 2
+
+    def test_denied_exits_two(self, install_backend: Any) -> None:
+        def deny(_: datetime | None) -> Any:
+            raise NotImplementedError("cloud runtime")
+
+        install_backend(self._policy(deny))
+        assert probe.main(["--days-back", "7"]) == 2
+
+    def test_mixed_table_exits_zero_if_any_depth_is_served(self, install_backend: Any) -> None:
+        """One genuinely served depth is enough to prove access exists."""
+
+        def historical(at: datetime | None) -> Any:
+            assert at is not None
+            # Serves 7 d honestly; clamps anything deeper.
+            return _Props(min(at - timedelta(minutes=5), NOW - timedelta(days=30)))
+
+        install_backend(self._policy(historical))
+        assert probe.main(["--days-back", "7", "60"]) == 0
+
+    def test_no_current_properties_exits_one(self, install_backend: Any) -> None:
+        """A broken probe must not be reported as a definitive answer."""
+        install_backend(lambda _: None)
+        assert probe.main(["--days-back", "7"]) == 1
