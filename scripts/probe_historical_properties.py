@@ -65,7 +65,8 @@ class _PropertiesBackend(Protocol):
     ``mypy --strict`` without a blanket ``type: ignore`` on every call.
     """
 
-    def properties(self, *, datetime: datetime | None = None) -> Any: ...
+    def properties(self, *, datetime: datetime | None = None) -> Any:
+        """Backend properties; with ``datetime``, the newest document older than it."""
 
 
 # Reads the same knob as the poller, so raising it when transients persist
