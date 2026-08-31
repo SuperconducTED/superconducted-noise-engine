@@ -916,7 +916,130 @@ ADR-012 (`ProbabilityClip`'s zero-gradient note),
 
 ---
 
-## ADR-024 — `calibration-data` branch: ledger and collision trees
+## ADR-024 — Degeneracy of random TSK consequent initialization
+
+**Status**: Open.
+
+**Context**: `TSKRuleBase.from_grid(consequent_init="random")` draws every
+consequent entry from a zero-mean Gaussian (`standard_normal * 0.1`), so the
+sign of each defuzzified output is a property of the draw. Under the
+bootstrap pipeline — `WeightedAverageDefuzzifier`, `ProbabilityClip`,
+`KrausChannelProjector` — a draw whose first two crisp parameters are both
+non-positive is clipped to exactly `[0, 0]`, and amplitude damping at
+`gamma = 0` composed with phase damping at `lambda = 0` is the identity
+channel. The ensemble then measures nothing while reporting success.
+
+Issue #35 raised this after Issue #31 (PR #34): the smoke script's
+hard-coded `default_rng(0)` was viable on the old 8-rule grid and degenerate
+on the ratified 27-rule grid (ADR-010). It reported the failure rate as
+"one draw in four to one in eight" and attributed the spread to the RNG
+seed, the rule count, and the input vector.
+
+**That attribution is wrong, and the correction is what this ADR turns on.**
+The rate is exactly 1/4 and is invariant to all three. Rows 0 and 1 of each
+rule's consequent matrix are disjoint entries of the same i.i.d. zero-mean
+draw. Weighted-average defuzzification applies one fixed non-negative
+weighting `w_r` — determined by the antecedent MFs and the input, never by
+the consequents — to both rows alike. So the two crisp outputs are i.i.d.
+zero-mean Gaussians, and
+
+    P(identity channel) = P(out_0 <= 0) * P(out_1 <= 0) = 1/2 * 1/2 = 1/4.
+
+Rule count, MF placement, and input vector all move the *variance* of those
+outputs; none of them can move the sign, so none can move the rate. The
+reported 2/8-vs-1/8 spread was an eight-sample artifact. Measured over 2000
+seeds, `endpoint` and `interior` placement both give 0.2420 (NC-023), and
+grids of 8, 27, and 64 rules under two different input vectors all land in
+[0.236, 0.261].
+
+This is not an edge case that a better default seed would avoid. It is the
+stationary behavior of a zero-mean initializer feeding a one-sided
+constraint.
+
+**Decision (proposed)**:
+
+1. **`consequent_init="random"` stays zero-mean and guarantees nothing about
+   viability.** It is not amended to be positive-biased or magnitude-only.
+   `from_grid` receives `per_input_mfs` and `output_dim` and nothing else; it
+   holds no reference to the defuzzifier, the squashing strategy, or the
+   channel projector — the three components that jointly *define* degeneracy.
+   A positive bias there would hard-code `KrausChannelProjector`'s reading of
+   `crisp[:2]` as `(gamma, lambda)` into a general TSK primitive, and would
+   be wrong for any other projector. It would also be actively misleading
+   under `SigmoidSquashing`, where no output is ever exactly zero — no draw
+   would look degenerate, yet a zero-mean draw yields `gamma ≈ lambda ≈ 0.5`,
+   a catastrophically strong channel. This answers Issue #35 question 1: no,
+   and for a layering reason rather than a procedural one. `fuzzy/tsk.py`
+   stays LOCKED and untouched.
+
+2. **Degeneracy is a pipeline property and is defined at the pipeline layer.**
+   `superconducted.integration.aer_factory.is_identity_damping` is the
+   canonical predicate, with `FuzzyNoiseModel.is_degenerate` as the
+   per-model form. It is written against the published parameter contract of
+   `KrausChannelProjector` and documents the squashing strategies it is valid
+   for. It lives in `integration/` rather than beside the projector only
+   because `channels/` is a LOCKED zone; it moves next to the projector if
+   the `ChannelProjector` ABC ever grows a viability method.
+
+3. **Callers of `consequent_init="random"` must check viability before use,
+   and get a shared mechanism for it.**
+   `aer_factory.first_viable_seed(build, seed_limit=64)` walks seeds
+   `0, 1, 2, ...` and returns the first non-degenerate ensemble together with
+   its seed. This is rejection sampling against a known 1/4 rejection rate,
+   not error recovery, and naming it that way is the point: a hard-coded seed
+   is a 3-in-4 bet, not a robust default. The search is deterministic, so the
+   selected seed reproduces on any machine. This answers Issue #35 question 2:
+   documented caller responsibility, yes — but the contract and the mechanism
+   both live in the library, not re-implemented per call site.
+
+4. **The "first two crisp parameters non-positive" test is exact here, and is
+   scoped rather than generalized.** Under `ProbabilityClip` every
+   non-positive raw output becomes exactly `0.0`, so "no positive entry among
+   the first two" and "both entries exactly zero" cannot come apart; a test
+   asserts the equivalence across 60 draws of the shipped grid, and a second
+   test confirms via `SuperOp` comparison that `[0, 0]` projects to the
+   identity channel exactly. It is *not* a universal definition — it is a
+   property of the (squashing, projector) pair, which is why it is documented
+   with its scope instead of promoted to the `RuleBase` layer. This answers
+   Issue #35 question 3: right test, wrong home; it was the smoke script's
+   private heuristic and is now a scoped library contract.
+
+5. **The ADR-014 trainer must not warm-start from an unchecked draw.** One
+   warm start in four begins at the identity channel, and with
+   `ProbabilityClip` that point has zero gradient in both output components
+   (ADR-012 names the same pathology). Such a run does not slowly climb out;
+   it cannot move at all through the clipped path. The trainer must either
+   call `first_viable_seed` when initializing or adopt a squashing strategy
+   with everywhere-nonzero gradient — `SigmoidSquashing` per ADR-012 — in
+   which case it needs its own viability definition, because the predicate
+   above does not describe that pipeline.
+
+**Consequences**: `scripts/first_ensemble_run.py` keeps its behavior and its
+selected seed (`endpoint` → 1) but drops its private `_is_degenerate` in
+favor of the shared predicate, so the definition has one home. Any future
+caller of `consequent_init="random"` — the ADR-014 trainer above all — has a
+supported way to avoid the 1/4 trap instead of rediscovering it. The
+`from_grid` contract is recorded here rather than in the LOCKED docstring;
+if the leads prefer it in the docstring too, that is a two-owner sign-off on
+`fuzzy/tsk.py` and does not change this decision.
+
+A pipeline that swaps `ProbabilityClip` for `SigmoidSquashing` invalidates
+clause 4's predicate and needs a new one. That is the expected trigger for
+revisiting this entry, alongside ADR-008 landing a multi-qubit projector with
+a different parameter reading.
+
+**Source**: Issue #35, Issue #31, PR #34,
+`docs/implementations/2026-08-28-issue-35-consequent-degeneracy.md`,
+`tests/test_channel_viability.py`, NC-023 and NC-024 in
+`docs/numerical-claims.md`.
+
+> Depends on ADR-010 (the 27-rule grid whose growth surfaced this), ADR-012
+> (`ProbabilityClip`'s zero-gradient note), and ADR-014 (the trainer clause 5
+> constrains). Does not modify ADR-014's deferral.
+
+---
+
+## ADR-025 — `calibration-data` branch: ledger and collision trees
 
 **Status**: Accepted.
 

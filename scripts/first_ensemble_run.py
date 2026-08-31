@@ -27,8 +27,10 @@ from superconducted.fuzzy.membership import GaussianMF
 from superconducted.fuzzy.squashing import ProbabilityClip
 from superconducted.fuzzy.tsk import TSKRuleBase
 from superconducted.integration.aer_factory import (
+    DEFAULT_SEED_SEARCH_LIMIT,
     FuzzyNoiseModel,
     FuzzyNoiseModelEnsemble,
+    first_viable_seed,
 )
 from superconducted.types import CalibrationSnapshot
 
@@ -54,10 +56,10 @@ MF_PLACEMENT_ENDPOINT: Final[str] = "endpoint"
 MF_PLACEMENT_INTERIOR: Final[str] = "interior"
 MF_PLACEMENTS: Final[tuple[str, ...]] = (MF_PLACEMENT_ENDPOINT, MF_PLACEMENT_INTERIOR)
 
-# Upper bound on the deterministic consequent-seed search. Empirically the
-# first or second seed is viable; 64 is a generous ceiling that still fails
-# fast if the degeneracy is structural rather than a bad draw.
-CONSEQUENT_SEED_SEARCH_LIMIT: Final[int] = 64
+# Upper bound on the deterministic consequent-seed search. Kept as an alias
+# of the library default so the script and `first_viable_seed` cannot drift;
+# ADR-024 explains why 64 is generous rather than arbitrary.
+CONSEQUENT_SEED_SEARCH_LIMIT: Final[int] = DEFAULT_SEED_SEARCH_LIMIT
 
 # Provisional. Issue #31 chose Option A (the endpoint layout) as the fix;
 # the comparison script reports which layout wins on which metric, and
@@ -190,15 +192,6 @@ def _ensemble_for_seed(
     return list(ensemble_iter)
 
 
-def _is_degenerate(members: list[FuzzyNoiseModel]) -> bool:
-    """True if any member collapses to an identity (no-op) channel."""
-    for member in members:
-        crisp = member.crisp_params
-        if crisp.size < 2 or not np.any(crisp[:2] > 0):
-            return True
-    return False
-
-
 def generate_safe_ensemble_with_seed(
     snapshot: CalibrationSnapshot,
     n: int,
@@ -211,31 +204,28 @@ def generate_safe_ensemble_with_seed(
     so the sign of the defuzzified output is a property of the draw, not of
     the design. A draw whose first two crisp parameters are all non-positive
     yields an identity channel, which makes the smoke run measure nothing.
+    That happens with probability exactly 1/4 — see ADR-024, which also
+    explains why `from_grid` cannot rule it out on the caller's behalf.
 
     Rather than hard-coding a seed that happens to work — which is what the
     script did until Issue #31, and which silently broke the moment the grid
-    grew from 8 rules to the ratified 27 — this walks seeds `0, 1, 2, ...`
-    in order and returns the first non-degenerate ensemble. The search is
-    deterministic, so the chosen seed is reproducible on any machine, and it
-    self-heals when the grid or the feature set changes again.
+    grew from 8 rules to the ratified 27 — this delegates to
+    `first_viable_seed`, walking seeds `0, 1, 2, ...` and returning the first
+    non-degenerate ensemble. The search is deterministic, so the chosen seed
+    is reproducible on any machine.
 
     Raises `ValueError` if no seed below `seed_limit` yields a viable
     ensemble, which would mean the degeneracy is structural rather than a
-    bad draw.
+    bad draw. The grid this script builds is passed as `context` so it
+    appears in that message; the library search cannot know it.
     """
-    if seed_limit <= 0:
-        raise ValueError(f"seed_limit must be positive; got {seed_limit}")
-
-    for seed in range(seed_limit):
-        members = _ensemble_for_seed(snapshot, n, placement, seed)
-        if not _is_degenerate(members):
-            return members, seed
-
-    raise ValueError(
-        f"No consequent seed below {seed_limit} produced a non-degenerate channel "
-        f"for placement {placement!r} with {MFS_PER_FEATURE} MFs per feature. "
-        "That points at a structural problem (zero consequents per ADR-014, or a "
-        "feature vector that fires no rule), not an unlucky draw."
+    return first_viable_seed(
+        lambda seed: _ensemble_for_seed(snapshot, n, placement, seed),
+        seed_limit=seed_limit,
+        context=(
+            f"Placement was {placement!r} with {MFS_PER_FEATURE} MFs per feature "
+            f"({MFS_PER_FEATURE**3} rules)."
+        ),
     )
 
 

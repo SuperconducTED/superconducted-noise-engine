@@ -11,7 +11,7 @@ A byte comparison between a freshly-serialised payload and its archived
 counterpart therefore differs even when the calibration data is identical. In
 the poll workflow that would report a *collision* on the first re-observed
 stamp after the fix merges, and keep doing it on every duplicate poll — putting
-routine churn on exactly the channel ADR-024 reserves for real divergence, and
+routine churn on exactly the channel ADR-025 reserves for real divergence, and
 writing a ``collisions/`` file plus a ``::warning::`` each time.
 
 Sorting ``operations`` on both sides before hashing makes the comparison mean

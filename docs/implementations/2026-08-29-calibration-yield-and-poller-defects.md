@@ -34,8 +34,8 @@ it happens.
 | `.github/workflows/calibration-historical-probe.yml` | New: read-only diagnostic for retention depth and window enumeration. |
 | `.github/workflows/ci.yml` | `mypy --strict` runs with no path argument so `[tool.mypy] files` is the single source of truth. |
 | `pyproject.toml` | Puts the whole `scripts` directory in mypy's checked set, so a new script cannot escape it. |
-| `docs/decisions.md` | Adds ADR-024 (Accepted): `ledger/` and `collisions/` on the data branch, extending ADR-020. |
-| `docs/numerical-claims.md` | NC-012 gains its unit; NC-013 retired as NC-R002; NC-021 updated; NC-023..NC-028 added. |
+| `docs/decisions.md` | Adds ADR-025 (Accepted): `ledger/` and `collisions/` on the data branch, extending ADR-020. |
+| `docs/numerical-claims.md` | NC-012 gains its unit; NC-013 retired as NC-R002; NC-021 updated; NC-025..NC-030 added. |
 | `docs/implementations/2026-08-29-calibration-yield-and-poller-defects.md` | This document. |
 | `evidence/PR-47-Evidence/` | Row-level enumeration data and its provenance, committed because Actions logs expire at ~90 days. |
 | `tests/test_calibration.py` | `serialize_target` order-independence regression; two tests for the historical-response guard; one existing fixture corrected (see Design decisions). |
@@ -361,10 +361,10 @@ The recoverable loss is the scheduler outage from 2026-08-26 onward, where IBM
 - **ADR-017** (`docs/decisions.md`, Accepted) — the Skip strategy this work applies to
   `init_error`. Its Decision already rejects Impute ("invents data and biases the aggregate
   toward the population") and mandates `Optional[float]` plus `FieldMissingness` counters,
-  so the `init_error` treatment *follows* ADR-017 rather than deciding anything new; NC-026
+  so the `init_error` treatment *follows* ADR-017 rather than deciding anything new; NC-028
   confirms the ADR's reasoning holds for this field specifically.
 - **ADR-020** (`docs/decisions.md`, Accepted) — calibration snapshot schema and storage
-- **ADR-024** (`docs/decisions.md`, Accepted) — `ledger/` and `collisions/` on the data
+- **ADR-025** (`docs/decisions.md`, Accepted) — `ledger/` and `collisions/` on the data
   branch; added by this work because ADR-020 fixes the layout and this extends it
 - ADR-014 (`docs/decisions.md`) — TSK trainer, gated on the floor this work re-specifies
 - `docs/numerical-claims.md` — NC-012 (the floor), NC-013 (superseded projection)

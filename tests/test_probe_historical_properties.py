@@ -4,7 +4,7 @@ The probe exists because a denied historical read is not an exception on the
 current SDK — it is a *current* document handed back in answer to a historical
 request. Its whole value is telling "honoured" apart from "ignored", so the
 verdict table is the thing worth pinning: if `_probe_one` says OK when the
-service ignored or clamped the request, NC-024's retention-depth claim is
+service ignored or clamped the request, NC-026's retention-depth claim is
 unfounded and a backfill built on it silently recovers nothing.
 
 Everything here runs against a stub backend, so there is no network and no

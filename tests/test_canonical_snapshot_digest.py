@@ -4,7 +4,7 @@ This is the comparison the poll workflow uses to decide `duplicate` vs
 `collision`. The property that matters is asymmetric: reordering
 `target.operations` must NOT change the digest (or every duplicate poll against
 the pre-fix archive is misfiled as a collision, putting routine churn on the
-channel ADR-024 reserves for real divergence), while any change to actual
+channel ADR-025 reserves for real divergence), while any change to actual
 calibration values MUST change it (or real divergence is silently dropped).
 """
 
