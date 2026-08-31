@@ -1,6 +1,6 @@
 """Abstract base classes for SuperconducTED's swappable design axes.
 
-Each ABC corresponds to one open decision recorded in CLAUDE.md and
+Each ABC corresponds to one open decision recorded in
 ``docs/decisions.md``. The TSK inference math (in
 :mod:`superconducted.fuzzy.tsk`) is concrete and locked; the Aer
 Factory/Ensemble integration pattern is also concrete and locked (in
