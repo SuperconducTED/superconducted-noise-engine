@@ -37,7 +37,7 @@ it happens.
 | `docs/decisions.md` | Adds ADR-025 (Accepted): `ledger/` and `collisions/` on the data branch, extending ADR-020. |
 | `docs/numerical-claims.md` | NC-012 gains its unit; NC-013 retired as NC-R002; NC-021 updated; NC-025..NC-030 added. |
 | `docs/implementations/2026-08-29-calibration-yield-and-poller-defects.md` | This document. |
-| `evidence/PR-47-Evidence/` | Row-level enumeration data and its provenance, committed because Actions logs expire at ~90 days. |
+| `docs/evidence/pr47-outage-enumeration/` | Row-level enumeration data and its provenance, committed because Actions logs expire at ~90 days. |
 | `tests/test_calibration.py` | `serialize_target` order-independence regression; two tests for the historical-response guard; one existing fixture corrected (see Design decisions). |
 | `tests/test_probe_historical_properties.py` | New: the probe's verdict table, sweep stepping and dedup, retry behaviour, and `main`'s exit codes. |
 | `tests/test_canonical_snapshot_digest.py` | New: reordering must not change the digest, a changed calibration value must, and an unreadable payload must be distinguishable from a differing one. |
@@ -128,7 +128,7 @@ not survive.
 
 Enumerating 2026-08-27T08:18Z → 2026-08-30T08:18Z at a 1 h step
 ([run 33301248740](https://github.com/SuperconducTED/superconducted-noise-engine/actions/runs/33301248740),
-73 queries, read-only; evidence in `evidence/PR-47-Evidence/`):
+73 queries, read-only; evidence in `docs/evidence/pr47-outage-enumeration/`):
 
 | | |
 | --- | ---: |
