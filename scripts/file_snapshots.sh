@@ -30,9 +30,10 @@
 #   POLL_TIME      ISO-8601 UTC instant of this poll                   (default now)
 #   PYTHON         interpreter that runs the digest                    (default python)
 #
-# Decisions (`new`, `duplicate`, `collision`, `collision-unreadable`) are
-# ADR-025's vocabulary; each is appended to ledger/<poll month>.tsv and the
-# result is pushed. Exits non-zero if the digest is missing or git fails.
+# Decisions (`new`, `duplicate`, `duplicate-partial`, `collision`,
+# `collision-unreadable`) are ADR-025's vocabulary; each is appended to
+# ledger/<poll month>.tsv and the result is pushed. Exits non-zero if the
+# digest is missing or git fails.
 set -euo pipefail
 shopt -s nullglob
 
@@ -96,20 +97,46 @@ for f in "$STAGING_DIR/$BACKEND"/*.json; do
     if [ "$same" -eq 0 ]; then
       # Same document. IBM has not republished; a true no-op.
       decision=duplicate
+    elif [ "$same" -eq 1 ]; then
+      # The documents differ -- but not every difference is divergence. A
+      # BACKFILL re-reads stamps we already hold (a query inside a gap is
+      # answered with the document at the gap's opening), and a historical
+      # fetch leaves `configuration` as None and sources `target` differently
+      # from the live poll that archived it. Compared in full those always
+      # differ; compared on the calibration payload they are identical. The
+      # first backfill run filed 7 such pairs as collisions, every one with a
+      # byte-identical `properties` block.
+      #
+      # So ask the narrower question before crying divergence: does the
+      # CALIBRATION PAYLOAD match? That is the data #46 s3c lost five versions
+      # of (gate-level, inside `properties`), so this keeps exactly the
+      # protection ADR-025 reserves collisions/ for.
+      set +e
+      "$PYTHON" "$digest" --compare --payload-only "$f" "$dest/$base"
+      payload_same=$?
+      set -e
+      if [ "$payload_same" -eq 0 ]; then
+        # Same measurements, different fetch path. The archived copy is the
+        # more complete of the two, and it is the one we keep; nothing is
+        # preserved beside it because nothing new was observed.
+        decision=duplicate-partial
+      else
+        sha=$(sha256sum "$f" | cut -c1-16)
+        coll="collisions/${stem:0:4}-${stem:4:2}/$BACKEND"
+        mkdir -p "$coll"
+        mv "$f" "$coll/$stem.$sha.json"
+        decision=collision
+        echo "::warning::$stem differs from the archived copy IN ITS CALIBRATION PAYLOAD under the same stamp; preserved at $coll/$stem.$sha.json"
+      fi
     else
-      # Genuinely different (1), or undecidable (2). Both preserve: keep the
-      # archived copy AND the new payload beside it.
+      # Undecidable (2): one side could not be read or parsed. Preserve, and
+      # never guess `duplicate` -- that would drop data.
       sha=$(sha256sum "$f" | cut -c1-16)
       coll="collisions/${stem:0:4}-${stem:4:2}/$BACKEND"
       mkdir -p "$coll"
       mv "$f" "$coll/$stem.$sha.json"
-      if [ "$same" -eq 2 ]; then
-        decision=collision-unreadable
-        echo "::warning::$stem could not be compared with the archived copy; preserved at $coll/$stem.$sha.json"
-      else
-        decision=collision
-        echo "::warning::$stem differs from the archived copy under the same stamp; preserved at $coll/$stem.$sha.json"
-      fi
+      decision=collision-unreadable
+      echo "::warning::$stem could not be compared with the archived copy; preserved at $coll/$stem.$sha.json"
     fi
   fi
   printf '%s\t%s\t%s\t%s\n' "$POLL_TIME" "$BACKEND" "$stem" "$decision" >> "$ledger"

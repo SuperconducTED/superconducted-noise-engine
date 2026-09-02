@@ -59,14 +59,27 @@ def _operation_key(entry: Any) -> tuple[str, tuple[Any, ...]]:
     )
 
 
-def canonical_digest(path: str | Path) -> str:
-    """SHA-256 of the snapshot with ``target.operations`` put in a fixed order."""
+def canonical_digest(path: str | Path, *, payload_only: bool = False) -> str:
+    """SHA-256 of the snapshot with ``target.operations`` put in a fixed order.
+
+    With ``payload_only``, digest **only** ``properties`` — the calibration
+    payload — ignoring ``target`` and ``configuration``. Those two are
+    provenance-dependent: a historical fetch
+    (``poller.fetch_snapshot(historical_at=...)``) leaves ``configuration`` as
+    ``None`` and sources ``target`` differently from a live poll, so the same
+    document fetched two ways compares unequal in full while its measurements
+    are identical. Comparing in full is right for two live payloads and wrong
+    across fetch paths; this mode is what makes the difference visible.
+    """
     with Path(path).open(encoding="utf-8") as fh:
         doc = json.load(fh)
 
-    target = doc.get("target")
-    if isinstance(target, dict) and isinstance(target.get("operations"), list):
-        target["operations"] = sorted(target["operations"], key=_operation_key)
+    if payload_only:
+        doc = {"properties": doc.get("properties")}
+    else:
+        target = doc.get("target")
+        if isinstance(target, dict) and isinstance(target.get("operations"), list):
+            target["operations"] = sorted(target["operations"], key=_operation_key)
 
     payload = json.dumps(doc, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
@@ -89,6 +102,12 @@ def main(argv: Iterable[str] | None = None) -> int:
         help="Treat the two paths as a pair: exit 0 if same document, 1 if different, "
         "2 if either could not be read.",
     )
+    parser.add_argument(
+        "--payload-only",
+        action="store_true",
+        help="Digest only the calibration payload (properties), ignoring target and "
+        "configuration. Use to compare a historical fetch against a live one.",
+    )
     parser.add_argument("paths", nargs="+", metavar="PATH")
     args = parser.parse_args(list(argv) if argv is not None else None)
 
@@ -96,7 +115,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         parser.error("--compare takes exactly two paths")
 
     try:
-        digests = [canonical_digest(p) for p in args.paths]
+        digests = [canonical_digest(p, payload_only=args.payload_only) for p in args.paths]
     except (OSError, ValueError) as exc:
         # ValueError covers both json.JSONDecodeError and UnicodeDecodeError. The
         # latter matters: without it a non-UTF-8 payload escapes as a traceback,

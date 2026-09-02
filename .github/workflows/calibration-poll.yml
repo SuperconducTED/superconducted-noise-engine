@@ -19,7 +19,9 @@ on:
         required: false
         default: ''
       historical_step_hours:
-        description: 'Step in hours. Keep under the readout p10 of 2.5h.'
+        description: 'Step in hours; fractions allowed (0.5, 0.25). Documents
+          republish at a mean interval of <=1.26h (NC-030) and a 1h sweep
+          recalls only 87.9% (NC-031), so prefer 0.5 or finer for recovery.'
         required: false
         default: '2'
       max_historical_days:

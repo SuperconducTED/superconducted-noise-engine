@@ -423,9 +423,19 @@ def parse_iso_utc(s: str) -> datetime:
 
 
 def _build_historical_window(start_str: str, end_str: str, step_hours_str: str) -> list[datetime]:
+    """Instants to query for a backfill sweep: ``start`` to ``end`` every ``step_hours``.
+
+    ``step_hours`` is a **float**. It parsed as ``int`` until 2026-09-02, which
+    rejected every sub-hourly sweep with "invalid literal for int() with base
+    10: '0.5'" — while the probe's own ``--enumerate`` accepted floats and the
+    workflow input advertised no such restriction. That mattered: NC-030 puts
+    document republication at a mean interval of at most 1.26 h, so an integer
+    step of 1 h is coarser than the publish cadence and NC-031 measures its
+    recall at 87.9%. A backfill could not reach the documents it was run for.
+    """
     start = parse_iso_utc(start_str)
     end = parse_iso_utc(end_str)
-    step_hours = int(step_hours_str)
+    step_hours = float(step_hours_str)
     if step_hours <= 0:
         raise ValueError(f"step_hours must be positive; got {step_hours}")
     if start >= end:

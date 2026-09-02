@@ -70,6 +70,26 @@ def _fresh(stem: str, t1: float = 100.0) -> bytes:
     return json.dumps(_doc(OPS_SORTED, stem, t1), sort_keys=True, separators=(",", ":")).encode()
 
 
+def _live(stem: str, t1: float = 100.0) -> bytes:
+    """A snapshot as a LIVE poll archived it: full `configuration`, live `target`."""
+    doc = _doc(OPS_LEGACY, stem, t1)
+    doc["configuration"] = {"backend_name": "ibm_fez", "n_qubits": 156, "simulator": False}
+    return json.dumps(doc, indent=2).encode()
+
+
+def _historical(stem: str, t1: float = 100.0) -> bytes:
+    """The same document as a HISTORICAL fetch produces it.
+
+    `fetch_snapshot(historical_at=...)` leaves `configuration` as None and
+    sources `target` from `target_history`, so a backfill re-reading an
+    archived stamp is never byte-equal to the live copy even when every
+    measurement matches.
+    """
+    doc = _doc([], stem, t1)
+    doc["configuration"] = None
+    return json.dumps(doc, sort_keys=True, separators=(",", ":")).encode()
+
+
 def _find_bash() -> str | None:
     """Prefer the bash that ships with Git on Windows over the WSL launcher."""
     candidates: list[Path] = []
@@ -284,6 +304,49 @@ class TestFileSnapshots:
         assert text.count("poll_time_utc") == 1  # header written once
         assert _ledger(origin, "2026-09") == {STEM_A: "duplicate", STEM_C: "new"}
         assert _subject(origin) == "calibration: 2026-09-01T16:00:00Z ibm_fez (+1)"
+
+    def test_a_backfilled_re_read_is_not_a_collision(self, sandbox: dict[str, Path]) -> None:
+        """The defect the first production backfill exposed.
+
+        A sweep re-reads stamps we already hold, and a historical fetch is
+        structurally less complete than the live poll that archived them. Under
+        a whole-document comparison every such re-read was filed as a
+        `collision` — 7 of them on the first run, every one with a
+        byte-identical `properties` block. It must be `duplicate-partial`:
+        recorded in the ledger, archived copy untouched, nothing written to
+        `collisions/`.
+        """
+        staging = _stage(sandbox["tmp"], "staging", {STEM_A: _historical(STEM_A)})
+        result = _run(sandbox, staging, sandbox["tmp"] / "wt")
+        assert result.returncode == 0, result.stdout + result.stderr
+
+        origin = sandbox["origin"]
+        assert _ledger(origin, "2026-09") == {STEM_A: "duplicate-partial"}
+        assert not any(p.startswith("collisions/") for p in _tree(origin))
+        assert _subject(origin) == f"poll: {POLL_TIME} ibm_fez (no new document)"
+        # The archived copy is the more complete of the two and is kept as-is.
+        archived = _git_bytes(
+            "show", f"calibration-data:snapshots/2026-08/ibm_fez/{STEM_A}.json", cwd=origin
+        )
+        assert archived == _legacy(STEM_A)
+
+    def test_a_changed_measurement_is_still_a_collision_across_fetch_paths(
+        self, sandbox: dict[str, Path]
+    ) -> None:
+        """The protection must survive the fix.
+
+        Same provenance difference as above, but a T1 that actually moved. This
+        is #46 §3c's failure mode and it must still reach `collisions/`.
+        """
+        staging = _stage(sandbox["tmp"], "staging", {STEM_A: _historical(STEM_A, t1=999.0)})
+        result = _run(sandbox, staging, sandbox["tmp"] / "wt")
+        assert result.returncode == 0, result.stdout + result.stderr
+
+        origin = sandbox["origin"]
+        assert _ledger(origin, "2026-09") == {STEM_A: "collision"}
+        collisions = [p for p in _tree(origin) if p.startswith("collisions/")]
+        assert len(collisions) == 1
+        assert "CALIBRATION PAYLOAD" in result.stdout + result.stderr
 
     def test_a_missing_digest_refuses_to_file_anything(self, sandbox: dict[str, Path]) -> None:
         """Without a comparator the script must stop, not guess."""

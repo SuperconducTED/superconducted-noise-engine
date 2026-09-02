@@ -134,3 +134,86 @@ class TestCli:
         lines = capsys.readouterr().out.strip().split("\n")
         assert len(lines) == 2
         assert all(len(line.split("  ")[0]) == 64 for line in lines)
+
+
+def _historical(operations: list[dict[str, Any]], t1: float = 100.0) -> dict[str, Any]:
+    """A snapshot as a HISTORICAL fetch produces it.
+
+    `fetch_snapshot(historical_at=...)` leaves `configuration` as None and
+    sources `target` from `target_history` rather than the live backend, so the
+    same document fetched historically is not byte-equal to the archived live
+    copy even when every measurement matches.
+    """
+    doc = _doc(operations, t1)
+    doc["configuration"] = None
+    doc["target"] = {"num_qubits": 2, "physical_qubits": [0, 1], "operations": []}
+    return doc
+
+
+class TestPayloadOnlyDigest:
+    """The comparison a backfill needs.
+
+    A sweep re-reads stamps the archive already holds — a query inside a gap is
+    answered with the document at the gap's opening. Compared in full, a
+    historical re-read of an archived stamp ALWAYS differs, and the first
+    backfill run duly filed 7 such pairs into `collisions/` with byte-identical
+    `properties` blocks. Comparing the calibration payload is what tells
+    "different fetch path" from "different measurements".
+    """
+
+    def test_configuration_and_target_do_not_affect_the_payload_digest(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        live = _write(tmp_path, "live.json", _doc(OPS_A))
+        hist = _write(tmp_path, "hist.json", _historical(OPS_SHUFFLED))
+        assert canonical_digest(live) != canonical_digest(hist)  # full: differs
+        assert canonical_digest(live, payload_only=True) == canonical_digest(
+            hist, payload_only=True
+        )
+
+    def test_a_changed_calibration_value_still_differs(self, tmp_path: pathlib.Path) -> None:
+        """The protection ADR-025 reserves collisions/ for must survive.
+
+        #46 §3c lost five gate-level versions under one stamp, and gate data
+        lives inside `properties` — so payload-only must still catch it.
+        """
+        live = _write(tmp_path, "live.json", _doc(OPS_A, t1=100.0))
+        hist = _write(tmp_path, "hist.json", _historical(OPS_A, t1=999.0))
+        assert canonical_digest(live, payload_only=True) != canonical_digest(
+            hist, payload_only=True
+        )
+
+    def test_missing_properties_is_still_digestible(self, tmp_path: pathlib.Path) -> None:
+        doc = _doc(OPS_A)
+        del doc["properties"]
+        p = _write(tmp_path, "no_props.json", doc)
+        assert len(canonical_digest(p, payload_only=True)) == 64
+
+    def test_two_documents_without_properties_are_equal(self, tmp_path: pathlib.Path) -> None:
+        """Degenerate, but it must not raise — refusing to compare is worse."""
+        a_doc, b_doc = _doc(OPS_A), _doc(OPS_SHUFFLED, t1=1.0)
+        del a_doc["properties"], b_doc["properties"]
+        a = _write(tmp_path, "a.json", a_doc)
+        b = _write(tmp_path, "b.json", b_doc)
+        assert canonical_digest(a, payload_only=True) == canonical_digest(b, payload_only=True)
+
+
+class TestPayloadOnlyCli:
+    def test_compare_payload_only_exits_zero_across_fetch_paths(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        live = _write(tmp_path, "live.json", _doc(OPS_A))
+        hist = _write(tmp_path, "hist.json", _historical(OPS_SHUFFLED))
+        assert main(["--compare", str(live), str(hist)]) == 1  # full comparison
+        assert main(["--compare", "--payload-only", str(live), str(hist)]) == 0
+
+    def test_compare_payload_only_exits_one_on_changed_measurements(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        live = _write(tmp_path, "live.json", _doc(OPS_A, t1=100.0))
+        hist = _write(tmp_path, "hist.json", _historical(OPS_A, t1=999.0))
+        assert main(["--compare", "--payload-only", str(live), str(hist)]) == 1
+
+    def test_unreadable_still_exits_two_under_payload_only(self, tmp_path: pathlib.Path) -> None:
+        a = _write(tmp_path, "a.json", _doc(OPS_A))
+        assert main(["--compare", "--payload-only", str(a), str(tmp_path / "missing.json")]) == 2
