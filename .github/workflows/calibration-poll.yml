@@ -19,7 +19,9 @@ on:
         required: false
         default: ''
       historical_step_hours:
-        description: 'Step in hours. Keep under the readout p10 of 2.5h.'
+        description: 'Step in hours; fractions allowed (0.5, 0.25). A 1h sweep
+          was measured to return only 87.9% of documents known to exist
+          (NC-031), so prefer 0.5 or finer for recovery.'
         required: false
         default: '2'
       max_historical_days:
@@ -93,6 +95,11 @@ jobs:
         env:
           STAGING_DIR: data/calibration
           DATA_WORKTREE: ${{ runner.temp }}/calibration-data
+          # Only a backfill may explain a stamp collision away as a lossy
+          # historical re-read. A scheduled poll fetches live, so any
+          # difference under an archived stamp is real divergence and is
+          # preserved. See scripts/file_snapshots.sh.
+          IS_BACKFILL: ${{ inputs.historical_start && '1' || '0' }}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'

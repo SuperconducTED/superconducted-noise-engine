@@ -513,3 +513,78 @@ class TestMain:
             ]
         )
         assert rc == 1
+
+
+class TestBuildHistoricalWindow:
+    """The backfill grid. A sub-hourly step must be accepted.
+
+    It was parsed with `int()` until 2026-09-02, so every fractional step was
+    rejected outright and the finest available grid was 1 h. NC-030 puts
+    document republication at a mean interval of at most 1.26 h and NC-031
+    measures a 1 h sweep's recall at 87.9%, so that restriction kept a backfill
+    from reaching the documents it was run for.
+    """
+
+    def test_fractional_step_is_accepted(self) -> None:
+        window = poller_module._build_historical_window(
+            "2026-08-17T18:00:00Z", "2026-08-17T20:00:00Z", "0.5"
+        )
+        assert window == [
+            datetime(2026, 8, 17, 18, 0, tzinfo=UTC),
+            datetime(2026, 8, 17, 18, 30, tzinfo=UTC),
+            datetime(2026, 8, 17, 19, 0, tzinfo=UTC),
+            datetime(2026, 8, 17, 19, 30, tzinfo=UTC),
+        ]
+
+    def test_integer_step_still_works(self) -> None:
+        window = poller_module._build_historical_window(
+            "2026-08-17T18:00:00Z", "2026-08-17T21:00:00Z", "1"
+        )
+        assert len(window) == 3
+        assert window[0] == datetime(2026, 8, 17, 18, 0, tzinfo=UTC)
+        assert window[-1] == datetime(2026, 8, 17, 20, 0, tzinfo=UTC)
+
+    def test_quarter_hour_step(self) -> None:
+        window = poller_module._build_historical_window(
+            "2026-08-09T15:39:00Z", "2026-08-09T16:39:00Z", "0.25"
+        )
+        assert len(window) == 4
+
+    @pytest.mark.parametrize("step", ["0", "-1", "0.0", "-0.5"])
+    def test_non_positive_step_is_rejected(self, step: str) -> None:
+        with pytest.raises(ValueError, match="step_hours must be positive"):
+            poller_module._build_historical_window(
+                "2026-08-17T18:00:00Z", "2026-08-17T20:00:00Z", step
+            )
+
+    def test_a_step_that_rounds_to_a_zero_timedelta_is_rejected(self) -> None:
+        """PR #55 review, P3.
+
+        `float("1e-12")` is positive, but `timedelta(hours=1e-12)` resolves to
+        microseconds and rounds to zero, so the sweep loop would never advance
+        — an infinite loop ending only at the job timeout. Checking the input
+        is not enough; the converted duration has to be positive too.
+        """
+        with pytest.raises(ValueError, match="rounds to a zero timedelta"):
+            poller_module._build_historical_window(
+                "2026-08-17T18:00:00Z", "2026-08-17T20:00:00Z", "1e-12"
+            )
+
+    def test_a_tiny_but_representable_step_is_accepted(self) -> None:
+        """The boundary is the timedelta resolution, not an arbitrary floor."""
+        window = poller_module._build_historical_window(
+            "2026-08-17T18:00:00Z", "2026-08-17T18:00:01Z", "1e-7"
+        )
+        assert len(window) > 1
+
+    def test_unparseable_step_is_rejected(self) -> None:
+        with pytest.raises(ValueError):
+            poller_module._build_historical_window(
+                "2026-08-17T18:00:00Z", "2026-08-17T20:00:00Z", "half"
+            )
+
+    def test_reversed_window_is_rejected(self) -> None:
+        with pytest.raises(ValueError, match="must be before"):
+            poller_module._build_historical_window(
+                "2026-08-17T20:00:00Z", "2026-08-17T18:00:00Z", "0.5"
+            )

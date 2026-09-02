@@ -15,7 +15,7 @@ import pathlib
 from typing import Any
 
 import pytest
-from scripts.canonical_snapshot_digest import canonical_digest, main
+from scripts.canonical_snapshot_digest import canonical_digest, is_lossy_reread, main
 
 
 def _doc(operations: list[dict[str, Any]], t1: float = 100.0) -> dict[str, Any]:
@@ -134,3 +134,150 @@ class TestCli:
         lines = capsys.readouterr().out.strip().split("\n")
         assert len(lines) == 2
         assert all(len(line.split("  ")[0]) == 64 for line in lines)
+
+
+def _historical(operations: list[dict[str, Any]], t1: float = 100.0) -> dict[str, Any]:
+    """A snapshot as a HISTORICAL fetch produces it.
+
+    `fetch_snapshot(historical_at=...)` leaves `configuration` as None and
+    sources `target` from `target_history` rather than the live backend, so the
+    same document fetched historically is not byte-equal to the archived live
+    copy even when every measurement matches.
+    """
+    doc = _doc(operations, t1)
+    doc["configuration"] = None
+    doc["target"] = {"num_qubits": 2, "physical_qubits": [0, 1], "operations": []}
+    return doc
+
+
+class TestPayloadOnlyDigest:
+    """The comparison a backfill needs.
+
+    A sweep re-reads stamps the archive already holds — a query inside a gap is
+    answered with the document at the gap's opening. Compared in full, a
+    historical re-read of an archived stamp ALWAYS differs, and the first
+    backfill run duly filed 7 such pairs into `collisions/` with byte-identical
+    `properties` blocks. Comparing the calibration payload is what tells
+    "different fetch path" from "different measurements".
+    """
+
+    def test_configuration_and_target_do_not_affect_the_payload_digest(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        live = _write(tmp_path, "live.json", _doc(OPS_A))
+        hist = _write(tmp_path, "hist.json", _historical(OPS_SHUFFLED))
+        assert canonical_digest(live) != canonical_digest(hist)  # full: differs
+        assert canonical_digest(live, payload_only=True) == canonical_digest(
+            hist, payload_only=True
+        )
+
+    def test_a_changed_calibration_value_still_differs(self, tmp_path: pathlib.Path) -> None:
+        """The protection ADR-025 reserves collisions/ for must survive.
+
+        #46 §3c lost five gate-level versions under one stamp, and gate data
+        lives inside `properties` — so payload-only must still catch it.
+        """
+        live = _write(tmp_path, "live.json", _doc(OPS_A, t1=100.0))
+        hist = _write(tmp_path, "hist.json", _historical(OPS_A, t1=999.0))
+        assert canonical_digest(live, payload_only=True) != canonical_digest(
+            hist, payload_only=True
+        )
+
+    def test_missing_properties_is_still_digestible(self, tmp_path: pathlib.Path) -> None:
+        doc = _doc(OPS_A)
+        del doc["properties"]
+        p = _write(tmp_path, "no_props.json", doc)
+        assert len(canonical_digest(p, payload_only=True)) == 64
+
+    def test_two_documents_without_properties_are_equal(self, tmp_path: pathlib.Path) -> None:
+        """Degenerate, but it must not raise — refusing to compare is worse."""
+        a_doc, b_doc = _doc(OPS_A), _doc(OPS_SHUFFLED, t1=1.0)
+        del a_doc["properties"], b_doc["properties"]
+        a = _write(tmp_path, "a.json", a_doc)
+        b = _write(tmp_path, "b.json", b_doc)
+        assert canonical_digest(a, payload_only=True) == canonical_digest(b, payload_only=True)
+
+
+class TestPayloadOnlyCli:
+    def test_compare_payload_only_exits_zero_across_fetch_paths(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        live = _write(tmp_path, "live.json", _doc(OPS_A))
+        hist = _write(tmp_path, "hist.json", _historical(OPS_SHUFFLED))
+        assert main(["--compare", str(live), str(hist)]) == 1  # full comparison
+        assert main(["--compare", "--payload-only", str(live), str(hist)]) == 0
+
+    def test_compare_payload_only_exits_one_on_changed_measurements(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        live = _write(tmp_path, "live.json", _doc(OPS_A, t1=100.0))
+        hist = _write(tmp_path, "hist.json", _historical(OPS_A, t1=999.0))
+        assert main(["--compare", "--payload-only", str(live), str(hist)]) == 1
+
+    def test_unreadable_still_exits_two_under_payload_only(self, tmp_path: pathlib.Path) -> None:
+        a = _write(tmp_path, "a.json", _doc(OPS_A))
+        assert main(["--compare", "--payload-only", str(a), str(tmp_path / "missing.json")]) == 2
+
+
+class TestIsLossyReread:
+    """The directional guard that keeps `--payload-only` from being a blanket rule.
+
+    PR #55's review showed the first attempt reduced to comparing the payload
+    alone: full equality implies payload equality, so `F or (not F and P)` is
+    just `P`. The narrow comparison therefore has to be gated on evidence that
+    the incoming payload really is a lossy historical re-read, not merely that
+    its payload happens to match.
+    """
+
+    def test_historical_over_live_is_a_reread(self) -> None:
+        assert is_lossy_reread({"configuration": None}, {"configuration": {"n_qubits": 156}})
+
+    def test_live_over_live_is_not(self) -> None:
+        assert not is_lossy_reread({"configuration": {"a": 1}}, {"configuration": {"a": 1}})
+
+    def test_live_over_historical_is_not(self) -> None:
+        """Directional: a MORE complete payload is never explained away."""
+        assert not is_lossy_reread({"configuration": {"a": 1}}, {"configuration": None})
+
+    def test_historical_over_historical_is_not(self) -> None:
+        assert not is_lossy_reread({"configuration": None}, {"configuration": None})
+
+
+class TestCompareRereadCli:
+    def test_lossy_reread_with_matching_payload_exits_zero(self, tmp_path: pathlib.Path) -> None:
+        archived = _doc(OPS_A)
+        archived["configuration"] = {"n_qubits": 156}
+        a = _write(tmp_path, "archived.json", archived)
+        b = _write(tmp_path, "hist.json", _historical(OPS_SHUFFLED))
+        assert main(["--compare-reread", str(b), str(a)]) == 0
+
+    def test_two_live_payloads_exit_one_even_when_the_payload_matches(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        """The P1 regression, at the CLI boundary."""
+        archived = _doc(OPS_A)
+        archived["configuration"] = {"n_qubits": 156}
+        incoming = _doc([op for op in OPS_A if op["name"] != "cz"])
+        incoming["configuration"] = {"n_qubits": 156}
+        a = _write(tmp_path, "archived.json", archived)
+        b = _write(tmp_path, "incoming.json", incoming)
+        assert main(["--compare-reread", str(b), str(a)]) == 1
+
+    def test_lossy_reread_with_changed_measurements_exits_one(self, tmp_path: pathlib.Path) -> None:
+        archived = _doc(OPS_A, t1=100.0)
+        archived["configuration"] = {"n_qubits": 156}
+        a = _write(tmp_path, "archived.json", archived)
+        b = _write(tmp_path, "hist.json", _historical(OPS_A, t1=999.0))
+        assert main(["--compare-reread", str(b), str(a)]) == 1
+
+    def test_unreadable_exits_two(self, tmp_path: pathlib.Path) -> None:
+        a = _write(tmp_path, "a.json", _doc(OPS_A))
+        assert main(["--compare-reread", str(a), str(tmp_path / "missing.json")]) == 2
+
+    def test_compare_and_compare_reread_are_mutually_exclusive(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        a = _write(tmp_path, "a.json", _doc(OPS_A))
+        b = _write(tmp_path, "b.json", _doc(OPS_A))
+        with pytest.raises(SystemExit):
+            main(["--compare", "--compare-reread", str(a), str(b)])

@@ -59,17 +59,60 @@ def _operation_key(entry: Any) -> tuple[str, tuple[Any, ...]]:
     )
 
 
-def canonical_digest(path: str | Path) -> str:
-    """SHA-256 of the snapshot with ``target.operations`` put in a fixed order."""
+def _load(path: str | Path) -> dict[str, Any]:
+    """Parse a snapshot. Raises ``OSError`` or ``ValueError`` like ``json.load``."""
+    with Path(path).open(encoding="utf-8") as fh:
+        doc: dict[str, Any] = json.load(fh)
+    return doc
+
+
+def _payload_digest(doc: dict[str, Any]) -> str:
+    """SHA-256 of the calibration payload alone."""
+    body = json.dumps({"properties": doc.get("properties")}, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(body.encode("utf-8")).hexdigest()
+
+
+def canonical_digest(path: str | Path, *, payload_only: bool = False) -> str:
+    """SHA-256 of the snapshot with ``target.operations`` put in a fixed order.
+
+    With ``payload_only``, digest **only** ``properties`` — the calibration
+    payload — ignoring ``target`` and ``configuration``. Those two are
+    provenance-dependent: a historical fetch
+    (``poller.fetch_snapshot(historical_at=...)``) leaves ``configuration`` as
+    ``None`` and sources ``target`` differently from a live poll, so the same
+    document fetched two ways compares unequal in full while its measurements
+    are identical. Comparing in full is right for two live payloads and wrong
+    across fetch paths; this mode is what makes the difference visible.
+    """
     with Path(path).open(encoding="utf-8") as fh:
         doc = json.load(fh)
 
-    target = doc.get("target")
-    if isinstance(target, dict) and isinstance(target.get("operations"), list):
-        target["operations"] = sorted(target["operations"], key=_operation_key)
+    if payload_only:
+        doc = {"properties": doc.get("properties")}
+    else:
+        target = doc.get("target")
+        if isinstance(target, dict) and isinstance(target.get("operations"), list):
+            target["operations"] = sorted(target["operations"], key=_operation_key)
 
     payload = json.dumps(doc, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def is_lossy_reread(new_doc: dict[str, Any], archived_doc: dict[str, Any]) -> bool:
+    """Does ``new_doc`` carry the structural signature of a historical re-read?
+
+    ``fetch_snapshot(historical_at=...)`` never fetches ``configuration``, so a
+    historical payload always has it as ``None``; a live poll archived one with
+    it populated. That asymmetry — **incoming missing it, archived holding
+    it** — is the only difference a backfill re-read is allowed to explain.
+
+    Deliberately directional. Two live payloads both carry a configuration, so
+    this is false for them and their difference stays a collision, which is the
+    case PR #55's review showed the first attempt had broken: comparing full
+    first and payload second reduces to comparing the payload alone, because
+    full equality implies payload equality.
+    """
+    return new_doc.get("configuration") is None and archived_doc.get("configuration") is not None
 
 
 def main(argv: Iterable[str] | None = None) -> int:
@@ -89,14 +132,42 @@ def main(argv: Iterable[str] | None = None) -> int:
         help="Treat the two paths as a pair: exit 0 if same document, 1 if different, "
         "2 if either could not be read.",
     )
+    parser.add_argument(
+        "--payload-only",
+        action="store_true",
+        help="Digest only the calibration payload (properties), ignoring target and "
+        "configuration. Use to compare a historical fetch against a live one.",
+    )
+    parser.add_argument(
+        "--compare-reread",
+        action="store_true",
+        help="Two paths NEW ARCHIVED: exit 0 only if NEW is a lossy historical re-read "
+        "of ARCHIVED (NEW has no configuration, ARCHIVED does) AND their calibration "
+        "payloads match. Exit 1 otherwise, 2 if either could not be read.",
+    )
     parser.add_argument("paths", nargs="+", metavar="PATH")
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     if args.compare and len(args.paths) != 2:
         parser.error("--compare takes exactly two paths")
+    if args.compare_reread and len(args.paths) != 2:
+        parser.error("--compare-reread takes exactly two paths")
+    if args.compare and args.compare_reread:
+        parser.error("--compare and --compare-reread are mutually exclusive")
+
+    if args.compare_reread:
+        try:
+            new_doc = _load(args.paths[0])
+            archived_doc = _load(args.paths[1])
+        except (OSError, ValueError) as exc:
+            print(f"canonical-snapshot-digest: {exc}", file=sys.stderr)
+            return 2
+        if not is_lossy_reread(new_doc, archived_doc):
+            return 1
+        return 0 if _payload_digest(new_doc) == _payload_digest(archived_doc) else 1
 
     try:
-        digests = [canonical_digest(p) for p in args.paths]
+        digests = [canonical_digest(p, payload_only=args.payload_only) for p in args.paths]
     except (OSError, ValueError) as exc:
         # ValueError covers both json.JSONDecodeError and UnicodeDecodeError. The
         # latter matters: without it a non-UTF-8 payload escapes as a traceback,
