@@ -445,9 +445,10 @@ def _build_historical_window(start_str: str, end_str: str, step_hours_str: str) 
         raise ValueError(f"start ({start}) must be before end ({end})")
     step = timedelta(hours=step_hours)
     # A positive float is not enough. `timedelta` resolves to microseconds, so
-    # anything below ~2.8e-10 h rounds to zero and the loop below would never
-    # advance -- an infinite loop that only ends when the job hits its timeout.
-    # Check the converted duration, not just the input (PR #55 review, P3).
+    # anything below ~1.39e-10 h (half a microsecond, 0.5 / 3.6e9) rounds to
+    # zero and the loop below would never advance -- an infinite loop that only
+    # ends when the job hits its timeout. Check the converted duration, not just
+    # the input (PR #55 review, P3).
     if step <= timedelta(0):
         raise ValueError(
             f"step_hours={step_hours} is positive but rounds to a zero timedelta; "

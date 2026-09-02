@@ -61,23 +61,32 @@ docstring records why the restriction was harmful rather than merely wrong, beca
 value that makes it harmful (the publish cadence) lives in a register row and not in the
 code.
 
-**The comparison.** The tempting fix — compare only `properties` everywhere — would have
-weakened the guarantee ADR-025 exists to provide. The chosen shape keeps the strict
-comparison as the first question and adds a second, narrower one only on the path that
-previously went straight to `collision`:
+**The comparison.** The first attempt compared in full and, on a mismatch, compared the
+payload — and was withdrawn in review. It provided none of the extra strictness it
+claimed: full equality implies payload equality, so *"identical in full, or else identical
+in payload"* reduces to *"identical in payload"*. Two **live** payloads differing only in
+`target` would have been recorded `duplicate-partial` and discarded where they were
+previously preserved (PR #55 review, P1, reproduced with the real filing script).
+
+So the narrow comparison is not reached by elimination. It is **gated on two independent
+conditions, both required**, and only then applied:
 
 1. Canonical full compare. Equal → `duplicate`. Unchanged, and still the fast path.
-2. Differs (exit 1) → compare `--payload-only`. Equal → `duplicate-partial`: same
-   measurements reached by a different fetch path. The archived copy is kept because it is
-   the more complete of the two, and nothing is written to `collisions/` because nothing
-   new was observed.
-3. Payload differs → `collision`, exactly as before, with the warning text now naming the
-   calibration payload so a reader knows which comparison failed.
-4. Unreadable (exit 2) → `collision-unreadable`, unchanged. The payload comparison is not
-   attempted, since a file that cannot be parsed cannot be parsed either way.
+2. Unreadable (exit 2) → `collision-unreadable`, unchanged. No payload comparison is
+   attempted; a file that cannot be parsed cannot be parsed either way.
+3. Differs, **and** the run swept a historical window (`IS_BACKFILL`, passed by the
+   workflow from `inputs.historical_start`), **and** the incoming payload carries the
+   structural signature of the expected loss — no `configuration` of its own where the
+   archived copy has one — **and** the calibration payloads match → `duplicate-partial`.
+   The archived copy is kept, being the more complete of the two, and nothing is written
+   to `collisions/`.
+4. Anything else that differs → `collision`, exactly as before.
 
-`--payload-only` restricts the digest to `properties` and deliberately does **not** sort
-`target.operations`, because `target` is not in the digest at all in that mode.
+The signature test is directional: a *more* complete payload is never explained away, and
+two live payloads both carry a configuration so they never reach it. A scheduled poll
+fetches live, so it can never take branch 3 at all. Both gates live in one tested function,
+`is_lossy_reread`, behind `--compare-reread`, rather than being split between shell and
+Python.
 
 ## Mathematical / Statistical details
 
@@ -94,12 +103,23 @@ not touch.
 
 ## Design decisions
 
-**Compare the payload, not the whole document, but only as a second question.** The single
-comparison that is right in both directions does not exist: comparing in full is correct
-between two live payloads and wrong across fetch paths, and comparing payload-only is
-correct across fetch paths but silently tolerates a `target` divergence between two live
-ones. Ordering the two questions keeps the strict answer wherever it is meaningful and
-falls back only where it is not.
+**Gate the narrow comparison on provenance, do not reach it by elimination.** The single
+comparison right in both directions does not exist: comparing in full is correct between
+two live payloads and wrong across fetch paths; comparing payload-only is correct across
+fetch paths but tolerates a `target` divergence between two live ones. *Ordering* the two
+questions does not resolve that, which is the mistake the first attempt made — the order
+is vacuous because full equality implies payload equality. What resolves it is asking
+whether this payload can be a lossy re-read **at all**, from the run's provenance and the
+document's own shape, before letting a payload match excuse anything.
+
+**One known limit, recorded rather than fixed.** `configuration is None` is a structural
+signature, not proof of provenance. A *live* fetch whose `backend.configuration()` call
+failed would carry the same shape, and during a backfill it could then be scored
+`duplicate-partial`. The `IS_BACKFILL` gate narrows this to backfill runs only, and it has
+not been observed on the pinned `qiskit-ibm-runtime`, so it is documented rather than
+worked around. The clean fix is for the poller to record the fetch type in the snapshot
+itself, which changes the schema and belongs with ADR-020 rather than here (PR #55 review,
+nit 3).
 
 **`duplicate-partial` rather than reusing `duplicate`.** The two are not the same
 observation. `duplicate` means the poller saw exactly what the archive holds;
@@ -120,9 +140,9 @@ real defect and deleting from the audit branch is a separate decision. They are 
 only production example of the failure this change prevents, which makes them worth keeping
 until #53 is closed.
 
-**The canary stayed small on purpose.** The shortest of the six recovery windows: 12.6 h,
-which at the 1 h step it fell back to is **13 historical query instants plus one current
-fetch**, not the 26 instants the intended 0.5 h step would have produced. Both defects
+**The canary stayed small on purpose.** The shortest of the six recovery windows:
+12 h 40 min, which at the 1 h step it fell back to is **13 historical query instants plus
+one current fetch**, not the 26 instants the intended 0.5 h step would have produced. Both defects
 surfaced inside two minutes and cost 7 spurious files. Running all six windows first would
 have cost more, by an amount nobody has computed — which is the argument for a canary, not
 a number to quote.
