@@ -389,10 +389,21 @@ select purely on `last_update_date`, and a returned earlier stamp can coexist
 with unreturned later ones. The two rows are therefore evidence that the backend
 was quiet, not proof that the windows are empty. Settling it is a read-only
 enumeration sweep of those windows at a fine step — cheap, and runnable through
-`workflow_dispatch` once the probe workflow is on the default branch. Until
-then the honest status of the Aug 7–17 windows is *probably nothing to
-backfill; not yet enumerated*. *(Corrected 2026-09-02; the earlier text said
-"proves" and "there is nothing to backfill there".)*
+`workflow_dispatch` once the probe workflow is on the default branch. *(Corrected
+2026-09-02; the earlier text said "proves" and "there is nothing to backfill
+there".)*
+
+> **Enumerated 2026-09-02, and the answer is not the one this section expected.**
+> Five sweeps plus two archive analyses settle it — see
+> `docs/implementations/2026-09-02-aug-gap-enumeration.md` and
+> `docs/evidence/aug-gap-enumeration/`. The windows hold nothing recoverable, so
+> the practical reading above stands. But **"the backend was quiet" is wrong**:
+> the device ran 13 bulk calibration rounds inside the windows, 9,807 parameter
+> measurements (NC-033), while our poller fetched one unchanging document 154
+> times (NC-034). The machine was working; IBM's *publication* had stalled. #45
+> §5's (a)/(b) dichotomy did not contain that state, so neither branch of it is
+> the answer. The sweep's own recall is now measured at 87.9% (NC-031), which is
+> why the conclusion rests on the archive evidence rather than on the sweeps.
 
 The recoverable loss is the scheduler outage from 2026-08-26 onward, where IBM
 *was* publishing at ~4 h and the poller ran 2–3×/day.
@@ -425,6 +436,11 @@ change is listed here so the history stays visible:
   accurately: it did not switch branches, which is the gap the blocker lived in.
 - **§ Implementation approach, Archive integrity** — the filing step now runs
   from `scripts/file_snapshots.sh` against a separate worktree.
+
+Later the same day, the Aug 7–17 windows were enumerated and the Results section
+gained an as-of block. The correction there is larger than a hedge: "the backend
+was quiet" is positively false, and the (a)/(b) dichotomy this document inherited
+from #45 §5 is incomplete. See `2026-09-02-aug-gap-enumeration.md`.
 
 ## Related docs
 
