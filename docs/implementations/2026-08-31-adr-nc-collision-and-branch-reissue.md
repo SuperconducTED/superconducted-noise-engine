@@ -106,7 +106,8 @@ issues #29 and #40 expensive.
 fails in a fresh environment on numpy 2.5.2's bundled stubs, which use the
 3.12+ `type` statement while `[tool.mypy]` pins `python_version = "3.11"`. The
 failure is in a third-party stub, not in this repository — the same command
-with `--python-version 3.12` reports no issues in 27 source files. Raising the
+with `--python-version 3.12` reports no issues (27 source files at `2af5c16`,
+28 once the 2026-09-02 review round adds a script). Raising the
 pin would silently drop the 3.11 support that `requires-python = ">=3.11"`
 promises, so it is left for a deliberate decision rather than folded into this
 change. It affects `main` identically and is not introduced here.
@@ -115,14 +116,23 @@ change. It affects `main` identically and is not introduced here.
 
 Run from the repository root. `python` must be a real 3.12 interpreter.
 
-- `python -m pytest tests/ --collect-only -q -o addopts=""` — tail line reads
-  `225 tests collected`, matching NC-021.
-- `python -m pytest -p no:cacheprovider` — `225 passed`.
-- `ruff check --no-cache` — `All checks passed!`.
-- `ruff format --check --no-cache` — `92 files already formatted`.
-- `mypy --strict --no-incremental --python-version 3.12` — `no issues found in
-  27 source files`. Without the flag this fails in numpy's stubs; see Design
-  decisions.
+The counts below are **as measured at `2af5c16`**, the commit this document
+describes. Three of them moved in the 2026-09-02 review round, so check the
+current expectation before reporting a mismatch — that round added tests,
+one script, and four files to the formatted set:
+
+| command | at `2af5c16` | at `4582c10` |
+| --- | --- | --- |
+| `python -m pytest tests/ --collect-only -q -o addopts=""` (tail line) | `225 tests collected` | see NC-021 |
+| `python -m pytest -p no:cacheprovider` | `225 passed` | matches NC-021 |
+| `ruff check --no-cache` | `All checks passed!` | unchanged |
+| `ruff format --check --no-cache` | `92 files already formatted` | `97` |
+| `mypy --strict --no-incremental --python-version 3.12` | `no issues found in 27 source files` | `28` |
+
+Cite NC-021 for the test count rather than either column — that is the row Rule
+6 keeps current, and restating an absolute here is the drift this document's own
+Design decisions argue against. Without `--python-version 3.12` mypy fails in
+numpy's stubs; see Design decisions.
 
 Collision resolution, which no test covers:
 
