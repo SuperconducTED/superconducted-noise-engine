@@ -557,6 +557,26 @@ class TestBuildHistoricalWindow:
                 "2026-08-17T18:00:00Z", "2026-08-17T20:00:00Z", step
             )
 
+    def test_a_step_that_rounds_to_a_zero_timedelta_is_rejected(self) -> None:
+        """PR #55 review, P3.
+
+        `float("1e-12")` is positive, but `timedelta(hours=1e-12)` resolves to
+        microseconds and rounds to zero, so the sweep loop would never advance
+        — an infinite loop ending only at the job timeout. Checking the input
+        is not enough; the converted duration has to be positive too.
+        """
+        with pytest.raises(ValueError, match="rounds to a zero timedelta"):
+            poller_module._build_historical_window(
+                "2026-08-17T18:00:00Z", "2026-08-17T20:00:00Z", "1e-12"
+            )
+
+    def test_a_tiny_but_representable_step_is_accepted(self) -> None:
+        """The boundary is the timedelta resolution, not an arbitrary floor."""
+        window = poller_module._build_historical_window(
+            "2026-08-17T18:00:00Z", "2026-08-17T18:00:01Z", "1e-7"
+        )
+        assert len(window) > 1
+
     def test_unparseable_step_is_rejected(self) -> None:
         with pytest.raises(ValueError):
             poller_module._build_historical_window(

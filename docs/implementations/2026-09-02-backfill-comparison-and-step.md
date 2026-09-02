@@ -11,10 +11,13 @@ whole recovery, and both are in code merged earlier the same day.
 `invalid literal for int() with base 10: '0.5'` before a single query was made
 ([run 33673095532](https://github.com/SuperconducTED/superconducted-noise-engine/actions/runs/33673095532)).
 Nothing advertised that restriction: the workflow input said only "Step in hours", and
-the probe's own `--enumerate` has always taken floats. It matters because NC-030 puts
-document republication at a mean interval of ≤ 1.26 h and NC-031 measures a 1 h sweep's
-recall at 87.9%, so the finest reachable grid was coarser than the publish cadence. A
-backfill could not reach the documents it was run for.
+the probe's own `--enumerate` has always taken floats. It matters because a 1 h grid was
+*measured* to miss documents that exist: NC-031 puts its recall at 87.9%, 29 of the 33
+archived documents in one control window. A mean republication interval would not
+establish that on its own — whether a document is caught depends on how long it remains
+the newest one older than some query instant and on where those instants fall, not on the
+mean (PR #55 review). The finest reachable grid was therefore one demonstrably lossy, and
+a backfill could not reach the documents it was run for.
 
 **2. Every re-read of an archived stamp was filed as a collision.** Retrying at a 1 h step
 ([run 33673272236](https://github.com/SuperconducTED/superconducted-noise-engine/actions/runs/33673272236))
@@ -24,12 +27,16 @@ false. Their `properties` blocks are byte-identical to the archived copies; they
 only because a historical fetch leaves `configuration` as `None` and sources `target`
 from `target_history` rather than the live backend.
 
-This is structural, not bad luck. A sweep must query instants inside a gap, and the
-service correctly answers with the document at the gap's opening — which we already hold.
-Every gap therefore yields at least one false collision. The five remaining recovery
-windows in #53 span 117 gaps, so continuing would have deposited well over a hundred
-spurious files on the branch that *is* the audit trail. The run was stopped after the
-canary.
+This is structural, not bad luck. A sweep queries instants inside a gap and the service
+answers with the document at the gap's opening, which we already hold — so a re-read, and
+a false collision, is the *normal* outcome for a swept gap rather than an unlucky one.
+
+It is **not** true that every gap must yield one. A gap shorter than the step can fall
+between query instants entirely, and the canary contains an example: no hourly instant
+falls in 22:07:58–22:49:57 (PR #55 review). So the count scales with how many archived
+stamps a sweep re-reads, which was not projected for the five remaining windows in #53 and
+should not be quoted as though it were. What is measured is the canary's own rate: 13
+historical query instants produced 7 false collisions. The run was stopped there.
 
 ## What changed
 
@@ -76,8 +83,9 @@ previously went straight to `collision`:
 
 N/A — purely structural. The change alters which of two documents is preferred and how a
 difference is classified; it computes no new quantity. The figures that motivate it
-(NC-030's ≤ 1.26 h republication interval, NC-031's 87.9% recall) were measured elsewhere
-and are cited, not recomputed.
+(NC-031's 87.9% recall) were measured elsewhere and are cited, not recomputed. NC-031 is
+recall against *archived* documents in one control window, not a general capture
+guarantee, and is used here only to say that a 1 h grid demonstrably misses some.
 
 One counting note for the reader: the 7 false collisions are 7 *files*, one per distinct
 archived stamp the canary re-read, not 7 documents lost. Nothing was lost — the archived
@@ -112,9 +120,12 @@ real defect and deleting from the audit branch is a separate decision. They are 
 only production example of the failure this change prevents, which makes them worth keeping
 until #53 is closed.
 
-**The canary stayed small on purpose.** 26 queries over the shortest of the six recovery
-windows. Both defects surfaced inside two minutes and cost 7 spurious files; the same run
-across all six windows would have cost more than a hundred.
+**The canary stayed small on purpose.** The shortest of the six recovery windows: 12.6 h,
+which at the 1 h step it fell back to is **13 historical query instants plus one current
+fetch**, not the 26 instants the intended 0.5 h step would have produced. Both defects
+surfaced inside two minutes and cost 7 spurious files. Running all six windows first would
+have cost more, by an amount nobody has computed — which is the argument for a canary, not
+a number to quote.
 
 ## Verification
 

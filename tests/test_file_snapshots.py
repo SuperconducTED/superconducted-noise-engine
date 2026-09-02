@@ -60,21 +60,31 @@ def _doc(operations: list[dict[str, Any]], stamp: str, t1: float = 100.0) -> dic
     }
 
 
-def _legacy(stem: str, t1: float = 100.0) -> bytes:
-    """A pre-#46 archived file: unsorted operations, indented."""
-    return json.dumps(_doc(OPS_LEGACY, stem, t1), indent=2).encode()
+# Every live poll fetches `backend.configuration()`, so an archived snapshot
+# carries one. A historical fetch never does. That asymmetry is what tells a
+# backfill re-read from a genuine divergence, so the fixtures model it.
+CONFIG = {"backend_name": "ibm_fez", "n_qubits": 156, "simulator": False}
+
+
+def _legacy(stem: str, t1: float = 100.0, config: Any = None) -> bytes:
+    """A pre-#46 archived file as a LIVE poll wrote it: unsorted ops, indented."""
+    doc = _doc(OPS_LEGACY, stem, t1)
+    doc["configuration"] = CONFIG if config is None else config
+    return json.dumps(doc, indent=2).encode()
 
 
 def _fresh(stem: str, t1: float = 100.0) -> bytes:
-    """A post-#46 payload: sorted operations, canonical separators."""
-    return json.dumps(_doc(OPS_SORTED, stem, t1), sort_keys=True, separators=(",", ":")).encode()
+    """A post-#46 LIVE payload: sorted operations, canonical separators."""
+    doc = _doc(OPS_SORTED, stem, t1)
+    doc["configuration"] = CONFIG
+    return json.dumps(doc, sort_keys=True, separators=(",", ":")).encode()
 
 
-def _live(stem: str, t1: float = 100.0) -> bytes:
-    """A snapshot as a LIVE poll archived it: full `configuration`, live `target`."""
-    doc = _doc(OPS_LEGACY, stem, t1)
-    doc["configuration"] = {"backend_name": "ibm_fez", "n_qubits": 156, "simulator": False}
-    return json.dumps(doc, indent=2).encode()
+def _live_with_target(stem: str, operations: list[dict[str, Any]], t1: float = 100.0) -> bytes:
+    """A LIVE payload whose `target` differs. Never explainable as a re-read."""
+    doc = _doc(operations, stem, t1)
+    doc["configuration"] = CONFIG
+    return json.dumps(doc, sort_keys=True, separators=(",", ":")).encode()
 
 
 def _historical(stem: str, t1: float = 100.0) -> bytes:
@@ -180,7 +190,12 @@ def _stage(tmp: Path, name: str, payloads: dict[str, bytes]) -> Path:
 
 
 def _run(
-    sandbox: dict[str, Path], staging: Path, worktree: Path, poll_time: str = POLL_TIME
+    sandbox: dict[str, Path],
+    staging: Path,
+    worktree: Path,
+    poll_time: str = POLL_TIME,
+    *,
+    backfill: bool = False,
 ) -> subprocess.CompletedProcess[str]:
     assert BASH is not None
     env = dict(os.environ)
@@ -191,6 +206,7 @@ def _run(
             "POLL_TIME": poll_time,
             "PYTHON": Path(sys.executable).as_posix(),
             "BACKEND": "ibm_fez",
+            "IS_BACKFILL": "1" if backfill else "0",
         }
     )
     return subprocess.run(
@@ -317,7 +333,7 @@ class TestFileSnapshots:
         `collisions/`.
         """
         staging = _stage(sandbox["tmp"], "staging", {STEM_A: _historical(STEM_A)})
-        result = _run(sandbox, staging, sandbox["tmp"] / "wt")
+        result = _run(sandbox, staging, sandbox["tmp"] / "wt", backfill=True)
         assert result.returncode == 0, result.stdout + result.stderr
 
         origin = sandbox["origin"]
@@ -339,14 +355,62 @@ class TestFileSnapshots:
         is #46 §3c's failure mode and it must still reach `collisions/`.
         """
         staging = _stage(sandbox["tmp"], "staging", {STEM_A: _historical(STEM_A, t1=999.0)})
-        result = _run(sandbox, staging, sandbox["tmp"] / "wt")
+        result = _run(sandbox, staging, sandbox["tmp"] / "wt", backfill=True)
         assert result.returncode == 0, result.stdout + result.stderr
 
         origin = sandbox["origin"]
         assert _ledger(origin, "2026-09") == {STEM_A: "collision"}
         collisions = [p for p in _tree(origin) if p.startswith("collisions/")]
         assert len(collisions) == 1
-        assert "CALIBRATION PAYLOAD" in result.stdout + result.stderr
+        assert f"::warning::{STEM_A} differs from the archived copy" in result.stdout
+
+    def test_a_live_target_change_is_still_a_collision(self, sandbox: dict[str, Path]) -> None:
+        """PR #55 review, P1 — the regression that review caught.
+
+        Two LIVE payloads, identical `properties` and `configuration`, one
+        operation dropped from `target`. The first attempt at the backfill fix
+        compared full-then-payload, which reduces to comparing the payload
+        alone (full equality implies payload equality), so this divergent
+        payload was recorded `duplicate-partial` and discarded. It must be
+        preserved.
+        """
+        dropped = [op for op in OPS_SORTED if op["name"] != "cz"]
+        staging = _stage(sandbox["tmp"], "staging", {STEM_A: _live_with_target(STEM_A, dropped)})
+        result = _run(sandbox, staging, sandbox["tmp"] / "wt", backfill=True)
+        assert result.returncode == 0, result.stdout + result.stderr
+
+        origin = sandbox["origin"]
+        assert _ledger(origin, "2026-09") == {STEM_A: "collision"}
+        assert len([p for p in _tree(origin) if p.startswith("collisions/")]) == 1
+
+    def test_a_live_configuration_change_is_still_a_collision(
+        self, sandbox: dict[str, Path]
+    ) -> None:
+        """Same asymmetry check, on `configuration` rather than `target`.
+
+        The incoming payload HAS a configuration, so it cannot be a lossy
+        historical re-read however much else matches.
+        """
+        doc = json.loads(_fresh(STEM_A).decode())
+        doc["configuration"] = {**CONFIG, "n_qubits": 127}
+        staging = _stage(
+            sandbox["tmp"],
+            "staging",
+            {STEM_A: json.dumps(doc, sort_keys=True, separators=(",", ":")).encode()},
+        )
+        result = _run(sandbox, staging, sandbox["tmp"] / "wt", backfill=True)
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert _ledger(sandbox["origin"], "2026-09") == {STEM_A: "collision"}
+
+    def test_a_lossy_reread_outside_a_backfill_is_still_a_collision(
+        self, sandbox: dict[str, Path]
+    ) -> None:
+        """A scheduled poll fetches live, so it can never explain a difference away."""
+        staging = _stage(sandbox["tmp"], "staging", {STEM_A: _historical(STEM_A)})
+        result = _run(sandbox, staging, sandbox["tmp"] / "wt", backfill=False)
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert _ledger(sandbox["origin"], "2026-09") == {STEM_A: "collision"}
+        assert len([p for p in _tree(sandbox["origin"]) if p.startswith("collisions/")]) == 1
 
     def test_a_missing_digest_refuses_to_file_anything(self, sandbox: dict[str, Path]) -> None:
         """Without a comparator the script must stop, not guess."""

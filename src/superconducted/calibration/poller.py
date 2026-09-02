@@ -428,10 +428,13 @@ def _build_historical_window(start_str: str, end_str: str, step_hours_str: str) 
     ``step_hours`` is a **float**. It parsed as ``int`` until 2026-09-02, which
     rejected every sub-hourly sweep with "invalid literal for int() with base
     10: '0.5'" — while the probe's own ``--enumerate`` accepted floats and the
-    workflow input advertised no such restriction. That mattered: NC-030 puts
-    document republication at a mean interval of at most 1.26 h, so an integer
-    step of 1 h is coarser than the publish cadence and NC-031 measures its
-    recall at 87.9%. A backfill could not reach the documents it was run for.
+    workflow input advertised no such restriction. That mattered because a 1 h
+    grid was measured to miss documents that exist: NC-031 puts its recall at
+    87.9% (29 of 33 archived documents returned) in one control window. Note a
+    mean republication interval alone would NOT establish that — whether a
+    document is caught depends on how long it stays the newest one older than
+    some query instant, and on where the query instants fall, not on the mean
+    (PR #55 review). A backfill could not reach documents it was run for.
     """
     start = parse_iso_utc(start_str)
     end = parse_iso_utc(end_str)
@@ -441,6 +444,15 @@ def _build_historical_window(start_str: str, end_str: str, step_hours_str: str) 
     if start >= end:
         raise ValueError(f"start ({start}) must be before end ({end})")
     step = timedelta(hours=step_hours)
+    # A positive float is not enough. `timedelta` resolves to microseconds, so
+    # anything below ~2.8e-10 h rounds to zero and the loop below would never
+    # advance -- an infinite loop that only ends when the job hits its timeout.
+    # Check the converted duration, not just the input (PR #55 review, P3).
+    if step <= timedelta(0):
+        raise ValueError(
+            f"step_hours={step_hours} is positive but rounds to a zero timedelta; "
+            "the sweep would not advance"
+        )
     out: list[datetime] = []
     t = start
     while t < end:

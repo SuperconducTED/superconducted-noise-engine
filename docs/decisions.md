@@ -1073,19 +1073,37 @@ including those that observe nothing. `decision` is one of `new`,
 `duplicate-partial`, `collision`, or `collision-unreadable`.
 
 `duplicate-partial` was added 2026-09-02, after the first production
-backfill. A sweep necessarily re-reads stamps the archive already holds
-— a query inside a gap is answered with the document at the gap's
-opening — and `fetch_snapshot(historical_at=...)` leaves `configuration`
-as `None` and sources `target` from `target_history` rather than the
-live backend. A historical re-read of an archived stamp is therefore
-**never** byte-equal to the live copy, even when every measurement
-matches. Compared whole-document, the first run filed 7 such pairs as
-`collision`, all 7 with byte-identical `properties`. The comparison now
-asks the narrower question second: if the full documents differ but the
-**calibration payload** matches, the row is `duplicate-partial`, the
-archived copy is kept untouched, and nothing is written to
-`collisions/`. That preserves what this tree exists for — #46 §3c's five
-lost versions were gate-level data, which lives inside `properties`.
+backfill. A sweep re-reads stamps the archive already holds — a query
+inside a gap is answered with the document at the gap's opening — and
+`fetch_snapshot(historical_at=...)` leaves `configuration` as `None` and
+sources `target` from `target_history` rather than the live backend. A
+historical re-read of an archived stamp is therefore **never** byte-equal
+to the live copy, even when every measurement matches. Compared
+whole-document, the first run filed 7 such pairs as `collision`, all 7
+with byte-identical `properties`.
+
+A payload comparison alone is **not** the fix, and the first attempt at
+one was withdrawn in review. Full equality implies payload equality, so
+"identical in full, or else identical in payload" reduces to "identical
+in payload" — the extra strictness is vacuous, and two *live* payloads
+differing only in `target` would have been discarded rather than
+preserved. `duplicate-partial` is therefore gated on two independent
+conditions, both required:
+
+1. the run swept a historical window (the workflow passes `IS_BACKFILL`;
+   a scheduled poll fetches live and can never explain a difference
+   away), and
+2. the incoming payload carries the structural signature of the expected
+   loss — no `configuration` of its own where the archived copy has one.
+   This is directional: a *more* complete payload is never explained
+   away, and two live payloads both carry a configuration so they never
+   reach the test.
+
+Only then, and only if the **calibration payload** also matches, is the
+row `duplicate-partial`: the archived copy is kept untouched and nothing
+is written to `collisions/`. That preserves what this tree exists for —
+#46 §3c's five lost versions were gate-level data, which lives inside
+`properties`.
 
     collisions/YYYY-MM/<backend>/<stem>.<sha8>.json
 
@@ -1108,8 +1126,12 @@ ADR-020 specifies; consumers that read only `snapshots/` are unaffected.
 - The ledger outlives Actions run retention, which is the point.
 - `collisions/` is expected to stay empty, and a non-empty tree is a
   signal worth investigating rather than routine churn. Backfill is the
-  case that nearly broke that property: without the payload comparison
-  above, every gap swept would have deposited at least one file here. That property
+  case that nearly broke that property: a re-read of an archived stamp is
+  the normal outcome of sweeping a gap, so without the gated comparison
+  above those re-reads accumulate here as routine churn. (Not every gap
+  produces one — a gap shorter than the step can fall between query
+  instants — so the count follows how many archived stamps a sweep
+  re-reads, and has not been projected.) That property
   depends on the comparison being **canonical, not bytewise**. Byte
   stability from #46 is not sufficient on its own: the archive predates
   that fix, so every file written before it holds `target.operations`
