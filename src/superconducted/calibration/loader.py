@@ -73,6 +73,7 @@ _EXPECTED_UNITS: Final[Mapping[str, str]] = {
     "readout_error": "",
     "prob_meas0_prep1": "",
     "prob_meas1_prep0": "",
+    "init_error": "",
 }
 
 # Conversion factors from the source unit to SI (seconds) for time
@@ -84,7 +85,11 @@ _UNIT_SCALE: Final[Mapping[str, float]] = {
 }
 
 
-@dataclass(frozen=True)
+# kw_only: `init_error` was inserted mid-struct (it belongs with the SPAM
+# probabilities, not appended after a duration), which would silently reorder
+# any positional construction. Every in-repo call site is already keyword-based;
+# this makes that a guarantee rather than a convention.
+@dataclass(frozen=True, kw_only=True)
 class ParsedQubitCalibration:
     """Typed view of one qubit's calibration entries.
 
@@ -97,8 +102,20 @@ class ParsedQubitCalibration:
     downstream skip-strategy aggregators can report on it.
 
     Time fields are stored in SI seconds; ``readout_error``,
-    ``prob_meas0_prep1``, and ``prob_meas1_prep0`` are dimensionless
-    probabilities in ``[0, 1]``.
+    ``prob_meas0_prep1``, ``prob_meas1_prep0`` and ``init_error`` are
+    dimensionless probabilities in ``[0, 1]``.
+
+    ``init_error`` is missing far more often than the rest, in two
+    distinct ways, and both are structural rather than sporadic. IBM did
+    not publish the field at all before 2026-08-04T00:52:30, and even
+    afterwards a fixed set of ~40 of the 156 qubits never reports it —
+    measured at 0 of 40 sampled post-cutover snapshots carrying it for
+    every qubit. Consumers must therefore treat ``None`` here as the
+    common case, not the exception. Per #45, absence is represented and
+    counted rather than imputed: co-observed fields explain under 14% of
+    ``init_error`` variance in-sample, and a model fitted on early August
+    scores a *negative* out-of-sample R^2 on late August, so there is no
+    fitted relation that would justify filling the pre-cutover gap.
     """
 
     index: int
@@ -107,6 +124,7 @@ class ParsedQubitCalibration:
     readout_error: float | None
     prob_meas0_prep1: float | None
     prob_meas1_prep0: float | None
+    init_error: float | None
     readout_length_seconds: float | None
 
 
@@ -142,6 +160,7 @@ class MissingnessStats:
     readout_length: FieldMissingness
     prob_meas0_prep1: FieldMissingness
     prob_meas1_prep0: FieldMissingness
+    init_error: FieldMissingness
 
 
 @dataclass(frozen=True)
@@ -333,6 +352,7 @@ def load_snapshot(path: str | pathlib.Path) -> ParsedCalibrationSnapshot:
                 readout_error=field_values["readout_error"],
                 prob_meas0_prep1=field_values["prob_meas0_prep1"],
                 prob_meas1_prep0=field_values["prob_meas1_prep0"],
+                init_error=field_values["init_error"],
                 readout_length_seconds=field_values["readout_length"],
             )
         )
@@ -351,6 +371,7 @@ def load_snapshot(path: str | pathlib.Path) -> ParsedCalibrationSnapshot:
         readout_length=_bundle("readout_length"),
         prob_meas0_prep1=_bundle("prob_meas0_prep1"),
         prob_meas1_prep0=_bundle("prob_meas1_prep0"),
+        init_error=_bundle("init_error"),
     )
 
     return ParsedCalibrationSnapshot(

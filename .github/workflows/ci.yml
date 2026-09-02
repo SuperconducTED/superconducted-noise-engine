@@ -44,7 +44,9 @@ jobs:
         run: ruff format --check .
 
       - name: Type check (mypy --strict)
-        run: mypy --strict src/superconducted
+        # No path argument: the checked set is [tool.mypy] files in pyproject.toml,
+        # so it stays a single source of truth as scripts are added.
+        run: mypy --strict
 
       - name: Tests
         run: pytest tests/ -v --cov=superconducted --cov-report=xml

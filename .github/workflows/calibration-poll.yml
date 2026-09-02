@@ -4,7 +4,28 @@ name: Calibration Polling
 on:
   schedule:
     - cron: '37 * * * *'
+  # A manual run with all inputs blank behaves exactly like a scheduled poll.
+  # Fill start and end to sweep a historical window instead — verified 2026-08-29
+  # that properties(datetime=...) is honoured on ibm_quantum_platform out to at
+  # least 60 days, so a scheduler outage is recoverable if caught in time.
   workflow_dispatch:
+    inputs:
+      historical_start:
+        description: 'Backfill start, ISO-8601 UTC. Blank = normal single poll.'
+        required: false
+        default: ''
+      historical_end:
+        description: 'Backfill end, ISO-8601 UTC.'
+        required: false
+        default: ''
+      historical_step_hours:
+        description: 'Step in hours. Keep under the readout p10 of 2.5h.'
+        required: false
+        default: '2'
+      max_historical_days:
+        description: 'Reject requests older than this. Probed good to 60.'
+        required: false
+        default: '30'
 
 concurrency:
   group: calibration-poll
@@ -13,7 +34,9 @@ concurrency:
 jobs:
   poll:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # A scheduled poll finishes in ~40s, so keep its bound tight; a backfill
+    # sweep makes one API call per step and legitimately needs longer.
+    timeout-minutes: ${{ inputs.historical_start && 60 || 10 }}
     permissions:
       contents: write
     steps:
@@ -31,11 +54,24 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install -e . --no-deps
 
-      # The poller reads one secret from the environment.
+      # The poller reads one secret from the environment. Inputs are passed via
+      # env, never interpolated into the shell.
       - name: Run poller
         env:
           IBM_QUANTUM_TOKEN: ${{ secrets.IBM_QUANTUM_TOKEN }}
-        run: superconducted-poll --backend ibm_fez
+          HIST_START: ${{ inputs.historical_start }}
+          HIST_END: ${{ inputs.historical_end }}
+          HIST_STEP: ${{ inputs.historical_step_hours || '2' }}
+          MAX_HIST_DAYS: ${{ inputs.max_historical_days || '30' }}
+        run: |
+          if [ -n "$HIST_START" ] && [ -n "$HIST_END" ]; then
+            echo "Backfill sweep: $HIST_START .. $HIST_END every ${HIST_STEP}h"
+            superconducted-poll --backend ibm_fez \
+              --historical "$HIST_START" "$HIST_END" "$HIST_STEP" \
+              --max-historical-days "$MAX_HIST_DAYS"
+          else
+            superconducted-poll --backend ibm_fez
+          fi
 
       - name: Verify poller produced snapshots
         run: |
@@ -44,19 +80,20 @@ jobs:
             exit 1
           }
 
-      # Snapshots are pushed to the dedicated calibration-data branch.
+      # Snapshots are pushed to the dedicated calibration-data branch by
+      # scripts/file_snapshots.sh, which checks that branch out into a SEPARATE
+      # worktree under $RUNNER_TEMP and files into it. It must not be checked
+      # out in place: doing so removed scripts/ from this tree mid-step, the
+      # canonical digest the filing step calls was gone, and every genuine
+      # duplicate would have been recorded as collision-unreadable (PR #50
+      # review). The script -- payload-month filing, never-overwrite, canonical
+      # duplicate/collision split, poll ledger -- is exercised end to end, real
+      # branch switch included, by tests/test_file_snapshots.py.
       - name: Commit snapshot to calibration-data branch
+        env:
+          STAGING_DIR: data/calibration
+          DATA_WORKTREE: ${{ runner.temp }}/calibration-data
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          mkdir -p /tmp/staging
-          cp -r data/calibration/* /tmp/staging/
-          git fetch origin calibration-data
-          git checkout -B calibration-data origin/calibration-data
-          mkdir -p snapshots/$(date -u +%Y-%m)/ibm_fez
-          mv /tmp/staging/ibm_fez/*.json snapshots/$(date -u +%Y-%m)/ibm_fez/
-          git add snapshots/
-          git diff --cached --quiet \
-            && echo 'No new snapshots' \
-            || git commit -m "calibration: $(date -u +%Y-%m-%dT%H:%MZ) ibm_fez"
-          git push origin calibration-data
+          bash scripts/file_snapshots.sh

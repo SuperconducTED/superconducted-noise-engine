@@ -1036,3 +1036,91 @@ a different parameter reading.
 > Depends on ADR-010 (the 27-rule grid whose growth surfaced this), ADR-012
 > (`ProbabilityClip`'s zero-gradient note), and ADR-014 (the trainer clause 5
 > constrains). Does not modify ADR-014's deferral.
+
+---
+
+## ADR-025 — `calibration-data` branch: ledger and collision trees
+
+**Status**: Accepted.
+
+**Context**: ADR-020 fixes the `calibration-data` layout as
+`snapshots/YYYY-MM/<backend>/<ISO8601-timestamp>.json` and nothing else.
+Two defects found while resolving #45 and #46 cannot be fixed inside
+that layout.
+
+First, gaps were unattributable. The workflow's `git diff --cached
+--quiet && echo 'No new snapshots'` branch discarded its own evidence:
+a quiet stretch looked identical to a stopped poller, and the run
+history that could have told them apart expires at ~90 days. Settling
+#45 §5 needed a multi-hour reconstruction from git history that a
+one-line-per-poll record would have made trivial.
+
+Second, a filename collision was treated as proof that IBM had not
+republished, and the payload was silently dropped (before #46, silently
+overwritten). That premise is false. #46 §3c documents five gate-level
+versions lost under one stamp, and the #45 enumeration showed the
+service does not select purely on `last_update_date`. A stamp collision
+with differing bytes is real divergence and discarding it is data loss.
+
+**Decision**: Two sibling trees are added to the branch.
+
+    ledger/YYYY-MM.tsv
+      poll_time_utc <TAB> backend <TAB> last_update_date <TAB> decision
+
+One row per polled document per run, appended on **every** poll
+including those that observe nothing. `decision` is one of `new`,
+`duplicate` (byte-identical to the archived copy), or `collision`.
+
+    collisions/YYYY-MM/<backend>/<stem>.<sha8>.json
+
+Written only on `collision`: the archived copy is never overwritten and
+the divergent payload is preserved beside it, named by the first eight
+hex digits of its SHA-256. `snapshots/` keeps exactly the layout
+ADR-020 specifies; consumers that read only `snapshots/` are unaffected.
+
+**Consequences**:
+
+- Polls that observe nothing now produce a commit, where before they
+  produced none in principle and a 1.4 MB rewrite in practice. The cost
+  is a ~60-byte append. Commit messages distinguish the two cases
+  (`calibration:` vs `poll:`), so the log stops reporting no-ops as new
+  data. This reads #46's acceptance criterion as "no snapshot bytes
+  rewritten per publish window" rather than "one commit per publish
+  window"; the strict version is recoverable by committing the ledger
+  only alongside a new snapshot, at the price of reintroducing the
+  unattributable gap.
+- The ledger outlives Actions run retention, which is the point.
+- `collisions/` is expected to stay empty, and a non-empty tree is a
+  signal worth investigating rather than routine churn. That property
+  depends on the comparison being **canonical, not bytewise**. Byte
+  stability from #46 is not sufficient on its own: the archive predates
+  that fix, so every file written before it holds `target.operations`
+  unsorted, and `cmp` would classify the first re-observation of any
+  archived stamp as a collision — putting routine churn on precisely the
+  channel this tree reserves for real divergence. The workflow therefore
+  compares through `scripts/canonical_snapshot_digest.py`, which sorts
+  `operations` on both sides before hashing. Verified against a real
+  pre-fix snapshot: bytewise differs, canonically identical.
+- A payload that cannot be parsed for comparison is recorded as
+  `collision-unreadable` and preserved rather than discarded. Refusing to
+  decide is safer than guessing `duplicate`, which would drop data.
+- The comparison runs from the **source checkout against a separate
+  worktree** of the data branch (`scripts/file_snapshots.sh`, 2026-09-02).
+  Checking the data branch out in place removes `scripts/` — the branch
+  holds only `snapshots/`, `ledger/`, `collisions/` and a README — so the
+  digest is gone by the time it is called, Python exits 2, and every
+  genuine duplicate is misfiled as `collision-unreadable` (PR #50 review,
+  blocker). `tests/test_file_snapshots.py` runs the script end to end,
+  branch switch included, and pins the `duplicate` / `collision` / `new`
+  decisions.
+- Partitioning both trees by month keeps each file small enough that
+  the per-poll append does not accumulate into a large blob rewrite.
+
+**Source**: #45 (§5 unattributable gaps, and the 2026-08-30 enumeration
+showing `updated_before` does not select purely on `last_update_date`),
+#46 §3c (five gate-level versions lost under one stamp), ADR-020 (the
+layout this extends), `.github/workflows/calibration-poll.yml`,
+`scripts/file_snapshots.sh`, `scripts/canonical_snapshot_digest.py`.
+
+> Extends ADR-020. `snapshots/` is unchanged; this entry adds
+> `ledger/` and `collisions/` alongside it.

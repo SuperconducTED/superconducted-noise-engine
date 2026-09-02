@@ -70,7 +70,7 @@ ignore = [
 [tool.mypy]
 python_version = "3.11"
 strict = true
-files = ["src/superconducted"]
+files = ["src/superconducted", "scripts"]
 warn_unused_ignores = false
 # Quiet down on third-party stubs we don't ship.
 disallow_subclassing_any = false

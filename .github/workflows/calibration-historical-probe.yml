@@ -1,0 +1,110 @@
+# Diagnostic for #45 Phase 2: can this account read historical calibration
+# properties, and how far back does the window reach? The answer decides
+# whether data lost to the scheduler outage is recoverable.
+#
+# Runs only when asked (manual dispatch, or a push to a probe/** branch). Makes
+# one read-only API call per probed depth and commits nothing. It runs here
+# rather than on a workstation because IBM_QUANTUM_TOKEN already lives in this
+# repository's secrets — the probe deliberately does not require the token to
+# be copied anywhere new.
+name: Calibration Historical Probe
+
+on:
+  # workflow_dispatch alone is not enough: GitHub only accepts a dispatch for a
+  # workflow that already exists on the DEFAULT branch, so this could not be run
+  # from a feature branch. The push trigger on a namespaced branch makes the
+  # probe runnable before it merges — and afterwards, runnable without merge
+  # rights.
+  push:
+    branches:
+      - 'probe/**'
+  workflow_dispatch:
+    inputs:
+      backend:
+        description: Backend to probe
+        default: ibm_fez
+        required: false
+      days_back:
+        description: Space-separated depths in days, e.g. "1 7 30 45"
+        default: '1 3 7 14 21 28 30 35 45 60'
+        required: false
+      enumerate_window:
+        description: 'Instead of depths: "START_ISO END_ISO STEP_HOURS" to list every document IBM will serve for that window.'
+        default: ''
+        required: false
+
+# Least privilege: the probe only checks out the repo and reads from IBM. It
+# commits nothing, so GITHUB_TOKEN never needs write. Explicit because the
+# repository default would otherwise apply (CodeQL actions/missing-workflow-permissions).
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e . --no-deps
+
+      # Inputs go through the environment, never interpolated into the shell.
+      - name: Probe historical properties
+        env:
+          IBM_QUANTUM_TOKEN: ${{ secrets.IBM_QUANTUM_TOKEN }}
+          # inputs.* are empty on a push event, so fall back to the same defaults.
+          PROBE_BACKEND: ${{ inputs.backend || 'ibm_fez' }}
+          PROBE_DAYS_BACK: ${{ inputs.days_back || '1 3 7 14 21 28 30 35 45 60' }}
+          PROBE_ENUMERATE: ${{ inputs.enumerate_window }}
+        run: |
+          # Inputs are LISTS, so they must word-split — hence unquoted below.
+          # Validate first so an unexpected value cannot become a glob or a flag.
+          set -f
+          probe() { python scripts/probe_historical_properties.py --backend "$PROBE_BACKEND" "$@" 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"; return "${PIPESTATUS[0]}"; }
+
+          # The `-` MUST come last in the bracket expression. Written as `+-\ ` it
+          # is a reversed range (0x2B..0x20) and bash rejects every input, valid
+          # ones included — which is exactly the bug this shape prevents.
+          validate_window() {
+            case "$1" in
+              *[!0-9.:TZ+\ -]*|'') echo "::error::$2"; exit 1 ;;
+            esac
+          }
+
+          rc=0
+          if [ -n "$PROBE_ENUMERATE" ]; then
+            validate_window "$PROBE_ENUMERATE" "enumerate_window must be 'START_ISO END_ISO STEP_HOURS'"
+            probe --enumerate $PROBE_ENUMERATE || rc=$?
+          else
+            case "$PROBE_DAYS_BACK" in
+              *[!0-9.\ ]*|'') echo "::error::days_back must be numbers and spaces"; exit 1 ;;
+            esac
+            probe --days-back $PROBE_DAYS_BACK || rc=$?
+            # A push carries no inputs, so also enumerate the recent window. That
+            # is the live question — which documents a polling gap actually missed
+            # — and answering it costs only read-only queries. It goes through the
+            # same validate_window as the dispatch path so one code path is tested.
+            if [ "$GITHUB_EVENT_NAME" = push ] && [ "$rc" -eq 0 ]; then
+              echo "" | tee -a "$GITHUB_STEP_SUMMARY"
+              window="$(date -u -d '72 hours ago' +%Y-%m-%dT%H:%M:%SZ) $(date -u +%Y-%m-%dT%H:%M:%SZ) 1"
+              validate_window "$window" "generated window failed validation"
+              probe --enumerate $window || rc=$?
+            fi
+          fi
+
+          echo "probe exit code: $rc" | tee -a "$GITHUB_STEP_SUMMARY"
+          # 0 = worked, 2 = definitively unavailable. Both are successful probes.
+          # 1 means the probe broke OR could not decide: a depth that errored
+          # or returned an unjudgeable document with no depth served, or a
+          # sweep answered with documents newer than it asked for. Neither is
+          # evidence about recoverability and neither may pass as a result.
+          [ "$rc" -eq 0 ] || [ "$rc" -eq 2 ]

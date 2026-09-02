@@ -47,7 +47,7 @@ ANFIS training could begin accumulating immediately.
 | `docs/architecture.md` | Canonical 6-stage pipeline, Aer Factory/Ensemble diagram, no-per-shot-hook invariant, polling docs, open-decision cross-reference. |
 | `docs/decisions.md` | ADR-001 through ADR-016. |
 | `docs/team.md` | Roster + module-ownership table. |
-| `docs/implementations/_TEMPLATE.md` | Implementation-doc template per global CLAUDE.md. |
+| `docs/implementations/_TEMPLATE.md` | Implementation-doc template per the project's documentation convention. |
 | `docs/implementations/2026-05-07-repo-bootstrap.md` | This file. |
 
 ## Implementation approach
@@ -154,5 +154,3 @@ run `superconducted-poll --backend ibm_fez`.
 
 - All ADRs in [`docs/decisions.md`](../decisions.md).
 - [`docs/architecture.md`](../architecture.md).
-- [`CLAUDE.md`](../../CLAUDE.md) (operational instructions for future
-  sessions).

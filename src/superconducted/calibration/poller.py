@@ -2,9 +2,18 @@
 
 Cron-friendly: one invocation = one polling round. Idempotent: existing
 snapshot files on disk are skipped (race-safe via ``O_CREAT|O_EXCL`` in
-:mod:`storage`). Handles ``NotImplementedError`` (historical access tier
-denied), ``properties()`` returning ``None``, and transient ``RuntimeError``
-with exponential-backoff retries.
+:mod:`storage`). Handles ``properties()`` returning ``None`` and transient
+``RuntimeError`` with exponential-backoff retries.
+
+The ``NotImplementedError`` branch is **defensive only**. It was written for
+the retired ``ibm_quantum`` channel; on ``ibm_quantum_platform`` with
+``qiskit-ibm-runtime==0.46.1`` the exception cannot be raised, because
+``IBMBackend.properties`` -> ``RuntimeClient.backend_properties`` ->
+``CloudBackend.properties`` turns ``datetime`` into an ``updated_before``
+query parameter and sends it. Denial therefore arrives as *data* — a
+current document in answer to a historical request — which is why
+:func:`fetch_snapshot` compares the returned stamp against the request
+rather than relying on an exception.
 
 Logs to a rotating file (default: ``data/logs/poller.log``). The CLI
 ``superconducted-poll`` is bound in ``pyproject.toml``.
@@ -94,6 +103,12 @@ def serialize_target(target: Any) -> dict[str, Any] | None:
                     with contextlib.suppress(TypeError, ValueError):
                         entry["error"] = float(error)
             out["operations"].append(entry)
+    # Byte-stability guard (#46). Neither Target.operation_names nor
+    # qargs_for_operation_name guarantees iteration order, and the
+    # sort_keys=True in storage.py normalises mapping keys, not sequence
+    # elements — so without this sort the same calibration document
+    # serialises differently on every poll.
+    out["operations"].sort(key=lambda e: (e["name"], tuple(e["qargs"])))
     return out
 
 
@@ -125,7 +140,7 @@ def serialize_configuration(config: Any) -> dict[str, Any] | None:
     return fallback
 
 
-def _coerce_utc(ts: Any) -> datetime | None:
+def coerce_utc(ts: Any) -> datetime | None:
     """Coerce an arbitrary timestamp (datetime, ISO str) to tz-aware UTC."""
     if ts is None:
         return None
@@ -154,7 +169,8 @@ def _fetch_properties_with_retry(
     exponential-backoff retries on :class:`RuntimeError`.
 
     :class:`NotImplementedError` is propagated immediately (historical
-    access tier denied) — retry would not help.
+    access tier denied) — retry would not help. Verified dead against
+    ``qiskit-ibm-runtime==0.46.1``; kept as a guard for other SDK versions.
     """
     last_exc: RuntimeError | None = None
     for attempt in range(retries + 1):
@@ -194,6 +210,10 @@ def fetch_snapshot(
 
     - ``backend.properties()`` returns ``None``.
     - Historical query raises :class:`NotImplementedError`.
+    - A historical query comes back with a document *newer* than the
+      requested instant, i.e. the service ignored ``datetime`` and served
+      the current document. Returning it would archive a snapshot the
+      caller already holds while reporting success.
 
     Raises the underlying :class:`RuntimeError` if ``retries`` are exhausted.
 
@@ -226,13 +246,30 @@ def fetch_snapshot(
         return None
 
     properties_dict = properties.to_dict()
-    timestamp = _coerce_utc(getattr(properties, "last_update_date", None))
+    timestamp = coerce_utc(getattr(properties, "last_update_date", None))
     if timestamp is None:
-        timestamp = _coerce_utc(properties_dict.get("last_update_date"))
+        timestamp = coerce_utc(properties_dict.get("last_update_date"))
     if timestamp is None:
         log.error(
             "Could not determine timestamp for %s snapshot (no last_update_date)",
             backend_name,
+        )
+        return None
+
+    # A historical request must come back with a document older than the
+    # instant asked for. If it does not, the service ignored `datetime` and
+    # handed back the current document: `save_if_new` would then find the
+    # timestamp already archived, report "skipped", and the whole sweep would
+    # finish green having recovered nothing. Refusing here is what makes a
+    # failed backfill visible instead of silent.
+    if historical_at is not None and timestamp > historical_at:
+        log.error(
+            "Historical request for %s at %s returned a NEWER document (%s); "
+            "the service ignored the datetime filter, so this is the current "
+            "snapshot, not the requested one. Refusing to archive it.",
+            backend_name,
+            historical_at.isoformat(),
+            timestamp.isoformat(),
         )
         return None
 
@@ -374,7 +411,7 @@ def poll_once(
                 )
 
 
-def _parse_iso_utc(s: str) -> datetime:
+def parse_iso_utc(s: str) -> datetime:
     """Parse an ISO-8601 string and return tz-aware UTC; naive → assumed UTC."""
     s = s.strip()
     if s.endswith("Z"):
@@ -386,8 +423,8 @@ def _parse_iso_utc(s: str) -> datetime:
 
 
 def _build_historical_window(start_str: str, end_str: str, step_hours_str: str) -> list[datetime]:
-    start = _parse_iso_utc(start_str)
-    end = _parse_iso_utc(end_str)
+    start = parse_iso_utc(start_str)
+    end = parse_iso_utc(end_str)
     step_hours = int(step_hours_str)
     if step_hours <= 0:
         raise ValueError(f"step_hours must be positive; got {step_hours}")

@@ -212,6 +212,38 @@ class TestSerializeTarget:
         assert isinstance(result["operations"], list)
         assert len(result["operations"]) == 3
 
+    def test_operations_order_independent(self) -> None:
+        """Regression for #46: serialization must not leak iteration order.
+
+        Neither ``Target.operation_names`` nor ``qargs_for_operation_name``
+        guarantees an order, so two processes reading the *same* calibration
+        document produced byte-different JSON. That defeated the workflow's
+        ``git diff --cached --quiet`` no-op guard and committed 333 snapshot
+        rewrites carrying no new data. Both loops are varied below.
+        """
+
+        def make_target(op_names: list[str], sx_qargs: list[tuple[int, ...]]) -> MagicMock:
+            target = MagicMock()
+            target.num_qubits = 2
+            target.physical_qubits = [0, 1]
+            target.operation_names = op_names
+            qargs_by_name = {"x": [(0,), (1,)], "sx": sx_qargs, "cx": [(0, 1)]}
+            target.qargs_for_operation_name.side_effect = lambda name: qargs_by_name[name]
+            instr_props = MagicMock()
+            instr_props.duration = 35.6e-9
+            instr_props.error = 1e-3
+            target.__getitem__.return_value = instr_props
+            return target
+
+        # Same content, both loops permuted: outer (operation_names) and
+        # inner (qargs_for_operation_name).
+        first = serialize_target(make_target(["x", "sx", "cx"], [(0,), (1,)]))
+        second = serialize_target(make_target(["cx", "x", "sx"], [(1,), (0,)]))
+
+        assert first is not None
+        assert len(first["operations"]) == 5
+        assert json.dumps(first, sort_keys=True) == json.dumps(second, sort_keys=True)
+
 
 # --- CalibrationSnapshot validation --------------------------------------
 
@@ -269,6 +301,40 @@ class TestFetchSnapshot:
         snap = fetch_snapshot(service, "ibm_test", historical_at=datetime(2026, 4, 1, tzinfo=UTC))
         assert snap is None
 
+    def test_historical_request_answered_with_a_newer_document_is_rejected(
+        self,
+        make_mock_service: Callable[..., MagicMock],
+        make_mock_properties: Callable[..., MagicMock],
+    ) -> None:
+        """A service that ignores `datetime` must not be mistaken for success.
+
+        On qiskit-ibm-runtime 0.46.1 `datetime` becomes an `updated_before`
+        query parameter and no exception is raised if it is disregarded — the
+        current document simply comes back. Archiving it would store a
+        timestamp the caller already holds, so `save_if_new` would report
+        "skipped (already archived)" and a whole backfill sweep would finish
+        green having recovered nothing. Refusing here is what makes that loud.
+        """
+        requested = datetime(2026, 4, 1, tzinfo=UTC)
+        current = make_mock_properties(last_update_date=datetime(2026, 8, 29, tzinfo=UTC))
+        service = make_mock_service(properties_value=current)
+
+        assert fetch_snapshot(service, "ibm_test", historical_at=requested) is None
+
+    def test_historical_request_answered_with_an_older_document_is_kept(
+        self,
+        make_mock_service: Callable[..., MagicMock],
+        make_mock_properties: Callable[..., MagicMock],
+    ) -> None:
+        """The honoured case: a document at or before the request is archived."""
+        requested = datetime(2026, 8, 29, tzinfo=UTC)
+        served = datetime(2026, 8, 28, 13, 8, 46, tzinfo=UTC)
+        service = make_mock_service(properties_value=make_mock_properties(last_update_date=served))
+
+        snap = fetch_snapshot(service, "ibm_test", historical_at=requested)
+        assert snap is not None
+        assert snap.timestamp == served
+
     def test_retries_on_runtime_error(
         self,
         make_mock_service: Callable[..., MagicMock],
@@ -304,7 +370,14 @@ class TestFetchSnapshot:
         make_mock_properties: Callable[..., MagicMock],
     ) -> None:
         # The historical_at requested differs from what properties report.
-        actual_ts = datetime(2026, 4, 15, 10, 0, 0, tzinfo=UTC)
+        #
+        # The payload stamp must be OLDER than the request: `properties(datetime=T)`
+        # returns the newest document older than T, so a newer one means the service
+        # ignored the filter and is now rejected outright — see
+        # test_historical_request_answered_with_a_newer_document_is_rejected. This
+        # case is about which of the two timestamps ends up on the snapshot, and
+        # that question only has a meaningful answer when the response is valid.
+        actual_ts = datetime(2026, 3, 15, 10, 0, 0, tzinfo=UTC)
         props = make_mock_properties(last_update_date=actual_ts)
         service = make_mock_service(properties_value=props)
         snap = fetch_snapshot(
