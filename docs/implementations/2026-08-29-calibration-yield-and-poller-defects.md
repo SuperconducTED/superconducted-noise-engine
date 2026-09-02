@@ -30,7 +30,7 @@ it happens.
 | `src/superconducted/calibration/loader.py` | `init_error` is a first-class typed field with its own missingness counters (ADR-017 Skip pattern); `ParsedQubitCalibration` is `kw_only`. |
 | `scripts/probe_historical_properties.py` | New: maps how far back historical properties can be read, and enumerates every document a window will serve. |
 | `scripts/canonical_snapshot_digest.py` | New: order-insensitive snapshot digest, so a pre-fix archived file compares equal to its post-fix re-serialisation. |
-| `.github/workflows/calibration-poll.yml` | Files by payload month, never overwrites an archived path, compares canonically to split `duplicate` from `collision`, appends a poll ledger, and accepts backfill inputs. |
+| `.github/workflows/calibration-poll.yml` | Files by payload month, never overwrites an archived path, compares canonically to split `duplicate` from `collision`, appends a poll ledger, and accepts backfill inputs. Since 2026-09-02 the filing logic lives in `scripts/file_snapshots.sh` and runs against a separate worktree. |
 | `.github/workflows/calibration-historical-probe.yml` | New: read-only diagnostic for retention depth and window enumeration. |
 | `.github/workflows/ci.yml` | `mypy --strict` runs with no path argument so `[tool.mypy] files` is the single source of truth. |
 | `pyproject.toml` | Puts the whole `scripts` directory in mypy's checked set, so a new script cannot escape it. |
@@ -67,7 +67,9 @@ path is now left alone, restoring across the ephemeral-runner boundary the
 `data/calibration/`, empty on every fresh runner, so it never consults the
 branch). And the `echo 'No new snapshots'` branch discarded its own evidence, so
 every gap was unattributable; a ledger row now records
-`(poll_time, backend, observed last_update_date, decision)`.
+`(poll_time, backend, observed last_update_date, decision)`. *(2026-09-02: the
+step now runs as `scripts/file_snapshots.sh` against a separate worktree of the
+data branch, so the digest it calls stays on disk — see Corrections below.)*
 
 **Backfill feasibility (#45 Phase 2).** `fetch_snapshot` catches
 `NotImplementedError` and logs "historical access tier denied", but in
@@ -94,6 +96,17 @@ carrying 504 distinct device states, the effective ratio is 504 / 126 ≈ **4.0
 samples per parameter**, below the 5× the number was derived from. The gate is
 not met.
 
+Distinct states are an **upper bound** on independent samples, not a count of
+them. Consecutive states are temporally correlated — T1/T2 recalibrate roughly
+daily and the readout family roughly every 4 h (#45 §3) — so the effective
+sample size under a samples-per-parameter rule is smaller than 504, and the 630
+figure itself is a working threshold from a rule of thumb, not a guarantee of
+training sufficiency. Neither caveat changes the conclusion (the gate is not met
+either way); both are recorded on NC-012 and NC-025 so that 504 is not later
+read as 504 independent draws. Assessing the temporal dependence properly is
+deferred with the trainer (Design decision 3). *(Added 2026-09-02; see the
+corrections note at the end of this document.)*
+
 ### Polling sufficiency
 
 Let λ be IBM's publish rate for a parameter family and μ the poll rate. Capture
@@ -102,8 +115,8 @@ already held. For the readout family (λ ≈ 1/4 h = 6 day⁻¹), μ < 6/day los
 irrecoverably in real time, while μ > 8/day is almost pure duplication. This is
 why the recommendation targets ~8 polls/day rather than restoring 24 — the
 marginal value of polls 9 through 24 is approximately zero, and #45's
-measurement bears this out: poll rate rose 2.7× and data rose 1.57×
-(Pearson r = +0.393).
+measurement bears this out: poll rate rose 2.7× and data rose 1.57× — both in
+**snapshot files per day** (#45 §1; Pearson r = +0.393).
 
 ### Capture rate over the live outage
 
@@ -163,10 +176,14 @@ misses most documents. The ~6/day figure survives only as a floor for catching
 **What it does not establish.** These are document republications, not distinct
 device states. #45 measured 43.6% of captured snapshots as byte-identical in their
 qubit block to the previous one, so an unknown fraction of the 46 carries no new
-qubit information — and #45's central result (2.7× polling → 1.57× data) was
-measured in *states*, so the sublinearity of information yield is untouched.
+qubit information. #45's "2.7× polling → 1.57× data" comparison (§1) is in
+**snapshot files per day**, not states; its state-level evidence for
+sublinearity is §8c, where marginal distinct-state yield fell 28% as polling
+doubled. Neither is touched by a document-level republication count.
 Converting 46 documents into a count of new device states requires fetching them
 and diffing the qubit blocks. That is the backfill, and it is the only way to know.
+*(Corrected 2026-09-02: an earlier version of this paragraph said the 2.7×/1.57×
+figure was measured in states. It was not.)*
 
 ### Marginal information yield
 
@@ -186,13 +203,15 @@ is exactly 0 or 1, so there is no overlap region and P(init_error | t < t\*) is
 assumption the data cannot check across the boundary.
 
 That assumption *is* checkable within the observed region by splitting on time.
-Over 40 snapshots spanning 2026-08-04 → 08-24 (n = 4607 qubit-records), OLS of
+Over 40 snapshots — every 5th of the 225 post-cutover files under
+`snapshots/2026-08/ibm_fez/` at `f0930b9`, i.e. `files[::5][:40]`, spanning
+2026-08-04T00:52:30 → 08-24T18:35:35 (n = 4607 qubit-records) — OLS of
 `init_error` on the six co-observed fields gives:
 
 | | R² |
 | --- | ---: |
 | in-sample, all six predictors | 0.139 |
-| **out-of-sample, train 08-04→08-19, test 08-19→08-24** | **−0.585** |
+| **out-of-sample, first 20 snapshots train (08-04→08-19), last 20 test (08-19→08-24)** | **−0.585** |
 | best single predictor (`readout_error`), in-sample | 0.128 |
 | best single predictor, out-of-sample | −0.168 |
 
@@ -204,10 +223,16 @@ imputation error would correlate perfectly with the schema boundary, it would
 present as a spurious regime shift dated exactly to a schema change — the class
 of artifact a drift model is built to detect.
 
-Reproduce with `scripts/` equivalents of the two analyses recorded in the
-session scratchpad, or re-derive: sample post-cutover snapshots, regress
-`init_error` on `{prob_meas0_prep1, prob_meas1_prep0, readout_error,
-readout_length, T1, T2}`, then refit on the earlier half and score on the later.
+Reproduce with `scripts/init_error_analysis.py --ref f0930b9` (committed
+2026-09-02; it reads the archive through `git show`, so only the ref needs to
+be fetched, and it prints the NC-027 counts from the same sample). The split is
+**between sampled snapshots** — first 20 train, last 20 test — which no
+ordering of rows within a snapshot can move; the PR #50 reviewer's independent
+reproduction, −0.584865, is this figure exactly. The original scratchpad cut at
+the row midpoint instead, which at `f0930b9` falls inside the
+2026-08-19T12:45:23 snapshot (3 of its 115 rows train, 112 test); that variant is
+tie-order sensitive — −0.586 in snapshot order, −0.61 to −0.58 over 200 random
+orderings of that one snapshot — and the script prints it for continuity only.
 Note `readout_length` is constant in the sample, so it contributes nothing.
 
 ### `init_error` raggedness
@@ -317,7 +342,13 @@ gh workflow run calibration-historical-probe.yml --repo SuperconducTED/supercond
 Workflow filing logic was simulated before deployment with a payload dated
 2026-06-30 polled under a 2026-09-01 clock, plus a duplicate of an archived path:
 the June payload filed under `snapshots/2026-06/`, the duplicate was preserved
-unmodified, and both decisions appeared in the ledger.
+unmodified, and both decisions appeared in the ledger. **That simulation did not
+switch branches**, which is why it missed the defect PR #50's review found: the
+in-place `git checkout -B calibration-data` removed `scripts/` and with it the
+digest, so every genuine duplicate would have been filed as
+`collision-unreadable`. The filing step now runs `scripts/file_snapshots.sh`
+against a separate worktree, and `tests/test_file_snapshots.py` exercises it end
+to end, real branch switch included (`2026-09-02-pr50-review-fixes.md`).
 
 ## Results
 
@@ -342,20 +373,62 @@ unmodified, and both decisions appeared in the ledger.
 No depth was denied. The `NotImplementedError` in IBM's own API reference is
 stale for this account and channel.
 
-**The 14 d and 21 d rows independently re-confirm #45's corrected §5.** Their
-returned stamps — 2026-08-14T20:18:59 and 2026-08-07T03:21:59 — are exactly the
-opening boundaries of the dark windows #45 §4 reports (`2026-08-14T20:19` and
-`2026-08-07T03:22`). Since `properties(datetime=T)` returns the closest document
-*older than* T, a request landing inside a window returning a document from
-before it proves IBM published nothing in between. The Aug 7–10 and Aug 14–17
-gaps were the backend being idle, not the pipeline dropping data — now
-established from IBM's own history, independently of the git-history argument
-that first settled it. **There is nothing to backfill there.**
+**The 14 d and 21 d rows are consistent with #45's corrected §5; they do not
+prove it.** Their returned stamps — 2026-08-14T20:18:59 and 2026-08-07T03:21:59 —
+are exactly the opening boundaries of the dark windows #45 §4 reports
+(`2026-08-14T20:19` and `2026-08-07T03:22`). If `properties(datetime=T)` strictly
+returned the newest document older than T, each row would show that nothing was
+published between the window's opening and the instant requested — but only up
+to that instant. The 21 d request (08-08T14:06) says nothing about
+08-08T14:06 → 08-10T14:02, the 14 d request (08-15T14:06) nothing about
+08-15T14:06 → 08-17T06:57, and the 08-10 → 08-12 window was not probed at all.
+The premise is not strictly true either: the outage enumeration above found two
+archived documents that the 1 h sweep never returned
+(`docs/evidence/pr47-outage-enumeration/README.md`), so `updated_before` does not
+select purely on `last_update_date`, and a returned earlier stamp can coexist
+with unreturned later ones. The two rows are therefore evidence that the backend
+was quiet, not proof that the windows are empty. Settling it is a read-only
+enumeration sweep of those windows at a fine step — cheap, and runnable through
+`workflow_dispatch` once the probe workflow is on the default branch. Until
+then the honest status of the Aug 7–17 windows is *probably nothing to
+backfill; not yet enumerated*. *(Corrected 2026-09-02; the earlier text said
+"proves" and "there is nothing to backfill there".)*
 
 The recoverable loss is the scheduler outage from 2026-08-26 onward, where IBM
 *was* publishing at ~4 h and the poller ran 2–3×/day.
 
+## Corrections, 2026-09-02 (PR #50 review)
+
+Bengisu's review of PR #50 (`a4c6568`) found one merge blocker, two probe
+defects, and three statements above that overreached. The code fixes are
+documented in `2026-09-02-pr50-review-fixes.md`; the statements were corrected
+**in place** rather than left standing with a footnote, because this document is
+the durable record the numerical-claims register points at, and each in-place
+change is listed here so the history stays visible:
+
+- **§ The 630 floor** — added the caveat that distinct states bound independent
+  samples from above and that 630 is a working threshold, not a guarantee.
+  Conclusion unchanged. Mirrored on NC-012 and NC-025.
+- **§ Polling sufficiency** and **§ Correction, 2026-08-30 → What it does not
+  establish** — the "2.7× polling → 1.57× data" figure is in snapshot files per
+  day (#45 §1), not distinct states; the sentence claiming otherwise was wrong
+  and is replaced. The state-level sublinearity evidence is #45 §8c.
+- **§ `init_error`: why imputation was rejected** — the 40-snapshot selection
+  rule and the split are now stated, the analysis is committed as
+  `scripts/init_error_analysis.py`, and the split is fixed between snapshots
+  because the original row-midpoint cut was tie-order sensitive. The reported
+  −0.585 stands (−0.584865, matching the reviewer's reproduction).
+- **§ Results, 14 d and 21 d rows** — "proves IBM published nothing in between"
+  and "there is nothing to backfill there" replaced with what the two queries
+  can support: consistency with a quiet backend, not proof of empty windows.
+- **§ Verification** — the pre-deployment shell simulation is now described
+  accurately: it did not switch branches, which is the gap the blocker lived in.
+- **§ Implementation approach, Archive integrity** — the filing step now runs
+  from `scripts/file_snapshots.sh` against a separate worktree.
+
 ## Related docs
+
+- `2026-09-02-pr50-review-fixes.md` — the review-round fixes and the corrections above
 
 - #45 — dataset yield analysis and the four decisions; #46 — `serialize_target` non-determinism
 - **ADR-017** (`docs/decisions.md`, Accepted) — the Skip strategy this work applies to

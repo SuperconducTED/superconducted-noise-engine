@@ -1104,6 +1104,15 @@ ADR-020 specifies; consumers that read only `snapshots/` are unaffected.
 - A payload that cannot be parsed for comparison is recorded as
   `collision-unreadable` and preserved rather than discarded. Refusing to
   decide is safer than guessing `duplicate`, which would drop data.
+- The comparison runs from the **source checkout against a separate
+  worktree** of the data branch (`scripts/file_snapshots.sh`, 2026-09-02).
+  Checking the data branch out in place removes `scripts/` — the branch
+  holds only `snapshots/`, `ledger/`, `collisions/` and a README — so the
+  digest is gone by the time it is called, Python exits 2, and every
+  genuine duplicate is misfiled as `collision-unreadable` (PR #50 review,
+  blocker). `tests/test_file_snapshots.py` runs the script end to end,
+  branch switch included, and pins the `duplicate` / `collision` / `new`
+  decisions.
 - Partitioning both trees by month keeps each file small enough that
   the per-poll append does not accumulate into a large blob rewrite.
 
@@ -1111,7 +1120,7 @@ ADR-020 specifies; consumers that read only `snapshots/` are unaffected.
 showing `updated_before` does not select purely on `last_update_date`),
 #46 §3c (five gate-level versions lost under one stamp), ADR-020 (the
 layout this extends), `.github/workflows/calibration-poll.yml`,
-`scripts/canonical_snapshot_digest.py`.
+`scripts/file_snapshots.sh`, `scripts/canonical_snapshot_digest.py`.
 
 > Extends ADR-020. `snapshots/` is unchanged; this entry adds
 > `ledger/` and `collisions/` alongside it.

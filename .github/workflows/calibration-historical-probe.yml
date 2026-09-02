@@ -102,6 +102,9 @@ jobs:
           fi
 
           echo "probe exit code: $rc" | tee -a "$GITHUB_STEP_SUMMARY"
-          # 0 = worked, 2 = definitively unavailable. Both are successful probes;
-          # only 1 means the probe itself broke.
+          # 0 = worked, 2 = definitively unavailable. Both are successful probes.
+          # 1 means the probe broke OR could not decide: a depth that errored
+          # or returned an unjudgeable document with no depth served, or a
+          # sweep answered with documents newer than it asked for. Neither is
+          # evidence about recoverability and neither may pass as a result.
           [ "$rc" -eq 0 ] || [ "$rc" -eq 2 ]
