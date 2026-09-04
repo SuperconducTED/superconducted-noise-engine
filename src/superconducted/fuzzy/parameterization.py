@@ -16,7 +16,7 @@ import numpy.typing as npt
 from superconducted.fuzzy.tsk import TSKRule, TSKRuleBase
 from superconducted.interfaces import CalibrationFeatureExtractor
 from superconducted.calibration.features import BasicCalibrationVectorizer
-from superconducted.calibration.storage import CalibrationSnapshot
+from superconducted.types import CalibrationSnapshot
 from superconducted.fuzzy.membership import GaussianMF, IntervalGaussianMF, TanhMF, TanhSigmoidMF
 
 
@@ -51,7 +51,7 @@ class ClampingFeatureExtractor(CalibrationFeatureExtractor):
 def _quantile_layout(samples: npt.NDArray[np.float64], k: int) -> dict[str, np.ndarray]:
     """Section 6.3: Computes the p1-p99 quantile binning layout for k levels."""
 
-    def q_fn(p: npt.NDArray[np.float64] | float) -> np.ndarray:
+    def q_fn(p: npt.NDArray[np.float64] | float) -> Any:
         return np.quantile(samples, p, method="linear")
 
     lo = float(q_fn(0.01))
@@ -96,7 +96,7 @@ def grid_partition(
     layout = _quantile_layout(samples, k)
     lo, e, c, r, m = layout["lo"], layout["e"], layout["c"], layout["r"], layout["m"]
 
-    mfs = []
+    mfs: list[Any] = []
 
     if shape is GaussianMF:
         for j in range(k):
@@ -160,7 +160,7 @@ def anchored_rule_base(
     anchor_product = list(itertools.product(*anchors))
 
     rules = []
-    expected_out_dim = None
+    expected_out_dim = 0
 
     for mf_tuple, anchor_tuple in zip(mf_product, anchor_product, strict=True):
         x_r = np.array(anchor_tuple, dtype=np.float64)
@@ -169,7 +169,7 @@ def anchored_rule_base(
         if not np.all(np.isfinite(y_target)):
             raise ValueError(f"Target function returned non-finite values for anchor {x_r}")
 
-        if expected_out_dim is None:
+        if expected_out_dim == 0:
             expected_out_dim = y_target.shape[0]
         elif y_target.shape[0] != expected_out_dim:
             raise ValueError(
@@ -179,6 +179,6 @@ def anchored_rule_base(
         consequent = np.zeros((expected_out_dim, input_dim + 1), dtype=np.float64)
         consequent[:, -1] = y_target
 
-        rules.append(TSKRule(antecedent_mfs=list(mf_tuple), consequent=consequent))
+        rules.append(TSKRule(antecedent_mfs=list(mf_tuple), consequent_params=consequent))
 
-    return TSKRuleBase(rules)
+    return TSKRuleBase(rules=rules, input_dim=input_dim, output_dim=expected_out_dim)

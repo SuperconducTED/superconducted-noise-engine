@@ -20,7 +20,7 @@ import numpy as np
 # The private _git function is excluded to avoid ImportError.
 from scripts.init_error_analysis import list_snapshots, read_snapshot
 from superconducted.calibration.features import BasicCalibrationVectorizer, _coerce_finite_float
-from superconducted.calibration.storage import CalibrationSnapshot
+from superconducted.types import CalibrationSnapshot
 
 
 @dataclass(frozen=True)
@@ -104,7 +104,7 @@ def snapshot_row(path: str, doc: dict[str, Any]) -> SnapshotFeatureRow:
         mean_T1, mean_T2, mean_ro = float(means[0]), float(means[1]), float(means[2])  # noqa: N806
     except ValueError:
         # FR-2: snapshot extract rejects -> written with mean_* empty, not dropped silently
-        mean_T1 = mean_T2 = mean_ro = None  # noqa: N806
+        mean_T1 = mean_T2 = mean_ro = None  # type: ignore[assignment]  # noqa: N806
 
     # 2. Extract per-qubit stats matching the exact Nduv filter in features.py
     qubits_section = snapshot.properties.get("qubits", [])
