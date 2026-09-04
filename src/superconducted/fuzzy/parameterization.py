@@ -3,6 +3,7 @@
 Bridges empirical archive statistics with the fuzzy inference engine,
 replacing hard-coded shape parameters with distribution-aware bounds.
 """
+
 from __future__ import annotations  # noqa: I001
 
 import itertools
@@ -16,12 +17,7 @@ from superconducted.fuzzy.tsk import TSKRule, TSKRuleBase
 from superconducted.interfaces import CalibrationFeatureExtractor
 from superconducted.calibration.features import BasicCalibrationVectorizer
 from superconducted.calibration.storage import CalibrationSnapshot
-from superconducted.fuzzy.membership import (
-    GaussianMF,
-    IntervalGaussianMF,
-    TanhMF,
-    TanhSigmoidMF
-)
+from superconducted.fuzzy.membership import GaussianMF, IntervalGaussianMF, TanhMF, TanhSigmoidMF
 
 
 class ClampingFeatureExtractor(CalibrationFeatureExtractor):
@@ -75,10 +71,7 @@ def _quantile_layout(samples: npt.NDArray[np.float64], k: int) -> dict[str, np.n
 
 
 def partition_anchors(
-    samples: npt.NDArray[np.float64],
-    k: int = 3,
-    *,
-    placement: str = "quantile"
+    samples: npt.NDArray[np.float64], k: int = 3, *, placement: str = "quantile"
 ) -> npt.NDArray[np.float64]:
     """FR-6: Anchors for every shape are the layout centers (c_j)."""
     if placement != "quantile":
@@ -94,7 +87,7 @@ def grid_partition(
     k: int = 3,
     *,
     placement: str = "quantile",
-    qubit_spread: Optional[float] = None  # noqa: UP045
+    qubit_spread: Optional[float] = None,  # noqa: UP045
 ) -> List[Any]:  # noqa: UP006
     """Section 6.3: Generates MFs bounded by empirical snapshot data quantiles."""
     if placement != "quantile":
@@ -128,10 +121,10 @@ def grid_partition(
     elif shape is TanhMF:
         for j in range(k):
             m_l = (c[j] - e[j]) / 4.0
-            m_r = (e[j+1] - c[j]) / 4.0
+            m_r = (e[j + 1] - c[j]) / 4.0
 
             left = e[j] - m_l
-            right = e[j+1] + m_r
+            right = e[j + 1] + m_r
 
             slope_left = math.atanh(0.8) / m_l
             slope_right = math.atanh(0.8) / m_r
@@ -148,7 +141,7 @@ def anchored_rule_base(
     per_input_mfs: Sequence[Sequence[Any]],
     target_fn: Callable[[npt.NDArray[np.float64]], npt.NDArray[np.float64]],
     *,
-    anchors: Sequence[npt.NDArray[np.float64]]
+    anchors: Sequence[npt.NDArray[np.float64]],
 ) -> TSKRuleBase:
     """FR-6, Section 6.4: Constructs a TSKRuleBase mapped to empirical anchors."""
     input_dim = len(per_input_mfs)
@@ -180,8 +173,7 @@ def anchored_rule_base(
             expected_out_dim = y_target.shape[0]
         elif y_target.shape[0] != expected_out_dim:
             raise ValueError(
-                f"Inconsistent output_dim. Expected {expected_out_dim}, "
-                f"got {y_target.shape[0]}"
+                f"Inconsistent output_dim. Expected {expected_out_dim}, got {y_target.shape[0]}"
             )
 
         consequent = np.zeros((expected_out_dim, input_dim + 1), dtype=np.float64)
