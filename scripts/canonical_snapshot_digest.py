@@ -72,7 +72,22 @@ def _payload_digest(doc: dict[str, Any]) -> str:
     return hashlib.sha256(body.encode("utf-8")).hexdigest()
 
 
-def canonical_digest(path: str | Path, *, payload_only: bool = False) -> str:
+def qubit_digest(payload: dict[str, Any]) -> str:
+    """
+    Returns the canonical SHA-256 hash of ``properties.qubits``.
+    This defines the immutable state of a device (NC-025).  It is intentionally
+    made public; document parsers will be able to eliminate duplicates without
+    running this script for every archive entry.
+    """
+    properties = payload.get("properties")
+    qubits = properties.get("qubits") if isinstance(properties, dict) else None
+    body = json.dumps(qubits, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(body.encode("utf-8")).hexdigest()
+
+
+def canonical_digest(
+    path: str | Path, *, payload_only: bool = False, scope: str = "document"
+) -> str:
     """SHA-256 of the snapshot with ``target.operations`` put in a fixed order.
 
     With ``payload_only``, digest **only** ``properties`` — the calibration
@@ -87,6 +102,10 @@ def canonical_digest(path: str | Path, *, payload_only: bool = False) -> str:
     with Path(path).open(encoding="utf-8") as fh:
         doc = json.load(fh)
 
+    if scope == "qubits":
+        return qubit_digest(doc)
+    if scope != "document":
+        raise ValueError(f"unknown digest scope: {scope}")
     if payload_only:
         doc = {"properties": doc.get("properties")}
     else:
@@ -139,6 +158,12 @@ def main(argv: Iterable[str] | None = None) -> int:
         "configuration. Use to compare a historical fetch against a live one.",
     )
     parser.add_argument(
+        "--scope",
+        choices=("document", "qubits"),
+        default="document",
+        help="Digest the canonical document (default) or properties.qubits only.",
+    )
+    parser.add_argument(
         "--compare-reread",
         action="store_true",
         help="Two paths NEW ARCHIVED: exit 0 only if NEW is a lossy historical re-read "
@@ -154,6 +179,8 @@ def main(argv: Iterable[str] | None = None) -> int:
         parser.error("--compare-reread takes exactly two paths")
     if args.compare and args.compare_reread:
         parser.error("--compare and --compare-reread are mutually exclusive")
+    if args.compare_reread and args.scope != "document":
+        parser.error("--compare-reread only supports --scope document")
 
     if args.compare_reread:
         try:
@@ -167,7 +194,10 @@ def main(argv: Iterable[str] | None = None) -> int:
         return 0 if _payload_digest(new_doc) == _payload_digest(archived_doc) else 1
 
     try:
-        digests = [canonical_digest(p, payload_only=args.payload_only) for p in args.paths]
+        digests = [
+            canonical_digest(p, payload_only=args.payload_only, scope=args.scope)
+            for p in args.paths
+        ]
     except (OSError, ValueError) as exc:
         # ValueError covers both json.JSONDecodeError and UnicodeDecodeError. The
         # latter matters: without it a non-UTF-8 payload escapes as a traceback,

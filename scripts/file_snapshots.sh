@@ -73,9 +73,13 @@ added=0
 # a stopped poller once the 90-day Actions run retention expires -- which is
 # exactly what made #45 expensive.
 ledger="ledger/${POLL_TIME:0:7}.tsv"
-mkdir -p ledger collisions
+state_index="health/state-index.tsv"
+mkdir -p ledger collisions health
 if [ ! -e "$ledger" ]; then
   printf 'poll_time_utc\tbackend\tlast_update_date\tdecision\n' > "$ledger"
+fi
+if [ ! -e "$state_index" ]; then
+  printf 'snapshot_filename\tlast_update_date\tqubit_digest\tis_new_state\n' > "$state_index"
 fi
 
 for f in "$STAGING_DIR/$BACKEND"/*.json; do
@@ -87,6 +91,20 @@ for f in "$STAGING_DIR/$BACKEND"/*.json; do
     mv "$f" "$dest/"
     decision=new
     added=$((added + 1))
+    # This is intentionally incremental: only the just-filed document is
+    # parsed. The scheduled dashboard reads this compact index, never 1+ GB of
+    # snapshots. A digest seen in any prior row is a duplicate device state.
+    qubit_digest=$("$PYTHON" "$digest" --scope qubits "$dest/$base" | awk '{print $1}')
+    if awk -F '\t' -v digest="$qubit_digest" 'NR > 1 && $3 == digest { found=1 } END { exit !found }' "$state_index"; then
+      is_new_state=0
+    else
+      is_new_state=1
+    fi
+    fraction=${stem:15:${#stem}-16}
+    decimal=""
+    if [ -n "$fraction" ]; then decimal=".$fraction"; fi
+    last_update_date="${stem:0:4}-${stem:4:2}-${stem:6:2}T${stem:9:2}:${stem:11:2}:${stem:13:2}${decimal}Z"
+    printf '%s\t%s\t%s\t%s\n' "$base" "$last_update_date" "$qubit_digest" "$is_new_state" >> "$state_index"
   else
     # A stamp collision does NOT prove the documents match -- #46 s3c lost
     # five gate-level versions under one stamp. But the comparison must be
@@ -149,7 +167,7 @@ for f in "$STAGING_DIR/$BACKEND"/*.json; do
   echo "$stem: $decision"
 done
 
-git add snapshots/ ledger/ collisions/
+git add snapshots/ ledger/ collisions/ health/
 if git diff --cached --quiet; then
   echo '::warning::nothing staged - poller produced no payload'
 elif [ "$added" -gt 0 ]; then

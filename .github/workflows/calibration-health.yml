@@ -1,0 +1,59 @@
+name: Calibration Pipeline Health
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: 'Append all unindexed snapshots before rendering (one-time use).'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: calibration-data-write
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: source
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check out compact data inputs
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse --branch calibration-data \
+            "https://github.com/${GITHUB_REPOSITORY}.git" data
+          cd data
+          git sparse-checkout set health ledger README.md
+      - name: Backfill state index
+        if: ${{ inputs.backfill }}
+        run: |
+          cd data
+          git sparse-checkout add snapshots
+          PYTHONPATH=../source python ../source/scripts/backfill_state_index.py --root .
+      - name: Render metrics and SVG
+        run: PYTHONPATH=source python source/scripts/pipeline_health.py --root data
+      - name: Commit only when the dashboard changed
+        run: |
+          cd data
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # metrics.json carries generated_at, so it changes every render. The
+          # SVG intentionally does not. Use the SVG as the material dashboard
+          # change gate; otherwise a quiet day would create a timestamp-only
+          # commit, defeating the branch churn budget.
+          git add health/progress.svg
+          git diff --cached --quiet && exit 0
+          git add health/metrics.json health/state-index.tsv
+          git commit -m 'health: refresh pipeline dashboard'
+          git push origin calibration-data
