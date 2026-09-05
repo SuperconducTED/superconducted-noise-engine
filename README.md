@@ -75,6 +75,22 @@ your chosen cadence. Recommended: every 4 hours.
 Never commit a real token. `.env` is gitignored; `.env.example` is the
 template.
 
+## Synthetic ANFIS smoke run
+
+The trainer can be exercised end-to-end with reproducible targets from a
+planted TSK model. This validates the LSE and premise-training workflow without
+claiming to train against calibration labels.
+
+```bash
+python scripts/train_anfis.py --rows 96 --seed 7
+python scripts/train_anfis.py --rows 96 --seed 7 --it2
+```
+
+The script emits a JSON report labelled `planted_tsk_synthetic`. The official
+calibration target contract is documented separately in the Issue #57
+implementation record. A real-data archive dataset builder remains out of
+scope for this smoke run and belongs to Issue #63.
+
 ## Team
 
 Five contributors plus a faculty advisor. See [docs/team.md](docs/team.md) for
