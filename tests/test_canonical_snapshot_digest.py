@@ -15,7 +15,7 @@ import pathlib
 from typing import Any
 
 import pytest
-from scripts.canonical_snapshot_digest import canonical_digest, is_lossy_reread, main
+from scripts.canonical_snapshot_digest import canonical_digest, is_lossy_reread, main, qubit_digest
 
 
 def _doc(operations: list[dict[str, Any]], t1: float = 100.0) -> dict[str, Any]:
@@ -79,6 +79,19 @@ class TestCanonicalDigest:
         p = _write(tmp_path, "odd.json", doc)
         assert len(canonical_digest(p)) == 64
 
+    def test_qubit_scope_ignores_gate_data_but_not_t1(self, tmp_path: pathlib.Path) -> None:
+        first = _doc(OPS_A, t1=100.0)
+        second = _doc(OPS_SHUFFLED, t1=100.0)
+        second["properties"]["gates"] = [{"gate": "x", "value": 99}]
+        changed = _doc(OPS_A, t1=101.0)
+        a, b, c = (
+            _write(tmp_path, name, doc)
+            for name, doc in (("a.json", first), ("b.json", second), ("c.json", changed))
+        )
+        assert canonical_digest(a, scope="qubits") == canonical_digest(b, scope="qubits")
+        assert canonical_digest(a, scope="qubits") != canonical_digest(c, scope="qubits")
+        assert qubit_digest(first) == canonical_digest(a, scope="qubits")
+
 
 class TestCli:
     def test_compare_same_document_exits_zero(self, tmp_path: pathlib.Path) -> None:
@@ -134,6 +147,11 @@ class TestCli:
         lines = capsys.readouterr().out.strip().split("\n")
         assert len(lines) == 2
         assert all(len(line.split("  ")[0]) == 64 for line in lines)
+
+    def test_qubit_scope_compares_qubit_blocks(self, tmp_path: pathlib.Path) -> None:
+        a = _write(tmp_path, "a.json", _doc(OPS_A))
+        b = _write(tmp_path, "b.json", _doc(OPS_SHUFFLED))
+        assert main(["--compare", "--scope", "qubits", str(a), str(b)]) == 0
 
 
 def _historical(operations: list[dict[str, Any]], t1: float = 100.0) -> dict[str, Any]:

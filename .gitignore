@@ -7,6 +7,10 @@ __pycache__/
 build/
 dist/
 .pytest_cache/
+.pytest-tmp/
+pytest-cache-files-*/
+.calibration-data/
+.calibration-f093/
 .mypy_cache/
 .ruff_cache/
 htmlcov/

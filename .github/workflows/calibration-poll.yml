@@ -30,7 +30,9 @@ on:
         default: '30'
 
 concurrency:
-  group: calibration-poll
+  # The health renderer also commits calibration-data. Serialize both writers
+  # to prevent an otherwise avoidable non-fast-forward push race.
+  group: calibration-data-write
   cancel-in-progress: false
 
 jobs:

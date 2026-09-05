@@ -1164,3 +1164,23 @@ layout this extends), `.github/workflows/calibration-poll.yml`,
 
 > Extends ADR-020. `snapshots/` is unchanged; this entry adds
 > `ledger/` and `collisions/` alongside it.
+
+### Amendment — 2026-09-05: pipeline-health tree
+
+`health/` is added as a third sibling tree on `calibration-data`:
+
+    health/state-index.tsv
+    health/metrics.json
+    health/progress.svg
+
+The state index is append-only and records one qubit-block canonical digest for
+each newly filed snapshot. The generated JSON and SVG are derived only from the
+state index and ledger; scheduled rendering must not traverse `snapshots/`.
+Candidate training floors are configuration inputs and must be labelled in the
+rendered output. The SVG is deterministic for identical committed index and
+ledger inputs, so the health workflow commits only when rendered bytes change.
+
+The daily renderer uses a depth-one sparse checkout of `health/` and `ledger/`.
+The one-time backfill is explicitly dispatched and is the only health operation
+permitted to walk `snapshots/`. This amendment preserves ADR-020 snapshot
+semantics and ADR-025 ledger decisions.
