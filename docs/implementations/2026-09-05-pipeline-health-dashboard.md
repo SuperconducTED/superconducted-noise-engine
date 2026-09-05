@@ -158,9 +158,10 @@ The real-archive backfill was also run locally without a push. It appended 894
 rows at `calibration-data` reference `f0930b9` and reproduced NC-025's 504
 distinct states; a second run appended zero rows. At `46f93c8`, it appended 936
 rows and measured 537 states with a 42.6% duplication ratio. The generated
-health tree and README are staged only in a detached local calibration-data
-worktree. GitHub Actions commit-on-change behaviour and visual inspection of
-the published SVG in both GitHub themes still require a PR and remote push.
+health tree and README are committed locally at `d7bdcd0` on
+`local/calibration-data-health`, without a remote push. GitHub Actions
+commit-on-change behaviour and visual inspection of the published SVG in both
+GitHub themes still require a PR and remote push.
 
 ## Related docs
 
