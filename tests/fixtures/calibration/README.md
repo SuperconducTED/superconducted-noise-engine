@@ -38,6 +38,22 @@ Dropped to stay under a reasonable fixture budget:
 
 The slim fixture is 154 982 bytes.
 
+## `ibm_fez_20260513T121322Z_with_gates.json`
+
+This companion fixture retains the same slim projection plus
+`properties.gates` entries for `sx`, `x`, `rx`, `rz`, `id`, and `cz`. It exists
+for target and reference-model consumers that need gate durations while keeping
+the original missing-T1/T2 qubit-72 regression case.
+
+**Provenance**: same source ref and full-source SHA-256 as the slim fixture.
+
+**Contents measured from this fixture**:
+- File SHA-256: `02d27ff1bf6af8bb06e0bce886454160926cb3adc1466e536245e03431487082`
+- Size: 688 636 bytes.
+- 156 single-qubit `sx` records, each with `gate_length == 24 ns`.
+- 352 two-qubit `cz` records, intentionally ignored by the single-qubit target parser.
+- 155 usable per-qubit thermal-relaxation targets; qubit 72 is skipped as `t1_missing`.
+
 **Regenerating** (run from repo root after `git fetch origin calibration-data`):
 
 ```bash
@@ -59,4 +75,14 @@ pathlib.Path('tests/fixtures/calibration/ibm_fez_20260513T121322Z_q72_missing_t1
     json.dumps(slim, indent=2), encoding='utf-8',
 )
 "
+```
+
+For the gate-bearing fixture, add this property to `slim['properties']` before
+writing it:
+
+```python
+keep = {'sx', 'x', 'rx', 'rz', 'id', 'cz'}
+slim['properties']['gates'] = [
+    entry for entry in data['properties']['gates'] if entry.get('gate') in keep
+]
 ```
