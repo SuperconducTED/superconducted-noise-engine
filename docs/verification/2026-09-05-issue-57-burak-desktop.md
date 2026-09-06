@@ -49,4 +49,4 @@ device-error calculations and their sources.
 This technical verification does not constitute required review approval.
 Issue #57 remains pending approval by `@BurakOztekin` and `@bengisucvd`, plus
 Dr. Akba's out-of-band read of the `interfaces.py` and `training/types.py`
-contracts. ADR-024 remains Open until those decisions are recorded.
+contracts. ADR-026 remains Open until those decisions are recorded.

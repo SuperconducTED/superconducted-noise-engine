@@ -1,4 +1,4 @@
-# ADR-024: Calibration training target
+# ADR-026: Calibration training target
 
 **Status**: Open.
 
