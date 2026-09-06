@@ -347,11 +347,13 @@ sampling lands later.
 
 **Status**: Deferred.
 
-**Context**: `simulate_engine` mean-aggregates counts at bootstrap.
+**Context**: `simulate_engine` sums counts element-wise at bootstrap
+(probability-equivalent to mean under normalized metrics).
 Interval-valued predictions need a different aggregation (e.g. min/max
 or quantile across members) to bracket real hardware behavior.
 
-**Decision (current)**: Mean aggregation now; revisit once ADR-015
+**Decision (current)**: Sum aggregation now, probability-equivalent to
+mean under normalized metrics; revisit once ADR-015
 delivers actual per-member variation worth bracketing.
 
 **Consequences**: Engine-vs-reference numbers at bootstrap are point
@@ -372,6 +374,18 @@ non-trivial.
 > `docs/architecture.md` (line 161) also describe the behavior as
 > "mean" — these are tracked as follow-up issues since they are outside
 > `docs/decisions.md`. Status remains Deferred.
+
+> Aligned · 2026-09-07 · Issue #25 Part 2. The Context and Decision text
+> above now describes current bootstrap aggregation as sum
+> (probability-equivalent to mean under normalized metrics), so the
+> 2026-05-25 note's opening sentence quotes the pre-alignment wording.
+> That note is left as written, per the dated-note convention. Both
+> follow-ups it tracks are closed by the same change: the `harness.py`
+> module docstring now matches `simulate_engine`'s own, and the
+> `docs/architecture.md` row now reads sum — that row is at line 166,
+> not the 161 recorded above. This aligns the DESCRIPTION only; the
+> mean-to-interval upgrade stays gated on ADR-015 and Status remains
+> Deferred.
 
 ---
 
