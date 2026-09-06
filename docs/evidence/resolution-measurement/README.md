@@ -28,6 +28,10 @@ remains an open decision on #58.
 - Canonical measured wall time: 15.404588 seconds. Runtime is informational, not an acceptance
   threshold.
 - TSV SHA-256: `7720006383eef24dcadfa9f66115db23eec078115c22de820fdfa61360e94cfd`.
+- Regeneration contract (NFR-1): the schema, protocol/input/provenance fields, verdicts,
+  ordering, and seeded counts rows match exactly. Density-matrix measurement fields may
+  differ across machines by at most absolute `1e-12`; repeated serialization of the same
+  locally measured rows remains byte-identical. The committed TSV itself is not rounded.
 
 Run from the repository root:
 

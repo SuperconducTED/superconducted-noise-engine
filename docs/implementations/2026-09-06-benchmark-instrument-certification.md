@@ -28,7 +28,7 @@ configuration.
 | `tests/test_harness.py` | Reproduces the three defects first, then pins execution, aggregation, metadata, seed, error, and ADR-022 contracts. |
 | `tests/test_reference.py` | Pins units, scopes, skips, tensor order, readout orientation, basis validity, report agreement, and determinism. |
 | `tests/test_metrics.py` | Pins all four wrong-mode rejections. |
-| `tests/test_resolution_measurement.py` | Pins discrepancy direction, conservative aggregation, completeness, and exact TSV regeneration. |
+| `tests/test_resolution_measurement.py` | Pins discrepancy direction, conservative aggregation, completeness, exact counts regeneration, and `1e-12` cross-machine density agreement. |
 | `tests/fixtures/calibration/README.md` | Corrects only the stale remote name because #57 has not yet done so on `main`. |
 | `docs/evidence/resolution-measurement/` | Records the provisional 24-cell TSV, exact command, inputs, environment, hash, and limitations. |
 | `docs/decisions.md` | Appends an ADR-022 as-of note; no existing decision text or status changes. |
@@ -357,6 +357,13 @@ Resolution regeneration:
 ```powershell
 python -m pytest tests/test_resolution_measurement.py::test_measurement_regenerates_committed_tsv -v
 ```
+
+NFR-1 is applied at the evidence boundary: protocol, inputs, provenance, verdicts, row
+order, and seeded counts cells agree exactly; density-matrix measurement fields agree
+across machines to absolute `1e-12`. Repeated serialization of the same locally measured
+rows remains byte-identical. This distinction was exercised by the PR's Linux 3.11/3.12
+jobs, whose Aer/linear-algebra reductions differed from the Windows evidence by at most
+approximately `4.44e-15`; production values are not rounded to manufacture bit identity.
 
 The direct `sx` execution guard is:
 

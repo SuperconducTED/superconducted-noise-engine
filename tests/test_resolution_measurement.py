@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 from collections import Counter
 from dataclasses import replace
 from pathlib import Path
@@ -94,7 +95,7 @@ def test_protocol_threshold_rejects_missing_mode() -> None:
 
 @pytest.mark.slow
 def test_measurement_regenerates_committed_tsv(tmp_path: Path) -> None:
-    """The recorded seed and protocol regenerate the committed evidence byte for byte."""
+    """Regeneration obeys NFR-1's exact/local and 1e-12/cross-machine contracts."""
     kwargs = {
         "gamma": 0.00017266737044123665,
         "lam": 0.0006630210259092216,
@@ -122,4 +123,40 @@ def test_measurement_regenerates_committed_tsv(tmp_path: Path) -> None:
         / "resolution.tsv"
     )
     write_tsv(regenerated, result.rows)
-    assert regenerated.read_bytes() == committed.read_bytes()
+
+    # Serialization of one set of rows is byte-stable on the same machine.
+    regenerated_again = tmp_path / "resolution-again.tsv"
+    write_tsv(regenerated_again, result.rows)
+    assert regenerated.read_bytes() == regenerated_again.read_bytes()
+
+    with regenerated.open(encoding="utf-8", newline="") as handle:
+        regenerated_reader = csv.DictReader(handle, delimiter="\t")
+        regenerated_fields = regenerated_reader.fieldnames
+        regenerated_rows = list(regenerated_reader)
+    with committed.open(encoding="utf-8", newline="") as handle:
+        committed_reader = csv.DictReader(handle, delimiter="\t")
+        committed_fields = committed_reader.fieldnames
+        committed_rows = list(committed_reader)
+
+    assert regenerated_fields == committed_fields
+    assert len(regenerated_rows) == len(committed_rows)
+    measured_fields = {
+        "baseline_mean",
+        "baseline_sample_sd",
+        "threshold",
+        "between_mean",
+        "margin",
+    }
+    for regenerated_row, committed_row in zip(regenerated_rows, committed_rows, strict=True):
+        if committed_row["mode"] == "counts":
+            # Seeded multinomial draws are exact under the pinned Qiskit/Aer stack.
+            assert regenerated_row == committed_row
+            continue
+        for field in committed_fields or ():
+            if field in measured_fields:
+                assert float(regenerated_row[field]) == pytest.approx(
+                    float(committed_row[field]), rel=0.0, abs=1e-12
+                )
+            else:
+                # Protocol, inputs, provenance, ordering, and verdict stay exact.
+                assert regenerated_row[field] == committed_row[field]

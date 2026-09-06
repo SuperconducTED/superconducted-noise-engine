@@ -9,11 +9,10 @@ from typing import Any, cast
 
 import numpy as np
 import pytest
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerError, AerSimulator
 from qiskit_aer.noise import NoiseModel, depolarizing_error, thermal_relaxation_error
 
-import superconducted.benchmarks.harness as harness_module
 from superconducted.benchmarks.circuits import (
     ghz_state_circuit,
     qft_circuit,
@@ -218,13 +217,13 @@ def test_run_benchmark_transpiles_once_and_defaults_to_reference_basis(
     benchmark_ensemble: FuzzyNoiseModelEnsemble,
 ) -> None:
     calls: list[dict[str, Any]] = []
-    original_transpile = harness_module.transpile
+    original_transpile = transpile
 
     def spy_transpile(circuit: QuantumCircuit, **kwargs: Any) -> QuantumCircuit:
         calls.append(kwargs)
         return original_transpile(circuit, **kwargs)
 
-    monkeypatch.setattr(harness_module, "transpile", spy_transpile)
+    monkeypatch.setattr("superconducted.benchmarks.harness.transpile", spy_transpile)
     reference = NoiseModel(basis_gates=list(DEVICE_BASIS))
 
     run_benchmark(
@@ -298,7 +297,7 @@ def test_transpiled_qft_installs_only_executed_noise_instructions(
     benchmark_ensemble: FuzzyNoiseModelEnsemble,
 ) -> None:
     circuit = qft_circuit(3)
-    compiled = harness_module.transpile(
+    compiled = transpile(
         circuit,
         basis_gates=list(DEVICE_BASIS),
         optimization_level=1,
