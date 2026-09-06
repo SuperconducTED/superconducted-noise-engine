@@ -427,6 +427,11 @@ follow-up will introduce
 consumer pattern emerges (e.g. when ANFIS training begins consuming
 vectorized features alongside the mean aggregates).
 
+> Promoted from draft to the ledger · 2026-06-19 · commit `105cf6c` (that
+> commit names no issue). The draft at
+> `docs/decisions/drafts/ADR-017-missing-per-qubit-calibration-fields-skip-strategy.md`
+> is retained as the authoring record; this ledger entry is canonical.
+
 ---
 
 ## ADR-018 — Tanh membership-function slope positivity convention

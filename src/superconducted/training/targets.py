@@ -43,9 +43,14 @@ class SkipCounts:
             raise ValueError("SkipCounts values must be non-negative")
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, eq=False)
 class QubitTargets:
-    """Per-qubit targets, an aligned usable mask, and rejection counts."""
+    """Per-qubit targets, an aligned usable mask, and rejection counts.
+
+    ``eq=False`` because ``values`` and ``usable`` are ndarrays: a generated
+    ``__eq__`` raises ``ValueError`` instead of answering, and the generated
+    ``__hash__`` raises ``TypeError``. Compare fields explicitly.
+    """
 
     values: npt.NDArray[np.float64]
     usable: npt.NDArray[np.bool_]
@@ -68,9 +73,13 @@ class QubitTargets:
         object.__setattr__(self, "usable", usable)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, eq=False)
 class SnapshotTarget:
-    """Distribution summary of usable per-qubit channel targets."""
+    """Distribution summary of usable per-qubit channel targets.
+
+    ``eq=False`` for the same reason as :class:`QubitTargets`: the summary
+    statistics are ndarrays. Compare fields explicitly.
+    """
 
     mean: npt.NDArray[np.float64]
     std: npt.NDArray[np.float64]
