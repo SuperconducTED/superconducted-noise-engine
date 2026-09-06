@@ -68,3 +68,48 @@ from Step 1 of the runbook was never posted. The screenshots are
 therefore the primary evidence for this run. Archiving them into this
 directory — as PR #36 did for `docs/evidence/adr-010-closure/` — is
 tracked as a follow-up.
+
+---
+
+## As of 2026-09-07 · screenshots archived
+
+The 2026-08-20 record above is left as written. This section records what
+changed since.
+
+**The ten screenshots are now in this directory.** The Evidence section above
+says archiving them "is tracked as a follow-up" — that follow-up was started on
+`feature/mert-cycle2-reconciliation` (commits `54f46ca`, `960289b`), which was
+never merged, so the images existed only on that branch while this record
+pointed at a review attachment. They are committed here byte-for-byte: every
+archived file's blob hash matches the blob on that branch.
+
+**Renamed to the step convention.** They arrived as `01. Image.png` …
+`10. Image.png`. Every sibling record (`pr29-burak-desktop`,
+`pr33-burak-desktop`, `pr34-burak-desktop`, `adr-010-closure`) names screenshots
+by the runbook step they show, so these were renamed to match, against the step
+list in the runbook posted to PR #32:
+
+| was | now | shows |
+| --- | --- | --- |
+| `01. Image.png` | `Step 00 to Step 04.png` | tool versions, clean room, `script` start, clone, `git checkout f95a5b2`, `rev-parse`, venv |
+| `02.`–`07.` | `Step 05 Part 1.png` … `Step 05 Part 6.png` | install and fingerprint: dependency resolution, wheel install, `pip install -e . --no-deps`, then `python3 --version`, `/etc/os-release`, `/proc/cpuinfo`, `pip freeze` |
+| `08. Image.png` | `Step 05 Part 7 and Step 06 Part 1.png` | tail of `pip freeze`, then three of the four guards — `ruff check`, `ruff format --check`, `mypy --strict` — and the start of `pytest` |
+| `09. Image.png` | `Step 06 Part 2 and Step 07.png` | `149 passed`, then both content checks: the `mean-aggregates counts` hit count and the cycle-2 plan diff |
+| `10. Image.png` | `Step 08.png` | `Script done.` |
+
+**Two corrections to the record above, from reading the screenshots.**
+
+First, the Evidence section says the ten cover "Steps 5 through 7". They cover
+**Steps 0 through 8**: `Step 00 to Step 04.png` shows the prerequisites, clean
+room, clone, commit pin and virtual environment, and `Step 08.png` shows the
+recording being stopped. Steps 5 to 7 are the bulk, not the whole.
+
+Second, it says "No `pr32-transcript.txt` was produced". That is true of that
+filename, but a transcript **was** recorded. The runbook posted to PR #32 is
+PowerShell (`Start-Transcript -Path C:\scted-verify\pr32-transcript.txt`), and
+the run was done on Ubuntu WSL2 using the equivalents — `script
+pr32-final-transcript.txt`, visible starting in `Step 00 to Step 04.png` and
+closing with `Script done.` in `Step 08.png`. So the recording exists under a
+different name on the verifier's machine; what the record above gets right is
+that it was never posted, which is why the screenshots remain the primary
+evidence.
