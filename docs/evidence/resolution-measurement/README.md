@@ -12,6 +12,7 @@ remains an open decision on #58.
 ## Provenance
 
 - Generator commit: `1ae6c3a0c2811412ba89376c557e122347d454a0`.
+- Evidence commit: `611901784979dbc5a62eec48fa27987f27a1d055`.
 - Source baseline: the agreed #57 fixture in PR #69, inspected without copying it into
   this branch. The mean 24 ns `sx` closed-form targets over its 155 usable qubits are
   `gamma_0 = 0.00017266737044123665` and

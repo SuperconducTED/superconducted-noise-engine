@@ -808,6 +808,14 @@ before merge.
 > See ADR-023 for how the reject-don't-clip convention applies to
 > `TanhMF`, the one MF that is a documented exemption from it.
 
+> As of 2026-09-06, issue #58 / commit `d646e07` extends this standing
+> property set through the certified density-matrix harness path and adds
+> explicit wrong-mode rejection pins for all four metrics. Metric data
+> errors now raise by default or carry a non-empty failure record when the
+> caller explicitly requests partial results; they are never silent NaN.
+> Status remains Accepted. Dr. Akba's out-of-band read is pending in the
+> single W1 advisor batch owned by #56.
+
 ---
 
 ## ADR-023 — Membership-function output range: floor exemption for `TanhMF`
