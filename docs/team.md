@@ -19,6 +19,7 @@
 | `calibration/poller.py` | Baha Jarad | Mert Efe Şensoy |
 | `calibration/storage.py` | Baha Jarad | Mert Efe Şensoy |
 | `calibration/features.py` | Baha Jarad | Bengisu |
+| `training/` (`__init__.py`, `anfis.py`, `parameters.py`, `targets.py`, `types.py`) | Mert Efe Şensoy | Burak Öztekin |
 | `fuzzy/membership.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
 | `fuzzy/tsk.py` (LOCKED) | Burak Öztekin | Mert Efe Şensoy + Bengisu |
 | `fuzzy/defuzzification.py` | Bengisu | Burak Öztekin |

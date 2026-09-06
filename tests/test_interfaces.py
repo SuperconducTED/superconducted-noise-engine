@@ -20,7 +20,9 @@ from superconducted.interfaces import (
     NormalizationStrategy,
     RuleBase,
     SquashingStrategy,
+    TSKTrainer,
 )
+from superconducted.training import TrainingResult, TrainingSet
 from superconducted.types import (
     CalibrationSnapshot,
     MembershipDegree,
@@ -33,6 +35,7 @@ ABCS = [
     CalibrationFeatureExtractor,
     FuzzificationStrategy,
     RuleBase,
+    TSKTrainer,
     Defuzzifier,
     SquashingStrategy,
     ChannelProjector,
@@ -134,6 +137,14 @@ def test_minimal_rule_base_stub() -> None:
             return False
 
     StubRB()
+
+
+def test_minimal_tsk_trainer_stub() -> None:
+    class StubTrainer(TSKTrainer):
+        def fit(self, rule_base: RuleBase, data: TrainingSet) -> TrainingResult:
+            raise NotImplementedError
+
+    StubTrainer()
 
 
 def test_minimal_defuzzifier_stub() -> None:

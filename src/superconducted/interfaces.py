@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import abc
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
@@ -19,6 +20,9 @@ from qiskit.circuit import Instruction, QuantumCircuit
 from qiskit_aer.noise import NoiseModel, QuantumError
 
 from .types import CalibrationSnapshot, MembershipDegree, RuleFiringResult, SimulationResult
+
+if TYPE_CHECKING:
+    from .training.types import TrainingResult, TrainingSet
 
 
 class MembershipFunction(abc.ABC):
@@ -31,8 +35,7 @@ class MembershipFunction(abc.ABC):
     ones.
 
     Trainable parameters are exposed as a flat 1-D ``float64`` vector for the
-    hybrid LSE/SGD ANFIS trainer that lives in
-    :mod:`superconducted.fuzzy.tsk` (deferred to ADR-014).
+    hybrid LSE/SGD ANFIS trainer in :mod:`superconducted.training`.
     """
 
     @abc.abstractmethod
@@ -139,6 +142,19 @@ class RuleBase(abc.ABC):
     @property
     @abc.abstractmethod
     def is_interval_type2(self) -> bool: ...
+
+
+class TSKTrainer(abc.ABC):
+    """Fit a validated training set without mutating the caller's rule base.
+
+    Implementations return a new finite rule base with the same structural
+    dimensions and interval type. They must not mutate caller-owned consequent
+    arrays or membership-function parameter arrays.
+    """
+
+    @abc.abstractmethod
+    def fit(self, rule_base: RuleBase, data: TrainingSet) -> TrainingResult:
+        """Fit ``rule_base`` to ``data`` and return a new training result."""
 
 
 class Defuzzifier(abc.ABC):
