@@ -1212,7 +1212,7 @@ outside-the-channel measurement effect. On the fixture, the readout-error
 median is $2.191162109375 \times 10^{-2}$, the `sx` gate-error median is
 $3.110293362374808 \times 10^{-4}$, and mean $(\gamma, \lambda)$ is
 $(1.7266737044123665 \times 10^{-4}, 6.630210259092216 \times 10^{-4})$
-(NC-036). The target is raw-space; existing inference projection remains
+(NC-040). The target is raw-space; existing inference projection remains
 responsible for probability clipping.
 
 The snapshot aggregate is not a per-qubit training table and is not a richer
@@ -1224,8 +1224,8 @@ Deferred and the NC-025 state-count gate is unmet.
 
 **Evidence**: `tests/test_aer_pin.py` matches Qiskit Aer's zero-temperature
 `thermal_relaxation_error` under `SuperOp` comparison across both Aer branches
-at 24 ns and 60 ns. NC-032 records maximum error below $10^{-12}$; NC-031 and
-NC-034 record the fixture's 24 ns gate duration and usable-row count. NC-035
+at 24 ns and 60 ns. NC-036 records maximum error below $10^{-12}$; NC-035 and
+NC-038 record the fixture's 24 ns gate duration and usable-row count. NC-039
 records the nonzero mean-of-targets versus target-at-mean-features gap.
 
 **Pending decisions**: Advisor/reviewer sign-off is required for raw-space

@@ -43,7 +43,7 @@
 git diff origin/main -- src/superconducted/fuzzy/tsk.py src/superconducted/channels/kraus.py
 ```
 
-NC-031 through NC-036 contain the exact target, fixture, parameter-count, and
+NC-035 through NC-040 contain the exact target, fixture, parameter-count, and
 device-error calculations and their sources.
 
 ## Outstanding human approvals
