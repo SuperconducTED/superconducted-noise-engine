@@ -107,7 +107,7 @@ def _feature_range(snapshot: CalibrationSnapshot, field: str) -> tuple[float, fl
 
 
 def _benchmark_ensemble_for_seed(
-    snapshot: CalibrationSnapshot, seed: int
+    snapshot: CalibrationSnapshot, seed: int, ensemble_size: int = 1
 ) -> FuzzyNoiseModelEnsemble:
     """Build the issue #58 one-member, 3x3x3 Gaussian test ensemble."""
     vectorizer = BasicCalibrationVectorizer()
@@ -132,20 +132,32 @@ def _benchmark_ensemble_for_seed(
         squashing=ProbabilityClip(),
         channel_projector=KrausChannelProjector(NoOpNormalization()),
         fuzzification_strategy=PostGateFuzzification(),
-        ensemble_size=1,
+        ensemble_size=ensemble_size,
     )
 
 
 @pytest.fixture(scope="session")
-def benchmark_ensemble(
+def make_benchmark_ensemble(
     benchmark_snapshot: CalibrationSnapshot,
-) -> FuzzyNoiseModelEnsemble:
-    """Return the first viable issue #58 test engine, avoiding ADR-024's identity trap."""
+) -> Callable[[int], FuzzyNoiseModelEnsemble]:
+    """Build viable issue #58 engines of a requested size from one fixed seed."""
     _members, seed = first_viable_seed(
         lambda candidate: list(_benchmark_ensemble_for_seed(benchmark_snapshot, candidate)),
         context="issue #58 committed-fixture 3x3x3 Gaussian grid",
     )
-    return _benchmark_ensemble_for_seed(benchmark_snapshot, seed)
+
+    def _factory(ensemble_size: int = 1) -> FuzzyNoiseModelEnsemble:
+        return _benchmark_ensemble_for_seed(benchmark_snapshot, seed, ensemble_size)
+
+    return _factory
+
+
+@pytest.fixture(scope="session")
+def benchmark_ensemble(
+    make_benchmark_ensemble: Callable[[int], FuzzyNoiseModelEnsemble],
+) -> FuzzyNoiseModelEnsemble:
+    """Return the first viable one-member engine, avoiding ADR-024's identity trap."""
+    return make_benchmark_ensemble(1)
 
 
 @pytest.fixture
