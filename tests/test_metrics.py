@@ -157,22 +157,28 @@ def test_r2_score_partial_match() -> None:
     assert metric.compute(engine, reference) == pytest.approx(0.75, abs=1e-10)
 
 
-def test_count_metric_rejects_state_mode() -> None:
-    """Count-based metrics must raise when handed a density-matrix-only result."""
-    metric = HellingerDistance()
-    counts_res = make_counts({"00": 50, "11": 50})
-    state_res = make_state([[1.0, 0.0], [0.0, 0.0]])
-    with pytest.raises(ValueError, match="Count-based metric"):
-        metric.compute(counts_res, state_res)
+@pytest.mark.parametrize(
+    ("metric", "unsupported_mode", "message"),
+    [
+        (HellingerDistance(), "density_matrix", "Count-based metric"),
+        (KLDivergence(), "density_matrix", "Count-based metric"),
+        (R2Score(), "density_matrix", "Count-based metric"),
+        (StateFidelity(), "counts", "density_matrix"),
+    ],
+    ids=("hellinger", "kl-divergence", "r2-score", "state-fidelity"),
+)
+def test_metric_rejects_unsupported_result_mode(
+    metric: object, unsupported_mode: str, message: str
+) -> None:
+    """Each public metric rejects the SimulationResult representation it cannot read."""
+    result = (
+        make_state([[1.0, 0.0], [0.0, 0.0]])
+        if unsupported_mode == "density_matrix"
+        else make_counts({"0": 1})
+    )
 
-
-def test_state_metric_rejects_counts_mode() -> None:
-    """StateFidelity must raise when handed a counts-only SimulationResult."""
-    metric = StateFidelity()
-    state_res = make_state([[1.0, 0.0], [0.0, 0.0]])
-    counts_res = make_counts({"00": 50, "11": 50})
-    with pytest.raises(ValueError, match="density_matrix"):
-        metric.compute(state_res, counts_res)
+    with pytest.raises(ValueError, match=message):
+        metric.compute(result, result)  # type: ignore[attr-defined]
 
 
 def test_normalize_rejects_empty_distribution() -> None:
