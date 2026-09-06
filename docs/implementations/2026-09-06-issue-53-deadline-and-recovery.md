@@ -269,3 +269,33 @@ merges would write another spurious file. Scheduled polls cannot: they run with
 
 Detail in `docs/implementations/2026-09-07-payload-digest-parameter-dates.md` on
 that branch.
+
+### NC-032 annotated, not restated
+
+#52 merged as `c9fd441`, so NC-031, NC-032 and `docs/evidence/aug-gap-enumeration/`
+reached `main` and this issue's last acceptance criterion became actionable. The
+control set reproduces NC-032 exactly: `control-2026-08-12_14.tsv` has 47 rows —
+29 `captured`, 14 `MISSED`, 4 `archived_not_served` — giving 43 served by the 1 h
+sweep, 33 archived, 47 proven to exist, 70.2%.
+
+After the backfill all **47 of 47** control rows are archived, plus 3 documents
+inside the same span that the 1 h sweep never served (`20260812T081604000000Z`,
+`20260812T104835000000Z`, `20260812T183935000000Z`). The window stands at **50
+held of ≥ 50 proven** over `20260812T063125Z .. 20260814T174409Z` at
+`calibration-data` `1996bf6`.
+
+Two things follow. The `≥ 47` denominator was itself an undercount — NC-031
+arriving from an independent direction, since the 1 h sweep served 43 of the 50
+now known to exist, 86.0% against its measured 87.9%.
+
+And the row was **annotated rather than restated**, following the dated-note
+precedent NC-026 sets in the same file: value `≤ 70.2% (33 of ≥ 47)` and
+`Last verified` `2026-09-02` are unchanged. NC-032 measures what the *poller*
+captured during ordinary operation at that date. Rewriting it to `≤ 100%
+(50 of ≥ 50)` would be strictly current and actively misleading — the bound is
+vacuous, because holding everything you can prove exists gives 100% by
+construction, and it would read as "capture is fine" when the window is complete
+only because #53 intervened on the very window the row measures. Retiring it
+under Rule 5 was also rejected: the claim is not wrong, it is a true measurement
+whose subject we then changed. A post-recovery capture rate needs a window that
+has not been backfilled, which is #54's territory.
