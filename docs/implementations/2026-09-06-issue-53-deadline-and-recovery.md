@@ -235,7 +235,7 @@ unedited. Two things changed the next day.
 dict that also carries `value`, scoped to the cross-fetch-path comparison only;
 the full digest behind `--compare` still hashes dates, because that is the
 live-vs-live decision where `collision` is the safe answer. On
-`claude/loving-mclean-4a2b76` (`1e7c0eb`), 290 tests passing, 10 added. Comparing
+`mert/payload-digest-parameter-dates` (`1e7c0eb`), 290 tests passing, 10 added. Comparing
 values alone was considered and rejected: it would call a T1 in µs equal to one
 in ns.
 
