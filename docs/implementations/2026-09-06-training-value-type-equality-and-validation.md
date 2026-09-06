@@ -30,13 +30,11 @@ see Design decisions.
 | --- | --- |
 | `src/superconducted/types.py` | `eq=False` on `TrainingDiagnostics` and `TrainingResult`, each docstring saying why; a comment recording why `inf` is deliberately accepted for `lse_condition_number`. |
 | `src/superconducted/training/targets.py` | `eq=False` on `QubitTargets` and `SnapshotTarget`, with the same reasoning in their docstrings. |
-| `tests/test_training_types.py` | Adds the §9.1 rejection table for both result types, pins `inf` acceptance for the condition number, and pins that the four array-bearing types compare and hash without raising. |
+| `tests/training/test_types.py` | Adds the §9.1 rejection table for both result types, pins `inf` acceptance for the condition number, and pins that the four array-bearing types compare and hash without raising. |
 
-Deliberately **not** changed here: `TrainingSet`'s optional-metadata contract
-(FR-4 requires `timestamps`, `provenance` and `archive_ref`; the shipped type
-makes them optional) and the hardcoded `clip_binding_rate = 0.0`. Both are
-design questions for the module owner rather than mechanical fixes, and remain
-open on PR #69.
+`TrainingSet` metadata is mandatory: `timestamps`, `provenance`, feature and
+target names, and `archive_ref` are preserved with every training set. The
+hardcoded `clip_binding_rate = 0.0` remains a separate future trainer concern.
 
 ## Implementation approach
 
@@ -44,9 +42,7 @@ open on PR #69.
 `__hash__`, so both fall back to `object`'s identity-based versions. Two
 distinct instances with equal contents therefore compare unequal. That is the
 behaviour FR-4 prescribes, and it is strictly better than raising: callers that
-need value equality compare the fields they care about with `np.array_equal`,
-which `tests/test_anfis.py::test_fit_is_deterministic_for_identical_inputs_and_configuration`
-already does.
+need value equality compare the fields they care about with `np.array_equal`.
 
 `ParameterCount` and `SkipCounts` are left with generated equality on purpose.
 They hold only integers, so their `__eq__` is well defined and useful.
@@ -99,8 +95,8 @@ finding was withdrawn, and 0 after the fix.
 ## Verification
 
 ```bash
-pytest tests/test_training_types.py -q     # 26 passed
-pytest tests/ -q                           # 396 passed
+pytest tests/training/test_types.py -q     # 26 passed
+pytest tests/ -q                           # 356 passed
 ruff check . && ruff format --check .
 mypy --strict
 python scripts/check_ids.py
@@ -110,8 +106,8 @@ Before/after evidence, which is the point of the exercise — the new tests were
 run against the source at the parent commit and fail there:
 
 ```
-FAILED tests/test_training_types.py::test_array_bearing_types_compare_by_identity_without_raising
-FAILED tests/test_training_types.py::test_array_bearing_types_are_hashable
+FAILED tests/training/test_types.py::test_array_bearing_types_compare_by_identity_without_raising
+FAILED tests/training/test_types.py::test_array_bearing_types_are_hashable
 2 failed, 24 passed
 ```
 

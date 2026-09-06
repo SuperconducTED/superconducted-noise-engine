@@ -1,6 +1,6 @@
 # Issue #57 verification · Burak's desktop · 2026-09-05
 
-**Implementation commit measured**: `fd9bb0d3116d3aa4a2f713b82e331b254b2e4520`
+**Implementation commit measured**: `37e1ba05fbe9961e1ca94bd9bb5fdbadf6c51808`
 **Branch**: `feature/issue-57-training-target`
 **Verdict**: VERIFIED for the implementation and numerical measurements below.
 
@@ -20,11 +20,11 @@
 
 | Check | Observed |
 | --- | --- |
-| Full test suite | `352 passed` |
+| Candidate test suite after the Issue #60 split | `356 passed in 15.19s` |
 | `ruff check` | `All checks passed!` |
 | `ruff format --check` | all candidate Python files already formatted |
-| `mypy --no-incremental src/superconducted/training src/superconducted/interfaces.py` | no issues found |
-| Candidate test count | 352 collected; `+72` from 280 at `origin/main` `7d39a2b` |
+| `mypy --strict src/superconducted` | `Success: no issues found in 25 source files` |
+| Candidate test count | 356 collected and passed; direct measurement at `37e1ba0` (NC-021) |
 | Aer conformance | Maximum SuperOp matrix-entry difference $9.992007221626409 \times 10^{-16}$ across 4 T1/T2 cases at 24 ns and 60 ns, below $10^{-12}$ |
 | 3x3x3 Gaussian parameter accounting | 234 total: 216 consequent plus 18 premise |
 | Gate-bearing fixture | SHA-256 `02d27ff1bf6af8bb06e0bce886454160926cb3adc1466e536245e03431487082`; 156 `sx` records at 24 ns; 155 usable targets; q72 `t1_missing` |
@@ -35,9 +35,11 @@
 
 ```bash
 .venv/bin/python -m pytest -q
-.venv/bin/ruff check src/superconducted/training src/superconducted/interfaces.py tests/test_targets.py tests/test_aer_pin.py tests/test_training_types.py tests/test_training_parameters.py tests/test_anfis.py tests/test_interfaces.py tests/test_train_anfis_script.py
-.venv/bin/ruff format --check src/superconducted/training tests/test_targets.py tests/test_aer_pin.py tests/test_training_types.py tests/test_training_parameters.py tests/test_anfis.py tests/test_interfaces.py tests/test_train_anfis_script.py
-.venv/bin/mypy --no-incremental src/superconducted/training src/superconducted/interfaces.py
+.venv/bin/python -m pytest --collect-only -q -o addopts=''
+.venv/bin/ruff check .
+.venv/bin/ruff format --check .
+.venv/bin/mypy --strict src/superconducted
+.venv/bin/python scripts/check_ids.py
 git diff origin/main -- src/superconducted/fuzzy/tsk.py src/superconducted/channels/kraus.py
 ```
 
@@ -48,5 +50,5 @@ device-error calculations and their sources.
 
 This technical verification does not constitute required review approval.
 Issue #57 remains pending approval by `@BurakOztekin` and `@bengisucvd`, plus
-Dr. Akba's out-of-band read of the `interfaces.py` and `training/types.py`
-contracts. ADR-026 remains Open until those decisions are recorded.
+Dr. Akba's out-of-band read of the `interfaces.py` and `types.py` contracts.
+ADR-027 remains Open until those decisions are recorded.
