@@ -106,7 +106,7 @@ def test_reference_returns_plain_model_with_transpilable_unitary_basis() -> None
     assert type(model) is NoiseModel
     assert set(model.basis_gates) == {"id", "rx", "rz", "sx", "x", "cz"}
     assert not ({"measure", "measure_2", "reset"} & set(model.basis_gates))
-    compiled = transpile(qft_circuit(2), basis_gates=model.basis_gates)
+    compiled = transpile(qft_circuit(3), basis_gates=model.basis_gates)
     assert "qft" not in compiled.count_ops()
 
 

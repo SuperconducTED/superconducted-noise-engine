@@ -93,30 +93,33 @@ def test_protocol_threshold_rejects_missing_mode() -> None:
 
 
 @pytest.mark.slow
-def test_measurement_is_deterministic_and_complete(tmp_path: Path) -> None:
-    """Fixed inputs produce the six required cells and byte-identical TSVs locally."""
+def test_measurement_regenerates_committed_tsv(tmp_path: Path) -> None:
+    """The recorded seed and protocol regenerate the committed evidence byte for byte."""
     kwargs = {
-        "gamma": 0.001,
-        "lam": 0.002,
-        "deltas": [0.1],
-        "repeats": 2,
-        "shots": 128,
-        "seed": 19,
+        "gamma": 0.00017266737044123665,
+        "lam": 0.0006630210259092216,
+        "deltas": [0.1, 0.01, 0.001, 0.0001],
+        "repeats": 32,
+        "shots": 4096,
+        "seed": 58,
         "basis_gates": ["cz", "id", "rx", "rz", "sx", "x"],
     }
-    first = measure_resolution(**kwargs)
-    second = measure_resolution(**kwargs)
+    result = measure_resolution(**kwargs)
 
-    assert first.rows == second.rows
-    assert len(first.rows) == 6
-    assert {row.circuit for row in first.rows} == {"qft_n3", "ghz_n3"}
-    assert {row.metric for row in first.rows} == {
+    assert len(result.rows) == 24
+    assert {row.circuit for row in result.rows} == {"qft_n3", "ghz_n3"}
+    assert {row.metric for row in result.rows} == {
         "hellinger",
         "one_minus_r2",
         "one_minus_state_fidelity",
     }
-    first_path = tmp_path / "first.tsv"
-    second_path = tmp_path / "second.tsv"
-    write_tsv(first_path, first.rows)
-    write_tsv(second_path, second.rows)
-    assert first_path.read_bytes() == second_path.read_bytes()
+    regenerated = tmp_path / "resolution.tsv"
+    committed = (
+        Path(__file__).parents[1]
+        / "docs"
+        / "evidence"
+        / "resolution-measurement"
+        / "resolution.tsv"
+    )
+    write_tsv(regenerated, result.rows)
+    assert regenerated.read_bytes() == committed.read_bytes()

@@ -89,6 +89,29 @@ def benchmark_snapshot() -> CalibrationSnapshot:
     )
 
 
+@pytest.fixture(scope="session")
+def issue_57_gates_snapshot() -> CalibrationSnapshot:
+    """Load #57's sole gates fixture, or skip consumers until that issue lands."""
+    fixture_path = (
+        Path(__file__).parent
+        / "fixtures"
+        / "calibration"
+        / "ibm_fez_20260513T121322Z_with_gates.json"
+    )
+    if not fixture_path.exists():
+        pytest.skip("Issue #57 has not yet landed ibm_fez_20260513T121322Z_with_gates.json")
+    data = json.loads(fixture_path.read_text(encoding="utf-8"))
+    timestamp = datetime.fromisoformat(str(data["timestamp"]).replace("Z", "+00:00"))
+    return CalibrationSnapshot(
+        backend=str(data["backend"]),
+        timestamp=timestamp,
+        schema_version=str(data["schema_version"]),
+        properties=data["properties"],
+        target=data.get("target"),
+        configuration=data.get("configuration"),
+    )
+
+
 def _feature_range(snapshot: CalibrationSnapshot, field: str) -> tuple[float, float]:
     values = [
         float(entry["value"])
@@ -139,22 +162,27 @@ def _benchmark_ensemble_for_seed(
 @pytest.fixture(scope="session")
 def make_benchmark_ensemble(
     benchmark_snapshot: CalibrationSnapshot,
-) -> Callable[[int], FuzzyNoiseModelEnsemble]:
+) -> Callable[..., FuzzyNoiseModelEnsemble]:
     """Build viable issue #58 engines of a requested size from one fixed seed."""
     _members, seed = first_viable_seed(
         lambda candidate: list(_benchmark_ensemble_for_seed(benchmark_snapshot, candidate)),
         context="issue #58 committed-fixture 3x3x3 Gaussian grid",
     )
 
-    def _factory(ensemble_size: int = 1) -> FuzzyNoiseModelEnsemble:
-        return _benchmark_ensemble_for_seed(benchmark_snapshot, seed, ensemble_size)
+    def _factory(
+        ensemble_size: int = 1,
+        *,
+        snapshot: CalibrationSnapshot | None = None,
+    ) -> FuzzyNoiseModelEnsemble:
+        selected_snapshot = benchmark_snapshot if snapshot is None else snapshot
+        return _benchmark_ensemble_for_seed(selected_snapshot, seed, ensemble_size)
 
     return _factory
 
 
 @pytest.fixture(scope="session")
 def benchmark_ensemble(
-    make_benchmark_ensemble: Callable[[int], FuzzyNoiseModelEnsemble],
+    make_benchmark_ensemble: Callable[..., FuzzyNoiseModelEnsemble],
 ) -> FuzzyNoiseModelEnsemble:
     """Return the first viable one-member engine, avoiding ADR-024's identity trap."""
     return make_benchmark_ensemble(1)

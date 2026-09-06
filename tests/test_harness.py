@@ -32,9 +32,10 @@ from superconducted.benchmarks.metrics import (
     R2Score,
     StateFidelity,
 )
+from superconducted.benchmarks.reference import build_reference
 from superconducted.integration.aer_factory import FuzzyNoiseModelEnsemble
 from superconducted.interfaces import BenchmarkMetric
-from superconducted.types import SimulationResult
+from superconducted.types import CalibrationSnapshot, SimulationResult
 
 
 class _ValueErrorMetric(BenchmarkMetric):
@@ -695,3 +696,76 @@ def test_all_four_circuits_produce_finite_mode_appropriate_rows(
     )
     assert [row.reference_value for row in counts_rows] == pytest.approx([0.0, 0.0, 1.0] * 4)
     assert [row.reference_value for row in state_rows] == pytest.approx([1.0] * 4)
+
+
+@pytest.mark.slow
+def test_issue_57_fixture_four_circuit_reference_integration(
+    issue_57_gates_snapshot: CalibrationSnapshot,
+    make_benchmark_ensemble: Callable[..., FuzzyNoiseModelEnsemble],
+) -> None:
+    """Run the required 12+4 rows against #57's physical reference after it lands."""
+    circuits = [
+        random_clifford_circuit(3, 2, rng=np.random.default_rng(0)),
+        ghz_state_circuit(3),
+        qft_circuit(3),
+        vqe_ansatz_circuit(3, rng=np.random.default_rng(0)),
+    ]
+    ensemble = make_benchmark_ensemble(1, snapshot=issue_57_gates_snapshot)
+    reference = build_reference(
+        issue_57_gates_snapshot,
+        scope="single_qubit_relaxation",
+        qubits=range(3),
+    )
+
+    counts_rows = run_benchmark(
+        circuits,
+        ensemble,
+        reference,
+        [HellingerDistance(), KLDivergence(), R2Score()],
+        shots=128,
+        seed=29,
+    )
+    state_rows = run_benchmark(
+        circuits,
+        ensemble,
+        reference,
+        [StateFidelity()],
+        mode="density_matrix",
+    )
+
+    assert len(counts_rows) == 12
+    assert len(state_rows) == 4
+    assert all(row.failure is None for row in [*counts_rows, *state_rows])
+    assert all(
+        math.isfinite(value)
+        for row in [*counts_rows, *state_rows]
+        for value in (row.engine_value, row.reference_value, row.delta)
+    )
+    assert [row.reference_value for row in counts_rows] == pytest.approx([0.0, 0.0, 1.0] * 4)
+    assert [row.reference_value for row in state_rows] == pytest.approx([1.0] * 4)
+
+
+def test_issue_57_fixture_like_for_like_noise_instruction_scope(
+    issue_57_gates_snapshot: CalibrationSnapshot,
+    make_benchmark_ensemble: Callable[..., FuzzyNoiseModelEnsemble],
+) -> None:
+    """Engine-installed names are covered by the one-qubit reference, except virtual rz."""
+    ensemble = make_benchmark_ensemble(1, snapshot=issue_57_gates_snapshot)
+    reference = build_reference(
+        issue_57_gates_snapshot,
+        scope="single_qubit_relaxation",
+        qubits=range(3),
+    )
+    engine_results = simulate_engine(
+        [qft_circuit(3), ghz_state_circuit(3)],
+        ensemble,
+        basis_gates=reference.basis_gates,
+        shots=32,
+        seed=41,
+    )
+    reference_names = set(reference.noise_instructions)
+
+    for result in engine_results:
+        assert result.metadata is not None
+        for member_names in result.metadata["noise_instructions"]:
+            assert set(member_names) - {"rz"} <= reference_names
