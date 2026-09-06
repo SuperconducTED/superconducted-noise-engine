@@ -270,6 +270,7 @@ def _build(
     dead_pairs: list[tuple[int, int]] = []
     override_names_used: set[str] = set()
     seen_gate_keys: set[tuple[str, tuple[int, ...]]] = set()
+    used_qubits: set[int] = set()
 
     for position, entry in enumerate(gates):
         context = f"properties.gates[{position}]"
@@ -314,14 +315,16 @@ def _build(
             error_b = thermal_relaxation_error(params_b.t1_s, params_b.t2_s, length_s)
             error = error_a.expand(error_b)
         model.add_quantum_error(error, gate_name, list(gate_qubits))
+        used_qubits.update(gate_qubits)
 
     if scope == "full_device":
         for q, params in usable.items():
             model.add_readout_error(_readout_error(params, q), [q])
+            used_qubits.add(q)
 
     report = ReferenceReport(
         scope=scope,
-        qubits_used=tuple(usable),
+        qubits_used=tuple(sorted(used_qubits)),
         skipped=skipped,
         gate_lengths_s=dict(sorted(lengths.items())),
         overridden_gate_lengths=tuple(sorted(override_names_used)),

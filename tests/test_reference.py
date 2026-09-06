@@ -309,6 +309,20 @@ def test_report_and_model_agree_and_build_is_deterministic() -> None:
     )
 
 
+def test_report_excludes_valid_qubit_without_an_installed_error() -> None:
+    """qubits_used means represented in the model, not merely valid T1/T2."""
+    snapshot = _snapshot(
+        qubits=[_qubit(), _qubit()],
+        gates=[_gate("sx", [0])],
+    )
+
+    model = build_reference(snapshot, scope="single_qubit_relaxation")
+    report = build_reference_report(snapshot, scope="single_qubit_relaxation")
+
+    assert report.qubits_used == (0,)
+    assert set(model._local_quantum_errors["sx"]) == {(0,)}
+
+
 WITH_GATES_FIXTURE = (
     Path(__file__).parent / "fixtures" / "calibration" / "ibm_fez_20260513T121322Z_with_gates.json"
 )

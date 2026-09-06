@@ -318,8 +318,11 @@ def test_transpiled_qft_installs_only_executed_noise_instructions(
 def test_density_mode_prepares_before_save_instruction(
     benchmark_ensemble: FuzzyNoiseModelEnsemble,
 ) -> None:
+    # On one qubit the current projector would accept save_density_matrix if
+    # the harness appended it before prepare(), so this is a causal ordering
+    # pin rather than merely an assertion that also passes on a 3-qubit save.
     result = simulate_engine(
-        [qft_circuit(3)],
+        [qft_circuit(1)],
         benchmark_ensemble,
         basis_gates=DEVICE_BASIS,
         mode="density_matrix",
