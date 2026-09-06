@@ -147,9 +147,15 @@ class ParameterCount:
             raise ValueError("ParameterCount total must equal premise plus consequent")
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, eq=False)
 class TrainingDiagnostics:
-    """Diagnostics collected during a training run."""
+    """Diagnostics collected during a training run.
+
+    ``eq=False`` because ``standardization`` holds ndarrays: a generated
+    ``__eq__`` compares the fields as a tuple, which raises ``ValueError`` on
+    an array element, and the generated ``__hash__`` raises ``TypeError``.
+    Equality is therefore identity; compare fields explicitly.
+    """
 
     clip_binding_rate: float
     zero_firing_rows_dropped: int
@@ -173,15 +179,27 @@ class TrainingDiagnostics:
             < 0
         ):
             raise ValueError("TrainingDiagnostics counts must be non-negative")
+        # inf is deliberately allowed. numpy.linalg.cond returns inf for any
+        # rank-deficient design matrix, including one that lstsq still solves
+        # correctly by minimum norm -- two identical feature rows, say, where
+        # the intercept is identifiable and the slope is not. Rejecting inf
+        # would turn a successful fit into a crash and destroy the very signal
+        # this diagnostic exists to report. NaN is different: it means the
+        # computation itself broke, and carries no information.
         if self.lse_condition_number < 0.0 or np.isnan(self.lse_condition_number):
             raise ValueError("lse_condition_number must be non-negative and not NaN")
         if any(not np.all(np.isfinite(values)) for values in self.standardization):
             raise ValueError("standardization values must be finite")
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, eq=False)
 class TrainingResult:
-    """Fitted rule base, metrics, and diagnostics."""
+    """Fitted rule base, metrics, and diagnostics.
+
+    ``eq=False`` for the same reason as :class:`TrainingDiagnostics`: the RMSE
+    fields are ndarrays, so a generated ``__eq__`` would raise rather than
+    answer. Equality is identity; compare fields explicitly.
+    """
 
     rule_base: TSKRuleBase
     train_rmse: npt.NDArray[np.float64]
