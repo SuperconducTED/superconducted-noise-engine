@@ -79,5 +79,7 @@ def test_out_of_range_t2_is_skipped_and_rejected_by_aer() -> None:
     targets = qubit_targets(snapshot, {0: duration})
     assert not targets.usable[0]
     assert targets.skipped.t2_exceeds_2t1 == 1
+    assert np.all(np.isnan(targets.values[0]))
+    assert 1.0 - np.exp(-duration * (2.0 / t2 - 1.0 / t1)) < 0.0
     with pytest.raises(NoiseError, match=r"T_2 greater than 2 \* T_1"):
         thermal_relaxation_error(t1, t2, duration)

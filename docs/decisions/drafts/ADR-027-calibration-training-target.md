@@ -1,4 +1,4 @@
-# ADR-026: Calibration training target
+# ADR-027: Calibration training target
 
 **Status**: Open.
 
@@ -93,4 +93,5 @@ and require separate architecture decisions.
 ## Source
 
 Issue #57; `src/superconducted/training/targets.py`;
-`tests/test_targets.py`; `tests/test_aer_pin.py`; ADR-014; ADR-020.
+`tests/training/test_targets.py`; `tests/training/test_aer_pin.py`; ADR-014;
+ADR-020.

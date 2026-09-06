@@ -26,7 +26,7 @@ from superconducted.training.targets import (
 from superconducted.types import CalibrationSnapshot
 
 GATE_FIXTURE = (
-    pathlib.Path(__file__).resolve().parent
+    pathlib.Path(__file__).resolve().parent.parent
     / "fixtures"
     / "calibration"
     / "ibm_fez_20260513T121322Z_with_gates.json"
