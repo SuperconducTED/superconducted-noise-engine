@@ -1,6 +1,9 @@
 """
 Feature distribution survey script.
 Reads every snapshot at a pinned ref and records the distribution of features.
+
+Usage:
+    python -m scripts.feature_distribution --repo <path> --ref <ref> --out <path>
 """
 
 import argparse
@@ -9,6 +12,7 @@ import json
 import subprocess
 import sys
 import time
+from collections.abc import Iterator
 from dataclasses import dataclass, fields
 from datetime import UTC, datetime
 from pathlib import Path
@@ -16,8 +20,6 @@ from typing import Any
 
 import numpy as np
 
-# FR-1: Import only the required helpers from init_error_analysis.py.
-# The private _git function is excluded to avoid ImportError.
 from scripts.init_error_analysis import list_snapshots, read_snapshot
 from superconducted.calibration.features import BasicCalibrationVectorizer, _coerce_finite_float
 from superconducted.types import CalibrationSnapshot
@@ -33,6 +35,7 @@ class SnapshotFeatureRow:
     timestamp: str
     last_update_date: str
     n_qubits: int
+    rejection_reason: str | None
 
     mean_T1: float | None  # noqa: N815
     mean_T2: float | None  # noqa: N815
@@ -66,7 +69,6 @@ def _compute_stats(
         return 0, None, None, None, None
 
     arr = np.array(values, dtype=np.float64)
-    # FR-2: std is empty when n_usable < 2 because a spread over one value is not a measurement
     std = float(np.std(arr, ddof=1)) if n_usable >= 2 else None
 
     p10 = float(np.percentile(arr, 10))
@@ -80,14 +82,12 @@ def snapshot_row(path: str, doc: dict[str, Any]) -> SnapshotFeatureRow:
     """FR-3: Importable extraction. The per-document work is a pure function."""
     stem = Path(path).stem
 
-    # Parse timestamp - falling back to stem parsing if not cleanly in dict
     raw_ts = doc.get("timestamp")
     if isinstance(raw_ts, str):
         ts = datetime.fromisoformat(raw_ts.replace("Z", "+00:00"))
     else:
         ts = datetime.strptime(stem, "%Y%m%dT%H%M%S%fZ").replace(tzinfo=UTC)
 
-    # Build the rich snapshot object per features.py contract
     snapshot = CalibrationSnapshot(
         backend=doc.get("backend", "unknown"),
         timestamp=ts,
@@ -97,16 +97,20 @@ def snapshot_row(path: str, doc: dict[str, Any]) -> SnapshotFeatureRow:
         configuration=doc.get("configuration"),
     )
 
-    # 1. Extract means using the approved vectorizer
     extractor = BasicCalibrationVectorizer()
+
+    mean_t1: float | None
+    mean_t2: float | None
+    mean_ro: float | None
+    rejection_reason: str | None = None
+
     try:
         means = extractor.extract(snapshot)
-        mean_T1, mean_T2, mean_ro = float(means[0]), float(means[1]), float(means[2])  # noqa: N806
-    except ValueError:
-        # FR-2: snapshot extract rejects -> written with mean_* empty, not dropped silently
-        mean_T1 = mean_T2 = mean_ro = None  # type: ignore[assignment]  # noqa: N806
+        mean_t1, mean_t2, mean_ro = float(means[0]), float(means[1]), float(means[2])
+    except ValueError as e:
+        mean_t1 = mean_t2 = mean_ro = None
+        rejection_reason = str(e)
 
-    # 2. Extract per-qubit stats matching the exact Nduv filter in features.py
     qubits_section = snapshot.properties.get("qubits", [])
     t1_vals, t2_vals, ro_vals = [], [], []
 
@@ -135,8 +139,9 @@ def snapshot_row(path: str, doc: dict[str, Any]) -> SnapshotFeatureRow:
         timestamp=snapshot.timestamp.isoformat(),
         last_update_date=last_update,
         n_qubits=len(qubits_section),
-        mean_T1=mean_T1,
-        mean_T2=mean_T2,
+        rejection_reason=rejection_reason,
+        mean_T1=mean_t1,
+        mean_T2=mean_t2,
         mean_readout_error=mean_ro,
         T1_n_usable=t1_n,
         T1_qubit_std=t1_std,
@@ -156,6 +161,18 @@ def snapshot_row(path: str, doc: dict[str, Any]) -> SnapshotFeatureRow:
     )
 
 
+def iter_snapshot_rows(
+    repo: Path, ref: str, prefix: str = "snapshots/"
+) -> Iterator[SnapshotFeatureRow]:
+    """Yields parsed snapshot rows one by one. Extracted as a standalone generator
+    to allow other modules to traverse the archive without triggering the CLI.
+    """
+    snapshot_paths = list_snapshots(repo, ref, prefix)
+    for path in snapshot_paths:
+        doc = read_snapshot(repo, ref, path)
+        yield snapshot_row(path, doc)
+
+
 def summarize(rows: list[SnapshotFeatureRow]) -> dict[str, Any]:
     """FR-4: Returns per-feature p1/p50/p99, median over snapshots of qubit_std, and counts."""
     summary: dict[str, Any] = {"file_count": len(rows)}
@@ -167,7 +184,6 @@ def summarize(rows: list[SnapshotFeatureRow]) -> dict[str, Any]:
     }
 
     for feat_name, (mean_attr, std_attr) in features.items():
-        # Collect valid means
         valid_means = [getattr(r, mean_attr) for r in rows if getattr(r, mean_attr) is not None]
         summary[f"{feat_name}_present_rows"] = len(valid_means)
 
@@ -181,7 +197,6 @@ def summarize(rows: list[SnapshotFeatureRow]) -> dict[str, Any]:
                 f"{feat_name}_p99"
             ] = None
 
-        # Collect valid standard deviations
         valid_stds = [getattr(r, std_attr) for r in rows if getattr(r, std_attr) is not None]
         if valid_stds:
             summary[f"{feat_name}_median_qubit_std"] = float(
@@ -205,33 +220,38 @@ def main() -> int:
     args = parser.parse_args()
     start_time = time.time()
 
-    # FR-1 Requirement: Script must raise/report when the ref is unreachable
+    # Reject negative limits to prevent unintended tail-slicing behavior during archive traversal.
+    if args.limit is not None and args.limit < 0:
+        print("Error: --limit cannot be negative.", file=sys.stderr)
+        return 1
+
     try:
         subprocess.run(
             ["git", "-C", args.repo, "cat-file", "-t", args.ref], check=True, capture_output=True
         )
     except subprocess.CalledProcessError:
         print(f"Error: Ref '{args.ref}' is unreachable in repo '{args.repo}'.", file=sys.stderr)
-        print("Requires `git fetch origin calibration-data` first.", file=sys.stderr)
+        print(
+            "Requires `git fetch superconducted-noise-engine calibration-data` first.",
+            file=sys.stderr,
+        )
         return 1
 
-    # The helper functions in init_error_analysis.py expect a Path object, not a string.
     repo_path = Path(args.repo)
-
-    snapshot_paths = list_snapshots(repo_path, args.ref, "snapshots/")
-
-    if args.backend:
-        snapshot_paths = [p for p in snapshot_paths if args.backend in p]
-
-    if args.limit:
-        snapshot_paths = snapshot_paths[: args.limit]
-
     rows: list[SnapshotFeatureRow] = []
-    for path in snapshot_paths:
-        doc = read_snapshot(repo_path, args.ref, path)
-        rows.append(snapshot_row(path, doc))
 
-    # Write output to TSV
+    # Consume the reusable iterator to build the survey data.
+    for row in iter_snapshot_rows(repo_path, args.ref):
+        if args.backend and args.backend not in row.path:
+            continue
+
+        rows.append(row)
+
+        # Halt extraction early if the requested limit is reached,
+        # optimizing runtime for partial surveys.
+        if args.limit is not None and len(rows) >= args.limit:
+            break
+
     field_names = [f.name for f in fields(SnapshotFeatureRow)]
     with open(args.out, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f, delimiter="\t")
@@ -239,7 +259,6 @@ def main() -> int:
         for row in rows:
             writer.writerow([getattr(row, name) for name in field_names])
 
-    # Print summary and runtime
     summary_data = summarize(rows)
     summary_data["runtime_seconds"] = time.time() - start_time
 

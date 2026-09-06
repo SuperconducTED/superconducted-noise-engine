@@ -4,24 +4,24 @@ Bridges empirical archive statistics with the fuzzy inference engine,
 replacing hard-coded shape parameters with distribution-aware bounds.
 """
 
-from __future__ import annotations  # noqa: I001
+from __future__ import annotations
 
 import itertools
 import math
-from typing import Any, Callable, List, Optional, Sequence, Type  # noqa: UP035
+from collections.abc import Callable, Sequence
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
 
-from superconducted.fuzzy.tsk import TSKRule, TSKRuleBase
-from superconducted.interfaces import CalibrationFeatureExtractor
-from superconducted.calibration.features import BasicCalibrationVectorizer
-from superconducted.types import CalibrationSnapshot
 from superconducted.fuzzy.membership import GaussianMF, IntervalGaussianMF, TanhMF, TanhSigmoidMF
+from superconducted.fuzzy.tsk import TSKRule, TSKRuleBase
+from superconducted.interfaces import CalibrationFeatureExtractor, MembershipFunction
+from superconducted.types import CalibrationSnapshot
 
 
 class ClampingFeatureExtractor(CalibrationFeatureExtractor):
-    """FR-12: Wraps BasicCalibrationVectorizer to clamp outliers to the [p1, p99] range.
+    """FR-12: Wraps an inner extractor to clamp outliers to the [lo, hi] range.
 
     Protects the fuzzy inference engine from anomalies (e.g., infinite or
     negative coherence times) by snapping out-of-bound values to the known
@@ -29,74 +29,138 @@ class ClampingFeatureExtractor(CalibrationFeatureExtractor):
     """
 
     def __init__(
-        self, p1_bounds: npt.NDArray[np.float64], p99_bounds: npt.NDArray[np.float64]
+        self,
+        inner: CalibrationFeatureExtractor,
+        lo: npt.NDArray[np.float64],
+        hi: npt.NDArray[np.float64],
     ) -> None:
-        self._base = BasicCalibrationVectorizer()
-        self._p1 = np.array(p1_bounds, dtype=np.float64)
-        self._p99 = np.array(p99_bounds, dtype=np.float64)
+        self._inner = inner
+        self._lo = np.array(lo, dtype=np.float64)
+        self._hi = np.array(hi, dtype=np.float64)
+
+        if self._lo.ndim != 1 or self._hi.ndim != 1:
+            raise ValueError("Bounds must be 1-dimensional arrays.")
+        if (
+            self._lo.shape[0] != self._inner.output_dim
+            or self._hi.shape[0] != self._inner.output_dim
+        ):
+            raise ValueError("Bounds dimensions must match the inner extractor's output_dim.")
+        if not np.all(np.isfinite(self._lo)) or not np.all(np.isfinite(self._hi)):
+            raise ValueError("Bounds must contain only finite numbers.")
+        if not np.all(self._lo < self._hi):
+            raise ValueError("Lower bounds (lo) must be strictly less than upper bounds (hi).")
+
+        self._extraction_count = 0
+        self._vector_count = 0
+        self._clamped_component_count = 0
 
     @property
     def output_dim(self) -> int:
-        return self._base.output_dim
+        return self._inner.output_dim
 
     @property
     def feature_names(self) -> tuple[str, ...]:
-        return self._base.feature_names
+        return self._inner.feature_names
+
+    @property
+    def extraction_count(self) -> int:
+        return self._extraction_count
+
+    @property
+    def vector_count(self) -> int:
+        return self._vector_count
+
+    @property
+    def clamped_component_count(self) -> int:
+        return self._clamped_component_count
 
     def extract(self, snapshot: CalibrationSnapshot) -> npt.NDArray[np.float64]:
-        raw = self._base.extract(snapshot)
-        return np.clip(raw, self._p1, self._p99)
+        raw = self._inner.extract(snapshot)
+
+        self._extraction_count += 1
+        self._vector_count += 1 if raw.ndim <= 1 else raw.shape[0]
+
+        out_of_bounds = (raw < self._lo) | (raw > self._hi)
+        self._clamped_component_count += int(np.sum(out_of_bounds))
+
+        return np.clip(raw, self._lo, self._hi)
 
 
-def _quantile_layout(samples: npt.NDArray[np.float64], k: int) -> dict[str, np.ndarray]:
-    """Section 6.3: Computes the p1-p99 quantile binning layout for k levels."""
+def _compute_layout(
+    samples: npt.NDArray[np.float64], k: int, placement: str
+) -> dict[str, np.ndarray]:
+    """Computes layout centers (c), edges (e), and reaches (r) for supported strategies."""
+    if k < 2:
+        raise ValueError(f"Number of partitions (k) must be at least 2, got {k}")
+    if samples.ndim != 1:
+        raise ValueError(f"Samples must be a 1-dimensional array, got {samples.ndim}D")
+    if not np.all(np.isfinite(samples)):
+        raise ValueError("Samples array must contain only finite numbers")
 
-    def q_fn(p: npt.NDArray[np.float64] | float) -> Any:
-        return np.quantile(samples, p, method="linear")
+    lo = float(np.quantile(samples, 0.01, method="linear"))
+    hi = float(np.quantile(samples, 0.99, method="linear"))
 
-    lo = float(q_fn(0.01))
-    hi = float(q_fn(0.99))
+    if placement == "quantile":
 
-    j_e = np.arange(k + 1, dtype=np.float64)
-    e = q_fn(0.01 + 0.98 * j_e / k)
+        def q_fn(p: npt.NDArray[np.float64] | float) -> Any:
+            return np.quantile(samples, p, method="linear")
 
-    j_c = np.arange(1, k + 1, dtype=np.float64)
-    c = q_fn(0.01 + 0.98 * (j_c - 0.5) / k)
+        j_e = np.arange(k + 1, dtype=np.float64)
+        e = q_fn(0.01 + 0.98 * j_e / k)
 
-    r = np.maximum(c - e[:-1], e[1:] - c)
+        if not np.all(np.diff(e) > 0):
+            raise ValueError(
+                "Tied quantiles detected; variance is too low to create valid partitions."
+            )
+
+        j_c = np.arange(1, k + 1, dtype=np.float64)
+        c = q_fn(0.01 + 0.98 * (j_c - 0.5) / k)
+        r = np.maximum(c - e[:-1], e[1:] - c)
+
+    elif placement == "endpoint":
+        c = np.linspace(lo, hi, k)
+        spacing = (hi - lo) / (k - 1)
+        e = np.linspace(lo - spacing / 2, hi + spacing / 2, k + 1)
+        r = np.full(k, spacing)
+
+    elif placement == "interior":
+        spacing = (hi - lo) / (k + 1)
+        c = np.linspace(lo + spacing, hi - spacing, k)
+        e = np.linspace(lo + spacing / 2, hi - spacing / 2, k + 1)
+        r = np.full(k, spacing)
+
+    else:
+        raise ValueError(f"Placement strategy '{placement}' not supported.")
+
     m = r / 4.0
-    s = math.atanh(0.8) / m
-
-    return {"lo": lo, "hi": hi, "e": e, "c": c, "r": r, "m": m, "s": s}
+    return {"lo": lo, "hi": hi, "e": e, "c": c, "r": r, "m": m}
 
 
 def partition_anchors(
     samples: npt.NDArray[np.float64], k: int = 3, *, placement: str = "quantile"
 ) -> npt.NDArray[np.float64]:
     """FR-6: Anchors for every shape are the layout centers (c_j)."""
-    if placement != "quantile":
-        raise ValueError(f"Placement strategy '{placement}' not supported.")
-
-    layout = _quantile_layout(samples, k)
+    layout = _compute_layout(samples, k, placement)
     return layout["c"]
 
 
 def grid_partition(
-    shape: Type[Any],  # noqa: UP006
+    shape: type[MembershipFunction],
     samples: npt.NDArray[np.float64],
     k: int = 3,
     *,
     placement: str = "quantile",
-    qubit_spread: Optional[float] = None,  # noqa: UP045
-) -> List[Any]:  # noqa: UP006
+    qubit_spread: float | None = None,
+) -> list[MembershipFunction]:
     """Section 6.3: Generates MFs bounded by empirical snapshot data quantiles."""
-    if placement != "quantile":
-        raise ValueError(f"Placement strategy '{placement}' not supported.")
 
-    layout = _quantile_layout(samples, k)
+    if shape is not IntervalGaussianMF and qubit_spread is not None:
+        raise ValueError(f"qubit_spread is not supported for T1 shape {shape.__name__}.")
+
+    layout = _compute_layout(samples, k, placement)
     lo, e, c, r, m = layout["lo"], layout["e"], layout["c"], layout["r"], layout["m"]
 
-    mfs: list[Any] = []
+    mfs: list[MembershipFunction] = []
 
     if shape is GaussianMF:
         for j in range(k):
@@ -123,13 +187,13 @@ def grid_partition(
             m_l = (c[j] - e[j]) / 4.0
             m_r = (e[j + 1] - c[j]) / 4.0
 
+            min_m = min(m_l, m_r)
+            slope = math.atanh(0.8) / min_m
+
             left = e[j] - m_l
             right = e[j + 1] + m_r
 
-            slope_left = math.atanh(0.8) / m_l
-            slope_right = math.atanh(0.8) / m_r
-
-            mfs.append(TanhMF(left, right, slope_left, slope_right))
+            mfs.append(TanhMF(left, right, slope, slope))
 
     else:
         raise NotImplementedError(f"Mapping for {shape.__name__} has not landed yet (FR-5).")
@@ -138,7 +202,7 @@ def grid_partition(
 
 
 def anchored_rule_base(
-    per_input_mfs: Sequence[Sequence[Any]],
+    per_input_mfs: Sequence[Sequence[MembershipFunction]],
     target_fn: Callable[[npt.NDArray[np.float64]], npt.NDArray[np.float64]],
     *,
     anchors: Sequence[npt.NDArray[np.float64]],
