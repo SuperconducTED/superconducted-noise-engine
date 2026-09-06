@@ -43,6 +43,13 @@ jobs:
       - name: Format check (ruff format)
         run: ruff format --check .
 
+      - name: Identifier collisions (ADR / NC)
+        # Duplicate ids do not surface as merge conflicts: two branches that
+        # append "the next free id" to different decisions touch different
+        # regions, so git merges both cleanly. Run before the slower checks so
+        # a collision is reported in seconds.
+        run: python scripts/check_ids.py
+
       - name: Type check (mypy --strict)
         # No path argument: the checked set is [tool.mypy] files in pyproject.toml,
         # so it stays a single source of truth as scripts are added.
