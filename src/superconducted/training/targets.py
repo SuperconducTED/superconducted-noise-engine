@@ -156,7 +156,7 @@ def qubit_targets(
     values = np.full((len(snapshot.qubits), 2), np.nan, dtype=np.float64)
     usable = np.zeros(len(snapshot.qubits), dtype=np.bool_)
     counts = SkipCounts()
-    for qubit in snapshot.qubits:
+    for position, qubit in enumerate(snapshot.qubits):
         t1, t2, gate_length = qubit.t1_seconds, qubit.t2_seconds, lengths.get(qubit.index)
         if t1 is None or not math.isfinite(t1):
             counts = replace(counts, t1_missing=counts.t1_missing + 1)
@@ -169,11 +169,11 @@ def qubit_targets(
         elif t2 > 2.0 * t1:
             counts = replace(counts, t2_exceeds_2t1=counts.t2_exceeds_2t1 + 1)
         else:
-            values[qubit.index] = (
+            values[position] = (
                 1.0 - math.exp(-gate_length / t1),
                 1.0 - math.exp(-gate_length * (2.0 / t2 - 1.0 / t1)),
             )
-            usable[qubit.index] = True
+            usable[position] = True
     return QubitTargets(values=values, usable=usable, skipped=counts)
 
 

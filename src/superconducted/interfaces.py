@@ -22,7 +22,7 @@ from qiskit_aer.noise import NoiseModel, QuantumError
 from .types import CalibrationSnapshot, MembershipDegree, RuleFiringResult, SimulationResult
 
 if TYPE_CHECKING:
-    from .training.types import TrainingResult, TrainingSet
+    from .types import TrainingResult, TrainingSet
 
 
 class MembershipFunction(abc.ABC):

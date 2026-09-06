@@ -28,7 +28,7 @@ see Design decisions.
 
 | File | One-sentence description |
 | --- | --- |
-| `src/superconducted/training/types.py` | `eq=False` on `TrainingDiagnostics` and `TrainingResult`, each docstring saying why; a comment recording why `inf` is deliberately accepted for `lse_condition_number`. |
+| `src/superconducted/types.py` | `eq=False` on `TrainingDiagnostics` and `TrainingResult`, each docstring saying why; a comment recording why `inf` is deliberately accepted for `lse_condition_number`. |
 | `src/superconducted/training/targets.py` | `eq=False` on `QubitTargets` and `SnapshotTarget`, with the same reasoning in their docstrings. |
 | `tests/test_training_types.py` | Adds the §9.1 rejection table for both result types, pins `inf` acceptance for the condition number, and pins that the four array-bearing types compare and hash without raising. |
 

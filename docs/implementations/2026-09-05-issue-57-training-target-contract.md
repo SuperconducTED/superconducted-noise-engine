@@ -14,7 +14,7 @@ the implemented proposal without changing its ledger status.
 | File | One-sentence description |
 | --- | --- |
 | `src/superconducted/training/targets.py` | Derives gate durations and per-qubit or feature-space `(gamma, lambda)` targets with explicit skip rules. |
-| `src/superconducted/training/types.py` | Makes training arrays immutable and records timestamps, feature/target names, row provenance, and archive identity. |
+| `src/superconducted/types.py` | Makes training arrays immutable and records timestamps, feature/target names, row provenance, and archive identity. |
 | `src/superconducted/interfaces.py` | Defines the non-mutating `TSKTrainer` contract. |
 | `src/superconducted/training/parameters.py` | Counts shared membership functions once when reporting trainable parameters. |
 | `tests/test_targets.py`, `tests/test_aer_pin.py` | Pin target derivation on synthetic inputs, the calibration fixture, and Qiskit Aer SuperOps. |
@@ -62,11 +62,11 @@ $9.992007221626409 \times 10^{-16}$, below the $10^{-12}$ acceptance tolerance.
 
 ## Design decisions
 
-The implementation follows the raw-space target proposal: the trainer fits
-finite unbounded outputs, while existing channel projection remains responsible
-for inference-time probability clipping. No target is fabricated for unusable
-qubits, and no multi-qubit target is derived because the current channel
-projector is intentionally single-qubit only.
+The implementation follows the raw-space target proposal: a future trainer may
+fit finite unbounded outputs, while existing channel projection remains
+responsible for inference-time probability clipping. No target is fabricated for
+unusable qubits, and no multi-qubit target is derived because the current
+channel projector is intentionally single-qubit only.
 
 The target ADR and its raw-versus-logit, gate-parser ownership, skip-policy, and
 snapshot-aggregation sign-offs remain Open in Issue #57. This implementation
@@ -75,12 +75,12 @@ record is not an acceptance of those pending architectural decisions.
 ## Verification
 
 - `.venv/bin/python -m pytest tests/test_targets.py tests/test_aer_pin.py -q`
-- `.venv/bin/python -m pytest -q`
-- `.venv/bin/ruff check src/superconducted/training tests/test_targets.py tests/test_aer_pin.py`
-- `.venv/bin/mypy --no-incremental src/superconducted/training src/superconducted/interfaces.py`
+- `.venv/bin/python -m pytest tests/test_targets.py tests/test_aer_pin.py tests/test_training_types.py tests/test_training_parameters.py -q`
+- `.venv/bin/ruff check src/superconducted/types.py src/superconducted/training tests/test_targets.py tests/test_aer_pin.py tests/test_training_types.py tests/test_training_parameters.py`
+- `.venv/bin/mypy --no-incremental src/superconducted/types.py src/superconducted/training src/superconducted/interfaces.py`
 
 ## Related docs
 
 - Issue #57
-- ADR-014 in `docs/decisions.md`
+- ADR-027 in `docs/decisions.md`
 - `tests/fixtures/calibration/README.md`

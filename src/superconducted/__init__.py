@@ -25,8 +25,12 @@ from .interfaces import (
 from .types import (
     CalibrationSnapshot,
     MembershipDegree,
+    ParameterCount,
     RuleFiringResult,
     SimulationResult,
+    TrainingDiagnostics,
+    TrainingResult,
+    TrainingSet,
 )
 
 __version__ = "0.1.0"
@@ -41,9 +45,13 @@ __all__ = [
     "MembershipDegree",
     "MembershipFunction",
     "NormalizationStrategy",
+    "ParameterCount",
     "RuleBase",
     "RuleFiringResult",
     "SimulationResult",
     "SquashingStrategy",
+    "TrainingDiagnostics",
+    "TrainingResult",
+    "TrainingSet",
     "__version__",
 ]

@@ -9,7 +9,7 @@ import numpy.typing as npt
 
 from ..fuzzy.tsk import TSKRuleBase
 from ..interfaces import MembershipFunction, RuleBase
-from .types import ParameterCount
+from ..types import ParameterCount
 
 
 @dataclass(frozen=True, slots=True)

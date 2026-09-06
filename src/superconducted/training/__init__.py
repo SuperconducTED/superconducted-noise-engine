@@ -1,6 +1,6 @@
-"""Training contracts and the hybrid ANFIS trainer."""
+"""Calibration-derived training-target helpers and parameter accounting."""
 
-from .anfis import HybridANFISTrainer
+from ..types import ParameterCount, TrainingDiagnostics, TrainingResult, TrainingSet
 from .parameters import PremiseLayout, count_trainable_parameters, premise_layout
 from .targets import (
     QubitTargets,
@@ -11,10 +11,8 @@ from .targets import (
     qubit_targets,
     snapshot_target,
 )
-from .types import ParameterCount, TrainingDiagnostics, TrainingResult, TrainingSet
 
 __all__ = [
-    "HybridANFISTrainer",
     "ParameterCount",
     "PremiseLayout",
     "QubitTargets",

@@ -321,6 +321,11 @@ are accumulated and a target-distribution definition exists.
 **Consequences**: Bootstrap's `from_grid` initializes consequents to
 zero. A model trained from scratch will need the trainer.
 
+> Revisited · 2026-09-07 · ADR-027 now provides a proposed calibration
+> target definition, so the second deferral condition is satisfied. The first
+> remains unmet: NC-025 records 504 distinct states, below the 630-state floor.
+> ADR-014 remains Deferred; no trainer implementation is accepted by this note.
+
 ---
 
 ## ADR-015 — Ensemble sampling mechanism
@@ -1169,3 +1174,65 @@ layout this extends), `.github/workflows/calibration-poll.yml`,
 
 > Extends ADR-020. `snapshots/` is unchanged; this entry adds
 > `ledger/` and `collisions/` alongside it.
+
+---
+
+## ADR-027 — Calibration training target
+
+**Status**: Open.
+
+**Context**: The single-qubit amplitude-plus-phase-damping channel needs one
+supervised target derived from archived IBM calibration data. Without an
+explicit derivation, training, anchored consequents, and the thermal reference
+can disagree on formulas, missing data, or gate duration.
+
+**Decision (proposed)**: For gate duration $t$ and a qubit's $T_1$, $T_2$, use
+
+$$
+\gamma = 1 - \exp(-t/T_1), \qquad
+\lambda = 1 - \exp[-t(2/T_2 - 1/T_1)].
+$$
+
+Accept only $T_2 \leq 2T_1$. Reject each qubit by its first applicable reason:
+missing/non-finite $T_1$, missing/non-finite $T_2$, missing/non-finite gate
+duration, non-positive physical values, then $T_2 > 2T_1$. Rejected rows retain
+their positional alignment with a NaN target and false usable mask.
+
+The snapshot target is the mean of usable per-qubit targets; standard deviation
+and the 10th, 50th, and 90th percentiles are retained. It is deliberately not
+the target evaluated at mean $T_1$/$T_2$, because the mapping is nonlinear.
+`training.targets.gate_lengths` reads only the requested one-qubit gate from
+the raw `properties.gates` envelope and requires the `ns` gate-length unit.
+
+**Consequences**: The proposal supplies one testable target to Issue #58's
+reference model and a future trainer. It deliberately introduces neither a
+multi-qubit, readout-error, nor non-zero-excited-population target: the current
+projector installs only a single-qubit channel, while readout error is an
+outside-the-channel measurement effect. On the fixture, the readout-error
+median is $2.191162109375 \times 10^{-2}$, the `sx` gate-error median is
+$3.110293362374808 \times 10^{-4}$, and mean $(\gamma, \lambda)$ is
+$(1.7266737044123665 \times 10^{-4}, 6.630210259092216 \times 10^{-4})$
+(NC-036). The target is raw-space; existing inference projection remains
+responsible for probability clipping.
+
+The snapshot aggregate is not a per-qubit training table and is not a richer
+feature-extractor decision under ADR-013. A future target-side upgrade may pair
+a per-qubit table with a per-qubit extractor, but must make that separate
+decision here. `HybridANFISTrainer`, its synthetic CLI, and synthetic smoke
+records are Issue #60 work: they must not land under this ADR while ADR-014 is
+Deferred and the NC-025 state-count gate is unmet.
+
+**Evidence**: `tests/test_aer_pin.py` matches Qiskit Aer's zero-temperature
+`thermal_relaxation_error` under `SuperOp` comparison across both Aer branches
+at 24 ns and 60 ns. NC-032 records maximum error below $10^{-12}$; NC-031 and
+NC-034 record the fixture's 24 ns gate duration and usable-row count. NC-035
+records the nonzero mean-of-targets versus target-at-mean-features gap.
+
+**Pending decisions**: Advisor/reviewer sign-off is required for raw-space
+training, raw gate-envelope parsing, the ordered skip policy, and mean of
+per-qubit targets. This entry remains Open until those decisions are recorded.
+
+**Source**: Issue #57; `docs/decisions/drafts/ADR-027-calibration-training-target.md`;
+`src/superconducted/training/targets.py`; `tests/training/test_targets.py`;
+`tests/training/test_aer_pin.py`; ADR-008, ADR-012, ADR-013, ADR-014, ADR-017,
+and ADR-020.
