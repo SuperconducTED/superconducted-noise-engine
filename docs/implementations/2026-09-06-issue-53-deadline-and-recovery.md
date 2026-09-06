@@ -223,3 +223,49 @@ and compare as multisets — they are equal, which is the finding.
   vocabulary.
 - NC-026 in `docs/numerical-claims.md` — retention depth ≥ 60 days, re-confirmed
   incidentally here: all 55 enumeration queries at ~32 days depth were honoured.
+
+---
+
+## As of 2026-09-07 — the collision is fixed, and one claim above was wrong
+
+The sections above are the record as measured on 2026-09-06 and are left
+unedited. Two things changed the next day.
+
+**The comparator was fixed.** `_strip_parameter_dates` now drops `date` from any
+dict that also carries `value`, scoped to the cross-fetch-path comparison only;
+the full digest behind `--compare` still hashes dates, because that is the
+live-vs-live decision where `collision` is the safe answer. On
+`claude/loving-mclean-4a2b76` (`1e7c0eb`), 290 tests passing, 10 added. Comparing
+values alone was considered and rejected: it would call a T1 in µs equal to one
+in ns.
+
+A sharper root cause than the one recorded above: the 26 differing gate entries
+are **exactly** the 26 carrying the `gate_error = 1` "not calibrated"
+placeholder, and no measured entry differed at all. The history endpoint
+reassembles a document and re-stamps the entries it synthesises, so that `date`
+is provenance rather than measurement.
+
+**The spurious file is gone.** `calibration-data` @ `1996bf6` — `collisions/`
+holds only its `README.md`, which records why, following the precedent set for
+#55's seven files in `40a1ff4`. `snapshots/2026-08/ibm_fez/` is unchanged at 304.
+The ledger row `2026-09-06T20:46:55Z ... collision` is deliberately left in
+place; the ledger records observations, not conclusions. So #53's "`collisions/`
+still empty" criterion now holds.
+
+**What the false collision actually cost, since it is easy to get wrong.** It did
+not cost a recovery. The collision branch in `scripts/file_snapshots.sh` sits in
+the `else` of `if [ ! -e "$dest/$base" ]`, so it is reached *only* when the stamp
+is already archived, and the archived copy is never overwritten (#46 §3c) —
+nothing was ever missing from `snapshots/`. The cost was a spurious file on
+ADR-025's divergence channel, plus a failed acceptance criterion pointing at the
+archive when the fault was in the comparator. An earlier draft of the #53 comment
+claimed a lost recovery; that was corrected before posting, and this note records
+the mechanism so the mistake is not made again.
+
+**Sequencing risk while the fix is unmerged.** The comparator fix is not on
+`main` and has no PR open, so a manual `workflow_dispatch` backfill run before it
+merges would write another spurious file. Scheduled polls cannot: they run with
+`IS_BACKFILL=0` and never reach that branch.
+
+Detail in `docs/implementations/2026-09-07-payload-digest-parameter-dates.md` on
+that branch.
