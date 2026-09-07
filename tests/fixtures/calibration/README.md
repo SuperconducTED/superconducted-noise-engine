@@ -18,7 +18,7 @@ contains `readout_error`, `prob_meas0_prep1`, `prob_meas1_prep0`, and
 standard entries.
 
 **Provenance**:
-- Source ref: `origin/calibration-data:snapshots/2026-05/ibm_fez/20260513T121322000000Z.json`
+- Source ref: `superconducted-noise-engine/calibration-data:snapshots/2026-05/ibm_fez/20260513T121322000000Z.json`
 - Full source SHA-256: `cbbbd2c3273e4e7eda006eaa104a16d8f81888776cbfc8453b637322671d1083`
 - Full source size: 1 324 893 bytes.
 
@@ -38,12 +38,13 @@ Dropped to stay under a reasonable fixture budget:
 
 The slim fixture is 154 982 bytes.
 
-**Regenerating** (run from repo root after `git fetch origin calibration-data`):
+**Regenerating** (run from repo root after
+`git fetch superconducted-noise-engine calibration-data`):
 
 ```bash
 python -c "
 import subprocess, json, pathlib
-src = 'origin/calibration-data:snapshots/2026-05/ibm_fez/20260513T121322000000Z.json'
+src = 'superconducted-noise-engine/calibration-data:snapshots/2026-05/ibm_fez/20260513T121322000000Z.json'
 data = json.loads(subprocess.check_output(['git', 'show', src]))
 slim = {
     'backend': data['backend'],
