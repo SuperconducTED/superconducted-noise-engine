@@ -34,17 +34,19 @@ def test_zero_rate_has_no_finite_projection_and_hour_boundary_is_included() -> N
     poll = PollRow(NOW.replace(minute=0), "duplicate")
     metrics = build_metrics([old], [poll], [("candidate", 2)], NOW)
     assert metrics["floors"][0]["projected_days"] is None
-    assert metrics["ledger_hour_coverage_72h"] == 1 / 72
+    assert metrics["ledger_hour_coverage_72h"] == 0
+    assert metrics["poll_hours_72h"][-1] is False  # the current partial hour is excluded
 
 
 def test_svg_is_deterministic_well_formed_and_safe() -> None:
-    metrics = build_metrics([], [], [("candidate", 630)], NOW)
+    metrics = build_metrics([], [], [("first", 630), ("second", 675)], NOW)
     svg = render_svg(metrics)
     assert svg == render_svg(metrics)
     assert "<script" not in svg and "<foreignObject" not in svg and "href=" not in svg
     root = ElementTree.fromstring(svg)
     assert root.attrib["viewBox"] == "0 0 900 480"
     assert 'fill="#f8fafc"' in svg
+    assert 'y="207"' in svg and 'y="222"' in svg
 
 
 def test_cli_writes_deterministic_artifacts_from_index_and_ledger(tmp_path: Path) -> None:

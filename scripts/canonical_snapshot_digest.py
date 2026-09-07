@@ -73,14 +73,15 @@ def _payload_digest(doc: dict[str, Any]) -> str:
 
 
 def qubit_digest(payload: dict[str, Any]) -> str:
-    """
-    Returns the canonical SHA-256 hash of ``properties.qubits``.
-    This defines the immutable state of a device (NC-025).  It is intentionally
-    made public; document parsers will be able to eliminate duplicates without
-    running this script for every archive entry.
+    """Return the canonical SHA-256 digest of a snapshot's qubit block.
+
+    This is the stable NC-025 definition of a device state. Invalid or missing
+    qubit data is undecidable, never a shared phantom digest.
     """
     properties = payload.get("properties")
-    qubits = properties.get("qubits") if isinstance(properties, dict) else None
+    if not isinstance(properties, dict) or not isinstance(properties.get("qubits"), list):
+        raise ValueError("snapshot properties.qubits must be a list")
+    qubits = properties["qubits"]
     body = json.dumps(qubits, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(body.encode("utf-8")).hexdigest()
 

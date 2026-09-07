@@ -48,6 +48,10 @@ def backfill(root: Path) -> int:
                 seen.add(row["qubit_digest"])
     snapshots = sorted((root / "snapshots").glob("*/*/*.json"), key=lambda path: path.name)
     missing = [path for path in snapshots if path.name not in existing]
+    if existing and missing:
+        raise ValueError(
+            "state index is incomplete; refusing to append historical rows after poll indexing"
+        )
     mode = "a" if index.exists() else "w"
     with index.open(mode, encoding="utf-8", newline="") as handle:
         writer = csv.writer(handle, delimiter="\t", lineterminator="\n")

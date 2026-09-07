@@ -6,17 +6,53 @@ on:
   workflow_dispatch:
     inputs:
       backfill:
-        description: 'Append all unindexed snapshots before rendering (one-time use).'
+        description: 'Build the index before rendering; use only before polling appends index rows.'
         required: false
         type: boolean
         default: false
 
 concurrency:
-  group: calibration-data-write
+  group: calibration-health
   cancel-in-progress: false
 
 jobs:
+  backfill:
+    if: ${{ inputs.backfill }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: source
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: calibration-data
+          path: data
+          fetch-depth: 1
+          sparse-checkout: |
+            snapshots
+            health
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build and commit the state index
+        run: |
+          PYTHONPATH=source python source/scripts/backfill_state_index.py --root data
+          cd data
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add health/state-index.tsv
+          git diff --cached --quiet && exit 0
+          git commit -m 'health: backfill state index'
+          git push origin HEAD:calibration-data
+
   render:
+    needs: backfill
+    if: ${{ always() && (needs.backfill.result == 'success' || needs.backfill.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -26,34 +62,31 @@ jobs:
         with:
           path: source
           fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: calibration-data
+          path: data
+          fetch-depth: 1
+          sparse-checkout: |
+            health
+            ledger
+          sparse-checkout-cone-mode: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Check out compact data inputs
-        run: |
-          git clone --depth 1 --filter=blob:none --sparse --branch calibration-data \
-            "https://github.com/${GITHUB_REPOSITORY}.git" data
-          cd data
-          git sparse-checkout set health ledger README.md
-      - name: Backfill state index
-        if: ${{ inputs.backfill }}
-        run: |
-          cd data
-          git sparse-checkout add snapshots
-          PYTHONPATH=../source python ../source/scripts/backfill_state_index.py --root .
       - name: Render metrics and SVG
         run: PYTHONPATH=source python source/scripts/pipeline_health.py --root data
-      - name: Commit only when the dashboard changed
+      - name: Commit only material health changes
         run: |
           cd data
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          # metrics.json carries generated_at, so it changes every render. The
-          # SVG intentionally does not. Use the SVG as the material dashboard
-          # change gate; otherwise a quiet day would create a timestamp-only
-          # commit, defeating the branch churn budget.
-          git add health/progress.svg
-          git diff --cached --quiet && exit 0
-          git add health/metrics.json health/state-index.tsv
+          git add health/
+          # generated_at changes in metrics.json each render. Commit it only
+          # when the dashboard SVG or append-only index changed.
+          if git diff --cached --quiet -- health/progress.svg health/state-index.tsv; then
+            git restore --staged health/metrics.json
+            exit 0
+          fi
           git commit -m 'health: refresh pipeline dashboard'
-          git push origin calibration-data
+          git push origin HEAD:calibration-data

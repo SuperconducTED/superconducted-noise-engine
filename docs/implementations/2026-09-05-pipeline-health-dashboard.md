@@ -2,13 +2,17 @@
 
 ## Problem / Motivation
 
-Issue #48 adds a continuous auditable health signal to the `calibration-data` archive. File count is not the training-data unit: repeated documents can have the same `properties.measurements on qubits. So, the dashboard measures distinct qubit-block states, shows polling coverage and makes visible a scheduler gap without scanning the snapshot archive. This builds on the ledger layout of ADR-025. The creation of the `health/` tree requires the ADR amendment and review listed in the issue before deployment.
+Issue #48 adds a continuous, auditable health signal to the `calibration-data`
+archive. File count is not the training-data unit: repeated documents can have
+the same `properties.qubits` measurements. The dashboard therefore reports
+distinct qubit-block states, polling coverage, and visible scheduler gaps
+without scanning the snapshot archive. It extends ADR-025's ledger layout while
+leaving the IBM fetch path, snapshot schema, and ADR-020 `snapshots/` layout
+unchanged.
 
-The dashboard separates three operational signals that the archive previously combined: documents filed, separate device states captured, and polling events seen. That distinction finds both a stopped scheduler that is no longer firing, and a healthy scheduler that is simply collecting repeated qubit states.
-It does not change the IBM fetch path, json schema or ADR-020.
-
-The dashboard shows three operational signals that the archive used to blend: documents filed, distinct device states taken, and polling events seen. This distinction detects a healthy scheduler collecting only repeated qubit states as well as stopped scheduler
-This does not alter the IBM fetch path, JSON schema, or ADR-020 `snapshots/` layout.
+The dashboard separates documents filed, distinct device states acquired, and
+poll events observed. This reveals both a stopped scheduler and a healthy
+scheduler that is only collecting repeated qubit states.
 
 
 ## What changed
@@ -20,9 +24,14 @@ This does not alter the IBM fetch path, JSON schema, or ADR-020 `snapshots/` lay
 | `scripts/backfill_state_index.py` | Idempotently appends existing snapshots to the state index in timestamp order. |
 | `scripts/pipeline_health.py` | Reads compact health inputs, writes metrics JSON, and renders a deterministic self-contained SVG. |
 | `.github/workflows/calibration-health.yml` | Daily sparse-checkout renderer with an optional one-time backfill and commit-on-change behaviour. |
-| `.github/workflows/calibration-poll.yml` | Shares the calibration-data writer concurrency group with the health workflow. |
+| `.github/workflows/calibration-poll.yml` | Keeps hourly polls isolated from health-render cancellation. |
+| `.gitignore` | Ignores generic pytest scratch paths created during local verification. |
+| `docs/decisions.md` | Adds the ADR-025 health-tree amendment. |
+| `docs/numerical-claims.md` | Registers the dashboard's test-count and backfill measurements. |
 | `tests/test_canonical_snapshot_digest.py` | Pins qubit-scope behaviour and the public digest API. |
+| `tests/test_backfill_state_index.py` | Tests timestamp ordering, idempotency, and unsafe partial-index refusal. |
 | `tests/test_pipeline_health.py` | Tests state metrics, poll-hour boundaries, deterministic SVG output, and basic SVG safety. |
+| `tests/test_file_snapshots.py` | Exercises per-poll index appends and undecidable digest handling end to end. |
 
 ## Implementation approach
 
@@ -30,8 +39,10 @@ The poll path calculates a sha-256 digest of qubit only for exactly the new snap
 
 The health job only checks `health/`, `ledger/` and the branch README in a sparse manner. It produces all the dashboard figures from the index and ADR-025 ledger, staging `health/` but committing only if the bytes changed. `generated_at` only exists in JSON; the SVG has no clock value, external resource, script, or theme-dependent foreground color.
 
-The only archive walking operation is the optional workflow-dispatch backfill.
-It does not touch existing index rows and ignores filenames that it already has indexed, so it is safe to run again after an interruption.
+The only archive-walking operation is the optional workflow-dispatch backfill.
+It is safe to repeat only after a complete backfill: it refuses an incomplete
+existing index, rather than appending historical rows after poll-side rows and
+permanently corrupting `is_new_state` chronology.
 
 ### Data contracts
 
@@ -50,12 +61,13 @@ The renderer generates `health/metrics.json` and `health/progress.svg`. `generat
 1. The hourly poll files a payload through `file_snapshots.sh`.
 2. Each `decision=new` appends exactly one state-index row; every poll outcome
    remains in ADR-025's monthly ledger.
-3. The daily health workflow sparsely checks out only `health/`, `ledger/`, and
-   `README.md`, renders the two health artifacts, and commits only a diff.
-4. A manual run with `backfill=true` first adds `snapshots/` to sparse checkout
-   and performs the sole archive-wide scan. Normal scheduled runs never do so.
-5. Both workflows use `calibration-data-write` concurrency, preventing a push
-   race between an hourly poll and a health render.
+3. The daily health workflow sparsely checks out only `health/` and `ledger/`,
+   renders the two health artifacts, and commits material output only.
+4. A manual `backfill=true` job checks out `snapshots/`, builds the complete
+   index, commits it, then lets the render job consume that committed input.
+   Normal scheduled runs never traverse snapshots.
+5. Poll and health workflows use separate concurrency groups so a health render
+   cannot cancel an hourly poll and erase its ledger evidence.
 
 ### Publishing constraints
 
@@ -63,6 +75,21 @@ The SVG has an explicit background and fixed palette for GitHub light and dark
 contexts. It is self-contained: no script, `foreignObject`, remote font,
 external image, or URL is emitted. Candidate floor marks are labelled by source
 rather than asserting one authoritative training floor.
+
+## Issue #48 decisions and external review
+
+The implementation adopts the issue's recommended daily render cadence. Hourly
+measurement remains in the poll-side index and ledger, while daily rendering
+avoids roughly 8,760 SVG commits per year. The ADR-025 amendment records the
+new `health/` tree and is intentionally pending Mert Efe Şensoy's review and
+out-of-band routing to Dr. Fırat Akba before workflow enablement.
+
+Alarm thresholds remain presentation-independent configuration, not hard-coded
+colours. The proposed operational starting points for the issue thread are
+72-hour ledger coverage below 75% (the observed collapse began at 16 polls/day,
+below the normal 22–23/day) and 24 hours without a new state. These are
+proposals based on measured scheduler history; adoption requires the issue
+discussion and review.
 
 ## Mathematical / Statistical details
 

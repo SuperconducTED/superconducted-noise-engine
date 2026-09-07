@@ -92,6 +92,15 @@ class TestCanonicalDigest:
         assert canonical_digest(a, scope="qubits") != canonical_digest(c, scope="qubits")
         assert qubit_digest(first) == canonical_digest(a, scope="qubits")
 
+    def test_qubit_scope_rejects_missing_or_malformed_qubits(self, tmp_path: pathlib.Path) -> None:
+        missing = _doc(OPS_A)
+        missing["properties"] = {}
+        malformed = _doc(OPS_A)
+        malformed["properties"] = None
+        for name, document in (("missing.json", missing), ("malformed.json", malformed)):
+            with pytest.raises(ValueError, match=r"properties\.qubits"):
+                canonical_digest(_write(tmp_path, name, document), scope="qubits")
+
 
 class TestCli:
     def test_compare_same_document_exits_zero(self, tmp_path: pathlib.Path) -> None:

@@ -128,7 +128,8 @@ def build_metrics(
         for day in range(30)
     ]
     recent_polls = [row for row in polls if row.timestamp > window24]
-    start72 = now.replace(minute=0, second=0, microsecond=0) - timedelta(hours=71)
+    end72 = now.replace(minute=0, second=0, microsecond=0)
+    start72 = end72 - timedelta(hours=72)
     hours = [start72 + timedelta(hours=offset) for offset in range(72)]
     fired = {row.timestamp.replace(minute=0, second=0, microsecond=0) for row in polls}
     hour_values = [hour in fired for hour in hours]
@@ -194,11 +195,15 @@ def render_svg(metrics: dict[str, Any]) -> str:
         f'<rect x="{bar_x}" y="165" width="{bar_width}" height="24" rx="4" fill="#d7e0ea"/>',
         f'<rect x="{bar_x}" y="165" width="{progress:.2f}" height="24" rx="4" fill="#166534"/>',
     ]
-    for floor in metrics["floors"]:
+    for index, floor in enumerate(metrics["floors"]):
         x = bar_x + min(int(floor["value"]) / max_floor, 1) * bar_width
         label = html.escape(f"{floor['label']}: {floor['value']}")
         labels.append(f'<path d="M{x:.2f} 159v36" stroke="#9a3412" stroke-width="2"/>')
-        labels.append(f'<text x="{x:.2f}" y="207" class="tiny" text-anchor="middle">{label}</text>')
+        baseline = 207 if index % 2 == 0 else 222
+        anchor = "end" if index == len(metrics["floors"]) - 1 else "middle"
+        labels.append(
+            f'<text x="{x:.2f}" y="{baseline}" class="tiny" text-anchor="{anchor}">{label}</text>'
+        )
     labels.append('<text x="55" y="252" class="label">Poll health — last 72 hours</text>')
     for index, fired in enumerate(metrics["poll_hours_72h"]):
         x = 55 + index * 11
@@ -213,7 +218,7 @@ def render_svg(metrics: dict[str, Any]) -> str:
         x = 55 + index * 25
         labels.append(f'<rect x="{x}" y="{445 - height:.2f}" width="18" height="{height:.2f}"')
         labels.append(' fill="#2563eb"/>')
-    labels.append(f'<text x="285" y="438" class="metric">{rate_text:.2f} states/day</text>')
+    labels.append(f'<text x="55" y="370" class="metric">{rate_text:.2f} states/day</text>')
     body = "".join(labels)
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} 480" role="img" '
@@ -228,8 +233,14 @@ def render_svg(metrics: dict[str, Any]) -> str:
 def main(argv: Iterable[str] | None = None) -> int:
     """Write ``metrics.json`` and ``progress.svg`` below a data-branch root."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=Path("."))
-    parser.add_argument("--floor", action="append", default=None)
+    parser.add_argument("--root", type=Path, default=Path("."), help="Calibration-data checkout.")
+    parser.add_argument(
+        "--floor",
+        action="append",
+        default=None,
+        metavar="LABEL=VALUE",
+        help="Candidate floor; may be repeated (default: NC-012=630 and TanhBellMF=675).",
+    )
     parser.add_argument(
         "--now", type=parse_time, default=None, help="UTC render instant (for tests)."
     )

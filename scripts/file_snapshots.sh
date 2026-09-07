@@ -94,17 +94,28 @@ for f in "$STAGING_DIR/$BACKEND"/*.json; do
     # This is intentionally incremental: only the just-filed document is
     # parsed. The scheduled dashboard reads this compact index, never 1+ GB of
     # snapshots. A digest seen in any prior row is a duplicate device state.
-    qubit_digest=$("$PYTHON" "$digest" --scope qubits "$dest/$base" | awk '{print $1}')
-    if awk -F '\t' -v digest="$qubit_digest" 'NR > 1 && $3 == digest { found=1 } END { exit !found }' "$state_index"; then
-      is_new_state=0
+    # A malformed qubit block is preserved as a new document but is not a
+    # state-index measurement. Do not let an undecidable digest abort the poll
+    # after moving its payload; the ledger still records the observation.
+    set +e
+    digest_output=$("$PYTHON" "$digest" --scope qubits "$dest/$base")
+    digest_status=$?
+    set -e
+    if [ "$digest_status" -ne 0 ]; then
+      echo "::warning::$stem has no decidable qubit digest; preserved but not indexed"
     else
-      is_new_state=1
+      qubit_digest=$(awk '{print $1}' <<< "$digest_output")
+      if awk -F '\t' -v digest="$qubit_digest" 'NR > 1 && $3 == digest { found=1 } END { exit !found }' "$state_index"; then
+        is_new_state=0
+      else
+        is_new_state=1
+      fi
+      fraction=${stem:15:${#stem}-16}
+      decimal=""
+      if [ -n "$fraction" ]; then decimal=".$fraction"; fi
+      last_update_date="${stem:0:4}-${stem:4:2}-${stem:6:2}T${stem:9:2}:${stem:11:2}:${stem:13:2}${decimal}Z"
+      printf '%s\t%s\t%s\t%s\n' "$base" "$last_update_date" "$qubit_digest" "$is_new_state" >> "$state_index"
     fi
-    fraction=${stem:15:${#stem}-16}
-    decimal=""
-    if [ -n "$fraction" ]; then decimal=".$fraction"; fi
-    last_update_date="${stem:0:4}-${stem:4:2}-${stem:6:2}T${stem:9:2}:${stem:11:2}:${stem:13:2}${decimal}Z"
-    printf '%s\t%s\t%s\t%s\n' "$base" "$last_update_date" "$qubit_digest" "$is_new_state" >> "$state_index"
   else
     # A stamp collision does NOT prove the documents match -- #46 s3c lost
     # five gate-level versions under one stamp. But the comparison must be

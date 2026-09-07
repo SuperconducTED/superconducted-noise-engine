@@ -1165,7 +1165,7 @@ layout this extends), `.github/workflows/calibration-poll.yml`,
 > Extends ADR-020. `snapshots/` is unchanged; this entry adds
 > `ledger/` and `collisions/` alongside it.
 
-### Amendment — 2026-09-05: pipeline-health tree
+### ADR-025 amendment — 2026-09-05: pipeline-health tree
 
 `health/` is added as a third sibling tree on `calibration-data`:
 

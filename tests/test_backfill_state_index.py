@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from scripts.backfill_state_index import backfill
 from scripts.pipeline_health import read_index
 
@@ -35,3 +36,11 @@ def test_backfill_orders_rows_marks_duplicate_state_and_is_idempotent(tmp_path: 
     assert [row.is_new for row in rows] == [True, False, True]
     assert backfill(tmp_path) == 0
     assert read_index(tmp_path / "health/state-index.tsv") == rows
+
+
+def test_backfill_refuses_to_append_history_after_partial_poll_index(tmp_path: Path) -> None:
+    _write_snapshot(tmp_path, "20260901T000000000000Z.json", 1.0)
+    assert backfill(tmp_path) == 1
+    _write_snapshot(tmp_path, "20260902T000000000000Z.json", 2.0)
+    with pytest.raises(ValueError, match="incomplete"):
+        backfill(tmp_path)
