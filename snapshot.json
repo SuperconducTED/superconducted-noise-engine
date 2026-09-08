@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-08 18:47 UTC",
+  "generated": "2026-09-08 18:58 UTC",
   "main": {
     "sha": "645b4d1a",
     "date": "2026-09-08",
@@ -338,13 +338,19 @@
           "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "Feature/issue 59 parameterization",
-          "updatedAt": "2026-09-08T13:51:43Z",
+          "updatedAt": "2026-09-08T18:56:11Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/68",
           "headRefOid": "3f5e0f99d7d1980e5ca587e7ac73c5e138f5fccc",
           "additions": 4283,
           "deletions": 2,
           "file_count": 9,
           "latest_reviews": [
+            {
+              "who": "BurakOztekin",
+              "state": "CHANGES_REQUESTED",
+              "at": "2026-09-08",
+              "last_activity": "2026-09-08"
+            },
             {
               "who": "mertefesensoy",
               "state": "CHANGES_REQUESTED",
@@ -402,7 +408,7 @@
       "blockers": [
         {
           "severity": "critical",
-          "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-09-04). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
+          "text": "CHANGES_REQUESTED standing from @BurakOztekin (2026-09-08), @mertefesensoy (2026-09-04). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
         }
       ],
       "declared_unblocks": [

@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-08 18:47 UTC · main at `645b4d1a` (2026-09-08) · 22 days to 2026-09-30_
+_Generated 2026-09-08 18:58 UTC · main at `645b4d1a` (2026-09-08) · 22 days to 2026-09-30_
 
 
 ## Milestones
@@ -82,13 +82,13 @@ _Generated 2026-09-08 18:47 UTC · main at `645b4d1a` (2026-09-08) · 22 days to
 
 **Burak Öztekin** (@BurakOztekin)
 
+1. Re-review PR #68 (#59: Manual MF parameterization from the archive)
+   - Your CHANGES_REQUESTED from 2026-09-08 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Start #60: ADR-014 hybrid ANFIS trainer
    - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.
 1. Re-review PR #83 (#57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py)
    - Your CHANGES_REQUESTED from 2026-09-08 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Start #73: Filter noise by physical gate semantics
-   - All stated upstream dependencies are met.
-1. Start #74: first_ensemble_run must transpile before prepare
    - All stated upstream dependencies are met.
 
 **Mert Efe Şensoy** (@mertefesensoy)
@@ -107,7 +107,7 @@ _Generated 2026-09-08 18:47 UTC · main at `645b4d1a` (2026-09-08) · 22 days to
 1. Start #84: Close the #57 advisor loop
    - The only phase-3 blocker with a multi-week external latency tail, and the only M1 gate with no work in flight. Every day it waits is a day added to M3.
 1. Unstick PR #68 for #59: Manual MF parameterization from the archive
-   - CHANGES_REQUESTED standing from @mertefesensoy (2026-09-04). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+   - CHANGES_REQUESTED standing from @BurakOztekin (2026-09-08), @mertefesensoy (2026-09-04). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -127,7 +127,7 @@ _Generated 2026-09-08 18:47 UTC · main at `645b4d1a` (2026-09-08) · 22 days to
 
 **#59: Manual MF parameterization from the archive** (@yigit-arda)
 
-- [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-09-04). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+- [critical] CHANGES_REQUESTED standing from @BurakOztekin (2026-09-08), @mertefesensoy (2026-09-04). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **#61: ADR-011 evidence + premise gradients** (@bengisucvd)
 
