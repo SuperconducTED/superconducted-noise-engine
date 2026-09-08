@@ -22,10 +22,35 @@ cd "$(dirname "$0")"
 LOG="run.log"
 started="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 outcome="started"
+
+# The report a run is entitled to make is written by the run itself. Deleting it
+# up front is the structural half of that: if this script does not reach the
+# end, there is no report file and `report.sh` has nothing to print, so
+# reporting becomes impossible rather than merely discouraged. That is the
+# difference between a rule and a guarantee, and it is the whole reason this
+# exists: a routine that could still compose a summary from leftover files did
+# exactly that on 2026-09-08, twice, and the summaries looked entirely normal.
+rm -f last_run.md
+token="${started}-$$"
+
+# Put the run token and the outcome at the top of the report generate.py wrote.
+# report.sh reads the token to decide whether the report is fresh, so this is
+# what makes a relayed report attributable to a particular run.
+stamp_report() {
+  { printf 'run-token: %s\noutcome: %s\n\n' "$token" "$1"; cat last_run.md; } \
+    > last_run.stamped && mv last_run.stamped last_run.md
+}
+
 log_exit() {
   local code=$?
   [ "$outcome" = "started" ] && outcome="FAILED (exit $code)"
   printf '%s  %s\n' "$started" "$outcome" >> "$LOG"
+  # A failed run leaves the caller a report saying so, rather than nothing at
+  # all, so the routine always has something truthful to relay.
+  if [ ! -f last_run.md ]; then
+    printf 'run-token: %s\noutcome: %s\n\nThe refresh did not complete. Nothing was\ncommitted and the dashboard was not updated; the numbers you may see elsewhere\nare from an earlier run. See run.log and the command output above.\n' \
+      "$token" "$outcome" > last_run.md
+  fi
   return $code
 }
 trap log_exit EXIT
@@ -52,6 +77,7 @@ if git diff --quiet -- index.html STATUS.md snapshot.json plan.json README.md hi
    [ -z "$(git ls-files --others --exclude-standard history/)" ]; then
   echo "==> byte-identical to the last run, nothing to commit"
   outcome="ok: byte-identical, no commit"
+  stamp_report "$outcome"
   exit 0
 fi
 
@@ -83,7 +109,12 @@ else
   subject="chore: phase-3 dashboard: no change ($(date -u +%Y-%m-%d))"
 fi
 
-git add index.html STATUS.md snapshot.json plan.json README.md history/ run.log
+# Stamp the report before committing, so the copy in git is the copy that was
+# relayed. The subject is already known here; only the push can still fail, and
+# the EXIT trap records that in run.log.
+stamp_report "ok: $subject"
+
+git add index.html STATUS.md snapshot.json plan.json README.md history/ run.log last_run.md
 GIT_AUTHOR_NAME="Mert Efe Şensoy" \
 GIT_AUTHOR_EMAIL="sensoymertefe@gmail.com" \
 GIT_COMMITTER_NAME="Mert Efe Şensoy" \
