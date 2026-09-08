@@ -966,14 +966,22 @@ def main() -> int:
     queue = action_queue(model, plan)
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
-    (HERE / "index.html").write_text(render_html(plan, model, queue, main_state, now), encoding="utf-8")
-    (HERE / "STATUS.md").write_text(render_markdown(plan, model, queue, main_state, now), encoding="utf-8")
-    (HERE / "snapshot.json").write_text(json.dumps(
+    # An explicit LF newline on every write: Python's text mode would otherwise
+    # emit CRLF on Windows, and update.sh decides whether to commit by diffing
+    # these files. A platform-dependent line ending would make every run on a
+    # Windows host look like a change, and the routine would commit daily noise.
+    def emit(name: str, text: str) -> None:
+        with open(HERE / name, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(text)
+
+    emit("index.html", render_html(plan, model, queue, main_state, now))
+    emit("STATUS.md", render_markdown(plan, model, queue, main_state, now))
+    emit("snapshot.json", json.dumps(
         {"generated": now, "main": main_state,
          "tickets": [{k: v for k, v in t.items() if k != "pr"} | {
              "pr": t["pr"]["number"] if t.get("pr") else None} for t in model["tickets"]],
          "milestones": model["milestones"]},
-        indent=2, ensure_ascii=False, default=str), encoding="utf-8")
+        indent=2, ensure_ascii=False, default=str))
 
     done = sum(1 for ms in model["milestones"] for g in ms["gates"] if g["status"] == DONE)
     total = sum(len(ms["gates"]) for ms in model["milestones"])
