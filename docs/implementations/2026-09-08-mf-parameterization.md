@@ -44,7 +44,7 @@ Three defects in the first cut of PR #68 are what this round closes:
 | `tests/test_feature_distribution.py` | Extended from three helper tests to the full FR-2/FR-3/FR-4 contract, a `tmp_path` git-repo integration test, a byte-identity determinism check, and a `slow` test that re-walks the real archive. |
 | `docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv` | *new* — the survey at a pinned `calibration-data` sha, replacing an unpinned `FETCH_HEAD` run. |
 | `docs/evidence/feature-distribution/README.md` | Provenance, the file-count reconciliation, units, the `ddof=1` convention, the summary table, the measured clamp rate, and the provisional runtime. |
-| `docs/numerical-claims.md` | NC-041..NC-044 for the four reported conclusions. |
+| `docs/numerical-claims.md` | NC-041..NC-044 for the four reported conclusions, appended after the NC-035..NC-040 block PR #69 landed. |
 | `docs/team.md` | Ownership row for `fuzzy/parameterization.py`. |
 
 `fuzzy/tsk.py`, `channels/kraus.py`, `interfaces.py` and `calibration/features.py`
@@ -226,20 +226,51 @@ anchoring is a third mechanism the clause does not enumerate. Recording that
 third mechanism in the ledger is the ADR-014 flip PR's job (#60 step 11); this
 PR writes no ledger text and claims no compliance.
 
+### The unit sanity check — the only one that can see a unit error
+
+PR #69 merged `training/targets.py` while this round was in progress, so
+section 6.6's contingency lapsed and FR-7 is wired to the real
+`training.targets.feature_target_fn(features, *, t_seconds)` rather than to a
+synthetic stand-in. That makes section 6.4 (c)'s magnitude check runnable, and
+it is the **only** check in the suite that can catch a unit error:
+
+At the archive's median anchor `[131.7984, 97.0365, 0.0205861]` with
+`t_seconds = 24 ns` (NC-035, `ibm_fez`'s `sx` length):
+
+```
+gamma  = 1.820797e-04
+lambda = 3.125143e-04
+```
+
+Order 1e-4, which is what the physics gives. Feeding the same microsecond value
+to `1 - exp(-t/T1)` as if it were seconds gives about 1e-10 — a value that is
+finite, strictly positive and inside `(0, 1)`, so `is_identity_damping` stays
+`False`, FR-11 passes, section 6.5's convexity bound holds, and every other
+check in this file goes green on a model wrong by six orders of magnitude.
+Nothing but the magnitude catches it.
+
+All 27 anchor combinations are accepted by `feature_target_fn`'s own guards and
+land strictly inside `(0, 1)`: gamma in `[1.6833e-04, 2.0254e-04]`, lambda in
+`[2.6134e-04, 3.8106e-04]`. That is not automatic — the callable rejects
+`mean_T2 > 2·mean_T1`, and the grid pairs each feature's levels independently,
+so the lowest T1 anchor meets the highest T2 anchor.
+
 ### Step 9 acceptance run
 
 Every one of the 975 surveyed feature vectors, through
 `ClampingFeatureExtractor(BasicCalibrationVectorizer(), lo, hi)`, for every M1
 shape (`NieTanDefuzzifier` for the IT2 base, `WeightedAverageDefuzzifier`
-otherwise), against a **synthetic** target — `training/targets.py` (#57) has not
-merged, so section 6.6 applies:
+otherwise), against the **real** target callable:
 
-| Shape | rules | rows | `ZeroDivisionError` | `is_identity_damping` |
-| --- | ---: | ---: | ---: | ---: |
-| `GaussianMF` | 27 | 975 | 0 | 0 |
-| `TanhMF` | 27 | 975 | 0 | 0 |
-| `TanhSigmoidMF` | 27 | 975 | 0 | 0 |
-| `IntervalGaussianMF` | 27 | 975 | 0 | 0 |
+| Shape | rules | rows | `ZeroDivisionError` | `is_identity_damping` | gamma range | lambda range |
+| --- | ---: | ---: | ---: | ---: | --- | --- |
+| `GaussianMF` | 27 | 975 | 0 | 0 | `[1.7400e-04, 2.0253e-04]` | `[3.1314e-04, 3.5507e-04]` |
+| `TanhMF` | 27 | 975 | 0 | 0 | `[1.6857e-04, 2.0254e-04]` | `[3.0323e-04, 3.6144e-04]` |
+| `TanhSigmoidMF` | 27 | 975 | 0 | 0 | `[1.8431e-04, 2.0254e-04]` | `[3.1139e-04, 3.5662e-04]` |
+| `IntervalGaussianMF` | 27 | 975 | 0 | 0 | `[1.7847e-04, 1.9443e-04]` | `[3.1548e-04, 3.3682e-04]` |
+
+Every range sits inside the anchor-target hull above, which is section 6.5's
+convexity bound holding on real data rather than in argument.
 
 **Measured clamp rate: 44 of 975 vectors, 4.51%** — 16 on `mean_T1`, 11 on
 `mean_T2`, 20 on `mean_readout_error`. Measured, not derived: a per-feature 2%
@@ -249,7 +280,8 @@ extractor and record its own rate per run.
 
 Parameter accounting on the Gaussian grid: 27 rules, **9 unique MF objects**
 (81 antecedent references), 18 premise parameters, 216 consequent entries — 234
-total, matching section 6.3. Copies instead of shared objects would have
+total, matching section 6.3 and independently confirming NC-037, which #57
+registered from `training/parameters.py::count_trainable_parameters`. Copies instead of shared objects would have
 inflated the premise count from 18 to 162 (NFR-7).
 
 ## Design decisions
@@ -286,6 +318,12 @@ FR-12 names and semantics are restored, and the two caveats a caller must handle
 are cumulative, so a per-shape rate needs a fresh wrapper) are in the class
 docstring.
 
+**FR-13 was not built, and step 10 is skipped.** `training/targets.py` merged
+with PR #69 on 2026-09-08, so section 6.6's contingency never triggered:
+`anchored_rule_base` consumes the real callable and `viable_seed_rule_base` is
+not needed. No seed appears anywhere in the untrained baseline, so ADR-024's 1/4
+rate does not apply to anything this PR produces and no caption has to carry it.
+
 **Still open — not decided here.** Section 7 decisions 1–3 have not been
 answered in the issue thread. The code implements the ticket's own
 recommendations (cumulative levels with a common slope for `TanhSigmoidMF`;
@@ -311,6 +349,10 @@ Re-walk the archive and confirm the committed TSV reproduces (needs the
 git fetch superconducted-noise-engine calibration-data && pytest tests/ -m slow -v
 ```
 
+```bash
+python scripts/check_ids.py
+```
+
 Regenerate the survey from scratch and diff it against the committed artifact —
 byte-identical, including line endings:
 
@@ -321,8 +363,9 @@ python -m scripts.feature_distribution --repo . --ref 3d1569d18bcc007c35f3f628f7
 Measured on Mert's laptop 2026-09-08 (**provisional** under NFR-3 until Burak's
 next batch record, architect decision C2):
 
-- Full suite collects **387** tests, up from **280** on `main` at `f26af37` —
-  a delta of **+107** against NC-021's current value.
+- Full suite collects **469** tests, up from **360** on `main` at `2d66f7a` —
+  a delta of **+109** against NC-021's current value of 360, which reproduces
+  exactly at that commit.
 - 13 pre-existing failures in `tests/test_probe_historical_properties.py`
   reproduce identically on `main` and are an environment gap
   (`qiskit-ibm-runtime` absent), not a regression.

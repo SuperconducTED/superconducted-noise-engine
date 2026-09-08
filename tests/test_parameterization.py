@@ -10,6 +10,8 @@ committed TSV is the durable record.
 from __future__ import annotations
 
 import csv
+import functools
+import itertools
 import math
 from datetime import UTC, datetime
 from pathlib import Path
@@ -49,6 +51,7 @@ from superconducted.fuzzy.parameterization import (
     tanh_slope_strategy,
 )
 from superconducted.integration.aer_factory import is_identity_damping
+from superconducted.training.targets import feature_target_fn
 from superconducted.types import CalibrationSnapshot
 
 M1_SHAPES = (GaussianMF, TanhMF, TanhSigmoidMF, IntervalGaussianMF)
@@ -67,6 +70,10 @@ _RNG_FREE_SKEWED = np.concatenate(
 SURVEY_DIR = Path(__file__).resolve().parents[1] / "docs" / "evidence" / "feature-distribution"
 FEATURE_COLUMNS = ("mean_T1", "mean_T2", "mean_readout_error")
 SPREAD_COLUMNS = ("T1_qubit_std", "T2_qubit_std", "readout_error_qubit_std")
+
+#: The reference gate the physics target is evaluated at: `ibm_fez`'s `sx`
+#: length, 24 ns (NC-035).
+SX_SECONDS = 24e-9
 
 
 def _spread_for(shape: type, samples: npt.NDArray[np.float64]) -> dict[str, float]:
@@ -96,10 +103,12 @@ def _synthetic_snapshot(t1: float, t2: float, readout: float) -> CalibrationSnap
 
 
 def _synthetic_target(x: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
-    """A stand-in for ``training.targets.feature_target_fn`` while #57 is unmerged.
+    """A cheap stand-in for the real target, used by the structural unit tests.
 
     Monotone in T1 and strictly inside ``(0, 1)`` for every anchor this suite
-    builds, which is all section 6.5's convexity argument needs.
+    builds, which is all the rule-base contract tests need. The conformance
+    tests use the real ``training.targets.feature_target_fn`` -- a synthetic
+    target cannot catch a unit error, and section 6.4 (c) says so explicitly.
     """
     return np.array([1.0e-4 * (1.0 + x[0] / 500.0), 2.0e-4 * (1.0 + x[2])], dtype=np.float64)
 
@@ -725,6 +734,46 @@ def test_sigmoid_ordering_holds_on_the_real_quantiles() -> None:
             assert mfs[j].degree(float(layout.edges[j])).low == pytest.approx(0.5, abs=1e-12)
 
 
+def test_the_target_magnitude_at_the_median_anchor_catches_a_unit_error() -> None:
+    """Section 6.4 (c): the only check in this suite that can see a unit error.
+
+    Feeding 131.8 (microseconds, read as if seconds) to ``1 - exp(-t/T1)`` with
+    ``t = 24 ns`` gives a gamma around 1e-10 where the physics gives 1e-4. That
+    wrong value is finite, strictly positive and inside ``(0, 1)``, so
+    ``is_identity_damping`` stays False, the convexity bound holds, and every
+    other check in this file goes green on a model wrong by six orders of
+    magnitude. Only the magnitude catches it.
+    """
+    samples, _ = _committed_survey()
+    median_anchor = np.array([partition_anchors(samples[name], 3)[1] for name in FEATURE_COLUMNS])
+
+    gamma, lam = feature_target_fn(median_anchor, t_seconds=SX_SECONDS)
+
+    assert 1e-5 < gamma < 1e-3, f"gamma {gamma:.3e} is not of order 1e-4"
+    assert 1e-5 < lam < 1e-3, f"lambda {lam:.3e} is not of order 1e-4"
+
+
+def test_every_anchor_is_accepted_by_the_real_target() -> None:
+    """All 27 anchor combinations satisfy ``feature_target_fn``'s own guards.
+
+    It rejects ``mean_T2 > 2 * mean_T1``, and the grid pairs each feature's
+    levels independently -- the lowest T1 anchor meets the highest T2 anchor --
+    so this is not automatic from the per-feature quantiles.
+    """
+    samples, _ = _committed_survey()
+    anchors = [partition_anchors(samples[name], 3) for name in FEATURE_COLUMNS]
+
+    targets = np.array(
+        [
+            feature_target_fn(np.array(combo), t_seconds=SX_SECONDS)
+            for combo in itertools.product(*anchors)
+        ]
+    )
+
+    assert targets.shape == (27, 2)
+    assert np.all((targets > 0.0) & (targets < 1.0))
+
+
 @pytest.mark.parametrize(
     ("shape", "defuzzifier"),
     [
@@ -735,7 +784,7 @@ def test_sigmoid_ordering_holds_on_the_real_quantiles() -> None:
     ],
 )
 def test_anchored_base_is_never_degenerate_on_the_archive(shape: type, defuzzifier: type) -> None:
-    """FR-11, step 9: every surveyed feature vector, through the clamp, every M1 shape.
+    """FR-11, step 9: every surveyed vector, through the clamp, real target, every M1 shape.
 
     Not luck but a theorem (section 6.5): with zero-order consequents the
     defuzzified output is a convex combination of the anchor targets, so it
@@ -755,7 +804,8 @@ def test_anchored_base_is_never_degenerate_on_the_archive(shape: type, defuzzifi
         for name, v in zip(FEATURE_COLUMNS, values, strict=True)
     ]
     anchors = [partition_anchors(v, 3) for v in values]
-    rb = anchored_rule_base(mfs, _synthetic_target, anchors=anchors)
+    target = functools.partial(feature_target_fn, t_seconds=SX_SECONDS)
+    rb = anchored_rule_base(mfs, target, anchors=anchors)
 
     lo = np.array([_quantile_layout(v, 3, PLACEMENT_QUANTILE).lo for v in values])
     hi = np.array([_quantile_layout(v, 3, PLACEMENT_QUANTILE).hi for v in values])
