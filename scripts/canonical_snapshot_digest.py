@@ -20,6 +20,12 @@ which serialisation order was in force when each side was written. Everything
 else is already canonical — ``storage.py`` dumps with ``sort_keys=True``, and
 the nested lists inside ``properties`` arrive from IBM in a fixed order.
 
+The payload comparison used across fetch paths (``--payload-only``,
+``--compare-reread``) normalises one more provenance-dependent field for the
+same reason: each parameter's own ``date``. The history endpoint re-stamps the
+entries it synthesises, so a backfilled re-read of a document already archived
+differs in those stamps while every measurement matches. See ``_payload_body``.
+
 Contract: reads only, prints only. ``--compare A B`` exits **0** when the two
 snapshots are the same document, **1** when they differ, and **2** when either
 side could not be read or parsed — so it can be used directly as a shell
@@ -66,10 +72,65 @@ def _load(path: str | Path) -> dict[str, Any]:
     return doc
 
 
+def _strip_parameter_dates(node: Any) -> Any:
+    """Return ``node`` with the ``date`` dropped from every parameter record.
+
+    A parameter record is any dict carrying a ``value``. Inside ``properties``
+    that is exactly the three places IBM puts them — ``qubits[][]``,
+    ``gates[].parameters[]`` and ``general[]`` — each of shape
+    ``{date, name, unit, value}``. Keying on ``value`` rather than on those
+    three paths keeps the rule from touching anything else: ``last_update_date``
+    is a different key on a dict that has no ``value``, and a gate's own
+    ``name``/``gate``/``qubits`` survive untouched. It also survives IBM moving
+    a parameter block, which a hard-coded path list would not.
+
+    Pure: builds new containers rather than mutating the document, because the
+    caller still has to write that document out with its dates intact.
+    """
+    if isinstance(node, list):
+        return [_strip_parameter_dates(item) for item in node]
+    if not isinstance(node, dict):
+        return node
+    is_parameter = "value" in node
+    return {
+        key: _strip_parameter_dates(value)
+        for key, value in node.items()
+        if not (is_parameter and key == "date")
+    }
+
+
+def _payload_body(doc: dict[str, Any]) -> str:
+    """The canonical byte-string for the calibration payload alone.
+
+    Per-parameter ``date`` is normalised away, for the same reason
+    ``canonical_digest`` normalises ``target.operations`` order: it is decided
+    by which endpoint answered, not by the measurement. The live properties
+    endpoint returns IBM's stored document; the history endpoint reassembles
+    one, and re-stamps the entries it synthesises. Backfill run 34058863047
+    hit this on ``ibm_fez`` ``20260813T220506000000Z``: same
+    ``last_update_date``, same 156/1952/449 shape, ``qubits`` and ``general``
+    exactly equal, and 26 gate entries differing in nothing but a ``date``
+    about 11 minutes apart. Those 26 were *exactly* the 26 entries carrying
+    the ``gate_error = 1`` placeholder that means "not calibrated" — no
+    measured entry differed. Hashing that stamp made a re-read of a document
+    we already hold look like divergence and put a file in ``collisions/``,
+    the channel ADR-025 reserves for the real thing.
+
+    ``date`` is the only field dropped. Comparing values alone was the other
+    candidate and is worse: it would call a ``T1`` in ``us`` equal to one in
+    ``ns``, and a ``T1``/``T2`` swap equal to neither having moved. ``name``,
+    ``unit`` and ``value`` are measurement; only ``date`` is provenance.
+    """
+    return json.dumps(
+        {"properties": _strip_parameter_dates(doc.get("properties"))},
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
 def _payload_digest(doc: dict[str, Any]) -> str:
     """SHA-256 of the calibration payload alone."""
-    body = json.dumps({"properties": doc.get("properties")}, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha256(body.encode("utf-8")).hexdigest()
+    return hashlib.sha256(_payload_body(doc).encode("utf-8")).hexdigest()
 
 
 def canonical_digest(path: str | Path, *, payload_only: bool = False) -> str:
@@ -83,18 +144,27 @@ def canonical_digest(path: str | Path, *, payload_only: bool = False) -> str:
     document fetched two ways compares unequal in full while its measurements
     are identical. Comparing in full is right for two live payloads and wrong
     across fetch paths; this mode is what makes the difference visible.
+
+    ``payload_only`` also drops each parameter's ``date`` — see
+    ``_payload_body``. The full digest deliberately keeps it: that is the
+    live-vs-live comparison, where the safe answer is ``collision`` and a
+    difference of any kind belongs in front of a human.
     """
     with Path(path).open(encoding="utf-8") as fh:
         doc = json.load(fh)
 
     if payload_only:
-        doc = {"properties": doc.get("properties")}
+        # Same byte-string as `_payload_digest`, deliberately: `--payload-only`
+        # and `--compare-reread` answer the same question about the same pair,
+        # and two copies of this line is how the per-parameter `date` came to
+        # be normalised in neither.
+        payload = _payload_body(doc)
     else:
         target = doc.get("target")
         if isinstance(target, dict) and isinstance(target.get("operations"), list):
             target["operations"] = sorted(target["operations"], key=_operation_key)
+        payload = json.dumps(doc, sort_keys=True, separators=(",", ":"))
 
-    payload = json.dumps(doc, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
