@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-08 18:40 UTC",
+  "generated": "2026-09-08 18:47 UTC",
   "main": {
     "sha": "645b4d1a",
     "date": "2026-09-08",
@@ -65,12 +65,7 @@
           "severity": "critical"
         }
       ],
-      "unblocks": [
-        57,
-        60,
-        59,
-        61
-      ],
+      "unblocks": [],
       "why_now": "The only phase-3 blocker with a multi-week external latency tail, and the only M1 gate with no work in flight. Every day it waits is a day added to M3.",
       "note": "Yiğit writes the brief; Mert sends it. ADR-027 stays Status: Open until the answers land.",
       "external_latency": true,
@@ -103,6 +98,12 @@
           "severity": "critical"
         }
       ],
+      "declared_unblocks": [
+        57,
+        60,
+        59,
+        61
+      ],
       "notes_info": [],
       "pr": null
     },
@@ -131,7 +132,8 @@
       "unblocks": [
         62,
         64,
-        65
+        65,
+        76
       ],
       "why_now": "Highest fan-out unmerged work in the phase: three tickets name it as a hard prerequisite. Its own Depends-on row reads 'Nothing hard: start in W1 without waiting for anything.'",
       "spawned": [
@@ -279,6 +281,11 @@
           "severity": "medium"
         }
       ],
+      "declared_unblocks": [
+        62,
+        64,
+        65
+      ],
       "notes_info": [],
       "pr": 79
     },
@@ -306,10 +313,7 @@
       "fallback": "§6.6 defines what to build if #57's target callable is late. #57 merged 2026-09-08, so the fallback is moot.",
       "extra_blockers": [],
       "unblocks": [
-        62,
-        61,
-        60,
-        63
+        62
       ],
       "why_now": "Clears the prerequisite ADR-019 has been blocked on since 2026-08-20 ('neither the ADR-014 trainer nor a manual parameterization has yet produced non-trivial MF parameters'), which in turn gates ADR-009, the highest-fan-out decision in the ledger.",
       "title": "Manual membership-function parameterization from the archive's own feature distribution, with consequents anchored to the physics target, so the ADR-019 ablation measures shapes instead of a random draw",
@@ -401,6 +405,12 @@
           "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-09-04). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
         }
       ],
+      "declared_unblocks": [
+        62,
+        61,
+        60,
+        63
+      ],
       "notes_info": [],
       "pr": 68
     },
@@ -437,9 +447,7 @@
         }
       ],
       "extra_blockers": [],
-      "unblocks": [
-        64
-      ],
+      "unblocks": [],
       "why_now": "The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit.",
       "note": "Type-agnostic over T1 and IT2 by design, so it does not wait on ADR-009.",
       "title": "ADR-014: build the hybrid ANFIS trainer in training/anfis.py so phase 3 ends with a fitted model, type-agnostic over T1 and IT2 so it does not wait on ADR-009",
@@ -465,6 +473,9 @@
         }
       ],
       "blockers": [],
+      "declared_unblocks": [
+        64
+      ],
       "notes_info": [],
       "pr": null
     },
@@ -528,6 +539,7 @@
           "severity": "low"
         }
       ],
+      "declared_unblocks": [],
       "notes_info": [],
       "pr": null
     },
@@ -554,7 +566,7 @@
       "fallback": "If #59 is not on main when both hard prerequisites are, run with first_viable_seed.",
       "extra_blockers": [],
       "unblocks": [
-        65
+        76
       ],
       "why_now": null,
       "title": "Run the ADR-019 membership-function ablation on the certified harness in both modes and publish a traceable table, so ADR-019 closes on measured evidence and ADR-009 finally gets its T1-vs-IT2 rows",
@@ -578,6 +590,9 @@
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [],
+      "declared_unblocks": [
+        65
+      ],
       "notes_info": [],
       "pr": null
     },
@@ -639,6 +654,9 @@
         }
       ],
       "blockers": [],
+      "declared_unblocks": [
+        60
+      ],
       "notes_info": [],
       "pr": null
     },
@@ -665,8 +683,7 @@
         }
       ],
       "unblocks": [
-        63,
-        49
+        63
       ],
       "why_now": "Its prerequisite merged 2026-09-02 and #63 cannot start its FR-1 half until the digest body is settled.",
       "pr_hint": [
@@ -769,6 +786,10 @@
           "severity": "high"
         }
       ],
+      "declared_unblocks": [
+        63,
+        49
+      ],
       "notes_info": [],
       "pr": 70
     },
@@ -795,9 +816,7 @@
           "severity": "low"
         }
       ],
-      "unblocks": [
-        54
-      ],
+      "unblocks": [],
       "why_now": null,
       "title": "Scheduled backfill sweep: make the pipeline tolerate the Actions scheduler instead of depending on it",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/49",
@@ -814,6 +833,9 @@
           "text": "The plan raises its priority per #54 but its own body still reads priority:low and 'pending Baha's confirmation'.",
           "severity": "low"
         }
+      ],
+      "declared_unblocks": [
+        54
       ],
       "notes_info": [],
       "pr": null
@@ -862,6 +884,7 @@
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [],
+      "declared_unblocks": [],
       "notes_info": [],
       "pr": null
     },
@@ -927,6 +950,7 @@
         }
       ],
       "blockers": [],
+      "declared_unblocks": [],
       "notes_info": [
         {
           "kind": "policy",
@@ -962,10 +986,7 @@
           "severity": "critical"
         }
       ],
-      "unblocks": [
-        58,
-        84
-      ],
+      "unblocks": [],
       "why_now": "It is the M0 gate and M0 is three days past its 2026-09-05 target.",
       "co_owner": null,
       "title": "Clear the queue and keep the records honest: merge #51 and #52, collect the sign-offs #55 still owes, run #53 before its 2026-09-05 guard, close #45 and #25, then derive the floor",
@@ -994,6 +1015,10 @@
           "severity": "critical"
         }
       ],
+      "declared_unblocks": [
+        58,
+        84
+      ],
       "notes_info": [],
       "pr": null
     },
@@ -1020,6 +1045,7 @@
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [],
+      "declared_unblocks": [],
       "notes_info": [],
       "pr": null
     },
@@ -1039,9 +1065,7 @@
           "severity": "medium"
         }
       ],
-      "unblocks": [
-        56
-      ],
+      "unblocks": [],
       "why_now": "It is one of two M0 items still open.",
       "title": "Polling cadence no longer limits the calibration dataset - IBM's publish rate does; the 630 floor is unmet under every information-based definition",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/45",
@@ -1078,6 +1102,9 @@
           "severity": "medium"
         }
       ],
+      "declared_unblocks": [
+        56
+      ],
       "notes_info": [],
       "pr": null
     },
@@ -1097,9 +1124,7 @@
           "severity": "medium"
         }
       ],
-      "unblocks": [
-        56
-      ],
+      "unblocks": [],
       "why_now": null,
       "title": "Backfill the 14 recoverable calibration documents, and enumerate the unswept 2026-08-06 gaps",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/53",
@@ -1282,6 +1307,9 @@
           "severity": "medium"
         }
       ],
+      "declared_unblocks": [
+        56
+      ],
       "notes_info": [],
       "pr": 80
     },
@@ -1320,6 +1348,7 @@
         }
       ],
       "blockers": [],
+      "declared_unblocks": [],
       "notes_info": [],
       "pr": null
     },
@@ -1358,6 +1387,7 @@
         }
       ],
       "blockers": [],
+      "declared_unblocks": [],
       "notes_info": [],
       "pr": null
     },
@@ -1396,6 +1426,7 @@
         }
       ],
       "blockers": [],
+      "declared_unblocks": [],
       "notes_info": [],
       "pr": null
     },
@@ -1447,6 +1478,7 @@
           "severity": "medium"
         }
       ],
+      "declared_unblocks": [],
       "notes_info": [],
       "pr": null
     },
@@ -1495,6 +1527,7 @@
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [],
+      "declared_unblocks": [],
       "notes_info": [],
       "pr": null
     },
@@ -1515,12 +1548,7 @@
           "severity": "critical"
         }
       ],
-      "unblocks": [
-        59,
-        60,
-        61,
-        63
-      ],
+      "unblocks": [],
       "why_now": "The contract merged; only the advisor half of its definition of done is outstanding.",
       "title": "Training contract: a target ADR pinned to Aer by SuperOp, the TSKTrainer ABC and training/targets.py, so the trainer, the anchored consequents and the reference model regress onto one derived target instead of three remembered ones",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/57",
@@ -1610,6 +1638,12 @@
           "text": "Code landed in PR #69, but the ticket's own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened; #84 owns it.",
           "severity": "critical"
         }
+      ],
+      "declared_unblocks": [
+        59,
+        60,
+        61,
+        63
       ],
       "notes_info": [],
       "pr": 83
