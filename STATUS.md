@@ -85,7 +85,7 @@ _Generated 2026-09-08 17:55 UTC · main at `645b4d1a` (2026-09-08) · 22 days to
 1. Start #60 — ADR-014 hybrid ANFIS trainer
    - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now — the archive fit part waits on #63.
 1. Re-review PR #78 (#53 — Backfill 14 recoverable documents)
-   - Your CHANGES_REQUESTED from 2026-09-07 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
+   - Your CHANGES_REQUESTED from 2026-09-07 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it. You commented again on 2026-09-08 without lifting it — a COMMENTED review does not dismiss a CHANGES_REQUESTED.
 1. Re-review PR #80 (#53 — Backfill 14 recoverable documents)
    - Your CHANGES_REQUESTED from 2026-09-07 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Start #73 — Filter noise by physical gate semantics

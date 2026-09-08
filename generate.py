@@ -566,7 +566,7 @@ def render_html(plan: dict, model: dict, queue: dict, main: dict, now: str) -> s
     O: list[str] = []
     a = O.append
 
-    a("<title>Phase 3 Tracker</title>")
+    a("<title>SuperconducTED Phase 3</title>")
     # IBM Plex is not a neutral pick: this project reads IBM Quantum calibration
     # snapshots all day, and Plex is IBM's own type. Mono carries every figure
     # that has to line up — ticket numbers, SHAs, timestamps, counts.
