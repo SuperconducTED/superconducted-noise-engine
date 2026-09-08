@@ -2,14 +2,25 @@
 
 ## Roster
 
-| Name | Role | Primary modules |
-| --- | --- | --- |
-| Dr. Fırat Akba | Faculty advisor | Reviews `docs/architecture.md` and architectural ADRs |
-| Mert Efe Şensoy | CS junior | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger |
-| Burak Öztekin | CS&EE senior | `fuzzy/tsk.py` (LOCKED), `fuzzy/fuzzification.py`, `integration/aer_factory.py`, `benchmarks/harness.py` |
-| Baha Jarad | CS&EE junior | `calibration/poller.py`, `calibration/storage.py`, `calibration/features.py` |
-| Yiğit Arda Kaderoğlu | CS sophomore | `fuzzy/membership.py`, `fuzzy/squashing.py`, `benchmarks/circuits.py` |
-| Bengisu | Math junior | `fuzzy/defuzzification.py`, `channels/kraus.py` (LOCKED, co-owned), `benchmarks/metrics.py` |
+| Name | GitHub | Role | Primary modules |
+| --- | --- | --- | --- |
+| Dr. Fırat Akba | **none — reviews out-of-band** | Faculty advisor | Reviews `docs/architecture.md` and architectural ADRs |
+| Mert Efe Şensoy | `@mertefesensoy` | CS junior | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger |
+| Burak Öztekin | `@BurakOztekin` | CS&EE senior | `fuzzy/tsk.py` (LOCKED), `fuzzy/fuzzification.py`, `integration/aer_factory.py`, `benchmarks/harness.py` |
+| Baha Jarad | `@BahaJarad` | CS&EE junior | `calibration/poller.py`, `calibration/storage.py`, `calibration/features.py` |
+| Yiğit Arda Kaderoğlu | `@yigit-arda` | CS sophomore | `fuzzy/membership.py`, `fuzzy/squashing.py`, `benchmarks/circuits.py` |
+| Bengisu | `@bengisucvd` | Math junior | `fuzzy/defuzzification.py`, `channels/kraus.py` (LOCKED, co-owned), `benchmarks/metrics.py` |
+
+Handles are from `gh api repos/SuperconducTED/superconducted-noise-engine/collaborators`,
+run 2026-09-07. A blank cell would be ambiguous, so an absent account is stated
+outright: **Dr. Akba has no GitHub account** and is not a repository
+collaborator — see "Reviews from outside GitHub" below.
+
+> **NOTE · Bengisu is `@bengisucvd`, not `@bengisu`.** `@bengisu` is a real
+> GitHub account belonging to someone unconnected to this project. Mentioning it
+> notifies a stranger and silently fails to notify her; this has already happened
+> three times. Copy the handle from this table rather than guessing it from a
+> first name.
 
 ## Module ownership
 
@@ -43,9 +54,50 @@
   the primary owner and the secondary reviewer to sign off, plus a
   reference to an ADR in `docs/decisions.md` if the change touches the
   locked math.
-- **Cross-cutting changes** (CI, pyproject, requirements, ABCs in interfaces.py) need Mert Efe Şensoy's approval plus one additional contributor/reviewer (Burak or Bengisu). Architectural changes that touch ADR ledger semantics additionally request review from Dr. Fırat Akba.
+- **Cross-cutting changes** (CI, pyproject, requirements, ABCs in interfaces.py) need Mert Efe Şensoy's approval plus one additional contributor/reviewer (Burak or Bengisu). Architectural changes that touch ADR ledger semantics additionally need Dr. Fırat Akba's sign-off, obtained out-of-band — see below.
+- **Reviews from outside GitHub.** Dr. Akba has no GitHub account, so his
+  sign-off cannot be a review request and must not be written as one: a PR
+  waiting on him will never show a pending reviewer, and `--add-reviewer` on his
+  name simply fails. Circulate the change to him directly (email, or a thesis
+  meeting), then record the outcome **in the PR** as a comment stating what was
+  circulated, when, and the verdict. The GitHub approval that merges the PR still
+  comes from a collaborator; his sign-off is a precondition recorded in writing,
+  not a substitute for one.
 - If you're unsure who owns a file, look in this table or ask in chat
   before opening a PR.
+
+## Documentation conventions
+
+Three house rules the cycle-2 opening batch surfaced. Ratified here so they are
+enforceable in review rather than re-litigated per PR.
+
+- **Dated docs are append-only.** A dated document under `docs/roadmap/` or
+  `docs/state-of-the-project/` is updated by appending a new as-of-stamped
+  section that reconciles the prior content, or by adding a new dated file —
+  never by editing the original in place. The filename's date is a
+  point-in-time claim about when the content was true, and editing the body
+  silently falsifies it. Reconciling in an appended section keeps both the
+  original reading and the correction auditable.
+
+- **Use the repository's real labels.** The live set, from `gh label list` run
+  2026-09-07:
+
+  | Group | Labels |
+  | --- | --- |
+  | Area | `area:benchmarks`, `area:calibration`, `area:fuzzy`, `area:integration` |
+  | Type | `type:coordination`, `type:devops`, `type:feature`, `type:research`, `type:testing` |
+  | Priority | `priority:critical`, `priority:high`, `priority:medium-high`, `priority:low` |
+  | Other | `bug`, `coordination`, `dependencies`, `documentation`, `duplicate`, `enhancement`, `good first issue`, `help wanted`, `invalid`, `python`, `question`, `wontfix` |
+
+  Re-run `gh label list` rather than trusting this table if it looks stale, and
+  update it here when it has drifted. An earlier audit claimed no `priority:*`
+  or `type:research` labels existed; issue #4 visibly carries both, so that
+  audit was wrong and is superseded by the live list above.
+
+- **Callouts are text labels, never emoji.** Write `> **CRITICAL · …**` and
+  `> **NOTE · …**` in issues, PRs and docs. This matches the ASCII-only style
+  used across the cycle-2 openers, and keeps callouts greppable and legible in
+  terminals and diffs where emoji render inconsistently or not at all.
 
 ## Updating this file
 
