@@ -331,3 +331,31 @@ earlier document's `What changed` table in place for the same reason.
 
 The 2026-09-06 measurements are untouched by this edit; re-running the checks in
 Verification returns what it returned then.
+
+### Two claims in the 2026-09-07 section have gone stale
+
+Both are left standing above, on the same reasoning: they were true when
+written, so the correction belongs here rather than in place.
+
+**The comparator fix has a PR.** The sequencing note above says the fix "is not
+on `main` and has no PR open". PR #80 opened at 2026-09-06T21:29Z, nine minutes
+after that sentence was committed in `3c58a04`, and it carries `1e7c0eb`. Only
+the "no PR open" clause is wrong. The risk the note describes is unchanged,
+because #80 is itself `CHANGES_REQUESTED` and unmerged, so the comparator fix is
+still absent from `main` and a manual `workflow_dispatch` backfill run before it
+lands would still write a spurious collision file.
+
+**#72 is closed.** The Design decisions section above names #52, #72 and #70 as
+three open PRs defining NC-031 and NC-032 as different claims. #52 merged as
+`c9fd441`; #72 closed without merging at 2026-09-08T11:59Z. #70 is the only
+remaining claimant, and it is currently `DIRTY` against `main`, so the
+renumbering falls to it alone.
+
+**The CI that catches that collision exists now, but does not run on this PR.**
+#71 merged at 2026-09-06T23:18Z as `5ef1fba`, adding `scripts/check_ids.py` to
+the `test` job. This branch predates that workflow change, so the check is
+absent from the checks reported on PR #78, and a reader who takes the green
+tick as evidence of id hygiene here would be reading something the run never
+tested. Run by hand against the tree produced by merging this branch into
+`main` at `645b4d1`, it reports no duplicate or colliding ADR or NC identifiers
+and exits `0`.
