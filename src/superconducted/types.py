@@ -9,10 +9,14 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any
+from math import isfinite
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import numpy.typing as npt
+
+if TYPE_CHECKING:
+    from .interfaces import RuleBase
 
 
 @dataclass(frozen=True, slots=True)
@@ -180,3 +184,183 @@ class SimulationResult:
             )
         if self.shots <= 0:
             raise ValueError(f"SimulationResult.shots must be positive; got {self.shots}")
+
+
+@dataclass(frozen=True, slots=True, eq=False)
+class TrainingSet:
+    """A finite supervised training set with immutable archive provenance.
+
+    Every row has a UTC timestamp and non-empty source provenance. Feature and
+    target names identify vector columns, while ``archive_ref`` identifies the
+    archived source revision from which the rows were derived.
+    """
+
+    features: npt.NDArray[np.float64]
+    targets: npt.NDArray[np.float64]
+    timestamps: tuple[datetime, ...]
+    provenance: tuple[str, ...]
+    feature_names: tuple[str, ...]
+    target_names: tuple[str, ...]
+    archive_ref: str
+    weights: npt.NDArray[np.float64] | None = None
+
+    def __post_init__(self) -> None:
+        features = np.asarray(self.features, dtype=np.float64)
+        targets = np.asarray(self.targets, dtype=np.float64)
+        if features.ndim != 2 or targets.ndim != 2:
+            raise ValueError("TrainingSet features and targets must both be 2-D")
+        if features.shape[0] == 0 or targets.shape[0] != features.shape[0]:
+            raise ValueError("TrainingSet features and targets must have the same non-zero rows")
+        if not np.all(np.isfinite(features)) or not np.all(np.isfinite(targets)):
+            raise ValueError("TrainingSet features and targets must be finite")
+        n_rows = features.shape[0]
+        if len(self.timestamps) != n_rows:
+            raise ValueError("TrainingSet timestamps must have one value per row")
+        timestamps: list[datetime] = []
+        for timestamp in self.timestamps:
+            if timestamp.tzinfo is None:
+                raise ValueError("TrainingSet timestamps must be tz-aware")
+            timestamps.append(timestamp.astimezone(UTC))
+        if len(self.provenance) != n_rows or any(not value for value in self.provenance):
+            raise ValueError("TrainingSet provenance must contain one non-empty value per row")
+        if len(self.feature_names) != features.shape[1] or any(
+            not value for value in self.feature_names
+        ):
+            raise ValueError(
+                "TrainingSet feature_names must contain one non-empty value per feature"
+            )
+        if len(self.target_names) != targets.shape[1] or any(
+            not value for value in self.target_names
+        ):
+            raise ValueError("TrainingSet target_names must contain one non-empty value per target")
+        if not self.archive_ref:
+            raise ValueError("TrainingSet archive_ref must be non-empty")
+        feature_copy = features.copy()
+        target_copy = targets.copy()
+        feature_copy.flags.writeable = False
+        target_copy.flags.writeable = False
+        object.__setattr__(self, "features", feature_copy)
+        object.__setattr__(self, "targets", target_copy)
+        object.__setattr__(self, "timestamps", tuple(timestamps))
+        if self.weights is not None:
+            weights = np.asarray(self.weights, dtype=np.float64)
+            if weights.shape != (n_rows,):
+                raise ValueError("TrainingSet weights must have one value per row")
+            if not np.all(np.isfinite(weights)) or np.any(weights <= 0.0):
+                raise ValueError("TrainingSet weights must be finite and positive")
+            weight_copy = weights.copy()
+            weight_copy.flags.writeable = False
+            object.__setattr__(self, "weights", weight_copy)
+
+    @property
+    def n_rows(self) -> int:
+        return int(self.features.shape[0])
+
+    @property
+    def input_dim(self) -> int:
+        return int(self.features.shape[1])
+
+    @property
+    def output_dim(self) -> int:
+        return int(self.targets.shape[1])
+
+    def time_split(self, cut: datetime) -> tuple[TrainingSet, TrainingSet]:
+        """Split at a timestamp boundary without splitting equal timestamps."""
+        if cut.tzinfo is None:
+            raise ValueError("time_split cut must be tz-aware")
+        normalized_cut = cut.astimezone(UTC)
+        train_indices = [
+            index for index, timestamp in enumerate(self.timestamps) if timestamp < normalized_cut
+        ]
+        validation_indices = [
+            index for index, timestamp in enumerate(self.timestamps) if timestamp >= normalized_cut
+        ]
+        if not train_indices or not validation_indices:
+            raise ValueError("time_split must leave rows on both sides of the boundary")
+        return self._select(train_indices), self._select(validation_indices)
+
+    def _select(self, indices: list[int]) -> TrainingSet:
+        return TrainingSet(
+            features=self.features[indices],
+            targets=self.targets[indices],
+            timestamps=tuple(self.timestamps[index] for index in indices),
+            provenance=tuple(self.provenance[index] for index in indices),
+            feature_names=self.feature_names,
+            target_names=self.target_names,
+            archive_ref=self.archive_ref,
+            weights=None if self.weights is None else self.weights[indices],
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class ParameterCount:
+    """Trainable premise and consequent parameter counts."""
+
+    premise: int
+    consequent: int
+    total: int
+
+    def __post_init__(self) -> None:
+        if min(self.premise, self.consequent, self.total) < 0:
+            raise ValueError("ParameterCount values must be non-negative")
+        if self.total != self.premise + self.consequent:
+            raise ValueError("ParameterCount total must equal premise plus consequent")
+
+
+@dataclass(frozen=True, slots=True, eq=False)
+class TrainingDiagnostics:
+    """Diagnostics collected during a training run.
+
+    ``eq=False`` avoids generated equality and hashing over ndarray fields.
+    """
+
+    clip_binding_rate: float
+    zero_firing_rows_dropped: int
+    nonfinite_rows_rejected: int
+    lse_condition_number: float
+    premise_steps_rejected: int
+    epochs_run: int
+    early_stopped: bool
+    standardization: tuple[npt.NDArray[np.float64], ...]
+
+    def __post_init__(self) -> None:
+        if not 0.0 <= self.clip_binding_rate <= 1.0:
+            raise ValueError("clip_binding_rate must be in [0, 1]")
+        if (
+            min(
+                self.zero_firing_rows_dropped,
+                self.nonfinite_rows_rejected,
+                self.premise_steps_rejected,
+                self.epochs_run,
+            )
+            < 0
+        ):
+            raise ValueError("TrainingDiagnostics counts must be non-negative")
+        if self.lse_condition_number < 0.0 or np.isnan(self.lse_condition_number):
+            raise ValueError("lse_condition_number must be non-negative and not NaN")
+        if any(not np.all(np.isfinite(values)) for values in self.standardization):
+            raise ValueError("standardization values must be finite")
+
+
+@dataclass(frozen=True, slots=True, eq=False)
+class TrainingResult:
+    """Fitted rule base, metrics, and diagnostics.
+
+    ``eq=False`` avoids generated equality and hashing over RMSE ndarray fields.
+    """
+
+    rule_base: RuleBase
+    train_rmse: npt.NDArray[np.float64]
+    validation_rmse: npt.NDArray[np.float64] | None
+    loss_history: tuple[float, ...]
+    diagnostics: TrainingDiagnostics
+    parameter_count: ParameterCount
+    seed: int | None = None
+
+    def __post_init__(self) -> None:
+        if any(not isfinite(loss) for loss in self.loss_history):
+            raise ValueError("TrainingResult loss_history must be finite")
+        if not np.all(np.isfinite(self.train_rmse)):
+            raise ValueError("TrainingResult train_rmse must be finite")
+        if self.validation_rmse is not None and not np.all(np.isfinite(self.validation_rmse)):
+            raise ValueError("TrainingResult validation_rmse must be finite")
