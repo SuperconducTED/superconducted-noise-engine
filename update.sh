@@ -48,7 +48,7 @@ echo "==> regenerating"
 
 # A brand-new day's record is untracked rather than modified, and git diff does
 # not see untracked files at all, so both questions have to be asked.
-if git diff --quiet -- index.html STATUS.md snapshot.json plan.json history/ &&
+if git diff --quiet -- index.html STATUS.md snapshot.json plan.json README.md history/ &&
    [ -z "$(git ls-files --others --exclude-standard history/)" ]; then
   echo "==> byte-identical to the last run, nothing to commit"
   outcome="ok: byte-identical, no commit"
@@ -65,7 +65,7 @@ fi
 strip_stamps() { sed -E 's/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2} UTC/<stamp>/g'; }
 
 substantive=0
-files="index.html STATUS.md snapshot.json plan.json $(ls history/*.json 2>/dev/null)"
+files="index.html STATUS.md snapshot.json plan.json README.md $(ls history/*.json 2>/dev/null)"
 for f in $files; do
   git show "HEAD:$f" 2>/dev/null | strip_stamps > /tmp/.p3-old.$$ || : > /tmp/.p3-old.$$
   strip_stamps < "$f" > /tmp/.p3-new.$$
@@ -74,7 +74,7 @@ done
 rm -f /tmp/.p3-old.$$ /tmp/.p3-new.$$
 
 echo "==> changes"
-git --no-pager diff --stat -- index.html STATUS.md snapshot.json plan.json history/
+git --no-pager diff --stat -- index.html STATUS.md snapshot.json plan.json README.md history/
 git ls-files --others --exclude-standard history/ | sed "s/^/ new  /"
 
 if [ "$substantive" -eq 1 ]; then
@@ -83,7 +83,7 @@ else
   subject="chore: phase-3 dashboard: no change ($(date -u +%Y-%m-%d))"
 fi
 
-git add index.html STATUS.md snapshot.json plan.json history/ run.log
+git add index.html STATUS.md snapshot.json plan.json README.md history/ run.log
 GIT_AUTHOR_NAME="Mert Efe Şensoy" \
 GIT_AUTHOR_EMAIL="sensoymertefe@gmail.com" \
 GIT_COMMITTER_NAME="Mert Efe Şensoy" \
