@@ -478,6 +478,46 @@ overwritten):
   all clean, and the survey regenerated at `3d1569d` still diffs byte-identically
   against the committed TSV after the `snapshot_row` hardening.
 
+## As of 2026-09-08, close of review round 2
+
+Appended rather than edited into the sections above, per the append-only rule for
+dated text. The "Still open" paragraph under Design decisions is superseded only
+in part, and the part that survives is the important one.
+
+**@BurakOztekin's review.** He requested changes at 18:56 UTC and approved at
+19:23 UTC, dismissing the earlier verdict. Worth recording what the hold was
+about, because it was not the code: he left no inline comments and wrote that
+the technical checks were fine, holding only because the Section 7 sign-off was
+not recorded in the issue thread. So no code change came out of his review, and
+none was asked for.
+
+**Section 7 remains the open gate.** Burak's approval covers the technical work.
+It is not, by itself, the written ratification of decisions 1, 2 and 3 that the
+definition of done asks for, and the #59 thread still carries only two comments:
+the section-8 continuation and @yigit-arda's 2026-09-04 request. A decision
+record stating what shipped and what was measured for each of the three has been
+drafted for that thread so a one-line answer from each owner closes it. Decision
+2 is the one that needs a real answer rather than a rubber stamp: the
+recommendation was adopted, but the measurement then put four of the nine
+`x*_j` inside their boxes, so all three features take the fallback and every
+`TanhMF` row is pointwise identical to its `TanhBellMF` row until the trainer
+runs. What needs ratifying is that outcome, not the recommendation that produced
+it.
+
+**NC-021 re-measured at the merge commit.** `main` moved under this branch while
+the review was in progress (#81 landed), so the row's earlier citation, `a0a13d8`,
+named a pre-merge tree nobody will merge. Re-collected at `3f5e0f9`: the value is
+unchanged at 485, and the source now names the merge commit. The value being
+unchanged is why this is worth stating explicitly rather than silently fixing:
+a stale citation that happens to carry the right number is exactly the failure
+that is invisible until someone tries to reproduce it.
+
+**What still blocks the merge, and it is not Burak.** `mergeStateStatus` is
+`BLOCKED` because @mertefesensoy's `CHANGES_REQUESTED` from 2026-09-04 is still
+the standing verdict; the 2026-09-08 `COMMENTED` review does not supersede it,
+and pushing fixes never clears a changes-request under this repository's ruleset.
+@bengisucvd has not yet reviewed and owns decision 3 with a share of decision 1.
+
 ## Related docs
 
 - Issue #59 (this ticket), Issue #31 (the `endpoint`/`interior` layouts kept as
