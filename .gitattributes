@@ -1,0 +1,11 @@
+# This repo runs with autocrlf, which rewrites files on checkout. A shell script
+# that comes back with CRLF line endings fails with a bad-interpreter error, so
+# pin the ones that must stay LF. index.html and STATUS.md are generated with LF
+# and compared byte-for-byte by update.sh's no-change check, so pin them too --
+# otherwise every checkout would look like a change and the routine would commit
+# noise daily.
+*.sh text eol=lf
+*.py text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.html text eol=lf
