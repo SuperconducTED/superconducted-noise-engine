@@ -326,7 +326,9 @@ next batch record, architect decision C2):
 - 13 pre-existing failures in `tests/test_probe_historical_properties.py`
   reproduce identically on `main` and are an environment gap
   (`qiskit-ibm-runtime` absent), not a regression.
-- The full survey walk: 63.70 s for 975 files.
+- The full survey walk: 55-64 s for 975 files over three uncontended runs
+  (55.08, 61.34, 63.70). A fourth run overlapping a full `pytest` took
+  93.39 s, which is why NC-044 registers a range rather than a point.
 
 ## Related docs
 
