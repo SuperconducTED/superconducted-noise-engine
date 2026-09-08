@@ -20,7 +20,8 @@ four days since, while the whole recovery sat one dispatch away from done.
 
 | File | One-sentence description |
 | --- | --- |
-| `docs/implementations/2026-09-06-issue-53-deadline-and-recovery.md` | This record — the only file this change adds to the code repository. |
+| `docs/implementations/2026-09-06-issue-53-deadline-and-recovery.md` | This record — the only file this change **adds** to the code repository; the row below is the only file it **modifies**. |
+| `docs/numerical-claims.md` | NC-032 restated per Rule 6 from `≤ 70.2% (33 of ≥ 47)` to `≤ 100% (50 of ≥ 50)`, re-sourced at `calibration-data` `3d1569d` over the span `20260812T063125Z .. 20260814T174409Z`, `Last verified` moved to 2026-09-07; the superseded value and a bolded warning that the new bound is **vacuous** are preserved in Notes. Landed 2026-09-07 — reasoning in [NC-032 restated per Rule 6](#nc-032-restated-per-rule-6) below. |
 
 No source, workflow, or test file was modified. #53 is a DevOps ticket ("two
 `workflow_dispatch` runs, no new Python") and that scope held. The substantive
@@ -228,8 +229,11 @@ and compare as multisets — they are equal, which is the finding.
 
 ## As of 2026-09-07 — the collision is fixed, and one claim above was wrong
 
-The sections above are the record as measured on 2026-09-06 and are left
-unedited. Two things changed the next day.
+The measurements above are the record as taken on 2026-09-06 and are left
+unedited. Two things changed the next day. One further edit was made above
+this line afterwards — the `What changed` manifest gained a row, which is a
+statement about what the PR touches rather than a measurement; the
+2026-09-08 section at the end of this document records it.
 
 **The comparator was fixed.** `_strip_parameter_dates` now drops `date` from any
 dict that also carries `value`, scoped to the cross-fetch-path comparison only;
@@ -308,3 +312,22 @@ as "capture is fine"**, because holding everything you can prove exists gives
 100% by construction, and this window is complete only because #53 backfilled
 the very window the row measures. A capture rate describing ordinary operation
 now needs a window that has not been backfilled, which is #54's territory.
+
+## As of 2026-09-08 — the `What changed` manifest, completed on review
+
+Reviewing PR #78 at 2026-09-07T22:18Z, @BurakOztekin observed that the
+`What changed` table listed only this document, while the restatement above
+also modifies `docs/numerical-claims.md`, and asked for the file and the
+restated NC-032 value to be named there explicitly. Both now are.
+
+The missing row was added to that table rather than appended here, on the
+distinction that a `What changed` table is a **manifest of what the PR touches**,
+not a dated measurement — so the append-only convention that keeps the
+2026-09-06 figures frozen does not reach it, and an incomplete manifest is
+itself the failure Rule 6 exists to prevent: a reader who trusts the table would
+not learn that an NC row moved. The precedent is
+`docs/implementations/2026-08-24-pr32-review-fixes.md`, which corrected an
+earlier document's `What changed` table in place for the same reason.
+
+The 2026-09-06 measurements are untouched by this edit; re-running the checks in
+Verification returns what it returned then.
