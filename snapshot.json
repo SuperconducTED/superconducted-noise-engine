@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-08 18:23 UTC",
+  "generated": "2026-09-08 18:24 UTC",
   "main": {
     "sha": "645b4d1a",
     "date": "2026-09-08",
@@ -1541,16 +1541,23 @@
           "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 83,
-          "reviewDecision": "REVIEW_REQUIRED",
+          "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "docs: close the three fixable Issue #57 definition-of-done gaps",
-          "updatedAt": "2026-09-08T12:37:20Z",
+          "updatedAt": "2026-09-08T18:23:58Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/83",
           "headRefOid": "0a200457a853cfa0a4e39070d17dffe98b693330",
           "additions": 185,
           "deletions": 4,
           "file_count": 4,
-          "latest_reviews": [],
+          "latest_reviews": [
+            {
+              "who": "BurakOztekin",
+              "state": "CHANGES_REQUESTED",
+              "at": "2026-09-08",
+              "last_activity": "2026-09-08"
+            }
+          ],
           "looked_since": [],
           "checks": [
             {
@@ -1595,8 +1602,8 @@
       "unmet_soft": [],
       "blockers": [
         {
-          "severity": "high",
-          "text": "No approving review yet: main's ruleset requires one."
+          "severity": "critical",
+          "text": "CHANGES_REQUESTED standing from @BurakOztekin (2026-09-08). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
         },
         {
           "kind": "advisor",
