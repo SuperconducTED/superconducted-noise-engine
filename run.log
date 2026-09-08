@@ -5,3 +5,9 @@
 2026-09-08T18:47:08Z  --- run begins (pid 238187) ---
 2026-09-08T18:47:08Z  ok: chore: phase-3 dashboard: state moved (2026-09-08)
 2026-09-08T18:58:46Z  --- run begins (pid 239824) ---
+2026-09-08T18:58:46Z  ok: chore: phase-3 dashboard: state moved (2026-09-08)
+2026-09-08T18:59:26Z  --- run begins (pid 240089) ---
+2026-09-08T18:59:26Z  FAILED (exit 1)
+2026-09-08T18:59:55Z  --- run begins (pid 240301) ---
+2026-09-08T18:59:55Z  FAILED (exit 1)
+2026-09-08T18:59:56Z  --- run begins (pid 240329) ---
