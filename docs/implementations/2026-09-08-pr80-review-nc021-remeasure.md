@@ -163,6 +163,34 @@ ruff format --check .                                     # 53 files already for
 mypy --strict src/superconducted                          # no issues in 25 source files
 ```
 
+The figure does not depend on the long-lived local venv. The whole runbook was
+dry-run in a throwaway clone before being posted — `git clone --filter=blob:none`
+(4.6 s), a brand-new `venv`, `pip install -r requirements.txt -r
+requirements-dev.txt`, `pip install -e . --no-deps` — and that clean environment
+independently collected **370** and passed **370**, with `ruff`, `ruff format`,
+`mypy --strict` and `check_ids.py` all clean.
+
+The same clone gives the differential form of the count, which needs no absolute
+at all:
+
+| ref | whole suite | `tests/test_canonical_snapshot_digest.py` |
+| --- | --- | --- |
+| `origin/main` (`645b4d1`) | 360 | 28 |
+| this branch | 370 | 38 |
+| delta | **+10** | **+10** |
+
+The two deltas being equal is the load-bearing part: it shows PR #80 adds tests
+in exactly one file and neither adds nor removes a test anywhere else, so the
+merge carried nothing unexpected. If they ever disagree, the suite total is not
+explained by this branch's own additions.
+
+Restoring `main`'s digest under the branch's tests fails **exactly 3** —
+`test_a_parameter_date_difference_is_not_a_divergence`,
+`test_payload_only_and_compare_reread_agree_on_a_date_only_pair`,
+`test_a_date_only_reread_exits_zero` — with 35 passing. That partition is what
+keeps the fix honest: 3 of the 10 new tests pin the defect, and the other 7 pass
+against both digests by design, so they catch the fix over-reaching.
+
 The digest behaviour Burak approved is unchanged by the merge; the pair from the
 run that produced the false collision still resolves the same way:
 
