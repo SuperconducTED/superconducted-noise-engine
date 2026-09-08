@@ -220,6 +220,49 @@ health tree and README are committed locally at `d7bdcd0` on
 commit-on-change behaviour and visual inspection of the published SVG in both
 GitHub themes still require a PR and remote push.
 
+### As of `e3c4ea8` (2026-09-09) — PR #70 second review round
+
+The 2026-09-05 block above is left exactly as measured on that date. This
+section records the state after the review fixes, per the convention that a
+dated snapshot is reconciled by appending rather than by rewriting its rows.
+
+- `ruff check .` and `ruff format --check .` over the whole repository — clean,
+  57 files.
+- `mypy --strict src/superconducted` — clean, 25 files. `mypy` with the project
+  config (`src/superconducted` **and** `scripts`) — clean, 34 files.
+- `python scripts/check_ids.py` — no duplicate or colliding ADR / NC identifiers.
+- `python -m pytest tests/ --collect-only -q -o addopts=""` — **391 collected**,
+  registered as NC-021 at this commit.
+- `python -m pytest tests/ -q` — 383 passed, 8 failed. All 8 are
+  `tests/test_file_snapshots.py` cases that reproduce identically at the merge
+  base `645b4d1`: on Windows the sandboxed digest subprocess returns
+  `collision-unreadable` where the assertion expects `collision`. They are an
+  environment artifact of running the bash harness under Git Bash, not a defect
+  on this branch, and CI on `ubuntu-latest` is the authority for the pass count.
+- `bash -n scripts/push_with_retry.sh scripts/file_snapshots.sh` — both parse.
+
+The FR-6 defect that opened this round was reproduced before it was fixed and
+re-checked after. Rendering one fixture twice, 24 h apart, with a byte-identical
+committed index and ledger:
+
+| | Before | After |
+| --- | --- | --- |
+| `progress.svg` bytes | differ | identical |
+| Cause | `Hours since last new state: 39.3` → `63.3` | staleness rendered as a band |
+| Effect on FR-6 | guard could never fire; a commit every run | guard fires; no commit |
+
+The exact figure is still available: `metrics.json` for that fixture carries
+`hours_since_last_new_state: 1551.28` beside `staleness_band: "over 7 days"`, so
+UC-6 traceability is unchanged and the section 9.3 provenance test asserts it
+mechanically.
+
+**Still not verified, and not verifiable from a local checkout.** Neither
+workflow has run in GitHub Actions, `health/` does not yet exist on
+`calibration-data`, and that branch's `README.md` still carries the dead
+"PR ticket #002" reference FR-8 exists to remove. The section 10 evidence — a
+backfill dispatch, a no-change render producing no commit, and the SVG shown in
+both GitHub themes — still requires a real run and a push.
+
 ## Related docs
 
 - Issue #48 — pipeline-health dashboard
