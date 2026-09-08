@@ -1,0 +1,574 @@
+<title>Phase 3 Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;450;500;600;700&display=swap">
+<style>
+
+/* Palette: a cryostat, not a cream document. The neutral carries a cool blue
+   bias toward the accent, which is the teal of a dilution-fridge readout rather
+   than a default indigo. Semantic colours (met / in flight / not done) are a
+   separate axis from the accent and never borrow it. */
+:root{
+  --bg:#f4f6f8; --panel:#fff; --sunk:#eceff3;
+  --ink:#101519; --ink-2:#39434d; --muted:#5f6b78; --line:#dde3e9;
+  --accent:#00707f; --accent-bg:#dff1f3; --accent-ink:#00707f;
+  --ok:#146b3a; --ok-bg:#e2f2e8;
+  --warn:#8f5406; --warn-bg:#faeedd;
+  --bad:#a80f37; --bad-bg:#fbe6ec;
+  --idle:#6b7783; --idle-bg:#e7ebef;
+  --shadow:0 1px 1px rgba(16,21,25,.03), 0 12px 28px -20px rgba(16,21,25,.28);
+  --sans:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1215; --panel:#141b20; --sunk:#101619;
+  --ink:#e6edf1; --ink-2:#b9c5ce; --muted:#8b98a4; --line:#242e35;
+  --accent:#4ecdd8; --accent-bg:#0d2f34; --accent-ink:#7fdde6;
+  --ok:#59c584; --ok-bg:#10291b;
+  --warn:#d9a24f; --warn-bg:#2a2011;
+  --bad:#f0708f; --bad-bg:#2c1219;
+  --idle:#7b8895; --idle-bg:#1a2126;
+  --shadow:0 1px 1px rgba(0,0,0,.4), 0 12px 28px -20px rgba(0,0,0,.8);
+}}
+:root[data-theme="dark"]{
+  --bg:#0d1215; --panel:#141b20; --sunk:#101619;
+  --ink:#e6edf1; --ink-2:#b9c5ce; --muted:#8b98a4; --line:#242e35;
+  --accent:#4ecdd8; --accent-bg:#0d2f34; --accent-ink:#7fdde6;
+  --ok:#59c584; --ok-bg:#10291b;
+  --warn:#d9a24f; --warn-bg:#2a2011;
+  --bad:#f0708f; --bad-bg:#2c1219;
+  --idle:#7b8895; --idle-bg:#1a2126;
+  --shadow:0 1px 1px rgba(0,0,0,.4), 0 12px 28px -20px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased;padding:0 0 88px}
+.wrap{max-width:1200px;margin:0 auto;padding:0 26px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+code,.mono,.num,td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+h1,h2,h3{text-wrap:balance}
+
+/* ---- masthead: an instrument readout, not a marketing hero ---- */
+header.hero{padding:40px 0 0}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted)}
+h1{font-size:33px;line-height:1.14;letter-spacing:-.02em;margin:10px 0 5px;font-weight:600}
+h1 .goal{color:var(--muted);font-weight:400}
+.sub{color:var(--muted);font-size:13px;line-height:1.55}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));
+  gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;
+  overflow:hidden;margin:26px 0 8px}
+.readout > div{background:var(--panel);padding:15px 17px}
+.readout .v{font-family:var(--mono);font-size:27px;font-weight:500;line-height:1;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.readout .v span{color:var(--muted);font-size:17px}
+.readout .k{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;margin-top:9px}
+.readout .v.alarm{color:var(--bad)}
+.bar{height:4px;border-radius:99px;background:var(--sunk);overflow:hidden;margin-top:12px}
+.bar > i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.calendar{padding:15px 17px;background:var(--panel);grid-column:1/-1}
+
+/* ---- section headings: hairline rule, no card ---- */
+h2{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  font-weight:600;margin:46px 0 6px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.lede{color:var(--muted);font-size:13px;margin:0 0 18px;max-width:74ch;line-height:1.6}
+
+/* ---- cards, spent only where an object really is separate ---- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;
+  box-shadow:var(--shadow);padding:19px 21px}
+.grid{display:grid;gap:13px}
+@media(min-width:920px){.grid.two{grid-template-columns:1fr 1fr}}
+
+/* ---- per-person action queue: the operating surface ---- */
+.person{border-top:3px solid var(--pc,var(--accent))}
+.person h3{margin:0;font-size:16px;font-weight:600;letter-spacing:-.008em}
+.person .role{color:var(--muted);font-size:12px;margin:1px 0 13px;font-family:var(--mono)}
+ol.acts{list-style:none;counter-reset:a;margin:0;padding:0;display:flex;
+  flex-direction:column}
+ol.acts li{counter-increment:a;position:relative;padding:12px 0 12px 30px;
+  border-top:1px solid var(--line)}
+ol.acts li:first-child{border-top:0;padding-top:2px}
+ol.acts li::before{content:counter(a);position:absolute;left:0;top:13px;
+  font-family:var(--mono);font-size:11px;font-weight:600;color:var(--muted)}
+ol.acts li:first-child::before{top:3px}
+ol.acts .act{font-weight:550;font-size:14.5px;display:block;margin-bottom:3px;
+  letter-spacing:-.005em}
+ol.acts .why{color:var(--ink-2);font-size:12.8px;line-height:1.55;display:block}
+ol.acts .tags{margin-top:8px;display:flex;gap:5px;flex-wrap:wrap}
+
+/* ---- milestone blocks ---- */
+.ms{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start}
+.ms h3{margin:0 0 2px;font-size:16px;font-weight:600;letter-spacing:-.008em}
+.ms h3 .id{font-family:var(--mono);color:var(--accent);margin-right:7px}
+.ms .when{text-align:right;white-space:nowrap}
+.ms .when .d{font-family:var(--mono);font-size:14px;font-weight:500}
+.ms .prog{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:3px}
+.gates{list-style:none;margin:15px 0 0;padding:0;grid-column:1/-1}
+.gates li{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:8px 0;
+  border-top:1px solid var(--line);font-size:13.8px;line-height:1.5}
+.gates .note{display:block;color:var(--muted);font-size:12.3px;margin-top:3px;line-height:1.5}
+
+/* ---- pills: state at a glance ---- */
+.pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10.5px;
+  font-weight:600;letter-spacing:.02em;white-space:nowrap;font-family:var(--mono)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+.pill.idle{background:var(--idle-bg);color:var(--muted)}
+.pill.accent{background:var(--accent-bg);color:var(--accent-ink)}
+
+/* ---- tables: hairlines only, no card chrome competing with the data ---- */
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.4px}
+th{text-align:left;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;padding:0 14px 9px 0;
+  border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:12px 14px 12px 0;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.num{white-space:nowrap;font-size:13px}
+td.num .cap{display:block;white-space:normal;font-family:var(--sans);
+  font-size:12.3px;color:var(--muted);margin-top:2px;line-height:1.45;max-width:24ch}
+/* Severity as form, not only as colour: a stripe on the row's first cell. */
+tr.sev-critical td:first-child{box-shadow:inset 3px 0 0 var(--bad);padding-left:11px}
+tr.sev-high td:first-child{box-shadow:inset 3px 0 0 var(--warn);padding-left:11px}
+tr.sev-medium td:first-child{box-shadow:inset 3px 0 0 var(--idle);padding-left:11px}
+.blockers{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.blockers li{font-size:12.9px;line-height:1.5;display:grid;
+  grid-template-columns:auto 1fr;gap:9px;max-width:62ch}
+.dot{width:6px;height:6px;border-radius:50%;margin-top:6px}
+.dot.critical{background:var(--bad)} .dot.high{background:var(--warn)}
+.dot.medium,.dot.low{background:var(--idle)}
+
+/* ---- risks ---- */
+.risk{display:grid;grid-template-columns:92px 1fr;gap:16px;padding:14px 0;
+  border-top:1px solid var(--line)}
+.risk:first-child{border-top:0;padding-top:0}
+.risk .what{font-weight:550;font-size:13.8px;margin-bottom:4px;line-height:1.5}
+.risk .ev{color:var(--muted);font-size:12.8px;line-height:1.55}
+.risk .ev b{color:var(--ink-2);font-weight:600}
+
+footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
+  color:var(--muted);font-size:12.3px;line-height:1.7}
+.empty{color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+</style>
+</style>
+<div class="wrap"><header class="hero">
+<div class="eyebrow">SuperconducTED/superconducted-noise-engine</div>
+<h1>Phase 3 <span class="goal">— Results from ANFIS</span></h1>
+<div class="sub">Generated 2026-09-08 17:51 UTC from live GitHub state · main at <code>645b4d1a</code> (2026-09-08) · plan of 2026-09-03 at <code>7d39a2b</code></div>
+<div class="readout">
+<div><div class="v">22</div><div class="k">days to 2026-09-30</div></div>
+<div><div class="v">6<span>/28</span></div><div class="k">gates met</div></div>
+<div><div class="v">11</div><div class="k">ready to start</div></div>
+<div><div class="v">5</div><div class="k">in review</div></div>
+<div><div class="v">5</div><div class="k">blocked upstream</div></div>
+<div><div class="v alarm">1</div><div class="k">milestones overdue</div></div>
+<div class="calendar">
+<div class="bar"><i style="width:21%"></i></div>
+<div class="sub" style="margin-top:7px">Calendar burned: day 6 of 28 (<span class="mono">21%</span>) · gates met: <span class="mono">21%</span>.</div>
+</div>
+</div></header>
+<h2>Work on this right now</h2>
+<div class="lede">Ranked per person: work that is ready and unblocks the most other tickets first, then reviews only that person can clear, then everything else by priority. A ticket waiting on an upstream dependency is never listed against its own owner — it is listed as a review or a start against whoever owns the blocker.</div>
+<div class="grid two">
+<div class="card person" style="--pc:#4338ca">
+<h3>Mert Efe Şensoy</h3><div class="role">@mertefesensoy · Lead — unblock others</div>
+<ol class="acts">
+<li>
+<span class="act">Send Dr. Akba the four ADR-027 questions (#84)</span>
+<span class="why">FR-15 routes all advisor contact through the lead, so no one else can send it. The decision-by date was 2026-09-08 and has passed. ADR-027 stays Open, ADR-014 stays Deferred, and the M3 ADR-009 memo has no answer to build on until this goes out.</span>
+<span class="tags">
+<span class="pill accent">ready to start</span>
+<span class="pill idle">unblocks #57, #60, #59, #61</span>
+<span class="pill idle">high</span>
+<span class="pill idle">M1</span>
+</span></li>
+<li>
+<span class="act">Re-review PR #68 (#59 — Manual MF parameterization from the archive)</span>
+<span class="why">Your CHANGES_REQUESTED from 2026-09-04 is the standing block. main&#x27;s ruleset does not dismiss it on push, so only you can clear it. You commented again on 2026-09-08 without lifting it — a COMMENTED review does not dismiss a CHANGES_REQUESTED.</span>
+<span class="tags">
+<span class="pill bad">you are the blocker</span>
+<span class="pill idle">unblocks #62, #61, #60, #63</span>
+<span class="pill idle">critical</span>
+<span class="pill idle">M1</span>
+</span></li>
+<li>
+<span class="act">Unstick PR #83 for #57 — Training contract: ADR-027, TSKTrainer ABC, training/targets.py</span>
+<span class="why">No approving review yet — main&#x27;s ruleset requires one.</span>
+<span class="tags">
+<span class="pill warn">in review</span>
+<span class="pill idle">unblocks #59, #60, #61, #63</span>
+<span class="pill idle">critical</span>
+<span class="pill idle">M1</span>
+</span></li>
+<li>
+<span class="act">Start #56 — Clear the queue, keep the records honest</span>
+<span class="why">It is the M0 gate and M0 is three days past its 2026-09-05 target.</span>
+<span class="tags">
+<span class="pill accent">ready to start</span>
+<span class="pill idle">unblocks #58, #84</span>
+<span class="pill idle">high</span>
+<span class="pill idle">M0</span>
+</span></li>
+</ol>
+</div>
+<div class="card person" style="--pc:#1d4ed8">
+<h3>Burak Öztekin</h3><div class="role">@BurakOztekin · The long pole — the trainer</div>
+<ol class="acts">
+<li>
+<span class="act">Start #60 — ADR-014 hybrid ANFIS trainer</span>
+<span class="why">The plan&#x27;s named long pole: four weeks of one person&#x27;s time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now — the archive fit part waits on #63.</span>
+<span class="tags">
+<span class="pill accent">ready to start</span>
+<span class="pill idle">unblocks #64</span>
+<span class="pill idle">critical</span>
+<span class="pill idle">M3</span>
+</span></li>
+<li>
+<span class="act">Re-review PR #78 (#53 — Backfill 14 recoverable documents)</span>
+<span class="why">Your CHANGES_REQUESTED from 2026-09-07 is the standing block. main&#x27;s ruleset does not dismiss it on push, so only you can clear it.</span>
+<span class="tags">
+<span class="pill bad">you are the blocker</span>
+<span class="pill idle">unblocks #56</span>
+<span class="pill idle">medium-high</span>
+<span class="pill idle">M0</span>
+</span></li>
+<li>
+<span class="act">Re-review PR #80 (#53 — Backfill 14 recoverable documents)</span>
+<span class="why">Your CHANGES_REQUESTED from 2026-09-07 is the standing block. main&#x27;s ruleset does not dismiss it on push, so only you can clear it.</span>
+<span class="tags">
+<span class="pill bad">you are the blocker</span>
+<span class="pill idle">unblocks #56</span>
+<span class="pill idle">medium-high</span>
+<span class="pill idle">M0</span>
+</span></li>
+<li>
+<span class="act">Start #73 — Filter noise by physical gate semantics</span>
+<span class="why">All stated upstream dependencies are met.</span>
+<span class="tags">
+<span class="pill accent">ready to start</span>
+<span class="pill idle">spawned</span>
+</span></li>
+</ol>
+</div>
+<div class="card person" style="--pc:#b45309">
+<h3>Yiğit Arda Kaderoğlu</h3><div class="role">@yigit-arda · The keystone — parameterization + ablation</div>
+<ol class="acts">
+<li>
+<span class="act">Start #84 — Close the #57 advisor loop</span>
+<span class="why">The only phase-3 blocker with a multi-week external latency tail, and the only M1 gate with no work in flight. Every day it waits is a day added to M3.</span>
+<span class="tags">
+<span class="pill accent">ready to start</span>
+<span class="pill idle">unblocks #57, #60, #59, #61</span>
+<span class="pill idle">high</span>
+<span class="pill idle">M1</span>
+</span></li>
+<li>
+<span class="act">Unstick PR #68 for #59 — Manual MF parameterization from the archive</span>
+<span class="why">CHANGES_REQUESTED standing from @mertefesensoy (2026-09-04). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.</span>
+<span class="tags">
+<span class="pill warn">in review</span>
+<span class="pill idle">unblocks #62, #61, #60, #63</span>
+<span class="pill idle">critical</span>
+<span class="pill idle">M1</span>
+</span></li>
+</ol>
+</div>
+<div class="card person" style="--pc:#be185d">
+<h3>Bengisu Cıvdı</h3><div class="role">@bengisucvd · The instruments</div>
+<ol class="acts">
+<li>
+<span class="act">Unstick PR #79 for #58 — Certify the benchmark instruments</span>
+<span class="why">Still a draft — CI and reviewers will not treat it as ready.</span>
+<span class="tags">
+<span class="pill warn">in review</span>
+<span class="pill idle">unblocks #62, #64, #65</span>
+<span class="pill idle">critical</span>
+<span class="pill idle">M1</span>
+</span></li>
+<li>
+<span class="act">Start #61 — ADR-011 evidence + premise gradients</span>
+<span class="why">Part B is unblocked (#57 merged) and the plan schedules it in W2 because the trainer&#x27;s verification depends on it.</span>
+<span class="tags">
+<span class="pill accent">ready to start</span>
+<span class="pill idle">high</span>
+<span class="pill idle">M2</span>
+</span></li>
+<li>
+<span class="act">Start #75 — Decide the LOCKED Kraus projector boundary</span>
+<span class="why">All stated upstream dependencies are met.</span>
+<span class="tags">
+<span class="pill accent">ready to start</span>
+<span class="pill idle">spawned</span>
+</span></li>
+</ol>
+</div>
+<div class="card person" style="--pc:#15803d">
+<h3>Baha Jarad</h3><div class="role">@BahaJarad · The data track</div>
+<ol class="acts">
+<li>
+<span class="act">Unstick PR #70 for #48 — Pipeline-health dashboard</span>
+<span class="why">Conflicts with main — needs a rebase before it can merge, and ci.yml will not re-run until it is clean.</span>
+<span class="tags">
+<span class="pill warn">in review</span>
+<span class="pill idle">unblocks #63, #49</span>
+<span class="pill idle">medium-high</span>
+<span class="pill idle">M2</span>
+</span></li>
+<li>
+<span class="act">Start #66 — Vectorizer returns µs where the repo assumes s</span>
+<span class="why">No dependencies in either direction, and it blocks running the shipped pipeline on real archived data — which phase 3 does throughout. On a real snapshot the ratified 3x3x3 grid fires at exactly zero and the bootstrap pipeline raises ZeroDivisionError.</span>
+<span class="tags">
+<span class="pill accent">ready to start</span>
+<span class="pill idle">high</span>
+<span class="pill idle">standalone</span>
+</span></li>
+</ol>
+</div>
+</div>
+<h2>Milestone gates</h2>
+<div class="lede">Every gate is the plan's own wording. ✅ verified against live GitHub or the ADR ledger on main · 🟡 in flight · ❌ not done · ⬜ no machine-checkable source.</div>
+<div class="grid" style="gap:13px">
+<div class="card"><div class="ms">
+<div><h3><span class="id">M0</span>🟡 Queue clear</h3><div class="sub">Everything below reads a clean main</div></div>
+<div class="when"><div class="d">2026-09-05</div><span class="pill bad">3d overdue</span><div class="prog">5/8 gates</div></div>
+<ul class="gates">
+<li><span>✅</span><span>#51 merged (aer_factory ADR references)
+</span></li>
+<li><span>✅</span><span>#52 merged (Aug 7-17 polling gaps)
+</span></li>
+<li><span>✅</span><span>#55 merged (sub-hourly backfill step)
+</span></li>
+<li><span>⬜</span><span>#55 post-merge owner read + ADR-025 sign-off collected
+<span class="note">Owner read is on Baha (poller.py is his). No recorded sign-off found on main; tracked inside #56 FR-2.</span>
+</span></li>
+<li><span>✅</span><span>#53 dispatched with ledger rows
+<span class="note">Four workflow_dispatch runs executed; snapshots/2026-08/ibm_fez 277 -&gt; 304 docs at 7139138. Record is PR #78, still unmerged.</span>
+</span></li>
+<li><span>🟡</span><span>#53&#x27;s record merged
+</span></li>
+<li><span>❌</span><span>#45 closed (dataset-yield finding)
+</span></li>
+<li><span>✅</span><span>#25 closed by the cycle-2 close record
+</span></li>
+</ul></div></div>
+<div class="card"><div class="ms">
+<div><h3><span class="id">M1</span>🟡 Contracts and instruments</h3><div class="sub">The ablation can run; the trainer has a contract; targets exist</div></div>
+<div class="when"><div class="d">2026-09-11</div><span class="pill idle">in 3d</span><div class="prog">1/5 gates</div></div>
+<ul class="gates">
+<li><span>❌</span><span>Target ADR sent to Dr. Akba with a decision-by date
+<span class="note">ADR-027 merged with Status: Open. docs/advisor/ holds only the unanswered 2026-05-25 questions file. Issue #84 owns the brief; its own decision-by date was 2026-09-08.</span>
+</span></li>
+<li><span>✅</span><span>TSKTrainer ABC and training value types merged
+</span></li>
+<li><span>🟡</span><span>Benchmark harness certified (#58)
+</span></li>
+<li><span>🟡</span><span>Premise parameterization for seven shapes merged (#59)
+</span></li>
+<li><span>❌</span><span>Feature-survey TSV committed
+<span class="note">Exists as docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv inside PR #68; not on main until #68 merges.</span>
+</span></li>
+</ul></div></div>
+<div class="card"><div class="ms">
+<div><h3><span class="id">M2</span>❌ First measurements</h3><div class="sub">ADR-019 closure; the premise stage</div></div>
+<div class="when"><div class="d">2026-09-18</div><span class="pill idle">in 10d</span><div class="prog">0/5 gates</div></div>
+<ul class="gates">
+<li><span>❌</span><span>ADR-019 ablation executed with its table (#62)
+</span></li>
+<li><span>❌</span><span>Gradient derivations and training/gradients.py (#61)
+</span></li>
+<li><span>🟡</span><span>Pipeline-health dashboard live (#48)
+</span></li>
+<li><span>❌</span><span>Scheduled sweep live (#49)
+</span></li>
+<li><span>❌</span><span>Trainer LSE stage passing on synthetic + anchored-baseline data
+<span class="note">#60 has no branch or PR yet. Its contract dependency (#57) merged 2026-09-08, so it is startable.</span>
+</span></li>
+</ul></div></div>
+<div class="card"><div class="ms">
+<div><h3><span class="id">M3</span>❌ Decisions</h3><div class="sub">ADR-015 / ADR-016; the final configuration</div></div>
+<div class="when"><div class="d">2026-09-25</div><span class="pill idle">in 17d</span><div class="prog">0/6 gates</div></div>
+<ul class="gates">
+<li><span>❌</span><span>ADR-019 closed with a winner
+<span class="note">Ledger on main reads: Open.</span>
+</span></li>
+<li><span>❌</span><span>ADR-009 decided (T1 vs IT2)
+<span class="note">Ledger on main reads: Open.</span>
+</span></li>
+<li><span>❌</span><span>ADR-011 follows
+<span class="note">Ledger on main reads: Open (effectively chosen for each path).</span>
+</span></li>
+<li><span>❌</span><span>training/dataset.py merged with its evidence TSV (#63)
+</span></li>
+<li><span>❌</span><span>Floor derived from the actual parameter count and registered
+<span class="note">Replaces the reconstructed 126 behind NC-012. Owned by #56.</span>
+</span></li>
+<li><span>❌</span><span>Trainer full loop merged, first archive fit, time-split metrics
+</span></li>
+</ul></div></div>
+<div class="card"><div class="ms">
+<div><h3><span class="id">M4</span>❌ ANFIS results</h3><div class="sub">The paper track</div></div>
+<div class="when"><div class="d">2026-09-30</div><span class="pill idle">in 22d</span><div class="prog">0/4 gates</div></div>
+<ul class="gates">
+<li><span>❌</span><span>Trained vs anchored baseline vs reference, four circuits, four metrics, in docs/findings/ with NC rows
+<span class="note">The phase-3 exit artifact. Produced by #62&#x27;s script re-run at M4.</span>
+</span></li>
+<li><span>❌</span><span>ADR-014 Accepted
+<span class="note">Ledger on main reads: Deferred.</span>
+</span></li>
+<li><span>❌</span><span>ADR-015 interim and ADR-016 interval aggregation merged (#64)
+</span></li>
+<li><span>❌</span><span>Phase-3 close record written
+<span class="note">Owned by #56, mirrors the cycle-2 close record convention.</span>
+</span></li>
+</ul></div></div>
+</div>
+<h2>Nothing upstream is blocking these — so what is?</h2>
+<div class="lede">Tickets whose stated dependencies are all met, and which therefore cannot be excused by the critical path. Each row is the actual reason it has not closed.</div>
+<div class="card"><div class="scroll"><table>
+<tr><th>Ticket</th><th>Owner</th><th>Where it is</th><th>What is actually blocking it</th></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/84">#84</a><span class="cap">Close the #57 advisor loop</span></td>
+<td>@yigit-arda</td><td><span class="pill accent">no branch yet</span></td><td><ul class="blockers">
+<li><span class="dot critical"></span><span>Dr. Akba must answer four ADR-027 questions. He has no GitHub account; FR-15 routes all contact through the lead.</span></li>
+<li><span class="dot critical"></span><span>The FR-15 decision-by date was 2026-09-08 and has passed with the brief unsent.</span></li>
+</ul></td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/56">#56</a><span class="cap">Clear the queue, keep the records honest</span></td>
+<td>@mertefesensoy</td><td><span class="pill accent">no branch yet</span></td><td><ul class="blockers">
+<li><span class="dot critical"></span><span>Every advisor item it carries (ADR-025 sign-off, ADR-009 flip, ADR-011 closure, ADR-014 read, the target ADR) needs Dr. Akba, who has no recorded answer to anything.</span></li>
+<li><span class="dot high"></span><span>#45 is still open; M0 is not closable until it is.</span></li>
+<li><span class="dot high"></span><span>#53&#x27;s record (PR #78) is unmerged at CHANGES_REQUESTED.</span></li>
+</ul></td></tr>
+<tr class="sev-low"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/49">#49</a><span class="cap">Scheduled backfill sweep</span></td>
+<td>@mertefesensoy</td><td><span class="pill accent">no branch yet</span></td><td><ul class="blockers">
+<li><span class="dot low"></span><span>The plan raises its priority per #54 but its own body still reads priority:low and &#x27;pending Baha&#x27;s confirmation&#x27;.</span></li>
+</ul></td></tr>
+<tr class="sev-medium"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/45">#45</a><span class="cap">Polling cadence no longer limits the dataset</span></td>
+<td>@mertefesensoy</td><td><span class="pill accent">no branch yet</span></td><td><ul class="blockers">
+<li><span class="dot medium"></span><span>Closure is a records task inside #56, not new code.</span></li>
+</ul></td></tr>
+<tr class="sev-low"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/61">#61</a><span class="cap">ADR-011 evidence + premise gradients</span></td>
+<td>@bengisucvd</td><td><span class="pill accent">no branch yet</span></td><td><ul class="blockers">
+<li><span class="dot low"></span><span>FR-4&#x27;s consequent convention and the raw-space vs logit-space choice both depend on #57&#x27;s decision.</span></li>
+</ul></td></tr>
+<tr class="sev-medium"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/75">#75</a><span class="cap">Decide the LOCKED Kraus projector boundary</span></td>
+<td>@bengisucvd</td><td><span class="pill accent">no branch yet</span></td><td><ul class="blockers">
+<li><span class="dot medium"></span><span>Touches LOCKED src/superconducted/channels/kraus.py — needs a decision, not just a patch.</span></li>
+</ul></td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/59">#59</a><span class="cap">Manual MF parameterization from the archive</span></td>
+<td>@yigit-arda</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/68">PR #68</a> <span class="pill idle">open</span><div class="sub">+4283/−2 · 9 files</div></td><td><ul class="blockers">
+<li><span class="dot critical"></span><span>CHANGES_REQUESTED standing from @mertefesensoy (2026-09-04). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.</span></li>
+</ul></td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/57">#57</a><span class="cap">Training contract: ADR-027, TSKTrainer ABC, training/targets.py</span></td>
+<td>@mertefesensoy</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/83">PR #83</a> <span class="pill idle">open</span><div class="sub">+185/−4 · 4 files</div></td><td><ul class="blockers">
+<li><span class="dot critical"></span><span>Code landed in PR #69, but the ticket&#x27;s own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened — #84 owns it.</span></li>
+<li><span class="dot high"></span><span>No approving review yet — main&#x27;s ruleset requires one.</span></li>
+</ul></td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/58">#58</a><span class="cap">Certify the benchmark instruments</span></td>
+<td>@bengisucvd</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/79">PR #79</a> <span class="pill warn">draft</span><div class="sub">+3215/−79 · 14 files</div></td><td><ul class="blockers">
+<li><span class="dot critical"></span><span>Conflicts with main — needs a rebase before it can merge, and ci.yml will not re-run until it is clean.</span></li>
+<li><span class="dot high"></span><span>Still a draft — CI and reviewers will not treat it as ready.</span></li>
+<li><span class="dot high"></span><span>Its green checks last ran 2026-09-06T21:11 against a main that has moved since — they are not evidence about the merge result.</span></li>
+<li><span class="dot high"></span><span>No approving review yet — main&#x27;s ruleset requires one.</span></li>
+<li><span class="dot medium"></span><span>Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).</span></li>
+</ul></td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/48">#48</a><span class="cap">Pipeline-health dashboard</span></td>
+<td>@BahaJarad</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/70">PR #70</a> <span class="pill idle">open</span><div class="sub">+768/−7 · 13 files</div></td><td><ul class="blockers">
+<li><span class="dot critical"></span><span>Conflicts with main — needs a rebase before it can merge, and ci.yml will not re-run until it is clean.</span></li>
+<li><span class="dot critical"></span><span>CHANGES_REQUESTED standing from @mertefesensoy (2026-09-06). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.</span></li>
+<li><span class="dot high"></span><span>Its green checks last ran 2026-09-05T19:09 against a main that has moved since — they are not evidence about the merge result.</span></li>
+<li><span class="dot high"></span><span>Decision 3: the --scope qubits digest body must be locked before FR-1 is written, because #63 consumes it.</span></li>
+</ul></td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/53">#53</a><span class="cap">Backfill 14 recoverable documents</span></td>
+<td>@mertefesensoy</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/78">PR #78</a> <span class="pill idle">open</span><div class="sub">+362/−1 · 2 files</div></td><td><ul class="blockers">
+<li><span class="dot critical"></span><span>CHANGES_REQUESTED standing from @BurakOztekin (2026-09-07). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.</span></li>
+<li><span class="dot medium"></span><span>The dispatches ran; only the record (PR #78) is outstanding, blocked on a re-review.</span></li>
+</ul></td></tr>
+</table></div></div>
+<h2>Blocked upstream</h2>
+<div class="lede">Waiting on another ticket, quoted from this ticket's own <span class="mono">Depends on</span> row. Do not start these; clear the blocker.</div>
+<div class="card"><div class="scroll"><table>
+<tr><th>Ticket</th><th>Owner</th><th>Waiting on</th><th>Fallback</th></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/62">#62</a><span class="cap">Run the ADR-019 ablation, publish the table</span></td>
+<td>@yigit-arda</td><td><ul class="blockers"><li><span class="dot critical"></span><span><b>#58</b> — certified harness (basis_gates, mode, seed, transpile-then-prepare, no silent NaN) and benchmarks/reference.py::build_reference</span></li><li><span class="dot critical"></span><span><b>#59</b> — the parameterized rule bases under ablation</span></li></ul></td>
+<td class="sub">If #59 is not on main when both hard prerequisites are, run with first_viable_seed.</td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/63">#63</a><span class="cap">Training-set builder (training/dataset.py)</span></td>
+<td>@BahaJarad</td><td><ul class="blockers"><li><span class="dot critical"></span><span><b>#48</b> — FR-1&#x27;s --scope qubits digest (his own ticket; the digest body must be locked before FR-1 is written)</span></li></ul></td>
+<td class="sub">—</td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/64">#64</a><span class="cap">ADR-015 / ADR-016 ensemble + intervals</span></td>
+<td>@bengisucvd</td><td><ul class="blockers"><li><span class="dot critical"></span><span><b>#58</b> — density-matrix mode, transpile-then-prepare, no silent NaN, build_reference, simulate_engine signature</span></li><li><span class="dot critical"></span><span><b>M3 gate</b> — gated on the ADR-009 decision and #60&#x27;s first archive fit</span></li></ul></td>
+<td class="sub">—</td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/65">#65</a><span class="cap">ADR-007 pre/between-gates fuzzification</span></td>
+<td>@BurakOztekin</td><td><ul class="blockers"><li><span class="dot critical"></span><span><b>#58</b> — certified harness and build_reference</span></li><li><span class="dot critical"></span><span><b>M3 gate</b> — phase 4; the M3 gate is the earliest conceivable start, not a promise</span></li></ul></td>
+<td class="sub">—</td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/76">#76</a><span class="cap">Promote diagonal Hellinger to a certified metric</span></td>
+<td>@bengisucvd</td><td><ul class="blockers"><li><span class="dot critical"></span><span><b>#58</b> — certified density-matrix harness</span></li><li><span class="dot critical"></span><span><b>#62</b> — the helper and evidence format must stabilise first</span></li></ul></td>
+<td class="sub">—</td></tr>
+</table></div></div>
+<h2>Open pull requests</h2>
+<div class="lede">A green tick on a CONFLICTING PR is not evidence: ci.yml does not dispatch while a PR is dirty, so those checks describe a main that has already moved.</div>
+<div class="card"><div class="scroll"><table>
+<tr><th>PR</th><th>Author</th><th>Mergeable</th><th>Review</th><th>Checks</th><th>Updated</th></tr>
+<tr class="sev-medium"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/83">#83</a><span class="cap">docs: close the three fixable Issue #57 definition-of-done gaps · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/57">#57</a></span></td>
+<td>@mertefesensoy</td><td><span class="pill ok">clean</span></td><td><span class="pill warn">no review</span></td><td><span class="pill ok">green</span><div class="sub">2026-09-08T12:37</div></td><td class="sub">2026-09-08</td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/80">#80</a><span class="cap">fix: exclude per-parameter date from the payload digest · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/53">#53</a></span></td>
+<td>@mertefesensoy</td><td><span class="pill ok">clean</span></td><td><div><span class="pill bad">changes requested</span> @BurakOztekin <span class="sub">2026-09-07</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-09-08T13:46</div></td><td class="sub">2026-09-08</td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/79">#79</a><span class="cap">Certify benchmark harness modes and calibration reference (#58)  · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/58">#58</a></span></td>
+<td>@bengisucvd</td><td><span class="pill bad">conflicting</span> <span class="pill warn">draft</span></td><td><span class="pill warn">no review</span></td><td><span class="pill warn">stale</span><div class="sub">2026-09-06T21:11</div></td><td class="sub">2026-09-08</td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/78">#78</a><span class="cap">docs: execute the #53 recovery and record what the 2026-09-05 de · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/53">#53</a></span></td>
+<td>@mertefesensoy</td><td><span class="pill ok">clean</span></td><td><div><span class="pill bad">changes requested</span> @BurakOztekin <span class="sub">2026-09-07</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-09-08T13:50</div></td><td class="sub">2026-09-08</td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/70">#70</a><span class="cap">Feature/pipeline health dashboard · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/48">#48</a></span></td>
+<td>@BahaJarad</td><td><span class="pill bad">conflicting</span></td><td><div><span class="pill bad">changes requested</span> @mertefesensoy <span class="sub">2026-09-06</span></div></td><td><span class="pill warn">stale</span><div class="sub">2026-09-05T19:09</div></td><td class="sub">2026-09-06</td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/68">#68</a><span class="cap">Feature/issue 59 parameterization · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/59">#59</a></span></td>
+<td>@yigit-arda</td><td><span class="pill ok">clean</span></td><td><div><span class="pill bad">changes requested</span> @mertefesensoy <span class="sub">2026-09-04</span></div><div class="sub">@mertefesensoy looked again 2026-09-08 without lifting it</div></td><td><span class="pill ok">green</span><div class="sub">2026-09-08T13:48</div></td><td class="sub">2026-09-08</td></tr>
+</table></div></div>
+<h2>ADR ledger</h2>
+<div class="lede">Status read from <span class="mono">docs/decisions.md</span> on main, not from any branch. Phase 3 ends with these decided.</div>
+<div class="card"><div class="scroll"><table>
+<tr><th>ADR</th><th>On main</th><th>Needs</th></tr>
+<tr><td class="num">❌ ADR-027<span class="cap">Calibration training target</span></td><td><span class="pill idle">Open</span></td><td class="sub">Dr. Akba&#x27;s four answers (#84)</td></tr>
+<tr><td class="num">❌ ADR-014<span class="cap">TSK trainer architecture</span></td><td><span class="pill idle">Deferred</span></td><td class="sub">#60 + the derived floor; revisited 2026-09-07, still Deferred</td></tr>
+<tr><td class="num">❌ ADR-019<span class="cap">MF ablation methodology</span></td><td><span class="pill idle">Open</span></td><td class="sub">#62&#x27;s table; prerequisite (b) cleared only when #59 merges</td></tr>
+<tr><td class="num">❌ ADR-009<span class="cap">T1 vs Interval Type-2</span></td><td><span class="pill idle">Open</span></td><td class="sub">ADR-019&#x27;s evidence + the M3 memo to Dr. Akba</td></tr>
+<tr><td class="num">❌ ADR-011<span class="cap">Defuzzification method</span></td><td><span class="pill idle">Open (effectively chosen for each path)</span></td><td class="sub">Follows ADR-009; #61 supplies the number</td></tr>
+<tr><td class="num">❌ ADR-015<span class="cap">Ensemble sampling mechanism</span></td><td><span class="pill idle">Deferred</span></td><td class="sub">#64, after the M3 gate</td></tr>
+<tr><td class="num">❌ ADR-016<span class="cap">Benchmark aggregation across members</span></td><td><span class="pill idle">Deferred</span></td><td class="sub">#64, after the M3 gate</td></tr>
+</table></div></div>
+<h2>Risks the plan named</h2>
+<div class="lede">Straight from plan §7, with what has actually happened to each.</div>
+<div class="card">
+<div class="risk">
+<div><span class="pill bad">materialised</span></div>
+<div><div class="what">Dr. Akba is a single-threaded gate: thirteen advisor decisions this phase, all routed through one person, and no recorded answer to any of the ten questions from 2026-05-25.</div><div class="ev"><b>Now:</b> docs/advisor/ still contains only 2026-05-25-questions-for-akba.md. The W1 batch was never sent; #84 (opened 2026-09-08) exists to write it.<br><b>Mitigation:</b> One W1 batch with a decision-by date per item, answers landing in docs/advisor/2026-09-03-decisions-from-akba.md.</div></div>
+</div>
+<div class="risk">
+<div><span class="pill bad">materialised</span></div>
+<div><div class="what">main&#x27;s merge gate is a ruleset requiring 1 approval, and it does not dismiss stale reviews on push — so pushing a fix never clears a CHANGES_REQUESTED.</div><div class="ev"><b>Now:</b> Computed live below from the open-PR table.<br><b>Mitigation:</b> Each blocked PR needs an explicit re-review, not just a push.</div></div>
+</div>
+<div class="risk">
+<div><span class="pill bad">materialised</span></div>
+<div><div class="what">Certifying the instruments surfaced four defects that were not in the plan (#73, #74, #75, #76), one of which touches LOCKED kraus.py.</div><div class="ev"><b>Now:</b> All four opened 2026-09-06 out of #58.<br><b>Mitigation:</b> None planned; they carry no milestone.</div></div>
+</div>
+<div class="risk">
+<div><span class="pill warn">watch</span></div>
+<div><div class="what">The trainer is one person&#x27;s four weeks, and Burak also reviews aer_factory.py, harness.py and tsk.py.</div><div class="ev"><b>Now:</b> #60 unblocked on 2026-09-08 with no branch yet, while Burak is the standing reviewer blocking two PRs (#78, #80).<br><b>Mitigation:</b> The LSE stage alone yields a usable model by M2; finite-difference premise gradients first; ADR-007 is explicitly a stretch.</div></div>
+</div>
+<div class="risk">
+<div><span class="pill warn">watch</span></div>
+<div><div class="what">The harness cannot run the ADR-019 protocol as shipped: NaN fidelity, QFT crashes untranspiled.</div><div class="ev"><b>Now:</b> PR #79 exists and is substantial, but is a draft, conflicts with main, and has no reviews.<br><b>Mitigation:</b> #58 is an M1 gate and a hard prerequisite of #62.</div></div>
+</div>
+<div class="risk">
+<div><span class="pill warn">watch</span></div>
+<div><div class="what">ci.yml does not dispatch on a conflicting PR, so a PR can show four green checks while no test has run against what would actually merge.</div><div class="ev"><b>Now:</b> Computed live below — any PR flagged CONFLICTING has checks that predate the current main.<br><b>Mitigation:</b> Rebase before trusting a green check on a CONFLICTING PR.</div></div>
+</div>
+<div class="risk">
+<div><span class="pill warn">watch</span></div>
+<div><div class="what">The critic&#x27;s load pass put all five contributors at or above four weeks before reviews.</div><div class="ev"><b>Now:</b> Open-PR count per person is shown below.<br><b>Mitigation:</b> The four scope decisions in plan §4, taken up front.</div></div>
+</div>
+</div>
+<footer>
+Generated by <code>generate.py</code> on the orphan <code>phase-3-dashboard</code> branch. Static plan model: <code>plan.json</code>. Live state read via <code>gh</code> at 2026-09-08 17:51 UTC.<br>Nothing here is hand-maintained except <code>plan.json</code>, which changes only when the plan or a ticket's stated dependency changes. Source of truth for the plan itself remains <code>docs/roadmap/2026-09-03-phase-3-plan.md</code> on main.
+</footer></div>

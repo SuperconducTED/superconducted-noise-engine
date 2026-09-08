@@ -1,0 +1,1843 @@
+{
+  "generated": "2026-09-08 17:51 UTC",
+  "main": {
+    "sha": "645b4d1a",
+    "date": "2026-09-08",
+    "msg": "Merge pull request #81 from SuperconducTED/mert/issue-25-parts-2-4",
+    "adr": {
+      "ADR-001": "Accepted",
+      "ADR-002": "Accepted",
+      "ADR-003": "Accepted",
+      "ADR-004": "Accepted",
+      "ADR-005": "Accepted",
+      "ADR-006": "Accepted",
+      "ADR-007": "Open",
+      "ADR-008": "Open / Deferred",
+      "ADR-009": "Open",
+      "ADR-010": "Accepted",
+      "ADR-011": "Open (effectively chosen for each path)",
+      "ADR-012": "Accepted",
+      "ADR-013": "Open / Deferred",
+      "ADR-014": "Deferred",
+      "ADR-015": "Deferred",
+      "ADR-016": "Deferred",
+      "ADR-017": "Accepted",
+      "ADR-018": "Accepted",
+      "ADR-019": "Open",
+      "ADR-020": "Accepted",
+      "ADR-021": "Accepted on the constraint · Open on variance-injection design",
+      "ADR-022": "Accepted",
+      "ADR-023": "Accepted",
+      "ADR-024": "Open",
+      "ADR-025": "Accepted",
+      "ADR-027": "Open"
+    },
+    "paths": {
+      "docs/evidence/feature-distribution": false
+    }
+  },
+  "tickets": [
+    {
+      "id": 84,
+      "short": "Close the #57 advisor loop",
+      "owner": "yigit-arda",
+      "co_owner": "mertefesensoy",
+      "milestone": "M1",
+      "track": "governance",
+      "priority": "high",
+      "hard_deps": [],
+      "soft_deps": [
+        {
+          "kind": "issue",
+          "id": 56,
+          "what": "owns creating docs/advisor/2026-09-03-decisions-from-akba.md"
+        }
+      ],
+      "extra_blockers": [
+        {
+          "kind": "advisor",
+          "text": "Dr. Akba must answer four ADR-027 questions. He has no GitHub account; FR-15 routes all contact through the lead.",
+          "severity": "critical"
+        },
+        {
+          "kind": "date",
+          "text": "The FR-15 decision-by date was 2026-09-08 and has passed with the brief unsent.",
+          "severity": "critical"
+        }
+      ],
+      "unblocks": [
+        57,
+        60,
+        59,
+        61
+      ],
+      "why_now": "The only phase-3 blocker with a multi-week external latency tail, and the only M1 gate with no work in flight. Every day it waits is a day added to M3.",
+      "note": "Yiğit writes the brief; Mert sends it. ADR-027 stays Status: Open until the answers land.",
+      "external_latency": true,
+      "co_owner_action": "Send Dr. Akba the four ADR-027 questions",
+      "co_owner_why": "FR-15 routes all advisor contact through the lead, so no one else can send it. The decision-by date was 2026-09-08 and has passed. ADR-027 stays Open, ADR-014 stays Deferred, and the M3 ADR-009 memo has no answer to build on until this goes out.",
+      "title": "Close the Issue #57 advisor loop: get Dr. Akba's four decisions on ADR-027, record them, flip the ADR",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/84",
+      "issue_state": "OPEN",
+      "state": "ready",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [
+        {
+          "kind": "issue",
+          "id": 56,
+          "what": "owns creating docs/advisor/2026-09-03-decisions-from-akba.md"
+        }
+      ],
+      "blockers": [
+        {
+          "kind": "advisor",
+          "text": "Dr. Akba must answer four ADR-027 questions. He has no GitHub account; FR-15 routes all contact through the lead.",
+          "severity": "critical"
+        },
+        {
+          "kind": "date",
+          "text": "The FR-15 decision-by date was 2026-09-08 and has passed with the brief unsent.",
+          "severity": "critical"
+        }
+      ],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 58,
+      "short": "Certify the benchmark instruments",
+      "owner": "bengisucvd",
+      "milestone": "M1",
+      "track": "instruments",
+      "priority": "critical",
+      "hard_deps": [],
+      "soft_deps": [
+        {
+          "kind": "issue",
+          "id": 56,
+          "what": "the restructured docs/team.md ownership table lands first in W1"
+        }
+      ],
+      "extra_blockers": [
+        {
+          "kind": "signoff",
+          "text": "Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).",
+          "severity": "medium"
+        }
+      ],
+      "unblocks": [
+        62,
+        64,
+        65
+      ],
+      "why_now": "Highest fan-out unmerged work in the phase: three tickets name it as a hard prerequisite. Its own Depends-on row reads 'Nothing hard: start in W1 without waiting for anything.'",
+      "spawned": [
+        73,
+        74,
+        75,
+        76
+      ],
+      "title": "Certify the benchmark instruments before anything is measured: state fidelity is silently NaN on every row, QFT crashes untranspiled, and nothing in the repo builds a reference noise model",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/58",
+      "issue_state": "OPEN",
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOD4LQXA",
+            "is_bot": false,
+            "login": "bengisucvd",
+            "name": "bengisucvd"
+          },
+          "closingIssuesReferences": [
+            {
+              "id": "I_kwDOSW8yNc8AAAABPh_4JA",
+              "number": 58,
+              "repository": {
+                "id": "R_kgDOSW8yNQ",
+                "name": "superconducted-noise-engine",
+                "owner": {
+                  "id": "O_kgDOENg1ug",
+                  "login": "SuperconducTED"
+                }
+              },
+              "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/58"
+            }
+          ],
+          "createdAt": "2026-09-06T21:11:52Z",
+          "headRefName": "bengisu/issue-58-benchmark-certification",
+          "isDraft": true,
+          "mergeable": "CONFLICTING",
+          "mergedAt": null,
+          "number": 79,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "Certify benchmark harness modes and calibration reference (#58) ",
+          "updatedAt": "2026-09-08T12:50:30Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/79",
+          "headRefOid": "5400702579c31ad9d2a57a871db5f3cd358b197d",
+          "additions": 3215,
+          "deletions": 79,
+          "file_count": 14,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-06T21:05"
+            },
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-06T21:11"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-06T21:05"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-06T21:11"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-06T21:05"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-06T21:11"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-06T21:05"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-06T21:11"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-06T21:05"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-06T21:11"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-06T21:06"
+            }
+          ],
+          "checks_newest": "2026-09-06T21:11",
+          "checks_failing": [],
+          "checks_stale_vs_main": true
+        }
+      ],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [
+        {
+          "kind": "issue",
+          "id": 56,
+          "what": "the restructured docs/team.md ownership table lands first in W1"
+        }
+      ],
+      "blockers": [
+        {
+          "severity": "high",
+          "text": "Still a draft — CI and reviewers will not treat it as ready."
+        },
+        {
+          "severity": "critical",
+          "text": "Conflicts with main — needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
+        },
+        {
+          "severity": "high",
+          "text": "Its green checks last ran 2026-09-06T21:11 against a main that has moved since — they are not evidence about the merge result."
+        },
+        {
+          "severity": "high",
+          "text": "No approving review yet — main's ruleset requires one."
+        },
+        {
+          "kind": "signoff",
+          "text": "Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).",
+          "severity": "medium"
+        }
+      ],
+      "notes_info": [],
+      "pr": 79
+    },
+    {
+      "id": 59,
+      "short": "Manual MF parameterization from the archive",
+      "owner": "yigit-arda",
+      "milestone": "M1",
+      "track": "fuzzy",
+      "priority": "critical",
+      "hard_deps": [
+        {
+          "kind": "issue",
+          "id": 57,
+          "what": "Part B's anchored_rule_base consumes training.targets.feature_target_fn",
+          "part": "B",
+          "satisfied_by": {
+            "kind": "pr_merged",
+            "id": 69,
+            "note": "The contract itself merged in PR #69 on 2026-09-08; #57 stays open only for its advisor half (#84)."
+          }
+        }
+      ],
+      "soft_deps": [],
+      "fallback": "§6.6 defines what to build if #57's target callable is late. #57 merged 2026-09-08, so the fallback is moot.",
+      "extra_blockers": [],
+      "unblocks": [
+        62,
+        61,
+        60,
+        63
+      ],
+      "why_now": "Clears the prerequisite ADR-019 has been blocked on since 2026-08-20 ('neither the ADR-014 trainer nor a manual parameterization has yet produced non-trivial MF parameters'), which in turn gates ADR-009, the highest-fan-out decision in the ledger.",
+      "title": "Manual membership-function parameterization from the archive's own feature distribution, with consequents anchored to the physics target, so the ADR-019 ablation measures shapes instead of a random draw",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/59",
+      "issue_state": "OPEN",
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOC8hIVw",
+            "is_bot": false,
+            "login": "yigit-arda",
+            "name": "yigitarda"
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-09-04T13:03:49Z",
+          "headRefName": "feature/issue-59-parameterization",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 68,
+          "reviewDecision": "CHANGES_REQUESTED",
+          "state": "OPEN",
+          "title": "Feature/issue 59 parameterization",
+          "updatedAt": "2026-09-08T13:51:43Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/68",
+          "headRefOid": "3f5e0f99d7d1980e5ca587e7ac73c5e138f5fccc",
+          "additions": 4283,
+          "deletions": 2,
+          "file_count": 9,
+          "latest_reviews": [
+            {
+              "who": "mertefesensoy",
+              "state": "CHANGES_REQUESTED",
+              "at": "2026-09-04",
+              "last_activity": "2026-09-08"
+            }
+          ],
+          "looked_since": [
+            {
+              "who": "mertefesensoy",
+              "at": "2026-09-08"
+            }
+          ],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:47"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:47"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:47"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:47"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:47"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:48"
+            }
+          ],
+          "checks_newest": "2026-09-08T13:48",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [],
+      "blockers": [
+        {
+          "severity": "critical",
+          "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-09-04). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
+        }
+      ],
+      "notes_info": [],
+      "pr": 68
+    },
+    {
+      "id": 60,
+      "short": "ADR-014 hybrid ANFIS trainer",
+      "owner": "BurakOztekin",
+      "milestone": "M3",
+      "track": "fuzzy",
+      "priority": "critical",
+      "hard_deps": [
+        {
+          "kind": "issue",
+          "id": 57,
+          "what": "TSKTrainer ABC, TrainingSet/TrainingResult/TrainingDiagnostics/ParameterCount, training/parameters.py",
+          "satisfied_by": {
+            "kind": "pr_merged",
+            "id": 69,
+            "note": "The contract itself merged in PR #69 on 2026-09-08; #57 stays open only for its advisor half (#84)."
+          }
+        },
+        {
+          "kind": "issue",
+          "id": 63,
+          "what": "the reader, for the first archive fit only",
+          "part": "archive fit"
+        }
+      ],
+      "soft_deps": [
+        {
+          "kind": "issue",
+          "id": 59,
+          "what": "anchored-baseline data for the LSE stage"
+        }
+      ],
+      "extra_blockers": [],
+      "unblocks": [
+        64
+      ],
+      "why_now": "The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit.",
+      "note": "Type-agnostic over T1 and IT2 by design, so it does not wait on ADR-009.",
+      "title": "ADR-014: build the hybrid ANFIS trainer in training/anfis.py so phase 3 ends with a fitted model, type-agnostic over T1 and IT2 so it does not wait on ADR-009",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/60",
+      "issue_state": "OPEN",
+      "state": "ready",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [
+        {
+          "kind": "issue",
+          "id": 63,
+          "what": "the reader, for the first archive fit only",
+          "part": "archive fit"
+        }
+      ],
+      "unmet_soft": [
+        {
+          "kind": "issue",
+          "id": 59,
+          "what": "anchored-baseline data for the LSE stage"
+        }
+      ],
+      "blockers": [],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 61,
+      "short": "ADR-011 evidence + premise gradients",
+      "owner": "bengisucvd",
+      "milestone": "M2",
+      "track": "fuzzy",
+      "priority": "high",
+      "hard_deps": [
+        {
+          "kind": "issue",
+          "id": 57,
+          "what": "training/__init__.py and training/parameters.py::premise_layout",
+          "part": "B",
+          "satisfied_by": {
+            "kind": "pr_merged",
+            "id": 69,
+            "note": "The contract itself merged in PR #69 on 2026-09-08; #57 stays open only for its advisor half (#84)."
+          }
+        }
+      ],
+      "soft_deps": [
+        {
+          "kind": "issue",
+          "id": 59,
+          "what": "Part A needs the IntervalGaussianMF grid to measure Nie-Tan against Karnik-Mendel",
+          "part": "A"
+        }
+      ],
+      "extra_blockers": [
+        {
+          "kind": "signoff",
+          "text": "FR-4's consequent convention and the raw-space vs logit-space choice both depend on #57's decision.",
+          "severity": "low"
+        }
+      ],
+      "unblocks": [],
+      "why_now": "Part B is unblocked (#57 merged) and the plan schedules it in W2 because the trainer's verification depends on it.",
+      "title": "ADR-011 needs a number and the trainer needs a gradient check: measure Nie-Tan against Karnik-Mendel, and derive the premise gradients as training/gradients.py",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/61",
+      "issue_state": "OPEN",
+      "state": "ready",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [
+        {
+          "kind": "issue",
+          "id": 59,
+          "what": "Part A needs the IntervalGaussianMF grid to measure Nie-Tan against Karnik-Mendel",
+          "part": "A"
+        }
+      ],
+      "blockers": [
+        {
+          "kind": "signoff",
+          "text": "FR-4's consequent convention and the raw-space vs logit-space choice both depend on #57's decision.",
+          "severity": "low"
+        }
+      ],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 62,
+      "short": "Run the ADR-019 ablation, publish the table",
+      "owner": "yigit-arda",
+      "milestone": "M2",
+      "track": "benchmarks",
+      "priority": "high",
+      "hard_deps": [
+        {
+          "kind": "issue",
+          "id": 58,
+          "what": "certified harness (basis_gates, mode, seed, transpile-then-prepare, no silent NaN) and benchmarks/reference.py::build_reference"
+        },
+        {
+          "kind": "issue",
+          "id": 59,
+          "what": "the parameterized rule bases under ablation"
+        }
+      ],
+      "soft_deps": [],
+      "fallback": "If #59 is not on main when both hard prerequisites are, run with first_viable_seed.",
+      "extra_blockers": [],
+      "unblocks": [
+        65
+      ],
+      "why_now": null,
+      "title": "Run the ADR-019 membership-function ablation on the certified harness in both modes and publish a traceable table, so ADR-019 closes on measured evidence and ADR-009 finally gets its T1-vs-IT2 rows",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/62",
+      "issue_state": "OPEN",
+      "state": "blocked",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [
+        {
+          "kind": "issue",
+          "id": 58,
+          "what": "certified harness (basis_gates, mode, seed, transpile-then-prepare, no silent NaN) and benchmarks/reference.py::build_reference"
+        },
+        {
+          "kind": "issue",
+          "id": 59,
+          "what": "the parameterized rule bases under ablation"
+        }
+      ],
+      "unmet_partial": [],
+      "unmet_soft": [],
+      "blockers": [],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 63,
+      "short": "Training-set builder (training/dataset.py)",
+      "owner": "BahaJarad",
+      "milestone": "M3",
+      "track": "data",
+      "priority": "high",
+      "hard_deps": [
+        {
+          "kind": "issue",
+          "id": 48,
+          "what": "FR-1's --scope qubits digest (his own ticket; the digest body must be locked before FR-1 is written)"
+        },
+        {
+          "kind": "issue",
+          "id": 57,
+          "what": "TrainingSet / time_split, training/targets.py, the gates-bearing fixture, the target ADR",
+          "satisfied_by": {
+            "kind": "pr_merged",
+            "id": 69,
+            "note": "The contract itself merged in PR #69 on 2026-09-08; #57 stays open only for its advisor half (#84)."
+          }
+        }
+      ],
+      "soft_deps": [
+        {
+          "kind": "issue",
+          "id": 59,
+          "what": "the loop and the spread column names"
+        }
+      ],
+      "extra_blockers": [],
+      "unblocks": [
+        60
+      ],
+      "why_now": "The reader-and-dedup half has no hard dependency the plan recognises and W2 is where it starts; #60's first archive fit is waiting on it.",
+      "title": "Training-set builder: one row per distinct device state from a pinned archive ref, so the trainer is fit on the unit NC-012 actually counts and the results doc can name the commit it read",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/63",
+      "issue_state": "OPEN",
+      "state": "blocked",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [
+        {
+          "kind": "issue",
+          "id": 48,
+          "what": "FR-1's --scope qubits digest (his own ticket; the digest body must be locked before FR-1 is written)"
+        }
+      ],
+      "unmet_partial": [],
+      "unmet_soft": [
+        {
+          "kind": "issue",
+          "id": 59,
+          "what": "the loop and the spread column names"
+        }
+      ],
+      "blockers": [],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 48,
+      "short": "Pipeline-health dashboard",
+      "owner": "BahaJarad",
+      "milestone": "M2",
+      "track": "data",
+      "priority": "medium-high",
+      "hard_deps": [
+        {
+          "kind": "pr",
+          "id": 50,
+          "what": "#47/PR #50 lands the ledger, canonical_snapshot_digest.py and ADR-024"
+        }
+      ],
+      "soft_deps": [],
+      "extra_blockers": [
+        {
+          "kind": "signoff",
+          "text": "Decision 3: the --scope qubits digest body must be locked before FR-1 is written, because #63 consumes it.",
+          "severity": "high"
+        }
+      ],
+      "unblocks": [
+        63,
+        49
+      ],
+      "why_now": "Its prerequisite merged 2026-09-02 and #63 cannot start its FR-1 half until the digest body is settled.",
+      "pr_hint": [
+        70
+      ],
+      "title": "Pipeline-health dashboard on calibration-data: per-poll device-state telemetry + SVG readout, so a scheduler collapse shows in a day instead of a quarter",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/48",
+      "issue_state": "OPEN",
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOCWD9LQ",
+            "is_bot": false,
+            "login": "BahaJarad",
+            "name": ""
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-09-05T19:08:44Z",
+          "headRefName": "feature/pipeline-health-dashboard",
+          "isDraft": false,
+          "mergeable": "CONFLICTING",
+          "mergedAt": null,
+          "number": 70,
+          "reviewDecision": "CHANGES_REQUESTED",
+          "state": "OPEN",
+          "title": "Feature/pipeline health dashboard",
+          "updatedAt": "2026-09-06T14:18:13Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/70",
+          "headRefOid": "8e3e797c1e5fcb75b4f5c35095a93f0b6dc384f3",
+          "additions": 768,
+          "deletions": 7,
+          "file_count": 13,
+          "latest_reviews": [
+            {
+              "who": "mertefesensoy",
+              "state": "CHANGES_REQUESTED",
+              "at": "2026-09-06",
+              "last_activity": "2026-09-06"
+            }
+          ],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-05T19:08"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-05T19:08"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-05T19:08"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-05T19:08"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-05T19:08"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-05T19:09"
+            }
+          ],
+          "checks_newest": "2026-09-05T19:09",
+          "checks_failing": [],
+          "checks_stale_vs_main": true
+        }
+      ],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [],
+      "blockers": [
+        {
+          "severity": "critical",
+          "text": "Conflicts with main — needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
+        },
+        {
+          "severity": "high",
+          "text": "Its green checks last ran 2026-09-05T19:09 against a main that has moved since — they are not evidence about the merge result."
+        },
+        {
+          "severity": "critical",
+          "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-09-06). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
+        },
+        {
+          "kind": "signoff",
+          "text": "Decision 3: the --scope qubits digest body must be locked before FR-1 is written, because #63 consumes it.",
+          "severity": "high"
+        }
+      ],
+      "notes_info": [],
+      "pr": 70
+    },
+    {
+      "id": 49,
+      "short": "Scheduled backfill sweep",
+      "owner": "mertefesensoy",
+      "co_owner": "BahaJarad",
+      "milestone": "M2",
+      "track": "data",
+      "priority": "low",
+      "hard_deps": [
+        {
+          "kind": "pr",
+          "id": 50,
+          "what": "#47's --historical path, canonical duplicate check, ADR-024"
+        }
+      ],
+      "soft_deps": [],
+      "extra_blockers": [
+        {
+          "kind": "assignment",
+          "text": "The plan raises its priority per #54 but its own body still reads priority:low and 'pending Baha's confirmation'.",
+          "severity": "low"
+        }
+      ],
+      "unblocks": [
+        54
+      ],
+      "why_now": null,
+      "title": "Scheduled backfill sweep: make the pipeline tolerate the Actions scheduler instead of depending on it",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/49",
+      "issue_state": "OPEN",
+      "state": "ready",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [],
+      "blockers": [
+        {
+          "kind": "assignment",
+          "text": "The plan raises its priority per #54 but its own body still reads priority:low and 'pending Baha's confirmation'.",
+          "severity": "low"
+        }
+      ],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 64,
+      "short": "ADR-015 / ADR-016 ensemble + intervals",
+      "owner": "bengisucvd",
+      "milestone": "M4",
+      "track": "benchmarks",
+      "priority": "medium-high",
+      "hard_deps": [
+        {
+          "kind": "issue",
+          "id": 58,
+          "what": "density-matrix mode, transpile-then-prepare, no silent NaN, build_reference, simulate_engine signature"
+        },
+        {
+          "kind": "gate",
+          "id": "M3",
+          "what": "gated on the ADR-009 decision and #60's first archive fit"
+        }
+      ],
+      "soft_deps": [],
+      "extra_blockers": [],
+      "unblocks": [],
+      "why_now": null,
+      "title": "ADR-015 and ADR-016: make ensemble members differ for a measured reason and report intervals with a coverage metric, so M4 does not report point estimates computed from N identical models",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/64",
+      "issue_state": "OPEN",
+      "state": "blocked",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [
+        {
+          "kind": "issue",
+          "id": 58,
+          "what": "density-matrix mode, transpile-then-prepare, no silent NaN, build_reference, simulate_engine signature"
+        },
+        {
+          "kind": "gate",
+          "id": "M3",
+          "what": "gated on the ADR-009 decision and #60's first archive fit"
+        }
+      ],
+      "unmet_partial": [],
+      "unmet_soft": [],
+      "blockers": [],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 65,
+      "short": "ADR-007 pre/between-gates fuzzification",
+      "owner": "BurakOztekin",
+      "milestone": "phase4",
+      "track": "fuzzy",
+      "priority": "low",
+      "hard_deps": [
+        {
+          "kind": "issue",
+          "id": 58,
+          "what": "certified harness and build_reference"
+        },
+        {
+          "kind": "gate",
+          "id": "M3",
+          "what": "phase 4; the M3 gate is the earliest conceivable start, not a promise"
+        }
+      ],
+      "soft_deps": [
+        {
+          "kind": "issue",
+          "id": 62,
+          "what": "the ablation's evidence format"
+        }
+      ],
+      "extra_blockers": [
+        {
+          "kind": "policy",
+          "text": "Explicitly allowed to slip past Sep 30. Must never compete with #60 for Burak's time.",
+          "severity": "info"
+        }
+      ],
+      "unblocks": [],
+      "why_now": null,
+      "title": "ADR-007: implement the pre-gate and between-gates fuzzification stubs and decide placement on a measurement instead of an Aer default (stretch, starts after M3)",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/65",
+      "issue_state": "OPEN",
+      "state": "blocked",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [
+        {
+          "kind": "issue",
+          "id": 58,
+          "what": "certified harness and build_reference"
+        },
+        {
+          "kind": "gate",
+          "id": "M3",
+          "what": "phase 4; the M3 gate is the earliest conceivable start, not a promise"
+        }
+      ],
+      "unmet_partial": [],
+      "unmet_soft": [
+        {
+          "kind": "issue",
+          "id": 62,
+          "what": "the ablation's evidence format"
+        }
+      ],
+      "blockers": [],
+      "notes_info": [
+        {
+          "kind": "policy",
+          "text": "Explicitly allowed to slip past Sep 30. Must never compete with #60 for Burak's time.",
+          "severity": "info"
+        }
+      ],
+      "pr": null
+    },
+    {
+      "id": 56,
+      "short": "Clear the queue, keep the records honest",
+      "owner": "mertefesensoy",
+      "milestone": "M0",
+      "track": "governance",
+      "priority": "high",
+      "hard_deps": [],
+      "soft_deps": [],
+      "extra_blockers": [
+        {
+          "kind": "issue",
+          "text": "#45 is still open; M0 is not closable until it is.",
+          "severity": "high"
+        },
+        {
+          "kind": "pr",
+          "text": "#53's record (PR #78) is unmerged at CHANGES_REQUESTED.",
+          "severity": "high"
+        },
+        {
+          "kind": "advisor",
+          "text": "Every advisor item it carries (ADR-025 sign-off, ADR-009 flip, ADR-011 closure, ADR-014 read, the target ADR) needs Dr. Akba, who has no recorded answer to anything.",
+          "severity": "critical"
+        }
+      ],
+      "unblocks": [
+        58,
+        84
+      ],
+      "why_now": "It is the M0 gate and M0 is three days past its 2026-09-05 target.",
+      "co_owner": null,
+      "title": "Clear the queue and keep the records honest: merge #51 and #52, collect the sign-offs #55 still owes, run #53 before its 2026-09-05 guard, close #45 and #25, then derive the floor",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/56",
+      "issue_state": "OPEN",
+      "state": "ready",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [],
+      "blockers": [
+        {
+          "kind": "issue",
+          "text": "#45 is still open; M0 is not closable until it is.",
+          "severity": "high"
+        },
+        {
+          "kind": "pr",
+          "text": "#53's record (PR #78) is unmerged at CHANGES_REQUESTED.",
+          "severity": "high"
+        },
+        {
+          "kind": "advisor",
+          "text": "Every advisor item it carries (ADR-025 sign-off, ADR-009 flip, ADR-011 closure, ADR-014 read, the target ADR) needs Dr. Akba, who has no recorded answer to anything.",
+          "severity": "critical"
+        }
+      ],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 66,
+      "short": "Vectorizer returns µs where the repo assumes s",
+      "owner": "BahaJarad",
+      "milestone": "standalone",
+      "track": "data",
+      "priority": "high",
+      "hard_deps": [],
+      "soft_deps": [],
+      "extra_blockers": [],
+      "unblocks": [],
+      "why_now": "No dependencies in either direction, and it blocks running the shipped pipeline on real archived data — which phase 3 does throughout. On a real snapshot the ratified 3x3x3 grid fires at exactly zero and the bootstrap pipeline raises ZeroDivisionError.",
+      "note": "Plan §1: no membership-function grid may be derived from FEATURE_SCALES; every grid comes from the archive's measured quantiles.",
+      "title": "BasicCalibrationVectorizer.extract returns microseconds where the rest of the repo assumes seconds, so the ratified grid fires at zero on real archived data",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/66",
+      "issue_state": "OPEN",
+      "state": "ready",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [],
+      "blockers": [],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 45,
+      "short": "Polling cadence no longer limits the dataset",
+      "owner": "mertefesensoy",
+      "milestone": "M0",
+      "track": "data",
+      "priority": "high",
+      "hard_deps": [],
+      "soft_deps": [],
+      "extra_blockers": [
+        {
+          "kind": "record",
+          "text": "Closure is a records task inside #56, not new code.",
+          "severity": "medium"
+        }
+      ],
+      "unblocks": [
+        56
+      ],
+      "why_now": "It is one of two M0 items still open.",
+      "title": "Polling cadence no longer limits the calibration dataset - IBM's publish rate does; the 630 floor is unmet under every information-based definition",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/45",
+      "issue_state": "OPEN",
+      "state": "ready",
+      "all_prs": [],
+      "merged_pr": {
+        "author": {
+          "id": "U_kgDOCJLpDw",
+          "is_bot": false,
+          "login": "mertefesensoy",
+          "name": "Mert Efe Şensoy"
+        },
+        "closingIssuesReferences": [],
+        "createdAt": "2026-09-02T19:07:26Z",
+        "headRefName": "mert/issue-45-gap-enumeration",
+        "isDraft": false,
+        "mergeable": "UNKNOWN",
+        "mergedAt": "2026-09-06T20:48:18Z",
+        "number": 52,
+        "reviewDecision": "APPROVED",
+        "state": "MERGED",
+        "title": "docs: enumerate the Aug 7-17 polling gaps — neither #45 explanation holds",
+        "updatedAt": "2026-09-06T20:48:24Z",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/52"
+      },
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [],
+      "blockers": [
+        {
+          "kind": "record",
+          "text": "Closure is a records task inside #56, not new code.",
+          "severity": "medium"
+        }
+      ],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 53,
+      "short": "Backfill 14 recoverable documents",
+      "owner": "mertefesensoy",
+      "milestone": "M0",
+      "track": "data",
+      "priority": "medium-high",
+      "hard_deps": [],
+      "soft_deps": [],
+      "extra_blockers": [
+        {
+          "kind": "pr",
+          "text": "The dispatches ran; only the record (PR #78) is outstanding, blocked on a re-review.",
+          "severity": "medium"
+        }
+      ],
+      "unblocks": [
+        56
+      ],
+      "why_now": null,
+      "title": "Backfill the 14 recoverable calibration documents, and enumerate the unswept 2026-08-06 gaps",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/53",
+      "issue_state": "OPEN",
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [
+            {
+              "id": "I_kwDOSW8yNc8AAAABPZYt2Q",
+              "number": 53,
+              "repository": {
+                "id": "R_kgDOSW8yNQ",
+                "name": "superconducted-noise-engine",
+                "owner": {
+                  "id": "O_kgDOENg1ug",
+                  "login": "SuperconducTED"
+                }
+              },
+              "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/53"
+            }
+          ],
+          "createdAt": "2026-09-06T21:06:50Z",
+          "headRefName": "mert/issue-53-deadline-and-recovery",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 78,
+          "reviewDecision": "CHANGES_REQUESTED",
+          "state": "OPEN",
+          "title": "docs: execute the #53 recovery and record what the 2026-09-05 deadline cost",
+          "updatedAt": "2026-09-08T13:54:34Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/78",
+          "headRefOid": "90a4e6827618047d19568a1d079d55cf53b880d0",
+          "additions": 362,
+          "deletions": 1,
+          "file_count": 2,
+          "latest_reviews": [
+            {
+              "who": "BurakOztekin",
+              "state": "CHANGES_REQUESTED",
+              "at": "2026-09-07",
+              "last_activity": "2026-09-07"
+            }
+          ],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:50"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:50"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:50"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:50"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:50"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:50"
+            }
+          ],
+          "checks_newest": "2026-09-08T13:50",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        },
+        {
+          "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [
+            {
+              "id": "I_kwDOSW8yNc8AAAABPZYt2Q",
+              "number": 53,
+              "repository": {
+                "id": "R_kgDOSW8yNQ",
+                "name": "superconducted-noise-engine",
+                "owner": {
+                  "id": "O_kgDOENg1ug",
+                  "login": "SuperconducTED"
+                }
+              },
+              "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/53"
+            }
+          ],
+          "createdAt": "2026-09-06T21:29:46Z",
+          "headRefName": "mert/payload-digest-parameter-dates",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 80,
+          "reviewDecision": "CHANGES_REQUESTED",
+          "state": "OPEN",
+          "title": "fix: exclude per-parameter date from the payload digest",
+          "updatedAt": "2026-09-08T13:52:19Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/80",
+          "headRefOid": "fcc8d5bede4d03bccee7af8813358bda0a1d39bd",
+          "additions": 806,
+          "deletions": 5,
+          "file_count": 5,
+          "latest_reviews": [
+            {
+              "who": "BurakOztekin",
+              "state": "CHANGES_REQUESTED",
+              "at": "2026-09-07",
+              "last_activity": "2026-09-07"
+            }
+          ],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:46"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:46"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:46"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:46"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:46"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:46"
+            }
+          ],
+          "checks_newest": "2026-09-08T13:46",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [],
+      "blockers": [
+        {
+          "severity": "critical",
+          "text": "CHANGES_REQUESTED standing from @BurakOztekin (2026-09-07). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
+        },
+        {
+          "kind": "pr",
+          "text": "The dispatches ran; only the record (PR #78) is outstanding, blocked on a re-review.",
+          "severity": "medium"
+        }
+      ],
+      "notes_info": [],
+      "pr": 78
+    },
+    {
+      "id": 54,
+      "short": "Capture rate ~70% during normal operation",
+      "owner": "mertefesensoy",
+      "milestone": "standalone",
+      "track": "data",
+      "priority": "high",
+      "hard_deps": [],
+      "soft_deps": [
+        {
+          "kind": "issue",
+          "id": 49,
+          "what": "follow-up to the sweep"
+        }
+      ],
+      "extra_blockers": [],
+      "unblocks": [],
+      "why_now": null,
+      "note": "Plan §8: no dependents and no hard dependencies; pick up whenever there is slack. Not required for the M4 result.",
+      "title": "Capture rate is ~70% during normal operation, not just during outages — the second constraint on the dataset",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/54",
+      "issue_state": "OPEN",
+      "state": "ready",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [
+        {
+          "kind": "issue",
+          "id": 49,
+          "what": "follow-up to the sweep"
+        }
+      ],
+      "blockers": [],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 73,
+      "short": "Filter noise by physical gate semantics",
+      "owner": "BurakOztekin",
+      "milestone": "spawned",
+      "track": "fuzzy",
+      "priority": "unset",
+      "hard_deps": [],
+      "soft_deps": [
+        {
+          "kind": "issue",
+          "id": 58,
+          "what": "established the defect"
+        }
+      ],
+      "extra_blockers": [],
+      "unblocks": [],
+      "why_now": null,
+      "note": "Spawned by #58, not in the original plan.",
+      "title": "Filter FuzzyNoiseModel noise by physical gate semantics so virtual and control instructions are not damped",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/73",
+      "issue_state": "OPEN",
+      "state": "ready",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [
+        {
+          "kind": "issue",
+          "id": 58,
+          "what": "established the defect"
+        }
+      ],
+      "blockers": [],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 74,
+      "short": "first_ensemble_run must transpile before prepare",
+      "owner": "BurakOztekin",
+      "milestone": "spawned",
+      "track": "integration",
+      "priority": "unset",
+      "hard_deps": [],
+      "soft_deps": [
+        {
+          "kind": "issue",
+          "id": 58,
+          "what": "certifies the opposite invariant"
+        }
+      ],
+      "extra_blockers": [],
+      "unblocks": [],
+      "why_now": null,
+      "note": "Spawned by #58, not in the original plan.",
+      "title": "Fix first_ensemble_run to transpile once before prepare against an explicit basis",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/74",
+      "issue_state": "OPEN",
+      "state": "ready",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [
+        {
+          "kind": "issue",
+          "id": 58,
+          "what": "certifies the opposite invariant"
+        }
+      ],
+      "blockers": [],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 75,
+      "short": "Decide the LOCKED Kraus projector boundary",
+      "owner": "bengisucvd",
+      "co_owner": "BurakOztekin",
+      "milestone": "spawned",
+      "track": "fuzzy",
+      "priority": "unset",
+      "hard_deps": [],
+      "soft_deps": [
+        {
+          "kind": "issue",
+          "id": 58,
+          "what": "surfaced both contracts"
+        }
+      ],
+      "extra_blockers": [
+        {
+          "kind": "policy",
+          "text": "Touches LOCKED src/superconducted/channels/kraus.py — needs a decision, not just a patch.",
+          "severity": "medium"
+        }
+      ],
+      "unblocks": [],
+      "why_now": null,
+      "note": "Spawned by #58, not in the original plan.",
+      "title": "Decide the LOCKED Kraus projector boundary: unused gate allowlist and silent probability clipping",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/75",
+      "issue_state": "OPEN",
+      "state": "ready",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [
+        {
+          "kind": "issue",
+          "id": 58,
+          "what": "surfaced both contracts"
+        }
+      ],
+      "blockers": [
+        {
+          "kind": "policy",
+          "text": "Touches LOCKED src/superconducted/channels/kraus.py — needs a decision, not just a patch.",
+          "severity": "medium"
+        }
+      ],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 76,
+      "short": "Promote diagonal Hellinger to a certified metric",
+      "owner": "bengisucvd",
+      "milestone": "phase4",
+      "track": "benchmarks",
+      "priority": "low",
+      "hard_deps": [
+        {
+          "kind": "issue",
+          "id": 58,
+          "what": "certified density-matrix harness"
+        },
+        {
+          "kind": "issue",
+          "id": 62,
+          "what": "the helper and evidence format must stabilise first"
+        }
+      ],
+      "soft_deps": [],
+      "extra_blockers": [],
+      "unblocks": [],
+      "why_now": null,
+      "note": "Explicitly phase 4. Every public metric must clear all six ADR-022 properties.",
+      "title": "Phase 4: promote shot-free diagonal Hellinger to a certified benchmark metric",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/76",
+      "issue_state": "OPEN",
+      "state": "blocked",
+      "all_prs": [],
+      "merged_pr": null,
+      "unmet_hard": [
+        {
+          "kind": "issue",
+          "id": 58,
+          "what": "certified density-matrix harness"
+        },
+        {
+          "kind": "issue",
+          "id": 62,
+          "what": "the helper and evidence format must stabilise first"
+        }
+      ],
+      "unmet_partial": [],
+      "unmet_soft": [],
+      "blockers": [],
+      "notes_info": [],
+      "pr": null
+    },
+    {
+      "id": 57,
+      "short": "Training contract: ADR-027, TSKTrainer ABC, training/targets.py",
+      "owner": "mertefesensoy",
+      "co_owner": "BurakOztekin",
+      "milestone": "M1",
+      "track": "fuzzy",
+      "priority": "critical",
+      "hard_deps": [],
+      "soft_deps": [],
+      "extra_blockers": [
+        {
+          "kind": "advisor",
+          "text": "Code landed in PR #69, but the ticket's own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened — #84 owns it.",
+          "severity": "critical"
+        }
+      ],
+      "unblocks": [
+        59,
+        60,
+        61,
+        63
+      ],
+      "why_now": "The contract merged; only the advisor half of its definition of done is outstanding.",
+      "title": "Training contract: a target ADR pinned to Aer by SuperOp, the TSKTrainer ABC and training/targets.py, so the trainer, the anchored consequents and the reference model regress onto one derived target instead of three remembered ones",
+      "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/57",
+      "issue_state": "OPEN",
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-09-08T12:37:18Z",
+          "headRefName": "mert/issue-57-dod-cleanup",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 83,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "docs: close the three fixable Issue #57 definition-of-done gaps",
+          "updatedAt": "2026-09-08T12:37:20Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/83",
+          "headRefOid": "0a200457a853cfa0a4e39070d17dffe98b693330",
+          "additions": 185,
+          "deletions": 4,
+          "file_count": 4,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T12:37"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T12:37"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T12:37"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T12:37"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T12:37"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T12:37"
+            }
+          ],
+          "checks_newest": "2026-09-08T12:37",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
+      "merged_pr": null,
+      "unmet_hard": [],
+      "unmet_partial": [],
+      "unmet_soft": [],
+      "blockers": [
+        {
+          "severity": "high",
+          "text": "No approving review yet — main's ruleset requires one."
+        },
+        {
+          "kind": "advisor",
+          "text": "Code landed in PR #69, but the ticket's own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened — #84 owns it.",
+          "severity": "critical"
+        }
+      ],
+      "notes_info": [],
+      "pr": 83
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M0",
+      "name": "Queue clear",
+      "target": "2026-09-05",
+      "owners": [
+        "mertefesensoy"
+      ],
+      "unblocks": "Everything below reads a clean main",
+      "gates": [
+        {
+          "text": "#51 merged (aer_factory ADR references)",
+          "status": "done",
+          "note": null
+        },
+        {
+          "text": "#52 merged (Aug 7-17 polling gaps)",
+          "status": "done",
+          "note": null
+        },
+        {
+          "text": "#55 merged (sub-hourly backfill step)",
+          "status": "done",
+          "note": null
+        },
+        {
+          "text": "#55 post-merge owner read + ADR-025 sign-off collected",
+          "status": "unknown",
+          "note": "Owner read is on Baha (poller.py is his). No recorded sign-off found on main; tracked inside #56 FR-2."
+        },
+        {
+          "text": "#53 dispatched with ledger rows",
+          "status": "done",
+          "note": "Four workflow_dispatch runs executed; snapshots/2026-08/ibm_fez 277 -> 304 docs at 7139138. Record is PR #78, still unmerged."
+        },
+        {
+          "text": "#53's record merged",
+          "status": "partial",
+          "note": null
+        },
+        {
+          "text": "#45 closed (dataset-yield finding)",
+          "status": "not_done",
+          "note": null
+        },
+        {
+          "text": "#25 closed by the cycle-2 close record",
+          "status": "done",
+          "note": null
+        }
+      ],
+      "done": 5,
+      "total": 8,
+      "status": "partial",
+      "days_left": -3
+    },
+    {
+      "id": "M1",
+      "name": "Contracts and instruments",
+      "target": "2026-09-11",
+      "owners": [
+        "mertefesensoy",
+        "bengisucvd",
+        "yigit-arda"
+      ],
+      "unblocks": "The ablation can run; the trainer has a contract; targets exist",
+      "gates": [
+        {
+          "text": "Target ADR sent to Dr. Akba with a decision-by date",
+          "status": "not_done",
+          "note": "ADR-027 merged with Status: Open. docs/advisor/ holds only the unanswered 2026-05-25 questions file. Issue #84 owns the brief; its own decision-by date was 2026-09-08."
+        },
+        {
+          "text": "TSKTrainer ABC and training value types merged",
+          "status": "done",
+          "note": null
+        },
+        {
+          "text": "Benchmark harness certified (#58)",
+          "status": "partial",
+          "note": null
+        },
+        {
+          "text": "Premise parameterization for seven shapes merged (#59)",
+          "status": "partial",
+          "note": null
+        },
+        {
+          "text": "Feature-survey TSV committed",
+          "status": "not_done",
+          "note": "Exists as docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv inside PR #68; not on main until #68 merges."
+        }
+      ],
+      "done": 1,
+      "total": 5,
+      "status": "partial",
+      "days_left": 3
+    },
+    {
+      "id": "M2",
+      "name": "First measurements",
+      "target": "2026-09-18",
+      "owners": [
+        "yigit-arda",
+        "bengisucvd",
+        "BahaJarad",
+        "BurakOztekin"
+      ],
+      "unblocks": "ADR-019 closure; the premise stage",
+      "gates": [
+        {
+          "text": "ADR-019 ablation executed with its table (#62)",
+          "status": "not_done",
+          "note": null
+        },
+        {
+          "text": "Gradient derivations and training/gradients.py (#61)",
+          "status": "not_done",
+          "note": null
+        },
+        {
+          "text": "Pipeline-health dashboard live (#48)",
+          "status": "partial",
+          "note": null
+        },
+        {
+          "text": "Scheduled sweep live (#49)",
+          "status": "not_done",
+          "note": null
+        },
+        {
+          "text": "Trainer LSE stage passing on synthetic + anchored-baseline data",
+          "status": "not_done",
+          "note": "#60 has no branch or PR yet. Its contract dependency (#57) merged 2026-09-08, so it is startable."
+        }
+      ],
+      "done": 0,
+      "total": 5,
+      "status": "not_done",
+      "days_left": 10
+    },
+    {
+      "id": "M3",
+      "name": "Decisions",
+      "target": "2026-09-25",
+      "owners": [
+        "BurakOztekin",
+        "bengisucvd",
+        "BahaJarad",
+        "mertefesensoy"
+      ],
+      "unblocks": "ADR-015 / ADR-016; the final configuration",
+      "gates": [
+        {
+          "text": "ADR-019 closed with a winner",
+          "status": "not_done",
+          "note": "Ledger on main reads: Open."
+        },
+        {
+          "text": "ADR-009 decided (T1 vs IT2)",
+          "status": "not_done",
+          "note": "Ledger on main reads: Open."
+        },
+        {
+          "text": "ADR-011 follows",
+          "status": "not_done",
+          "note": "Ledger on main reads: Open (effectively chosen for each path)."
+        },
+        {
+          "text": "training/dataset.py merged with its evidence TSV (#63)",
+          "status": "not_done",
+          "note": null
+        },
+        {
+          "text": "Floor derived from the actual parameter count and registered",
+          "status": "not_done",
+          "note": "Replaces the reconstructed 126 behind NC-012. Owned by #56."
+        },
+        {
+          "text": "Trainer full loop merged, first archive fit, time-split metrics",
+          "status": "not_done",
+          "note": null
+        }
+      ],
+      "done": 0,
+      "total": 6,
+      "status": "not_done",
+      "days_left": 17
+    },
+    {
+      "id": "M4",
+      "name": "ANFIS results",
+      "target": "2026-09-30",
+      "owners": [
+        "BurakOztekin",
+        "yigit-arda",
+        "bengisucvd",
+        "mertefesensoy"
+      ],
+      "unblocks": "The paper track",
+      "gates": [
+        {
+          "text": "Trained vs anchored baseline vs reference, four circuits, four metrics, in docs/findings/ with NC rows",
+          "status": "not_done",
+          "note": "The phase-3 exit artifact. Produced by #62's script re-run at M4."
+        },
+        {
+          "text": "ADR-014 Accepted",
+          "status": "not_done",
+          "note": "Ledger on main reads: Deferred."
+        },
+        {
+          "text": "ADR-015 interim and ADR-016 interval aggregation merged (#64)",
+          "status": "not_done",
+          "note": null
+        },
+        {
+          "text": "Phase-3 close record written",
+          "status": "not_done",
+          "note": "Owned by #56, mirrors the cycle-2 close record convention."
+        }
+      ],
+      "done": 0,
+      "total": 4,
+      "status": "not_done",
+      "days_left": 22
+    }
+  ]
+}
