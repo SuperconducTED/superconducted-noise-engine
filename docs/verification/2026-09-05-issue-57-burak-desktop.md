@@ -90,3 +90,22 @@ the collected and passed counts. Expect them to match NC-021's 360 and to differ
 from the 356 above by exactly the four named tests — state the difference
 against NC-021's commit rather than an absolute, so a stale row surfaces as a
 visible mismatch.
+
+---
+
+## As of 2026-09-08 · canonical desktop re-run complete
+
+The required re-run was completed on `DESKTOP-2CST637` against the PR #69 merge
+commit `2d66f7ab1d25e7852ad4807fbfdaf9f7aab0b8d1`. To ensure the command imported
+that candidate's source tree rather than the editable checkout, it was run with
+`PYTHONPATH` set to the candidate worktree's `src/` directory.
+
+| Check | Observed |
+| --- | --- |
+| Full test suite | `360 passed in 13.12s` |
+| Candidate test count | 360 collected |
+
+The collected and passed counts match NC-021's 360 at `5397bb6`; the four-test
+delta from the original 356 measurement is therefore verified on the canonical
+desktop. This supersedes only the preceding **re-run needed** status. The
+original measurements remain their recorded values at `37e1ba0`.
