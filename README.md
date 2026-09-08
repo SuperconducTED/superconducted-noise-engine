@@ -99,6 +99,58 @@ Manual gates carry a `note` explaining what was checked and when. A `note` is a 
 any other in this project: it should name what was measured and where, so it can be
 re-verified rather than trusted.
 
+## Verification
+
+The project convention puts an implementation record under `docs/implementations/` on
+`main`. This one lives here instead, deliberately: the whole point of the orphan branch is
+that phase-3 tracking never touches the engineering tree, and adding a doc to `main` to
+describe a branch that must not reach `main` would defeat it. This section is that record's
+verification half.
+
+**The generator is honest about live state.** Every ✅ traces to a live read, so the check
+is to move something on GitHub and confirm the mark follows:
+
+```bash
+python generate.py && grep -c '✅' STATUS.md   # baseline
+gh issue close 66 && python generate.py        # then reopen it
+grep -c '✅' STATUS.md                          # must have risen by one
+```
+
+**The routine does not commit noise.** Two runs in a row with nothing moving upstream must
+produce a `no change` commit, never a `state moved` one:
+
+```bash
+./update.sh && ./update.sh && git log --oneline -2
+```
+
+The second subject must read `— no change`. If it reads `— state moved` with only a
+timestamp in the diff, the stamp filter in `update.sh` has drifted from the format
+`generate.py` emits.
+
+**`update.sh` refuses to commit onto the wrong branch.** It `cd`s to its own directory
+first, so where you invoke it from does not matter — what it guards against is *this
+worktree having been switched to another branch*, which is the case where a commit would
+actually land somewhere it should not. Confirm the guard fires:
+
+```bash
+git switch --detach && bash update.sh   # exits 1, writes nothing
+git switch phase-3-dashboard
+```
+
+**Line endings survive a fresh checkout.** `autocrlf` is on in this repo, and a CRLF
+`update.sh` fails with a bad-interpreter error. `.gitattributes` pins LF; confirm after any
+fresh clone with `file update.sh`, which must not say `CRLF`.
+
+**The derivations hold.** The three corrections in the section above are the ones a naive
+implementation gets wrong, so they are the ones worth re-checking whenever `generate.py`
+changes:
+
+| Check | Expected |
+| --- | --- |
+| `#60` after `#57`'s contract merged | **ready**, with a scope note that the archive-fit part waits on `#63` — not blocked |
+| A reviewer who follows a `CHANGES_REQUESTED` with a `COMMENTED` | still listed as the blocker, with "looked again … without lifting it" |
+| A `CONFLICTING` PR with green checks | checks marked **stale**, never green |
+
 ## Sources
 
 - `docs/roadmap/2026-09-03-phase-3-plan.md` on `main` — the plan itself, and the source of
