@@ -27,7 +27,7 @@ it.
 | --- | --- |
 | `scripts/canonical_snapshot_digest.py` | New `_strip_parameter_dates` / `_payload_body`; the payload digest and `canonical_digest(payload_only=True)` now share one byte-string with each parameter's `date` normalised away, while the full digest stays strict. |
 | `tests/test_canonical_snapshot_digest.py` | Date-bearing fixtures modelled on the reproduced pair, and 10 tests extending the PR #55 suite that pin both directions of the duplicate-vs-collision decision. |
-| `docs/numerical-claims.md` | NC-021 (full test-suite size) 280 → 290, measured at `0a4271b`, per Rule 6. |
+| `docs/numerical-claims.md` | NC-021 (full test-suite size) → 370, measured at the merge `8176d79`, per Rule 6. The first pass recorded `290` at `0a4271b`, which measured this branch's pre-merge base rather than the tree that will merge; PR #80 review caught that. |
 
 ## Reproduction
 
@@ -220,8 +220,15 @@ Full suite and static checks:
 python -m pytest tests/ -q
 ```
 
-290 pass at `0a4271b` (NC-021). `ruff check .`, `ruff format --check .` and
-`mypy` are clean.
+370 collected and 370 pass at `8176d79` (NC-021), the merge that brings this branch
+up to `main` at `645b4d1`. `ruff check .` (all checks passed), `ruff format --check .`
+(53 files already formatted) and `mypy --strict src/superconducted` (25 source files,
+no issues) are clean at the same commit.
+
+The earlier figure in this document, `290` at `0a4271b`, measured the branch before
+the merge. It described neither side and is superseded; see NC-021 for the chain.
+Nine of the 370 (`tests/test_file_snapshots.py`) skip on a machine without `git` and
+`bash`, giving 370 collected / 361 passed / 9 skipped there.
 
 > On Windows the working interpreter is
 > `C:\Users\senso\AppData\Local\Programs\Python\Python312\python.exe`; `.venv`
