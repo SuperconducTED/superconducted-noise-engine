@@ -23,6 +23,7 @@ calibration-data    (orphan, snapshots and ledger)
 | `STATUS.md` | The same content as Markdown, for reading in a terminal or a PR. Generated. |
 | `snapshot.json` | The full computed model for the latest run, for debugging a value that looks wrong. Generated. |
 | `history/YYYY-MM-DD.json` | One small record per day: gate counts, ticket states, ADR statuses. Generated, and the only files here that accumulate. |
+| `run.log` | One line per run: when it started and how it ended. Append-only. |
 | `update.sh` | Regenerate, commit if anything changed, push. What the daily routine runs. |
 
 ## Day by day
@@ -164,6 +165,16 @@ actually land somewhere it should not. Confirm the guard fires:
 ```bash
 git switch --detach && bash update.sh   # exits 1, writes nothing
 git switch phase-3-dashboard
+```
+
+**A run always leaves a trace.** `update.sh` appends to `run.log` before it does
+anything and records the outcome on the way out, whatever the exit path. Without that,
+a scheduled run that failed and one that never started look identical from here: no
+commit, no push, nothing on disk. The outcome line for a failed run stays local until
+the next successful run commits it, so check the file itself, not just `git log`:
+
+```bash
+tail -5 run.log
 ```
 
 **Line endings survive a fresh checkout.** `autocrlf` is on in this repo, and a CRLF

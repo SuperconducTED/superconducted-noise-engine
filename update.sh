@@ -13,6 +13,24 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
+# Leave a trace on disk before doing anything, and record the outcome on the way
+# out however the script exits. Without this a failed scheduled run leaves no
+# evidence at all: no commit, no push, nothing to inspect afterwards, so "did it
+# run and fail" and "did it never run" look identical from here. A failure line
+# stays local until the next successful run commits it, which is fine; the point
+# is that it exists to be read.
+LOG="run.log"
+started="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+outcome="started"
+log_exit() {
+  local code=$?
+  [ "$outcome" = "started" ] && outcome="FAILED (exit $code)"
+  printf '%s  %s\n' "$started" "$outcome" >> "$LOG"
+  return $code
+}
+trap log_exit EXIT
+printf '%s  --- run begins (pid %s) ---\n' "$started" "$$" >> "$LOG"
+
 # The Store-stub `python` on PATH is not reliable on this machine; prefer the
 # real 3.12 install and fall back only if it is absent.
 PY="/c/Users/senso/AppData/Local/Programs/Python/Python312/python.exe"
@@ -21,6 +39,7 @@ PY="/c/Users/senso/AppData/Local/Programs/Python/Python312/python.exe"
 branch="$(git rev-parse --abbrev-ref HEAD)"
 if [ "$branch" != "phase-3-dashboard" ]; then
   echo "refusing to run: expected branch phase-3-dashboard, found $branch" >&2
+  outcome="refused: on branch $branch"
   exit 1
 fi
 
@@ -32,6 +51,7 @@ echo "==> regenerating"
 if git diff --quiet -- index.html STATUS.md snapshot.json plan.json history/ &&
    [ -z "$(git ls-files --others --exclude-standard history/)" ]; then
   echo "==> byte-identical to the last run, nothing to commit"
+  outcome="ok: byte-identical, no commit"
   exit 0
 fi
 
@@ -63,7 +83,7 @@ else
   subject="chore: phase-3 dashboard: no change ($(date -u +%Y-%m-%d))"
 fi
 
-git add index.html STATUS.md snapshot.json plan.json history/
+git add index.html STATUS.md snapshot.json plan.json history/ run.log
 GIT_AUTHOR_NAME="Mert Efe Şensoy" \
 GIT_AUTHOR_EMAIL="sensoymertefe@gmail.com" \
 GIT_COMMITTER_NAME="Mert Efe Şensoy" \
@@ -72,4 +92,5 @@ GIT_COMMITTER_EMAIL="sensoymertefe@gmail.com" \
 
 echo "==> pushing"
 git push -q superconducted-noise-engine phase-3-dashboard
+outcome="ok: $subject"
 echo "==> done: $subject"
