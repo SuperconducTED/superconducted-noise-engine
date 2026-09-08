@@ -20,10 +20,14 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 import pytest
+from scripts.compare_mf_placement import main as compare_mf_placement_main
+from scripts.compare_mf_placement import rule_count
 from scripts.first_ensemble_run import mf_centers
 
 from superconducted.calibration.features import BasicCalibrationVectorizer
+from superconducted.channels.kraus import KrausChannelProjector, NoOpNormalization
 from superconducted.fuzzy.defuzzification import NieTanDefuzzifier, WeightedAverageDefuzzifier
+from superconducted.fuzzy.fuzzification import PostGateFuzzification
 from superconducted.fuzzy.membership import (
     GaussianMF,
     IntervalGaussianMF,
@@ -50,7 +54,8 @@ from superconducted.fuzzy.parameterization import (
     tanh_floor_onsets,
     tanh_slope_strategy,
 )
-from superconducted.integration.aer_factory import is_identity_damping
+from superconducted.fuzzy.squashing import ProbabilityClip
+from superconducted.integration.aer_factory import FuzzyNoiseModelEnsemble, is_identity_damping
 from superconducted.training.targets import feature_target_fn
 from superconducted.types import CalibrationSnapshot
 
@@ -74,6 +79,38 @@ SPREAD_COLUMNS = ("T1_qubit_std", "T2_qubit_std", "readout_error_qubit_std")
 #: The reference gate the physics target is evaluated at: `ibm_fez`'s `sx`
 #: length, 24 ns (NC-035).
 SX_SECONDS = 24e-9
+
+#: The archive ref the pinned conformance numbers below were measured at. The
+#: shape properties (coverage, ordering, non-degeneracy) hold for any survey;
+#: the *values* -- which ADR-023 branch each feature takes, how many rows the
+#: clamp moved -- are properties of this one, so the tests that pin them skip
+#: rather than fail when a later survey at a new ref becomes the newest TSV.
+SURVEY_REF = "3d1569d"
+
+#: Step 5b's nine `x*_j`, measured on the `SURVEY_REF` survey, and which of
+#: them land inside their feature's domain box. Pinned as literals on purpose:
+#: recomputing `inside` from the module's own onset formula and asserting the
+#: module agrees with itself is not a test, and that is what this file did
+#: before -- a layout regression that flipped every feature to half-reach would
+#: have gone green. The implementation doc's step-5b table carries the same
+#: numbers, so a genuine change fails here and there together.
+EXPECTED_ONSETS: dict[str, tuple[float, float, float]] = {
+    "mean_T1": (149.15620978103783, 159.64859067441097, 100.09407855131994),
+    "mean_T2": (116.1544000691872, 3.658257158133736, 81.97290471387986),
+    "mean_readout_error": (0.030559118805391992, 0.013965141538381243, -0.03160349544324337),
+}
+EXPECTED_ONSET_INSIDE: dict[str, tuple[bool, bool, bool]] = {
+    "mean_T1": (True, False, True),
+    "mean_T2": (False, False, True),
+    "mean_readout_error": (True, False, False),
+}
+
+#: The measured clamp rate of Issue #59 step 9, which the ablation (#62) has to
+#: report per run: 44 of 975 surveyed vectors leave the domain box, attributed
+#: 16 / 11 / 20 across the three features. Measured, never derived -- a
+#: per-feature 2% tail only bounds the vector rate between 2% and about 6%.
+EXPECTED_CLAMPED_VECTORS = 44
+EXPECTED_CLAMPED_COMPONENTS = (16, 11, 20)
 
 
 def _spread_for(shape: type, samples: npt.NDArray[np.float64]) -> dict[str, float]:
@@ -427,6 +464,32 @@ def test_legacy_gaussian_sigma_is_the_shipped_width(placement: str) -> None:
 
 
 @pytest.mark.parametrize("placement", [PLACEMENT_ENDPOINT, PLACEMENT_INTERIOR])
+def test_legacy_pin_is_for_the_gaussian_only(placement: str) -> None:
+    """FR-5 pins ``0.25 * (hi - lo)`` for ``GaussianMF``; the other shapes take r_j.
+
+    The pin exists so ``first_ensemble_run``'s own numbers reproduce by
+    equality, and that script builds Gaussians and nothing else. FR-5 gives
+    every other shape "the same centers and the section 6.3 widths with ``r_j``
+    derived from the equal spacing", so an IT2 footprint built on the legacy
+    width would be a third parameterization nobody asked for -- and it is not
+    the same number: 25.0 against 21.233 at endpoint on a span of 100.
+    """
+    lo, hi = 0.0, 100e-6
+    samples = np.array([lo, hi])
+    layout = _quantile_layout(samples, 3, placement)
+    expected = layout.reaches / math.sqrt(2.0 * math.log(2.0))
+
+    mfs = grid_partition(IntervalGaussianMF, samples, 3, placement=placement, qubit_spread=1e-6)
+
+    for j, mf in enumerate(mfs):
+        center, sigma_low, sigma_high = mf.parameters()
+        assert center == pytest.approx(layout.centers[j])
+        assert sigma_low == pytest.approx(expected[j])
+        assert sigma_low != pytest.approx(0.25 * (hi - lo))
+        assert sigma_high > sigma_low
+
+
+@pytest.mark.parametrize("placement", [PLACEMENT_ENDPOINT, PLACEMENT_INTERIOR])
 def test_legacy_placements_still_cover_their_range(placement: str) -> None:
     """The shipped sigma is wider than the bin-cover minimum, so FR-9 still holds."""
     lo, hi = 0.0, 100e-6
@@ -564,6 +627,19 @@ def test_non_vector_target_is_rejected() -> None:
         anchored_rule_base(mfs, lambda _x: np.ones((2, 2)), anchors=anchors)
 
 
+def test_zero_length_target_is_rejected() -> None:
+    """A zero-length target is a contract violation, not an ``output_dim`` default.
+
+    It is 1-D and finite, so it passes both of the other guards; without this
+    one it built a rule base with no output columns, which defuzzifies to
+    nothing and fails somewhere far from the cause.
+    """
+    mfs, anchors, _ = _three_feature_grid()
+
+    with pytest.raises(ValueError, match="zero-length vector"):
+        anchored_rule_base(mfs, lambda _x: np.zeros(0), anchors=anchors)
+
+
 # --------------------------------------------------------------------------
 # ClampingFeatureExtractor (FR-12, section 9.1)
 # --------------------------------------------------------------------------
@@ -645,6 +721,34 @@ def test_clamp_returns_a_fresh_array_and_does_not_mutate_inner() -> None:
     assert inner.last == pytest.approx(np.array([150.0, 100.0, 0.02]))
 
 
+@pytest.mark.parametrize("bad", [np.nan, np.inf, -np.inf])
+def test_a_non_finite_feature_is_rejected_rather_than_clamped(bad: float) -> None:
+    """The one input the clamp does not absorb, and the reason it must not.
+
+    ``np.clip`` preserves NaN, so passing it through makes every firing strength
+    NaN; the defuzzifier does not raise (the sum is NaN, not zero),
+    ``KrausChannelProjector`` maps NaN to maximal damping, and
+    ``is_identity_damping`` simultaneously reports the vector as the identity
+    channel. Wrong in both directions with every check green -- exactly the
+    failure mode NFR-5 exists to kill.
+    """
+
+    class NonFinite(BasicCalibrationVectorizer):
+        def extract(self, snapshot: CalibrationSnapshot) -> npt.NDArray[np.float64]:
+            return np.array([bad, 100.0, 0.02])
+
+    wrapper = ClampingFeatureExtractor(
+        NonFinite(), np.array([100.0, 80.0, 0.01]), np.array([200.0, 120.0, 0.05])
+    )
+
+    with pytest.raises(ValueError, match="non-finite feature"):
+        wrapper.extract(_synthetic_snapshot(150.0, 100.0, 0.02))
+
+    # Raised before the counters moved, so they only describe successful calls.
+    assert wrapper.n_extractions == 0
+    assert wrapper.n_clamped_vectors == 0
+
+
 @pytest.mark.parametrize(
     ("lo", "hi", "match"),
     [
@@ -667,12 +771,22 @@ def test_clamp_constructor_rejects_bad_bounds(
 # --------------------------------------------------------------------------
 
 
-def _committed_survey() -> tuple[dict[str, npt.NDArray[np.float64]], dict[str, float]]:
+def _committed_survey_path() -> Path:
     matches = sorted(SURVEY_DIR.glob("*.tsv"))
     if not matches:
         pytest.skip("no committed feature-distribution survey")
+    return matches[-1]
 
-    with matches[-1].open(newline="", encoding="utf-8") as handle:
+
+def _require_pinned_survey() -> None:
+    """Skip when the newest survey is not the one the pinned values were measured at."""
+    stem = _committed_survey_path().stem
+    if SURVEY_REF not in stem:
+        pytest.skip(f"pinned values were measured on {SURVEY_REF}, newest survey is {stem}")
+
+
+def _committed_survey() -> tuple[dict[str, npt.NDArray[np.float64]], dict[str, float]]:
+    with _committed_survey_path().open(newline="", encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle, delimiter="\t"))
 
     samples = {
@@ -684,6 +798,55 @@ def _committed_survey() -> tuple[dict[str, npt.NDArray[np.float64]], dict[str, f
         for name, col in zip(FEATURE_COLUMNS, SPREAD_COLUMNS, strict=True)
     }
     return samples, spreads
+
+
+def _committed_feature_vectors() -> npt.NDArray[np.float64]:
+    """The surveyed feature vectors, one row per snapshot, kept row-aligned.
+
+    Built in one pass over the rows that carry all three means, not by stacking
+    the three independently filtered per-feature arrays: those happen to be
+    equal-length only because no row in this survey was rejected, and one
+    rejected row would silently pair a snapshot's T1 with a different
+    snapshot's T2 (or raise on a length mismatch, if you were lucky).
+    """
+    with _committed_survey_path().open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle, delimiter="\t"))
+    return np.array(
+        [
+            [float(row[name]) for name in FEATURE_COLUMNS]
+            for row in rows
+            if all(row[name] for name in FEATURE_COLUMNS)
+        ],
+        dtype=np.float64,
+    )
+
+
+def _domain_box(
+    samples: dict[str, npt.NDArray[np.float64]],
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """The per-feature ``[p1, p99]`` box the partition is defined on."""
+    layouts = [_quantile_layout(samples[name], 3, PLACEMENT_QUANTILE) for name in FEATURE_COLUMNS]
+    return (
+        np.array([layout.lo for layout in layouts]),
+        np.array([layout.hi for layout in layouts]),
+    )
+
+
+def _archive_partition(
+    shape: type, samples: dict[str, npt.NDArray[np.float64]], spreads: dict[str, float]
+) -> tuple[list[list[Any]], list[npt.NDArray[np.float64]]]:
+    """The per-feature MFs and anchors for one shape on the committed survey."""
+    mfs = [
+        grid_partition(
+            shape,
+            samples[name],
+            3,
+            **({"qubit_spread": spreads[name]} if shape is IntervalGaussianMF else {}),
+        )
+        for name in FEATURE_COLUMNS
+    ]
+    anchors = [partition_anchors(samples[name], 3) for name in FEATURE_COLUMNS]
+    return mfs, anchors
 
 
 @pytest.mark.parametrize("shape", [GaussianMF, TanhMF, IntervalGaussianMF])
@@ -700,25 +863,70 @@ def test_bin_cover_holds_on_the_real_quantiles(shape: type) -> None:
 
 
 def test_tanh_branch_taken_on_the_real_quantiles_is_pinned() -> None:
-    """Step 5b: the nine x*_j are computed, and the shipped slopes match the branch.
+    """Step 5b: the nine x*_j are pinned as values, and the shipped slopes match.
 
     Deliberately not asserted to lie outside ``[lo, hi]`` -- on a right-skewed
-    feature that assertion is false by construction.
+    feature that assertion is false by construction, and four of these nine do
+    land inside. What is asserted instead is the measurement itself, so this
+    fails if the layout moves rather than agreeing with whatever the module
+    currently computes.
     """
+    _require_pinned_survey()
     samples, _ = _committed_survey()
 
     for name, values in samples.items():
-        onsets = tanh_floor_onsets(values, 3)
         layout = _quantile_layout(values, 3, PLACEMENT_QUANTILE)
-        inside = bool(np.any((onsets >= layout.lo) & (onsets <= layout.hi)))
-        strategy = tanh_slope_strategy(values, 3)
-        assert strategy == (TANH_SLOPES_EQUAL if inside else TANH_SLOPES_HALF_REACH)
+        onsets = tanh_floor_onsets(values, 3)
 
+        assert onsets.shape == (3,), f"{name} must report one onset per level"
+        assert onsets == pytest.approx(EXPECTED_ONSETS[name], rel=1e-12)
+        inside = tuple(bool(b) for b in (onsets >= layout.lo) & (onsets <= layout.hi))
+        assert inside == EXPECTED_ONSET_INSIDE[name]
+
+        # Every feature has at least one floored tail inside its box, so every
+        # feature takes decision 2's fallback -- which means each TanhMF row
+        # coincides with its TanhBellMF row until the trainer runs. That
+        # consequence belongs in the ablation caption, not a footnote.
+        assert tanh_slope_strategy(values, 3) == TANH_SLOPES_EQUAL
         for mf in grid_partition(TanhMF, values, 3):
             _, _, slope_left, slope_right = mf.parameters()
-            if strategy == TANH_SLOPES_EQUAL:
-                assert slope_left == pytest.approx(slope_right)
-        assert onsets.shape == (3,), f"{name} must report one onset per level"
+            assert slope_left == pytest.approx(slope_right)
+
+
+def test_forcing_half_reach_slopes_reinstates_the_unequal_mapping() -> None:
+    """The decision-2 counterfactual is reachable, and only through the override.
+
+    Every surveyed feature measures ``equal-slope``, so without an explicit
+    ``tanh_slopes`` nothing in the suite can exercise the half-reach branch on
+    real data or show what the fallback bought.
+    """
+    _require_pinned_survey()
+    samples, _ = _committed_survey()
+    values = samples["mean_T1"]
+
+    forced = np.array(
+        [
+            mf.parameters()
+            for mf in grid_partition(TanhMF, values, 3, tanh_slopes=TANH_SLOPES_HALF_REACH)
+        ]
+    )
+    default = np.array([mf.parameters() for mf in grid_partition(TanhMF, values, 3)])
+    explicit_fallback = np.array(
+        [mf.parameters() for mf in grid_partition(TanhMF, values, 3, tanh_slopes=TANH_SLOPES_EQUAL)]
+    )
+
+    assert np.any(forced[:, 2] != forced[:, 3]), "half-reach must give a skewed bin two slopes"
+    assert not np.allclose(forced, default)
+    # The explicit fallback reproduces the measured default exactly.
+    assert np.array_equal(explicit_fallback, default)
+
+
+def test_tanh_slopes_is_rejected_for_other_shapes_and_unknown_values() -> None:
+    with pytest.raises(ValueError, match="only meaningful for TanhMF"):
+        grid_partition(GaussianMF, _RNG_FREE_SKEWED, 3, tanh_slopes=TANH_SLOPES_EQUAL)
+
+    with pytest.raises(ValueError, match="unknown tanh_slopes"):
+        grid_partition(TanhMF, _RNG_FREE_SKEWED, 3, tanh_slopes="steepest")
 
 
 def test_sigmoid_ordering_holds_on_the_real_quantiles() -> None:
@@ -786,38 +994,121 @@ def test_every_anchor_is_accepted_by_the_real_target() -> None:
 def test_anchored_base_is_never_degenerate_on_the_archive(shape: type, defuzzifier: type) -> None:
     """FR-11, step 9: every surveyed vector, through the clamp, real target, every M1 shape.
 
+    The clamp here is the real ``ClampingFeatureExtractor``, not a bare
+    ``np.clip``: step 9 says this is "the exact object the ablation will hand to
+    the harness, evaluated on the exact inputs the archive produces", and an
+    inlined clip would leave FR-12's wrapper -- the only place the out-of-range
+    policy is applied -- unexercised on the archive.
+
     Not luck but a theorem (section 6.5): with zero-order consequents the
     defuzzified output is a convex combination of the anchor targets, so it
     stays inside their range and ``is_identity_damping`` is False wherever some
     rule fires -- which the bin-cover rule guarantees inside ``[lo, hi]``.
     """
     samples, spreads = _committed_survey()
-    values = [samples[name] for name in FEATURE_COLUMNS]
-
-    mfs = [
-        grid_partition(
-            shape,
-            v,
-            3,
-            **({"qubit_spread": spreads[name]} if shape is IntervalGaussianMF else {}),
-        )
-        for name, v in zip(FEATURE_COLUMNS, values, strict=True)
-    ]
-    anchors = [partition_anchors(v, 3) for v in values]
+    mfs, anchors = _archive_partition(shape, samples, spreads)
     target = functools.partial(feature_target_fn, t_seconds=SX_SECONDS)
     rb = anchored_rule_base(mfs, target, anchors=anchors)
 
-    lo = np.array([_quantile_layout(v, 3, PLACEMENT_QUANTILE).lo for v in values])
-    hi = np.array([_quantile_layout(v, 3, PLACEMENT_QUANTILE).hi for v in values])
-    vectors = np.clip(np.column_stack(values), lo, hi)
+    lo, hi = _domain_box(samples)
+    clamp = ClampingFeatureExtractor(BasicCalibrationVectorizer(), lo, hi)
+    raw_vectors = _committed_feature_vectors()
 
     biases = np.array([rule.consequent_params[:, -1] for rule in rb.rules])
     engine = defuzzifier()
-    for x in vectors:
+    for row in raw_vectors:
+        x = clamp.extract(_synthetic_snapshot(*row))
         crisp = np.asarray(engine.defuzzify(rb.evaluate(x))).reshape(-1)
         assert not is_identity_damping(crisp)
         assert np.all(crisp >= biases.min(axis=0) - 1e-12)
         assert np.all(crisp <= biases.max(axis=0) + 1e-12)
+
+    assert clamp.n_extractions == len(raw_vectors)
+
+
+def test_the_measured_clamp_rate_is_pinned() -> None:
+    """Step 9's "measure the clamp rate; do not derive it", pinned in the suite.
+
+    The ablation (#62) has to report this per run, and the implementation doc
+    and the evidence README both quote it, so it needs one place that fails when
+    it moves.
+    """
+    _require_pinned_survey()
+    samples, _ = _committed_survey()
+    lo, hi = _domain_box(samples)
+    clamp = ClampingFeatureExtractor(BasicCalibrationVectorizer(), lo, hi)
+
+    vectors = _committed_feature_vectors()
+    for row in vectors:
+        clamp.extract(_synthetic_snapshot(*row))
+
+    assert clamp.n_extractions == len(vectors)
+    assert clamp.n_clamped_vectors == EXPECTED_CLAMPED_VECTORS
+    assert tuple(clamp.n_clamped_components) == EXPECTED_CLAMPED_COMPONENTS
+
+
+def test_the_ensemble_evaluates_an_out_of_range_snapshot_through_the_clamp() -> None:
+    """UC-7 and FR-12's reason for existing: the ablation's real injection path.
+
+    ``FuzzyNoiseModel._compute_crisp_params`` extracts and evaluates back to
+    back with no interception point, so injecting this wrapper as
+    ``feature_extractor`` is the only way a caller that builds an ensemble can
+    apply the out-of-range policy at all (architect decision B6).
+
+    The unwrapped contrast section 9.2 asks for -- the same snapshot raising for
+    ``TriangularMF`` and ``TrapezoidalMF`` -- cannot be asserted yet: those two
+    are the only compact-support shapes and they land in the second commit
+    (architect decision C3), while all four M1 shapes have unbounded support and
+    fire something everywhere. Step 5c adds it.
+    """
+    samples, spreads = _committed_survey()
+    mfs, anchors = _archive_partition(GaussianMF, samples, spreads)
+    rb = anchored_rule_base(
+        mfs, functools.partial(feature_target_fn, t_seconds=SX_SECONDS), anchors=anchors
+    )
+
+    lo, hi = _domain_box(samples)
+    clamp = ClampingFeatureExtractor(BasicCalibrationVectorizer(), lo, hi)
+
+    # Well outside the box on all three features, in both directions.
+    outside = _synthetic_snapshot(5000.0, 1.0, 0.9)
+    ensemble = FuzzyNoiseModelEnsemble(
+        calibration=outside,
+        feature_extractor=clamp,
+        rule_base=rb,
+        defuzzifier=WeightedAverageDefuzzifier(),
+        squashing=ProbabilityClip(),
+        channel_projector=KrausChannelProjector(NoOpNormalization()),
+        fuzzification_strategy=PostGateFuzzification(),
+        ensemble_size=4,
+    )
+
+    members = list(ensemble)
+    assert len(members) == 4
+    for member in members:
+        assert np.all(np.isfinite(member.crisp_params))
+        assert not member.is_degenerate
+
+    # Section 6.4 (a): the counters count *calls*, so four members built from
+    # one snapshot record four extractions of one vector. A clamp rate over
+    # distinct snapshots must divide by the ensemble size.
+    assert clamp.n_extractions == 4
+    assert clamp.n_clamped_vectors == 4
+    assert tuple(clamp.n_clamped_components) == (4, 4, 4)
+
+
+def test_compare_mf_placement_still_runs_and_still_reports_27_rules(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """UC-4: Issue #31's comparison stays reproducible while this module lands."""
+    for placement in (PLACEMENT_ENDPOINT, PLACEMENT_INTERIOR):
+        assert rule_count(placement) == 27
+
+    compare_mf_placement_main()
+    printed = capsys.readouterr().out
+
+    assert "n_rules" in printed
+    assert "MISMATCH" not in printed
 
 
 def test_layout_is_shared_between_partition_and_anchors_on_the_real_quantiles() -> None:

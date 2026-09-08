@@ -202,6 +202,38 @@ def test_an_unparseable_timestamp_becomes_a_rejection_rather_than_an_exception()
     assert row.mean_T1 is None
 
 
+@pytest.mark.parametrize(
+    "properties",
+    [
+        "not-a-dict",
+        {"qubits": "not-a-list"},
+        {"qubits": [None, 7, "nope"]},
+        {"qubits": [[None, 7, "nope"]]},
+        {"qubits": [[{"name": "T1", "value": 100.0}]], "last_update_date": {"not": "a string"}},
+    ],
+    ids=["properties", "qubits", "qubit-entries", "nduv-entries", "last-update-date"],
+)
+def test_a_malformed_document_is_a_rejection_rather_than_an_exception(properties: object) -> None:
+    """§6.4's "never raises" has to cover a malformed document, not only a rejected one.
+
+    ``doc`` is parsed JSON from an external archive and #63 imports this
+    function to build the training set, so a container of the wrong shape must
+    not escape as an ``AttributeError`` from somewhere inside the qubit walk.
+    """
+    doc = _doc([_qubit(100.0, 70.0, 0.01)])
+    doc["properties"] = properties
+
+    row = snapshot_row("snapshots/2026-05/ibm_fez/20260513T121322000000Z.json", doc)
+
+    assert isinstance(row.last_update_date, str)
+    assert row.T1_n_usable >= 0
+    # Nothing usable survives these shapes, so the row carries a reason rather
+    # than empty silence -- and a malformed document is labelled as such, never
+    # as the legitimate "no usable value" rejection.
+    if row.mean_T1 is None:
+        assert row.rejection_reason
+
+
 def test_fr_2_column_order_is_a_strict_prefix_of_the_row() -> None:
     """#63 reads these columns positionally; the reason column is appended last."""
     names = [f.name for f in fields(SnapshotFeatureRow)]

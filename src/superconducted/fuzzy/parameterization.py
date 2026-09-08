@@ -16,6 +16,10 @@ Two conventions that look inconsistent until you read them together (NFR-5):
   box is a legitimate archived measurement that simply sits outside the model's
   stated domain, and the ablation cannot crash mid-run on it, so
   :class:`ClampingFeatureExtractor` moves it onto the boundary and counts it.
+  Its one exception is a **non-finite** component, which raises: that is not a
+  measurement, and clamping cannot absorb it -- ``np.clip`` preserves NaN, and a
+  NaN reaching the channel installs maximal damping while every viability check
+  stays green. See :meth:`ClampingFeatureExtractor.extract`.
 
 No direct qiskit use here; qiskit arrives transitively through
 ``superconducted.interfaces``, which imports it at module level for the ABCs
@@ -71,6 +75,10 @@ PLACEMENTS: Final[tuple[str, ...]] = (
 #: trainer runs -- state that in any results caption built from it.
 TANH_SLOPES_HALF_REACH: Final[str] = "half-reach"
 TANH_SLOPES_EQUAL: Final[str] = "equal-slope"
+TANH_SLOPE_STRATEGIES: Final[tuple[str, ...]] = (
+    TANH_SLOPES_HALF_REACH,
+    TANH_SLOPES_EQUAL,
+)
 
 #: Shapes that architect decision C3 defers to the second commit, before M2.
 _SECOND_COMMIT_SHAPES: Final[tuple[str, ...]] = (
@@ -284,38 +292,57 @@ def tanh_slope_strategy(
     )
 
 
-def _gaussian_sigmas(layout: QuantileLayout, placement: str) -> npt.NDArray[np.float64]:
-    """Gaussian widths: half-max on the bin's wider edge, or the shipped legacy width.
+def _bin_cover_sigmas(layout: QuantileLayout) -> npt.NDArray[np.float64]:
+    """Section 6.3's Gaussian width, for every placement and every Gaussian shape.
 
-    ``sigma = r_j / sqrt(2 ln 2)`` puts ``mu(c_j +- r_j)`` at exactly 0.5, which
-    is the bin-cover rule. Under the two legacy placements FR-5 pins instead the
-    width ``first_ensemble_run._default_mfs_for_feature`` ships, so Issue #31's
+    ``sigma = r_j / sqrt(2 ln 2)`` puts ``mu(c_j +- r_j)`` at exactly 0.5, so the
+    half-max points sit on the bin's wider edge, which is the bin-cover rule.
+    """
+    return layout.reaches / _HALF_MAX_SIGMA
+
+
+def _gaussian_sigmas(layout: QuantileLayout, placement: str) -> npt.NDArray[np.float64]:
+    """``GaussianMF`` widths: the bin-cover width, or FR-5's legacy pin.
+
+    Under the two legacy placements FR-5 pins the width
+    ``first_ensemble_run._default_mfs_for_feature`` ships, so Issue #31's
     comparison can be reproduced by equality; that width is wider than the
     bin-cover minimum, so coverage still holds.
+
+    The pin is for ``GaussianMF`` **only**. It exists so the smoke script's own
+    numbers reproduce, and that script builds Gaussians and nothing else; FR-5
+    gives every other shape "the same centers and the section 6.3 widths with
+    ``r_j`` derived from the equal spacing" under those placements. That is why
+    :func:`_interval_gaussian_partition` calls :func:`_bin_cover_sigmas` rather
+    than this function -- an IT2 footprint built on the legacy width would be a
+    third parameterization nobody asked for.
     """
     if placement == PLACEMENT_QUANTILE or layout.source_range is None:
-        return layout.reaches / _HALF_MAX_SIGMA
+        return _bin_cover_sigmas(layout)
     lo, hi = layout.source_range
     return np.full(layout.k, 0.25 * (hi - lo), dtype=np.float64)
 
 
 def _gaussian_partition(
-    layout: QuantileLayout, placement: str, qubit_spread: float | None
+    layout: QuantileLayout, placement: str, qubit_spread: float | None, tanh_slopes: str | None
 ) -> list[MembershipFunction]:
-    del qubit_spread
+    del qubit_spread, tanh_slopes
     sigmas = _gaussian_sigmas(layout, placement)
     return [GaussianMF(float(layout.centers[j]), float(sigmas[j])) for j in range(layout.k)]
 
 
 def _interval_gaussian_partition(
-    layout: QuantileLayout, placement: str, qubit_spread: float | None
+    layout: QuantileLayout, placement: str, qubit_spread: float | None, tanh_slopes: str | None
 ) -> list[MembershipFunction]:
+    del placement, tanh_slopes
     if qubit_spread is None or not math.isfinite(qubit_spread) or qubit_spread <= 0:
         raise ValueError(
             "IntervalGaussianMF requires a finite, strictly positive qubit_spread; "
             f"got {qubit_spread!r}"
         )
-    sigmas_low = _gaussian_sigmas(layout, placement)
+    # The bin-cover width under every placement, not the FR-5 legacy pin: that
+    # pin reproduces the smoke script, which ships Gaussians only.
+    sigmas_low = _bin_cover_sigmas(layout)
     mfs: list[MembershipFunction] = []
     for j in range(layout.k):
         sigma_low = float(sigmas_low[j])
@@ -327,9 +354,9 @@ def _interval_gaussian_partition(
 
 
 def _tanh_sigmoid_partition(
-    layout: QuantileLayout, placement: str, qubit_spread: float | None
+    layout: QuantileLayout, placement: str, qubit_spread: float | None, tanh_slopes: str | None
 ) -> list[MembershipFunction]:
-    del placement, qubit_spread
+    del placement, qubit_spread, tanh_slopes
     # Cumulative levels: MF j reads "at least level j" and crosses 0.5 at the
     # bin's lower edge. One common slope, because two rising sigmoids with
     # different slopes cross inside the range and the ordering invariant
@@ -345,10 +372,12 @@ def _tanh_sigmoid_partition(
 
 
 def _tanh_partition(
-    layout: QuantileLayout, placement: str, qubit_spread: float | None
+    layout: QuantileLayout, placement: str, qubit_spread: float | None, tanh_slopes: str | None
 ) -> list[MembershipFunction]:
     del placement, qubit_spread
-    strategy = _strategy_for_layout(layout)
+    # The measured branch by default (decision 2); an explicit `tanh_slopes`
+    # overrides it, which is the only way to run the counterfactual.
+    strategy = tanh_slopes if tanh_slopes is not None else _strategy_for_layout(layout)
     mfs: list[MembershipFunction] = []
     for j in range(layout.k):
         c = float(layout.centers[j])
@@ -373,7 +402,7 @@ def _tanh_partition(
     return mfs
 
 
-_ShapeBuilder = Callable[[QuantileLayout, str, float | None], list[MembershipFunction]]
+_ShapeBuilder = Callable[[QuantileLayout, str, float | None, str | None], list[MembershipFunction]]
 
 #: The M1 shapes of architect decision C3's first commit. A shape absent from
 #: this table raises ``NotImplementedError`` rather than receiving a silently
@@ -393,6 +422,7 @@ def grid_partition(
     *,
     placement: str = PLACEMENT_QUANTILE,
     qubit_spread: float | None = None,
+    tanh_slopes: str | None = None,
 ) -> list[MembershipFunction]:
     """Build ``k`` membership functions of one shape covering one feature (FR-5).
 
@@ -401,16 +431,33 @@ def grid_partition(
     ``qubit_spread`` is required for ``IntervalGaussianMF`` (it sizes the
     footprint of uncertainty) and rejected for every T1 shape.
 
+    ``tanh_slopes`` overrides ``TanhMF``'s slope strategy and is rejected for
+    every other shape. Leave it ``None`` -- the default measures ADR-023's onset
+    on this feature's own layout and takes decision 2's equal-slope fallback
+    only where a floored tail would land inside the domain box. Passing
+    ``TANH_SLOPES_HALF_REACH`` on a feature that measured ``equal-slope``
+    deliberately reinstates that floored tail, so use it for a counterfactual
+    and say so in the caption; :func:`tanh_slope_strategy` reports what the
+    default would have chosen.
+
     Returns ``k`` fresh MF objects, ascending by anchor, each satisfying its own
     validation and the bin-cover rule (``max_j mu_j(x).low >= 0.5`` across
     ``[e_0, e_k]``; ``TanhSigmoidMF`` satisfies the ordering invariant instead).
     Deterministic: no RNG anywhere.
 
-    Raises ``ValueError`` on a degenerate layout or a misused ``qubit_spread``,
-    and ``NotImplementedError`` for a shape whose commit has not landed.
+    Raises ``ValueError`` on a degenerate layout or a misused ``qubit_spread``
+    or ``tanh_slopes``, and ``NotImplementedError`` for a shape whose commit has
+    not landed.
     """
     if shape is not IntervalGaussianMF and qubit_spread is not None:
         raise ValueError(f"qubit_spread is not supported for T1 shape {shape.__name__}.")
+    if tanh_slopes is not None:
+        if shape is not TanhMF:
+            raise ValueError(f"tanh_slopes is only meaningful for TanhMF, not {shape.__name__}.")
+        if tanh_slopes not in TANH_SLOPE_STRATEGIES:
+            raise ValueError(
+                f"unknown tanh_slopes {tanh_slopes!r}; known: {list(TANH_SLOPE_STRATEGIES)}"
+            )
 
     builder = _SHAPE_BUILDERS.get(shape)
     if builder is None:
@@ -427,7 +474,7 @@ def grid_partition(
         )
 
     layout = _quantile_layout(np.asarray(samples, dtype=np.float64), k, placement)
-    return builder(layout, placement, qubit_spread)
+    return builder(layout, placement, qubit_spread, tanh_slopes)
 
 
 def anchored_rule_base(
@@ -498,7 +545,13 @@ def anchored_rule_base(
         consequent[:, -1] = y_target
         rules.append(TSKRule(antecedent_mfs=list(mf_tuple), consequent_params=consequent))
 
-    return TSKRuleBase(rules=rules, input_dim=input_dim, output_dim=int(output_dim or 0))
+    if not output_dim:
+        # A zero-length target is a contract violation, not a default: FR-7 takes
+        # `output_dim` from the first `target_fn` call, and a rule base with no
+        # output columns would build cleanly and defuzzify to nothing.
+        raise ValueError("target_fn returned a zero-length vector; output_dim must be >= 1")
+
+    return TSKRuleBase(rules=rules, input_dim=input_dim, output_dim=output_dim)
 
 
 class ClampingFeatureExtractor(CalibrationFeatureExtractor):
@@ -601,8 +654,29 @@ class ClampingFeatureExtractor(CalibrationFeatureExtractor):
 
         A fresh array: never the one ``inner`` returned, and ``inner`` and the
         snapshot are not mutated.
+
+        A **non-finite** component raises ``ValueError`` instead, and does so
+        before the counters move, so they only ever describe extractions that
+        succeeded. This is the one input the clamp does not absorb, and the
+        asymmetry is deliberate: clamping is for a legitimate measurement that
+        sits outside the model's stated domain, and a NaN is not a measurement.
+        Letting it through would be worse than crashing -- ``np.clip`` preserves
+        NaN, every firing strength then goes NaN, the defuzzifier does not raise
+        (the sum is NaN, not zero), ``KrausChannelProjector`` maps NaN to 1.0 and
+        installs maximal damping, and ``is_identity_damping`` reports that vector
+        as the identity channel. The run would be wrong in both directions at
+        once and every viability check would stay green (NFR-5).
+        ``BasicCalibrationVectorizer`` cannot produce one -- it drops non-finite
+        Nduv values and raises when nothing is usable -- so this guard is for the
+        wrappers that compose with this one, ``OffsetFeatureExtractor`` (#64)
+        first among them.
         """
         raw = self._inner.extract(snapshot)
+        if not np.all(np.isfinite(raw)):
+            raise ValueError(
+                f"{type(self._inner).__name__}.extract returned a non-finite feature "
+                f"vector {raw!r}; the clamp absorbs out-of-domain values, not NaN or inf."
+            )
         out_of_bounds = (raw < self._lo) | (raw > self._hi)
 
         self._n_extractions += 1

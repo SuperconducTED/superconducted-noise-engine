@@ -47,6 +47,14 @@ from typing import Any
 import numpy as np
 
 from scripts.init_error_analysis import _git, list_snapshots, read_snapshot
+
+# `_coerce_finite_float` is private on purpose and imported anyway, on purpose:
+# FR-2 requires the per-qubit columns to walk `properties.qubits` with *exactly*
+# the Nduv filter `BasicCalibrationVectorizer.extract` averages over, so
+# `*_n_usable` is the count `extract` used. Re-implementing the filter here
+# would let the two drift silently, which is the one failure this column exists
+# to rule out. #64 makes `calibration/features.py::per_qubit_spread` the single
+# home for this loop; when it lands, import that instead.
 from superconducted.calibration.features import BasicCalibrationVectorizer, _coerce_finite_float
 from superconducted.types import CalibrationSnapshot
 
@@ -116,6 +124,17 @@ def _compute_stats(
     return n_usable, std, p10, p50, p90
 
 
+def _as_str(value: Any) -> str:
+    """A TSV cell for a JSON value that ought to be a string but need not be.
+
+    Empty for anything that is not one, rather than ``"None"`` or a repr: an
+    absent or malformed ``last_update_date`` is missing provenance, and writing
+    a plausible-looking placeholder into a committed evidence file is worse than
+    writing nothing.
+    """
+    return value if isinstance(value, str) else ""
+
+
 def _parse_timestamp(doc: dict[str, Any], stem: str) -> datetime:
     """Snapshot timestamp, parsed exactly as ``first_ensemble_run._load_snapshot`` does.
 
@@ -135,9 +154,13 @@ def snapshot_row(path: str, doc: dict[str, Any]) -> SnapshotFeatureRow:
     Pure: no I/O, no mutation of ``doc``. Never raises -- a document the
     vectorizer rejects, or one whose timestamp will not parse, comes back with
     empty ``mean_*`` and a ``rejection_reason``, and is counted rather than
-    dropped. The per-qubit statistics walk ``properties.qubits`` with the same
-    Nduv filter ``BasicCalibrationVectorizer.extract`` uses, so ``*_n_usable``
-    is the count ``extract`` averaged over and ``n_usable <= n_qubits``.
+    dropped. That promise covers a **malformed** document too, not only a
+    rejected one: ``doc`` is parsed JSON from an external archive, so every
+    container this walks is shape-checked before it is iterated. #63 imports
+    this function to build the training set and must not have to pre-validate.
+    The per-qubit statistics walk ``properties.qubits`` with the same Nduv
+    filter ``BasicCalibrationVectorizer.extract`` uses, so ``*_n_usable`` is the
+    count ``extract`` averaged over and ``n_usable <= n_qubits``.
     """
     stem = Path(path).stem
     rejection_reason: str | None = None
@@ -148,11 +171,14 @@ def snapshot_row(path: str, doc: dict[str, Any]) -> SnapshotFeatureRow:
         timestamp = datetime.min.replace(tzinfo=UTC)
         rejection_reason = f"unparseable timestamp: {exc}"
 
+    raw_properties = doc.get("properties")
+    properties: dict[str, Any] = raw_properties if isinstance(raw_properties, dict) else {}
+
     snapshot = CalibrationSnapshot(
         backend=doc.get("backend", "unknown"),
         timestamp=timestamp,
         schema_version=doc.get("schema_version", "1.0.0"),
-        properties=doc.get("properties", {}),
+        properties=properties,
         target=doc.get("target"),
         configuration=doc.get("configuration"),
     )
@@ -165,15 +191,30 @@ def snapshot_row(path: str, doc: dict[str, Any]) -> SnapshotFeatureRow:
             means = BasicCalibrationVectorizer().extract(snapshot)
             mean_t1, mean_t2, mean_ro = float(means[0]), float(means[1]), float(means[2])
         except ValueError as exc:
+            # The documented rejection: a feature with no usable value.
             rejection_reason = str(exc)
+        except (AttributeError, TypeError) as exc:
+            # A malformed document, caught here rather than fixed upstream.
+            # `BasicCalibrationVectorizer.extract` assumes `properties.qubits`
+            # is a list of lists of dicts and raises `AttributeError` when the
+            # archive disagrees; `calibration/features.py` is Baha's and Issue
+            # #59 consumes it without editing it, so widening the guard at the
+            # call site is this script's only option. Recorded as its own
+            # reason so a malformed row is never read as a legitimate rejection.
+            rejection_reason = f"malformed document: {type(exc).__name__}: {exc}"
 
-    qubits_section = snapshot.properties.get("qubits", [])
+    raw_qubits = properties.get("qubits", [])
+    qubits_section: list[Any] = raw_qubits if isinstance(raw_qubits, list) else []
     t1_vals: list[float] = []
     t2_vals: list[float] = []
     ro_vals: list[float] = []
 
     for qubit_props in qubits_section:
+        if not isinstance(qubit_props, list):
+            continue
         for nduv in qubit_props:
+            if not isinstance(nduv, dict):
+                continue
             name = nduv.get("name")
             val = _coerce_finite_float(nduv.get("value"))
             if val is None:
@@ -194,7 +235,7 @@ def snapshot_row(path: str, doc: dict[str, Any]) -> SnapshotFeatureRow:
         stem=stem,
         backend=snapshot.backend,
         timestamp=snapshot.timestamp.isoformat(),
-        last_update_date=doc.get("properties", {}).get("last_update_date", ""),
+        last_update_date=_as_str(properties.get("last_update_date")),
         n_qubits=len(qubits_section),
         mean_T1=mean_t1,
         mean_T2=mean_t2,
