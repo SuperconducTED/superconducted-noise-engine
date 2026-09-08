@@ -18,7 +18,7 @@ contains `readout_error`, `prob_meas0_prep1`, `prob_meas1_prep0`, and
 standard entries.
 
 **Provenance**:
-- Source ref: `origin/calibration-data:snapshots/2026-05/ibm_fez/20260513T121322000000Z.json`
+- Source ref: `superconducted-noise-engine/calibration-data:snapshots/2026-05/ibm_fez/20260513T121322000000Z.json`
 - Full source SHA-256: `cbbbd2c3273e4e7eda006eaa104a16d8f81888776cbfc8453b637322671d1083`
 - Full source size: 1 324 893 bytes.
 
@@ -54,12 +54,15 @@ the original missing-T1/T2 qubit-72 regression case.
 - 352 two-qubit `cz` records, intentionally ignored by the single-qubit target parser.
 - 155 usable per-qubit thermal-relaxation targets; qubit 72 is skipped as `t1_missing`.
 
-**Regenerating** (run from repo root after `git fetch origin calibration-data`):
+**Regenerating** (run from repo root after
+`git fetch superconducted-noise-engine calibration-data`). The remote name is
+whatever your checkout calls this repository; a plain `git clone` names it `origin`
+instead, in which case substitute that below:
 
 ```bash
 python -c "
 import subprocess, json, pathlib
-src = 'origin/calibration-data:snapshots/2026-05/ibm_fez/20260513T121322000000Z.json'
+src = 'superconducted-noise-engine/calibration-data:snapshots/2026-05/ibm_fez/20260513T121322000000Z.json'
 data = json.loads(subprocess.check_output(['git', 'show', src]))
 slim = {
     'backend': data['backend'],
