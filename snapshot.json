@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-08 17:55 UTC",
+  "generated": "2026-09-08 18:10 UTC",
   "main": {
     "sha": "645b4d1a",
     "date": "2026-09-08",
@@ -259,19 +259,19 @@
       "blockers": [
         {
           "severity": "high",
-          "text": "Still a draft — CI and reviewers will not treat it as ready."
+          "text": "Still a draft: CI and reviewers will not treat it as ready."
         },
         {
           "severity": "critical",
-          "text": "Conflicts with main — needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
+          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
         },
         {
           "severity": "high",
-          "text": "Its green checks last ran 2026-09-06T21:11 against a main that has moved since — they are not evidence about the merge result."
+          "text": "Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result."
         },
         {
           "severity": "high",
-          "text": "No approving review yet — main's ruleset requires one."
+          "text": "No approving review yet: main's ruleset requires one."
         },
         {
           "kind": "signoff",
@@ -753,11 +753,11 @@
       "blockers": [
         {
           "severity": "critical",
-          "text": "Conflicts with main — needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
+          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
         },
         {
           "severity": "high",
-          "text": "Its green checks last ran 2026-09-05T19:09 against a main that has moved since — they are not evidence about the merge result."
+          "text": "Its green checks last ran 2026-09-05T19:09 against a main that has moved since; they are not evidence about the merge result."
         },
         {
           "severity": "critical",
@@ -1008,7 +1008,7 @@
       "soft_deps": [],
       "extra_blockers": [],
       "unblocks": [],
-      "why_now": "No dependencies in either direction, and it blocks running the shipped pipeline on real archived data — which phase 3 does throughout. On a real snapshot the ratified 3x3x3 grid fires at exactly zero and the bootstrap pipeline raises ZeroDivisionError.",
+      "why_now": "No dependencies in either direction, and it blocks running the shipped pipeline on real archived data, which phase 3 does throughout. On a real snapshot the ratified 3x3x3 grid fires at exactly zero and the bootstrap pipeline raises ZeroDivisionError.",
       "note": "Plan §1: no membership-function grid may be derived from FEATURE_SCALES; every grid comes from the archive's measured quantiles.",
       "title": "BasicCalibrationVectorizer.extract returns microseconds where the rest of the repo assumes seconds, so the ratified grid fires at zero on real archived data",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/66",
@@ -1128,103 +1128,16 @@
               "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/53"
             }
           ],
-          "createdAt": "2026-09-06T21:06:50Z",
-          "headRefName": "mert/issue-53-deadline-and-recovery",
-          "isDraft": false,
-          "mergeable": "MERGEABLE",
-          "mergedAt": null,
-          "number": 78,
-          "reviewDecision": "CHANGES_REQUESTED",
-          "state": "OPEN",
-          "title": "docs: execute the #53 recovery and record what the 2026-09-05 deadline cost",
-          "updatedAt": "2026-09-08T13:54:34Z",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/78",
-          "headRefOid": "90a4e6827618047d19568a1d079d55cf53b880d0",
-          "additions": 362,
-          "deletions": 1,
-          "file_count": 2,
-          "latest_reviews": [
-            {
-              "who": "BurakOztekin",
-              "state": "CHANGES_REQUESTED",
-              "at": "2026-09-07",
-              "last_activity": "2026-09-08"
-            }
-          ],
-          "looked_since": [
-            {
-              "who": "BurakOztekin",
-              "at": "2026-09-08"
-            }
-          ],
-          "checks": [
-            {
-              "name": "test (3.11)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-08T13:50"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-08T13:50"
-            },
-            {
-              "name": "Analyze (actions)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-08T13:50"
-            },
-            {
-              "name": "test (3.12)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-08T13:50"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-08T13:50"
-            },
-            {
-              "name": "CodeQL",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-08T13:50"
-            }
-          ],
-          "checks_newest": "2026-09-08T13:50",
-          "checks_failing": [],
-          "checks_stale_vs_main": false
-        },
-        {
-          "author": {
-            "id": "U_kgDOCJLpDw",
-            "is_bot": false,
-            "login": "mertefesensoy",
-            "name": "Mert Efe Şensoy"
-          },
-          "closingIssuesReferences": [
-            {
-              "id": "I_kwDOSW8yNc8AAAABPZYt2Q",
-              "number": 53,
-              "repository": {
-                "id": "R_kgDOSW8yNQ",
-                "name": "superconducted-noise-engine",
-                "owner": {
-                  "id": "O_kgDOENg1ug",
-                  "login": "SuperconducTED"
-                }
-              },
-              "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/53"
-            }
-          ],
           "createdAt": "2026-09-06T21:29:46Z",
           "headRefName": "mert/payload-digest-parameter-dates",
           "isDraft": false,
           "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 80,
-          "reviewDecision": "CHANGES_REQUESTED",
+          "reviewDecision": "APPROVED",
           "state": "OPEN",
           "title": "fix: exclude per-parameter date from the payload digest",
-          "updatedAt": "2026-09-08T13:52:19Z",
+          "updatedAt": "2026-09-08T18:10:11Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/80",
           "headRefOid": "fcc8d5bede4d03bccee7af8813358bda0a1d39bd",
           "additions": 806,
@@ -1233,9 +1146,9 @@
           "latest_reviews": [
             {
               "who": "BurakOztekin",
-              "state": "CHANGES_REQUESTED",
-              "at": "2026-09-07",
-              "last_activity": "2026-09-07"
+              "state": "APPROVED",
+              "at": "2026-09-08",
+              "last_activity": "2026-09-08"
             }
           ],
           "looked_since": [],
@@ -1274,6 +1187,88 @@
           "checks_newest": "2026-09-08T13:46",
           "checks_failing": [],
           "checks_stale_vs_main": false
+        },
+        {
+          "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [
+            {
+              "id": "I_kwDOSW8yNc8AAAABPZYt2Q",
+              "number": 53,
+              "repository": {
+                "id": "R_kgDOSW8yNQ",
+                "name": "superconducted-noise-engine",
+                "owner": {
+                  "id": "O_kgDOENg1ug",
+                  "login": "SuperconducTED"
+                }
+              },
+              "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/53"
+            }
+          ],
+          "createdAt": "2026-09-06T21:06:50Z",
+          "headRefName": "mert/issue-53-deadline-and-recovery",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 78,
+          "reviewDecision": "APPROVED",
+          "state": "OPEN",
+          "title": "docs: execute the #53 recovery and record what the 2026-09-05 deadline cost",
+          "updatedAt": "2026-09-08T17:58:06Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/78",
+          "headRefOid": "90a4e6827618047d19568a1d079d55cf53b880d0",
+          "additions": 362,
+          "deletions": 1,
+          "file_count": 2,
+          "latest_reviews": [
+            {
+              "who": "BurakOztekin",
+              "state": "APPROVED",
+              "at": "2026-09-08",
+              "last_activity": "2026-09-08"
+            }
+          ],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:50"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:50"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:50"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:50"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:50"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-08T13:50"
+            }
+          ],
+          "checks_newest": "2026-09-08T13:50",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
         }
       ],
       "merged_pr": null,
@@ -1282,17 +1277,13 @@
       "unmet_soft": [],
       "blockers": [
         {
-          "severity": "critical",
-          "text": "CHANGES_REQUESTED standing from @BurakOztekin (2026-09-07). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
-        },
-        {
           "kind": "pr",
           "text": "The dispatches ran; only the record (PR #78) is outstanding, blocked on a re-review.",
           "severity": "medium"
         }
       ],
       "notes_info": [],
-      "pr": 78
+      "pr": 80
     },
     {
       "id": 54,
@@ -1427,7 +1418,7 @@
       "extra_blockers": [
         {
           "kind": "policy",
-          "text": "Touches LOCKED src/superconducted/channels/kraus.py — needs a decision, not just a patch.",
+          "text": "Touches LOCKED src/superconducted/channels/kraus.py: needs a decision, not just a patch.",
           "severity": "medium"
         }
       ],
@@ -1452,7 +1443,7 @@
       "blockers": [
         {
           "kind": "policy",
-          "text": "Touches LOCKED src/superconducted/channels/kraus.py — needs a decision, not just a patch.",
+          "text": "Touches LOCKED src/superconducted/channels/kraus.py: needs a decision, not just a patch.",
           "severity": "medium"
         }
       ],
@@ -1520,7 +1511,7 @@
       "extra_blockers": [
         {
           "kind": "advisor",
-          "text": "Code landed in PR #69, but the ticket's own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened — #84 owns it.",
+          "text": "Code landed in PR #69, but the ticket's own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened; #84 owns it.",
           "severity": "critical"
         }
       ],
@@ -1605,11 +1596,11 @@
       "blockers": [
         {
           "severity": "high",
-          "text": "No approving review yet — main's ruleset requires one."
+          "text": "No approving review yet: main's ruleset requires one."
         },
         {
           "kind": "advisor",
-          "text": "Code landed in PR #69, but the ticket's own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened — #84 owns it.",
+          "text": "Code landed in PR #69, but the ticket's own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened; #84 owns it.",
           "severity": "critical"
         }
       ],

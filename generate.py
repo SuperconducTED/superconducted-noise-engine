@@ -3,16 +3,16 @@
 
 Reads two things and joins them:
 
-  1. ``plan.json`` — the static, hand-curated model of the phase-3 plan. Owners,
+  1. ``plan.json``: the static, hand-curated model of the phase-3 plan. Owners,
      milestone gates, and every dependency edge quoted from a ticket's own
      "Depends on" row. This changes only when the plan or a ticket changes.
-  2. Live GitHub state, via the ``gh`` CLI — issue open/closed, PR review
+  2. Live GitHub state, via the ``gh`` CLI: issue open/closed, PR review
      decision, mergeability, check-run conclusions, and the ADR ledger on main.
 
 and writes ``index.html``, ``STATUS.md`` and ``snapshot.json``.
 
 The point of the join is the derived column nobody maintains by hand: for every
-ticket, whether its *upstream* dependencies are met, and — separately — what
+ticket, whether its *upstream* dependencies are met and (separately) what
 else is standing between it and closure once they are. Those are different
 questions and the plan conflates them; this does not.
 
@@ -20,7 +20,7 @@ Contract
 --------
 inputs   : plan.json (cwd), a working ``gh`` on PATH authenticated to the repo,
            network access to github.com.
-outputs  : index.html, STATUS.md, snapshot.json written into cwd. Idempotent —
+outputs  : index.html, STATUS.md, snapshot.json written into cwd. Idempotent:
            running twice with unchanged upstream state produces identical files
            except for the generated-at timestamp.
 exit code: 0 on success, 1 if ``gh`` fails or plan.json is unreadable. It never
@@ -45,7 +45,7 @@ REPO = "SuperconducTED/superconducted-noise-engine"
 
 # Status vocabulary. The emoji are the user-facing contract of this dashboard:
 # green means done and verified against live state, red means not done, amber
-# means in flight. Nothing is amber merely because it is uncertain — an unknown
+# means in flight. Nothing is amber merely because it is uncertain; an unknown
 # renders as its own grey marker so it cannot be mistaken for progress.
 DONE, NOT_DONE, PARTIAL, UNKNOWN = "done", "not_done", "partial", "unknown"
 MARK = {DONE: "✅", NOT_DONE: "❌", PARTIAL: "🟡", UNKNOWN: "⬜"}
@@ -91,7 +91,7 @@ def enrich_open_prs(prs: dict[int, dict]) -> None:
     """Add reviews and check-run detail to open PRs, in place.
 
     Only open PRs are enriched: this costs one API round-trip each and merged
-    PRs never change. ``checks_stale_vs_main`` is the important derived field —
+    PRs never change. ``checks_stale_vs_main`` is the important derived field:
     a CONFLICTING PR's checks ran against a main that has since moved, so a
     green tick there is not evidence about the merge result.
     """
@@ -109,7 +109,7 @@ def enrich_open_prs(prs: dict[int, dict]) -> None:
 
         # A reviewer's *blocking* state, which is not the same as their latest
         # review. On GitHub a later COMMENTED review does not dismiss an earlier
-        # CHANGES_REQUESTED — only an APPROVED or an explicit dismissal does. So
+        # CHANGES_REQUESTED; only an APPROVED or an explicit dismissal does. So
         # only those three states move the needle; COMMENTED is tracked purely
         # so the dashboard can say when the reviewer last looked. Getting this
         # wrong hides exactly the reviews that are holding the phase up.
@@ -200,7 +200,7 @@ def prs_for_issue(issue_no: int, prs: dict[int, dict], hints: list[int] | None =
     plan.json (for branches opened without a closing keyword and without the
     number in the name), GitHub's own ``closingIssuesReferences``, then the
     branch name and title. An issue can legitimately have more than one open PR
-    — #53 has two — so this returns a list; taking only the first would hide a
+    (#53 has two), so this returns a list; taking only the first would hide a
     blocked one behind a clean one.
     """
     open_prs = [p for p in prs.values() if p["state"] == "OPEN"]
@@ -248,7 +248,7 @@ def dep_met(dep: dict, issues: dict, prs: dict, milestone_state: dict) -> bool:
     """Is this dependency satisfied?
 
     ``satisfied_by`` matters more than it looks. A downstream ticket almost
-    never depends on an *issue* — it depends on an artifact that issue produces.
+    never depends on an *issue*; it depends on an artifact that issue produces.
     #57's issue is still open because its advisor half is outstanding, but the
     contract #59, #60, #61 and #63 actually consume merged in PR #69. Keying
     those edges on issue closure would paint the entire trainer track blocked
@@ -279,15 +279,15 @@ def review_blockers(pr: dict) -> list[dict]:
     Ordered deliberately: a conflict must be fixed before a review is worth
     asking for, and a draft will not be reviewed at all. main's ruleset requires
     one approval and does *not* dismiss stale reviews on push, so a standing
-    CHANGES_REQUESTED needs an explicit re-review — pushing a fix does not clear it.
+    CHANGES_REQUESTED needs an explicit re-review; pushing a fix does not clear it.
     """
     out: list[dict] = []
     if pr.get("isDraft"):
-        out.append({"severity": "high", "text": "Still a draft — CI and reviewers will not treat it as ready."})
+        out.append({"severity": "high", "text": "Still a draft: CI and reviewers will not treat it as ready."})
     if pr.get("mergeable") == "CONFLICTING":
-        out.append({"severity": "critical", "text": "Conflicts with main — needs a rebase before it can merge, and ci.yml will not re-run until it is clean."})
+        out.append({"severity": "critical", "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."})
     if pr.get("checks_stale_vs_main"):
-        out.append({"severity": "high", "text": f"Its green checks last ran {pr.get('checks_newest') or 'earlier'} against a main that has moved since — they are not evidence about the merge result."})
+        out.append({"severity": "high", "text": f"Its green checks last ran {pr.get('checks_newest') or 'earlier'} against a main that has moved since; they are not evidence about the merge result."})
     if pr.get("checks_failing"):
         names = ", ".join(c["name"] for c in pr["checks_failing"][:4])
         out.append({"severity": "critical", "text": f"Failing checks: {names}."})
@@ -297,7 +297,7 @@ def review_blockers(pr: dict) -> list[dict]:
         who = ", ".join(f"@{r['who']} ({r['at']})" for r in changes) or "a reviewer"
         out.append({"severity": "critical", "text": f"CHANGES_REQUESTED standing from {who}. Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."})
     elif decision == "REVIEW_REQUIRED" or not pr.get("latest_reviews"):
-        out.append({"severity": "high", "text": "No approving review yet — main's ruleset requires one."})
+        out.append({"severity": "high", "text": "No approving review yet: main's ruleset requires one."})
     return out
 
 
@@ -346,8 +346,8 @@ def build(plan: dict, issues: dict, prs: dict, main: dict) -> dict:
 
         # A hard dependency carrying a "part" gates only that part of the
         # ticket, not the ticket. #60's dependency on #63 is for the first
-        # archive fit alone; its LSE stage — the M2 gate and the whole reason
-        # the trainer is the long pole — needs nothing from #63. Treating a
+        # archive fit alone; its LSE stage (the M2 gate, and the whole reason
+        # the trainer is called the long pole) needs nothing from #63. Treating a
         # partial dep as blocking would park the phase's critical path behind
         # a data ticket for no reason, so partial deps become scope notes.
         unmet_all = [d for d in t.get("hard_deps", []) if not dep_met(d, issues, prs, milestone_state)]
@@ -394,7 +394,7 @@ def days_between(a: str, b: str) -> int:
 
 
 # --------------------------------------------------------------------------
-# "Work on this now" — the ranked queue
+# "Work on this now": the ranked queue
 # --------------------------------------------------------------------------
 
 SEV_RANK = {"critical": 0, "high": 1, "medium": 2, "low": 3, "info": 4}
@@ -404,13 +404,13 @@ def action_queue(model: dict, plan: dict) -> dict[str, list[dict]]:
     """One ranked action list per person.
 
     Ranking is by *consequence*, not by activity type. Sorted on:
-      1. fan-out — how many other tickets this releases. This is the whole
+      1. fan-out: how many other tickets this releases. This is the whole
          reason the plan has a critical path, so it dominates. A re-review that
          frees three tickets outranks starting a defect that frees none, and an
          in-flight PR that four people are waiting on outranks fresh work.
       2. the ticket's own priority label.
       3. kind, as a tiebreak only: a review you alone can clear, then in-flight
-         work, then a fresh start — cheapest-first among equals.
+         work, then a fresh start, cheapest-first among equals.
 
     A ticket blocked on an upstream dependency is never listed against its own
     owner. It surfaces instead against whoever owns the blocker, which is the
@@ -422,8 +422,8 @@ def action_queue(model: dict, plan: dict) -> dict[str, list[dict]]:
 
     def rank(kind: str, fanout: int, t: dict) -> tuple:
         # External latency comes first, ahead of even fan-out. Work whose
-        # completion waits on somebody outside the team — an advisor answering
-        # four questions — has a lead time the team cannot compress, so a day
+        # completion waits on somebody outside the team (an advisor answering
+        # four questions) has a lead time the team cannot compress, so a day
         # of delay there costs a day of phase, while a day of delay on internal
         # work can still be absorbed. Everything else sorts on consequence.
         return (0 if t.get("external_latency") else 1,
@@ -433,7 +433,7 @@ def action_queue(model: dict, plan: dict) -> dict[str, list[dict]]:
         if not t.get("unmet_partial"):
             return ""
         bits = "; ".join(f"the {d['part']} part waits on #{d['id']}" for d in t["unmet_partial"])
-        return f" Start the rest now — {bits}."
+        return f" Start the rest now: {bits}."
 
     for t in model["tickets"]:
         if t["state"] == "done":
@@ -443,7 +443,7 @@ def action_queue(model: dict, plan: dict) -> dict[str, list[dict]]:
             verb = "Start" if not t.get("merged_pr") else "Finish"
             act = {
                 "rank": rank("ready", fanout, t), "kind": "ready", "ticket": t,
-                "action": f"{verb} #{t['id']} — {t['short']}",
+                "action": f"{verb} #{t['id']}: {t['short']}",
                 "why": (t.get("why_now") or "All stated upstream dependencies are met.") + scope_note(t),
                 "fanout": fanout,
             }
@@ -452,7 +452,7 @@ def action_queue(model: dict, plan: dict) -> dict[str, list[dict]]:
             pr = t["pr"]
             act = {
                 "rank": rank("in_review", fanout, t), "kind": "in_review", "ticket": t,
-                "action": f"Unstick PR #{pr['number']} for #{t['id']} — {t['short']}",
+                "action": f"Unstick PR #{pr['number']} for #{t['id']}: {t['short']}",
                 "why": (t["blockers"][0]["text"] if t["blockers"] else "Awaiting merge.") + scope_note(t),
                 "fanout": fanout,
             }
@@ -483,11 +483,11 @@ def action_queue(model: dict, plan: dict) -> dict[str, list[dict]]:
                 why = (f"Your CHANGES_REQUESTED from {rev['at']} is the standing block. "
                        f"main's ruleset does not dismiss it on push, so only you can clear it.")
                 if looked:
-                    why += (f" You commented again on {looked['at']} without lifting it — "
+                    why += (f" You commented again on {looked['at']} without lifting it; "
                             f"a COMMENTED review does not dismiss a CHANGES_REQUESTED.")
                 by_person[rev["who"]].append({
                     "rank": rank("review", fanout, t), "kind": "review", "ticket": t,
-                    "action": f"Re-review PR #{pr['number']} (#{t['id']} — {t['short']})",
+                    "action": f"Re-review PR #{pr['number']} (#{t['id']}: {t['short']})",
                     "why": why, "fanout": fanout,
                 })
 
@@ -507,13 +507,13 @@ def e(s: object) -> str:
 def render_markdown(plan: dict, model: dict, queue: dict, main: dict, now: str) -> str:
     L: list[str] = []
     a = L.append
-    a(f"# Phase 3 — {plan['phase']['goal']}\n")
+    a(f"# Phase 3: {plan['phase']['goal']}\n")
     a(f"_Generated {now} · main at `{main['sha']}` ({main['date']}) · "
       f"{days_between(plan_today(), plan['phase']['end'])} days to {plan['phase']['end']}_\n")
 
     a("\n## Milestones\n")
     for ms in model["milestones"]:
-        a(f"\n### {MARK[ms['status']]} {ms['id']} · {ms['name']} — target {ms['target']} "
+        a(f"\n### {MARK[ms['status']]} {ms['id']} · {ms['name']}, target {ms['target']} "
           f"({ms['done']}/{ms['total']})\n")
         for g in ms["gates"]:
             a(f"- {MARK[g['status']]} {g['text']}")
@@ -528,11 +528,11 @@ def render_markdown(plan: dict, model: dict, queue: dict, main: dict, now: str) 
             a(f"1. {act['action']}")
             a(f"   - {act['why']}")
 
-    a("\n## Not blocked by anything upstream — so what is holding them?\n")
+    a("\n## Not blocked by anything upstream, so what is holding them?\n")
     for t in model["tickets"]:
         if t["state"] in ("done", "blocked") or not t["blockers"]:
             continue
-        a(f"\n**#{t['id']} — {t['short']}** (@{t['owner']})\n")
+        a(f"\n**#{t['id']}: {t['short']}** (@{t['owner']})\n")
         for b in sorted(t["blockers"], key=lambda x: SEV_RANK.get(x["severity"], 9)):
             a(f"- [{b['severity']}] {b['text']}")
 
@@ -542,13 +542,13 @@ def render_markdown(plan: dict, model: dict, queue: dict, main: dict, now: str) 
             continue
         deps = "; ".join(f"#{d['id']} ({d['what']})" if d["kind"] != "gate"
                          else f"{d['id']} gate ({d['what']})" for d in t["unmet_hard"])
-        a(f"- **#{t['id']}** {t['short']} (@{t['owner']}) — waiting on {deps}")
+        a(f"- **#{t['id']}** {t['short']} (@{t['owner']}), waiting on {deps}")
 
     a("\n## ADR ledger\n")
     for w in plan["adr_watch"]:
         cur = main["adr"].get(w["id"], "?")
         mk = MARK[DONE] if cur.lower().startswith(w["want"].lower()) else MARK[NOT_DONE]
-        a(f"- {mk} **{w['id']}** {w['name']} — on main: _{cur}_ · needs: {w['gate']}")
+        a(f"- {mk} **{w['id']}** {w['name']}, on main: _{cur}_ · needs: {w['gate']}")
     return "\n".join(L) + "\n"
 
 
@@ -569,7 +569,7 @@ def render_html(plan: dict, model: dict, queue: dict, main: dict, now: str) -> s
     a("<title>SuperconducTED Phase 3</title>")
     # IBM Plex is not a neutral pick: this project reads IBM Quantum calibration
     # snapshots all day, and Plex is IBM's own type. Mono carries every figure
-    # that has to line up — ticket numbers, SHAs, timestamps, counts.
+    # that has to line up: ticket numbers, SHAs, timestamps, counts.
     a('<link rel="preconnect" href="https://fonts.googleapis.com">')
     a('<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>')
     a('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
@@ -733,7 +733,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
     # ---- hero
     a('<div class="wrap"><header class="hero">')
     a(f'<div class="eyebrow">{e(p["repo"])}</div>')
-    a(f'<h1>{e(p["name"])} <span class="goal">— {e(p["goal"])}</span></h1>')
+    a(f'<h1>{e(p["name"])} <span class="goal">: {e(p["goal"])}</span></h1>')
     a(f'<div class="sub">Generated {e(now)} from live GitHub state · '
       f'main at <code>{e(main["sha"])}</code> ({e(main["date"])}) · '
       f'plan of {e(p["plan_written"])} at <code>{e(p["plan_base_sha"])}</code></div>')
@@ -760,7 +760,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
     a(f'<div class="sub" style="margin-top:7px">Calendar burned: day {elapsed} of '
       f'{total_days} (<span class="mono">{pct}%</span>) · gates met: '
       f'<span class="mono">{gate_pct}%</span>'
-      + (f' — running <b>{pct - gate_pct} points</b> behind the calendar.'
+      + (f'; running <b>{pct - gate_pct} points</b> behind the calendar.'
          if pct > gate_pct else '.') + '</div>')
     a('</div>')
     a('</div></header>')
@@ -769,7 +769,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
     a('<h2>Work on this right now</h2>')
     a('<div class="lede">Ranked per person: work that is ready and unblocks the most other '
       'tickets first, then reviews only that person can clear, then everything else by priority. '
-      'A ticket waiting on an upstream dependency is never listed against its own owner — it is '
+      'A ticket waiting on an upstream dependency is never listed against its own owner; it is '
       'listed as a review or a start against whoever owns the blocker.</div>')
     a('<div class="grid two">')
     order = ["mertefesensoy", "BurakOztekin", "yigit-arda", "bengisucvd", "BahaJarad"]
@@ -828,7 +828,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
     a('</div>')
 
     # ---- unblocked but stuck
-    a('<h2>Nothing upstream is blocking these — so what is?</h2>')
+    a('<h2>Nothing upstream is blocking these, so what is?</h2>')
     a('<div class="lede">Tickets whose stated dependencies are all met, and which therefore '
       'cannot be excused by the critical path. Each row is the actual reason it has not closed.</div>')
     stuck = [t for t in model["tickets"] if t["state"] != "done" and t["state"] != "blocked" and t["blockers"]]
@@ -865,11 +865,11 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
         deps = "".join(
             f'<li><span class="dot critical"></span><span><b>'
             + (f'#{d["id"]}' if d["kind"] != "gate" else f'{d["id"]} gate')
-            + f'</b> — {e(d["what"])}</span></li>' for d in t["unmet_hard"])
+            + f'</b>: {e(d["what"])}</span></li>' for d in t["unmet_hard"])
         a(f'<tr class="sev-critical"><td class="num"><a href="{e(t["url"])}">#{t["id"]}</a>'
           f'<span class="cap">{e(t["short"])}</span></td>')
         a(f'<td>@{e(t["owner"])}</td><td><ul class="blockers">{deps}</ul></td>')
-        a(f'<td class="sub">{e(t.get("fallback") or "—")}</td></tr>')
+        a(f'<td class="sub">{e(t.get("fallback") or "not stated")}</td></tr>')
     a('</table></div></div>')
 
     # ---- open PRs
@@ -904,7 +904,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
         chk = ('<span class="pill bad">failing</span>' if pr.get("checks_failing")
                else ('<span class="pill warn">stale</span>' if pr.get("checks_stale_vs_main")
                      else '<span class="pill ok">green</span>'))
-        chk += f'<div class="sub">{e(pr.get("checks_newest") or "—")}</div>'
+        chk += f'<div class="sub">{e(pr.get("checks_newest") or "none")}</div>'
         stuck = ("critical" if pr.get("mergeable") == "CONFLICTING"
                  or pr.get("reviewDecision") == "CHANGES_REQUESTED"
                  else ("high" if pr.get("isDraft") else "medium"))
@@ -985,7 +985,7 @@ def main() -> int:
 
     done = sum(1 for ms in model["milestones"] for g in ms["gates"] if g["status"] == DONE)
     total = sum(len(ms["gates"]) for ms in model["milestones"])
-    print(f"wrote index.html, STATUS.md, snapshot.json — {done}/{total} gates met, "
+    print(f"wrote index.html, STATUS.md, snapshot.json: {done}/{total} gates met, "
           f"{sum(1 for t in model['tickets'] if t['state']=='ready')} ready, "
           f"{sum(1 for t in model['tickets'] if t['state']=='blocked')} blocked")
     return 0

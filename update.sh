@@ -53,9 +53,9 @@ echo "==> changes"
 git --no-pager diff --stat -- index.html STATUS.md snapshot.json plan.json
 
 if [ "$substantive" -eq 1 ]; then
-  subject="chore: phase-3 dashboard — state moved ($(date -u +%Y-%m-%d))"
+  subject="chore: phase-3 dashboard: state moved ($(date -u +%Y-%m-%d))"
 else
-  subject="chore: phase-3 dashboard — no change ($(date -u +%Y-%m-%d))"
+  subject="chore: phase-3 dashboard: no change ($(date -u +%Y-%m-%d))"
 fi
 
 git add index.html STATUS.md snapshot.json plan.json

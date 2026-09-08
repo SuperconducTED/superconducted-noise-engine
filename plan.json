@@ -40,17 +40,17 @@
   "people": {
     "mertefesensoy": {
       "name": "Mert Efe Şensoy",
-      "role": "Lead — unblock others",
+      "role": "Lead: unblock others",
       "colour": "#4338ca"
     },
     "BurakOztekin": {
       "name": "Burak Öztekin",
-      "role": "The long pole — the trainer",
+      "role": "The long pole: the trainer",
       "colour": "#1d4ed8"
     },
     "yigit-arda": {
       "name": "Yiğit Arda Kaderoğlu",
-      "role": "The keystone — parameterization + ablation",
+      "role": "The keystone: parameterization + ablation",
       "colour": "#b45309"
     },
     "bengisucvd": {
@@ -65,7 +65,7 @@
     },
     "akba": {
       "name": "Dr. Fırat Akba",
-      "role": "Advisor — out of band via the lead",
+      "role": "Advisor: out of band via the lead",
       "colour": "#6b7280"
     }
   },
@@ -756,7 +756,7 @@
       "soft_deps": [],
       "extra_blockers": [],
       "unblocks": [],
-      "why_now": "No dependencies in either direction, and it blocks running the shipped pipeline on real archived data — which phase 3 does throughout. On a real snapshot the ratified 3x3x3 grid fires at exactly zero and the bootstrap pipeline raises ZeroDivisionError.",
+      "why_now": "No dependencies in either direction, and it blocks running the shipped pipeline on real archived data, which phase 3 does throughout. On a real snapshot the ratified 3x3x3 grid fires at exactly zero and the bootstrap pipeline raises ZeroDivisionError.",
       "note": "Plan §1: no membership-function grid may be derived from FEATURE_SCALES; every grid comes from the archive's measured quantiles."
     },
     {
@@ -880,7 +880,7 @@
       "extra_blockers": [
         {
           "kind": "policy",
-          "text": "Touches LOCKED src/superconducted/channels/kraus.py — needs a decision, not just a patch.",
+          "text": "Touches LOCKED src/superconducted/channels/kraus.py: needs a decision, not just a patch.",
           "severity": "medium"
         }
       ],
@@ -926,7 +926,7 @@
       "extra_blockers": [
         {
           "kind": "advisor",
-          "text": "Code landed in PR #69, but the ticket's own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened — #84 owns it.",
+          "text": "Code landed in PR #69, but the ticket's own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened; #84 owns it.",
           "severity": "critical"
         }
       ],
@@ -1007,7 +1007,7 @@
     },
     {
       "id": "review-throughput",
-      "text": "main's merge gate is a ruleset requiring 1 approval, and it does not dismiss stale reviews on push — so pushing a fix never clears a CHANGES_REQUESTED.",
+      "text": "main's merge gate is a ruleset requiring 1 approval, and it does not dismiss stale reviews on push, so pushing a fix never clears a CHANGES_REQUESTED.",
       "mitigation": "Each blocked PR needs an explicit re-review, not just a push.",
       "status": "materialised",
       "evidence": "Computed live below from the open-PR table."
@@ -1017,7 +1017,7 @@
       "text": "ci.yml does not dispatch on a conflicting PR, so a PR can show four green checks while no test has run against what would actually merge.",
       "mitigation": "Rebase before trusting a green check on a CONFLICTING PR.",
       "status": "watch",
-      "evidence": "Computed live below — any PR flagged CONFLICTING has checks that predate the current main."
+      "evidence": "Computed live below: any PR flagged CONFLICTING has checks that predate the current main."
     },
     {
       "id": "scope-discovery",

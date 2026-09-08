@@ -8,18 +8,18 @@ already set: data that belongs to the repo but not to the source tree lives on i
 root.
 
 ```
-phase-3-dashboard   (orphan — this branch)
+phase-3-dashboard   (orphan, this branch)
 main                (the project; untouched by anything here)
-calibration-data    (orphan — snapshots and ledger)
+calibration-data    (orphan, snapshots and ledger)
 ```
 
 ## What is here
 
 | File | What it is |
 | --- | --- |
-| `plan.json` | The **static plan model**: milestones and their gates, owners, and every dependency edge — each one quoted from a ticket's own `Depends on` row on GitHub rather than inferred from the milestone table. Hand-maintained, and only when the plan or a ticket actually changes. |
+| `plan.json` | The **static plan model**: milestones and their gates, owners, and every dependency edge, each one quoted from a ticket's own `Depends on` row on GitHub rather than inferred from the milestone table. Hand-maintained, and only when the plan or a ticket actually changes. |
 | `generate.py` | Joins `plan.json` against **live GitHub state** and renders the outputs. Contains no status of its own. |
-| `index.html` | The dashboard. Generated — do not edit. |
+| `index.html` | The dashboard. Generated, do not edit. |
 | `STATUS.md` | The same content as Markdown, for reading in a terminal or a PR. Generated. |
 | `snapshot.json` | The computed model for a run, so two days can be diffed. Generated. |
 | `update.sh` | Regenerate, commit if anything changed, push. What the daily routine runs. |
@@ -44,7 +44,7 @@ dependency set, so the routine cannot break on an environment drift.
 
 The phase-3 plan states dependencies, and GitHub states what has merged. Neither alone
 answers the question that actually governs a day's work: *given where everything is right
-now, what should each person do next, and for anything not waiting on someone else — what
+now, what should each person do next, and for anything not waiting on someone else, what
 is actually holding it?* Those are two different questions and the plan conflates them.
 The dashboard separates them into two sections deliberately.
 
@@ -59,8 +59,8 @@ wrong:
   fallback.
 
 - **A dependency with a `part` gates that part, not the ticket.** `#60` needs `#63` for its
-  first archive fit and for nothing else. Its LSE stage — the M2 gate, and the whole reason
-  the trainer is called the long pole — needs nothing from `#63`. Partial dependencies
+  first archive fit and for nothing else. Its LSE stage (the M2 gate, and the whole reason
+  the trainer is called the long pole) needs nothing from `#63`. Partial dependencies
   become scope notes on a startable ticket, never a block.
 
 - **A later `COMMENTED` review does not dismiss an earlier `CHANGES_REQUESTED`.** `main`'s
@@ -78,7 +78,7 @@ already moved. They are marked stale rather than green.
 | | |
 | --- | --- |
 | ✅ | Met, and verified against live GitHub or the ADR ledger on `main`. |
-| 🟡 | In flight — a PR exists but has not merged. |
+| 🟡 | In flight: a PR exists but has not merged. |
 | ❌ | Not done. |
 | ⬜ | No machine-checkable source. Deliberately not amber: an unknown must never read as progress. |
 
@@ -91,7 +91,7 @@ Edit it when, and only when, one of these is true:
 - a new ticket joins the phase, or an owner changes;
 - a manual gate (`"kind": "manual"`) becomes machine-checkable, or its `note` goes stale.
 
-Everything else — issue state, PR state, review decisions, CI, ADR statuses — is read live
+Everything else (issue state, PR state, review decisions, CI, ADR statuses) is read live
 on every run and must never be written here. If a number in the dashboard looks wrong, the
 fix is almost always in `generate.py`'s derivation or in a ticket on GitHub, not in this file.
 
@@ -123,12 +123,12 @@ produce a `no change` commit, never a `state moved` one:
 ./update.sh && ./update.sh && git log --oneline -2
 ```
 
-The second subject must read `— no change`. If it reads `— state moved` with only a
+The second subject must read `: no change`. If it reads `: state moved` with only a
 timestamp in the diff, the stamp filter in `update.sh` has drifted from the format
 `generate.py` emits.
 
 **`update.sh` refuses to commit onto the wrong branch.** It `cd`s to its own directory
-first, so where you invoke it from does not matter — what it guards against is *this
+first, so where you invoke it from does not matter; what it guards against is *this
 worktree having been switched to another branch*, which is the case where a commit would
 actually land somewhere it should not. Confirm the guard fires:
 
@@ -147,13 +147,13 @@ changes:
 
 | Check | Expected |
 | --- | --- |
-| `#60` after `#57`'s contract merged | **ready**, with a scope note that the archive-fit part waits on `#63` — not blocked |
+| `#60` after `#57`'s contract merged | **ready**, with a scope note that the archive-fit part waits on `#63`, not blocked |
 | A reviewer who follows a `CHANGES_REQUESTED` with a `COMMENTED` | still listed as the blocker, with "looked again … without lifting it" |
 | A `CONFLICTING` PR with green checks | checks marked **stale**, never green |
 
 ## Sources
 
-- `docs/roadmap/2026-09-03-phase-3-plan.md` on `main` — the plan itself, and the source of
+- `docs/roadmap/2026-09-03-phase-3-plan.md` on `main`: the plan itself, and the source of
   truth for anything the dashboard and the plan disagree about.
-- `docs/decisions.md` on `main` — ADR statuses, read live.
+- `docs/decisions.md` on `main`: ADR statuses, read live.
 - Issues #45–#84 and their `Depends on` rows.
