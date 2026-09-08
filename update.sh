@@ -27,22 +27,44 @@ fi
 echo "==> regenerating"
 "$PY" generate.py
 
-if git diff --quiet -- index.html STATUS.md snapshot.json; then
-  echo "==> no change since the last run"
+if git diff --quiet -- index.html STATUS.md snapshot.json plan.json; then
+  echo "==> byte-identical to the last run, nothing to commit"
   exit 0
 fi
 
-# Show what actually moved, so a routine's log is readable without opening the diff.
+# Every run stamps a fresh generated-at time, so "the files differ" is not the
+# same question as "anything actually moved". Ask the second question by
+# diffing with the timestamps filtered out. Both cases still get committed --
+# a daily heartbeat is worth recording, because "checked, nothing moved" is
+# real information about a phase with a deadline -- but the commit subject
+# says which it was, so `git log --oneline` reads as a record of progress
+# rather than a wall of identical refreshes.
+strip_stamps() { sed -E 's/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2} UTC/<stamp>/g'; }
+
+substantive=0
+for f in index.html STATUS.md snapshot.json plan.json; do
+  git show "HEAD:$f" 2>/dev/null | strip_stamps > /tmp/.p3-old.$$ || : > /tmp/.p3-old.$$
+  strip_stamps < "$f" > /tmp/.p3-new.$$
+  if ! cmp -s /tmp/.p3-old.$$ /tmp/.p3-new.$$; then substantive=1; fi
+done
+rm -f /tmp/.p3-old.$$ /tmp/.p3-new.$$
+
 echo "==> changes"
-git --no-pager diff --stat -- index.html STATUS.md snapshot.json
+git --no-pager diff --stat -- index.html STATUS.md snapshot.json plan.json
+
+if [ "$substantive" -eq 1 ]; then
+  subject="chore: phase-3 dashboard — state moved ($(date -u +%Y-%m-%d))"
+else
+  subject="chore: phase-3 dashboard — no change ($(date -u +%Y-%m-%d))"
+fi
 
 git add index.html STATUS.md snapshot.json plan.json
 GIT_AUTHOR_NAME="Mert Efe Şensoy" \
 GIT_AUTHOR_EMAIL="sensoymertefe@gmail.com" \
 GIT_COMMITTER_NAME="Mert Efe Şensoy" \
 GIT_COMMITTER_EMAIL="sensoymertefe@gmail.com" \
-  git commit -q -m "chore: refresh phase-3 dashboard ($(date -u +%Y-%m-%d))"
+  git commit -q -m "$subject"
 
 echo "==> pushing"
 git push -q superconducted-noise-engine phase-3-dashboard
-echo "==> done"
+echo "==> done: $subject"
