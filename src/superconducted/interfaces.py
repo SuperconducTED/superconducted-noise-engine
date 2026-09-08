@@ -147,9 +147,57 @@ class RuleBase(abc.ABC):
 class TSKTrainer(abc.ABC):
     """Fit a validated training set without mutating the caller's rule base.
 
-    Implementations return a new finite rule base with the same structural
-    dimensions and interval type. They must not mutate caller-owned consequent
-    arrays or membership-function parameter arrays.
+    *Inputs.* A :class:`RuleBase` — concretely a
+    :class:`superconducted.fuzzy.tsk.TSKRuleBase`, but annotated as the ABC
+    because ``fuzzy/tsk.py`` imports this module and the reverse import would
+    be circular. Implementations therefore ``isinstance``-check the argument
+    and raise :class:`TypeError` for any other :class:`RuleBase`. The second
+    input is a validated :class:`superconducted.types.TrainingSet`.
+
+    *Output.* A :class:`superconducted.types.TrainingResult` whose
+    ``rule_base`` is a **new** object.
+
+    *Side effects.* None on the caller's rule base.
+
+    *Invariants.*
+
+    (a) The input rule base's parameter **values** are unchanged after
+        ``fit`` — every ``TSKRule.consequent_params`` and every
+        ``MembershipFunction.parameters()``.
+    (b) Every consequent entry and MF parameter in the returned rule base is
+        finite.
+    (c) The returned rule base has the same ``n_rules``, ``input_dim``,
+        ``output_dim`` and ``is_interval_type2``.
+
+    Invariant (a) is the trainer's obligation rather than a property of the
+    LOCKED ``fuzzy/tsk.py``, because that module is shallowly read-only in
+    three ways:
+
+    - ``TSKRule.consequent_params`` has no setter but returns the *live*
+      internal ndarray, so ``rb.rules[0].consequent_params[0, -1] = 42.0``
+      changes what ``consequent()`` returns.
+    - ``TSKRule.__init__`` calls ``np.asarray(consequent_params,
+      dtype=np.float64)``, which **aliases** a caller's float64 array rather
+      than copying it.
+    - ``TSKRuleBase.from_grid`` iterates ``product(*per_input_mfs)`` and
+      reuses one MF object across every rule naming it, while
+      ``set_parameters`` mutates in place — so a 3x3x3 grid has 27 rules and
+      81 antecedent references over only 9 distinct objects.
+
+    Implementations must therefore ``copy.deepcopy`` the membership functions
+    before calling ``set_parameters``, pass freshly allocated consequent
+    arrays into rebuilt ``TSKRule`` objects, and never write through
+    ``rule.consequent_params[...]``.
+
+    *Warm start.* An implementation must satisfy ADR-024 clause 5 — call
+    ``first_viable_seed`` when initializing, or adopt a squashing strategy
+    with everywhere-nonzero gradient (``SigmoidSquashing`` per ADR-012) and
+    define its own viability predicate — **or record the mechanism it uses
+    instead**. The clause is written against *drawn* initializations; an
+    anchored consequent evaluated at each rule's centre is not drawn at all,
+    so it meets the clause's intent while falling outside its letter, and
+    such a trainer documents that third mechanism rather than claiming the
+    clause.
     """
 
     @abc.abstractmethod
