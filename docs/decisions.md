@@ -1204,6 +1204,26 @@ the target evaluated at mean $T_1$/$T_2$, because the mapping is nonlinear.
 `training.targets.gate_lengths` reads only the requested one-qubit gate from
 the raw `properties.gates` envelope and requires the `ns` gate-length unit.
 
+A train/validation split is cut at a **snapshot boundary**, never inside one:
+`TrainingSet.time_split(cut)` sends rows with `timestamp < cut` left and
+`>= cut` right, so rows sharing a timestamp always stay together. NC-028 is the
+precedent. Its −0.585 R² was measured across a 20-day time split, and a cut
+placed inside a snapshot proved sensitive to the order of that snapshot's rows,
+while a cut placed between snapshots cannot be moved by any ordering. The split
+raises rather than returning an empty side, because a silently empty validation
+set is worse than a crash.
+
+**Not the target.** Two other quantities are *evaluation references* in phase 3
+and explicitly not regression targets:
+
+- **(B)** a distribution-level target derived from reference-simulation counts,
+  and
+- **(C)** hardware counts.
+
+Both are how a fitted model is *judged*; neither is what it regresses onto.
+Conflating them would let a model be trained against the same counts it is
+later scored on, and would silently change the target's units and support.
+
 **Consequences**: The proposal supplies one testable target to Issue #58's
 reference model and a future trainer. It deliberately introduces neither a
 multi-qubit, readout-error, nor non-zero-excited-population target: the current
@@ -1235,4 +1255,6 @@ per-qubit targets. This entry remains Open until those decisions are recorded.
 **Source**: Issue #57; `docs/decisions/drafts/ADR-027-calibration-training-target.md`;
 `src/superconducted/training/targets.py`; `tests/training/test_targets.py`;
 `tests/training/test_aer_pin.py`; ADR-008, ADR-012, ADR-013, ADR-014, ADR-017,
-and ADR-020.
+ADR-020, and ADR-024 clause 5 — the warm-start obligation the `TSKTrainer`
+docstring carries, which a trainer must either satisfy or replace with a
+recorded mechanism of its own. NC-028 is cited above for the split rule.
