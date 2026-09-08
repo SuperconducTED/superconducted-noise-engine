@@ -34,9 +34,18 @@ it.
 Performed **before** any change, against the two documents as committed:
 
 ```bash
-git show superconducted-noise-engine/calibration-data:snapshots/2026-08/ibm_fez/20260813T220506000000Z.json
-git show superconducted-noise-engine/calibration-data:collisions/2026-08/ibm_fez/20260813T220506000000Z.d6f9532e37a0da84.json
+git fetch superconducted-noise-engine calibration-data
+git show ca5b23b:snapshots/2026-08/ibm_fez/20260813T220506000000Z.json
+git show ca5b23b:collisions/2026-08/ibm_fez/20260813T220506000000Z.d6f9532e37a0da84.json
 ```
+
+`ca5b23b` is the backfill commit that wrote the collision file, and it is the
+ref both reads must name. The branch **tip** no longer serves the second path:
+`1996bf6` removed the spurious file (see `## Follow-up on calibration-data`
+below), so a `git show` against `calibration-data` itself now fails with
+`does not exist in 'superconducted-noise-engine/calibration-data'`. The
+snapshot blob is unaffected by that removal and is byte-identical at the tip
+and at `ca5b23b` (`0db0b0d`); the collision blob is `234500d`.
 
 | Fact | Observed |
 | --- | --- |
@@ -202,10 +211,15 @@ the new digest by design: they guard against the fix over-reaching.
 Against the real pair:
 
 ```bash
-git show superconducted-noise-engine/calibration-data:snapshots/2026-08/ibm_fez/20260813T220506000000Z.json > archived.json
-git show superconducted-noise-engine/calibration-data:collisions/2026-08/ibm_fez/20260813T220506000000Z.d6f9532e37a0da84.json > new.json
+git fetch superconducted-noise-engine calibration-data
+git show ca5b23b:snapshots/2026-08/ibm_fez/20260813T220506000000Z.json > archived.json
+git show ca5b23b:collisions/2026-08/ibm_fez/20260813T220506000000Z.d6f9532e37a0da84.json > new.json
 python scripts/canonical_snapshot_digest.py --compare-reread new.json archived.json; echo $?
 ```
+
+Read both documents at `ca5b23b`, not at the branch tip: `1996bf6` has since
+removed the collision file. Read them with `git show` rather than checking the
+branch out, so `core.autocrlf` cannot rewrite the bytes the digest hashes.
 
 `0` after this change (was `1`), which `file_snapshots.sh` reads as
 `duplicate-partial`. `--compare new.json archived.json` still exits `1`, and
