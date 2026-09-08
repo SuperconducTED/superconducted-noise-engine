@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-08 18:10 UTC · main at `645b4d1a` (2026-09-08) · 22 days to 2026-09-30_
+_Generated 2026-09-08 18:22 UTC · main at `645b4d1a` (2026-09-08) · 22 days to 2026-09-30_
 
 
 ## Milestones
@@ -172,6 +172,12 @@ _Generated 2026-09-08 18:10 UTC · main at `645b4d1a` (2026-09-08) · 22 days to
 - **#64** ADR-015 / ADR-016 ensemble + intervals (@bengisucvd), waiting on #58 (density-matrix mode, transpile-then-prepare, no silent NaN, build_reference, simulate_engine signature); M3 gate (gated on the ADR-009 decision and #60's first archive fit)
 - **#65** ADR-007 pre/between-gates fuzzification (@BurakOztekin), waiting on #58 (certified harness and build_reference); M3 gate (phase 4; the M3 gate is the earliest conceivable start, not a promise)
 - **#76** Promote diagonal Hellinger to a certified metric (@bengisucvd), waiting on #58 (certified density-matrix harness); #62 (the helper and evidence format must stabilise first)
+
+## Day by day
+
+
+Only 1 day recorded so far. The routine adds one per day.
+
 
 ## ADR ledger
 
