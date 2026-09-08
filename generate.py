@@ -400,6 +400,155 @@ def days_between(a: str, b: str) -> int:
 SEV_RANK = {"critical": 0, "high": 1, "medium": 2, "low": 3, "info": 4}
 
 
+# --------------------------------------------------------------------------
+# History: one small record per day, so the phase can be read as a trend
+# --------------------------------------------------------------------------
+
+HISTORY = HERE / "history"
+
+
+def summarise(model: dict, main: dict, now: str) -> dict:
+    """The compact daily record. Deliberately small and derived only.
+
+    It holds counts and per-ticket states, never prose: the day-over-day story
+    is *computed* by diffing two of these, so it cannot drift from what the
+    dashboard says. One file per day, overwritten by later runs on the same
+    day, so the record is "where the phase stood at the end of that day"
+    rather than a log of every refresh.
+    """
+    gates = [g for ms in model["milestones"] for g in ms["gates"]]
+    counts: dict[str, int] = defaultdict(int)
+    for t in model["tickets"]:
+        counts[t["state"]] += 1
+    return {
+        "date": plan_today(),
+        "generated": now,
+        "main_sha": main["sha"],
+        "gates_done": sum(1 for g in gates if g["status"] == DONE),
+        "gates_total": len(gates),
+        "milestones": {ms["id"]: {"done": ms["done"], "total": ms["total"],
+                                  "status": ms["status"]} for ms in model["milestones"]},
+        "counts": dict(counts),
+        "tickets": {str(t["id"]): t["state"] for t in model["tickets"]},
+        "adr": dict(main["adr"]),
+    }
+
+
+def load_history() -> list[dict]:
+    if not HISTORY.is_dir():
+        return []
+    out = []
+    for f in sorted(HISTORY.glob("*.json")):
+        try:
+            out.append(json.loads(f.read_text(encoding="utf-8")))
+        except (json.JSONDecodeError, OSError):
+            continue  # a corrupt day must not take the whole dashboard down
+    return sorted(out, key=lambda d: d.get("date", ""))
+
+
+STATE_WORD = {"ready": "ready to start", "in_review": "in review",
+              "blocked": "blocked upstream", "done": "closed"}
+
+
+def day_events(prev: dict, cur: dict, plan: dict) -> list[str]:
+    """What changed between two daily records, in plain language.
+
+    Only transitions are reported. A ticket that sat blocked all week produces
+    no line, which is the point: the list should read as "what moved", not as
+    a re-statement of the board.
+    """
+    ev: list[str] = []
+    short = {str(t["id"]): t["short"] for t in plan["tickets"]}
+
+    dg = cur["gates_done"] - prev["gates_done"]
+    if dg:
+        ev.append(f"{'+' if dg > 0 else ''}{dg} milestone "
+                  f"{'gate' if abs(dg) == 1 else 'gates'} "
+                  f"({prev['gates_done']} to {cur['gates_done']} of {cur['gates_total']})")
+
+    for mid, m in cur["milestones"].items():
+        p = prev["milestones"].get(mid)
+        if p and p["done"] != m["done"]:
+            ev.append(f"{mid} {p['done']}/{p['total']} to {m['done']}/{m['total']}")
+
+    for tid, state in cur["tickets"].items():
+        was = prev["tickets"].get(tid)
+        if was and was != state:
+            ev.append(f"#{tid} {short.get(tid, '')}: {STATE_WORD.get(was, was)} "
+                      f"to {STATE_WORD.get(state, state)}")
+
+    for adr, status in cur["adr"].items():
+        was = prev["adr"].get(adr)
+        if was and was != status:
+            ev.append(f"{adr}: {was} to {status}")
+
+    if prev.get("main_sha") != cur.get("main_sha"):
+        ev.append(f"main moved to {cur['main_sha']}")
+    return ev
+
+
+def burnup_svg(history: list[dict], plan: dict) -> str:
+    """Gates met over the phase, against an even-pace reference.
+
+    One data series and one reference line, so no categorical palette is in
+    play. Identity never rests on hue: the measured series is a solid stroke
+    with an endpoint marker and a direct end-label, the reference is dashed
+    and separately labelled, which keeps them apart in greyscale, under any
+    colour-vision deficiency, and in forced-colors mode.
+
+    Returns "" below three points, because two points drawn as a trend line
+    invite a reading the data cannot support.
+    """
+    if len(history) < 3:
+        return ""
+
+    p = plan["phase"]
+    W, H = 720, 220
+    L, R, T, B = 44, 92, 16, 34          # room in the viewBox for outer labels
+    total = history[-1]["gates_total"]
+    span = max(1, days_between(p["start"], p["end"]))
+
+    def x(date: str) -> float:
+        return L + (W - L - R) * max(0.0, min(1.0, days_between(p["start"], date) / span))
+
+    def y(v: float) -> float:
+        return T + (H - T - B) * (1 - (v / total if total else 0))
+
+    pts = [(x(h["date"]), y(h["gates_done"])) for h in history]
+    path = " ".join(("M" if i == 0 else "L") + f"{px:.1f},{py:.1f}"
+                    for i, (px, py) in enumerate(pts))
+    last = history[-1]
+
+    s = [f'<svg viewBox="0 0 {W} {H}" width="100%" role="img" '
+         f'aria-label="Milestone gates met over the phase, against an even-pace reference.">']
+    # Recessive frame: baseline and the target gridline only.
+    for v, lab in ((0, "0"), (total, str(total))):
+        s.append(f'<line x1="{L}" y1="{y(v):.1f}" x2="{W-R}" y2="{y(v):.1f}" '
+                 f'stroke="var(--line)" stroke-width="1" fill="none"/>')
+        s.append(f'<text x="{L-8}" y="{y(v)+4:.1f}" text-anchor="end" fill="var(--muted)" '
+                 f'font-size="11" font-family="var(--mono)">{lab}</text>')
+    # Even-pace reference: dashed, neutral, labelled at its own end.
+    s.append(f'<line x1="{x(p["start"]):.1f}" y1="{y(0):.1f}" x2="{x(p["end"]):.1f}" '
+             f'y2="{y(total):.1f}" stroke="var(--muted)" stroke-width="1" '
+             f'stroke-dasharray="4 4" fill="none" opacity=".65"/>')
+    s.append(f'<text x="{W-R+8}" y="{y(total)+4:.1f}" fill="var(--muted)" font-size="11" '
+             f'font-family="var(--sans)">even pace</text>')
+    # Measured series.
+    s.append(f'<path d="{path}" stroke="var(--accent)" stroke-width="2" fill="none" '
+             f'stroke-linejoin="round" stroke-linecap="round"/>')
+    s.append(f'<circle cx="{pts[-1][0]:.1f}" cy="{pts[-1][1]:.1f}" r="4.5" '
+             f'fill="var(--accent)" stroke="var(--panel)" stroke-width="2"/>')
+    s.append(f'<text x="{pts[-1][0]+10:.1f}" y="{pts[-1][1]+4:.1f}" fill="var(--ink)" '
+             f'font-size="12" font-weight="600" font-family="var(--sans)">'
+             f'{last["gates_done"]} met</text>')
+    # Date axis: the two endpoints only; the table below carries the detail.
+    for date, anchor, px in ((p["start"], "start", x(p["start"])), (p["end"], "end", x(p["end"]))):
+        s.append(f'<text x="{px:.1f}" y="{H-10}" text-anchor="{anchor}" fill="var(--muted)" '
+                 f'font-size="11" font-family="var(--mono)">{date}</text>')
+    s.append("</svg>")
+    return "".join(s)
+
+
 def action_queue(model: dict, plan: dict) -> dict[str, list[dict]]:
     """One ranked action list per person.
 
@@ -504,7 +653,8 @@ def e(s: object) -> str:
     return html.escape(str(s if s is not None else ""))
 
 
-def render_markdown(plan: dict, model: dict, queue: dict, main: dict, now: str) -> str:
+def render_markdown(plan: dict, model: dict, queue: dict, main: dict, now: str,
+                    history: list[dict]) -> str:
     L: list[str] = []
     a = L.append
     a(f"# Phase 3: {plan['phase']['goal']}\n")
@@ -544,6 +694,20 @@ def render_markdown(plan: dict, model: dict, queue: dict, main: dict, now: str) 
                          else f"{d['id']} gate ({d['what']})" for d in t["unmet_hard"])
         a(f"- **#{t['id']}** {t['short']} (@{t['owner']}), waiting on {deps}")
 
+    a("\n## Day by day\n")
+    if len(history) < 2:
+        a(f"\nOnly {len(history)} day recorded so far. The routine adds one per day.\n")
+    else:
+        a("\n| Date | Gates | Ready | In review | Blocked | What moved |")
+        a("| --- | ---: | ---: | ---: | ---: | --- |")
+        for i, h in enumerate(reversed(history)):
+            j = len(history) - 1 - i
+            ev = day_events(history[j - 1], h, plan) if j > 0 else ["first record"]
+            c = h.get("counts", {})
+            a(f"| {h['date']} | {h['gates_done']}/{h['gates_total']} | {c.get('ready', 0)} "
+              f"| {c.get('in_review', 0)} | {c.get('blocked', 0)} | "
+              f"{'; '.join(ev) if ev else 'nothing moved'} |")
+
     a("\n## ADR ledger\n")
     for w in plan["adr_watch"]:
         cur = main["adr"].get(w["id"], "?")
@@ -552,7 +716,8 @@ def render_markdown(plan: dict, model: dict, queue: dict, main: dict, now: str) 
     return "\n".join(L) + "\n"
 
 
-def render_html(plan: dict, model: dict, queue: dict, main: dict, now: str) -> str:
+def render_html(plan: dict, model: dict, queue: dict, main: dict, now: str,
+                history: list[dict]) -> str:
     """Render the dashboard. Self-contained: no external CSS, JS or fonts."""
     p = plan["phase"]
     days_left = days_between(plan_today(), p["end"])
@@ -915,6 +1080,39 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
           f'<td>{rev_html}</td><td>{chk}</td><td class="sub">{e(pr["updatedAt"][:10])}</td></tr>')
     a('</table></div></div>')
 
+    # ---- day by day
+    a('<h2>Day by day</h2>')
+    a('<div class="lede">One record per day, written by the routine and diffed against '
+      'the day before. Every line below is computed from those records, so it cannot drift '
+      'from what the rest of this page says.</div>')
+    chart = burnup_svg(history, plan)
+    if chart:
+        a(f'<div class="card" style="margin-bottom:13px">{chart}</div>')
+    a('<div class="card"><div class="scroll"><table>')
+    a('<tr><th>Date</th><th>Gates</th><th>Ready</th><th>In review</th>'
+      '<th>Blocked</th><th>What moved</th></tr>')
+    if not history:
+        a('<tr><td colspan="6" class="empty">No records yet.</td></tr>')
+    for i in range(len(history) - 1, -1, -1):
+        h = history[i]
+        ev = day_events(history[i - 1], h, plan) if i > 0 else []
+        c = h.get("counts", {})
+        if i == 0:
+            moved = '<span class="pill idle">first record</span>'
+        elif ev:
+            moved = '<ul class="blockers">' + "".join(
+                f'<li><span class="dot medium"></span><span>{e(x)}</span></li>' for x in ev
+            ) + '</ul>'
+        else:
+            moved = '<span class="sub">nothing moved</span>'
+        a(f'<tr><td class="num">{e(h["date"])}</td>'
+          f'<td class="num">{h["gates_done"]}/{h["gates_total"]}</td>'
+          f'<td class="num">{c.get("ready", 0)}</td>'
+          f'<td class="num">{c.get("in_review", 0)}</td>'
+          f'<td class="num">{c.get("blocked", 0)}</td>'
+          f'<td>{moved}</td></tr>')
+    a('</table></div></div>')
+
     # ---- ADR ledger
     a('<h2>ADR ledger</h2>')
     a('<div class="lede">Status read from <span class="mono">docs/decisions.md</span> on main, '
@@ -974,8 +1172,18 @@ def main() -> int:
         with open(HERE / name, "w", encoding="utf-8", newline="\n") as fh:
             fh.write(text)
 
-    emit("index.html", render_html(plan, model, queue, main_state, now))
-    emit("STATUS.md", render_markdown(plan, model, queue, main_state, now))
+    # Record today before rendering, so the page always includes the day it is
+    # describing. A later run on the same date overwrites its own record rather
+    # than appending, which keeps exactly one row per day however often it runs.
+    HISTORY.mkdir(exist_ok=True)
+    today = summarise(model, main_state, now)
+    with open(HISTORY / f"{today['date']}.json", "w", encoding="utf-8", newline="\n") as fh:
+        json.dump(today, fh, indent=2, ensure_ascii=False, sort_keys=True)
+        fh.write("\n")
+    history = load_history()
+
+    emit("index.html", render_html(plan, model, queue, main_state, now, history))
+    emit("STATUS.md", render_markdown(plan, model, queue, main_state, now, history))
     emit("snapshot.json", json.dumps(
         {"generated": now, "main": main_state,
          "tickets": [{k: v for k, v in t.items() if k != "pr"} | {

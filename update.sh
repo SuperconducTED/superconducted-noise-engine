@@ -27,7 +27,10 @@ fi
 echo "==> regenerating"
 "$PY" generate.py
 
-if git diff --quiet -- index.html STATUS.md snapshot.json plan.json; then
+# A brand-new day's record is untracked rather than modified, and git diff does
+# not see untracked files at all, so both questions have to be asked.
+if git diff --quiet -- index.html STATUS.md snapshot.json plan.json history/ &&
+   [ -z "$(git ls-files --others --exclude-standard history/)" ]; then
   echo "==> byte-identical to the last run, nothing to commit"
   exit 0
 fi
@@ -42,7 +45,8 @@ fi
 strip_stamps() { sed -E 's/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2} UTC/<stamp>/g'; }
 
 substantive=0
-for f in index.html STATUS.md snapshot.json plan.json; do
+files="index.html STATUS.md snapshot.json plan.json $(ls history/*.json 2>/dev/null)"
+for f in $files; do
   git show "HEAD:$f" 2>/dev/null | strip_stamps > /tmp/.p3-old.$$ || : > /tmp/.p3-old.$$
   strip_stamps < "$f" > /tmp/.p3-new.$$
   if ! cmp -s /tmp/.p3-old.$$ /tmp/.p3-new.$$; then substantive=1; fi
@@ -50,7 +54,8 @@ done
 rm -f /tmp/.p3-old.$$ /tmp/.p3-new.$$
 
 echo "==> changes"
-git --no-pager diff --stat -- index.html STATUS.md snapshot.json plan.json
+git --no-pager diff --stat -- index.html STATUS.md snapshot.json plan.json history/
+git ls-files --others --exclude-standard history/ | sed "s/^/ new  /"
 
 if [ "$substantive" -eq 1 ]; then
   subject="chore: phase-3 dashboard: state moved ($(date -u +%Y-%m-%d))"
@@ -58,7 +63,7 @@ else
   subject="chore: phase-3 dashboard: no change ($(date -u +%Y-%m-%d))"
 fi
 
-git add index.html STATUS.md snapshot.json plan.json
+git add index.html STATUS.md snapshot.json plan.json history/
 GIT_AUTHOR_NAME="Mert Efe Şensoy" \
 GIT_AUTHOR_EMAIL="sensoymertefe@gmail.com" \
 GIT_COMMITTER_NAME="Mert Efe Şensoy" \

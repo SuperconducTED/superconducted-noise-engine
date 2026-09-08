@@ -21,8 +21,37 @@ calibration-data    (orphan, snapshots and ledger)
 | `generate.py` | Joins `plan.json` against **live GitHub state** and renders the outputs. Contains no status of its own. |
 | `index.html` | The dashboard. Generated, do not edit. |
 | `STATUS.md` | The same content as Markdown, for reading in a terminal or a PR. Generated. |
-| `snapshot.json` | The computed model for a run, so two days can be diffed. Generated. |
+| `snapshot.json` | The full computed model for the latest run, for debugging a value that looks wrong. Generated. |
+| `history/YYYY-MM-DD.json` | One small record per day: gate counts, ticket states, ADR statuses. Generated, and the only files here that accumulate. |
 | `update.sh` | Regenerate, commit if anything changed, push. What the daily routine runs. |
+
+## Day by day
+
+The routine writes `history/<date>.json` on every run, and a later run on the same date
+overwrites its own record. So each file answers "where did the phase stand at the end of
+that day", not "what happened at 08:40". The dashboard's **Day by day** section is computed
+by diffing consecutive records, which means the day-over-day story cannot drift from what
+the rest of the page says: both are derived from the same numbers.
+
+A record holds counts and states only, never prose. Lines such as *"#60: blocked upstream
+to ready to start"* are computed at render time from two records rather than stored. That
+is why adding a ticket to `plan.json` improves the history retroactively, and why changing
+a wording never rewrites the past.
+
+Only transitions are reported. A ticket that sat blocked all week produces no line, so the
+column reads as **what moved** rather than as a restatement of the board. A day on which
+nothing moved says exactly that.
+
+The burn-up chart appears once there are **three or more** records. Two points drawn as a
+trend line invite a reading the data cannot support, so below three the section shows the
+table alone. The chart carries one measured series against an even-pace reference, and the
+two are told apart by stroke weight and direct labels rather than by colour, so it survives
+greyscale, colour-vision deficiency, and forced-colors mode.
+
+The history is **not backfilled**. Records start the day the branch was created
+(2026-09-08), because earlier daily states were never measured and reconstructing them
+would be fabrication. `git log` on this branch is the coarser second record: one commit per
+run, with a subject saying whether anything moved.
 
 ## Running it
 
