@@ -1197,12 +1197,31 @@ layout this extends), `.github/workflows/calibration-poll.yml`,
     health/metrics.json
     health/progress.svg
 
-The state index is append-only and records one qubit-block canonical digest for
-each newly filed snapshot. The generated JSON and SVG are derived only from the
-state index and ledger; scheduled rendering must not traverse `snapshots/`.
-Candidate training floors are configuration inputs and must be labelled in the
-rendered output. The SVG is deterministic for identical committed index and
-ledger inputs, so the health workflow commits only when rendered bytes change.
+The state index is append-only **in the poll path**, and records one qubit-block
+canonical digest for each newly filed snapshot. The dispatched backfill may
+regenerate it once in `last_update_date` order (`--rebuild`); this is the only
+permitted rewrite and exists because the hourly poller starts appending the
+moment this merges, which closes the append path for history and would leave
+`is_new_state` permanently mismarked.
+
+The generated JSON and SVG are derived only from the state index and ledger;
+scheduled rendering must not traverse `snapshots/`. Candidate training floors
+are configuration inputs supplied by the workflow and must be labelled in the
+rendered output; no floor value is a literal in the renderer.
+
+The SVG carries **no clock reading**: every figure in it is a function of the
+committed index and ledger, plus the position of the two rolling windows FR-5
+mandates (the 72-hour poll strip and the 30-day acquisition sparkline).
+`generated_at` and the exact `hours_since_last_new_state` live in
+`metrics.json` alone, and the SVG renders the staleness as a band. This is what
+lets the health workflow commit only when rendered bytes change: a quiet
+archive reaches byte-stability within 30 days of its last new state, after
+which repeated renders produce no commit at all.
+
+`health/` is written by two workflows in separate concurrency groups, so their
+pushes can race. They resolve it by replaying onto the branch tip rather than
+by sharing a group, because a shared group lets a render cancel a queued poll
+and a cancelled poll writes no ledger row.
 
 The daily renderer uses a depth-one sparse checkout of `health/` and `ledger/`.
 The one-time backfill is explicitly dispatched and is the only health operation

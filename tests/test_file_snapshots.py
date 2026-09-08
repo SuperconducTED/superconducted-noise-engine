@@ -32,6 +32,10 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "file_snapshots.sh"
 DIGEST = REPO_ROOT / "scripts" / "canonical_snapshot_digest.py"
+# The script locates its siblings by its own path, so the sandbox must hold every
+# one of them. A missing push helper fails only at the very end, after the payload
+# has moved and the ledger row is written.
+PUSH_RETRY = REPO_ROOT / "scripts" / "push_with_retry.sh"
 
 # A is re-observed unchanged (bytes differ, document does not); B is re-observed
 # with a changed value; C is a June stamp polled in September, so it must file
@@ -176,6 +180,8 @@ def sandbox(tmp_path: Path) -> dict[str, Path]:
     (src / "scripts").mkdir()
     shutil.copy(SCRIPT, src / "scripts" / SCRIPT.name)
     shutil.copy(DIGEST, src / "scripts" / DIGEST.name)
+    shutil.copy(PUSH_RETRY, src / "scripts" / PUSH_RETRY.name)
+    (src / "scripts" / PUSH_RETRY.name).chmod(0o755)
     _git("add", "-A", cwd=src)
     _git("commit", "-q", "-m", "source tree", cwd=src)
     _git("remote", "add", "origin", str(origin), cwd=src)

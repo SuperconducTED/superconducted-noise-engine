@@ -186,4 +186,7 @@ elif [ "$added" -gt 0 ]; then
 else
   git commit -m "poll: $POLL_TIME $BACKEND (no new document)"
 fi
-git push "$DATA_REMOTE" "$DATA_BRANCH"
+# The health workflow is a second writer to this branch and runs in its own
+# concurrency group, so this push can now lose a race. Losing it silently drops
+# the ledger row that makes a scheduler stall visible, so replay and retry.
+"$here/push_with_retry.sh" "$DATA_REMOTE" "$DATA_BRANCH"

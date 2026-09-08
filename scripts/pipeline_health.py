@@ -1,8 +1,15 @@
-"""
-Create deterministic pipeline health metrics using the check out of calibration data.
+"""Deterministic pipeline-health metrics and SVG for a ``calibration-data`` checkout.
+
 The scheduled command reads only ``health/state-index.tsv`` and ``ledger/*.tsv``,
-never traversing the entire snapshots archive.  The module is stdlib-only and can
-be used directly for metrics computation without creating a subprocess
+never traversing the snapshot archive (NFR-1). The module is stdlib-only and its
+public functions are importable, so metrics can be computed without a subprocess.
+
+Rendering contract (NFR-3/FR-6): the SVG carries no clock reading. Every figure in
+it is a function of the committed index and ledger, plus the position of the two
+rolling windows FR-5 mandates. ``generated_at`` and the exact
+``hours_since_last_new_state`` live in ``metrics.json`` only. Rendering a bare
+elapsed-hours figure would change the bytes on every run and make the workflow's
+commit-on-change guard unreachable.
 """
 
 from __future__ import annotations
@@ -16,6 +23,15 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
+
+STALENESS_BANDS: tuple[tuple[float, str], ...] = (
+    (24.0, "under 24 h"),
+    (72.0, "24 h to 3 days"),
+    (168.0, "3 to 7 days"),
+)
+"""Upper bound in hours, paired with the label shown strictly below it."""
+
+OVER_LAST_BAND = "over 7 days"
 
 
 @dataclass(frozen=True)
@@ -89,6 +105,25 @@ def read_ledger(directory: Path) -> list[PollRow]:
     return result
 
 
+def staleness_band(hours: float | None) -> str:
+    """Bucket ``hours_since_last_new_state`` into the band the SVG renders.
+
+    The bounds are the two thresholds the dashboard already reasons in: 24 h is
+    the staleness alarm proposed for issue #48 section 7.3, and 72 h is the
+    poll-coverage window. Bucketing is what keeps the rendered bytes a function
+    of the committed inputs: a bare elapsed-hours figure advances on every run,
+    so the workflow would commit several KB to a 1.17 GB branch daily forever
+    and FR-6's commit-on-change guard could never fire. The exact hours stay in
+    ``metrics.json``, so nothing rendered is untraceable (UC-6).
+    """
+    if hours is None:
+        return "never"
+    for limit, label in STALENESS_BANDS:
+        if hours < limit:
+            return label
+    return OVER_LAST_BAND
+
+
 def _floor_values(values: Sequence[str]) -> list[tuple[str, int]]:
     """Parse ``label=value`` candidate floors."""
     result: list[tuple[str, int]] = []
@@ -158,12 +193,13 @@ def build_metrics(
         "index_head": index_head,
         "documents_total": documents,
         "states_total": states_total,
-        "duplication_ratio": 0 if not documents else 1 - states_total / documents,
+        "duplication_ratio": 0.0 if not documents else 1 - states_total / documents,
         "states_added_24h": states24,
         "states_added_7d": states7,
         "states_per_day_7d": rate,
-        "states_per_day_30d": daily_states,
+        "new_states_per_day_30d": daily_states,
         "hours_since_last_new_state": since,
+        "staleness_band": staleness_band(since),
         "polls_fired_24h": len(recent_polls),
         "polls_yielding_new_state_24h": sum(row.decision == "new" for row in recent_polls),
         "ledger_hour_coverage_72h": sum(hour_values) / 72,
@@ -173,16 +209,15 @@ def build_metrics(
 
 
 def render_svg(metrics: dict[str, Any]) -> str:
-    """Render a self-contained, GitHub-safe SVG with no time-varying content."""
+    """Render a self-contained, GitHub-safe SVG carrying no clock reading."""
     states = int(metrics["states_total"])
     documents = int(metrics["documents_total"])
     duplicate = float(metrics["duplication_ratio"]) * 100
-    stale = metrics["hours_since_last_new_state"]
     max_floor = max((int(floor["value"]) for floor in metrics["floors"]), default=max(states, 1))
     width = 900
     bar_x, bar_width = 55, 790
     progress = min(states / max_floor, 1) * bar_width
-    stale_text = "—" if stale is None else f"{float(stale):.1f}"
+    stale_text = html.escape(str(metrics["staleness_band"]))
     coverage = float(metrics["ledger_hour_coverage_72h"]) * 100
     rate_text = float(metrics["states_per_day_7d"])
     labels = [
@@ -190,7 +225,7 @@ def render_svg(metrics: dict[str, Any]) -> str:
         f'<text x="55" y="76" class="value">{states} states</text>',
         f'<text x="300" y="76" class="metric">{documents} documents</text>',
         f'<text x="525" y="76" class="metric">{duplicate:.1f}% duplicate</text>',
-        f'<text x="55" y="116" class="label">Hours since last new state: {stale_text}</text>',
+        f'<text x="55" y="116" class="label">Time since last new state: {stale_text}</text>',
         '<text x="55" y="154" class="label">Distinct states against candidate floors</text>',
         f'<rect x="{bar_x}" y="165" width="{bar_width}" height="24" rx="4" fill="#d7e0ea"/>',
         f'<rect x="{bar_x}" y="165" width="{progress:.2f}" height="24" rx="4" fill="#166534"/>',
@@ -211,13 +246,15 @@ def render_svg(metrics: dict[str, Any]) -> str:
         labels.append(f'<rect x="{x}" y="263" width="8" height="20" rx="1" fill="{colour}"/>')
     labels.append(f'<text x="55" y="310" class="label">72-hour coverage: {coverage:.1f}%</text>')
     labels.append('<text x="55" y="350" class="label">New states per day — trailing 30 days</text>')
-    daily_states = [int(value) for value in metrics["states_per_day_30d"]]
+    daily_states = [int(value) for value in metrics["new_states_per_day_30d"]]
     peak = max(daily_states, default=0)
     for index, value in enumerate(daily_states):
         height = 0 if peak == 0 else value / peak * 70
         x = 55 + index * 25
-        labels.append(f'<rect x="{x}" y="{445 - height:.2f}" width="18" height="{height:.2f}"')
-        labels.append(' fill="#2563eb"/>')
+        labels.append(
+            f'<rect x="{x}" y="{445 - height:.2f}" width="18" '
+            f'height="{height:.2f}" fill="#2563eb"/>'
+        )
     labels.append(f'<text x="55" y="370" class="metric">{rate_text:.2f} states/day</text>')
     body = "".join(labels)
     return (
@@ -237,9 +274,10 @@ def main(argv: Iterable[str] | None = None) -> int:
     parser.add_argument(
         "--floor",
         action="append",
-        default=None,
+        required=True,
         metavar="LABEL=VALUE",
-        help="Candidate floor; may be repeated (default: NC-012=630 and TanhBellMF=675).",
+        help="Candidate floor, repeatable. Required: FR-7 makes floors configuration, "
+        "so the workflow supplies them and no floor value is a literal in this module.",
     )
     parser.add_argument(
         "--now", type=parse_time, default=None, help="UTC render instant (for tests)."
@@ -250,7 +288,7 @@ def main(argv: Iterable[str] | None = None) -> int:
     metrics = build_metrics(
         read_index(root / "health/state-index.tsv"),
         read_ledger(root / "ledger"),
-        _floor_values(args.floor or ["NC-012=630", "TanhBellMF=675"]),
+        _floor_values(args.floor),
         now,
     )
     health = root / "health"

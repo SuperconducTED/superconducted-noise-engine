@@ -20,8 +20,9 @@ scheduler that is only collecting repeated qubit states.
 | File | One-sentence description |
 | --- | --- |
 | `scripts/canonical_snapshot_digest.py` | Adds the importable `qubit_digest()` API and `--scope qubits` while preserving document-digest defaults. |
-| `scripts/file_snapshots.sh` | Appends one qubit-digest state-index row for each newly archived document. |
-| `scripts/backfill_state_index.py` | Idempotently appends existing snapshots to the state index in timestamp order. |
+| `scripts/file_snapshots.sh` | Appends one qubit-digest state-index row for each newly archived document, and pushes through the retry helper. |
+| `scripts/push_with_retry.sh` | Replays a data-branch commit onto the tip and retries, so the poll and health pushes can race safely. |
+| `scripts/backfill_state_index.py` | Idempotently appends existing snapshots in timestamp order, with a `--rebuild` mode that regenerates the whole index once the poller has started appending. |
 | `scripts/pipeline_health.py` | Reads compact health inputs, writes metrics JSON, and renders a deterministic self-contained SVG. |
 | `.github/workflows/calibration-health.yml` | Daily sparse-checkout renderer with an optional one-time backfill and commit-on-change behaviour. |
 | `.github/workflows/calibration-poll.yml` | Keeps hourly polls isolated from health-render cancellation. |
@@ -54,7 +55,7 @@ snapshot_filename<TAB>last_update_date<TAB>qubit_digest<TAB>is_new_state
 
 `filename` is the archived document's name; `last_update_date` is its ISO-8601 UTC timestamp. `qubit_digest` is SHA-256 over the canonical compact JSON of `properties.qubits` only. `is_new_state` is `1` only if that digest has not been seen in a prior row. This makes the index the small, replayable source of truth for state counts without the need of scheduled jobs reading snapshots.
 
-The renderer generates `health/metrics.json` and `health/progress.svg`. `generated_at` should be present in JSON only for provenance; the SVG has no timestamp, so the same committed inputs produce byte-identical rendered output.
+The renderer generates `health/metrics.json` and `health/progress.svg`. `generated_at` and the exact `hours_since_last_new_state` are present in JSON only, for provenance. The SVG carries no clock reading, so its bytes are a function of the committed index and ledger plus the position of the two rolling windows FR-5 mandates. A quiet archive therefore reaches byte-stability within 30 days of its last new state, after which repeated renders commit nothing; `tests/test_pipeline_health.py::TestCommitOnChange` pins both halves of that.
 
 ### Workflow lifecycle
 
@@ -117,14 +118,32 @@ new state; it is a raw staleness signal, not an unapproved alarm threshold.
 ## Design decisions
 
 Candidate floors are workflow configuration, not a training assertion in code.
-The default readout shows the documented `NC-012=630` candidate and the
-`TanhBellMF=675` alternative together, labelled by source. The implementation
-does not decide the true training floor.
+`--floor` is **required**: `pipeline_health.py` holds no floor value at all, and
+`tests/test_pipeline_health.py` asserts that neither `630` nor `675` appears in
+its source. The values live in the health workflow's `HEALTH_FLOORS` env block
+and can be overridden per dispatch. The default readout shows the documented
+`NC-012=630` candidate and the `TanhBellMF=675` alternative together, labelled
+by source. The implementation does not decide the true training floor.
+
+The staleness headline is rendered as a **band** (`under 24 h`, `24 h to 3
+days`, `3 to 7 days`, `over 7 days`, `never`), not as an elapsed-hours figure.
+The exact hours stay in `metrics.json`. This is not cosmetic: a rendered clock
+reading advances on every run, so the rendered bytes would differ every time and
+FR-6's commit-on-change guard could never fire, putting 8.3 KB on a 1.17 GB
+branch daily forever. The band bounds are the two thresholds the dashboard
+already reasons in, 24 h being the proposed staleness alarm and 72 h the
+poll-coverage window.
 
 The renderer runs daily rather than every poll to limit branch churn while the
-index and ledger retain hourly measurement. The poller and renderer share one
-GitHub Actions concurrency group, preventing concurrent writes to
-`calibration-data` from causing a non-fast-forward push failure.
+index and ledger retain hourly measurement. The poller and renderer use
+**separate** concurrency groups: sharing one would let a health render cancel a
+queued poll, and a cancelled poll writes no ledger row, which is invisible in
+exactly the instrument this dashboard exists to provide. The cost of that choice
+is that the two pushes to `calibration-data` can race, so both go through
+`scripts/push_with_retry.sh`, which replays the commit onto the branch tip and
+retries. Replay rather than merge: each workflow writes a tree only it touches,
+so a textual conflict means something unmodelled happened and the run must fail
+loudly instead of guessing.
 
 Before the workflow is enabled, ADR-025 must be amended to include the
 `health/` tree and receive the out-of-band architectural review required by
@@ -140,10 +159,15 @@ without launching one subprocess per file.
 
 1. Obtain the ADR-025 amendment and the issue-required architectural review for
    the new `health/` tree.
-2. Merge the source and workflow changes.
-3. Dispatch **Calibration Pipeline Health** once with `backfill=true`. Record
-   the indexed calibration-data ref and reconcile its result with NC-025's
-   historical 504-state result at `f0930b9`; investigate a mismatch.
+2. Merge the source and workflow changes. **The poller starts appending index
+   rows on its next run** (`cron: 37 * * * *`), and at NC-030's republication
+   rate the first `decision=new` typically lands within an hour or two.
+3. Dispatch **Calibration Pipeline Health** with `backfill=true`. If the poller
+   has already appended a row, the append path refuses to run rather than mark
+   long-known states as new; dispatch with `rebuild=true` as well, which
+   regenerates the index in `last_update_date` order. Record the indexed
+   calibration-data ref and reconcile its result with NC-025's historical
+   504-state result at `f0930b9`; investigate a mismatch.
 4. Dispatch it again without backfill. Unchanged inputs must result in no commit.
 5. Update the calibration-data README to embed
    `![Pipeline health](health/progress.svg)` and link ADR-020 and ADR-025.
@@ -153,17 +177,23 @@ For a local render against a calibration-data checkout:
 
 ```powershell
 $env:PYTHONPATH = (Get-Location).Path
-python scripts/pipeline_health.py --root path\to\calibration-data
+python scripts/pipeline_health.py --root path\to\calibration-data `
+  --floor NC-012=630 --floor TanhBellMF=675
 ```
+
+`--floor` is required (FR-7). The workflow supplies it from `HEALTH_FLOORS`; a
+local run must state the candidates it is rendering against.
 
 For the idempotent local backfill:
 
 ```powershell
 $env:PYTHONPATH = (Get-Location).Path
 python scripts/backfill_state_index.py --root path\to\calibration-data
+# add --rebuild to regenerate a skewed or partially poll-written index
 ```
 
-The second backfill run should append zero rows. Neither command makes a network
+The second backfill run should append zero rows, and a second `--rebuild` run
+should leave the index byte-identical. Neither command makes a network
 request; both use committed files in the supplied checkout.
 
 ## Verification

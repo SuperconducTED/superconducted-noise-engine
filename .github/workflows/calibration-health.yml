@@ -6,11 +6,32 @@ on:
   workflow_dispatch:
     inputs:
       backfill:
-        description: 'Build the index before rendering; use only before polling appends index rows.'
+        description: 'Build the state index before rendering.'
         required: false
         type: boolean
         default: false
+      rebuild:
+        description: 'With backfill: rewrite the whole index in last_update_date order. Required once the poller has appended rows.'
+        required: false
+        type: boolean
+        default: false
+      floors:
+        description: 'Space-separated LABEL=VALUE candidate floors. Blank uses the workflow default below.'
+        required: false
+        type: string
+        default: ''
 
+# FR-7: candidate floors are configuration, never a literal in the renderer.
+# 630 is NC-012's floor (126 trainable parameters x 5); 675 is the same rule of
+# thumb when TanhBellMF(left, right, slope) makes each premise 3 parameters
+# rather than 2. Both ship as labelled candidates because issue #48 section 1.2
+# is explicit that this pipeline does not decide the training floor.
+env:
+  HEALTH_FLOORS: 'NC-012=630 TanhBellMF=675'
+
+# Deliberately NOT the poller's group. Sharing one would let a render cancel a
+# queued poll, and a cancelled poll writes no ledger row. The resulting push
+# race is handled by scripts/push_with_retry.sh instead.
 concurrency:
   group: calibration-health
   cancel-in-progress: false
@@ -41,14 +62,15 @@ jobs:
           python-version: '3.12'
       - name: Build and commit the state index
         run: |
-          PYTHONPATH=source python source/scripts/backfill_state_index.py --root data
+          PYTHONPATH=source python source/scripts/backfill_state_index.py \
+            --root data ${{ inputs.rebuild && '--rebuild' || '' }}
           cd data
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add health/state-index.tsv
           git diff --cached --quiet && exit 0
           git commit -m 'health: backfill state index'
-          git push origin HEAD:calibration-data
+          ../source/scripts/push_with_retry.sh origin calibration-data
 
   render:
     needs: backfill
@@ -75,18 +97,27 @@ jobs:
         with:
           python-version: '3.12'
       - name: Render metrics and SVG
-        run: PYTHONPATH=source python source/scripts/pipeline_health.py --root data
+        env:
+          FLOORS: ${{ inputs.floors || env.HEALTH_FLOORS }}
+        run: |
+          floor_args=()
+          for floor in $FLOORS; do floor_args+=(--floor "$floor"); done
+          PYTHONPATH=source python source/scripts/pipeline_health.py \
+            --root data "${floor_args[@]}"
       - name: Commit only material health changes
         run: |
           cd data
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add health/
-          # generated_at changes in metrics.json each render. Commit it only
-          # when the dashboard SVG or append-only index changed.
-          if git diff --cached --quiet -- health/progress.svg health/state-index.tsv; then
+          # metrics.json carries generated_at and so changes every render. The SVG
+          # carries no clock reading, so it changes only when the archive or the
+          # poll history did -- that is the commit-on-change signal (FR-6).
+          # state-index.tsv is not part of the gate: this job never writes it, and
+          # the backfill job above commits it itself.
+          if git diff --cached --quiet -- health/progress.svg; then
             git restore --staged health/metrics.json
             exit 0
           fi
           git commit -m 'health: refresh pipeline dashboard'
-          git push origin HEAD:calibration-data
+          ../source/scripts/push_with_retry.sh origin calibration-data

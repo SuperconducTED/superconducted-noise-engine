@@ -182,6 +182,11 @@ def main(argv: Iterable[str] | None = None) -> int:
         parser.error("--compare and --compare-reread are mutually exclusive")
     if args.compare_reread and args.scope != "document":
         parser.error("--compare-reread only supports --scope document")
+    if args.payload_only and args.scope != "document":
+        # Both flags narrow what is hashed, and --scope qubits is the narrower of
+        # the two, so combining them silently ignored --payload-only. This module
+        # exits 2 rather than guess anywhere else; it must not guess here either.
+        parser.error("--payload-only only supports --scope document")
 
     if args.compare_reread:
         try:
