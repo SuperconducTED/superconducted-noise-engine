@@ -1,13 +1,39 @@
-"""
-Feature distribution survey script.
-Reads every snapshot at a pinned ref and records the distribution of features.
+"""Survey the calibration archive's own feature distribution (Issue #59, Part A).
 
-Usage:
-    python -m scripts.feature_distribution --repo <path> --ref <ref> --out <path>
+Reads every ``snapshots/**/*.json`` at a pinned ref through ``git show`` and
+writes one TSV row per snapshot: the three ``BasicCalibrationVectorizer``
+features, plus the per-qubit spread of the values each feature averages over.
+``scripts/feature_distribution.py::summarize`` reduces those rows to the
+quantiles ``superconducted.fuzzy.parameterization`` consumes.
+
+Units are the vectorizer's own (NFR-8): **microseconds** for ``mean_T1`` and
+``mean_T2``, dimensionless for ``mean_readout_error``. That is the raw Nduv
+value with no scaling. ``scripts/first_ensemble_run.py::FEATURE_SCALES`` is in
+seconds and is **not** a source of truth for anything here.
+
+``*_qubit_std`` is the **sample** standard deviation, ``numpy.std(v, ddof=1)``,
+written empty when fewer than two values are usable -- a spread over one value
+is not a measurement. ``ddof=1`` matches ``calibration/features.py::per_qubit_spread``
+(#64), which becomes the single home for this statistic; on the committed
+fixture ``ibm_fez_20260513T121322Z_q72_missing_t1t2.json`` the T1 spread is
+45.4847 with ``ddof=1`` and 45.3377 with ``ddof=0``.
+
+Read-only: the archive is never checked out, never written to, and the network
+is never touched. Requires ``git fetch superconducted-noise-engine
+calibration-data`` first -- the remote is not ``origin``.
+
+Usage::
+
+    python -m scripts.feature_distribution --repo <path> --ref <sha> \\
+        [--backend ibm_fez] [--limit N] --out <tsv>
+
+``--ref`` should be a commit sha, not ``FETCH_HEAD``: the committed TSV's
+provenance has to survive the next fetch.
 """
 
 import argparse
 import csv
+import itertools
 import json
 import subprocess
 import sys
@@ -20,14 +46,21 @@ from typing import Any
 
 import numpy as np
 
-from scripts.init_error_analysis import list_snapshots, read_snapshot
+from scripts.init_error_analysis import _git, list_snapshots, read_snapshot
 from superconducted.calibration.features import BasicCalibrationVectorizer, _coerce_finite_float
 from superconducted.types import CalibrationSnapshot
+
+_STEM_TIMESTAMP_FORMAT = "%Y%m%dT%H%M%S%fZ"
 
 
 @dataclass(frozen=True)
 class SnapshotFeatureRow:
-    """FR-2: One row per snapshot. Columns in the exact requested order."""
+    """One archived snapshot's features and per-qubit spread (FR-2).
+
+    Field order is the TSV column order. FR-2's stated columns come first, so
+    they are a strict prefix; ``rejection_reason`` is appended last and is
+    non-empty exactly when ``mean_*`` are empty.
+    """
 
     path: str
     stem: str
@@ -35,7 +68,6 @@ class SnapshotFeatureRow:
     timestamp: str
     last_update_date: str
     n_qubits: int
-    rejection_reason: str | None
 
     mean_T1: float | None  # noqa: N815
     mean_T2: float | None  # noqa: N815
@@ -59,11 +91,17 @@ class SnapshotFeatureRow:
     readout_error_qubit_p50: float | None
     readout_error_qubit_p90: float | None
 
+    rejection_reason: str | None
+
 
 def _compute_stats(
     values: list[float],
 ) -> tuple[int, float | None, float | None, float | None, float | None]:
-    """FR-2: Helper to compute n_usable, std (ddof=1), p10, p50, p90."""
+    """Return ``(n_usable, std, p10, p50, p90)`` over one feature's qubit values.
+
+    ``std`` is the **sample** standard deviation (``ddof=1``) and is ``None``
+    when fewer than two values are usable, rather than NaN (FR-2).
+    """
     n_usable = len(values)
     if n_usable == 0:
         return 0, None, None, None, None
@@ -78,68 +116,86 @@ def _compute_stats(
     return n_usable, std, p10, p50, p90
 
 
-def snapshot_row(path: str, doc: dict[str, Any]) -> SnapshotFeatureRow:
-    """FR-3: Importable extraction. The per-document work is a pure function."""
-    stem = Path(path).stem
+def _parse_timestamp(doc: dict[str, Any], stem: str) -> datetime:
+    """Snapshot timestamp, parsed exactly as ``first_ensemble_run._load_snapshot`` does.
 
+    Falls back to the filename stem for a document with no ``timestamp`` field.
+    Raises ``ValueError`` if neither parses; :func:`snapshot_row` turns that into
+    a rejection rather than letting it escape.
+    """
     raw_ts = doc.get("timestamp")
     if isinstance(raw_ts, str):
-        ts = datetime.fromisoformat(raw_ts.replace("Z", "+00:00"))
-    else:
-        ts = datetime.strptime(stem, "%Y%m%dT%H%M%S%fZ").replace(tzinfo=UTC)
+        return datetime.fromisoformat(raw_ts.replace("Z", "+00:00"))
+    return datetime.strptime(stem, _STEM_TIMESTAMP_FORMAT).replace(tzinfo=UTC)
+
+
+def snapshot_row(path: str, doc: dict[str, Any]) -> SnapshotFeatureRow:
+    """Reduce one parsed archive document to its survey row (FR-3).
+
+    Pure: no I/O, no mutation of ``doc``. Never raises -- a document the
+    vectorizer rejects, or one whose timestamp will not parse, comes back with
+    empty ``mean_*`` and a ``rejection_reason``, and is counted rather than
+    dropped. The per-qubit statistics walk ``properties.qubits`` with the same
+    Nduv filter ``BasicCalibrationVectorizer.extract`` uses, so ``*_n_usable``
+    is the count ``extract`` averaged over and ``n_usable <= n_qubits``.
+    """
+    stem = Path(path).stem
+    rejection_reason: str | None = None
+
+    try:
+        timestamp = _parse_timestamp(doc, stem)
+    except ValueError as exc:
+        timestamp = datetime.min.replace(tzinfo=UTC)
+        rejection_reason = f"unparseable timestamp: {exc}"
 
     snapshot = CalibrationSnapshot(
         backend=doc.get("backend", "unknown"),
-        timestamp=ts,
+        timestamp=timestamp,
         schema_version=doc.get("schema_version", "1.0.0"),
         properties=doc.get("properties", {}),
         target=doc.get("target"),
         configuration=doc.get("configuration"),
     )
 
-    extractor = BasicCalibrationVectorizer()
-
-    mean_t1: float | None
-    mean_t2: float | None
-    mean_ro: float | None
-    rejection_reason: str | None = None
-
-    try:
-        means = extractor.extract(snapshot)
-        mean_t1, mean_t2, mean_ro = float(means[0]), float(means[1]), float(means[2])
-    except ValueError as e:
-        mean_t1 = mean_t2 = mean_ro = None
-        rejection_reason = str(e)
+    mean_t1: float | None = None
+    mean_t2: float | None = None
+    mean_ro: float | None = None
+    if rejection_reason is None:
+        try:
+            means = BasicCalibrationVectorizer().extract(snapshot)
+            mean_t1, mean_t2, mean_ro = float(means[0]), float(means[1]), float(means[2])
+        except ValueError as exc:
+            rejection_reason = str(exc)
 
     qubits_section = snapshot.properties.get("qubits", [])
-    t1_vals, t2_vals, ro_vals = [], [], []
+    t1_vals: list[float] = []
+    t2_vals: list[float] = []
+    ro_vals: list[float] = []
 
     for qubit_props in qubits_section:
         for nduv in qubit_props:
             name = nduv.get("name")
             val = _coerce_finite_float(nduv.get("value"))
-            if val is not None:
-                if name == "T1":
-                    t1_vals.append(val)
-                elif name == "T2":
-                    t2_vals.append(val)
-                elif name == "readout_error":
-                    ro_vals.append(val)
+            if val is None:
+                continue
+            if name == "T1":
+                t1_vals.append(val)
+            elif name == "T2":
+                t2_vals.append(val)
+            elif name == "readout_error":
+                ro_vals.append(val)
 
     t1_n, t1_std, t1_p10, t1_p50, t1_p90 = _compute_stats(t1_vals)
     t2_n, t2_std, t2_p10, t2_p50, t2_p90 = _compute_stats(t2_vals)
     ro_n, ro_std, ro_p10, ro_p50, ro_p90 = _compute_stats(ro_vals)
-
-    last_update = doc.get("properties", {}).get("last_update_date", "")
 
     return SnapshotFeatureRow(
         path=path,
         stem=stem,
         backend=snapshot.backend,
         timestamp=snapshot.timestamp.isoformat(),
-        last_update_date=last_update,
+        last_update_date=doc.get("properties", {}).get("last_update_date", ""),
         n_qubits=len(qubits_section),
-        rejection_reason=rejection_reason,
         mean_T1=mean_t1,
         mean_T2=mean_t2,
         mean_readout_error=mean_ro,
@@ -158,23 +214,38 @@ def snapshot_row(path: str, doc: dict[str, Any]) -> SnapshotFeatureRow:
         readout_error_qubit_p10=ro_p10,
         readout_error_qubit_p50=ro_p50,
         readout_error_qubit_p90=ro_p90,
+        rejection_reason=rejection_reason,
     )
 
 
 def iter_snapshot_rows(
-    repo: Path, ref: str, prefix: str = "snapshots/"
+    repo: Path, ref: str, prefix: str = "snapshots/", *, backend: str | None = None
 ) -> Iterator[SnapshotFeatureRow]:
-    """Yields parsed snapshot rows one by one. Extracted as a standalone generator
-    to allow other modules to traverse the archive without triggering the CLI.
+    """Walk every ``*.json`` under ``prefix`` at ``ref``, newest path last (FR-3).
+
+    Importable so the training-set builder (#63) reuses the extraction loop
+    instead of rewriting the archive walk. ``backend`` filters on the path
+    segment *before* any document is read, so it saves the ``git show`` too.
     """
-    snapshot_paths = list_snapshots(repo, ref, prefix)
-    for path in snapshot_paths:
-        doc = read_snapshot(repo, ref, path)
-        yield snapshot_row(path, doc)
+    paths = list_snapshots(repo, ref, prefix)
+    if backend is not None:
+        paths = [p for p in paths if f"/{backend}/" in p]
+    for path in paths:
+        yield snapshot_row(path, read_snapshot(repo, ref, path))
 
 
 def summarize(rows: list[SnapshotFeatureRow]) -> dict[str, Any]:
-    """FR-4: Returns per-feature p1/p50/p99, median over snapshots of qubit_std, and counts."""
+    """Reduce survey rows to the per-feature figures the partition consumes (FR-4).
+
+    Per feature: p1/p50/p99 of the snapshot values, the median over snapshots of
+    ``*_qubit_std``, and how many rows carry a usable mean. Rows with empty
+    ``mean_*`` are excluded from the quantiles but still counted in
+    ``file_count``; rows whose std is empty are skipped by the median.
+
+    ``file_count`` counts **files**, never samples and never distinct device
+    states -- the archive holds byte-identical repeats, and NC-025's distinct
+    count is #63's job.
+    """
     summary: dict[str, Any] = {"file_count": len(rows)}
 
     features = {
@@ -193,74 +264,72 @@ def summarize(rows: list[SnapshotFeatureRow]) -> dict[str, Any]:
             summary[f"{feat_name}_p50"] = float(np.percentile(arr_means, 50))
             summary[f"{feat_name}_p99"] = float(np.percentile(arr_means, 99))
         else:
-            summary[f"{feat_name}_p1"] = summary[f"{feat_name}_p50"] = summary[
-                f"{feat_name}_p99"
-            ] = None
+            summary[f"{feat_name}_p1"] = None
+            summary[f"{feat_name}_p50"] = None
+            summary[f"{feat_name}_p99"] = None
 
         valid_stds = [getattr(r, std_attr) for r in rows if getattr(r, std_attr) is not None]
-        if valid_stds:
-            summary[f"{feat_name}_median_qubit_std"] = float(
-                np.median(np.array(valid_stds, dtype=np.float64))
-            )
-        else:
-            summary[f"{feat_name}_median_qubit_std"] = None
+        summary[f"{feat_name}_median_qubit_std"] = (
+            float(np.median(np.array(valid_stds, dtype=np.float64))) if valid_stds else None
+        )
 
+    summary["rejected_rows"] = sum(1 for r in rows if r.rejection_reason)
     return summary
 
 
-def main() -> int:
-    """FR-1: The walk and the CLI."""
-    parser = argparse.ArgumentParser(description="Survey the archive's feature distribution.")
-    parser.add_argument("--repo", required=True, help="Path to the git repository")
-    parser.add_argument("--ref", required=True, help="Pinned git ref (e.g., FETCH_HEAD)")
-    parser.add_argument("--backend", help="Filter by a specific backend (e.g., ibm_fez)")
-    parser.add_argument("--limit", type=int, help="Limit the number of processed files")
-    parser.add_argument("--out", required=True, help="Output TSV file path")
+def write_tsv(rows: list[SnapshotFeatureRow], out: Path) -> None:
+    """Write the survey rows as a TSV, byte-identically for identical input (FR-10).
 
-    args = parser.parse_args()
-    start_time = time.time()
-
-    # Reject negative limits to prevent unintended tail-slicing behavior during archive traversal.
-    if args.limit is not None and args.limit < 0:
-        print("Error: --limit cannot be negative.", file=sys.stderr)
-        return 1
-
-    try:
-        subprocess.run(
-            ["git", "-C", args.repo, "cat-file", "-t", args.ref], check=True, capture_output=True
-        )
-    except subprocess.CalledProcessError:
-        print(f"Error: Ref '{args.ref}' is unreachable in repo '{args.repo}'.", file=sys.stderr)
-        print(
-            "Requires `git fetch superconducted-noise-engine calibration-data` first.",
-            file=sys.stderr,
-        )
-        return 1
-
-    repo_path = Path(args.repo)
-    rows: list[SnapshotFeatureRow] = []
-
-    # Consume the reusable iterator to build the survey data.
-    for row in iter_snapshot_rows(repo_path, args.ref):
-        if args.backend and args.backend not in row.path:
-            continue
-
-        rows.append(row)
-
-        # Halt extraction early if the requested limit is reached,
-        # optimizing runtime for partial surveys.
-        if args.limit is not None and len(rows) >= args.limit:
-            break
-
+    ``lineterminator="\\n"`` rather than ``csv``'s default ``\\r\\n``: the repo's
+    ``.gitattributes`` normalises every text file to LF, so a CRLF writer would
+    make the script's output differ from its own committed artifact on every
+    platform and no determinism check could ever pass.
+    """
     field_names = [f.name for f in fields(SnapshotFeatureRow)]
-    with open(args.out, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f, delimiter="\t")
+    with out.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle, delimiter="\t", lineterminator="\n")
         writer.writerow(field_names)
         for row in rows:
             writer.writerow([getattr(row, name) for name in field_names])
 
+
+def main() -> int:
+    """Run the archive walk and write the TSV, printing the FR-4 summary (FR-1)."""
+    parser = argparse.ArgumentParser(description="Survey the archive's feature distribution.")
+    parser.add_argument("--repo", required=True, help="Path to the git repository")
+    parser.add_argument("--ref", required=True, help="Pinned git ref; use a commit sha")
+    parser.add_argument("--backend", help="Filter by a specific backend (e.g., ibm_fez)")
+    parser.add_argument("--limit", type=int, help="Stop after this many rows")
+    parser.add_argument("--out", required=True, help="Output TSV file path")
+
+    args = parser.parse_args()
+    start_time = time.monotonic()
+
+    if args.limit is not None and args.limit < 0:
+        print("Error: --limit cannot be negative.", file=sys.stderr)
+        return 1
+
+    repo_path = Path(args.repo)
+    try:
+        _git(repo_path, "cat-file", "-t", args.ref)
+    except (subprocess.CalledProcessError, OSError):
+        print(f"Error: Ref '{args.ref}' is unreachable in repo '{args.repo}'.", file=sys.stderr)
+        print(
+            "Run `git fetch superconducted-noise-engine calibration-data` first; "
+            "the archive remote is not `origin`.",
+            file=sys.stderr,
+        )
+        return 1
+
+    walk = iter_snapshot_rows(repo_path, args.ref, backend=args.backend)
+    if args.limit is not None:
+        walk = itertools.islice(walk, args.limit)
+    rows = list(walk)
+
+    write_tsv(rows, Path(args.out))
+
     summary_data = summarize(rows)
-    summary_data["runtime_seconds"] = time.time() - start_time
+    summary_data["runtime_seconds"] = time.monotonic() - start_time
 
     print("Survey Summary:")
     print(json.dumps(summary_data, indent=2))

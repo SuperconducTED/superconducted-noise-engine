@@ -8,7 +8,7 @@
 | Mert Efe Şensoy | CS junior | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger |
 | Burak Öztekin | CS&EE senior | `fuzzy/tsk.py` (LOCKED), `fuzzy/fuzzification.py`, `integration/aer_factory.py`, `benchmarks/harness.py` |
 | Baha Jarad | CS&EE junior | `calibration/poller.py`, `calibration/storage.py`, `calibration/features.py` |
-| Yiğit Arda Kaderoğlu | CS sophomore | `fuzzy/membership.py`, `fuzzy/squashing.py`, `benchmarks/circuits.py` |
+| Yiğit Arda Kaderoğlu | CS sophomore | `fuzzy/membership.py`, `fuzzy/parameterization.py`, `fuzzy/squashing.py`, `benchmarks/circuits.py` |
 | Bengisu | Math junior | `fuzzy/defuzzification.py`, `channels/kraus.py` (LOCKED, co-owned), `benchmarks/metrics.py` |
 
 ## Module ownership
@@ -20,6 +20,7 @@
 | `calibration/storage.py` | Baha Jarad | Mert Efe Şensoy |
 | `calibration/features.py` | Baha Jarad | Bengisu |
 | `fuzzy/membership.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
+| `fuzzy/parameterization.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
 | `fuzzy/tsk.py` (LOCKED) | Burak Öztekin | Mert Efe Şensoy + Bengisu |
 | `fuzzy/defuzzification.py` | Bengisu | Burak Öztekin |
 | `fuzzy/fuzzification.py` | Burak Öztekin | Mert Efe Şensoy |
