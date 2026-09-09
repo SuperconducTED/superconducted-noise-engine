@@ -105,3 +105,15 @@ Update this file when:
 - A team member joins or leaves.
 - Module ownership shifts (record the date in the PR description).
 - A new module appears in the source tree — add a row before merging.
+
+**Package `__init__.py` files** (Issue #57 FR-14, settled 2026-09-08). The rule
+above says "a new module", and until Issue #57 the table listed no `__init__.py`
+at all although six package files existed, so "every module" and the practice
+disagreed. The settled reading is **(a)**: a package gets **one row naming the
+package**, which covers its `__init__.py` along with the modules listed beside
+it — as the `training/` row does. Reading (b), declaring docstring-only
+`__init__.py` files out of scope, was rejected because it leaves the ownership
+of a re-export surface unstated, and a package root that re-exports the ABCs is
+exactly where a cross-cutting change can hide. The six pre-existing package
+files are covered by their directory's row where one exists; adding rows for
+the rest is housekeeping, not a blocker on any ticket.
