@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SuperconducTED · Danışman Karar Dosyası · 2026-09-09</title>
+<style>
+  :root{
+    --ink:#16212e; --ink-soft:#41505f; --line:#d8dee6; --paper:#fbfaf7;
+    --navy:#1a3a5c; --navy-soft:#e8eef5; --rust:#a8541c; --rust-soft:#fbf0e6;
+    --green:#2f6b45; --green-soft:#e9f3ec; --grey:#6b7684; --grey-soft:#eef0f3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:16px/1.65 Georgia,"Times New Roman",serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:48px 28px 96px}
+  header.mast{border-bottom:3px double var(--navy);padding-bottom:22px;margin-bottom:34px}
+  .kicker{font:600 11px/1 -apple-system,Segoe UI,sans-serif;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--rust);margin-bottom:14px}
+  h1{font-size:31px;line-height:1.22;margin:0 0 14px;color:var(--navy);letter-spacing:-.01em}
+  .sub{color:var(--ink-soft);font-size:16.5px;margin:0}
+  .meta{margin-top:20px;font:13px/1.75 -apple-system,Segoe UI,sans-serif;color:var(--ink-soft)}
+  .meta b{color:var(--ink);font-weight:600}
+  h2{font-size:21px;margin:44px 0 14px;color:var(--navy);
+    border-bottom:1px solid var(--line);padding-bottom:7px}
+  p{margin:0 0 15px}
+  .lede{font-size:17.5px;line-height:1.7;color:var(--ink)}
+  .lede strong{color:var(--navy)}
+  .card{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);
+    border-left:5px solid var(--navy);background:#fff;border-radius:3px;
+    padding:20px 22px;margin-bottom:14px;transition:border-color .12s,box-shadow .12s}
+  .card:hover{border-color:var(--navy);box-shadow:0 2px 12px rgba(26,58,92,.09)}
+  .card .num{font:700 12px/1 -apple-system,Segoe UI,sans-serif;letter-spacing:.1em;
+    color:var(--rust);display:block;margin-bottom:7px}
+  .card h3{margin:0 0 8px;font-size:19px;color:var(--navy)}
+  .card p{margin:0;font-size:14.5px;color:var(--ink-soft);line-height:1.6}
+  .card .tags{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
+  .badge{display:inline-block;font:600 11px/1 -apple-system,Segoe UI,sans-serif;
+    padding:5px 9px;border-radius:3px;letter-spacing:.03em;white-space:nowrap}
+  .b-ask{background:var(--navy-soft);color:var(--navy)}
+  .b-rat{background:var(--green-soft);color:var(--green)}
+  .b-no{background:var(--grey-soft);color:var(--grey)}
+  .note{background:var(--rust-soft);border-left:4px solid var(--rust);
+    padding:16px 20px;margin:22px 0;border-radius:0 3px 3px 0}
+  .note strong{color:var(--rust)}
+  .note p:last-child{margin-bottom:0}
+  table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14.5px}
+  th{text-align:left;background:var(--navy);color:#fff;padding:10px 12px;
+    font:600 12.5px/1.4 -apple-system,Segoe UI,sans-serif;letter-spacing:.02em}
+  td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:nth-child(even) td{background:#fff}
+  code{font:13.5px/1.5 "SF Mono",Consolas,monospace;background:var(--grey-soft);
+    padding:1px 5px;border-radius:3px;color:var(--navy)}
+  .legend{display:flex;flex-wrap:wrap;gap:22px;margin:18px 0 8px;
+    font:14px/1.5 -apple-system,Segoe UI,sans-serif;color:var(--ink-soft)}
+  .legend div{flex:1;min-width:210px}
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
+    font:13px/1.7 -apple-system,Segoe UI,sans-serif;color:var(--grey)}
+  @media print{body{background:#fff}.wrap{padding:0}.card:hover{box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="mast">
+  <div class="kicker">SuperconducTED · Faz 3 · Danışman Karar Dosyası</div>
+  <h1>Dr. Fırat Akba'ya sorduklarımız, sormadıklarımız ve her ikisinin gerekçesi</h1>
+  <p class="sub">Beş konu başlığı, tek mesaj. Her soru; arka planı, gerekçesi, bize
+     kazandıracağı şey ve <em>neden kendi başımıza çözemediğimiz</em> ile birlikte.</p>
+  <div class="meta">
+    <b>Tarih:</b> 9 Eylül 2026 &nbsp;·&nbsp;
+    <b>Gönderen:</b> Mert Efe Şensoy &nbsp;·&nbsp;
+    <b>Ölçüm referansı:</b> <code>main @ 5f935ea</code><br>
+    <b>Kayıt yeri:</b> <code>docs/advisor/2026-09-03-decisions-from-akba.md</code>
+  </div>
+</header>
+
+<p class="lede">Hocam, bu dosyanın tek bir amacı var: <strong>size sormamız gereken şeyleri
+bir kere, toplu ve anlaşılır biçimde sormak.</strong> 25 Mayıs 2026'da size on soru
+yönelttik ve bu depoda o soruların hiçbirinin kayıtlı bir cevabı yok. Sorun sizin değil,
+bizim: soruları on üç ayrı yere dağıtmıştık ve hiçbirinin son tarihi yoktu. Bu sefer
+tek mesaj, her maddede bir karar tarihi.</p>
+
+<p class="lede">İkinci ve bizce daha önemli amaç: <strong>size sormamamız gereken şeyleri
+ayıklamak.</strong> Aşağıdaki listeyi hazırlarken on üç maddelik ilk listeyi tek tek
+elden geçirdik ve dördünü çıkardık. Çıkardıklarımızı da gerekçesiyle yazdık, çünkü
+"kendi ölçebileceğimiz bir şeyi size sormak" da en az cevapsız kalan soru kadar
+maliyetli.</p>
+
+<div class="note">
+  <p><strong>Zaman ayırmanız gereken yer neresi.</strong> Beş dosyadan dördü teknik
+  onay niteliğinde ve hızlı okunur. <strong>05 · Yayın stratejisi</strong> ise
+  tamamen sizin alanınız: hakemlerin ne bekleyeceği, hangi mecraya ve ne zaman
+  gideceğimiz, gerçek donanım doğrulamasının ne kadarının şart olduğu. Vaktiniz
+  kısıtlıysa oradan başlayın.</p>
+</div>
+
+<h2>Sınıflandırma</h2>
+<div class="legend">
+  <div><span class="badge b-ask">SOR</span> &nbsp;Cevap sizde. Ölçerek elde
+    edemeyeceğimiz bir yargı, bir yetki ya da alanın beklentisi.</div>
+  <div><span class="badge b-rat">ONAYLA</span> &nbsp;Biz ölçtük ya da ölçeceğiz.
+    Sizden tasarım değil, teyit ya da "hayır, şuraya dönün" bekliyoruz.</div>
+  <div><span class="badge b-no">SORMUYORUZ</span> &nbsp;İlk listede vardı, çıkardık.
+    Gerekçesi ilgili dosyanın sonunda.</div>
+</div>
+
+<h2>Dosyalar</h2>
+
+<a class="card" href="01-egitim-hedefi.html">
+  <span class="num">DOSYA 01</span>
+  <h3>Eğitim hedefi · ADR-027</h3>
+  <p>Modelin neye <em>regresyon yapacağı</em>. Kübit başına iki sönümleme oranını
+     T1, T2 ve kapı süresinden türeten kapalı formül, ve bu formülün Qiskit Aer'in
+     kendi termal gevşeme kanalına 1e-12 mertebesinde eşit olduğunu kanıtlayan test.</p>
+  <div class="tags"><span class="badge b-rat">ONAYLA · D1, D3, D4</span>
+    <span class="badge b-ask">SOR · D5 modül sahipliği</span>
+    <span class="badge b-no">SORMUYORUZ · D2</span></div>
+</a>
+
+<a class="card" href="02-tip-sistemi.html">
+  <span class="num">DOSYA 02</span>
+  <h3>Tip sistemi · ADR-009, ADR-011</h3>
+  <p>Tip-1 mi, Aralık Tip-2 mi? Ve arkasından gelen durulaştırma seçimi.
+     Bu projenin en yüksek yayılımlı kararı: üç ADR ve iki açık bilet buna bağlı.</p>
+  <div class="tags"><span class="badge b-ask">SOR · kapsam</span>
+    <span class="badge b-rat">ONAYLA · kanıt</span></div>
+</a>
+
+<a class="card" href="03-topluluk-ve-varyans.html">
+  <span class="num">DOSYA 03</span>
+  <h3>Topluluk ve varyans · ADR-015, ADR-016</h3>
+  <p>Aer'in atış başına geri çağrı noktası yok; bu mimari bir kısıt, tercih değil.
+     Belirsizliği ancak N ayrı gürültü modeliyle ifade edebiliyoruz. Üyeler
+     nasıl farklılaşmalı ve sonuçlar nasıl raporlanmalı?</p>
+  <div class="tags"><span class="badge b-ask">SOR · mekanizma</span>
+    <span class="badge b-ask">SOR · aralık semantiği</span>
+    <span class="badge b-no">SORMUYORUZ · MemberPerturbation</span></div>
+</a>
+
+<a class="card" href="04-veri-durustlugu.html">
+  <span class="num">DOSYA 04</span>
+  <h3>Veri dürüstlüğü · ADR-025 ve veri kümesi</h3>
+  <p>Arşivin gerçekte ne kadar tam olduğu, eksik kalibrasyon alanlarını nasıl
+     ele aldığımız, ve eğitim eşiğinin dayandığı sayının kaynağının olmadığını
+     fark edip yeniden türetmemiz.</p>
+  <div class="tags"><span class="badge b-ask">SOR · ADR-025 eki</span>
+    <span class="badge b-ask">SOR · eksik veri</span>
+    <span class="badge b-no">SORMUYORUZ · ADR-013</span></div>
+</a>
+
+<a class="card" href="05-yayin-stratejisi.html">
+  <span class="num">DOSYA 05</span>
+  <h3>Yayın stratejisi</h3>
+  <p>Tamamen sizin alanınız. Hedef mecra ve takvim, gerçek donanım doğrulamasının
+     gerekli derinliği, ve hakemlerin bekleyeceği metrik sıralaması. Hiçbirinin
+     cevabı bu depoda yok ve hiçbiri deneyle üretilemez.</p>
+  <div class="tags"><span class="badge b-ask">SOR · üç maddenin tamamı</span>
+    <span class="badge b-no">SORMUYORUZ · ekip iş bölümü</span></div>
+</a>
+
+<h2>Karar takvimi</h2>
+<p>Bir maddenin tarihinde cevapsız kalması sorun değil; <strong>kayıtsız kalması
+sorun.</strong> Cevap gelmezse ilgili ADR "Open" kalır ve kaydımıza sorunun hangi
+tarihte gittiği yazılır. Böylece boşluk bir kayıt olur, sessizlik değil.</p>
+
+<table>
+  <tr><th>Tarih</th><th>Kapsam</th><th>Neden bu tarih</th></tr>
+  <tr><td><b>16 Eylül</b></td><td>ADR-027 (D1, D3, D4, D5), ADR-025 eki</td>
+      <td>Üç faz-3 bileti (#58, #59, #60) bu cevabı tüketiyor; hedef tanımı
+          değişirse üçü birden etkilenir.</td></tr>
+  <tr><td><b>23 Eylül</b></td><td>ADR-009, ADR-011, ADR-015, ADR-019, eski Q1/Q3/Q5/Q8</td>
+      <td>M3 "kararlar" kilometre taşı. Ölçüm kanıtı (#61, #62) bu tarihe kadar
+          elimizde olacak.</td></tr>
+  <tr><td><b>30 Eylül</b></td><td>ADR-014, ADR-016, yayın stratejisi</td>
+      <td>Faz 3 kapanışı. Q6 ve Q9 takvimi belirlediği için pratikte
+          <em>daha erken</em> bir cevap işimize yarar.</td></tr>
+</table>
+
+<footer>
+  Bu dosya <code>docs/advisor/2026-09-09-akba-brief/</code> altında depoda saklanır.
+  Cevaplar <code>docs/advisor/2026-09-03-decisions-from-akba.md</code> dosyasına,
+  her karar için bir tarihli kayıt olarak eklenir: soru, cevap, tarih, mecra ve
+  hangi ADR'yi açtığı. &nbsp;·&nbsp; SuperconducTED · Issue #56 FR-12
+</footer>
+
+</div>
+</body>
+</html>
