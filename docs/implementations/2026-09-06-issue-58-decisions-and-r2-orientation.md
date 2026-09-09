@@ -411,11 +411,21 @@ Metric semantics at the cited commit (`reference_value` is exactly 1.0 for R²,
 git show 7d39a2b:src/superconducted/benchmarks/harness.py | sed -n '125,155p'
 ```
 
-NC id allocation (max is `NC-030`, 29 rows, the hole at 013 is `NC-R002`):
+NC id allocation. The point this check makes is **structural, not a specific number**: the
+next free id is `max + 1`, never the active row count, because the sequence has a hole at
+013 that is `NC-R002` rather than a free slot. State the result differentially against the
+commit you run it on rather than pinning an absolute here, which is the Rule 6 discipline
+this very document argues for. (An earlier draft of this line read "max is `NC-030`, 29
+rows"; that was true when written on 2026-09-06 and had already drifted to max `NC-040`
+over 39 active rows by 2026-09-09, which is exactly the failure mode a pinned expectation
+produces.)
 
 ```bash
-grep -oE "^\| NC-(R?)[0-9]+" docs/numerical-claims.md | sort -u | tail -8
+grep -oE "^\| NC-(R?)[0-9]+" docs/numerical-claims.md | sort -u | tail -8   # max id
+grep -cE "^\| NC-[0-9]+" docs/numerical-claims.md                          # active rows
 ```
+
+The two numbers must differ, and `max + 1` is the next free id.
 
 The resolution-rule analysis. Self-contained, no third-party imports; reproduces every
 figure in the synthetic Measurements tables:
