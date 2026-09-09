@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 · Veri dürüstlüğü (ADR-025 ve veri kümesi) · SuperconducTED</title>
+<style>
+  :root{
+    --ink:#16212e; --ink-soft:#41505f; --line:#d8dee6; --paper:#fbfaf7;
+    --navy:#1a3a5c; --navy-soft:#e8eef5; --rust:#a8541c; --rust-soft:#fbf0e6;
+    --green:#2f6b45; --green-soft:#e9f3ec; --grey:#6b7684; --grey-soft:#eef0f3;
+    --red:#93321f; --red-soft:#fbeae6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:16px/1.65 Georgia,"Times New Roman",serif}
+  .wrap{max-width:860px;margin:0 auto;padding:44px 28px 96px}
+  a.back{font:600 12px/1 -apple-system,Segoe UI,sans-serif;color:var(--rust);
+    text-decoration:none;letter-spacing:.08em;text-transform:uppercase}
+  a.back:hover{text-decoration:underline}
+  header.mast{border-bottom:3px double var(--navy);padding-bottom:20px;margin:16px 0 32px}
+  .kicker{font:600 11px/1 -apple-system,Segoe UI,sans-serif;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--rust);margin-bottom:12px}
+  h1{font-size:29px;line-height:1.24;margin:0 0 12px;color:var(--navy);letter-spacing:-.01em}
+  .sub{color:var(--ink-soft);font-size:16.5px;margin:0}
+  h2{font-size:21px;margin:42px 0 6px;color:var(--navy);
+    border-bottom:1px solid var(--line);padding-bottom:7px}
+  p{margin:0 0 15px}
+  ul,ol{margin:0 0 15px;padding-left:22px}
+  li{margin-bottom:7px}
+  .qbox{border:1px solid var(--line);border-top:5px solid var(--navy);background:#fff;
+    border-radius:3px;padding:24px 26px;margin:26px 0}
+  .qbox.rat{border-top-color:var(--green)}
+  .qbox.no{border-top-color:var(--grey);background:#f7f8f9}
+  .qhead{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .qbox h4{margin:0;font-size:20px;color:var(--navy);flex:1;min-width:260px;line-height:1.3}
+  .qbox.no h4{color:var(--grey)}
+  .badge{display:inline-block;font:600 11px/1 -apple-system,Segoe UI,sans-serif;
+    padding:5px 9px;border-radius:3px;letter-spacing:.03em;white-space:nowrap}
+  .b-ask{background:var(--navy-soft);color:var(--navy)}
+  .b-rat{background:var(--green-soft);color:var(--green)}
+  .b-no{background:var(--grey-soft);color:var(--grey)}
+  .field{margin:16px 0 0}
+  .field .lbl{font:700 11px/1 -apple-system,Segoe UI,sans-serif;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--rust);display:block;margin-bottom:6px}
+  .field.why .lbl{color:var(--navy)}
+  .note{background:var(--rust-soft);border-left:4px solid var(--rust);
+    padding:15px 19px;margin:20px 0;border-radius:0 3px 3px 0}
+  .note strong{color:var(--rust)}
+  .note p:last-child{margin-bottom:0}
+  .warn{background:var(--red-soft);border-left:4px solid var(--red);
+    padding:15px 19px;margin:20px 0;border-radius:0 3px 3px 0}
+  .warn strong{color:var(--red)}
+  .warn p:last-child{margin-bottom:0}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+  th{text-align:left;background:var(--navy);color:#fff;padding:10px 12px;
+    font:600 12.5px/1.4 -apple-system,Segoe UI,sans-serif}
+  td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:nth-child(even) td{background:#fff}
+  code{font:13.5px/1.5 "SF Mono",Consolas,monospace;background:var(--grey-soft);
+    padding:1px 5px;border-radius:3px;color:var(--navy)}
+  figure{margin:24px 0;text-align:center}
+  figcaption{font:13.5px/1.6 -apple-system,Segoe UI,sans-serif;color:var(--ink-soft);
+    margin-top:10px;text-align:left}
+  .bignum{display:flex;gap:16px;flex-wrap:wrap;margin:22px 0}
+  .bignum div{flex:1;min-width:170px;background:#fff;border:1px solid var(--line);
+    border-top:4px solid var(--rust);border-radius:3px;padding:16px 18px;text-align:center}
+  .bignum .n{font:700 27px/1.1 Georgia,serif;color:var(--navy);display:block}
+  .bignum .n.bad{color:var(--red)}
+  .bignum .l{font:13px/1.5 -apple-system,Segoe UI,sans-serif;color:var(--ink-soft);
+    display:block;margin-top:7px}
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
+    font:13px/1.7 -apple-system,Segoe UI,sans-serif;color:var(--grey)}
+  @media print{body{background:#fff}.wrap{padding:0}a.back{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<a class="back" href="index.html">&larr; Karar dosyası</a>
+
+<header class="mast">
+  <div class="kicker">Dosya 04 · Faz 3 · Karar tarihi 16-23 Eylül 2026</div>
+  <h1>Veri dürüstlüğü: arşiv gerçekte ne kadar tam, ve eşik neydi?</h1>
+  <p class="sub">ADR-025 eki · Eski Soru 5 ve 8 &nbsp;·&nbsp;
+     Bu dosyanın bir bölümü soru değil, bir düzeltme.</p>
+</header>
+
+<h2>Önce bir özeleştiri: eğitim eşiğimizin kaynağı yokmuş</h2>
+
+<p>Hocam, bu dosyaya bir soruyla değil bir itirafla başlamak istiyoruz.</p>
+
+<p>Bu proje iki yıldır "ANFIS eğitimi için en az 630 anlık görüntü gerekir"
+diyor. 630 sayısı şuradan geliyordu: <em>126 eğitilebilir parametre × 5</em>,
+yani parametre başına beş örnek şeklindeki standart pratik kural. Bu yaz sayısal
+iddiaların kaydını tutmaya başlayınca <strong>126'nın nereden geldiğini
+soramadık, çünkü hiçbir dosya onu türetmiyordu.</strong> Git geçmişine baktık:
+7 Mayıs 2026'da <code>docs/architecture.md</code> dosyasına girmiş, yani
+<em>27 kurallı ızgara var olmadan önce</em>. Sonra dört ayrı belgeye yayılmış.</p>
+
+<p>Bu oturumda kural tabanının kendisine sorduk. Cevap:</p>
+
+<div class="bignum">
+  <div><span class="n">126</span><span class="l">İki yıldır kullanılan,
+    hiçbir dosyanın türetmediği sayı</span></div>
+  <div><span class="n">234</span><span class="l">Kural tabanından ölçülen
+    gerçek değer (Gaussian, 3×3×3, çıktı boyutu 2)</span></div>
+  <div><span class="n bad">1170</span><span class="l">Gerçek eşik: 234 × 5.
+    Eski eşik 630 idi.</span></div>
+</div>
+
+<p>126 yalnızca şöyle yeniden üretilebiliyor: sonuç katsayılarının <em>tek bir
+çıktı boyutu</em> artı öncül sayısı, yani 108 + 18. Yani iki çıktılı bir modelde
+sonuç tarafının yarısı sayılmamış. Hata bu.</p>
+
+<div class="warn">
+  <p><strong>Sonucu şu: eşiğe olan mesafemiz sandığımızın iki katından fazla.</strong>
+  Arşivde 504 ayrık cihaz durumu var (NC-025, <code>f0930b9</code> referansında
+  ölçüldü). Eski eşiğe göre bu parametre başına 4.0 örnekti, yani "az kaldı".
+  Yeni eşiğe göre parametre başına 2.15 örnek, yani <em>yarı yolda bile
+  değiliz</em>. Bunu size sormuyoruz, bildiriyoruz; ama takvimi doğrudan
+  etkilediği için Dosya 05'teki yayın sorularının arka planı bu.</p>
+</div>
+
+<p style="font-size:14.5px;color:#41505f">Dürüstlük notu: 504 sayısı
+<code>f0930b9</code> referansında ölçüldü ve bugünkü referansta yeniden
+ölçülmedi; onu #63 yapacak. Ayrıca "ayrık durum" bağımsız örnek demek değil:
+ardışık durumlar zaman içinde ilintili (T1/T2 günlük, okuma ~4 saat), yani
+etkin örneklem büyüklüğü 504'ün altında. Eşiği geçmek "eğitim yeterli"
+kanıtı değil, sadece <em>iddia edebileceğimiz şeyin sınırı</em>.</p>
+
+<h2>İkinci özeleştiri: yakalama oranı sandığımızdan düşük</h2>
+
+<p>Bir de veri toplamanın kendisi var. Kalibrasyon verisini saatlik olarak
+çekiyoruz. Uzun süre "kaçırdıklarımız sadece zamanlayıcı çöktüğünde oluyor"
+diye düşündük. Ölçtük, öyle değilmiş: <strong>zamanlayıcı düzgün çalışırken
+bile 62 saatlik bir pencerede yakalama en fazla %70.2 çıktı</strong> ve
+kaçan 14 belge 1.1 ile 3.2 saat arasında 13 ayrı boşlukta duruyordu.
+Mekanizma örtüşme (aliasing): saatlik bir örnekleyici ile ortalama 1.26 saatte
+bir yayın yapan bir kaynak.</p>
+
+<div class="note">
+  <p><strong>Bu satırı geçen hafta geçersizleştirdik, ve bunu da kaydettik.</strong>
+  Kaçan 14 belgeyi geri kurtardık. Ama kurtardığımız pencere, ölçümün yapıldığı
+  pencerenin ta kendisiydi. Yani satır şimdi "%100 (50 / 50)" okuyor ki bu
+  <em>boş bir ifade</em>: kanıtlayabildiğiniz her şeye sahipseniz oran zorunlu
+  olarak %100 çıkar. Sicile bunu "bu sınır boştur ve 'yakalama iyi' diye
+  okunmamalıdır" notuyla yazdık. Sıradan çalışmayı tarif eden bir yakalama
+  oranı için artık geri doldurulmamış bir pencere gerekiyor.</p>
+</div>
+
+<h2>Sorular</h2>
+
+<div class="qbox">
+  <div class="qhead">
+    <h4>1 · ADR-025 eki: <code>duplicate-partial</code> kararı</h4>
+    <span class="badge b-ask">SOR · yetki</span>
+  </div>
+
+  <div class="field"><span class="lbl">Arka plan</span>
+    <p>Arşive her yazma işlemi bir muhasebe defterine satır düşüyor ve her satırın
+    bir <em>karar</em> değeri var: <code>new</code>, <code>duplicate</code>,
+    <code>collision</code>, <code>collision-unreadable</code>. Buradaki
+    <code>collision</code> ciddi bir şey: "aynı zaman damgası için iki farklı
+    içerik gördük", yani ya IBM belgeyi yeniden yayımladı ya bizim karşılaştırmamız
+    bozuk.</p>
+    <p>Geri doldurma yaparken bir sorun çıktı: geçmiş uç noktası, elimizde zaten
+    olan bir belgeyi <em>eksik</em> döndürebiliyor. Bu bir çakışma değil, kayıplı
+    bir yeniden okuma. PR #55 bunun için beşinci bir değer ekledi:
+    <code>duplicate-partial</code>, iki koşula bağlı olarak: işlem bir geri
+    doldurma olacak (<code>IS_BACKFILL</code>) <em>ve</em> farkın yapısal imzası
+    kayıplı bir yeniden okumaya uyacak.</p>
+  </div>
+
+  <div class="field"><span class="lbl">Ne rica ediyoruz</span>
+    <p>Bu ek, PR #55 ile birlikte 2 Eylül'de birleştirildi ve o PR'ın kendi
+    yorumu "Dr. Akba'nın onayı ayrıca alınmalı" diyordu. Alınmadı. Bunu
+    kapatmak istiyoruz: <strong>ekin metnini karar defterinde onaylamanız.</strong></p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden size soruyoruz</span>
+    <p>Çünkü bu bir <strong>yetki</strong> maddesi: <code>docs/decisions.md</code>
+    sizin sahipliğinizde ve bu ek, defterdeki bir kararın anlamını değiştiriyor.
+    Teknik tarafı ölçtük ve çalışıyor; sizden istediğimiz doğrulama değil, onay.</p>
+    <p>Bir de ilkesel bir tarafı var ve orada gerçekten fikrinizi istiyoruz:
+    <em>bir muhasebe defteri gözlemi mi kaydetmeli, yoksa sonucu mu?</em> Biz
+    gözlemi kaydetmeyi seçtik. Somut örnek: geri doldurma sırasında sistem bir
+    <code>collision</code> satırı yazdı. İnceledik, bizim karşılaştırmamızın
+    hatasıydı (1952 kapı kaydından 26'sı yalnızca bir zaman damgası alanında
+    farklıydı, ve o 26 kayıt tam olarak "kalibre edilmemiş" işaretli olanlardı).
+    Karşılaştırmayı düzelttik, hatalı dosyayı sildik, <strong>ama defterdeki
+    <code>collision</code> satırını bilerek bıraktık</strong>. O satır o an ne
+    gördüğümüzün kaydı. Bu doğru duruş mu?</p>
+  </div>
+</div>
+
+<div class="qbox">
+  <div class="qhead">
+    <h4>2 · Eksik kalibrasyon verisi: eleme mi, bulanık maksimum entropi mi?</h4>
+    <span class="badge b-ask">SOR</span>
+  </div>
+
+  <div class="field"><span class="lbl">Arka plan</span>
+    <p>IBM kalibrasyon cevaplarında bazı kübitlerin T1 ve T2 değerleri eksik
+    çıkıyor; ölçüm o kalibrasyon penceresinde başarısız olduğunda. ibm_fez'de
+    72 numaralı kübitte gördük: T1 ve T2 yok ama okuma kalibrasyonu sağlam.
+    Eksiklik oranı yaklaşık %0.64.</p>
+    <p>Bugün <b>eleme</b> yapıyoruz: tipli yükleyici eksik alanı işaretliyor,
+    ortalama alıcılar o kübiti dışarıda bırakıyor. Bu, doldurmaya (imputation)
+    göre yansız; doldurma ortalamayı popülasyona doğru çeker. Ama eksiklik
+    oranıyla orantılı istatistiksel güç kaybediyoruz.</p>
+    <p>Alternatif <b>bulanık maksimum entropi</b>: eksik alanı geniş, maksimum
+    entropili bir üyelik aralığı olarak temsil edip belirsizliği bulanıklaştırma
+    katmanından ileri taşımak. Bulanık bir sistem için teorik olarak doğru
+    yaklaşım bu.</p>
+  </div>
+
+  <div class="field"><span class="lbl">Eğilimimiz</span>
+    <p>Yayın için eleme. Oran %1'in altında ve şeffafça raporlamak yeterli
+    görünüyor. Maksimum entropi bir takip katkısı olur.</p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden size soruyoruz</span>
+    <p>Burada gerçek bir gerilim var ve doğru tarafı ölçerek bulamayız.
+    Eleme <em>istatistiksel olarak</em> daha güvenli. Ama biz bir <em>bulanık
+    sistem</em> makalesi yazıyoruz, ve bulanık sistemlerin var olma sebeplerinden
+    biri tam olarak "bilmediğim şeyi bir aralık olarak taşıyabilirim" iddiası.
+    Eksik veriyi eleyerek atmak, bu iddiayı kullanmadığımız anlamına geliyor.</p>
+    <p>Yani soru şu: <strong>eksik kalibrasyon verisinin bulanık ele alınışı bu
+    makalenin bir katkı noktası olabilir mi, yoksa dikkat dağıtır mı?</strong>
+    Katkıysa öncelik değişir ve Tip-2 altyapısını uçtan uca bağlamamız gerekir.
+    Değilse eleriz ve oranı yazarız. Bu bir konumlandırma sorusu, ve konumlandırmayı
+    deneyerek öğrenemeyiz.</p>
+  </div>
+</div>
+
+<div class="qbox">
+  <div class="qhead">
+    <h4>3 · Tek arka uçla mı devam edelim?</h4>
+    <span class="badge b-ask">SOR</span>
+  </div>
+
+  <div class="field"><span class="lbl">Arka plan</span>
+    <p>Yalnızca ibm_fez'i (156 kübitlik bir işlemci) yokluyoruz. Tek arka uçlu
+    bir veri kümesi demek, eğitilmiş modelimizin ve bütün deneysel sonuçlarımızın
+    tek bir işlemcinin gürültü karakteristiğine ve kübit topolojisine özgü olması
+    demek. İlk yayın için savunulabilir (kontrollü değişken tasarımı) ama bir
+    hakem genellenebilirliği sorabilir.</p>
+  </div>
+
+  <div class="field"><span class="lbl">Eğilimimiz ve yeni bir kısıt</span>
+    <p>A seçeneği: tek arka uç, "kontrollü değişken" argümanıyla. Ama artık
+    <em>pratik</em> bir gerekçe de var: yukarıdaki eşik düzeltmesinden sonra tek
+    arka uçla bile eşiğin epey altındayız. İkinci bir arka uç eklersek ikisi de
+    ayrı ayrı daha yavaş birikir. C seçeneği (ikinciyi yalnızca kısa bir
+    genellenebilirlik bölümü için yoklamak, üzerinde eğitmemek) bu yüzden
+    A ile B arasında gerçekçi bir orta yol olabilir.</p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden size soruyoruz</span>
+    <p>Yine hakem beklentisi sorusu: <em>tek arka uçlu bir çalışma, "kontrollü
+    tasarım" gerekçesiyle kabul görür mü, yoksa genellenebilirlik eksikliği
+    reddi getirir mi?</em> Bunu bizim ölçme imkânımız yok. Ayrıca C seçeneğini
+    seçerseniz somut bir tanıma ihtiyacımız var: "aktarım doğrulaması" ne
+    demek olacak? Aynı üyelik fonksiyonlarını başka bir arka uca uygulamak mı,
+    yoksa öncülleri donduran ama sonuç katsayılarını yeniden fit eden bir
+    prosedür mü? İkisi çok farklı iddialar.</p>
+  </div>
+</div>
+
+<h2>Sormadıklarımız ve nedeni</h2>
+
+<div class="qbox no">
+  <div class="qhead">
+    <h4>ADR-013 · Daha zengin öznitelik çıkarıcıları</h4>
+    <span class="badge b-no">SORMUYORUZ · vakti gelmedi</span>
+  </div>
+  <p>ADR-013 bugün "Open / Deferred" ve bugünkü çıkarıcı bütün kübitler
+  üzerinden basit bir toplama yapıyor. Kübit başına, kapı gruplu ya da kayma
+  hızına duyarlı çıkarıcılar kalibrasyon sinyalinin daha fazlasını
+  yakalayabilir.</p>
+  <p><strong>Neden sormuyoruz:</strong> ADR-013 kendi metninde erteleme
+  koşulunu yazmış: çıkarıcılar eşik karşılandıktan sonra ampirik olarak
+  karşılaştırılacak. Eşik karşılanmadı, üstelik bu dosyanın başındaki düzeltmeden
+  sonra eskisinden daha uzağız. Yani ortada henüz karara bağlanacak bir şey yok;
+  karşılaştırmayı çalıştıramadan seçim yapmak, tam da bu projenin daha önce
+  yaptığı ve pişman olduğu şey olurdu.</p>
+  <p>Eşik karşılandığında bu soru kendiliğinden gündeme gelecek ve o zaman
+  ölçümle birlikte gelecek.</p>
+</div>
+
+<footer>
+  Kaynaklar: <code>docs/decisions.md</code> ADR-013, ADR-017, ADR-025 &nbsp;·&nbsp;
+  <code>docs/numerical-claims.md</code> NC-012, NC-025, NC-026, NC-029..NC-034 &nbsp;·&nbsp;
+  <code>docs/implementations/2026-08-29-calibration-yield-and-poller-defects.md</code> &nbsp;·&nbsp;
+  biletler #45, #53, #54, #63 &nbsp;·&nbsp; PR #50, #55, #80 &nbsp;·&nbsp;
+  ölçüm referansı <code>main @ 5f935ea</code>
+</footer>
+
+</div>
+</body>
+</html>
