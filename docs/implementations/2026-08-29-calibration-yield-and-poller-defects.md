@@ -457,3 +457,44 @@ from #45 §5 is incomplete. See `2026-09-02-aug-gap-enumeration.md`.
   branch; added by this work because ADR-020 fixes the layout and this extends it
 - ADR-014 (`docs/decisions.md`) — TSK trainer, gated on the floor this work re-specifies
 - `docs/numerical-claims.md` — NC-012 (the floor), NC-013 (superseded projection)
+
+---
+
+## Record repair · as-of 2026-09-09
+
+Everything above this heading is left unedited. This section restores a sentence that
+PR #52 removed from this document in place, which the append-only convention for dated
+documents forbids (`docs/team.md`, `## Documentation conventions`; issue #56 NFR-2).
+
+**What was removed.** PR #52 (`c9fd441`, `+20 -4` on this file) deleted the following
+sentence from the paragraph now ending "once the probe workflow is on the default branch",
+along with the re-flow of the correction note around it:
+
+> Until then the honest status of the Aug 7-17 windows is *probably nothing to backfill;
+> not yet enumerated*.
+
+**Why it was removed, and why that was the wrong mechanism.** The sentence had become
+false: PR #52's own enumeration settled the question the sentence said was open, and the
+`> **Enumerated 2026-09-02 ...**` callout immediately below records the answer. Correcting
+a claim the evidence has overtaken is right. Doing it by deletion is not.
+
+This document is dated 2026-08-29 and its filename is a claim about when its contents were
+true. On 2026-08-29 we genuinely believed the windows probably held nothing to backfill and
+had not yet enumerated them; that belief is part of the record, and the callout below reads
+as a correction only if the thing it corrects is still visible. Removing the sentence
+deletes the evidence that we once believed something else, which is exactly the history a
+reviewer or the advisor reads.
+
+**The repair is itself an append.** The sentence is quoted above rather than re-inserted
+into the paragraph, so no line of this document is edited and both readings stay auditable:
+the 2026-08-29 belief, and the 2026-09-02 finding that overturned it.
+
+**What the sentence's own claim is worth today.** Its practical half held. The Aug 7-17
+windows hold nothing recoverable, which the callout below confirms. Its stated reason did
+not: the windows were not quiet, and NC-033 and NC-034 replace the #45 section 5 (a)/(b)
+dichotomy that this sentence inherited. The correct reading is that the sentence reached a
+true conclusion from a wrong model, which is worth preserving precisely because it is the
+kind of error a deleted line cannot teach anyone.
+
+Recorded on PR #52's thread on 2026-09-09 as well, so the merge record carries the
+explanation and a later append-only sweep reads a reason rather than an unexplained gap.
