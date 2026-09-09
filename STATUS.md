@@ -1,12 +1,12 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-08 19:03 UTC · main at `645b4d1a` (2026-09-08) · 22 days to 2026-09-30_
+_Generated 2026-09-09 07:55 UTC · main at `5f935ea1` (2026-09-08) · 21 days to 2026-09-30_
 
 
 ## Milestones
 
 
-### 🟡 M0 · Queue clear, target 2026-09-05 (5/8)
+### 🟡 M0 · Queue clear, target 2026-09-05 (6/8)
 
 - ✅ #51 merged (aer_factory ADR references)
 - ✅ #52 merged (Aug 7-17 polling gaps)
@@ -15,7 +15,7 @@ _Generated 2026-09-08 19:03 UTC · main at `645b4d1a` (2026-09-08) · 22 days to
   - _Owner read is on Baha (poller.py is his). No recorded sign-off found on main; tracked inside #56 FR-2._
 - ✅ #53 dispatched with ledger rows
   - _Four workflow_dispatch runs executed; snapshots/2026-08/ibm_fez 277 -> 304 docs at 7139138. Record is PR #78, still unmerged._
-- 🟡 #53's record merged
+- ✅ #53's record merged
 - ❌ #45 closed (dataset-yield finding)
 - ✅ #25 closed by the cycle-2 close record
 
@@ -82,32 +82,30 @@ _Generated 2026-09-08 19:03 UTC · main at `645b4d1a` (2026-09-08) · 22 days to
 
 **Burak Öztekin** (@BurakOztekin)
 
-1. Re-review PR #68 (#59: Manual MF parameterization from the archive)
-   - Your CHANGES_REQUESTED from 2026-09-08 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Start #60: ADR-014 hybrid ANFIS trainer
    - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.
-1. Re-review PR #83 (#57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py)
-   - Your CHANGES_REQUESTED from 2026-09-08 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Start #73: Filter noise by physical gate semantics
+   - All stated upstream dependencies are met.
+1. Start #74: first_ensemble_run must transpile before prepare
    - All stated upstream dependencies are met.
 
 **Mert Efe Şensoy** (@mertefesensoy)
 
 1. Send Dr. Akba the four ADR-027 questions (#84)
    - FR-15 routes all advisor contact through the lead, so no one else can send it. The decision-by date was 2026-09-08 and has passed. ADR-027 stays Open, ADR-014 stays Deferred, and the M3 ADR-009 memo has no answer to build on until this goes out.
-1. Re-review PR #68 (#59: Manual MF parameterization from the archive)
-   - Your CHANGES_REQUESTED from 2026-09-04 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it. You commented again on 2026-09-08 without lifting it; a COMMENTED review does not dismiss a CHANGES_REQUESTED.
 1. Re-review PR #70 (#48: Pipeline-health dashboard)
    - Your CHANGES_REQUESTED from 2026-09-06 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
-1. Unstick PR #83 for #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
-   - CHANGES_REQUESTED standing from @BurakOztekin (2026-09-08). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+1. Finish #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
+   - The contract merged; only the advisor half of its definition of done is outstanding.
+1. Start #56: Clear the queue, keep the records honest
+   - It is the M0 gate and M0 is three days past its 2026-09-05 target.
 
 **Yiğit Arda Kaderoğlu** (@yigit-arda)
 
 1. Start #84: Close the #57 advisor loop
    - The only phase-3 blocker with a multi-week external latency tail, and the only M1 gate with no work in flight. Every day it waits is a day added to M3.
 1. Unstick PR #68 for #59: Manual MF parameterization from the archive
-   - CHANGES_REQUESTED standing from @BurakOztekin (2026-09-08), @mertefesensoy (2026-09-04). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+   - Still a draft: CI and reviewers will not treat it as ready.
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -127,7 +125,9 @@ _Generated 2026-09-08 19:03 UTC · main at `645b4d1a` (2026-09-08) · 22 days to
 
 **#59: Manual MF parameterization from the archive** (@yigit-arda)
 
-- [critical] CHANGES_REQUESTED standing from @BurakOztekin (2026-09-08), @mertefesensoy (2026-09-04). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
+- [high] Still a draft: CI and reviewers will not treat it as ready.
+- [high] Its green checks last ran 2026-09-08T19:40 against a main that has moved since; they are not evidence about the merge result.
 
 **#61: ADR-011 evidence + premise gradients** (@bengisucvd)
 
@@ -137,7 +137,7 @@ _Generated 2026-09-08 19:03 UTC · main at `645b4d1a` (2026-09-08) · 22 days to
 
 - [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-09-06). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
-- [high] Its green checks last ran 2026-09-05T19:09 against a main that has moved since; they are not evidence about the merge result.
+- [high] Its green checks last ran 2026-09-08T21:24 against a main that has moved since; they are not evidence about the merge result.
 - [high] Decision 3: the --scope qubits digest body must be locked before FR-1 is written, because #63 consumes it.
 
 **#49: Scheduled backfill sweep** (@mertefesensoy)
@@ -154,17 +154,12 @@ _Generated 2026-09-08 19:03 UTC · main at `645b4d1a` (2026-09-08) · 22 days to
 
 - [medium] Closure is a records task inside #56, not new code.
 
-**#53: Backfill 14 recoverable documents** (@mertefesensoy)
-
-- [medium] The dispatches ran; only the record (PR #78) is outstanding, blocked on a re-review.
-
 **#75: Decide the LOCKED Kraus projector boundary** (@bengisucvd)
 
 - [medium] Touches LOCKED src/superconducted/channels/kraus.py: needs a decision, not just a patch.
 
 **#57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py** (@mertefesensoy)
 
-- [critical] CHANGES_REQUESTED standing from @BurakOztekin (2026-09-08). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 - [critical] Code landed in PR #69, but the ticket's own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened; #84 owns it.
 
 ## Blocked upstream
@@ -178,8 +173,10 @@ _Generated 2026-09-08 19:03 UTC · main at `645b4d1a` (2026-09-08) · 22 days to
 ## Day by day
 
 
-Only 1 day recorded so far. The routine adds one per day.
-
+| Date | Gates | Ready | In review | Blocked | What moved |
+| --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-09 | 7/28 | 12 | 3 | 5 | +1 milestone gate (6 to 7 of 28); M0 5/8 to 6/8; #53 Backfill 14 recoverable documents: in review to closed; #57 Training contract: ADR-027, TSKTrainer ABC, training/targets.py: in review to ready to start; main moved to 5f935ea1 |
+| 2026-09-08 | 6/28 | 11 | 5 | 5 | first record |
 
 ## ADR ledger
 
