@@ -498,3 +498,39 @@ kind of error a deleted line cannot teach anyone.
 
 Recorded on PR #52's thread on 2026-09-09 as well, so the merge record carries the
 explanation and a later append-only sweep reads a reason rather than an unexplained gap.
+
+---
+
+## Floor correction · as-of 2026-09-09
+
+Everything above this heading is left unedited, including the `## Record repair · as-of
+2026-09-09` section. This section records that a figure this document repeats has been
+measured and found wrong (#56 FR-10).
+
+This document states that NC-012 records the floor as roughly 126 trainable parameters
+times 5, and derives a ratio from it. **The 126 was never derived by any file in this
+repository.** `git log -S'126'` puts it into `docs/architecture.md` on 2026-05-07, before
+the 27-rule grid existed, and it is reproducible only as one output dimension of consequent
+entries plus the premise count (108 + 18), which undercounts a two-output model by half its
+consequent term.
+
+Measured at `main` @ `5f935ea` with `count_trainable_parameters` on the rule base actually
+in use, a 3x3x3 `GaussianMF` grid at `output_dim = 2`:
+
+| Quantity | Value |
+| --- | --- |
+| Consequent entries | 216 |
+| Unique premise parameters | 18 |
+| **Trainable parameters** | **234** (registered as NC-045; reproduces NC-037) |
+| **Derived floor**, 234 x 5 | **1170** (NC-012, corrected) |
+| Ratio at 504 distinct states (NC-025, at `f0930b9`) | **2.15**, not 4.0 |
+
+**This does not change any conclusion in this document.** Section 7 of #45 and the decision
+recorded here both say the gate is not met; the correction makes the shortfall larger, not
+smaller. The gate is further away than this document reported, in the same direction.
+
+Two caveats travel with the new figure and are unchanged by it: the floor moves with
+membership-function shape, from 1170 to 1260 across the seven implemented shapes (NC-046),
+and ADR-009 reads `Open` at this commit so the shape and type are not yet decided.
+Distinct device states remain an upper bound on independent samples, so crossing 1170 would
+be a claim gate rather than a proof of training sufficiency.
