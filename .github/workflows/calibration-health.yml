@@ -20,6 +20,11 @@ on:
         required: false
         type: string
         default: ''
+      data_branch:
+        description: 'Data branch to read and update. Use a scratch branch for validation.'
+        required: false
+        type: string
+        default: calibration-data
 
 # FR-7: candidate floors are configuration, never a literal in the renderer.
 # 630 is NC-012's floor (126 trainable parameters x 5); 675 is the same rule of
@@ -43,6 +48,8 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: write
+    env:
+      DATA_BRANCH: ${{ inputs.data_branch || 'calibration-data' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -50,7 +57,7 @@ jobs:
           fetch-depth: 1
       - uses: actions/checkout@v4
         with:
-          ref: calibration-data
+          ref: ${{ env.DATA_BRANCH }}
           path: data
           fetch-depth: 1
           sparse-checkout: |
@@ -70,7 +77,7 @@ jobs:
           git add health/state-index.tsv
           git diff --cached --quiet && exit 0
           git commit -m 'health: backfill state index'
-          ../source/scripts/push_with_retry.sh origin calibration-data
+          ../source/scripts/push_with_retry.sh origin "$DATA_BRANCH"
 
   render:
     needs: backfill
@@ -79,6 +86,8 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: write
+    env:
+      DATA_BRANCH: ${{ inputs.data_branch || 'calibration-data' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -86,7 +95,7 @@ jobs:
           fetch-depth: 1
       - uses: actions/checkout@v4
         with:
-          ref: calibration-data
+          ref: ${{ env.DATA_BRANCH }}
           path: data
           fetch-depth: 1
           sparse-checkout: |
@@ -120,4 +129,4 @@ jobs:
             exit 0
           fi
           git commit -m 'health: refresh pipeline dashboard'
-          ../source/scripts/push_with_retry.sh origin calibration-data
+          ../source/scripts/push_with_retry.sh origin "$DATA_BRANCH"
