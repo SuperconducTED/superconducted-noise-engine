@@ -27,12 +27,21 @@ on:
         default: calibration-data
 
 # FR-7: candidate floors are configuration, never a literal in the renderer.
-# 630 is NC-012's floor (126 trainable parameters x 5); 675 is the same rule of
-# thumb when TanhBellMF(left, right, slope) makes each premise 3 parameters
-# rather than 2. Both ship as labelled candidates because issue #48 section 1.2
-# is explicit that this pipeline does not decide the training floor.
+#
+# 1170 is NC-012 as corrected on 2026-09-09 (#56 FR-10): NC-045 measures the rule
+# base in use with count_trainable_parameters and gets 234 parameters, times the
+# x5 samples-per-parameter rule of thumb. It supersedes the 630 this workflow
+# shipped until now, whose 126 no reachable file derives and which undercounts
+# the consequent term by one output dimension.
+#
+# 1215 is the same rule of thumb for TanhBellMF, which NC-046 measures at 243
+# parameters because it carries 3 premise parameters per MF rather than 2.
+#
+# Both ship as labelled candidates: issue #48 section 1.2 is explicit that this
+# pipeline does not decide the training floor, and NC-045 is still a provisional
+# laptop measurement awaiting the batch-2 canonical record.
 env:
-  HEALTH_FLOORS: 'NC-012=630 TanhBellMF=675'
+  HEALTH_FLOORS: 'NC-012=1170 TanhBellMF=1215'
 
 # Deliberately NOT the poller's group. Sharing one would let a render cancel a
 # queued poll, and a cancelled poll writes no ledger row. The resulting push

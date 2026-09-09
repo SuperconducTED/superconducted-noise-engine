@@ -123,7 +123,7 @@ class TestConformance:
             StateRow("c.json", NOW - timedelta(hours=5), "b", True),
         ]
         polls = [PollRow(NOW - timedelta(hours=hour), "new") for hour in range(1, 40)]
-        metrics = build_metrics(states, polls, [("NC-012", 630), ("TanhBellMF", 675)], NOW)
+        metrics = build_metrics(states, polls, [("NC-012", 1170), ("TanhBellMF", 1215)], NOW)
         allowed = _renderable_numbers(metrics)
         for node in _text_nodes(render_svg(metrics)):
             unlicensed = set(NUMBER.findall(node)) - allowed
@@ -157,7 +157,7 @@ class TestCommitOnChange:
     def test_unchanged_inputs_render_identical_bytes_a_day_apart(self) -> None:
         """The render instant must not reach the SVG; if it does the guard never fires."""
         states = self._quiet_archive()
-        floors = [("NC-012", 630)]
+        floors = [("NC-012", 1170)]
         first = render_svg(build_metrics(states, [], floors, NOW))
         second = render_svg(build_metrics(states, [], floors, NOW + timedelta(days=1)))
         assert first == second
@@ -165,7 +165,7 @@ class TestCommitOnChange:
     def test_one_new_state_changes_the_rendered_bytes(self) -> None:
         """The other half of FR-6: a material change must still produce a commit."""
         states = self._quiet_archive()
-        floors = [("NC-012", 630)]
+        floors = [("NC-012", 1170)]
         before = render_svg(build_metrics(states, [], floors, NOW))
         after = render_svg(
             build_metrics(
@@ -186,13 +186,38 @@ class TestCommitOnChange:
         assert staleness_band(168.0) == staleness_band(10_000.0) == "over 7 days"
 
 
+def _shipped_floors() -> list[tuple[str, int]]:
+    """The candidate floors the health workflow actually supplies.
+
+    Read out of the workflow rather than restated here. Pinning literals in the
+    test is what let the renderer keep shipping 630 and 675 for a day after
+    #56 FR-10 corrected NC-012 to 1170: the guard passed while the dashboard
+    published a floor no register row asserted.
+    """
+    workflow = Path(__file__).resolve().parents[1] / ".github/workflows/calibration-health.yml"
+    text = workflow.read_text(encoding="utf-8")
+    match = re.search(r"^\s*HEALTH_FLOORS:\s*'([^']*)'", text, re.MULTILINE)
+    assert match, "HEALTH_FLOORS is the FR-7 configuration surface and must exist"
+    floors = [item.partition("=") for item in match.group(1).split()]
+    assert floors, "HEALTH_FLOORS must name at least one candidate floor"
+    return [(label, int(value)) for label, _, value in floors]
+
+
 class TestFloorsAreConfiguration:
     """FR-7: floors are a configuration input, never an assertion in code."""
 
-    def test_no_candidate_floor_is_a_literal_in_the_renderer(self) -> None:
+    def test_no_shipped_floor_is_a_literal_in_the_renderer(self) -> None:
         source = Path(__file__).resolve().parents[1] / "scripts" / "pipeline_health.py"
         body = source.read_text(encoding="utf-8")
-        assert "630" not in body and "675" not in body
+        for label, value in _shipped_floors():
+            assert str(value) not in body, f"{label}={value} leaked into the renderer"
+
+    def test_the_shipped_floors_render_and_are_labelled(self) -> None:
+        """FR-7's other half: UC-6 needs every tick to carry its source."""
+        floors = _shipped_floors()
+        svg = render_svg(build_metrics([], [], floors, NOW))
+        for label, value in floors:
+            assert f"{label}: {value}" in svg
 
     def test_the_cli_refuses_to_invent_a_floor(self, tmp_path: Path) -> None:
         with pytest.raises(SystemExit) as excinfo:

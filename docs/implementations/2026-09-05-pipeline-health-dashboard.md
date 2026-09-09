@@ -118,12 +118,19 @@ new state; it is a raw staleness signal, not an unapproved alarm threshold.
 ## Design decisions
 
 Candidate floors are workflow configuration, not a training assertion in code.
-`--floor` is **required**: `pipeline_health.py` holds no floor value at all, and
-`tests/test_pipeline_health.py` asserts that neither `630` nor `675` appears in
-its source. The values live in the health workflow's `HEALTH_FLOORS` env block
-and can be overridden per dispatch. The default readout shows the documented
-`NC-012=630` candidate and the `TanhBellMF=675` alternative together, labelled
-by source. The implementation does not decide the true training floor.
+`--floor` is **required**: `pipeline_health.py` holds no floor value at all. The
+values live in the health workflow's `HEALTH_FLOORS` env block and can be
+overridden per dispatch, and `tests/test_pipeline_health.py` reads that block
+out of the workflow and asserts none of its values appears in the renderer's
+source, so the guard follows the configuration instead of pinning two literals.
+
+The default readout shows the `NC-012=1170` candidate and the `TanhBellMF=1215`
+alternative together, labelled by source. Both moved on 2026-09-09: #56 FR-10
+corrected NC-012 from `630` to `1170` after NC-045 measured the rule base in use
+at 234 trainable parameters, and NC-046 measures TanhBellMF at 243, so the
+alternative is 1215 rather than the 675 the issue body reasoned to before the
+count was taken. The implementation does not decide the true training floor, and
+NC-045 is still a provisional laptop measurement.
 
 The staleness headline is rendered as a **band** (`under 24 h`, `24 h to 3
 days`, `3 to 7 days`, `over 7 days`, `never`), not as an elapsed-hours figure.
@@ -178,7 +185,7 @@ For a local render against a calibration-data checkout:
 ```powershell
 $env:PYTHONPATH = (Get-Location).Path
 python scripts/pipeline_health.py --root path\to\calibration-data `
-  --floor NC-012=630 --floor TanhBellMF=675
+  --floor NC-012=1170 --floor TanhBellMF=1215
 ```
 
 `--floor` is required (FR-7). The workflow supplies it from `HEALTH_FLOORS`; a
