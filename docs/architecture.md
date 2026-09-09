@@ -163,4 +163,4 @@ for ANFIS training (≈ 126 trainable parameters × 5× rule of thumb).
 | ADR-013 Calibration features | `CalibrationFeatureExtractor` | BasicCalibrationVectorizer | per-qubit, drift-aware (deferred) |
 | ADR-014 TSK trainer | (in `fuzzy.tsk`) | none — manual params | hybrid LSE + SGD ANFIS |
 | ADR-015 Ensemble sampling | (in `integration.aer_factory`) | identical (no perturbation) | input-vector / MF / IT2 perturbation |
-| ADR-016 Benchmark aggregation | (in `benchmarks.harness`) | mean | interval-valued |
+| ADR-016 Benchmark aggregation | (in `benchmarks.harness`) | sum (probability-equivalent to mean under normalized metrics) | interval-valued |
