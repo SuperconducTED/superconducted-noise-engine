@@ -114,6 +114,28 @@ to make that failure mode structurally hard to repeat.
    date, and any necessary notes.
 4. The claim is now safe to cite in public-facing documentation.
 
+### Granularity for a results or ablation table
+
+The unit of registration for a results table is **one row per reported
+conclusion, not one row per cell.**
+
+Such a row must cite three things: the committed results TSV **by path**, the
+**archive ref** the run consumed, and the **commit the table was produced at**.
+The TSV is the audit trail for the individual figures. A reader who wants one
+cell reads the TSV at that commit; they do not look for a register row that
+names it.
+
+The reason is arithmetic. A seven-shape ablation over four circuits and four
+metrics is a few hundred figures, and the ADR-019 ablation ticket priced a
+strict per-figure rule at 500-600 rows. A register that long is a register
+nobody reads, which defeats the purpose of having one.
+
+The counter-rule that keeps this honest: **a figure quoted in prose outside the
+table still needs its own row**, or an explicit "to be measured". The
+conclusion-row rule changes the unit of registration for tables. It does not
+create an exemption from Rule 3 or from the obligation that every number in a
+public-facing document resolves to a row or to a named file on `main`.
+
 ## Retiring a claim
 
 1. Move the row to `Retired claims`.
