@@ -6,11 +6,12 @@ import json
 import re
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 from xml.etree import ElementTree
 
 import pytest
 from scripts.pipeline_health import (
+    NOTHING_TO_PUBLISH,
     PollRow,
     StateRow,
     build_metrics,
@@ -293,10 +294,61 @@ def test_poll_hours_span_a_month_partition(tmp_path: Path) -> None:
         header + "2026-09-01T00:00:00Z\tibm_fez\t20260901T000000Z\tduplicate\n", encoding="utf-8"
     )
     (health / "state-index.tsv").write_text(
-        "snapshot_filename\tlast_update_date\tqubit_digest\tis_new_state\n", encoding="utf-8"
+        "snapshot_filename\tlast_update_date\tqubit_digest\tis_new_state\n"
+        "a.json\t2026-08-31T23:00:00Z\tdigest\t1\n",
+        encoding="utf-8",
     )
     args = ["--root", str(tmp_path), "--now", "2026-09-01T12:00:00Z", "--floor", "candidate=630"]
     assert main(args) == 0
     metrics = json.loads((health / "metrics.json").read_text(encoding="utf-8"))
     assert sum(metrics["poll_hours_72h"]) == 2, "one hour from each monthly ledger file"
     assert metrics["ledger_hour_coverage_72h"] == 2 / 72
+
+
+class TestRefusesToPublishAZero:
+    """A dashboard reporting zero device states is worse than no dashboard."""
+
+    FLOORS: ClassVar[list[str]] = ["--floor", "NC-012=1170"]
+
+    @staticmethod
+    def _with_ledger(tmp_path: Path) -> None:
+        ledger = tmp_path / "ledger"
+        ledger.mkdir()
+        (ledger / "2026-09.tsv").write_text(
+            "poll_time_utc\tbackend\tlast_update_date\tdecision\n"
+            "2026-09-09T18:00:00Z\tibm_fez\t20260909T180000Z\tnew\n",
+            encoding="utf-8",
+        )
+
+    def test_an_absent_index_publishes_nothing(self, tmp_path: Path) -> None:
+        """The state of calibration-data on the first scheduled run after merge."""
+        self._with_ledger(tmp_path)
+        assert main(["--root", str(tmp_path), *self.FLOORS]) == NOTHING_TO_PUBLISH
+        assert not (tmp_path / "health").exists()
+
+    def test_a_header_only_index_publishes_nothing(self, tmp_path: Path) -> None:
+        """What the poll workflow leaves behind before the backfill is dispatched."""
+        self._with_ledger(tmp_path)
+        health = tmp_path / "health"
+        health.mkdir()
+        (health / "state-index.tsv").write_text(
+            "snapshot_filename\tlast_update_date\tqubit_digest\tis_new_state\n", encoding="utf-8"
+        )
+        assert main(["--root", str(tmp_path), *self.FLOORS]) == NOTHING_TO_PUBLISH
+        assert not (health / "metrics.json").exists()
+        assert not (health / "progress.svg").exists()
+
+    def test_one_indexed_document_is_enough_to_publish(self, tmp_path: Path) -> None:
+        """The guard must not swallow a small but real archive."""
+        self._with_ledger(tmp_path)
+        health = tmp_path / "health"
+        health.mkdir()
+        (health / "state-index.tsv").write_text(
+            "snapshot_filename\tlast_update_date\tqubit_digest\tis_new_state\n"
+            "a.json\t2026-09-09T17:00:00Z\tdigest\t1\n",
+            encoding="utf-8",
+        )
+        assert main(["--root", str(tmp_path), *self.FLOORS]) == 0
+        assert (health / "progress.svg").exists()
+        metrics = json.loads((health / "metrics.json").read_text(encoding="utf-8"))
+        assert metrics["documents_total"] == 1 and metrics["states_total"] == 1

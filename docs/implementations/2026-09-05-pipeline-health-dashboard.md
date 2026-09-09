@@ -40,6 +40,18 @@ The poll path calculates a sha-256 digest of qubit only for exactly the new snap
 
 The health job only checks `health/`, `ledger/` and the branch README in a sparse manner. It produces all the dashboard figures from the index and ADR-025 ledger, staging `health/` but committing only if the bytes changed. `generated_at` only exists in JSON; the SVG has no clock value, external resource, script, or theme-dependent foreground color.
 
+The renderer refuses to publish from an index that names no documents. It exits
+**3**, writes nothing, and emits a `::warning::`; the workflow gates its commit
+step on that, so nothing is staged and nothing is pushed. This is the cold-start
+case and it is not hypothetical: `calibration-data` has no `health/` tree until
+the one-time backfill is dispatched, and the poll workflow creates the index with
+a header row on its first run after merge. Without the guard, the first scheduled
+render would publish `0 states` on a branch holding hundreds and commit it, and
+the branch README embeds that graphic. A dashboard reporting a zero it cannot
+justify is the failure `docs/numerical-claims.md` exists to prevent, so the
+renderer declines rather than guesses. Argparse keeps exit **2** for a bad
+invocation.
+
 The only archive-walking operation is the optional workflow-dispatch backfill.
 It is safe to repeat only after a complete backfill: it refuses an incomplete
 existing index, rather than appending historical rows after poll-side rows and
@@ -176,6 +188,8 @@ without launching one subprocess per file.
    calibration-data ref and reconcile its result with NC-025's historical
    504-state result at `f0930b9`; investigate a mismatch.
 4. Dispatch it again without backfill. Unchanged inputs must result in no commit.
+   Until step 3 has run, a scheduled render exits 3 and publishes nothing, so the
+   order of steps 2 and 3 cannot corrupt the branch; it only delays the dashboard.
 5. Update the calibration-data README to embed
    `![Pipeline health](health/progress.svg)` and link ADR-020 and ADR-025.
 6. Verify the committed SVG on GitHub in both themes and retain PR evidence.

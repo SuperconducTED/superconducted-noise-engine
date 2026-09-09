@@ -115,14 +115,28 @@ jobs:
         with:
           python-version: '3.12'
       - name: Render metrics and SVG
+        id: render
         env:
           FLOORS: ${{ inputs.floors || env.HEALTH_FLOORS }}
         run: |
           floor_args=()
           for floor in $FLOORS; do floor_args+=(--floor "$floor"); done
+          set +e
           PYTHONPATH=source python source/scripts/pipeline_health.py \
             --root data "${floor_args[@]}"
+          status=$?
+          set -e
+          # 3 is "the index is empty or absent, nothing was written". That is the
+          # state of this branch until the one-time backfill is dispatched, and
+          # committing then would publish a dashboard reporting zero states.
+          if [ "$status" -eq 3 ]; then
+            echo 'published=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          [ "$status" -eq 0 ] || exit "$status"
+          echo 'published=true' >> "$GITHUB_OUTPUT"
       - name: Commit only material health changes
+        if: steps.render.outputs.published == 'true'
         run: |
           cd data
           git config user.name 'github-actions[bot]'

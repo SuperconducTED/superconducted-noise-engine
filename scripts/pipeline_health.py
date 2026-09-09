@@ -4,6 +4,13 @@ The scheduled command reads only ``health/state-index.tsv`` and ``ledger/*.tsv``
 never traversing the snapshot archive (NFR-1). The module is stdlib-only and its
 public functions are importable, so metrics can be computed without a subprocess.
 
+Exit codes: **0** when the dashboard was written, **3** when the state index is
+absent or holds no rows, so nothing was written and there is nothing to publish.
+A dashboard reporting zero device states is worse than no dashboard: on the first
+scheduled run after this lands, before the one-time backfill is dispatched, the
+index does not exist yet, and publishing then would put `0 states` on a branch
+that holds hundreds. Argparse keeps **2** for a bad invocation.
+
 Rendering contract (NFR-3/FR-6): the SVG carries no clock reading. Every figure in
 it is a function of the committed index and ledger, plus the position of the two
 rolling windows FR-5 mandates. ``generated_at`` and the exact
@@ -32,6 +39,9 @@ STALENESS_BANDS: tuple[tuple[float, str], ...] = (
 """Upper bound in hours, paired with the label shown strictly below it."""
 
 OVER_LAST_BAND = "over 7 days"
+
+NOTHING_TO_PUBLISH = 3
+"""Exit code for an index that names no documents. See the module docstring."""
 
 
 @dataclass(frozen=True)
@@ -285,8 +295,20 @@ def main(argv: Iterable[str] | None = None) -> int:
     args = parser.parse_args(list(argv) if argv is not None else None)
     now = args.now or datetime.now(UTC)
     root: Path = args.root
+    states = read_index(root / "health/state-index.tsv")
+    if not states:
+        # Refuse rather than publish a zero. The poll workflow creates this file with
+        # a header on its first run, so "absent" and "header only" are both just
+        # "the backfill has not run yet", and both must decline.
+        print(
+            "::warning::health/state-index.tsv is absent or holds no rows, so no "
+            "dashboard was written. Dispatch Calibration Pipeline Health with "
+            "backfill=true, adding rebuild=true if the poller has already appended "
+            "rows, then this job will publish."
+        )
+        return NOTHING_TO_PUBLISH
     metrics = build_metrics(
-        read_index(root / "health/state-index.tsv"),
+        states,
         read_ledger(root / "ledger"),
         _floor_values(args.floor),
         now,
