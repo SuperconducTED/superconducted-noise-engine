@@ -251,7 +251,7 @@ dated snapshot is reconciled by appending rather than by rewriting its rows.
   57 files.
 - `mypy --strict src/superconducted` — clean, 25 files. `mypy` with the project
   config (`src/superconducted` **and** `scripts`) — clean, 34 files.
-- `python scripts/check_ids.py` — no duplicate or colliding ADR / NC identifiers.
+- `python scripts/check_ids.py`: no duplicate or colliding ADR / NC identifiers.
 - `python -m pytest tests/ --collect-only -q -o addopts=""` — **391 collected**,
   registered as NC-021 at this commit.
 - `python -m pytest tests/ -q` — 383 passed, 8 failed. All 8 are
@@ -293,7 +293,7 @@ convention.
 **The blocker: one canonicalisation for the qubit digest.**
 
 `qubit_digest` hashed each parameter's `date`. `_payload_body`, eleven lines
-above it in the same module, drops it — that is #80 (`0a4271b`), which reached
+above it in the same module, drops it; that is #80 (`0a4271b`), which reached
 this branch through the `4bea68c` merge and never got applied to the qubits
 scope, although FR-1 asks that scope to reuse the same canonicalisation. The
 module therefore held two contradictory answers to one question.
@@ -317,7 +317,7 @@ Measured before changing anything, over 60 consecutive documents at `f0930b9`:
 
 | Definition | Distinct states | Pairs equal only after stripping |
 | --- | --- | --- |
-| shipped, `date` hashed | 34 | — |
+| shipped, `date` hashed | 34 | n/a |
 | aligned, `date` stripped | 34 | 0 |
 
 The sample is one contiguous run, 6.7% of the 894 documents at that ref, and it
@@ -357,23 +357,23 @@ after a sweep and anything else reading the index has to know.
 
 **Verification at `7ec173f`.**
 
-- `ruff check .` and `ruff format --check .` over the repository — clean, 57 files.
-- `mypy --strict` on the three scripts — clean.
-- `python scripts/check_ids.py` — no duplicate or colliding identifiers.
-- `python -m pytest tests/ --collect-only -q -o addopts=""` — **419 collected**,
+- `ruff check .` and `ruff format --check .` over the repository: clean, 57 files.
+- `mypy --strict` on the three scripts: clean.
+- `python scripts/check_ids.py`: no duplicate or colliding identifiers.
+- `python -m pytest tests/ --collect-only -q -o addopts=""`: **419 collected**,
   registered as NC-021 at this commit.
-- `python -m pytest tests/ -q` — **419 passed**, 0 failed, 46.6 s. Note this
+- `python -m pytest tests/ -q`: **419 passed**, 0 failed, 46.6 s. Note this
   differs from the round-2 block: the 8 `tests/test_file_snapshots.py` failures
   recorded there did not reproduce, in a clean interpreter at a short path
   rather than the repository `.venv`. They were an environment artefact, as that
   block said, and `ubuntu-latest` remains the authority for the pass count.
-- `bash -n scripts/file_snapshots.sh scripts/push_with_retry.sh` — both parse.
+- `bash -n scripts/file_snapshots.sh scripts/push_with_retry.sh`: both parse.
 
 **Still not verified, and still not verifiable from a local checkout.** The
 section 10 evidence that was outstanding after round 2 is unchanged by this
 round: `calibration-data` has no `health/` tree, its `README.md` still carries
 the dead "PR ticket #002" reference FR-8 exists to remove, and no Actions run
-has yet shown an *unchanged* render producing no commit — run `34404140171`
+has yet shown an *unchanged* render producing no commit; run `34404140171`
 skipped its commit step through the cold-start exit-3 guard, which is a
 different path. The ADR-025 amendment also still needs the out-of-band routing
 `docs/team.md` requires, and that routing now has more to carry: this round

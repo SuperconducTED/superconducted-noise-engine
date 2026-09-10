@@ -185,7 +185,7 @@ def canonical_digest(
     difference of any kind belongs in front of a human.
 
     With ``scope="qubits"`` the digest covers ``properties.qubits`` alone and
-    also drops per-parameter ``date`` — see ``qubit_digest`` for why that is
+    also drops per-parameter ``date``; see ``qubit_digest`` for why that is
     the right answer for counting device states and the wrong one for the
     collision path. ``payload_only`` and ``scope="qubits"`` both narrow what is
     hashed, so combining them raises rather than silently applying one.
