@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-10 05:41 UTC · main at `3b949cd4` (2026-09-09) · 20 days to 2026-09-30_
+_Generated 2026-09-10 08:15 UTC · main at `d0d0b073` (2026-09-10) · 20 days to 2026-09-30_
 
 
 ## Milestones
@@ -33,7 +33,7 @@ _Generated 2026-09-10 05:41 UTC · main at `3b949cd4` (2026-09-09) · 20 days to
 
 - ❌ ADR-019 ablation executed with its table (#62)
 - ❌ Gradient derivations and training/gradients.py (#61)
-- 🟡 Pipeline-health dashboard live (#48)
+- ❌ Pipeline-health dashboard live (#48)
 - 🟡 Scheduled sweep live (#49)
 - ❌ Trainer LSE stage passing on synthetic + anchored-baseline data
   - _#60 has no branch or PR yet. Its contract dependency (#57) merged 2026-09-08, so it is startable._
@@ -66,8 +66,8 @@ _Generated 2026-09-10 05:41 UTC · main at `3b949cd4` (2026-09-09) · 20 days to
 
 **Baha Jarad** (@BahaJarad)
 
-1. Unstick PR #70 for #48: Pipeline-health dashboard
-   - CHANGES_REQUESTED standing from @mertefesensoy (2026-09-06). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+1. Start #48: Pipeline-health dashboard
+   - Its prerequisite merged 2026-09-02 and #63 cannot start its FR-1 half until the digest body is settled.
 1. Start #66: Vectorizer returns µs where the repo assumes s
    - No dependencies in either direction, and it blocks running the shipped pipeline on real archived data, which phase 3 does throughout. On a real snapshot the ratified 3x3x3 grid fires at exactly zero and the bootstrap pipeline raises ZeroDivisionError.
 
@@ -93,12 +93,12 @@ _Generated 2026-09-10 05:41 UTC · main at `3b949cd4` (2026-09-09) · 20 days to
 
 1. Send Dr. Akba the four ADR-027 questions (#84)
    - FR-15 routes all advisor contact through the lead, so no one else can send it. The decision-by date was 2026-09-08 and has passed. ADR-027 stays Open, ADR-014 stays Deferred, and the M3 ADR-009 memo has no answer to build on until this goes out.
-1. Re-review PR #70 (#48: Pipeline-health dashboard)
-   - Your CHANGES_REQUESTED from 2026-09-06 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Finish #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
    - The contract merged; only the advisor half of its definition of done is outstanding.
 1. Finish #56: Clear the queue, keep the records honest
    - It is the M0 gate and M0 is three days past its 2026-09-05 target.
+1. Start #54: Capture rate ~70% during normal operation
+   - All stated upstream dependencies are met.
 
 **Yiğit Arda Kaderoğlu** (@yigit-arda)
 
@@ -123,7 +123,9 @@ _Generated 2026-09-10 05:41 UTC · main at `3b949cd4` (2026-09-09) · 20 days to
 
 **#59: Manual MF parameterization from the archive** (@yigit-arda)
 
+- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [high] Still a draft: CI and reviewers will not treat it as ready.
+- [high] Its green checks last ran 2026-09-08T19:40 against a main that has moved since; they are not evidence about the merge result.
 
 **#61: ADR-011 evidence + premise gradients** (@bengisucvd)
 
@@ -131,7 +133,6 @@ _Generated 2026-09-10 05:41 UTC · main at `3b949cd4` (2026-09-09) · 20 days to
 
 **#48: Pipeline-health dashboard** (@BahaJarad)
 
-- [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-09-06). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 - [high] Decision 3: the --scope qubits digest body must be locked before FR-1 is written, because #63 consumes it.
 
 **#49: Scheduled backfill sweep** (@mertefesensoy)
@@ -166,7 +167,7 @@ _Generated 2026-09-10 05:41 UTC · main at `3b949cd4` (2026-09-09) · 20 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
-| 2026-09-10 | 8/28 | 10 | 4 | 5 | +1 milestone gate (7 to 8 of 28); M0 6/8 to 7/8; #45 Polling cadence no longer limits the dataset: ready to start to closed; #49 Scheduled backfill sweep: ready to start to in review; main moved to 3b949cd4 |
+| 2026-09-10 | 8/28 | 11 | 3 | 5 | +1 milestone gate (7 to 8 of 28); M0 6/8 to 7/8; #45 Polling cadence no longer limits the dataset: ready to start to closed; #48 Pipeline-health dashboard: in review to ready to start; #49 Scheduled backfill sweep: ready to start to in review; main moved to d0d0b073 |
 | 2026-09-09 | 7/28 | 12 | 3 | 5 | +1 milestone gate (6 to 7 of 28); M0 5/8 to 6/8; #53 Backfill 14 recoverable documents: in review to closed; #57 Training contract: ADR-027, TSKTrainer ABC, training/targets.py: in review to ready to start; main moved to 5f935ea1 |
 | 2026-09-08 | 6/28 | 11 | 5 | 5 | first record |
 

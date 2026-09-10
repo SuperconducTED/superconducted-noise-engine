@@ -1,9 +1,9 @@
 {
-  "generated": "2026-09-10 05:41 UTC",
+  "generated": "2026-09-10 08:15 UTC",
   "main": {
-    "sha": "3b949cd4",
-    "date": "2026-09-09",
-    "msg": "Merge pull request #88 from SuperconducTED/mert/issue-58-decision-record",
+    "sha": "d0d0b073",
+    "date": "2026-09-10",
+    "msg": "Merge pull request #70 from SuperconducTED/feature/pipeline-health-dashboard",
     "adr": {
       "ADR-001": "Accepted",
       "ADR-002": "Accepted",
@@ -324,7 +324,7 @@
           "createdAt": "2026-09-04T13:03:49Z",
           "headRefName": "feature/issue-59-parameterization",
           "isDraft": true,
-          "mergeable": "UNKNOWN",
+          "mergeable": "CONFLICTING",
           "mergedAt": null,
           "number": 68,
           "reviewDecision": "APPROVED",
@@ -385,7 +385,7 @@
           ],
           "checks_newest": "2026-09-08T19:40",
           "checks_failing": [],
-          "checks_stale_vs_main": false
+          "checks_stale_vs_main": true
         }
       ],
       "merged_pr": null,
@@ -396,6 +396,14 @@
         {
           "severity": "high",
           "text": "Still a draft: CI and reviewers will not treat it as ready."
+        },
+        {
+          "severity": "critical",
+          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
+        },
+        {
+          "severity": "high",
+          "text": "Its green checks last ran 2026-09-08T19:40 against a main that has moved since; they are not evidence about the merge result."
         }
       ],
       "declared_unblocks": [
@@ -685,86 +693,13 @@
       "title": "Pipeline-health dashboard on calibration-data: per-poll device-state telemetry + SVG readout, so a scheduler collapse shows in a day instead of a quarter",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/48",
       "issue_state": "OPEN",
-      "state": "in_review",
-      "all_prs": [
-        {
-          "author": {
-            "id": "U_kgDOCWD9LQ",
-            "is_bot": false,
-            "login": "BahaJarad",
-            "name": ""
-          },
-          "closingIssuesReferences": [],
-          "createdAt": "2026-09-05T19:08:44Z",
-          "headRefName": "feature/pipeline-health-dashboard",
-          "isDraft": false,
-          "mergeable": "MERGEABLE",
-          "mergedAt": null,
-          "number": 70,
-          "reviewDecision": "CHANGES_REQUESTED",
-          "state": "OPEN",
-          "title": "Feature/pipeline health dashboard",
-          "updatedAt": "2026-09-10T05:38:34Z",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/70",
-          "headRefOid": "b6434854670428ce4a53c7067a7176d89cc096f1",
-          "additions": 2619,
-          "deletions": 10,
-          "file_count": 23,
-          "latest_reviews": [
-            {
-              "who": "mertefesensoy",
-              "state": "CHANGES_REQUESTED",
-              "at": "2026-09-06",
-              "last_activity": "2026-09-06"
-            }
-          ],
-          "looked_since": [],
-          "checks": [
-            {
-              "name": "test (3.11)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:30"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:30"
-            },
-            {
-              "name": "Analyze (actions)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:30"
-            },
-            {
-              "name": "test (3.12)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:30"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:30"
-            },
-            {
-              "name": "CodeQL",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:30"
-            }
-          ],
-          "checks_newest": "2026-09-10T05:30",
-          "checks_failing": [],
-          "checks_stale_vs_main": false
-        }
-      ],
+      "state": "ready",
+      "all_prs": [],
       "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
-        {
-          "severity": "critical",
-          "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-09-06). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
-        },
         {
           "kind": "signoff",
           "text": "Decision 3: the --scope qubits digest body must be locked before FR-1 is written, because #63 consumes it.",
@@ -776,7 +711,7 @@
         49
       ],
       "notes_info": [],
-      "pr": 70
+      "pr": null
     },
     {
       "id": 49,
@@ -819,7 +754,7 @@
           "createdAt": "2026-09-10T05:24:56Z",
           "headRefName": "mert/issue-49-sweep",
           "isDraft": false,
-          "mergeable": "MERGEABLE",
+          "mergeable": "UNKNOWN",
           "mergedAt": null,
           "number": 90,
           "reviewDecision": "REVIEW_REQUIRED",
@@ -894,7 +829,7 @@
           "createdAt": "2026-09-10T05:11:26Z",
           "headRefName": "mert/issue-49-poll-cron-entries",
           "isDraft": false,
-          "mergeable": "MERGEABLE",
+          "mergeable": "UNKNOWN",
           "mergedAt": null,
           "number": 89,
           "reviewDecision": "REVIEW_REQUIRED",
@@ -1730,7 +1665,7 @@
         },
         {
           "text": "Pipeline-health dashboard live (#48)",
-          "status": "partial",
+          "status": "not_done",
           "note": null
         },
         {

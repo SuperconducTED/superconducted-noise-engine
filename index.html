@@ -159,12 +159,12 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <div class="wrap"><header class="hero">
 <div class="eyebrow">SuperconducTED/superconducted-noise-engine</div>
 <h1>Phase 3 <span class="goal">: Results from ANFIS</span></h1>
-<div class="sub">Generated 2026-09-10 05:41 UTC from live GitHub state · main at <code>3b949cd4</code> (2026-09-09) · plan of 2026-09-03 at <code>7d39a2b</code></div>
+<div class="sub">Generated 2026-09-10 08:15 UTC from live GitHub state · main at <code>d0d0b073</code> (2026-09-10) · plan of 2026-09-03 at <code>7d39a2b</code></div>
 <div class="readout">
 <div><div class="v">20</div><div class="k">days to 2026-09-30</div></div>
 <div><div class="v">8<span>/28</span></div><div class="k">gates met</div></div>
-<div><div class="v">10</div><div class="k">ready to start</div></div>
-<div><div class="v">4</div><div class="k">in review</div></div>
+<div><div class="v">11</div><div class="k">ready to start</div></div>
+<div><div class="v">3</div><div class="k">in review</div></div>
 <div><div class="v">5</div><div class="k">blocked upstream</div></div>
 <div><div class="v alarm">1</div><div class="k">milestones overdue</div></div>
 <div class="calendar">
@@ -187,15 +187,6 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <span class="pill idle">M1</span>
 </span></li>
 <li>
-<span class="act">Re-review PR #70 (#48: Pipeline-health dashboard)</span>
-<span class="why">Your CHANGES_REQUESTED from 2026-09-06 is the standing block. main&#x27;s ruleset does not dismiss it on push, so only you can clear it.</span>
-<span class="tags">
-<span class="pill bad">you are the blocker</span>
-<span class="pill idle">unblocks #63</span>
-<span class="pill idle">medium-high</span>
-<span class="pill idle">M2</span>
-</span></li>
-<li>
 <span class="act">Finish #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py</span>
 <span class="why">The contract merged; only the advisor half of its definition of done is outstanding.</span>
 <span class="tags">
@@ -210,6 +201,14 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <span class="pill accent">ready to start</span>
 <span class="pill idle">high</span>
 <span class="pill idle">M0</span>
+</span></li>
+<li>
+<span class="act">Start #54: Capture rate ~70% during normal operation</span>
+<span class="why">All stated upstream dependencies are met.</span>
+<span class="tags">
+<span class="pill accent">ready to start</span>
+<span class="pill idle">high</span>
+<span class="pill idle">standalone</span>
 </span></li>
 </ol>
 </div>
@@ -295,10 +294,10 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <h3>Baha Jarad</h3><div class="role">@BahaJarad · The data track</div>
 <ol class="acts">
 <li>
-<span class="act">Unstick PR #70 for #48: Pipeline-health dashboard</span>
-<span class="why">CHANGES_REQUESTED standing from @mertefesensoy (2026-09-06). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.</span>
+<span class="act">Start #48: Pipeline-health dashboard</span>
+<span class="why">Its prerequisite merged 2026-09-02 and #63 cannot start its FR-1 half until the digest body is settled.</span>
 <span class="tags">
-<span class="pill warn">in review</span>
+<span class="pill accent">ready to start</span>
 <span class="pill idle">unblocks #63</span>
 <span class="pill idle">medium-high</span>
 <span class="pill idle">M2</span>
@@ -365,7 +364,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </span></li>
 <li><span>❌</span><span>Gradient derivations and training/gradients.py (#61)
 </span></li>
-<li><span>🟡</span><span>Pipeline-health dashboard live (#48)
+<li><span>❌</span><span>Pipeline-health dashboard live (#48)
 </span></li>
 <li><span>🟡</span><span>Scheduled sweep live (#49)
 </span></li>
@@ -415,6 +414,10 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <div class="lede">Tickets whose stated dependencies are all met, and which therefore cannot be excused by the critical path. Each row is the actual reason it has not closed.</div>
 <div class="card"><div class="scroll"><table>
 <tr><th>Ticket</th><th>Owner</th><th>Where it is</th><th>What is actually blocking it</th></tr>
+<tr class="sev-high"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/48">#48</a><span class="cap">Pipeline-health dashboard</span></td>
+<td>@BahaJarad</td><td><span class="pill accent">no branch yet</span></td><td><ul class="blockers">
+<li><span class="dot high"></span><span>Decision 3: the --scope qubits digest body must be locked before FR-1 is written, because #63 consumes it.</span></li>
+</ul></td></tr>
 <tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/84">#84</a><span class="cap">Close the #57 advisor loop</span></td>
 <td>@yigit-arda</td><td><span class="pill accent">no branch yet</span></td><td><ul class="blockers">
 <li><span class="dot critical"></span><span>Dr. Akba must answer four ADR-027 questions. He has no GitHub account; FR-15 routes all contact through the lead.</span></li>
@@ -444,14 +447,11 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <li><span class="dot high"></span><span>No approving review yet: main&#x27;s ruleset requires one.</span></li>
 <li><span class="dot medium"></span><span>Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).</span></li>
 </ul></td></tr>
-<tr class="sev-high"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/59">#59</a><span class="cap">Manual MF parameterization from the archive</span></td>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/59">#59</a><span class="cap">Manual MF parameterization from the archive</span></td>
 <td>@yigit-arda</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/68">PR #68</a> <span class="pill warn">draft</span><div class="sub">+4323/−2 · 9 files</div></td><td><ul class="blockers">
+<li><span class="dot critical"></span><span>Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.</span></li>
 <li><span class="dot high"></span><span>Still a draft: CI and reviewers will not treat it as ready.</span></li>
-</ul></td></tr>
-<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/48">#48</a><span class="cap">Pipeline-health dashboard</span></td>
-<td>@BahaJarad</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/70">PR #70</a> <span class="pill idle">open</span><div class="sub">+2619/−10 · 23 files</div></td><td><ul class="blockers">
-<li><span class="dot critical"></span><span>CHANGES_REQUESTED standing from @mertefesensoy (2026-09-06). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.</span></li>
-<li><span class="dot high"></span><span>Decision 3: the --scope qubits digest body must be locked before FR-1 is written, because #63 consumes it.</span></li>
+<li><span class="dot high"></span><span>Its green checks last ran 2026-09-08T19:40 against a main that has moved since; they are not evidence about the merge result.</span></li>
 </ul></td></tr>
 <tr class="sev-high"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/49">#49</a><span class="cap">Scheduled backfill sweep</span></td>
 <td>@mertefesensoy</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/90">PR #90</a> <span class="pill idle">open</span><div class="sub">+485/−5 · 7 files</div></td><td><ul class="blockers">
@@ -489,17 +489,15 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <td>@mertefesensoy</td><td><span class="pill ok">clean</span></td><td><span class="pill warn">no review</span></td><td><span class="pill ok">green</span><div class="sub">2026-09-10T05:12</div></td><td class="sub">2026-09-10</td></tr>
 <tr class="sev-high"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/79">#79</a><span class="cap">Certify benchmark harness modes and calibration reference (#58)  · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/58">#58</a></span></td>
 <td>@bengisucvd</td><td><span class="pill ok">clean</span> <span class="pill warn">draft</span></td><td><span class="pill warn">no review</span></td><td><span class="pill ok">green</span><div class="sub">2026-09-06T21:11</div></td><td class="sub">2026-09-08</td></tr>
-<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/70">#70</a><span class="cap">Feature/pipeline health dashboard · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/48">#48</a></span></td>
-<td>@BahaJarad</td><td><span class="pill ok">clean</span></td><td><div><span class="pill bad">changes requested</span> @mertefesensoy <span class="sub">2026-09-06</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-09-10T05:30</div></td><td class="sub">2026-09-10</td></tr>
-<tr class="sev-high"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/68">#68</a><span class="cap">Feature/issue 59 parameterization · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/59">#59</a></span></td>
-<td>@yigit-arda</td><td><span class="pill ok">clean</span> <span class="pill warn">draft</span></td><td><div><span class="pill ok">approved</span> @BurakOztekin <span class="sub">2026-09-08</span></div><div><span class="pill ok">approved</span> @mertefesensoy <span class="sub">2026-09-08</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-09-08T19:40</div></td><td class="sub">2026-09-09</td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/68">#68</a><span class="cap">Feature/issue 59 parameterization · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/59">#59</a></span></td>
+<td>@yigit-arda</td><td><span class="pill bad">conflicting</span> <span class="pill warn">draft</span></td><td><div><span class="pill ok">approved</span> @BurakOztekin <span class="sub">2026-09-08</span></div><div><span class="pill ok">approved</span> @mertefesensoy <span class="sub">2026-09-08</span></div></td><td><span class="pill warn">stale</span><div class="sub">2026-09-08T19:40</div></td><td class="sub">2026-09-09</td></tr>
 </table></div></div>
 <h2>Day by day</h2>
 <div class="lede">One record per day, written by the routine and diffed against the day before. Every line below is computed from those records, so it cannot drift from what the rest of this page says.</div>
 <div class="card" style="margin-bottom:13px"><svg viewBox="0 0 720 220" width="100%" role="img" aria-label="Milestone gates met over the phase, against an even-pace reference."><line x1="44" y1="186.0" x2="628" y2="186.0" stroke="var(--line)" stroke-width="1" fill="none"/><text x="36" y="190.0" text-anchor="end" fill="var(--muted)" font-size="11" font-family="var(--mono)">0</text><line x1="44" y1="16.0" x2="628" y2="16.0" stroke="var(--line)" stroke-width="1" fill="none"/><text x="36" y="20.0" text-anchor="end" fill="var(--muted)" font-size="11" font-family="var(--mono)">28</text><line x1="44.0" y1="186.0" x2="628.0" y2="16.0" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 4" fill="none" opacity=".65"/><text x="636" y="20.0" fill="var(--muted)" font-size="11" font-family="var(--sans)">even pace</text><path d="M169.1,149.6 L190.0,143.5 L210.9,137.4" stroke="var(--accent)" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><circle cx="210.9" cy="137.4" r="4.5" fill="var(--accent)" stroke="var(--panel)" stroke-width="2"/><text x="220.9" y="141.4" fill="var(--ink)" font-size="12" font-weight="600" font-family="var(--sans)">8 met</text><text x="44.0" y="210" text-anchor="start" fill="var(--muted)" font-size="11" font-family="var(--mono)">2026-09-02</text><text x="628.0" y="210" text-anchor="end" fill="var(--muted)" font-size="11" font-family="var(--mono)">2026-09-30</text></svg></div>
 <div class="card"><div class="scroll"><table>
 <tr><th>Date</th><th>Gates</th><th>Ready</th><th>In review</th><th>Blocked</th><th>What moved</th></tr>
-<tr><td class="num">2026-09-10</td><td class="num">8/28</td><td class="num">10</td><td class="num">4</td><td class="num">5</td><td><ul class="blockers"><li><span class="dot medium"></span><span>+1 milestone gate (7 to 8 of 28)</span></li><li><span class="dot medium"></span><span>M0 6/8 to 7/8</span></li><li><span class="dot medium"></span><span>#45 Polling cadence no longer limits the dataset: ready to start to closed</span></li><li><span class="dot medium"></span><span>#49 Scheduled backfill sweep: ready to start to in review</span></li><li><span class="dot medium"></span><span>main moved to 3b949cd4</span></li></ul></td></tr>
+<tr><td class="num">2026-09-10</td><td class="num">8/28</td><td class="num">11</td><td class="num">3</td><td class="num">5</td><td><ul class="blockers"><li><span class="dot medium"></span><span>+1 milestone gate (7 to 8 of 28)</span></li><li><span class="dot medium"></span><span>M0 6/8 to 7/8</span></li><li><span class="dot medium"></span><span>#45 Polling cadence no longer limits the dataset: ready to start to closed</span></li><li><span class="dot medium"></span><span>#48 Pipeline-health dashboard: in review to ready to start</span></li><li><span class="dot medium"></span><span>#49 Scheduled backfill sweep: ready to start to in review</span></li><li><span class="dot medium"></span><span>main moved to d0d0b073</span></li></ul></td></tr>
 <tr><td class="num">2026-09-09</td><td class="num">7/28</td><td class="num">12</td><td class="num">3</td><td class="num">5</td><td><ul class="blockers"><li><span class="dot medium"></span><span>+1 milestone gate (6 to 7 of 28)</span></li><li><span class="dot medium"></span><span>M0 5/8 to 6/8</span></li><li><span class="dot medium"></span><span>#53 Backfill 14 recoverable documents: in review to closed</span></li><li><span class="dot medium"></span><span>#57 Training contract: ADR-027, TSKTrainer ABC, training/targets.py: in review to ready to start</span></li><li><span class="dot medium"></span><span>main moved to 5f935ea1</span></li></ul></td></tr>
 <tr><td class="num">2026-09-08</td><td class="num">6/28</td><td class="num">11</td><td class="num">5</td><td class="num">5</td><td><span class="pill idle">first record</span></td></tr>
 </table></div></div>
@@ -548,5 +546,5 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </div>
 </div>
 <footer>
-Generated by <code>generate.py</code> on the orphan <code>phase-3-dashboard</code> branch. Static plan model: <code>plan.json</code>. Live state read via <code>gh</code> at 2026-09-10 05:41 UTC.<br>Nothing here is hand-maintained except <code>plan.json</code>, which changes only when the plan or a ticket's stated dependency changes. Source of truth for the plan itself remains <code>docs/roadmap/2026-09-03-phase-3-plan.md</code> on main.
+Generated by <code>generate.py</code> on the orphan <code>phase-3-dashboard</code> branch. Static plan model: <code>plan.json</code>. Live state read via <code>gh</code> at 2026-09-10 08:15 UTC.<br>Nothing here is hand-maintained except <code>plan.json</code>, which changes only when the plan or a ticket's stated dependency changes. Source of truth for the plan itself remains <code>docs/roadmap/2026-09-03-phase-3-plan.md</code> on main.
 </footer></div>
