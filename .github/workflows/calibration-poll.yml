@@ -2,8 +2,27 @@
 name: Calibration Polling
 
 on:
+  # Four entries per hour, not one, because GitHub dispatches `schedule` on a
+  # best-effort queue and drops it under load: measured 6.13 runs/day over the
+  # 15 days to 2026-09-10, about 26% of the 24/day this cron asks for, with a
+  # median gap of 3.23 h and a worst gap of 12.70 h. 99 of those 100 runs
+  # SUCCEEDED, so this is dropped dispatches rather than failing jobs, and no
+  # amount of fixing the job will change it (#49).
+  #
+  # Spread across the hour rather than clustered, so one load spike is less
+  # likely to take all four, and off the top of the hour per GitHub's own
+  # documented mitigation. :37 is kept because NC-008 records it as the target.
+  #
+  # This raises the odds of at least one poll per hour; it does not guarantee
+  # one, and it is a mitigation rather than the fix. The fix is #49's sweep,
+  # which makes a missed poll cost latency instead of data. Extra polls inside
+  # one hour are cheap: IBM republishes every ~1.26 h (NC-030), so a duplicate
+  # stamp is recorded as `duplicate` and its payload discarded.
   schedule:
+    - cron: '7 * * * *'
+    - cron: '22 * * * *'
     - cron: '37 * * * *'
+    - cron: '52 * * * *'
   # A manual run with all inputs blank behaves exactly like a scheduled poll.
   # Fill start and end to sweep a historical window instead — verified 2026-08-29
   # that properties(datetime=...) is honoured on ibm_quantum_platform out to at
