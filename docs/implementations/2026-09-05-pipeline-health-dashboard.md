@@ -33,6 +33,7 @@ scheduler that is only collecting repeated qubit states.
 | `tests/test_backfill_state_index.py` | Tests timestamp ordering, idempotency, and unsafe partial-index refusal. |
 | `tests/test_pipeline_health.py` | Tests state metrics, poll-hour boundaries, deterministic SVG output, and basic SVG safety. |
 | `tests/test_file_snapshots.py` | Exercises per-poll index appends and undecidable digest handling end to end. |
+| `tests/fixtures/pipeline_health/` | Committed archive, ledger and golden artifacts behind the section 9.2 end-to-end check. |
 
 ## Implementation approach
 
@@ -378,6 +379,59 @@ skipped its commit step through the cold-start exit-3 guard, which is a
 different path. The ADR-025 amendment also still needs the out-of-band routing
 `docs/team.md` requires, and that routing now has more to carry: this round
 changes what a row in `health/state-index.tsv` means.
+
+### As of `c966ba4` (2026-09-10): section 9.2 closed, and what closing it found
+
+Appended rather than folded into the block above, so each figure keeps the
+commit it was measured at.
+
+**Section 9.2 now has the fixture it asks for.** `tests/fixtures/pipeline_health/`
+holds four snapshot documents and a seven-row ledger; `TestEndToEndFixture` runs
+`backfill_state_index` then `pipeline_health` over them and compares
+`metrics.json` and `progress.svg` byte for byte against committed goldens. Round
+2 recorded the field-and-determinism approach as a deliberate deviation, which
+was defensible, but it left the one artifact the team actually reads with no
+guard on its bytes. Golden files are worth their maintenance cost here precisely
+because `progress.svg` is published into the branch README, and regeneration is
+one documented command rather than a hand edit. The guard was checked as a
+guard: changing one hex digit of one fill colour fails it, and it passes again
+on revert.
+
+The fixture is chosen rather than arbitrary. `20260901T060000000000Z` repeats the
+previous document's measurements under a later parameter `date`, so the four
+documents are two device states and the round-3 blocker is proven over the real
+archive path. Rendered at `2026-09-02T12:00:00Z`, state B was first seen exactly
+24 h earlier, which pins two strict comparisons nothing else covered:
+`staleness_band` tests `hours < limit`, and the acquisition window tests
+`timestamp > window24`. `tests/fixtures/pipeline_health/README.md` records both.
+
+**Closing it found a defect nothing else could have.** `Path.write_text`
+translates newlines to `os.linesep`, so the renderer wrote CRLF from Windows and
+LF from the workflow's ubuntu runner for byte-identical inputs. NFR-3 is a
+statement about identical inputs producing identical artifacts, and the platform
+axis was the one nobody was testing, because every previous test compared one
+platform against itself.
+
+It was reachable. This document tells the reader to render locally, and
+`calibration-data` carries no `.gitattributes` to normalise line endings, so two
+writers alternating would rewrite all 8 KB of `progress.svg` on a 1.17 GB branch
+and fire FR-6's commit-on-change guard with nothing to report. Both artifact
+writes now pass `newline="\n"` explicitly.
+`backfill_state_index._write` already had this right.
+
+**Verification at `c966ba4`.**
+
+- `ruff check .` and `ruff format --check .`: clean, 57 files.
+- `mypy --strict` under the project config: clean, 34 files.
+- `python scripts/check_ids.py`: no duplicate or colliding identifiers.
+- `python -m pytest tests/ --collect-only -q -o addopts=""`: **423 collected**,
+  registered as NC-021 at this commit.
+- `python -m pytest tests/ -q`: **423 passed**, 0 failed.
+
+The three items listed as outstanding in the block above are unchanged: an
+Actions run showing an unchanged render producing no commit, FR-8 on
+`calibration-data` itself with the both-themes screenshot, and the ADR-025
+routing plus a second reviewer.
 
 ## Related docs
 
