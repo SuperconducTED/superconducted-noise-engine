@@ -105,9 +105,16 @@ class StateRow:
 
 @dataclass(frozen=True)
 class PollRow:
-    """One ADR-025 ledger record."""
+    """One ADR-025 ledger record.
+
+    ``document`` is the ledger's ``last_update_date`` column, which holds the
+    archived document's *stem*, while the state index names the same document
+    with its ``.json`` suffix. Carrying it is what lets a poll outcome be joined
+    to the state it produced; see ``build_metrics``.
+    """
 
     timestamp: datetime
+    document: str
     decision: str
 
 
@@ -152,15 +159,28 @@ def read_index(path: Path) -> list[StateRow]:
     return result
 
 
+LEDGER_FIELDS = ("poll_time_utc", "last_update_date", "decision")
+"""Ledger columns this module reads. ``backend`` is present but unused here."""
+
+
 def read_ledger(directory: Path) -> list[PollRow]:
     """Read all monthly ADR-025 ledgers in ``directory``."""
     result: list[PollRow] = []
     for path in sorted(directory.glob("*.tsv")) if directory.exists() else []:
         with path.open(encoding="utf-8", newline="") as handle:
             for number, row in enumerate(csv.DictReader(handle, delimiter="\t"), 2):
-                if row.get("poll_time_utc") is None or row.get("decision") is None:
+                # A ledger missing `last_update_date` would silently give every
+                # PollRow an empty document and quietly zero the join below, so
+                # it is required here rather than defaulted.
+                if any(not row.get(field) for field in LEDGER_FIELDS):
                     raise ValueError(f"{path}:{number}: malformed ledger row")
-                result.append(PollRow(parse_time(row["poll_time_utc"]), row["decision"]))
+                result.append(
+                    PollRow(
+                        parse_time(row["poll_time_utc"]),
+                        row["last_update_date"],
+                        row["decision"],
+                    )
+                )
     return result
 
 
@@ -234,6 +254,15 @@ def build_metrics(
     the acquisition rate the floor projection needs: it measures how fast the
     backend produces distinct calibration states, so a sweep that *discovers*
     two hundred old states does not read as two hundred states acquired today.
+
+    The two poll fields are the deliberate exception: they answer a question
+    about *us* rather than about the device, so they are keyed on poll time.
+    ``polls_yielding_new_state_24h`` therefore reads on both clocks at once, and
+    the two can disagree without either being wrong. A sweep that recovers a
+    state the device published a week ago counts there, because the poll did
+    acquire something we did not hold, while ``states_added_24h`` correctly
+    leaves it out, because the device did not produce it today. When they
+    disagree, the archive gained by catching up rather than by keeping up.
     """
     now = now.astimezone(UTC)
     documents = len(states)
@@ -254,6 +283,29 @@ def build_metrics(
         for day in range(30)
     ]
     recent_polls = [row for row in polls if row.timestamp > window24]
+    # FR-4 asks how many of those polls "produced a new state", so this is
+    # decided against the state index and never against the ledger alone.
+    # `decision=new` means the *stamp* was not already archived, which the
+    # archive says is a different question: at NC-025's duplication two in five
+    # newly filed documents carry a device state we already hold. Measured, not
+    # reasoned: over `calibration-data` @ `cb7a8c2` rendered at the last ledger
+    # instant, counting `decision=new` gave 6 of 6 polls "yielding a new state",
+    # a flat 100% against an archive that is 43.4% duplicate; the join below
+    # gives 3, which is exactly `states_added_24h` for that window. That is the
+    # substitution issue #48 is built to refuse -- "it counts distinct device
+    # states, not files" -- and the fixture published it too, carrying
+    # `states_added_24h: 0` beside a 2 for a document its own README calls a
+    # plain duplicate.
+    #
+    # Counted as digests rather than rows so a document indexed twice cannot
+    # count twice, and resolved through `acquired` so the answer is independent
+    # of index append order for the same reason every window above is.
+    filed_new = {f"{row.document}.json" for row in recent_polls if row.decision == "new"}
+    acquired_by_poll = {
+        row.digest
+        for row in states
+        if row.filename in filed_new and acquired[row.digest] == row.timestamp
+    }
     end72 = now.replace(minute=0, second=0, microsecond=0)
     start72 = end72 - timedelta(hours=72)
     hours = [start72 + timedelta(hours=offset) for offset in range(72)]
@@ -292,7 +344,7 @@ def build_metrics(
         "hours_since_last_new_state": since,
         "staleness_band": staleness_band(since),
         "polls_fired_24h": len(recent_polls),
-        "polls_yielding_new_state_24h": sum(row.decision == "new" for row in recent_polls),
+        "polls_yielding_new_state_24h": len(acquired_by_poll),
         "ledger_hour_coverage_72h": sum(hour_values) / 72,
         "poll_hours_72h": hour_values,
         "floors": floor_metrics,

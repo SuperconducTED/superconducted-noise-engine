@@ -121,7 +121,7 @@
     false
   ],
   "polls_fired_24h": 3,
-  "polls_yielding_new_state_24h": 2,
+  "polls_yielding_new_state_24h": 1,
   "staleness_band": "24 h to 3 days",
   "states_added_24h": 0,
   "states_added_7d": 2,

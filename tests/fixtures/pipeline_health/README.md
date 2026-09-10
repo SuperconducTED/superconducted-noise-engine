@@ -28,6 +28,14 @@ Four documents, two distinct states, 50% duplication.
 The ledger has a deliberate gap through most of 09-01 so the 72-hour strip has
 something to show rather than being uniformly filled.
 
+It also separates a poll that filed a document from a poll that acquired a
+device state. Two rows in the trailing 24 h read `decision=new`, but only
+`20260901T120000000000Z` is the first sighting of its digest; `20260902T000000000000Z`
+is the plain duplicate above. `polls_yielding_new_state_24h` is therefore 1 and
+not 2, and this fixture is what says so. The golden carried the 2 next to
+`states_added_24h: 0` in the same document, which is how the defect was found:
+the field counted files while its name said states.
+
 ## Two values sit exactly on a boundary, deliberately
 
 Rendered at `--now 2026-09-02T12:00:00Z`, state B was first seen exactly 24 h

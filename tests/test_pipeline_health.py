@@ -21,6 +21,7 @@ from scripts.pipeline_health import (
     build_metrics,
     main,
     read_index,
+    read_ledger,
     render_svg,
     staleness_band,
     text_span,
@@ -29,19 +30,28 @@ from scripts.pipeline_health import (
 NOW = datetime(2026, 9, 4, 12, tzinfo=UTC)
 
 
-def test_metrics_count_distinct_states_and_only_new_ledger_rows() -> None:
+def test_metrics_count_distinct_states_and_only_polls_that_produced_one() -> None:
+    """`b` is filed as a new document but carries the state `a` already had.
+
+    That is the ordinary case at NC-025's 43.6% duplication, not a corner: the
+    stamp is new, the device state is not. `polls_yielding_new_state_24h` must
+    therefore be 1 and not 2, or the field counts files while its name says
+    states, which is the substitution issue #48 exists to refuse.
+    """
     states = [
         StateRow("a.json", NOW - timedelta(hours=2), "a", True),
         StateRow("b.json", NOW - timedelta(hours=1), "a", False),
         StateRow("c.json", NOW - timedelta(minutes=30), "b", True),
     ]
     polls = [
-        PollRow(NOW - timedelta(hours=1), "new"),
-        PollRow(NOW - timedelta(hours=2), "duplicate-partial"),
+        PollRow(NOW - timedelta(minutes=30), "c", "new"),
+        PollRow(NOW - timedelta(hours=1), "b", "new"),
+        PollRow(NOW - timedelta(hours=2), "a", "duplicate-partial"),
     ]
     metrics = build_metrics(states, polls, [("candidate", 4)], NOW)
     assert metrics["documents_total"] == 3
     assert metrics["states_total"] == 2
+    assert metrics["polls_fired_24h"] == 3
     assert metrics["polls_yielding_new_state_24h"] == 1
     assert metrics["floors"][0]["states_remaining"] == 2
     assert len(metrics["new_states_per_day_30d"]) == 30
@@ -49,7 +59,7 @@ def test_metrics_count_distinct_states_and_only_new_ledger_rows() -> None:
 
 def test_zero_rate_has_no_finite_projection_and_hour_boundary_is_included() -> None:
     old = StateRow("a.json", NOW - timedelta(days=8), "a", True)
-    poll = PollRow(NOW.replace(minute=0), "duplicate")
+    poll = PollRow(NOW.replace(minute=0), "a", "duplicate")
     metrics = build_metrics([old], [poll], [("candidate", 2)], NOW)
     assert metrics["floors"][0]["projected_days"] is None
     assert metrics["ledger_hour_coverage_72h"] == 0
@@ -128,7 +138,9 @@ class TestConformance:
             StateRow("b.json", NOW - timedelta(days=2), "a", False),
             StateRow("c.json", NOW - timedelta(hours=5), "b", True),
         ]
-        polls = [PollRow(NOW - timedelta(hours=hour), "new") for hour in range(1, 40)]
+        polls = [
+            PollRow(NOW - timedelta(hours=hour), f"poll{hour}", "new") for hour in range(1, 40)
+        ]
         metrics = build_metrics(states, polls, [("NC-012", 1170), ("TanhBellMF", 1215)], NOW)
         allowed = _renderable_numbers(metrics)
         for node in _text_nodes(render_svg(metrics)):
@@ -376,6 +388,24 @@ class TestHistoricalSweep:
         assert after["states_total"] == 3
         assert after["states_added_24h"] == before["states_added_24h"] + 1
 
+    def test_a_recovered_state_counts_for_the_poll_but_not_for_the_device(self) -> None:
+        """The two clocks may disagree here, and that disagreement is the reading.
+
+        The sweep files a document the device published 30 hours ago carrying a
+        state the archive never held. `states_added_24h` must leave it out: the
+        device did not produce it today. `polls_yielding_new_state_24h` must
+        count it: the poll did acquire something we did not have. Reading either
+        field with the other's clock is what makes a recovery look like either a
+        phantom acquisition or a wasted poll.
+        """
+        floors = [("NC-012", 1170)]
+        recovered = StateRow("swept-c.json", NOW - timedelta(hours=30), "c", True)
+        polls = [PollRow(NOW - timedelta(hours=1), "swept-c", "new")]
+        metrics = build_metrics([*self._live(), recovered], polls, floors, NOW)
+        assert metrics["states_total"] == 3
+        assert metrics["states_added_24h"] == 1, "only live-b was produced inside the window"
+        assert metrics["polls_yielding_new_state_24h"] == 1
+
 
 def _shipped_floors() -> list[tuple[str, int]]:
     """The candidate floors the health workflow actually supplies.
@@ -493,6 +523,37 @@ def test_poll_hours_span_a_month_partition(tmp_path: Path) -> None:
     metrics = json.loads((health / "metrics.json").read_text(encoding="utf-8"))
     assert sum(metrics["poll_hours_72h"]) == 2, "one hour from each monthly ledger file"
     assert metrics["ledger_hour_coverage_72h"] == 2 / 72
+
+
+class TestLedgerParsing:
+    """`last_update_date` is now load-bearing, so it is required rather than defaulted."""
+
+    HEADER: ClassVar[str] = "poll_time_utc\tbackend\tlast_update_date\tdecision\n"
+
+    @staticmethod
+    def _read(tmp_path: Path, text: str) -> list[PollRow]:
+        ledger = tmp_path / "ledger"
+        ledger.mkdir()
+        (ledger / "2026-09.tsv").write_text(text, encoding="utf-8")
+        return read_ledger(ledger)
+
+    def test_a_row_naming_its_document_is_read(self, tmp_path: Path) -> None:
+        rows = self._read(
+            tmp_path, self.HEADER + "2026-09-01T00:37:00Z\tibm_fez\t20260901T000000Z\tnew\n"
+        )
+        assert [row.document for row in rows] == ["20260901T000000Z"]
+
+    def test_a_row_without_a_document_is_rejected(self, tmp_path: Path) -> None:
+        """Silently defaulting it would zero the join and read as "no polls yielded"."""
+        with pytest.raises(ValueError, match="malformed ledger row"):
+            self._read(tmp_path, self.HEADER + "2026-09-01T00:37:00Z\tibm_fez\t\tnew\n")
+
+    def test_a_ledger_without_the_column_is_rejected(self, tmp_path: Path) -> None:
+        with pytest.raises(ValueError, match="malformed ledger row"):
+            self._read(
+                tmp_path,
+                "poll_time_utc\tbackend\tdecision\n2026-09-01T00:37:00Z\tibm_fez\tnew\n",
+            )
 
 
 class TestRefusesToPublishAZero:
