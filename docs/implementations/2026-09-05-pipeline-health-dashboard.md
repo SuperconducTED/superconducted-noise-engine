@@ -433,6 +433,127 @@ Actions run showing an unchanged render producing no commit, FR-8 on
 `calibration-data` itself with the both-themes screenshot, and the ADR-025
 routing plus a second reviewer.
 
+### As of `1309335` (2026-09-10): the second reviewer's finding, and what it measured
+
+Appended rather than folded into the blocks above, so each figure keeps the
+commit it was measured at.
+
+**`polls_yielding_new_state_24h` counted documents, not device states.**
+
+The field summed ledger rows carrying `decision=new`. That decision records only
+that the *stamp* was not already archived, which the archive says is a different
+question from whether a device state was acquired: at NC-025's duplication two
+in five newly filed documents carry a state we already hold.
+
+The `## Mathematical / Statistical details` section above states the rule that
+produced this, and is superseded here rather than rewritten: "Only ADR-025
+decision `new` contributes to `polls_yielding_new_state_24h`" is a necessary
+condition, not a sufficient one. The document filed by that poll must also be
+the **first sighting** of its qubit digest.
+
+**Measured, not argued.** Over `calibration-data` @ `cb7a8c2`, backfilled with
+this branch's own `backfill_state_index.py` and rendered at the last ledger
+instant, `2026-09-10T05:08:31Z`:
+
+| | old expression | corrected join |
+| --- | --- | --- |
+| `polls_fired_24h` | 6 | 6 |
+| `polls_yielding_new_state_24h` | **6** | **3** |
+| `states_added_24h` | 3 | 3 |
+
+The old field reported that 100% of polls in the trailing 24 hours produced a
+new device state, on an archive measured at 43.4% duplicate in the same run.
+The corrected figure agrees exactly with `states_added_24h` for that window,
+which is what a stretch of live polling with no sweep should produce.
+
+The committed fixture published the same defect and is what exposed it:
+`expected/metrics.json` carried `polls_yielding_new_state_24h: 2` beside
+`states_added_24h: 0`, and one of those two documents is the one
+`tests/fixtures/pipeline_health/README.md` calls "a plain duplicate, the
+ordinary case". Two mutually inconsistent numbers, in one published document,
+in the dashboard whose stated reason for existing is that a file-counting
+instrument lied for three months.
+
+**The fix.** `PollRow` now carries the ledger's `last_update_date` column, which
+holds the document stem, so a poll outcome can be joined to the state index
+(`stem` against the index's `stem.json`). The field counts distinct digests
+whose first sighting was filed by a `decision=new` poll inside the window, and
+resolves "first sighting" through `first_sightings` rather than the index's
+`is_new_state` column. Counting digests rather than rows means a document
+indexed twice cannot count twice; resolving through `first_sightings` means the
+answer is independent of index append order, for the same reason every other
+window here is.
+
+`last_update_date` is now **required** in a ledger row rather than defaulted. A
+ledger lacking the column would otherwise give every `PollRow` an empty document
+and silently zero the join, which reads as a healthy poller yielding nothing.
+
+**The two poll fields read a different clock, deliberately.** Every state window
+is keyed on `last_update_date`, the device's own clock. The two poll fields
+answer a question about us rather than about the device, so they are keyed on
+poll time. `polls_yielding_new_state_24h` therefore spans both, and it can
+legitimately exceed `states_added_24h` after a historical sweep: a poll that
+recovers a state the device published a week ago did acquire something we did
+not hold, while the device did not produce it today. When they disagree, the
+archive gained by catching up rather than by keeping up.
+`TestHistoricalSweep::test_a_recovered_state_counts_for_the_poll_but_not_for_the_device`
+pins that reading.
+
+**One correction to the block above, recorded rather than edited.** The
+`## Mathematical / Statistical details` section says the poll strip "comprises
+the 72 UTC hour buckets ending with the current hour". It does not, and must
+not: `build_metrics` ends the window at the last **complete** hour, and
+`test_zero_rate_has_no_finite_projection_and_hour_boundary_is_included` asserts
+`poll_hours_72h[-1] is False` for exactly that reason. Including the current
+partial hour would make a healthy poller read 71/72 for most of every hour.
+
+**Golden regeneration.** Regenerated through the documented
+`PIPELINE_HEALTH_REGOLD=1` path, never by hand. `metrics.json` moved by one
+byte, `2` to `1`; `progress.svg` is byte-identical, because the field is not
+rendered. That asymmetry is itself the check: the fix reached the audit surface
+and left the published graphic alone, so FR-6's commit-on-change guard sees
+nothing on this change.
+
+**Verification at `1309335`.**
+
+- `ruff check .` and `ruff format --check .`: clean, 57 files.
+- `mypy --strict` under the project config: clean, 34 source files.
+- `python scripts/check_ids.py`: no duplicate or colliding identifiers.
+- `python -m pytest tests/ --collect-only -q -o addopts=""`: **427 collected**,
+  registered as NC-021 at this commit.
+- `python -m pytest tests/ -q`: **427 passed**, 0 failed.
+
+**Issue §48 step 4 re-run under the current digest definition.** The block for
+`7ec173f` records the step-4 reconciliation as re-owed after the digest change,
+with a 60-document sample standing in for it. It has now been run in full, with
+this branch's own scripts, and the count does not move:
+
+| ref | documents | states, `date` hashed | states, `date` stripped | merges | duplication |
+| --- | --- | --- | --- | --- | --- |
+| `f0930b9` | 894 | 504 | 504 | 0 | 43.6242% |
+| `46f93c8` | 936 | 537 | 537 | 0 | 42.6282% |
+| `cb7a8c2` | 994 | 563 | 563 | 0 | 43.3602% |
+
+Stripping is a function, so the new partition is a coarsening of the old one and
+the count could only have fallen; it does not, at any of the three refs. The
+normalisation is nonetheless doing real work rather than being a no-op: 100% of
+the 861,789 qubit parameter records at `f0930b9` carry a `date`, and every one
+of the 894 documents changes its qubit bytes under stripping. Wherever a
+parameter's `date` moved, at least one `value` moved with it.
+
+This is a provisional laptop measurement in the sense `docs/team.md` means. The
+canonical figure remains whatever the dispatched `backfill=true` produces at a
+named ref, and the NC-025 and NC-047 notes still say so.
+
+**Still open**, unchanged by this commit: FR-8 on `calibration-data` with the
+both-themes screenshot, the ADR-025 routing to Dr. Akba, and a second reviewer
+approval. Also open from the second review and deliberately not fixed here: the
+non-unique `snapshot_filename` underlying `_chronological_key` and the
+backfill's `existing` set, the partial final bucket in
+`new_states_per_day_30d`, the unqualified `projected_date`, `polls_fired_24h`
+counting ledger rows rather than polls, and the missing NC-046 upper floor in
+`HEALTH_FLOORS`.
+
 ## Related docs
 
 - Issue #48 — pipeline-health dashboard
