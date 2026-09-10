@@ -279,6 +279,20 @@ class TestEndToEndFixture:
         """NFR-3 over the CLI path, including the backfill's own idempotency."""
         assert self._render(tmp_path) == self._render(tmp_path)
 
+    def test_the_artifacts_carry_no_platform_line_endings(self, tmp_path: Path) -> None:
+        """NFR-3 across platforms, not just across runs on one of them.
+
+        `write_text` translates to `os.linesep` by default, so a render from
+        Windows wrote CRLF where the ubuntu runner wrote LF for identical
+        inputs. `calibration-data` has no `.gitattributes` to normalise that, so
+        two writers would rewrite the whole SVG on every alternation and fire
+        FR-6's commit-on-change guard with nothing to report. The implementation
+        doc documents a local render, so this is a reachable path, and on a
+        Windows checkout it also silently broke the golden comparison above.
+        """
+        for name, body in self._render(tmp_path).items():
+            assert b"\r\n" not in body, f"{name} was written with platform line endings"
+
 
 class TestHistoricalSweep:
     """A sweep appends old documents behind live poll rows; no metric may move.

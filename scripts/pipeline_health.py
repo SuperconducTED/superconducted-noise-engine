@@ -407,10 +407,17 @@ def main(argv: Iterable[str] | None = None) -> int:
     )
     health = root / "health"
     health.mkdir(parents=True, exist_ok=True)
+    # newline="\n" explicitly: the default translates to os.linesep, so a render
+    # from Windows wrote CRLF and the workflow's ubuntu runner wrote LF for the
+    # same inputs. NFR-3 says identical inputs produce byte-identical artifacts,
+    # and `calibration-data` carries no .gitattributes to normalise them away, so
+    # alternating writers would rewrite all 8 KB of the SVG on a 1.17 GB branch
+    # and fire FR-6's commit-on-change guard every time. The implementation doc
+    # documents a local render, so this is a path someone is invited to take.
     (health / "metrics.json").write_text(
-        json.dumps(metrics, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        json.dumps(metrics, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
     )
-    (health / "progress.svg").write_text(render_svg(metrics), encoding="utf-8")
+    (health / "progress.svg").write_text(render_svg(metrics), encoding="utf-8", newline="\n")
     return 0
 
 
