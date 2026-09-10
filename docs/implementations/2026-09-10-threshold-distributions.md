@@ -139,9 +139,19 @@ two bounds are safe to adopt.
 of windows, and 75% firing on 85.5%. Measured against the metric itself: 125 windows,
 maximum 31.9%, p95 30.6%, red firing on 0.0%, and 75% firing on 100%.
 
-A proxy was tried in case the figures came from IBM's publication clock over the whole
-backfilled archive rather than from poll rows. It does not reproduce them either: 2816
-windows, p5 12.5%, maximum 73.6%, below-15% at 7.0%.
+Three sources were checked, and the result locates the error precisely: **the median
+reproduces, the tail does not.**
+
+| Source | Windows | p50 | p95 | max |
+| --- | --- | --- | --- | --- |
+| §7.3 as reported | 399 | 27.8% | 81.9% | 83.3% |
+| Live ledger @ `9d7e74c` | 125 | **27.8%** | 30.6% | 31.9% |
+| Validation branch ledger @ `49c3c59` | 99 | **27.8%** | 30.6% | 31.9% |
+| IBM publication clock, whole archive | 2816 | 31.9% | 55.6% | 73.6% |
+
+Both ledgers give exactly the p50 §7.3 reports, so its median came from real ledger data.
+None of the three yields its p95 or its maximum. The tail is the half that matters here,
+because 15% and 75% are both drawn from it.
 
 The reason a four-month coverage figure cannot exist here is structural. `ledger/` begins at
 2026-09-02T16:49Z, when ADR-025 landed, and is the only record that counts no-op polls.
