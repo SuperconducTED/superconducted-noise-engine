@@ -1,9 +1,9 @@
 {
-  "generated": "2026-09-09 07:55 UTC",
+  "generated": "2026-09-10 05:41 UTC",
   "main": {
-    "sha": "5f935ea1",
-    "date": "2026-09-08",
-    "msg": "Merge pull request #83 from SuperconducTED/mert/issue-57-dod-cleanup",
+    "sha": "3b949cd4",
+    "date": "2026-09-09",
+    "msg": "Merge pull request #88 from SuperconducTED/mert/issue-58-decision-record",
     "adr": {
       "ADR-001": "Accepted",
       "ADR-002": "Accepted",
@@ -172,7 +172,7 @@
           "createdAt": "2026-09-06T21:11:52Z",
           "headRefName": "bengisu/issue-58-benchmark-certification",
           "isDraft": true,
-          "mergeable": "CONFLICTING",
+          "mergeable": "UNKNOWN",
           "mergedAt": null,
           "number": 79,
           "reviewDecision": "REVIEW_REQUIRED",
@@ -245,7 +245,7 @@
           ],
           "checks_newest": "2026-09-06T21:11",
           "checks_failing": [],
-          "checks_stale_vs_main": true
+          "checks_stale_vs_main": false
         }
       ],
       "merged_pr": null,
@@ -262,14 +262,6 @@
         {
           "severity": "high",
           "text": "Still a draft: CI and reviewers will not treat it as ready."
-        },
-        {
-          "severity": "critical",
-          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
-        },
-        {
-          "severity": "high",
-          "text": "Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result."
         },
         {
           "severity": "high",
@@ -332,13 +324,13 @@
           "createdAt": "2026-09-04T13:03:49Z",
           "headRefName": "feature/issue-59-parameterization",
           "isDraft": true,
-          "mergeable": "CONFLICTING",
+          "mergeable": "UNKNOWN",
           "mergedAt": null,
           "number": 68,
           "reviewDecision": "APPROVED",
           "state": "OPEN",
           "title": "Feature/issue 59 parameterization",
-          "updatedAt": "2026-09-08T19:56:06Z",
+          "updatedAt": "2026-09-09T15:29:14Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/68",
           "headRefOid": "5395e11df9a387f1bb13620316b6f89dd4a46102",
           "additions": 4323,
@@ -393,7 +385,7 @@
           ],
           "checks_newest": "2026-09-08T19:40",
           "checks_failing": [],
-          "checks_stale_vs_main": true
+          "checks_stale_vs_main": false
         }
       ],
       "merged_pr": null,
@@ -404,14 +396,6 @@
         {
           "severity": "high",
           "text": "Still a draft: CI and reviewers will not treat it as ready."
-        },
-        {
-          "severity": "critical",
-          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
-        },
-        {
-          "severity": "high",
-          "text": "Its green checks last ran 2026-09-08T19:40 against a main that has moved since; they are not evidence about the merge result."
         }
       ],
       "declared_unblocks": [
@@ -714,18 +698,18 @@
           "createdAt": "2026-09-05T19:08:44Z",
           "headRefName": "feature/pipeline-health-dashboard",
           "isDraft": false,
-          "mergeable": "CONFLICTING",
+          "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 70,
           "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "Feature/pipeline health dashboard",
-          "updatedAt": "2026-09-08T21:30:59Z",
+          "updatedAt": "2026-09-10T05:38:34Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/70",
-          "headRefOid": "a8a5222192662007d812afa7ee1c774f6b56f307",
-          "additions": 1482,
+          "headRefOid": "b6434854670428ce4a53c7067a7176d89cc096f1",
+          "additions": 2619,
           "deletions": 10,
-          "file_count": 15,
+          "file_count": 23,
           "latest_reviews": [
             {
               "who": "mertefesensoy",
@@ -739,37 +723,37 @@
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-08T21:24"
+              "started": "2026-09-10T05:30"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-08T21:24"
+              "started": "2026-09-10T05:30"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-08T21:24"
+              "started": "2026-09-10T05:30"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-08T21:24"
+              "started": "2026-09-10T05:30"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-08T21:24"
+              "started": "2026-09-10T05:30"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-09-08T21:24"
+              "started": "2026-09-10T05:30"
             }
           ],
-          "checks_newest": "2026-09-08T21:24",
+          "checks_newest": "2026-09-10T05:30",
           "checks_failing": [],
-          "checks_stale_vs_main": true
+          "checks_stale_vs_main": false
         }
       ],
       "merged_pr": null,
@@ -777,14 +761,6 @@
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
-        {
-          "severity": "critical",
-          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
-        },
-        {
-          "severity": "high",
-          "text": "Its green checks last ran 2026-09-08T21:24 against a main that has moved since; they are not evidence about the merge result."
-        },
         {
           "severity": "critical",
           "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-09-06). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
@@ -830,13 +806,154 @@
       "title": "Scheduled backfill sweep: make the pipeline tolerate the Actions scheduler instead of depending on it",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/49",
       "issue_state": "OPEN",
-      "state": "ready",
-      "all_prs": [],
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-09-10T05:24:56Z",
+          "headRefName": "mert/issue-49-sweep",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 90,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "feat: daily calibration sweep, and make an empty sweep fail loudly (#49)",
+          "updatedAt": "2026-09-10T05:33:02Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/90",
+          "headRefOid": "95ada98e3e90c3e6f6cde1d878535bdac4a646a9",
+          "additions": 485,
+          "deletions": 5,
+          "file_count": 7,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T05:25"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T05:25"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T05:25"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T05:25"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T05:25"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T05:25"
+            }
+          ],
+          "checks_newest": "2026-09-10T05:25",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        },
+        {
+          "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [
+            {
+              "id": "I_kwDOSW8yNc8AAAABO3R2Rw",
+              "number": 49,
+              "repository": {
+                "id": "R_kgDOSW8yNQ",
+                "name": "superconducted-noise-engine",
+                "owner": {
+                  "id": "O_kgDOENg1ug",
+                  "login": "SuperconducTED"
+                }
+              },
+              "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/49"
+            }
+          ],
+          "createdAt": "2026-09-10T05:11:26Z",
+          "headRefName": "mert/issue-49-poll-cron-entries",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 89,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "ci: four hourly poll crons instead of one, as an #49 stopgap",
+          "updatedAt": "2026-09-10T05:33:00Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/89",
+          "headRefOid": "5fb38f54e2500db249c0d920a27931edeca38a87",
+          "additions": 19,
+          "deletions": 0,
+          "file_count": 1,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T05:11"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T05:11"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T05:11"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T05:11"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T05:11"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T05:12"
+            }
+          ],
+          "checks_newest": "2026-09-10T05:12",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
       "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
+        {
+          "severity": "high",
+          "text": "No approving review yet: main's ruleset requires one."
+        },
         {
           "kind": "assignment",
           "text": "The plan raises its priority per #54 but its own body still reads priority:low and 'pending Baha's confirmation'.",
@@ -847,7 +964,7 @@
         54
       ],
       "notes_info": [],
-      "pr": null
+      "pr": 90
     },
     {
       "id": 64,
@@ -1003,7 +1120,26 @@
       "issue_state": "OPEN",
       "state": "ready",
       "all_prs": [],
-      "merged_pr": null,
+      "merged_pr": {
+        "author": {
+          "id": "U_kgDOCJLpDw",
+          "is_bot": false,
+          "login": "mertefesensoy",
+          "name": "Mert Efe Şensoy"
+        },
+        "closingIssuesReferences": [],
+        "createdAt": "2026-09-09T15:28:55Z",
+        "headRefName": "mert/issue-56-training-floor",
+        "isDraft": false,
+        "mergeable": "UNKNOWN",
+        "mergedAt": "2026-09-09T20:15:35Z",
+        "number": 87,
+        "reviewDecision": "APPROVED",
+        "state": "MERGED",
+        "title": "docs: derive the training floor from the rule base, correcting an undocumented 126 (#56 FR-10)",
+        "updatedAt": "2026-09-09T20:15:39Z",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/87"
+      },
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
@@ -1078,8 +1214,8 @@
       "why_now": "It is one of two M0 items still open.",
       "title": "Polling cadence no longer limits the calibration dataset - IBM's publish rate does; the 630 floor is unmet under every information-based definition",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/45",
-      "issue_state": "OPEN",
-      "state": "ready",
+      "issue_state": "CLOSED",
+      "state": "done",
       "all_prs": [],
       "merged_pr": {
         "author": {
@@ -1098,7 +1234,7 @@
         "reviewDecision": "APPROVED",
         "state": "MERGED",
         "title": "docs: enumerate the Aug 7-17 polling gaps — neither #45 explanation holds",
-        "updatedAt": "2026-09-06T20:48:24Z",
+        "updatedAt": "2026-09-09T15:13:42Z",
         "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/52"
       },
       "unmet_hard": [],
@@ -1514,7 +1650,7 @@
         },
         {
           "text": "#45 closed (dataset-yield finding)",
-          "status": "not_done",
+          "status": "done",
           "note": null
         },
         {
@@ -1523,10 +1659,10 @@
           "note": null
         }
       ],
-      "done": 6,
+      "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -4
+      "days_left": -5
     },
     {
       "id": "M1",
@@ -1568,7 +1704,7 @@
       "done": 1,
       "total": 5,
       "status": "partial",
-      "days_left": 2
+      "days_left": 1
     },
     {
       "id": "M2",
@@ -1599,7 +1735,7 @@
         },
         {
           "text": "Scheduled sweep live (#49)",
-          "status": "not_done",
+          "status": "partial",
           "note": null
         },
         {
@@ -1611,7 +1747,7 @@
       "done": 0,
       "total": 5,
       "status": "not_done",
-      "days_left": 9
+      "days_left": 8
     },
     {
       "id": "M3",
@@ -1659,7 +1795,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": 16
+      "days_left": 15
     },
     {
       "id": "M4",
@@ -1697,7 +1833,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": 21
+      "days_left": 20
     }
   ]
 }

@@ -1,12 +1,12 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-09 07:55 UTC · main at `5f935ea1` (2026-09-08) · 21 days to 2026-09-30_
+_Generated 2026-09-10 05:41 UTC · main at `3b949cd4` (2026-09-09) · 20 days to 2026-09-30_
 
 
 ## Milestones
 
 
-### 🟡 M0 · Queue clear, target 2026-09-05 (6/8)
+### 🟡 M0 · Queue clear, target 2026-09-05 (7/8)
 
 - ✅ #51 merged (aer_factory ADR references)
 - ✅ #52 merged (Aug 7-17 polling gaps)
@@ -16,7 +16,7 @@ _Generated 2026-09-09 07:55 UTC · main at `5f935ea1` (2026-09-08) · 21 days to
 - ✅ #53 dispatched with ledger rows
   - _Four workflow_dispatch runs executed; snapshots/2026-08/ibm_fez 277 -> 304 docs at 7139138. Record is PR #78, still unmerged._
 - ✅ #53's record merged
-- ❌ #45 closed (dataset-yield finding)
+- ✅ #45 closed (dataset-yield finding)
 - ✅ #25 closed by the cycle-2 close record
 
 ### 🟡 M1 · Contracts and instruments, target 2026-09-11 (1/5)
@@ -34,7 +34,7 @@ _Generated 2026-09-09 07:55 UTC · main at `5f935ea1` (2026-09-08) · 21 days to
 - ❌ ADR-019 ablation executed with its table (#62)
 - ❌ Gradient derivations and training/gradients.py (#61)
 - 🟡 Pipeline-health dashboard live (#48)
-- ❌ Scheduled sweep live (#49)
+- 🟡 Scheduled sweep live (#49)
 - ❌ Trainer LSE stage passing on synthetic + anchored-baseline data
   - _#60 has no branch or PR yet. Its contract dependency (#57) merged 2026-09-08, so it is startable._
 
@@ -67,7 +67,7 @@ _Generated 2026-09-09 07:55 UTC · main at `5f935ea1` (2026-09-08) · 21 days to
 **Baha Jarad** (@BahaJarad)
 
 1. Unstick PR #70 for #48: Pipeline-health dashboard
-   - Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
+   - CHANGES_REQUESTED standing from @mertefesensoy (2026-09-06). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 1. Start #66: Vectorizer returns µs where the repo assumes s
    - No dependencies in either direction, and it blocks running the shipped pipeline on real archived data, which phase 3 does throughout. On a real snapshot the ratified 3x3x3 grid fires at exactly zero and the bootstrap pipeline raises ZeroDivisionError.
 
@@ -97,7 +97,7 @@ _Generated 2026-09-09 07:55 UTC · main at `5f935ea1` (2026-09-08) · 21 days to
    - Your CHANGES_REQUESTED from 2026-09-06 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Finish #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
    - The contract merged; only the advisor half of its definition of done is outstanding.
-1. Start #56: Clear the queue, keep the records honest
+1. Finish #56: Clear the queue, keep the records honest
    - It is the M0 gate and M0 is three days past its 2026-09-05 target.
 
 **Yiğit Arda Kaderoğlu** (@yigit-arda)
@@ -117,17 +117,13 @@ _Generated 2026-09-09 07:55 UTC · main at `5f935ea1` (2026-09-08) · 21 days to
 
 **#58: Certify the benchmark instruments** (@bengisucvd)
 
-- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [high] Still a draft: CI and reviewers will not treat it as ready.
-- [high] Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result.
 - [high] No approving review yet: main's ruleset requires one.
 - [medium] Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
 
 **#59: Manual MF parameterization from the archive** (@yigit-arda)
 
-- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [high] Still a draft: CI and reviewers will not treat it as ready.
-- [high] Its green checks last ran 2026-09-08T19:40 against a main that has moved since; they are not evidence about the merge result.
 
 **#61: ADR-011 evidence + premise gradients** (@bengisucvd)
 
@@ -135,13 +131,12 @@ _Generated 2026-09-09 07:55 UTC · main at `5f935ea1` (2026-09-08) · 21 days to
 
 **#48: Pipeline-health dashboard** (@BahaJarad)
 
-- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-09-06). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
-- [high] Its green checks last ran 2026-09-08T21:24 against a main that has moved since; they are not evidence about the merge result.
 - [high] Decision 3: the --scope qubits digest body must be locked before FR-1 is written, because #63 consumes it.
 
 **#49: Scheduled backfill sweep** (@mertefesensoy)
 
+- [high] No approving review yet: main's ruleset requires one.
 - [low] The plan raises its priority per #54 but its own body still reads priority:low and 'pending Baha's confirmation'.
 
 **#56: Clear the queue, keep the records honest** (@mertefesensoy)
@@ -149,10 +144,6 @@ _Generated 2026-09-09 07:55 UTC · main at `5f935ea1` (2026-09-08) · 21 days to
 - [critical] Every advisor item it carries (ADR-025 sign-off, ADR-009 flip, ADR-011 closure, ADR-014 read, the target ADR) needs Dr. Akba, who has no recorded answer to anything.
 - [high] #45 is still open; M0 is not closable until it is.
 - [high] #53's record (PR #78) is unmerged at CHANGES_REQUESTED.
-
-**#45: Polling cadence no longer limits the dataset** (@mertefesensoy)
-
-- [medium] Closure is a records task inside #56, not new code.
 
 **#75: Decide the LOCKED Kraus projector boundary** (@bengisucvd)
 
@@ -175,6 +166,7 @@ _Generated 2026-09-09 07:55 UTC · main at `5f935ea1` (2026-09-08) · 21 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-10 | 8/28 | 10 | 4 | 5 | +1 milestone gate (7 to 8 of 28); M0 6/8 to 7/8; #45 Polling cadence no longer limits the dataset: ready to start to closed; #49 Scheduled backfill sweep: ready to start to in review; main moved to 3b949cd4 |
 | 2026-09-09 | 7/28 | 12 | 3 | 5 | +1 milestone gate (6 to 7 of 28); M0 5/8 to 6/8; #53 Backfill 14 recoverable documents: in review to closed; #57 Training contract: ADR-027, TSKTrainer ABC, training/targets.py: in review to ready to start; main moved to 5f935ea1 |
 | 2026-09-08 | 6/28 | 11 | 5 | 5 | first record |
 

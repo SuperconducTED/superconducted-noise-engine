@@ -1,15 +1,12 @@
-run-token: 2026-09-09T07:55:40Z-1990
-outcome: ok: chore: phase-3 dashboard: state moved (2026-09-09)
+run-token: 2026-09-10T05:40:56Z-46304
+outcome: ok: chore: phase-3 dashboard: state moved (2026-09-10)
 
-**7/28 milestone gates met** · 21 days to 2026-09-30 · calendar 25% burned against 25% of gates.
+**8/28 milestone gates met** · 20 days to 2026-09-30 · calendar 29% burned against 29% of gates.
 
-**Since 2026-09-08:** +1 milestone gate (6 to 7 of 28); M0 5/8 to 6/8; #53 Backfill 14 recoverable documents: in review to closed; #57 Training contract: ADR-027, TSKTrainer ABC, training/targets.py: in review to ready to start; main moved to 5f935ea1.
+**Since 2026-09-09:** +1 milestone gate (7 to 8 of 28); M0 6/8 to 7/8; #45 Polling cadence no longer limits the dataset: ready to start to closed; #49 Scheduled backfill sweep: ready to start to in review; main moved to 3b949cd4.
 
 **Needs attention**
-- M0 (Queue clear) is 4 days past its 2026-09-05 target at 6/8
-- PR #79 (#58) conflicts with main, so its checks are not evidence and it cannot merge
-- PR #68 (#59) conflicts with main, so its checks are not evidence and it cannot merge
-- PR #70 (#48) conflicts with main, so its checks are not evidence and it cannot merge
+- M0 (Queue clear) is 5 days past its 2026-09-05 target at 7/8
 
 **Next action per person**
 - Mert Efe Şensoy: Send Dr. Akba the four ADR-027 questions (#84)
