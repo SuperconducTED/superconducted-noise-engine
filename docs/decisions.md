@@ -1225,7 +1225,22 @@ moment this merges, which closes the append path for history and would leave
 The generated JSON and SVG are derived only from the state index and ledger;
 scheduled rendering must not traverse `snapshots/`. Candidate training floors
 are configuration inputs supplied by the workflow and must be labelled in the
-rendered output; no floor value is a literal in the renderer.
+rendered output; no floor value is a literal in the renderer. Each label names
+the register row it traces to, and the configured set must bracket the whole
+range that row reports rather than a part of it: the renderer scales the
+progress bar to the largest configured floor, so dropping the top of a measured
+range does not merely omit a tick, it makes the bar read fuller than the
+evidence supports.
+
+**`projected_days` and `projected_date` are not registrable claims.** They are a
+straight-line extrapolation of a single seven-day count and must never be cited
+in `docs/numerical-claims.md`, quoted as a date the project is working toward,
+or carried into a runbook expectation. NC-R002 is retired for being exactly
+this: a projected floor date that arrived with the gate unmet. The arithmetic is
+auditable and the inputs are published beside it, `states_added_7d` included, so
+a reader can see how much evidence the number rests on; that is the whole of
+what these two fields are for. `states_total`, `documents_total` and
+`duplication_ratio` are measurements and may be cited.
 
 The SVG carries **no clock reading**: every figure in it is a function of the
 committed index and ledger, plus the position of the two rolling windows FR-5

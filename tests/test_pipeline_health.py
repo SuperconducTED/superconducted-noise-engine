@@ -66,6 +66,58 @@ def test_zero_rate_has_no_finite_projection_and_hour_boundary_is_included() -> N
     assert metrics["poll_hours_72h"][-1] is False  # the current partial hour is excluded
 
 
+class TestTrailingWindows:
+    """The sparkline is a rate read, so every bucket in it must be a whole day."""
+
+    RENDER: ClassVar[datetime] = datetime(2026, 9, 4, 3, 17, tzinfo=UTC)
+    """The scheduled render instant, `cron: 17 3 * * *`, where this went wrong."""
+
+    def _daily(self, states: list[StateRow]) -> list[int]:
+        metrics = build_metrics(states, [], [("candidate", 4)], self.RENDER)
+        return [int(value) for value in metrics["new_states_per_day_30d"]]
+
+    def test_the_last_bucket_is_yesterday_not_a_fraction_of_today(self) -> None:
+        """At 03:17 a today-anchored window drew its last bar from 13.7% of a day."""
+        yesterday = StateRow("y.json", self.RENDER - timedelta(hours=6), "y", True)
+        today = StateRow("t.json", self.RENDER - timedelta(hours=1), "t", True)
+        daily = self._daily([yesterday, today])
+        assert len(daily) == 30
+        assert daily[-1] == 1, "the final bucket is 2026-09-03, a complete day"
+        assert sum(daily) == 1, "today is not a bucket, because today is not over"
+
+    def test_a_state_acquired_today_is_still_visible_on_a_rolling_window(self) -> None:
+        """Excluding today from the buckets must not hide it from the archive."""
+        today = StateRow("t.json", self.RENDER - timedelta(hours=1), "t", True)
+        metrics = build_metrics([today], [], [("candidate", 4)], self.RENDER)
+        assert metrics["states_added_24h"] == 1
+        assert metrics["states_total"] == 1
+        assert metrics["new_states_per_day_30d"][-1] == 0
+
+    def test_the_window_spans_exactly_thirty_days_back_from_midnight(self) -> None:
+        """The oldest bucket is inclusive and the day before it is out."""
+        oldest = StateRow(
+            "o.json", self.RENDER.replace(hour=0, minute=0) - timedelta(days=30), "o", True
+        )
+        older = StateRow("x.json", oldest.timestamp - timedelta(seconds=1), "x", True)
+        assert self._daily([oldest])[0] == 1
+        assert self._daily([older])[0] == 0
+        assert sum(self._daily([older])) == 0
+
+
+def test_polls_fired_counts_polls_not_ledger_rows() -> None:
+    """A sweep files a whole gap under one POLL_TIME, one ledger row per document.
+
+    Measured on the live ledger at `cb7a8c2`: 129 rows from 53 polls, one sweep
+    writing 52 of them. Counting rows would read that sweep as a poller firing
+    twice an hour, in the panel UC-5 exists to make scheduler health legible.
+    """
+    sweep = NOW - timedelta(hours=2)
+    polls = [PollRow(sweep, f"swept{n}", "new") for n in range(52)]
+    polls.append(PollRow(NOW - timedelta(hours=1), "live", "duplicate"))
+    metrics = build_metrics([], polls, [("candidate", 4)], NOW)
+    assert metrics["polls_fired_24h"] == 2
+
+
 def test_svg_is_deterministic_well_formed_and_safe() -> None:
     metrics = build_metrics([], [], [("first", 630), ("second", 675)], NOW)
     svg = render_svg(metrics)
@@ -108,6 +160,25 @@ NUMBER = re.compile(r"\d+(?:\.\d+)?")
 def _text_nodes(svg: str) -> list[str]:
     """Every rendered text node, which is where a figure becomes a published claim."""
     return [node.text or "" for node in ElementTree.fromstring(svg).iter("{*}text")]
+
+
+def _escapes_the_canvas(svg: str) -> list[str]:
+    """Text nodes whose estimated span leaves the viewBox, described for the failure."""
+    root = ElementTree.fromstring(svg)
+    canvas = float(root.attrib["viewBox"].split()[2])
+    offenders = []
+    for node in root.iter("{*}text"):
+        left, right = text_span(
+            float(node.attrib["x"]),
+            node.text or "",
+            FONT_PX[node.attrib["class"]],
+            node.attrib.get("text-anchor", "start"),
+        )
+        if left < 0:
+            offenders.append(f"{node.text!r} starts at {left:.1f}, off the left edge")
+        if right > canvas:
+            offenders.append(f"{node.text!r} ends at {right:.1f}, past {canvas:.0f}")
+    return offenders
 
 
 def _renderable_numbers(metrics: dict[str, Any]) -> set[str]:
@@ -161,18 +232,7 @@ class TestConformance:
         tick position and centred the rightmost label past the viewBox.
         """
         floors = [("IntervalGaussianMF", 1260), ("NC-012", 1170), ("TanhBellMF", 1215)]
-        svg = render_svg(build_metrics([], [], floors, NOW))
-        root = ElementTree.fromstring(svg)
-        canvas = float(root.attrib["viewBox"].split()[2])
-        for node in root.iter("{*}text"):
-            left, right = text_span(
-                float(node.attrib["x"]),
-                node.text or "",
-                FONT_PX[node.attrib["class"]],
-                node.attrib.get("text-anchor", "start"),
-            )
-            assert left >= 0, f"{node.text!r} starts at {left:.1f}, off the left edge"
-            assert right <= canvas, f"{node.text!r} ends at {right:.1f}, past {canvas:.0f}"
+        assert not _escapes_the_canvas(render_svg(build_metrics([], [], floors, NOW)))
 
     def test_font_sizes_match_the_style_block(self) -> None:
         """FONT_PX is the bounds check's model of the SVG; pin it to the real thing."""
@@ -439,6 +499,38 @@ class TestFloorsAreConfiguration:
         svg = render_svg(build_metrics([], [], floors, NOW))
         for label, value in floors:
             assert f"{label}: {value}" in svg
+
+    def test_every_shipped_label_names_a_register_row(self) -> None:
+        """A shape name is not a source. FR-7 asks each tick to carry the row it traces to."""
+        for label, value in _shipped_floors():
+            assert re.match(r"NC-\d{3}\b", label), f"{label}={value} names no NC row"
+
+    def test_the_shipped_floors_fit_the_canvas(self) -> None:
+        """The bounds guard is worth little if it never runs on the real configuration.
+
+        The shipped floors cluster in the last 60 px of an 845 px bar, so their
+        labels are the ones with somewhere to escape to, and adding a candidate
+        makes it tighter rather than looser.
+        """
+        svg = render_svg(build_metrics([], [], _shipped_floors(), NOW))
+        assert not _escapes_the_canvas(svg)
+
+    def test_the_shipped_floors_cover_the_registered_range(self) -> None:
+        """NC-046 reports a range, and the bar's full scale is the largest candidate.
+
+        Shipping only part of the bracket does not just omit a tick, it rescales
+        the progress bar, so the dashboard reads fuller than the evidence allows.
+        """
+        values = [value for _, value in _shipped_floors()]
+        claims = Path(__file__).resolve().parents[1] / "docs" / "numerical-claims.md"
+        row = next(
+            line for line in claims.read_text(encoding="utf-8").splitlines() if "| NC-046 |" in line
+        )
+        registered = re.search(r"floor (\d+) to (\d+)", row)
+        assert registered, "NC-046 must state the floor range this configuration brackets"
+        low, high = int(registered.group(1)), int(registered.group(2))
+        assert min(values) == low, "the bottom of NC-046's range is not rendered"
+        assert max(values) == high, "the top of NC-046's range is not rendered"
 
     def test_the_cli_refuses_to_invent_a_floor(self, tmp_path: Path) -> None:
         with pytest.raises(SystemExit) as excinfo:

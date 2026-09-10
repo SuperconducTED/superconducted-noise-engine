@@ -11,7 +11,7 @@ on:
         type: boolean
         default: false
       rebuild:
-        description: 'With backfill: rewrite the whole index in last_update_date order. Required once the poller has appended rows.'
+        description: 'With backfill: rewrite the whole index in last_update_date order. Required once the poller has appended rows. Disable Calibration Poll first: this job fetches ~1.3 GB before it pushes a whole-file rewrite, and a poll landing inside that window makes the replay conflict and the run fail.'
         required: false
         type: boolean
         default: false
@@ -35,13 +35,28 @@ on:
 # the consequent term by one output dimension.
 #
 # 1215 is the same rule of thumb for TanhBellMF, which NC-046 measures at 243
-# parameters because it carries 3 premise parameters per MF rather than 2.
+# parameters because it carries 3 premise parameters per MF rather than 2. It is
+# the candidate issue #48 section 1.2 names by hand, as the 675 of its day.
 #
-# Both ship as labelled candidates: issue #48 section 1.2 is explicit that this
-# pipeline does not decide the training floor, and NC-045 is still a provisional
-# laptop measurement awaiting the batch-2 canonical record.
+# 1260 is the top of NC-046's own registered range: that row reports 234 to 252
+# parameters, floor 1170 to 1260, with 252 for the four-premise-parameter shapes.
+# Shipping only 1170 and 1215 rendered the bottom and middle of a measured
+# bracket and left its top invisible, which is not cosmetic here: `max_floor` in
+# the renderer sets the progress bar's full scale, so the omission drew 504
+# states as 41.5% complete where the honest worst case is 40.0%. A dashboard
+# whose bar reads fuller when a candidate is left out is the failure section 1.2
+# is written to prevent.
+#
+# Every label names the register row it is traceable to, per FR-7's requirement
+# that a rendered floor carry its source (UC-6). `TanhBellMF` alone did not: it
+# is a membership-function shape, not a row, so a reader could not grep it.
+#
+# All three ship as labelled candidates: issue #48 section 1.2 is explicit that
+# this pipeline does not decide the training floor, and NC-045 and NC-046 are
+# both still provisional laptop measurements awaiting the batch-2 canonical
+# record.
 env:
-  HEALTH_FLOORS: 'NC-012=1170 TanhBellMF=1215'
+  HEALTH_FLOORS: 'NC-012=1170 NC-046-TanhBellMF=1215 NC-046-max=1260'
 
 # Deliberately NOT the poller's group. Sharing one would let a render cancel a
 # queued poll, and a cancelled poll writes no ledger row. The resulting push
@@ -76,6 +91,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      # Operating note for the one-time dispatch. This job's checkout faults in
+      # the whole ~1.3 GB archive, so it runs for minutes, and `--rebuild`
+      # rewrites `health/state-index.tsv` end to end rather than appending. The
+      # poller appends to that same file on `cron: 37 * * * *` and files a new
+      # document in most hours (NC-030), so a poll landing inside this job's
+      # window leaves push_with_retry.sh replaying a whole-file rewrite onto a
+      # one-line append, which conflicts. Conflicting is the designed outcome --
+      # a silent merge would drop the poller's row -- but it costs the dispatch,
+      # so disable Calibration Poll for the duration instead of retrying into it.
       - name: Build and commit the state index
         run: |
           PYTHONPATH=source python source/scripts/backfill_state_index.py \

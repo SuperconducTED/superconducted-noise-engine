@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import csv
 import re
+from collections import Counter
 from collections.abc import Iterable, Sequence
 from datetime import datetime
 from pathlib import Path
@@ -52,8 +53,8 @@ def timestamp_from_name(path: Path) -> str:
     return f"{date}T{time}{decimal}Z"
 
 
-def _chronological_key(path: Path) -> tuple[datetime, str, str]:
-    """Sort key for archive order: parsed instant, then filename, then backend.
+def _chronological_key(path: Path) -> tuple[datetime, str, str, str]:
+    """Sort key for archive order: instant, then partition, backend and filename.
 
     Parsed rather than compared as an ISO string. ``2026-09-01T00:00:00.123456Z``
     sorts *before* ``2026-09-01T00:00:00Z`` byte-wise, because ``.`` (0x2E)
@@ -66,9 +67,32 @@ def _chronological_key(path: Path) -> tuple[datetime, str, str]:
     The backend key matters because two backends can publish one
     ``last_update_date``, which gives their files identical names; without it
     the order would fall through to the filesystem.
+
+    The **partition** key matters because the archive already holds one such
+    pair, and the backend key does not separate it: at `f0930b9`,
+    ``snapshots/2026-06/ibm_fez/20260630T214008000000Z.json`` and
+    ``snapshots/2026-07/ibm_fez/20260630T214008000000Z.json`` are different
+    blobs under one instant, one backend and one filename, so 894 paths carry
+    only 893 distinct names. Without this component the three preceding keys tie
+    and ``sorted`` falls back to ``Path.glob`` order, which is whatever
+    ``os.scandir`` reports and need not agree between an ext4 runner and an NTFS
+    checkout. The two happen to share a qubit digest today, so the emitted rows
+    are byte-identical either way and nothing moves; the contract above is
+    "reproducible chronological order", and one differing qubit block is all it
+    would take for a non-reproducible index on an append-only branch.
+
+    The 2026-07 copy is itself misfiled, since its stem names June and
+    ``file_snapshots.sh`` derives the partition from the stem. That is an
+    ADR-020 defect predating this pipeline and is not repaired here; this key
+    only stops it from making the index non-deterministic.
     """
     stamp = timestamp_from_name(path)
-    return (datetime.fromisoformat(stamp.replace("Z", "+00:00")), path.name, path.parent.name)
+    return (
+        datetime.fromisoformat(stamp.replace("Z", "+00:00")),
+        path.parent.parent.name,
+        path.parent.name,
+        path.name,
+    )
 
 
 def archived_snapshots(root: Path) -> list[Path]:
@@ -145,7 +169,14 @@ def backfill(root: Path, *, rebuild: bool = False) -> int:
         _write(index, rows, "w")
         return len(rows)
 
-    existing: set[str] = set()
+    # A multiset, not a set. `snapshot_filename` is not unique in the archive:
+    # one `last_update_date` is filed under two month partitions, so 894 paths
+    # at `f0930b9` carry 893 distinct names. Set membership then reports the
+    # second copy as already indexed and drops it for the life of the branch,
+    # silently, because nothing downstream can miss a row it never saw. Counting
+    # instead makes "indexed" mean "indexed as many times as the archive holds
+    # it", which is the same answer as a set whenever names are unique.
+    indexed: Counter[str] = Counter()
     seen: set[str] = set()
     if index.exists():
         with index.open(encoding="utf-8", newline="") as handle:
@@ -153,9 +184,19 @@ def backfill(root: Path, *, rebuild: bool = False) -> int:
             if tuple(reader.fieldnames or ()) != HEADER:
                 raise ValueError(f"{index} has an unexpected header")
             for row in reader:
-                existing.add(row["snapshot_filename"])
+                indexed[row["snapshot_filename"]] += 1
                 seen.add(row["qubit_digest"])
-    missing = [path for path in snapshots if path.name not in existing]
+    existing = sum(indexed.values())
+    # Consumed in the archive's own chronological order, which is the order
+    # `_write` emitted them in, so same-named paths pair up positionally rather
+    # than by content. They are interchangeable for this question anyway: the
+    # only such pair in the archive shares a qubit digest.
+    missing: list[Path] = []
+    for path in snapshots:
+        if indexed[path.name]:
+            indexed[path.name] -= 1
+        else:
+            missing.append(path)
     # Digest before deciding, so the refusal below is about rows that would
     # actually be appended. A document the archive holds but nothing can digest
     # stays "missing" for the rest of the branch's life; testing `missing` here

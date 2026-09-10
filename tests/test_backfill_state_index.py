@@ -172,3 +172,62 @@ def test_archived_snapshots_order_is_reproducible_across_backends(tmp_path: Path
         path.write_text(json.dumps(_snapshot(1.0)), encoding="utf-8")
     ordered = archived_snapshots(tmp_path)
     assert [path.parent.name for path in ordered] == ["ibm_fez", "ibm_torino"]
+
+
+class TestOneNameUnderTwoPartitions:
+    """The archive already holds one document filed under two month partitions.
+
+    At `f0930b9`, `snapshots/2026-06/ibm_fez/20260630T214008000000Z.json` and
+    `snapshots/2026-07/ibm_fez/20260630T214008000000Z.json` are different blobs
+    under one instant, one backend and one filename: 894 paths, 893 distinct
+    names. The 2026-07 copy is misfiled against ADR-020, since its stem names
+    June, but the pipeline has to be correct over the archive as it is.
+    """
+
+    @staticmethod
+    def _both(root: Path, first: float = 1.0, second: float = 1.0) -> None:
+        for partition, t1 in (("2026-06", first), ("2026-07", second)):
+            path = root / "snapshots" / partition / "ibm_fez" / "20260630T214008000000Z.json"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(_snapshot(t1)), encoding="utf-8")
+
+    def test_the_order_is_decided_rather_than_left_to_the_filesystem(self, tmp_path: Path) -> None:
+        """Without the partition key these tie and `sorted` falls back to glob order."""
+        self._both(tmp_path)
+        ordered = archived_snapshots(tmp_path)
+        assert [path.parent.parent.name for path in ordered] == ["2026-06", "2026-07"]
+
+    def test_both_documents_are_indexed(self, tmp_path: Path) -> None:
+        """Two paths, two rows. Keying `existing` on the name alone loses one."""
+        self._both(tmp_path, 1.0, 2.0)
+        assert backfill(tmp_path) == 2
+        rows = read_index(tmp_path / "health/state-index.tsv")
+        assert [row.filename for row in rows] == ["20260630T214008000000Z.json"] * 2
+        assert len({row.digest for row in rows}) == 2, "different blobs, different states"
+
+    def test_a_second_run_still_appends_nothing(self, tmp_path: Path) -> None:
+        """FR-3 idempotency has to survive the duplicate name, in both directions.
+
+        Counting rows rather than testing set membership is what makes the
+        second run see the archive as fully indexed instead of one short.
+        """
+        self._both(tmp_path, 1.0, 2.0)
+        assert backfill(tmp_path) == 2
+        assert backfill(tmp_path) == 0
+        assert backfill(tmp_path, rebuild=True) == 2
+        assert backfill(tmp_path) == 0
+
+    def test_a_half_indexed_pair_is_still_incomplete(self, tmp_path: Path) -> None:
+        """The row that set membership silently dropped now reaches the refusal.
+
+        One row present and two paths on disk is a partially indexed archive,
+        which the append path must refuse rather than append behind, exactly as
+        it would for any other unindexed document.
+        """
+        self._both(tmp_path, 1.0, 2.0)
+        index = tmp_path / "health/state-index.tsv"
+        assert backfill(tmp_path) == 2
+        kept = index.read_text(encoding="utf-8").splitlines()[:2]
+        index.write_text("\n".join(kept) + "\n", encoding="utf-8")
+        with pytest.raises(ValueError, match="state index is incomplete"):
+            backfill(tmp_path)

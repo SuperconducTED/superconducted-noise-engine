@@ -274,7 +274,18 @@ def build_metrics(
     window7 = now - timedelta(days=7)
     states24 = sum(moment > window24 for moment in acquired.values())
     states7 = sum(moment > window7 for moment in acquired.values())
-    start30 = now.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=29)
+    # Thirty *complete* UTC days, ending with yesterday. Anchoring the window on
+    # today put a partial day in the last bucket, and the scheduled render fires
+    # at 03:17 UTC, so the rightmost bar of the acquisition sparkline was drawn
+    # from 3 h 17 min of data, 13.7% of a day, on every scheduled run. FR-5's
+    # panel is a *rate* read, and a systematically short final bar misreads it
+    # in the one place a reader looks to ask whether the archive is still
+    # accumulating. Today is not lost: `states_added_24h` and
+    # `states_per_day_7d` both cover it, on rolling windows where a partial day
+    # is not a distortion. Excluding it also makes these buckets change once a
+    # day rather than continuously, which is one fewer reason for FR-6's
+    # commit-on-change guard to fire on a day that gained nothing.
+    start30 = now.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=30)
     daily_states = [
         sum(
             start30 + timedelta(days=day) <= moment < start30 + timedelta(days=day + 1)
@@ -314,6 +325,16 @@ def build_metrics(
     index_head = None if not states else states[-1].filename
     floor_metrics: list[dict[str, Any]] = []
     rate = states7 / 7
+    # `projected_days` and `projected_date` are a straight-line extrapolation of
+    # a single seven-day count, and they are the two fields here that must never
+    # be cited as a measurement. NC-R002 is retired in the register for being
+    # exactly this: a projected floor date that passed with the gate unmet. The
+    # arithmetic is auditable, the estimate is not stable -- a seven-day count of
+    # k carries roughly Poisson dispersion, so a quiet week moves the date by
+    # more than the whole projection is worth, and a date is rendered to the day
+    # either way. `states_added_7d` is published beside them so a reader can see
+    # how much evidence the number rests on. See ADR-025's amendment, which says
+    # in as many words that these two are not registrable claims.
     for label, value in floors:
         remaining = max(value - states_total, 0)
         projected_days = remaining / rate if rate > 0 else None
@@ -343,7 +364,16 @@ def build_metrics(
         "new_states_per_day_30d": daily_states,
         "hours_since_last_new_state": since,
         "staleness_band": staleness_band(since),
-        "polls_fired_24h": len(recent_polls),
+        # Distinct poll instants, not ledger rows. FR-4's parenthetical says
+        # "ledger rows in the trailing 24 h", which assumed one row per poll;
+        # `file_snapshots.sh` writes one row per *staged document*, so a
+        # dispatched historical sweep files a whole gap under a single
+        # `POLL_TIME`. Measured on the live ledger at `cb7a8c2`: 129 rows from
+        # 53 polls, with one sweep alone writing 52 of them. Left as rows, a
+        # reader of UC-5 comparing this against #45's 22 to 23 runs/day would
+        # read one sweep as a poller firing twice an hour. The name and UC-5
+        # govern; the count of rows is recoverable from the ledger itself.
+        "polls_fired_24h": len({row.timestamp for row in recent_polls}),
         "polls_yielding_new_state_24h": len(acquired_by_poll),
         "ledger_hour_coverage_72h": sum(hour_values) / 72,
         "poll_hours_72h": hour_values,
