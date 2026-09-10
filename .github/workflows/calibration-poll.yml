@@ -23,6 +23,11 @@ on:
     - cron: '22 * * * *'
     - cron: '37 * * * *'
     - cron: '52 * * * *'
+    # The daily sweep (#49). Re-reads the trailing window and fills whatever the
+    # hourly path missed, which is what turns a dropped poll into late data
+    # instead of lost data. KEEP IN SYNC with SWEEP_CRON and timeout-minutes
+    # below: a `schedule:` entry cannot be referenced from an expression.
+    - cron: '41 4 * * *'
   # A manual run with all inputs blank behaves exactly like a scheduled poll.
   # Fill start and end to sweep a historical window instead — verified 2026-08-29
   # that properties(datetime=...) is honoured on ibm_quantum_platform out to at
@@ -48,6 +53,20 @@ on:
         required: false
         default: '30'
 
+# Sweep parameters, kept here as configuration rather than buried in the step.
+#   Window  48 h  trailing, so a skipped sweep is absorbed by the next one. The
+#           overlap does NOT improve per-instant recall: shifting a 1 h grid by
+#           24 h realigns it on the same instants.
+#   Step    1 h   48 IBM calls per sweep, inside the 73-call run already
+#           demonstrated in #50's probe. NC-031 measured 1 h recall at 87.9%
+#           (29 of 33), so a sweep is not a perfect substitute for polling. The
+#           finer 0.5 h grid stays available through workflow_dispatch for
+#           post-outage recovery, which is what the input description advises.
+env:
+  SWEEP_CRON: '41 4 * * *'
+  SWEEP_WINDOW_HOURS: '48'
+  SWEEP_STEP_HOURS: '1'
+
 concurrency:
   # A health render must not cancel a queued poll: absent ledger rows are the
   # scheduler-degradation signal this pipeline exists to expose.
@@ -59,7 +78,11 @@ jobs:
     runs-on: ubuntu-latest
     # A scheduled poll finishes in ~40s, so keep its bound tight; a backfill
     # sweep makes one API call per step and legitimately needs longer.
-    timeout-minutes: ${{ inputs.historical_start && 60 || 10 }}
+    # `inputs` is empty on a schedule event, so the bare `inputs.historical_start`
+    # this used to carry gave the scheduled sweep the 10-minute poll bound and
+    # killed it mid-window (#49 section 2.2). The cron literal is repeated here
+    # because job-level keys cannot read the `env` context.
+    timeout-minutes: ${{ (inputs.historical_start || github.event.schedule == '41 4 * * *') && 60 || 10 }}
     permissions:
       contents: write
     steps:
@@ -86,7 +109,16 @@ jobs:
           HIST_END: ${{ inputs.historical_end }}
           HIST_STEP: ${{ inputs.historical_step_hours || '2' }}
           MAX_HIST_DAYS: ${{ inputs.max_historical_days || '30' }}
+          IS_SWEEP: ${{ github.event.schedule == env.SWEEP_CRON && '1' || '0' }}
         run: |
+          # A dispatch with explicit dates always wins. Otherwise, when the sweep
+          # cron fired, derive the window from the clock so the existing
+          # `-n "$HIST_START"` branch below runs unchanged (#49 section 2.3).
+          if [ -z "$HIST_START" ] && [ "$IS_SWEEP" = '1' ]; then
+            HIST_START=$(date -u -d "$SWEEP_WINDOW_HOURS hours ago" +%Y-%m-%dT%H:%M:%SZ)
+            HIST_END=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            HIST_STEP="$SWEEP_STEP_HOURS"
+          fi
           if [ -n "$HIST_START" ] && [ -n "$HIST_END" ]; then
             echo "Backfill sweep: $HIST_START .. $HIST_END every ${HIST_STEP}h"
             superconducted-poll --backend ibm_fez \
@@ -120,7 +152,15 @@ jobs:
           # historical re-read. A scheduled poll fetches live, so any
           # difference under an archived stamp is real divergence and is
           # preserved. See scripts/file_snapshots.sh.
-          IS_BACKFILL: ${{ inputs.historical_start && '1' || '0' }}
+          #
+          # The scheduled sweep counts as a backfill. This carried the same bare
+          # `inputs.historical_start` as timeout-minutes did, and `inputs` is
+          # empty on a schedule event, so every sweep would have run with
+          # IS_BACKFILL=0 and every lossy historical re-read would have been
+          # filed as `collision` rather than `duplicate-partial`: a junk file in
+          # collisions/ and a ::warning:: every single day, on the one tree
+          # ADR-025 says is a signal because it is normally empty.
+          IS_BACKFILL: ${{ (inputs.historical_start || github.event.schedule == env.SWEEP_CRON) && '1' || '0' }}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'

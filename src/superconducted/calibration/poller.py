@@ -29,6 +29,7 @@ import os
 import sys
 import time
 from collections.abc import Callable, Iterable
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -331,6 +332,34 @@ def _default_service_factory(
     return QiskitRuntimeService(**kwargs)
 
 
+@dataclass(frozen=True)
+class SweepOutcome:
+    """What a historical sweep actually retrieved.
+
+    ``requested`` is how many instants the sweep asked for, ``returned`` how
+    many of them the service answered with a usable document, and ``saved`` how
+    many of those were new to the archive.
+
+    ``returned`` and ``saved`` are deliberately separate, because only one of
+    them is a health signal. A sweep over a window the archive already holds
+    saves nothing and is perfectly healthy: that is the idempotency #49 asks
+    for. A sweep that returns nothing *at all* across an entire window is not
+    healthy, it means the historical path is not working, and until now that
+    case exited 0 like any other. Every failure inside ``fetch_snapshot``
+    (denied tier, ``properties()`` returning ``None``, a missing
+    ``last_update_date``, or the service ignoring the ``datetime`` filter and
+    handing back the current document) returns ``None``, and the sweep loop
+    skips it. Logged, but invisible to the exit code, so a scheduled daily
+    sweep could recover nothing for months and stay green. That is the exact
+    blind spot #45 cost a quarter to find and #48 exists to remove, so the
+    sweep must not reintroduce it inside its own machinery.
+    """
+
+    requested: int = 0
+    returned: int = 0
+    saved: int = 0
+
+
 def poll_once(
     backends: list[str],
     storage: CalibrationStorage,
@@ -343,7 +372,7 @@ def poll_once(
     max_historical_days: int = 30,
     retries: int = 3,
     logger: logging.Logger | None = None,
-) -> None:
+) -> SweepOutcome:
     """Run one polling round across ``backends``.
 
     For each backend, fetches the current snapshot. If ``historical_window``
@@ -379,6 +408,10 @@ def poll_once(
     else:
         service = service_factory()
 
+    requested = 0
+    returned = 0
+    newly_archived = 0
+
     for backend_name in backends:
         snapshot = fetch_snapshot(service, backend_name, retries=retries, logger=log)
         if snapshot is not None:
@@ -392,6 +425,7 @@ def poll_once(
 
         if historical_window:
             for ts in historical_window:
+                requested += 1
                 h_snapshot = fetch_snapshot(
                     service,
                     backend_name,
@@ -401,7 +435,10 @@ def poll_once(
                 )
                 if h_snapshot is None:
                     continue
+                returned += 1
                 saved = storage.save_if_new(h_snapshot)
+                if saved:
+                    newly_archived += 1
                 log.info(
                     "historical %s @ %s (requested %s): %s",
                     backend_name,
@@ -409,6 +446,15 @@ def poll_once(
                     ts.isoformat(),
                     "saved" if saved else "skipped (already archived)",
                 )
+
+    if requested:
+        log.info(
+            "sweep summary: %d instants requested, %d documents returned, %d newly archived",
+            requested,
+            returned,
+            newly_archived,
+        )
+    return SweepOutcome(requested=requested, returned=returned, saved=newly_archived)
 
 
 def parse_iso_utc(s: str) -> datetime:
@@ -557,7 +603,7 @@ def main(argv: Iterable[str] | None = None) -> int:
             return 1
 
     try:
-        poll_once(
+        outcome = poll_once(
             backends=list(args.backend),
             storage=storage,
             historical_window=historical_window,
@@ -569,4 +615,17 @@ def main(argv: Iterable[str] | None = None) -> int:
     except Exception as exc:
         logger.exception("Polling failed: %s", exc)
         return 1
+
+    # Exit 2, distinct from 1, so an unattended sweep that retrieved nothing is
+    # distinguishable from a crash. Gated on documents *returned*, never on
+    # documents saved: re-sweeping a window the archive already holds saves
+    # nothing and must stay a success.
+    if outcome.requested and not outcome.returned:
+        logger.error(
+            "Sweep requested %d instants and the service returned no usable document "
+            "for any of them. The historical path is not working (denied tier, or the "
+            "datetime filter ignored); refusing to report success.",
+            outcome.requested,
+        )
+        return 2
     return 0
