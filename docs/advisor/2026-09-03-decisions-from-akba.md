@@ -96,3 +96,36 @@ naming the question, the answer, the date it was given, the medium it came throu
 the PR or ADR it unblocks.*
 
 <!-- Append one dated entry per decision below this line. Do not edit anything above it. -->
+
+## Outstanding items, as of 2026-09-10
+
+Not a decision entry: an addition to the same circulation. Appended rather than added as
+row 14 of the 2026-09-09 table, because that table sits above this file's append marker.
+The table stands exactly as written; this section records what joined the batch after it.
+
+| # | Item | Class | Decision-by | Status |
+| --- | --- | --- | --- | --- |
+| 14 | ADR-025 pipeline-health amendment (owed on PR #70, Issue #48) | Ask (principle + authority) x2, Ratify x1 | 2026-09-23 | Outstanding, **merged ahead of the answer**; deviation recorded on PR #70 |
+
+**It travels with item 2.** Item 2 is PR #55's `duplicate-partial` amendment: also
+ADR-025, also Outstanding. Both ask the same question from opposite sides, namely what a
+ledger row records, and splitting them across two circulations invites two half-answers.
+
+The brief is `docs/advisor/2026-09-09-akba-brief/06-olcum-birimi.html`, written as the
+sibling of File 04's first question and placed inside the 2026-09-09 cluster rather than
+sent on its own. That placement is deliberate and it is only defensible because **the
+batch has not gone out**: no one has received a version of this cluster that lacks File
+06. Had it been sent, the honest form would have been a separately dated file, since the
+cluster would then be a record of something delivered.
+
+**Why it merged before the answer**, in short; the full argument is in the brief and on
+PR #70. The dashboard exists to make a scheduler collapse visible in days instead of a
+quarter, that collapse is ongoing and tracked in #49, and waiting would have meant losing
+the thing being measured while waiting for permission to measure it. The definition change
+moves no number on today's archive: 894 documents to 504 states, 936 to 537, 994 to 563,
+with zero merges under stripping at every one of the three refs. Reversal is one
+`workflow_dispatch` with `backfill=true rebuild=true` plus one line in
+`canonical_snapshot_digest.py`, and no data is lost, because the archive is untouched and
+only the derived index is regenerated.
+
+ADR-025's amendment status stays **Open** until an answer is recorded below.
