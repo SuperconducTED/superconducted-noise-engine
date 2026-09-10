@@ -11,6 +11,7 @@ from xml.etree import ElementTree
 
 import pytest
 from scripts.pipeline_health import (
+    FONT_PX,
     NOTHING_TO_PUBLISH,
     PollRow,
     StateRow,
@@ -19,6 +20,7 @@ from scripts.pipeline_health import (
     read_index,
     render_svg,
     staleness_band,
+    text_span,
 )
 
 NOW = datetime(2026, 9, 4, 12, tzinfo=UTC)
@@ -136,6 +138,34 @@ class TestConformance:
         background = ElementTree.fromstring(svg)[1].attrib["fill"]
         assert svg.count(background) == 1, f"{background} is used as ink as well as ground"
 
+    def test_no_text_node_escapes_the_canvas(self) -> None:
+        """Section 9.3 well-formedness: a clipped tick label loses its source (UC-6).
+
+        Exercised against floors supplied in the order that used to break it,
+        largest first, since `text-anchor` keyed off list position rather than
+        tick position and centred the rightmost label past the viewBox.
+        """
+        floors = [("IntervalGaussianMF", 1260), ("NC-012", 1170), ("TanhBellMF", 1215)]
+        svg = render_svg(build_metrics([], [], floors, NOW))
+        root = ElementTree.fromstring(svg)
+        canvas = float(root.attrib["viewBox"].split()[2])
+        for node in root.iter("{*}text"):
+            left, right = text_span(
+                float(node.attrib["x"]),
+                node.text or "",
+                FONT_PX[node.attrib["class"]],
+                node.attrib.get("text-anchor", "start"),
+            )
+            assert left >= 0, f"{node.text!r} starts at {left:.1f}, off the left edge"
+            assert right <= canvas, f"{node.text!r} ends at {right:.1f}, past {canvas:.0f}"
+
+    def test_font_sizes_match_the_style_block(self) -> None:
+        """FONT_PX is the bounds check's model of the SVG; pin it to the real thing."""
+        style = ElementTree.fromstring(render_svg(build_metrics([], [], [("f", 9)], NOW)))[0]
+        for name, size in FONT_PX.items():
+            assert f".{name}{{font:" in (style.text or "")
+            assert re.search(rf"\.{name}{{font:(?:\d+ )?{size}px ", style.text or ""), name
+
     def test_progress_bar_clamps_when_states_exceed_every_floor(self) -> None:
         """Overshooting a candidate floor must not paint outside the bar."""
         states = [StateRow(f"{n}.json", NOW, str(n), True) for n in range(40)]
@@ -185,6 +215,89 @@ class TestCommitOnChange:
         assert staleness_band(24.0) == staleness_band(71.9) == "24 h to 3 days"
         assert staleness_band(72.0) == "3 to 7 days"
         assert staleness_band(168.0) == staleness_band(10_000.0) == "over 7 days"
+
+
+class TestHistoricalSweep:
+    """A sweep appends old documents behind live poll rows; no metric may move.
+
+    This is the shape issue #48 §11 point 2 produces in practice: the 72-hour
+    strip exposes a stall, the operator dispatches `historical_start` over the
+    gap, and `file_snapshots.sh` files each missed document as `decision=new`.
+    Those rows land *out of chronological order* and carry `is_new_state=1`
+    whenever their digest is not already in the index, even for a state a
+    later-dated row already recorded.
+    """
+
+    @staticmethod
+    def _live() -> list[StateRow]:
+        """What the poller recorded before the gap was noticed."""
+        return [
+            StateRow("live-a.json", NOW - timedelta(hours=30), "a", True),
+            StateRow("live-b.json", NOW - timedelta(hours=2), "b", True),
+        ]
+
+    @staticmethod
+    def _swept() -> list[StateRow]:
+        """What a sweep appends afterwards: older documents, marked new.
+
+        `swept-b` carries digest "b", which `live-b` already recorded two hours
+        ago, but the poller only sees the document in front of it, so it writes
+        `is_new_state=1`. Its timestamp sits inside the 24-hour window, which is
+        what made this reach the published rate rather than staying harmless.
+        """
+        return [
+            StateRow("swept-a.json", NOW - timedelta(hours=20), "a", True),
+            StateRow("swept-b.json", NOW - timedelta(hours=6), "b", True),
+        ]
+
+    def test_a_sweep_does_not_inflate_the_acquisition_rate(self) -> None:
+        floors = [("NC-012", 1170)]
+        before = build_metrics(self._live(), [], floors, NOW)
+        after = build_metrics([*self._live(), *self._swept()], [], floors, NOW)
+        assert after["documents_total"] == 4, "the swept documents are still archived"
+        assert after["states_total"] == before["states_total"] == 2
+        for field in ("states_added_24h", "states_added_7d", "states_per_day_7d"):
+            assert after[field] == before[field], f"{field} moved on a sweep that acquired nothing"
+        assert after["new_states_per_day_30d"] == before["new_states_per_day_30d"]
+
+    def test_a_sweep_moves_the_staleness_clock_back_not_forward(self) -> None:
+        """Filling a gap can only make the archive look *staler*, never fresher.
+
+        `live-b` looked like a state first seen two hours ago. The sweep shows
+        the device was already in that state six hours ago and the poller simply
+        missed it, so the honest reading of "time since the last new state" is
+        six hours. The two-hour figure was an artefact of the gap.
+        """
+        floors = [("NC-012", 1170)]
+        before = build_metrics(self._live(), [], floors, NOW)
+        after = build_metrics([*self._live(), *self._swept()], [], floors, NOW)
+        assert before["hours_since_last_new_state"] == 2.0
+        assert after["hours_since_last_new_state"] == 6.0
+        assert after["staleness_band"] == "under 24 h"
+
+    def test_only_index_head_depends_on_index_order(self) -> None:
+        """The index is append-only, so its order is a fact about polling, not data.
+
+        `index_head` is the one field allowed to move with it: FR-4 defines it as
+        the last row consumed, which is provenance for the render rather than a
+        measurement of the archive.
+        """
+        rows = [*self._live(), *self._swept()]
+        floors = [("NC-012", 1170)]
+        ordered = build_metrics(sorted(rows, key=lambda row: row.timestamp), [], floors, NOW)
+        appended = build_metrics(rows, [], floors, NOW)
+        assert ordered.pop("index_head") == "live-b.json"
+        assert appended.pop("index_head") == "swept-b.json"
+        assert ordered == appended
+
+    def test_a_state_first_seen_inside_the_window_still_counts(self) -> None:
+        """The guard must not swallow a genuine acquisition (the other half)."""
+        floors = [("NC-012", 1170)]
+        before = build_metrics(self._live(), [], floors, NOW)
+        fresh = StateRow("live-c.json", NOW - timedelta(hours=1), "c", True)
+        after = build_metrics([*self._live(), fresh], [], floors, NOW)
+        assert after["states_total"] == 3
+        assert after["states_added_24h"] == before["states_added_24h"] + 1
 
 
 def _shipped_floors() -> list[tuple[str, int]]:

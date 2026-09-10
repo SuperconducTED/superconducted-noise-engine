@@ -58,6 +58,16 @@ if [ ! -f "$digest" ]; then
   echo "::error::$digest is missing; refusing to file anything without a comparator"
   exit 1
 fi
+# Checked here for the same reason as the comparator: this script's last act is
+# the push, so a missing or non-executable helper would fail only after every
+# payload has moved and every ledger row is written -- the most expensive point
+# in the run to discover it. New .sh files also commit non-executable from a
+# Windows checkout, which -x catches and -f would not.
+push_retry="$here/push_with_retry.sh"
+if [ ! -x "$push_retry" ]; then
+  echo "::error::$push_retry is missing or not executable; refusing to file what it cannot push"
+  exit 1
+fi
 
 git fetch "$DATA_REMOTE" "$DATA_BRANCH"
 # -B resets the local branch to the remote tip, exactly as the old in-place
@@ -114,6 +124,19 @@ for f in "$STAGING_DIR/$BACKEND"/*.json; do
       decimal=""
       if [ -n "$fraction" ]; then decimal=".$fraction"; fi
       last_update_date="${stem:0:4}-${stem:4:2}-${stem:6:2}T${stem:9:2}:${stem:11:2}:${stem:13:2}${decimal}Z"
+      # A historical sweep (IS_BACKFILL=1) files documents older than rows the
+      # hourly poller already appended, so the index stops being chronological
+      # and `is_new_state` marks a long-known state as this row's first
+      # sighting. The metrics engine derives first sightings from timestamps
+      # rather than trusting this column precisely so that costs nothing, but
+      # the column itself is now wrong and anything else reading the index has
+      # to know. Say so once per row instead of leaving it silent.
+      index_max=$(awk -F '\t' 'NR > 1 && $2 > max { max = $2 } END { print max }' "$state_index")
+      if [ -n "$index_max" ] && [[ "$last_update_date" < "$index_max" ]]; then
+        echo "::warning::$stem predates the newest indexed document ($index_max); its" \
+             "is_new_state is decided against later rows. Dispatch Calibration Pipeline" \
+             "Health with backfill=true rebuild=true to restore the column's chronology."
+      fi
       printf '%s\t%s\t%s\t%s\n' "$base" "$last_update_date" "$qubit_digest" "$is_new_state" >> "$state_index"
     fi
   else
@@ -189,4 +212,4 @@ fi
 # The health workflow is a second writer to this branch and runs in its own
 # concurrency group, so this push can now lose a race. Losing it silently drops
 # the ledger row that makes a scheduler stall visible, so replay and retry.
-"$here/push_with_retry.sh" "$DATA_REMOTE" "$DATA_BRANCH"
+"$push_retry" "$DATA_REMOTE" "$DATA_BRANCH"

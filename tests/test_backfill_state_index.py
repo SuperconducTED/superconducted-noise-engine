@@ -108,6 +108,62 @@ class TestRebuild:
         assert [row.is_new for row in read_index(index)] == [True]
 
 
+def test_a_fractional_stamp_sorts_after_the_bare_second_it_shares(tmp_path: Path) -> None:
+    """`.` precedes `Z` in ASCII, so the ISO string sorts the later instant first.
+
+    Latent while every archived name carries the six-digit fraction, but STAMP
+    admits both shapes, and getting it wrong swaps which of two documents in the
+    same second is recorded as a state's first sighting.
+    """
+    _write_snapshot(tmp_path, "20260901T000000Z.json", 1.0)
+    _write_snapshot(tmp_path, "20260901T000000123456Z.json", 2.0)
+    _write_snapshot(tmp_path, "20260901T000001Z.json", 3.0)
+    assert [path.name for path in archived_snapshots(tmp_path)] == [
+        "20260901T000000Z.json",
+        "20260901T000000123456Z.json",
+        "20260901T000001Z.json",
+    ]
+
+
+class TestTolerance:
+    """One bad file must not throw away a nine-hundred-file dispatch."""
+
+    def test_an_undigestable_document_is_skipped_not_fatal(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        """Matches `file_snapshots.sh`: preserved on the branch, absent from the index."""
+        _write_snapshot(tmp_path, "20260901T000000000000Z.json", 1.0)
+        broken = tmp_path / "snapshots/2026-09/ibm_fez/20260902T000000000000Z.json"
+        broken.write_text(json.dumps({"properties": {}}), encoding="utf-8")
+        _write_snapshot(tmp_path, "20260903T000000000000Z.json", 2.0)
+
+        assert backfill(tmp_path, rebuild=True) == 2
+        assert "preserved but not indexed" in capsys.readouterr().out
+        rows = read_index(tmp_path / "health/state-index.tsv")
+        assert [row.filename for row in rows] == [
+            "20260901T000000000000Z.json",
+            "20260903T000000000000Z.json",
+        ]
+        assert broken.exists(), "the payload stays archived; only the measurement is missing"
+
+    def test_a_non_timestamp_filename_is_skipped(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        _write_snapshot(tmp_path, "20260901T000000000000Z.json", 1.0)
+        stray = tmp_path / "snapshots/2026-09/ibm_fez/notes.json"
+        stray.write_text(json.dumps({"properties": {"qubits": []}}), encoding="utf-8")
+        assert backfill(tmp_path, rebuild=True) == 1
+        assert "not a UTC-timestamp snapshot name" in capsys.readouterr().out
+
+    def test_a_skipped_document_does_not_break_idempotency(self, tmp_path: Path) -> None:
+        """The count reports rows written, so a second run still appends zero."""
+        _write_snapshot(tmp_path, "20260901T000000000000Z.json", 1.0)
+        broken = tmp_path / "snapshots/2026-09/ibm_fez/20260902T000000000000Z.json"
+        broken.write_text(json.dumps({"properties": {}}), encoding="utf-8")
+        assert backfill(tmp_path) == 1
+        assert backfill(tmp_path) == 0
+
+
 def test_archived_snapshots_order_is_reproducible_across_backends(tmp_path: Path) -> None:
     """Two backends can publish one last_update_date, which gives their files one name."""
     for backend in ("ibm_fez", "ibm_torino"):

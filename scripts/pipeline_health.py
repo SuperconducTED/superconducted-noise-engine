@@ -43,6 +43,55 @@ OVER_LAST_BAND = "over 7 days"
 NOTHING_TO_PUBLISH = 3
 """Exit code for an index that names no documents. See the module docstring."""
 
+FONT_PX: dict[str, int] = {"title": 24, "value": 22, "metric": 16, "label": 15, "tiny": 12}
+"""Rendered size per text class, mirroring ``render_svg``'s ``<style>`` block.
+
+Exported so the section 9.3 bounds check measures each text node at the size it
+is actually drawn at instead of inventing its own model;
+``test_font_sizes_match_the_style_block`` pins the two together.
+"""
+
+ADVANCE_RATIO = 0.62
+"""Horizontal advance per character as a fraction of the font size.
+
+A deliberate over-estimate for `sans-serif`, whose real advances are per-glyph
+and per-renderer. Bounds work here is one-sided: over-estimating moves a label
+inside the canvas and fails the conformance check early, while under-estimating
+lets one escape, so the error belongs on this side.
+"""
+
+
+def text_span(x: float, text: str, font_px: float, anchor: str) -> tuple[float, float]:
+    """Estimate the horizontal extent a text node occupies, as ``(left, right)``.
+
+    Shared by the renderer, which uses it to choose an anchor, and by the
+    section 9.3 conformance test, which uses it to assert nothing escapes the
+    canvas. One estimator, so the guard cannot drift from the thing it guards.
+    """
+    width = len(text) * font_px * ADVANCE_RATIO
+    if anchor == "end":
+        return (x - width, x)
+    if anchor == "middle":
+        return (x - width / 2, x + width / 2)
+    return (x, x + width)
+
+
+def _anchor_for(x: float, text: str, font_px: float, canvas: float, margin: float = 8.0) -> str:
+    """Choose the anchor that keeps a tick label inside ``canvas``.
+
+    Keyed on where the tick actually sits, never on its position in the floor
+    list. FR-7 makes floors free-form configuration and the workflow exposes a
+    ``floors`` dispatch input, so "the last one supplied" and "the rightmost"
+    are not the same tick. Anchoring the last-supplied label to its end put the
+    rightmost label past the viewBox for any ordering but ascending, which no
+    caller is obliged to use and none is checked for.
+    """
+    for anchor in ("middle", "end", "start"):
+        left, right = text_span(x, text, font_px, anchor)
+        if left >= margin and right <= canvas - margin:
+            return anchor
+    return "middle"
+
 
 @dataclass(frozen=True)
 class StateRow:
@@ -145,30 +194,62 @@ def _floor_values(values: Sequence[str]) -> list[tuple[str, int]]:
     return result
 
 
+def first_sightings(states: Sequence[StateRow]) -> dict[str, datetime]:
+    """Map each digest to the earliest ``last_update_date`` that carried it.
+
+    Derived rather than read from the index's ``is_new_state`` column, because
+    that column is decided by *append order* and the append order is not always
+    chronological. The poll workflow supports historical sweeps
+    (``IS_BACKFILL``, ``historical_start``), and a sweep files documents older
+    than rows already in the index; each one whose digest is not yet present is
+    recorded ``is_new_state=1`` even when a later-dated document already carried
+    that state. Trusting the column would then over-report exactly the recovery
+    the operator swept to achieve: a sweep run to fill a gap the 72-hour strip
+    exposed lands rows *inside* the trailing windows, inflating
+    ``states_added_24h`` and the acquisition rate that feeds every projection.
+
+    Deriving it here costs one pass and makes every window below independent of
+    append order, so no ``--rebuild`` is owed after a sweep. The column stays in
+    the index because FR-2 fixes the schema, and it stays parsed and validated
+    because a malformed one still means the file cannot be trusted.
+    """
+    earliest: dict[str, datetime] = {}
+    for row in states:
+        seen = earliest.get(row.digest)
+        if seen is None or row.timestamp < seen:
+            earliest[row.digest] = row.timestamp
+    return earliest
+
+
 def build_metrics(
     states: Sequence[StateRow],
     polls: Sequence[PollRow],
     floors: Sequence[tuple[str, int]],
     now: datetime,
 ) -> dict[str, Any]:
-    """Calculate published metrics relative to a supplied UTC instant."""
+    """Calculate published metrics relative to a supplied UTC instant.
+
+    Every state window below is keyed on ``last_update_date``, the device's own
+    clock, never on when the archive happened to observe the document. That is
+    the acquisition rate the floor projection needs: it measures how fast the
+    backend produces distinct calibration states, so a sweep that *discovers*
+    two hundred old states does not read as two hundred states acquired today.
+    """
     now = now.astimezone(UTC)
     documents = len(states)
-    digests = {row.digest for row in states}
-    states_total = len(digests)
-    new_rows = [row for row in states if row.is_new]
-    last_new = max((row.timestamp for row in new_rows), default=None)
+    acquired = first_sightings(states)
+    states_total = len(acquired)
+    last_new = max(acquired.values(), default=None)
     since = (now - last_new).total_seconds() / 3600 if last_new else None
     window24 = now - timedelta(hours=24)
     window7 = now - timedelta(days=7)
-    states24 = sum(row.is_new and row.timestamp > window24 for row in states)
-    states7 = sum(row.is_new and row.timestamp > window7 for row in states)
+    states24 = sum(moment > window24 for moment in acquired.values())
+    states7 = sum(moment > window7 for moment in acquired.values())
     start30 = now.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=29)
     daily_states = [
         sum(
-            row.is_new
-            and start30 + timedelta(days=day) <= row.timestamp < start30 + timedelta(days=day + 1)
-            for row in states
+            start30 + timedelta(days=day) <= moment < start30 + timedelta(days=day + 1)
+            for moment in acquired.values()
         )
         for day in range(30)
     ]
@@ -240,12 +321,23 @@ def render_svg(metrics: dict[str, Any]) -> str:
         f'<rect x="{bar_x}" y="165" width="{bar_width}" height="24" rx="4" fill="#d7e0ea"/>',
         f'<rect x="{bar_x}" y="165" width="{progress:.2f}" height="24" rx="4" fill="#166534"/>',
     ]
-    for index, floor in enumerate(metrics["floors"]):
+    # Draw ticks left to right whatever order the workflow supplied them in.
+    # metrics.json keeps the operator's order; only the drawing is sorted, so
+    # the baseline stagger below alternates between *neighbouring* ticks.
+    ordered = sorted(
+        metrics["floors"], key=lambda floor: (int(floor["value"]), str(floor["label"]))
+    )
+    for index, floor in enumerate(ordered):
         x = bar_x + min(int(floor["value"]) / max_floor, 1) * bar_width
-        label = html.escape(f"{floor['label']}: {floor['value']}")
+        drawn = f"{floor['label']}: {floor['value']}"
         labels.append(f'<path d="M{x:.2f} 159v36" stroke="#9a3412" stroke-width="2"/>')
-        baseline = 207 if index % 2 == 0 else 222
-        anchor = "end" if index == len(metrics["floors"]) - 1 else "middle"
+        # Three rows, not two: with two, the first and third tick share a
+        # baseline and collide again as soon as a third floor is configured.
+        baseline = (207, 222, 237)[index % 3]
+        # Measure the glyphs that get drawn, not the escaped source, so the
+        # anchor and the conformance check agree on the same string.
+        anchor = _anchor_for(x, drawn, FONT_PX["tiny"], width)
+        label = html.escape(drawn)
         labels.append(
             f'<text x="{x:.2f}" y="{baseline}" class="tiny" text-anchor="{anchor}">{label}</text>'
         )

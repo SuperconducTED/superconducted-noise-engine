@@ -138,11 +138,29 @@ def qubit_digest(payload: dict[str, Any]) -> str:
 
     This is the stable NC-025 definition of a device state. Invalid or missing
     qubit data is undecidable, never a shared phantom digest.
+
+    Per-parameter ``date`` is normalised away through ``_strip_parameter_dates``,
+    for the same reason ``_payload_body`` drops it and by the same code, so this
+    module holds one answer to "is a parameter's ``date`` measurement?" rather
+    than two. The answer differs by *question*, not by scope: the full document
+    digest keeps ``date`` because it compares two live payloads and wants any
+    difference in front of a human, whereas this counts *device states*, where
+    a re-measurement that reproduced the identical value is the same state and
+    a history-endpoint re-stamp is provenance rather than a new measurement.
+    Counting one as two inflates ``states_total`` against a training floor whose
+    own caveat already says distinct is only an upper bound on independent.
+
+    The archive as it stands does not distinguish the two: over 60 consecutive
+    documents at ``f0930b9`` both definitions give 34 distinct states and no
+    pair merges only under stripping. That is what makes this safe to align
+    now; it is not a licence to leave two definitions in place, because
+    ``scope="qubits"`` feeds an **append-only** index that no later fix can
+    repair without a full ``--rebuild``.
     """
     properties = payload.get("properties")
     if not isinstance(properties, dict) or not isinstance(properties.get("qubits"), list):
         raise ValueError("snapshot properties.qubits must be a list")
-    qubits = properties["qubits"]
+    qubits = _strip_parameter_dates(properties["qubits"])
     body = json.dumps(qubits, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(body.encode("utf-8")).hexdigest()
 
@@ -165,14 +183,25 @@ def canonical_digest(
     ``_payload_body``. The full digest deliberately keeps it: that is the
     live-vs-live comparison, where the safe answer is ``collision`` and a
     difference of any kind belongs in front of a human.
+
+    With ``scope="qubits"`` the digest covers ``properties.qubits`` alone and
+    also drops per-parameter ``date`` — see ``qubit_digest`` for why that is
+    the right answer for counting device states and the wrong one for the
+    collision path. ``payload_only`` and ``scope="qubits"`` both narrow what is
+    hashed, so combining them raises rather than silently applying one.
     """
     with Path(path).open(encoding="utf-8") as fh:
         doc = json.load(fh)
 
-    if scope == "qubits":
-        return qubit_digest(doc)
-    if scope != "document":
+    if scope not in {"document", "qubits"}:
         raise ValueError(f"unknown digest scope: {scope}")
+    if scope == "qubits":
+        if payload_only:
+            # The CLI rejects this pair at line ~254; the importable API must
+            # agree, because silently honouring the narrower of two narrowing
+            # flags is the kind of guess this module exits 2 rather than make.
+            raise ValueError("payload_only and scope='qubits' both narrow the digest; pick one")
+        return qubit_digest(doc)
     if payload_only:
         # Same byte-string as `_payload_digest`, deliberately: `--payload-only`
         # and `--compare-reread` answer the same question about the same pair,
