@@ -4,25 +4,24 @@
   "floors": [
     {
       "label": "NC-012",
-      "projected_date": "2027-01-06",
-      "projected_days": 118.22222222222221,
+      "projected_date": "2027-01-13",
+      "projected_days": 125.1764705882353,
       "states_remaining": 608,
       "value": 1170
     },
     {
       "label": "TanhBellMF",
-      "projected_date": "2027-01-14",
-      "projected_days": 126.97222222222221,
+      "projected_date": "2027-01-22",
+      "projected_days": 134.44117647058823,
       "states_remaining": 653,
       "value": 1215
     }
   ],
-  "generated_at": "2026-09-09T20:35:44.393891Z",
-  "hours_since_last_new_state": 2.033720525277778,
+  "generated_at": "2026-09-10T05:35:50.913823Z",
+  "hours_since_last_new_state": 11.0355316175,
   "index_head": "20260909T183343000000Z.json",
-  "ledger_hour_coverage_72h": 0.25,
+  "ledger_hour_coverage_72h": 0.20833333333333334,
   "new_states_per_day_30d": [
-    0,
     6,
     4,
     3,
@@ -51,19 +50,11 @@
     5,
     5,
     6,
-    3
+    3,
+    0
   ],
   "poll_hours_72h": [
     true,
-    true,
-    false,
-    false,
-    true,
-    false,
-    false,
-    false,
-    false,
-    true,
     false,
     false,
     false,
@@ -125,13 +116,22 @@
     false,
     false,
     true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
     false
   ],
-  "polls_fired_24h": 6,
-  "polls_yielding_new_state_24h": 6,
+  "polls_fired_24h": 3,
+  "polls_yielding_new_state_24h": 3,
   "staleness_band": "under 24 h",
-  "states_added_24h": 5,
-  "states_added_7d": 36,
-  "states_per_day_7d": 5.142857142857143,
+  "states_added_24h": 2,
+  "states_added_7d": 34,
+  "states_per_day_7d": 4.857142857142857,
   "states_total": 562
 }
