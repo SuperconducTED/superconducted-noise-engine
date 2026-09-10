@@ -90,9 +90,10 @@ carry the firing rates of the thresholds judged against them (NC-049, NC-051). S
 them means a future re-measurement of the distribution does not silently restate the
 decision, and a change of threshold does not require re-deriving the distribution.
 
-**Section 7.3's figures were not reverse-engineered.** Two candidate sources were tried and
-neither reproduces them; a third was not invented to make them fit. The rows record what is
-measurable and say plainly that the rest is not, which is the honest form.
+**Section 7.3's figures were not reverse-engineered.** Three candidate sources were tried,
+including the scratch branch its own comment says the dashboard first ran on. All three
+give the p50 it reports and none gives its tail, and no fourth was invented to close the
+gap. The rows record what is measurable and say plainly that the rest is not.
 
 ## Verification
 
