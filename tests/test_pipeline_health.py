@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import shutil
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, ClassVar
 from xml.etree import ElementTree
 
 import pytest
+from scripts.backfill_state_index import main as backfill_main
 from scripts.pipeline_health import (
     FONT_PX,
     NOTHING_TO_PUBLISH,
@@ -215,6 +218,66 @@ class TestCommitOnChange:
         assert staleness_band(24.0) == staleness_band(71.9) == "24 h to 3 days"
         assert staleness_band(72.0) == "3 to 7 days"
         assert staleness_band(168.0) == staleness_band(10_000.0) == "over 7 days"
+
+
+class TestEndToEndFixture:
+    """Issue #48 section 9.2: a committed archive rendered whole, asserted whole.
+
+    Everything else in this file exercises one function against synthetic rows.
+    This walks the path the workflow actually walks, `backfill_state_index` then
+    `pipeline_health`, over four committed snapshot documents and a committed
+    ledger, and compares both published artifacts byte for byte.
+
+    Golden files earn their maintenance cost here because `progress.svg` is
+    *published*: it is embedded in the branch README, so an unintended rendering
+    change is a change to something the team reads, and FR-6's commit-on-change
+    guard rests on those bytes being a function of the inputs alone. When a
+    rendering change is intended, regenerate rather than hand-edit:
+
+        PIPELINE_HEALTH_REGOLD=1 python -m pytest tests/test_pipeline_health.py \\
+            -k test_the_fixture_renders_the_committed_artifacts
+
+    then read the diff before committing it. The fixture supplies its own floor
+    rather than the workflow's, so the artifacts do not churn when a candidate
+    floor is re-pointed at a new NC row.
+    """
+
+    FIXTURE: ClassVar[Path] = Path(__file__).resolve().parent / "fixtures" / "pipeline_health"
+    NOW: ClassVar[str] = "2026-09-02T12:00:00Z"
+    FLOOR: ClassVar[str] = "sample=8"
+
+    def _render(self, tmp_path: Path) -> dict[str, bytes]:
+        shutil.copytree(self.FIXTURE / "archive", tmp_path, dirs_exist_ok=True)
+        assert backfill_main(["--root", str(tmp_path)]) == 0
+        assert main(["--root", str(tmp_path), "--now", self.NOW, "--floor", self.FLOOR]) == 0
+        health = tmp_path / "health"
+        return {name: (health / name).read_bytes() for name in ("metrics.json", "progress.svg")}
+
+    def test_the_fixture_renders_the_committed_artifacts(self, tmp_path: Path) -> None:
+        for name, body in self._render(tmp_path).items():
+            golden = self.FIXTURE / "expected" / name
+            if os.environ.get("PIPELINE_HEALTH_REGOLD"):
+                golden.write_bytes(body)
+            assert body == golden.read_bytes(), (
+                f"{name} differs from the committed artifact. If the change is intended, "
+                "regenerate with PIPELINE_HEALTH_REGOLD=1 and review the diff."
+            )
+
+    def test_the_restamped_document_is_one_state_not_two(self, tmp_path: Path) -> None:
+        """The round-3 blocker, proven over the real archive path.
+
+        `20260901T060000000000Z` repeats the measurements of the document before
+        it under a later parameter `date`, the way the history endpoint re-stamps
+        the records it synthesises. Four documents, two device states.
+        """
+        metrics = json.loads(self._render(tmp_path)["metrics.json"])
+        assert metrics["documents_total"] == 4
+        assert metrics["states_total"] == 2
+        assert metrics["duplication_ratio"] == 0.5
+
+    def test_rendering_the_fixture_twice_is_byte_identical(self, tmp_path: Path) -> None:
+        """NFR-3 over the CLI path, including the backfill's own idempotency."""
+        assert self._render(tmp_path) == self._render(tmp_path)
 
 
 class TestHistoricalSweep:
