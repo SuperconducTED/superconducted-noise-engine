@@ -32,6 +32,10 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "file_snapshots.sh"
 DIGEST = REPO_ROOT / "scripts" / "canonical_snapshot_digest.py"
+# The script locates its siblings by its own path, so the sandbox must hold every
+# one of them. A missing push helper fails only at the very end, after the payload
+# has moved and the ledger row is written.
+PUSH_RETRY = REPO_ROOT / "scripts" / "push_with_retry.sh"
 
 # A is re-observed unchanged (bytes differ, document does not); B is re-observed
 # with a changed value; C is a June stamp polled in September, so it must file
@@ -39,6 +43,7 @@ DIGEST = REPO_ROOT / "scripts" / "canonical_snapshot_digest.py"
 STEM_A = "20260828T031723000000Z"
 STEM_B = "20260828T061614000000Z"
 STEM_C = "20260630T065221000000Z"
+STEM_D = "20260701T065221000000Z"
 POLL_TIME = "2026-09-01T12:00:00Z"
 
 OPS_LEGACY = [
@@ -175,6 +180,8 @@ def sandbox(tmp_path: Path) -> dict[str, Path]:
     (src / "scripts").mkdir()
     shutil.copy(SCRIPT, src / "scripts" / SCRIPT.name)
     shutil.copy(DIGEST, src / "scripts" / DIGEST.name)
+    shutil.copy(PUSH_RETRY, src / "scripts" / PUSH_RETRY.name)
+    (src / "scripts" / PUSH_RETRY.name).chmod(0o755)
     _git("add", "-A", cwd=src)
     _git("commit", "-q", "-m", "source tree", cwd=src)
     _git("remote", "add", "origin", str(origin), cwd=src)
@@ -233,6 +240,19 @@ def _ledger(origin: Path, month: str) -> dict[str, str]:
     return decisions
 
 
+def _state_index(origin: Path) -> list[tuple[str, str, str, str]]:
+    """Rows from the append-only state index on the pushed data branch."""
+    text = _git("show", "calibration-data:health/state-index.tsv", cwd=origin)
+    header, *rows = text.strip("\n").split("\n")
+    assert header.split("\t") == [
+        "snapshot_filename",
+        "last_update_date",
+        "qubit_digest",
+        "is_new_state",
+    ]
+    return [tuple(row.split("\t")) for row in rows]
+
+
 def _tree(origin: Path) -> set[str]:
     return set(_git("ls-tree", "-r", "--name-only", "calibration-data", cwd=origin).split())
 
@@ -254,7 +274,12 @@ class TestFileSnapshots:
         staging = _stage(
             sandbox["tmp"],
             "staging",
-            {STEM_A: _fresh(STEM_A), STEM_B: _fresh(STEM_B, t1=999.0), STEM_C: _fresh(STEM_C)},
+            {
+                STEM_A: _fresh(STEM_A),
+                STEM_B: _fresh(STEM_B, t1=999.0),
+                STEM_C: _fresh(STEM_C),
+                STEM_D: _fresh(STEM_D),
+            },
         )
         result = _run(sandbox, staging, sandbox["tmp"] / "wt")
         assert result.returncode == 0, result.stdout + result.stderr
@@ -264,8 +289,12 @@ class TestFileSnapshots:
             STEM_A: "duplicate",
             STEM_B: "collision",
             STEM_C: "new",
+            STEM_D: "new",
         }
-        assert _subject(origin) == f"calibration: {POLL_TIME} ibm_fez (+1)"
+        assert _subject(origin) == f"calibration: {POLL_TIME} ibm_fez (+2)"
+        index = _state_index(origin)
+        assert [row[0] for row in index] == [f"{STEM_C}.json", f"{STEM_D}.json"]
+        assert [row[3] for row in index] == ["1", "0"]
 
         tree = _tree(origin)
         assert f"snapshots/2026-06/ibm_fez/{STEM_C}.json" in tree  # payload month, not poll month
@@ -301,6 +330,21 @@ class TestFileSnapshots:
         assert _ledger(origin, "2026-09") == {STEM_A: "duplicate"}
         assert _subject(origin) == f"poll: {POLL_TIME} ibm_fez (no new document)"
         assert not any(p.startswith("collisions/") for p in _tree(origin))
+
+    def test_undecidable_qubit_digest_preserves_the_document_and_ledger_row(
+        self, sandbox: dict[str, Path]
+    ) -> None:
+        """A malformed qubit block must not abort a poll after its payload moves."""
+        staging = _stage(
+            sandbox["tmp"],
+            "staging",
+            {STEM_C: json.dumps({"properties": {}}).encode()},
+        )
+        result = _run(sandbox, staging, sandbox["tmp"] / "wt")
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert "preserved but not indexed" in result.stdout
+        assert _ledger(sandbox["origin"], "2026-09") == {STEM_C: "new"}
+        assert _state_index(sandbox["origin"]) == []
 
     def test_ledger_appends_across_polls_in_the_same_month(self, sandbox: dict[str, Path]) -> None:
         first = _stage(sandbox["tmp"], "staging1", {STEM_A: _fresh(STEM_A)})

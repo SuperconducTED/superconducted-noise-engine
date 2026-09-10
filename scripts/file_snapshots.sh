@@ -58,6 +58,16 @@ if [ ! -f "$digest" ]; then
   echo "::error::$digest is missing; refusing to file anything without a comparator"
   exit 1
 fi
+# Checked here for the same reason as the comparator: this script's last act is
+# the push, so a missing or non-executable helper would fail only after every
+# payload has moved and every ledger row is written -- the most expensive point
+# in the run to discover it. New .sh files also commit non-executable from a
+# Windows checkout, which -x catches and -f would not.
+push_retry="$here/push_with_retry.sh"
+if [ ! -x "$push_retry" ]; then
+  echo "::error::$push_retry is missing or not executable; refusing to file what it cannot push"
+  exit 1
+fi
 
 git fetch "$DATA_REMOTE" "$DATA_BRANCH"
 # -B resets the local branch to the remote tip, exactly as the old in-place
@@ -73,9 +83,13 @@ added=0
 # a stopped poller once the 90-day Actions run retention expires -- which is
 # exactly what made #45 expensive.
 ledger="ledger/${POLL_TIME:0:7}.tsv"
-mkdir -p ledger collisions
+state_index="health/state-index.tsv"
+mkdir -p ledger collisions health
 if [ ! -e "$ledger" ]; then
   printf 'poll_time_utc\tbackend\tlast_update_date\tdecision\n' > "$ledger"
+fi
+if [ ! -e "$state_index" ]; then
+  printf 'snapshot_filename\tlast_update_date\tqubit_digest\tis_new_state\n' > "$state_index"
 fi
 
 for f in "$STAGING_DIR/$BACKEND"/*.json; do
@@ -87,6 +101,44 @@ for f in "$STAGING_DIR/$BACKEND"/*.json; do
     mv "$f" "$dest/"
     decision=new
     added=$((added + 1))
+    # This is intentionally incremental: only the just-filed document is
+    # parsed. The scheduled dashboard reads this compact index, never 1+ GB of
+    # snapshots. A digest seen in any prior row is a duplicate device state.
+    # A malformed qubit block is preserved as a new document but is not a
+    # state-index measurement. Do not let an undecidable digest abort the poll
+    # after moving its payload; the ledger still records the observation.
+    set +e
+    digest_output=$("$PYTHON" "$digest" --scope qubits "$dest/$base")
+    digest_status=$?
+    set -e
+    if [ "$digest_status" -ne 0 ]; then
+      echo "::warning::$stem has no decidable qubit digest; preserved but not indexed"
+    else
+      qubit_digest=$(awk '{print $1}' <<< "$digest_output")
+      if awk -F '\t' -v digest="$qubit_digest" 'NR > 1 && $3 == digest { found=1 } END { exit !found }' "$state_index"; then
+        is_new_state=0
+      else
+        is_new_state=1
+      fi
+      fraction=${stem:15:${#stem}-16}
+      decimal=""
+      if [ -n "$fraction" ]; then decimal=".$fraction"; fi
+      last_update_date="${stem:0:4}-${stem:4:2}-${stem:6:2}T${stem:9:2}:${stem:11:2}:${stem:13:2}${decimal}Z"
+      # A historical sweep (IS_BACKFILL=1) files documents older than rows the
+      # hourly poller already appended, so the index stops being chronological
+      # and `is_new_state` marks a long-known state as this row's first
+      # sighting. The metrics engine derives first sightings from timestamps
+      # rather than trusting this column precisely so that costs nothing, but
+      # the column itself is now wrong and anything else reading the index has
+      # to know. Say so once per row instead of leaving it silent.
+      index_max=$(awk -F '\t' 'NR > 1 && $2 > max { max = $2 } END { print max }' "$state_index")
+      if [ -n "$index_max" ] && [[ "$last_update_date" < "$index_max" ]]; then
+        echo "::warning::$stem predates the newest indexed document ($index_max); its" \
+             "is_new_state is decided against later rows. Dispatch Calibration Pipeline" \
+             "Health with backfill=true rebuild=true to restore the column's chronology."
+      fi
+      printf '%s\t%s\t%s\t%s\n' "$base" "$last_update_date" "$qubit_digest" "$is_new_state" >> "$state_index"
+    fi
   else
     # A stamp collision does NOT prove the documents match -- #46 s3c lost
     # five gate-level versions under one stamp. But the comparison must be
@@ -149,7 +201,7 @@ for f in "$STAGING_DIR/$BACKEND"/*.json; do
   echo "$stem: $decision"
 done
 
-git add snapshots/ ledger/ collisions/
+git add snapshots/ ledger/ collisions/ health/
 if git diff --cached --quiet; then
   echo '::warning::nothing staged - poller produced no payload'
 elif [ "$added" -gt 0 ]; then
@@ -157,4 +209,7 @@ elif [ "$added" -gt 0 ]; then
 else
   git commit -m "poll: $POLL_TIME $BACKEND (no new document)"
 fi
-git push "$DATA_REMOTE" "$DATA_BRANCH"
+# The health workflow is a second writer to this branch and runs in its own
+# concurrency group, so this push can now lose a race. Losing it silently drops
+# the ledger row that makes a scheduler stall visible, so replay and retry.
+"$push_retry" "$DATA_REMOTE" "$DATA_BRANCH"

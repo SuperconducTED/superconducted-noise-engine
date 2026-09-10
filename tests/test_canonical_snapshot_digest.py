@@ -15,7 +15,7 @@ import pathlib
 from typing import Any
 
 import pytest
-from scripts.canonical_snapshot_digest import canonical_digest, is_lossy_reread, main
+from scripts.canonical_snapshot_digest import canonical_digest, is_lossy_reread, main, qubit_digest
 
 
 def _doc(operations: list[dict[str, Any]], t1: float = 100.0) -> dict[str, Any]:
@@ -79,6 +79,79 @@ class TestCanonicalDigest:
         p = _write(tmp_path, "odd.json", doc)
         assert len(canonical_digest(p)) == 64
 
+    def test_qubit_scope_ignores_gate_data_but_not_t1(self, tmp_path: pathlib.Path) -> None:
+        first = _doc(OPS_A, t1=100.0)
+        second = _doc(OPS_SHUFFLED, t1=100.0)
+        second["properties"]["gates"] = [{"gate": "x", "value": 99}]
+        changed = _doc(OPS_A, t1=101.0)
+        a, b, c = (
+            _write(tmp_path, name, doc)
+            for name, doc in (("a.json", first), ("b.json", second), ("c.json", changed))
+        )
+        assert canonical_digest(a, scope="qubits") == canonical_digest(b, scope="qubits")
+        assert canonical_digest(a, scope="qubits") != canonical_digest(c, scope="qubits")
+        assert qubit_digest(first) == canonical_digest(a, scope="qubits")
+
+    def test_qubit_scope_ignores_a_parameter_date_restamp(self, tmp_path: pathlib.Path) -> None:
+        """A re-stamped measurement is the same device state, not a second one.
+
+        The history endpoint re-stamps the parameter records it synthesises, so
+        without this a backfill sweep would file a document already held as a
+        new distinct state and inflate `states_total` in an append-only index.
+        Same normalisation, same reason and same code as `_payload_body`.
+        """
+        stamped = _doc(OPS_A)
+        stamped["properties"]["qubits"] = [
+            [{"date": "2026-08-28T03:00:00+00:00", "name": "T1", "unit": "us", "value": 100.0}]
+        ]
+        restamped = _doc(OPS_A)
+        restamped["properties"]["qubits"] = [
+            [{"date": "2026-09-10T11:22:33+00:00", "name": "T1", "unit": "us", "value": 100.0}]
+        ]
+        moved = _doc(OPS_A)
+        moved["properties"]["qubits"] = [
+            [{"date": "2026-09-10T11:22:33+00:00", "name": "T1", "unit": "us", "value": 100.5}]
+        ]
+        assert qubit_digest(stamped) == qubit_digest(restamped)
+        assert qubit_digest(stamped) != qubit_digest(moved), "a moved value is a new state"
+
+    def test_document_scope_still_keeps_a_parameter_date(self, tmp_path: pathlib.Path) -> None:
+        """The collision path is the opposite question and must stay unchanged.
+
+        `--scope qubits` counts device states, where a re-stamp is provenance.
+        The full document digest compares two live payloads, where any
+        difference belongs in front of a human as a `collision`.
+        """
+        stamped = _doc(OPS_A)
+        stamped["properties"]["qubits"] = [
+            [{"date": "2026-08-28T03:00:00+00:00", "name": "T1", "unit": "us", "value": 100.0}]
+        ]
+        restamped = json.loads(json.dumps(stamped))
+        restamped["properties"]["qubits"][0][0]["date"] = "2026-09-10T11:22:33+00:00"
+        a = _write(tmp_path, "a.json", stamped)
+        b = _write(tmp_path, "b.json", restamped)
+        assert canonical_digest(a) != canonical_digest(b)
+
+    def test_qubit_scope_and_payload_only_cannot_be_combined(self, tmp_path: pathlib.Path) -> None:
+        """Both flags narrow what is hashed; the API must not pick one silently."""
+        p = _write(tmp_path, "a.json", _doc(OPS_A))
+        with pytest.raises(ValueError, match="pick one"):
+            canonical_digest(p, payload_only=True, scope="qubits")
+
+    def test_an_unknown_scope_is_rejected(self, tmp_path: pathlib.Path) -> None:
+        p = _write(tmp_path, "a.json", _doc(OPS_A))
+        with pytest.raises(ValueError, match="unknown digest scope"):
+            canonical_digest(p, scope="gates")
+
+    def test_qubit_scope_rejects_missing_or_malformed_qubits(self, tmp_path: pathlib.Path) -> None:
+        missing = _doc(OPS_A)
+        missing["properties"] = {}
+        malformed = _doc(OPS_A)
+        malformed["properties"] = None
+        for name, document in (("missing.json", missing), ("malformed.json", malformed)):
+            with pytest.raises(ValueError, match=r"properties\.qubits"):
+                canonical_digest(_write(tmp_path, name, document), scope="qubits")
+
 
 class TestCli:
     def test_compare_same_document_exits_zero(self, tmp_path: pathlib.Path) -> None:
@@ -134,6 +207,11 @@ class TestCli:
         lines = capsys.readouterr().out.strip().split("\n")
         assert len(lines) == 2
         assert all(len(line.split("  ")[0]) == 64 for line in lines)
+
+    def test_qubit_scope_compares_qubit_blocks(self, tmp_path: pathlib.Path) -> None:
+        a = _write(tmp_path, "a.json", _doc(OPS_A))
+        b = _write(tmp_path, "b.json", _doc(OPS_SHUFFLED))
+        assert main(["--compare", "--scope", "qubits", str(a), str(b)]) == 0
 
 
 def _historical(operations: list[dict[str, Any]], t1: float = 100.0) -> dict[str, Any]:

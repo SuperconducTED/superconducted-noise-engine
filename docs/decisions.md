@@ -1189,6 +1189,78 @@ layout this extends), `.github/workflows/calibration-poll.yml`,
 > Extends ADR-020. `snapshots/` is unchanged; this entry adds
 > `ledger/` and `collisions/` alongside it.
 
+### ADR-025 amendment — 2026-09-05: pipeline-health tree
+
+`health/` is added as a third sibling tree on `calibration-data`:
+
+    health/state-index.tsv
+    health/metrics.json
+    health/progress.svg
+
+The state index is append-only **in the poll path**, and records one qubit-block
+canonical digest for each newly filed snapshot. That digest normalises away each
+parameter record's own `date`, by the same rule and the same code as the payload
+digest this ADR already relies on: within `properties.qubits` a `date` says when
+a value was measured, not what was measured, so a re-measurement that reproduced
+the identical value is one device state and a history-endpoint re-stamp is
+provenance. The full document digest keeps `date`, deliberately and unchanged,
+because the collision path compares two live payloads and any difference there
+belongs in front of a human. **One row of this index therefore means "a device
+state distinct in its measured values", not "a byte-distinct qubit block".**
+
+`is_new_state` records what the poller could see when it wrote the row and is
+not authoritative about chronology: a dispatched historical sweep appends
+documents older than rows already present, and the poller marks a state new
+whenever its digest is absent from the rows so far. Readers of this index must
+derive first sightings from `last_update_date`, as the metrics engine does,
+rather than trusting the column. The column stays because it records the
+observation and because a malformed one still means the file cannot be trusted.
+
+The dispatched backfill may
+regenerate it once in `last_update_date` order (`--rebuild`); this is the only
+permitted rewrite and exists because the hourly poller starts appending the
+moment this merges, which closes the append path for history and would leave
+`is_new_state` permanently mismarked.
+
+The generated JSON and SVG are derived only from the state index and ledger;
+scheduled rendering must not traverse `snapshots/`. Candidate training floors
+are configuration inputs supplied by the workflow and must be labelled in the
+rendered output; no floor value is a literal in the renderer. Each label names
+the register row it traces to, and the configured set must bracket the whole
+range that row reports rather than a part of it: the renderer scales the
+progress bar to the largest configured floor, so dropping the top of a measured
+range does not merely omit a tick, it makes the bar read fuller than the
+evidence supports.
+
+**`projected_days` and `projected_date` are not registrable claims.** They are a
+straight-line extrapolation of a single seven-day count and must never be cited
+in `docs/numerical-claims.md`, quoted as a date the project is working toward,
+or carried into a runbook expectation. NC-R002 is retired for being exactly
+this: a projected floor date that arrived with the gate unmet. The arithmetic is
+auditable and the inputs are published beside it, `states_added_7d` included, so
+a reader can see how much evidence the number rests on; that is the whole of
+what these two fields are for. `states_total`, `documents_total` and
+`duplication_ratio` are measurements and may be cited.
+
+The SVG carries **no clock reading**: every figure in it is a function of the
+committed index and ledger, plus the position of the two rolling windows FR-5
+mandates (the 72-hour poll strip and the 30-day acquisition sparkline).
+`generated_at` and the exact `hours_since_last_new_state` live in
+`metrics.json` alone, and the SVG renders the staleness as a band. This is what
+lets the health workflow commit only when rendered bytes change: a quiet
+archive reaches byte-stability within 30 days of its last new state, after
+which repeated renders produce no commit at all.
+
+`health/` is written by two workflows in separate concurrency groups, so their
+pushes can race. They resolve it by replaying onto the branch tip rather than
+by sharing a group, because a shared group lets a render cancel a queued poll
+and a cancelled poll writes no ledger row.
+
+The daily renderer uses a depth-one sparse checkout of `health/` and `ledger/`.
+The one-time backfill is explicitly dispatched and is the only health operation
+permitted to walk `snapshots/`. This amendment preserves ADR-020 snapshot
+semantics and ADR-025 ledger decisions.
+
 ---
 
 ## ADR-027 — Calibration training target

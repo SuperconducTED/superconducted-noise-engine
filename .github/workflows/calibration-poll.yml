@@ -30,6 +30,8 @@ on:
         default: '30'
 
 concurrency:
+  # A health render must not cancel a queued poll: absent ledger rows are the
+  # scheduler-degradation signal this pipeline exists to expose.
   group: calibration-poll
   cancel-in-progress: false
 
