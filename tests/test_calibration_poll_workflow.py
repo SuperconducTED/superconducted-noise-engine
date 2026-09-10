@@ -48,10 +48,27 @@ def test_the_sweep_cron_is_actually_scheduled(workflow: str) -> None:
 
 
 def test_the_hourly_poll_is_still_scheduled(workflow: str) -> None:
-    """The sweep supplements the hourly sample; it does not replace it."""
+    """The sweep supplements the hourly sample; it does not replace it.
+
+    PR #89 raised that sample from one entry per hour to four (:07, :22, :37,
+    :52), because GitHub declines to dispatch about three quarters of the
+    schedules it is asked for, and it shipped without a guard of its own. The
+    count is asserted as a floor rather than as an exact set: retuning which
+    minutes are used is a legitimate future change, whereas quietly collapsing
+    back to a single entry would undo #89 without failing anything.
+
+    ``:37`` is named because NC-008 registers it as the polling target, and #89
+    kept it for exactly that reason.
+    """
     crons = _schedule_crons(workflow)
     hourly = [c for c in crons if c.endswith("* * * *") and not c.split()[1].isdigit()]
-    assert hourly, f"no hourly cron left in {crons}"
+    assert len(hourly) >= 4, (
+        f"#89 spread the hourly sample across four entries per hour; {crons} carries "
+        f"{len(hourly)}, so that mitigation has been undone"
+    )
+    assert "37 * * * *" in hourly, (
+        f"NC-008 registers :37 as the polling target and it is missing from {crons}"
+    )
 
 
 def test_timeout_covers_the_sweep(workflow: str) -> None:

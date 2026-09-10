@@ -11,6 +11,19 @@ a worst gap of 12.70 h, with only 12 of 94 gaps at or under 1.5 h. **99 of those
 three quarters of the schedules, which its documentation explicitly permits
 ("if the load is sufficiently high enough, some queued jobs may be dropped").
 
+That measurement characterises the **single-cron** regime and nothing else. It
+is history, not a prediction: PR #89 changed the configuration it describes, and
+no figure for the new one exists yet.
+
+**PR #89 landed the stopgap while this branch was open.** It replaced the single
+`:37` entry with four per hour (:07, :22, :37, :52), on the reasoning that
+spreading the requests across the hour makes it less likely for one load spike
+to take all of them. Its own comment is explicit that this raises the odds of a
+poll firing without guaranteeing one, and that the actual fix is #49's sweep.
+The two are complementary and neither substitutes for the other: **#89 acts on
+how often a sample is taken; this branch acts on what a missed sample costs.**
+This work is rebased on top of #89, so the workflow now carries five crons.
+
 Issue #49 is the response, and it does not try to fix the scheduler. It converts
 the pipeline from sampling to **sweeping**: a daily job re-reads a trailing
 window and fills whatever the hourly path missed. Because historical calibration
@@ -22,20 +35,23 @@ data and becomes late data. Under that design a cron firing 6 times instead of
 
 | File | One-sentence description |
 | --- | --- |
-| `.github/workflows/calibration-poll.yml` | Adds a daily sweep cron that derives its window from the clock, and fixes two expressions that silently misbehaved on a `schedule` event. |
+| `.github/workflows/calibration-poll.yml` | Adds a daily sweep cron alongside the four hourly entries #89 landed, derives its window from the clock, and fixes two expressions that silently misbehaved on a `schedule` event. |
 | `src/superconducted/calibration/poller.py` | `poll_once` now returns a `SweepOutcome`, and `main` exits **2** when a sweep retrieved no document at all. |
 | `tests/test_calibration.py` | Four tests pinning the sweep-outcome contract, including the idempotency case that must stay a success. |
-| `tests/test_calibration_poll_workflow.py` | New: five guards on the workflow file, chiefly that the sweep cron string agrees across the three places GitHub forces it to appear. |
+| `tests/test_calibration_poll_workflow.py` | New: five guards on the workflow file. Four cover the sweep cron's agreement across the three places GitHub forces it to appear; the fifth also holds #89's four hourly entries and the `:37` NC-008 target in place, which #89 itself shipped without. |
 | `tests/conftest.py` | Nulls `backend.target_history` on the mock backend, matching the existing `target` and `configuration`. |
-| `docs/numerical-claims.md` | NC-021 re-measured on this branch. |
+| `docs/numerical-claims.md` | NC-021's chain extended to account for the 9 sweep tests, which the rebased row records the value of without explaining. |
 
 ## Implementation approach
 
-**One workflow, two crons.** Per #49 §2.1 the sweep is a second `schedule:` entry
-on the existing workflow rather than a new file, because the commit step carries
-the ADR-025 ledger, the canonical duplicate check and the collision handling.
-A copy would have to be kept in sync with the ADR by hand. The step distinguishes
-the two by comparing `github.event.schedule` against `env.SWEEP_CRON`.
+**One workflow, five crons: four samples and a sweep.** Per #49 §2.1 the sweep is
+another `schedule:` entry on the existing workflow rather than a new file,
+because the commit step carries the ADR-025 ledger, the canonical duplicate
+check and the collision handling. A copy would have to be kept in sync with the
+ADR by hand. The step tells a sweep from a sample by comparing
+`github.event.schedule` against `env.SWEEP_CRON`, so the four hourly entries #89
+added are indistinguishable from each other and from the single entry that
+preceded them; only the sweep cron takes the new branch.
 
 **The window is derived, not configured per run.** On the sweep cron the step
 computes `HIST_START` / `HIST_END` from `date -u`, so the existing
@@ -76,6 +92,55 @@ instants and got nothing back.
 The gate is on **documents returned, never documents saved**. Re-sweeping a
 window the archive already holds saves nothing and is the idempotency #49 §5
 requires; gating on saved would fail every healthy second sweep.
+
+## What `main` moved underneath this branch
+
+This work opened against `3b949cd`. Before it landed, `main` gained PR #70's
+pipeline-health work (`scripts/pipeline_health.py`,
+`scripts/backfill_state_index.py`, `scripts/push_with_retry.sh`, the `health/`
+tree recorded in ADR-025's 2026-09-05 amendment) and PR #89's cron entries.
+Three of those interact with a daily sweep. None blocks this merge.
+
+**A daily sweep prints an instruction that is not true. Issue #93.**
+`file_snapshots.sh` now appends a row to `health/state-index.tsv` per document
+it files, and warns per row when the filed document predates the newest already
+indexed, telling the operator to dispatch the health workflow with
+`backfill=true rebuild=true`. Every document a sweep recovers is by construction
+one the hourly poller missed, so it is older than the newest indexed row, and
+the warning fires for essentially every recovered document, every day.
+`pipeline_health.py::first_sightings` says the opposite in its own docstring:
+first sightings are derived from timestamps, which makes every trailing window
+independent of append order, "so no `--rebuild` is owed after a sweep". The
+dashboard is therefore correct after a sweep with no repair, the archive is
+untouched, and `is_new_state` being wrong is a cost PR #70 accepted knowingly
+for FR-2's schema. What is wrong is only the remedy the warning names, and the
+job it names fetches ~1.3 GB and requires disabling the poller first. Left
+alone, the daily instruction is either an hour wasted or a habit of ignoring
+`::warning::` on the one workflow ADR-025 needs quiet. Filed rather than fixed
+here: the fix belongs in the two PR #70 files this branch does not otherwise
+touch, and it has four candidate shapes that deserve their own decision.
+
+**The sweep sits in the concurrency queue longer than a poll does.** The group is
+`calibration-poll` with `cancel-in-progress: false`, so a run arriving while
+another is in flight waits, and a second arrival replaces the waiting one.
+#89 raised arrivals to four per hour, and the sweep may run for up to its
+60-minute bound, so the sweep's window can discard up to three queued hourly
+polls. That displacement is absorbed rather than lost: the sweep is re-reading
+that exact window as it runs, so the samples it displaces are precisely the ones
+it recovers. `polls_fired_24h` counts distinct ledger timestamps rather than
+workflow run records, so a displaced poll does not appear as a fired-and-failed
+poll in the metrics. It does depress the count for that hour, which is honest,
+because no poll ran.
+
+**The sweep is a longer-lived writer in a race that now exists.**
+`file_snapshots.sh` no longer pushes directly; it goes through
+`push_with_retry.sh`, because the health workflow became a second writer to
+`calibration-data`. A sweep holds that writer role for minutes rather than the
+~40 seconds a poll takes, so it is exposed to the race for correspondingly
+longer. The two schedules do not currently overlap: health renders at `17 3`,
+the sweep starts at `41 4`, which is 84 minutes of clearance against a 60-minute
+bound. That clearance is incidental to two independently chosen crons and
+nothing enforces it, so moving either one is not a free change.
 
 ## Mathematical / Statistical details
 
@@ -125,12 +190,27 @@ python -m mypy --strict src/superconducted
 python scripts/check_ids.py
 ```
 
-At `HEAD` of this branch: ruff clean over 54 files, `mypy --strict` clean over 25
-source files and the project config clean over 32, `check_ids.py` clean,
-**379 tests collected**. 371 pass locally; the 8 failures are
-`tests/test_file_snapshots.py` cases that reproduce identically at the merge base
-on this Windows machine, so CI on `ubuntu-latest` is the authority for the pass
-count.
+Re-measured on the rebased branch, not carried over from the pre-rebase one.
+`ruff check` clean, `check_ids.py` clean, **447 tests collected and all 447
+passing** on Windows in a clean 3.12.10 interpreter at a short path.
+
+Two things about that block are worth stating rather than leaving implied.
+
+The earlier measurement on this branch recorded 379 collected and 8
+`tests/test_file_snapshots.py` failures. The failures did not reproduce here.
+They are an artefact of the repository `.venv` rather than of the platform,
+which is the same reading NC-021's own chain reached independently at `7ec173f`.
+CI on `ubuntu-latest` remains the authority for the pass count; this run agrees
+with it rather than standing in for it.
+
+`ruff format --check` and `mypy --strict` are **not** reported from this machine.
+Both fail here for reasons this branch does not own: `ruff format` flags a
+fenced code block in `docs/implementations/2026-09-06-issue-58-decisions-and-r2-orientation.md`,
+a file that predates the merge base and that this branch never touches, and
+`mypy` stops on a `type` statement inside numpy 2.5.3's shipped stubs under the
+project's pinned `python_version = "3.11"`. `main`'s own CI is green at
+`4355850` over that same file, so both are local resolution artefacts. CI is the
+authority for those two gates.
 
 The four shell paths were simulated before deploying:
 
@@ -140,6 +220,16 @@ The four shell paths were simulated before deploying:
 | sweep cron, no inputs | derived 48 h window, 1 h step |
 | dispatch with explicit dates | explicit window wins |
 | sweep cron plus explicit dates | dispatch still wins |
+
+**The CI run this PR reported was not a run of this tree.** The only `CI` run on
+`mert/issue-49-sweep` fired at the opening push, on `95ada98` at 05:24Z, against
+a tree based on `3b949cd`: before #70, #91 and #89 reached `main`. It is where
+the "CI green, 379 tests" in the PR comment comes from. Once #89 merged at
+19:43Z the PR went `CONFLICTING`, and `ci.yml` does not dispatch on a conflicted
+PR while CodeQL keeps running and keeps reporting success, so the checks panel
+went on reading green while nothing ran the tests. The rebase onto `4355850`
+is what restores a real signal, and the count to trust is the one CI reports on
+the rebased head.
 
 **Not yet verified, and it needs a real run.** #49 §5 asks for a sweep executed
 over a known gap with the recovered document count reported, and for a second
@@ -153,9 +243,15 @@ figures on the issue.
 
 - Issue #49 (this work), #48 (the telemetry that makes a gap visible), #45 (the
   scheduler characterisation)
-- ADR-020 and ADR-025 in `docs/decisions.md`
-- NC-026 (60-day retention), NC-029 (capture rate over the outage), NC-030
-  (republication rate), NC-031 (1 h sweep recall)
+- PR #89, the four-entry hourly cron this merges on top of, and issue #93, the
+  contradiction a daily sweep exposes between two files PR #70 landed
+- PR #70 and `docs/implementations/2026-09-05-pipeline-health-dashboard.md`, for
+  the `health/` tree and the renderer whose windows survive a sweep untouched
+- ADR-020 and ADR-025 in `docs/decisions.md`, including ADR-025's 2026-09-05
+  pipeline-health amendment
+- NC-008 (the `:37` polling target the cron test pins), NC-026 (60-day
+  retention), NC-029 (capture rate over the outage), NC-030 (republication
+  rate), NC-031 (1 h sweep recall)
 
 > **Note on #49's own references.** Its §8 cites NC-024 for the 60-day retention,
 > NC-027 for the capture rate and NC-028 for the republication rate. All three
