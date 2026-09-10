@@ -554,6 +554,129 @@ backfill's `existing` set, the partial final bucket in
 counting ledger rows rather than polls, and the missing NC-046 upper floor in
 `HEALTH_FLOORS`.
 
+### As of `2321301` (2026-09-10): the second reviewer's minors
+
+Appended, not folded into the blocks above. Five code findings and one operating
+note. None of them moves a number on the archive as it stands today, which is
+why they are minors; each of them makes one wrong under a condition the archive
+already contains or the runbook already invites.
+
+**`snapshot_filename` is not unique, and two places assumed it was.** The
+archive holds one `last_update_date` under two month partitions: at `f0930b9`,
+`snapshots/2026-06/ibm_fez/20260630T214008000000Z.json` and its 2026-07 twin are
+different blobs (`f970f706` and `8219d293`) sharing an instant, a backend and a
+filename, so 894 paths carry 893 distinct names. The 2026-07 copy is misfiled
+against ADR-020, since its own stem names June, but the pipeline has to be
+correct over the archive as it is.
+
+- `_chronological_key` tied on all three of its components, so `sorted` fell
+  through to `Path.glob`, which reports `os.scandir` order and need not agree
+  between an ext4 runner and an NTFS checkout. The month partition is now part
+  of the key.
+- `backfill`'s `existing` set reported the second copy as already indexed and
+  dropped it, silently, because nothing downstream can miss a row it never saw.
+  It is a multiset now: indexed as many times as the archive holds it, which is
+  the same answer as a set wherever names are unique. A half-indexed pair now
+  reaches the incompleteness refusal instead of being quietly completed wrong.
+
+Both were latent rather than active, because the two copies happen to share a
+qubit digest, so the emitted rows were byte-identical either way. Verified: the
+index built at `f0930b9` is byte-identical before and after the change, sha256
+`77458adec4ca56fed7afa3df57bcfa494f15f26c8a221a1d8b960b493db04068`, 894 rows,
+504 distinct states, second run appends zero.
+
+**The acquisition sparkline ended in a stub.** `new_states_per_day_30d` anchored
+its thirty buckets on today, leaving a partial day in the last one. The
+scheduled render fires at `cron: 17 3 * * *`, so the rightmost bar was drawn
+from 3 h 17 min of data, **13.7% of a day**, on every scheduled run, in the FR-5
+panel a reader consults to ask whether the archive is still accumulating. It is
+now thirty *complete* days ending yesterday. Today is not lost:
+`states_added_24h` and `states_per_day_7d` both cover it, on rolling windows
+where a partial day is not a distortion. A side benefit for FR-6: these buckets
+now change once a day rather than continuously, so a day that gained nothing has
+one fewer reason to move the rendered bytes.
+
+**`polls_fired_24h` counted ledger rows, not polls.** `file_snapshots.sh` writes
+one row per staged document, so a dispatched historical sweep files an entire
+gap under a single `POLL_TIME`. Measured on the live ledger at `cb7a8c2`:
+
+| | value |
+| --- | --- |
+| ledger rows | 129 |
+| distinct poll instants | 53 |
+| rows written by the largest single poll | **52** |
+
+Left as rows, a reader of UC-5 comparing this against #45's 22 to 23 runs/day
+would have read one sweep as a poller firing twice an hour, in the panel that
+exists to make scheduler health legible. FR-4's parenthetical says "ledger rows
+in the trailing 24 h", which assumed one row per poll; the field name and UC-5
+govern, and the row count is recoverable from the ledger itself.
+
+**`HEALTH_FLOORS` rendered part of a measured range.** NC-046 registers 234 to
+252 parameters, floor 1170 to 1260. The workflow shipped 1170 and 1215, so the
+top of the bracket was invisible. That is not cosmetic: `max_floor` sets the
+progress bar's full scale, so 504 states drew as 41.5% complete where the honest
+worst case is 40.0%, and a bar that reads fuller when a candidate is omitted is
+the failure issue §1.2 is written to prevent. All three now ship, and every
+label names the register row it traces to. `TanhBellMF` alone did not: it is a
+membership-function shape, not a source, so FR-7's "carry its source" was half
+met and a reader could not grep it.
+`TestFloorsAreConfiguration` now reads NC-046's registered range out of
+`docs/numerical-claims.md` and asserts the shipped set brackets it, so the next
+correction to that row fails the suite rather than quietly rescaling the bar.
+
+**The one-time rebuild races the poller.** The `backfill=true rebuild=true`
+dispatch faults in ~1.3 GB before pushing a whole-file rewrite of
+`health/state-index.tsv`, and the poller appends to that same file on
+`cron: 37 * * * *`, filing a new document in most hours (NC-030). A poll landing
+inside the job's window leaves `push_with_retry.sh` replaying a rewrite onto an
+append, which conflicts. Conflicting is the designed outcome, since a silent
+merge would drop the poller's row, but it costs the dispatch. Recorded in the
+`rebuild` input description, where the operator reads it at dispatch time, and
+beside the job.
+
+**`projected_days` and `projected_date` are now declared non-claims.** ADR-025's
+amendment states it: they extrapolate a single seven-day count in a straight
+line and must never be cited in `docs/numerical-claims.md`, quoted as a target
+date, or carried into a runbook expectation. NC-R002 is retired in the register
+for being exactly that, a projected floor date that arrived with the gate unmet.
+
+*Design decision, recorded because the alternative was live.* Publishing an
+interval instead was the other option. It was rejected: an exact Poisson
+interval needs a quantile of the incomplete gamma function, which NFR-4's
+stdlib-only rule turns into thirty lines of numerical code, and a method that
+size needs its own register row and its own approximation-error statement. That
+is a larger change than this finding justifies. The inputs are published beside
+the projection instead, `states_added_7d` included, so a reader can see how much
+evidence it rests on.
+
+**Golden regeneration.** Through the documented `PIPELINE_HEALTH_REGOLD=1` path.
+`metrics.json` moves the sparkline's `2` from index 28 to index 29, and
+`progress.svg` moves one bar 25 px right. That is the bucket shift and nothing
+else: no rendered text changed and the file is the same length.
+
+**Verification at `2321301`.**
+
+- `ruff check .` and `ruff format --check .`: clean, 57 files.
+- `mypy --strict` under the project config: clean, 34 source files.
+- `python scripts/check_ids.py`: no duplicate or colliding identifiers.
+- `python -m pytest tests/ --collect-only -q -o addopts=""`: **438 collected**,
+  registered as NC-021 at this commit.
+- `python -m pytest tests/ -q`: **438 passed**, 0 failed.
+- Rendered over the live archive at `cb7a8c2`, `--now 2026-09-10T05:08:31Z`,
+  with the shipped floors: 994 documents, 563 states, 43.4% duplication, three
+  ticks at x = 788.57, 816.79 and 845.00 on staggered baselines 207, 222 and
+  237, every text node inside the canvas by the module's own estimator, XML
+  well-formed, and no `<script>`, `<foreignObject>`, external `href`, `url(` or
+  `@import`.
+
+**Still open**, unchanged: FR-8 on `calibration-data` with the both-themes
+screenshot, the ADR-025 routing to Dr. Akba, and a second reviewer approval. The
+remaining review items are nits and are deliberately not taken here: the two
+em dashes in the rendered SVG, `index_head` not identifying a row while
+`snapshot_filename` stays non-unique, and the misfiled 2026-07 snapshot, which
+is an ADR-020 defect predating this pipeline and wants its own issue.
+
 ## Related docs
 
 - Issue #48 — pipeline-health dashboard
