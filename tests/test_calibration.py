@@ -588,3 +588,114 @@ class TestBuildHistoricalWindow:
             poller_module._build_historical_window(
                 "2026-08-17T20:00:00Z", "2026-08-17T18:00:00Z", "0.5"
             )
+
+
+class TestSweepOutcome:
+    """A sweep that retrieves nothing must not exit 0. See SweepOutcome."""
+
+    @staticmethod
+    def _window() -> list[datetime]:
+        now = datetime.now(UTC)
+        return [now - timedelta(hours=h) for h in (3, 2, 1)]
+
+    def test_counts_requested_returned_and_saved(
+        self,
+        tmp_storage: CalibrationStorage,
+        make_mock_service: Callable[..., MagicMock],
+        make_mock_properties: Callable[..., MagicMock],
+    ) -> None:
+        window = self._window()
+        # One usable document per instant, each older than the instant asked for
+        # so the "service ignored datetime" guard does not reject it.
+        service = make_mock_service(
+            properties_side_effect=[
+                make_mock_properties(),
+                *(
+                    make_mock_properties(last_update_date=ts - timedelta(minutes=5))
+                    for ts in window
+                ),
+            ]
+        )
+        outcome = poll_once(
+            ["ibm_test"],
+            tmp_storage,
+            historical_window=window,
+            service_factory=lambda: service,
+        )
+        assert outcome.requested == 3
+        assert outcome.returned == 3
+        assert outcome.saved == 3
+
+    def test_a_sweep_that_returns_nothing_is_not_a_success(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        make_mock_service: Callable[..., MagicMock],
+        make_mock_properties: Callable[..., MagicMock],
+    ) -> None:
+        """The failure this guard exists for: every instant declined, exit 0 before."""
+        window = self._window()
+        service = make_mock_service(
+            properties_side_effect=[make_mock_properties(), *(None for _ in window)]
+        )
+        monkeypatch.setattr(poller_module, "_default_service_factory", lambda **kw: service)
+        rc = main(
+            [
+                "--backend",
+                "ibm_test",
+                "--data-dir",
+                str(tmp_path / "data"),
+                "--log-dir",
+                str(tmp_path / "logs"),
+                "--historical",
+                window[0].isoformat(),
+                window[-1].isoformat(),
+                "1",
+            ]
+        )
+        assert rc == 2
+
+    def test_a_sweep_that_saves_nothing_but_returns_documents_is_a_success(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        make_mock_service: Callable[..., MagicMock],
+        make_mock_properties: Callable[..., MagicMock],
+    ) -> None:
+        """Idempotency, which is the whole point: a re-sweep saves nothing and is fine.
+
+        This is why the guard counts documents returned rather than documents
+        saved. Gating on saved would fail every healthy second sweep.
+        """
+        window = self._window()
+        stamp = window[0] - timedelta(minutes=5)
+        service = make_mock_service(
+            properties_side_effect=[
+                make_mock_properties(last_update_date=stamp),
+                *(make_mock_properties(last_update_date=stamp) for _ in window),
+            ]
+        )
+        monkeypatch.setattr(poller_module, "_default_service_factory", lambda **kw: service)
+        argv = [
+            "--backend",
+            "ibm_test",
+            "--data-dir",
+            str(tmp_path / "data"),
+            "--log-dir",
+            str(tmp_path / "logs"),
+            "--historical",
+            window[0].isoformat(),
+            window[-1].isoformat(),
+            "1",
+        ]
+        assert main(argv) == 0
+
+    def test_a_poll_with_no_sweep_reports_nothing_requested(
+        self,
+        tmp_storage: CalibrationStorage,
+        make_mock_service: Callable[..., MagicMock],
+    ) -> None:
+        """The guard must never fire on the ordinary hourly path."""
+        outcome = poll_once(["ibm_test"], tmp_storage, service_factory=lambda: make_mock_service())
+        assert outcome.requested == 0
+        assert outcome.returned == 0
