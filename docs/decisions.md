@@ -1198,7 +1198,25 @@ layout this extends), `.github/workflows/calibration-poll.yml`,
     health/progress.svg
 
 The state index is append-only **in the poll path**, and records one qubit-block
-canonical digest for each newly filed snapshot. The dispatched backfill may
+canonical digest for each newly filed snapshot. That digest normalises away each
+parameter record's own `date`, by the same rule and the same code as the payload
+digest this ADR already relies on: within `properties.qubits` a `date` says when
+a value was measured, not what was measured, so a re-measurement that reproduced
+the identical value is one device state and a history-endpoint re-stamp is
+provenance. The full document digest keeps `date`, deliberately and unchanged,
+because the collision path compares two live payloads and any difference there
+belongs in front of a human. **One row of this index therefore means "a device
+state distinct in its measured values", not "a byte-distinct qubit block".**
+
+`is_new_state` records what the poller could see when it wrote the row and is
+not authoritative about chronology: a dispatched historical sweep appends
+documents older than rows already present, and the poller marks a state new
+whenever its digest is absent from the rows so far. Readers of this index must
+derive first sightings from `last_update_date`, as the metrics engine does,
+rather than trusting the column. The column stays because it records the
+observation and because a malformed one still means the file cannot be trusted.
+
+The dispatched backfill may
 regenerate it once in `last_update_date` order (`--rebuild`); this is the only
 permitted rewrite and exists because the hourly poller starts appending the
 moment this merges, which closes the append path for history and would leave

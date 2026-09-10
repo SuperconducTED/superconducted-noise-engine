@@ -284,6 +284,101 @@ workflow has run in GitHub Actions, `health/` does not yet exist on
 backfill dispatch, a no-change render producing no commit, and the SVG shown in
 both GitHub themes — still requires a real run and a push.
 
+### As of `7ec173f` (2026-09-10) — PR #70 third review round
+
+The two blocks above are left exactly as measured on their dates. This section
+records the state after the round-3 fixes, per the append-not-rewrite
+convention.
+
+**The blocker: one canonicalisation for the qubit digest.**
+
+`qubit_digest` hashed each parameter's `date`. `_payload_body`, eleven lines
+above it in the same module, drops it — that is #80 (`0a4271b`), which reached
+this branch through the `4bea68c` merge and never got applied to the qubits
+scope, although FR-1 asks that scope to reuse the same canonicalisation. The
+module therefore held two contradictory answers to one question.
+
+The question is not a matter of taste, because the two scopes ask different
+things. The full document digest drives the collision path, where two live
+payloads are compared and *any* difference belongs in front of a human, so it
+keeps `date`. The qubits scope counts **device states**, where a re-measurement
+that reproduced the identical value is the same state and a history-endpoint
+re-stamp is provenance. Counting a re-stamp as a second state inflates
+`states_total` against a floor whose own caveat already says distinct is only an
+upper bound on independent.
+
+It was reachable, not theoretical: the poll workflow supports historical sweeps
+(`historical_start`, `IS_BACKFILL`), the history endpoint re-stamps the
+parameter records it synthesises, and `health/state-index.tsv` is append-only,
+so a swept document filed as a phantom second state could not be repaired
+without a full `--rebuild` that would reproduce it.
+
+Measured before changing anything, over 60 consecutive documents at `f0930b9`:
+
+| Definition | Distinct states | Pairs equal only after stripping |
+| --- | --- | --- |
+| shipped, `date` hashed | 34 | — |
+| aligned, `date` stripped | 34 | 0 |
+
+The sample is one contiguous run, 6.7% of the 894 documents at that ref, and it
+shows 43.3% duplication against NC-025's 43.6%, so it is representative of the
+thing being measured. It is an indication that the alignment does not move the
+count, **not** a re-run of the issue §48 step-4 reconciliation. See the NC-025
+note: that reconciliation was performed under the dates-included definition and
+is re-owed under this one, from the dispatched backfill.
+
+**The major: trailing-window metrics no longer depend on append order.**
+
+`build_metrics` read `is_new_state` out of the index, and that column is decided
+by append order, not chronology. A sweep files documents older than rows the
+hourly poller already appended; each digest not yet present is recorded
+`is_new_state=1` even where a later-dated row already carried that state. The
+failing case is this dashboard's own headline use, issue §11 point 2: the
+72-hour strip exposes a stall, the operator sweeps the gap, and the swept rows
+land *inside* the trailing windows and over-report the recovery.
+
+`first_sightings` now derives the earliest `last_update_date` per digest, so
+`states_added_24h`, `states_added_7d`, `states_per_day_7d`,
+`new_states_per_day_30d` and `hours_since_last_new_state` are all independent of
+append order and no `--rebuild` is owed after a sweep. `index_head` is the one
+field that still moves with order, which is correct: FR-4 defines it as the last
+row consumed, so it is provenance for the render rather than a measurement.
+
+One consequence worth stating plainly, because it looks like a regression and is
+not: filling a gap can make the archive read *staler*. If a swept document shows
+the device was already in a state six hours ago that the poller first recorded
+two hours ago, `hours_since_last_new_state` becomes 6, not 2. The 2 was an
+artefact of the gap. `TestHistoricalSweep` pins this alongside the guard that a
+genuine acquisition still counts.
+
+`file_snapshots.sh` warns when it appends a row older than the index maximum.
+The metrics no longer depend on the column, but the column itself is still wrong
+after a sweep and anything else reading the index has to know.
+
+**Verification at `7ec173f`.**
+
+- `ruff check .` and `ruff format --check .` over the repository — clean, 57 files.
+- `mypy --strict` on the three scripts — clean.
+- `python scripts/check_ids.py` — no duplicate or colliding identifiers.
+- `python -m pytest tests/ --collect-only -q -o addopts=""` — **419 collected**,
+  registered as NC-021 at this commit.
+- `python -m pytest tests/ -q` — **419 passed**, 0 failed, 46.6 s. Note this
+  differs from the round-2 block: the 8 `tests/test_file_snapshots.py` failures
+  recorded there did not reproduce, in a clean interpreter at a short path
+  rather than the repository `.venv`. They were an environment artefact, as that
+  block said, and `ubuntu-latest` remains the authority for the pass count.
+- `bash -n scripts/file_snapshots.sh scripts/push_with_retry.sh` — both parse.
+
+**Still not verified, and still not verifiable from a local checkout.** The
+section 10 evidence that was outstanding after round 2 is unchanged by this
+round: `calibration-data` has no `health/` tree, its `README.md` still carries
+the dead "PR ticket #002" reference FR-8 exists to remove, and no Actions run
+has yet shown an *unchanged* render producing no commit — run `34404140171`
+skipped its commit step through the cold-start exit-3 guard, which is a
+different path. The ADR-025 amendment also still needs the out-of-band routing
+`docs/team.md` requires, and that routing now has more to carry: this round
+changes what a row in `health/state-index.tsv` means.
+
 ## Related docs
 
 - Issue #48 — pipeline-health dashboard
