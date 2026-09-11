@@ -1261,6 +1261,35 @@ The one-time backfill is explicitly dispatched and is the only health operation
 permitted to walk `snapshots/`. This amendment preserves ADR-020 snapshot
 semantics and ADR-025 ledger decisions.
 
+### ADR-025 amendment status, 2026-09-10: advisor sign-off outstanding
+
+**The 2026-09-05 amendment above is recorded but not ratified. Its status is Open.**
+
+`docs/team.md` makes Dr. Akba's out-of-band sign-off a precondition for a change that
+touches ADR ledger semantics, and this amendment is one: it changes what a row in
+`health/state-index.tsv` means, and with it the definition behind NC-025. That sign-off
+has not been obtained. PR #70 merged without it on 2026-09-10.
+
+This note exists so the deviation is visible to someone reading this file who never sees
+that pull request. The amendment text above is left exactly as written; a recorded gap is
+a record and a silence is not.
+
+| | |
+| --- | --- |
+| **Circulated** | Not yet. Brief written as `docs/advisor/2026-09-09-akba-brief/06-olcum-birimi.html`, riding with the 2026-09-09 batch |
+| **Travels with** | PR #55's `duplicate-partial` amendment, item 2 of the register. The same question from the other side: what does a ledger record? |
+| **Recorded in** | `docs/advisor/2026-09-03-decisions-from-akba.md`, item 14, appended 2026-09-10 |
+| **Owner** | Issue #84, which owns the advisor loop and the decisions register |
+| **Decision-by** | 2026-09-23 |
+| **Reversal cost** | One `workflow_dispatch` with `backfill=true rebuild=true`, one line in `canonical_snapshot_digest.py`, no data loss |
+
+Nothing on the archive is at risk while this is open: the definition change merges zero
+states at all three measured refs (894 documents to 504 states, 936 to 537, 994 to 563),
+so NC-025 and NC-047 both stand as registered.
+
+This status line is removed only by appending the answer to the decisions register. It is
+not cleared by a review, a merge, or the passage of the decision-by date.
+
 ---
 
 ## ADR-027 — Calibration training target
