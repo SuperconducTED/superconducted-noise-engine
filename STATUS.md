@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-10 08:15 UTC · main at `d0d0b073` (2026-09-10) · 20 days to 2026-09-30_
+_Generated 2026-09-11 05:41 UTC · main at `75dfdae3` (2026-09-10) · 19 days to 2026-09-30_
 
 
 ## Milestones
@@ -29,12 +29,12 @@ _Generated 2026-09-10 08:15 UTC · main at `d0d0b073` (2026-09-10) · 20 days to
 - ❌ Feature-survey TSV committed
   - _Exists as docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv inside PR #68; not on main until #68 merges._
 
-### ❌ M2 · First measurements, target 2026-09-18 (0/5)
+### 🟡 M2 · First measurements, target 2026-09-18 (1/5)
 
 - ❌ ADR-019 ablation executed with its table (#62)
 - ❌ Gradient derivations and training/gradients.py (#61)
-- ❌ Pipeline-health dashboard live (#48)
-- 🟡 Scheduled sweep live (#49)
+- 🟡 Pipeline-health dashboard live (#48)
+- ✅ Scheduled sweep live (#49)
 - ❌ Trainer LSE stage passing on synthetic + anchored-baseline data
   - _#60 has no branch or PR yet. Its contract dependency (#57) merged 2026-09-08, so it is startable._
 
@@ -66,8 +66,8 @@ _Generated 2026-09-10 08:15 UTC · main at `d0d0b073` (2026-09-10) · 20 days to
 
 **Baha Jarad** (@BahaJarad)
 
-1. Start #48: Pipeline-health dashboard
-   - Its prerequisite merged 2026-09-02 and #63 cannot start its FR-1 half until the digest body is settled.
+1. Unstick PR #94 for #48: Pipeline-health dashboard
+   - No approving review yet: main's ruleset requires one.
 1. Start #66: Vectorizer returns µs where the repo assumes s
    - No dependencies in either direction, and it blocks running the shipped pipeline on real archived data, which phase 3 does throughout. On a real snapshot the ratified 3x3x3 grid fires at exactly zero and the bootstrap pipeline raises ZeroDivisionError.
 
@@ -117,7 +117,9 @@ _Generated 2026-09-10 08:15 UTC · main at `d0d0b073` (2026-09-10) · 20 days to
 
 **#58: Certify the benchmark instruments** (@bengisucvd)
 
+- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [high] Still a draft: CI and reviewers will not treat it as ready.
+- [high] Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result.
 - [high] No approving review yet: main's ruleset requires one.
 - [medium] Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
 
@@ -133,12 +135,8 @@ _Generated 2026-09-10 08:15 UTC · main at `d0d0b073` (2026-09-10) · 20 days to
 
 **#48: Pipeline-health dashboard** (@BahaJarad)
 
-- [high] Decision 3: the --scope qubits digest body must be locked before FR-1 is written, because #63 consumes it.
-
-**#49: Scheduled backfill sweep** (@mertefesensoy)
-
 - [high] No approving review yet: main's ruleset requires one.
-- [low] The plan raises its priority per #54 but its own body still reads priority:low and 'pending Baha's confirmation'.
+- [high] Decision 3: the --scope qubits digest body must be locked before FR-1 is written, because #63 consumes it.
 
 **#56: Clear the queue, keep the records honest** (@mertefesensoy)
 
@@ -167,6 +165,7 @@ _Generated 2026-09-10 08:15 UTC · main at `d0d0b073` (2026-09-10) · 20 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-11 | 9/28 | 10 | 3 | 5 | +1 milestone gate (8 to 9 of 28); M2 0/5 to 1/5; #48 Pipeline-health dashboard: ready to start to in review; #49 Scheduled backfill sweep: in review to closed; main moved to 75dfdae3 |
 | 2026-09-10 | 8/28 | 11 | 3 | 5 | +1 milestone gate (7 to 8 of 28); M0 6/8 to 7/8; #45 Polling cadence no longer limits the dataset: ready to start to closed; #48 Pipeline-health dashboard: in review to ready to start; #49 Scheduled backfill sweep: ready to start to in review; main moved to d0d0b073 |
 | 2026-09-09 | 7/28 | 12 | 3 | 5 | +1 milestone gate (6 to 7 of 28); M0 5/8 to 6/8; #53 Backfill 14 recoverable documents: in review to closed; #57 Training contract: ADR-027, TSKTrainer ABC, training/targets.py: in review to ready to start; main moved to 5f935ea1 |
 | 2026-09-08 | 6/28 | 11 | 5 | 5 | first record |

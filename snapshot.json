@@ -1,9 +1,9 @@
 {
-  "generated": "2026-09-10 08:15 UTC",
+  "generated": "2026-09-11 05:41 UTC",
   "main": {
-    "sha": "d0d0b073",
+    "sha": "75dfdae3",
     "date": "2026-09-10",
-    "msg": "Merge pull request #70 from SuperconducTED/feature/pipeline-health-dashboard",
+    "msg": "Merge pull request #90 from SuperconducTED/mert/issue-49-sweep",
     "adr": {
       "ADR-001": "Accepted",
       "ADR-002": "Accepted",
@@ -172,7 +172,7 @@
           "createdAt": "2026-09-06T21:11:52Z",
           "headRefName": "bengisu/issue-58-benchmark-certification",
           "isDraft": true,
-          "mergeable": "UNKNOWN",
+          "mergeable": "CONFLICTING",
           "mergedAt": null,
           "number": 79,
           "reviewDecision": "REVIEW_REQUIRED",
@@ -245,7 +245,7 @@
           ],
           "checks_newest": "2026-09-06T21:11",
           "checks_failing": [],
-          "checks_stale_vs_main": false
+          "checks_stale_vs_main": true
         }
       ],
       "merged_pr": null,
@@ -262,6 +262,14 @@
         {
           "severity": "high",
           "text": "Still a draft: CI and reviewers will not treat it as ready."
+        },
+        {
+          "severity": "critical",
+          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
+        },
+        {
+          "severity": "high",
+          "text": "Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result."
         },
         {
           "severity": "high",
@@ -693,13 +701,154 @@
       "title": "Pipeline-health dashboard on calibration-data: per-poll device-state telemetry + SVG readout, so a scheduler collapse shows in a day instead of a quarter",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/48",
       "issue_state": "OPEN",
-      "state": "ready",
-      "all_prs": [],
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [
+            {
+              "id": "I_kwDOSW8yNc8AAAABO3IFfg",
+              "number": 48,
+              "repository": {
+                "id": "R_kgDOSW8yNQ",
+                "name": "superconducted-noise-engine",
+                "owner": {
+                  "id": "O_kgDOENg1ug",
+                  "login": "SuperconducTED"
+                }
+              },
+              "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/48"
+            }
+          ],
+          "createdAt": "2026-09-10T20:49:11Z",
+          "headRefName": "mert/issue-48-akba-handoff",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 94,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "docs: build the ADR-025 advisor handoff the deferral said already existed (#48)",
+          "updatedAt": "2026-09-10T21:29:18Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/94",
+          "headRefOid": "fbf33c5618485fd5401b80babb5892625bd97a06",
+          "additions": 511,
+          "deletions": 3,
+          "file_count": 5,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T20:50"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T20:50"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T20:50"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T20:50"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T20:50"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T20:51"
+            }
+          ],
+          "checks_newest": "2026-09-10T20:51",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        },
+        {
+          "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-09-10T20:58:34Z",
+          "headRefName": "mert/issue-48-threshold-rows",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 95,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "docs: register issue #48 §7.3's thresholds, and the distributions behind them",
+          "updatedAt": "2026-09-10T21:17:54Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/95",
+          "headRefOid": "fd66e4b7b21a2a521bdff1970a2a093c1bed4f90",
+          "additions": 556,
+          "deletions": 1,
+          "file_count": 4,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T21:00"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T21:00"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T21:00"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T21:00"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T21:00"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-10T21:00"
+            }
+          ],
+          "checks_newest": "2026-09-10T21:00",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
       "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
+        {
+          "severity": "high",
+          "text": "No approving review yet: main's ruleset requires one."
+        },
         {
           "kind": "signoff",
           "text": "Decision 3: the --scope qubits digest body must be locked before FR-1 is written, because #63 consumes it.",
@@ -711,7 +860,7 @@
         49
       ],
       "notes_info": [],
-      "pr": null
+      "pr": 94
     },
     {
       "id": 49,
@@ -740,155 +889,33 @@
       "why_now": null,
       "title": "Scheduled backfill sweep: make the pipeline tolerate the Actions scheduler instead of depending on it",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/49",
-      "issue_state": "OPEN",
-      "state": "in_review",
-      "all_prs": [
-        {
-          "author": {
-            "id": "U_kgDOCJLpDw",
-            "is_bot": false,
-            "login": "mertefesensoy",
-            "name": "Mert Efe Şensoy"
-          },
-          "closingIssuesReferences": [],
-          "createdAt": "2026-09-10T05:24:56Z",
-          "headRefName": "mert/issue-49-sweep",
-          "isDraft": false,
-          "mergeable": "UNKNOWN",
-          "mergedAt": null,
-          "number": 90,
-          "reviewDecision": "REVIEW_REQUIRED",
-          "state": "OPEN",
-          "title": "feat: daily calibration sweep, and make an empty sweep fail loudly (#49)",
-          "updatedAt": "2026-09-10T05:33:02Z",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/90",
-          "headRefOid": "95ada98e3e90c3e6f6cde1d878535bdac4a646a9",
-          "additions": 485,
-          "deletions": 5,
-          "file_count": 7,
-          "latest_reviews": [],
-          "looked_since": [],
-          "checks": [
-            {
-              "name": "test (3.11)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:25"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:25"
-            },
-            {
-              "name": "Analyze (actions)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:25"
-            },
-            {
-              "name": "test (3.12)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:25"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:25"
-            },
-            {
-              "name": "CodeQL",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:25"
-            }
-          ],
-          "checks_newest": "2026-09-10T05:25",
-          "checks_failing": [],
-          "checks_stale_vs_main": false
+      "issue_state": "CLOSED",
+      "state": "done",
+      "all_prs": [],
+      "merged_pr": {
+        "author": {
+          "id": "U_kgDOCJLpDw",
+          "is_bot": false,
+          "login": "mertefesensoy",
+          "name": "Mert Efe Şensoy"
         },
-        {
-          "author": {
-            "id": "U_kgDOCJLpDw",
-            "is_bot": false,
-            "login": "mertefesensoy",
-            "name": "Mert Efe Şensoy"
-          },
-          "closingIssuesReferences": [
-            {
-              "id": "I_kwDOSW8yNc8AAAABO3R2Rw",
-              "number": 49,
-              "repository": {
-                "id": "R_kgDOSW8yNQ",
-                "name": "superconducted-noise-engine",
-                "owner": {
-                  "id": "O_kgDOENg1ug",
-                  "login": "SuperconducTED"
-                }
-              },
-              "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/49"
-            }
-          ],
-          "createdAt": "2026-09-10T05:11:26Z",
-          "headRefName": "mert/issue-49-poll-cron-entries",
-          "isDraft": false,
-          "mergeable": "UNKNOWN",
-          "mergedAt": null,
-          "number": 89,
-          "reviewDecision": "REVIEW_REQUIRED",
-          "state": "OPEN",
-          "title": "ci: four hourly poll crons instead of one, as an #49 stopgap",
-          "updatedAt": "2026-09-10T05:33:00Z",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/89",
-          "headRefOid": "5fb38f54e2500db249c0d920a27931edeca38a87",
-          "additions": 19,
-          "deletions": 0,
-          "file_count": 1,
-          "latest_reviews": [],
-          "looked_since": [],
-          "checks": [
-            {
-              "name": "test (3.11)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:11"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:11"
-            },
-            {
-              "name": "Analyze (actions)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:11"
-            },
-            {
-              "name": "test (3.12)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:11"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:11"
-            },
-            {
-              "name": "CodeQL",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T05:12"
-            }
-          ],
-          "checks_newest": "2026-09-10T05:12",
-          "checks_failing": [],
-          "checks_stale_vs_main": false
-        }
-      ],
-      "merged_pr": null,
+        "closingIssuesReferences": [],
+        "createdAt": "2026-09-10T05:24:56Z",
+        "headRefName": "mert/issue-49-sweep",
+        "isDraft": false,
+        "mergeable": "UNKNOWN",
+        "mergedAt": "2026-09-10T20:32:35Z",
+        "number": 90,
+        "reviewDecision": "APPROVED",
+        "state": "MERGED",
+        "title": "feat: daily calibration sweep, and make an empty sweep fail loudly (#49)",
+        "updatedAt": "2026-09-10T20:34:08Z",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/90"
+      },
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
-        {
-          "severity": "high",
-          "text": "No approving review yet: main's ruleset requires one."
-        },
         {
           "kind": "assignment",
           "text": "The plan raises its priority per #54 but its own body still reads priority:low and 'pending Baha's confirmation'.",
@@ -899,7 +926,7 @@
         54
       ],
       "notes_info": [],
-      "pr": 90
+      "pr": null
     },
     {
       "id": 64,
@@ -1288,13 +1315,7 @@
       "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
-      "unmet_soft": [
-        {
-          "kind": "issue",
-          "id": 49,
-          "what": "follow-up to the sweep"
-        }
-      ],
+      "unmet_soft": [],
       "blockers": [],
       "declared_unblocks": [],
       "notes_info": [],
@@ -1597,7 +1618,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -5
+      "days_left": -6
     },
     {
       "id": "M1",
@@ -1639,7 +1660,7 @@
       "done": 1,
       "total": 5,
       "status": "partial",
-      "days_left": 1
+      "days_left": 0
     },
     {
       "id": "M2",
@@ -1665,12 +1686,12 @@
         },
         {
           "text": "Pipeline-health dashboard live (#48)",
-          "status": "not_done",
+          "status": "partial",
           "note": null
         },
         {
           "text": "Scheduled sweep live (#49)",
-          "status": "partial",
+          "status": "done",
           "note": null
         },
         {
@@ -1679,10 +1700,10 @@
           "note": "#60 has no branch or PR yet. Its contract dependency (#57) merged 2026-09-08, so it is startable."
         }
       ],
-      "done": 0,
+      "done": 1,
       "total": 5,
-      "status": "not_done",
-      "days_left": 8
+      "status": "partial",
+      "days_left": 7
     },
     {
       "id": "M3",
@@ -1730,7 +1751,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": 15
+      "days_left": 14
     },
     {
       "id": "M4",
@@ -1768,7 +1789,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": 20
+      "days_left": 19
     }
   ]
 }

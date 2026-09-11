@@ -1,0 +1,91 @@
+{
+  "adr": {
+    "ADR-001": "Accepted",
+    "ADR-002": "Accepted",
+    "ADR-003": "Accepted",
+    "ADR-004": "Accepted",
+    "ADR-005": "Accepted",
+    "ADR-006": "Accepted",
+    "ADR-007": "Open",
+    "ADR-008": "Open / Deferred",
+    "ADR-009": "Open",
+    "ADR-010": "Accepted",
+    "ADR-011": "Open (effectively chosen for each path)",
+    "ADR-012": "Accepted",
+    "ADR-013": "Open / Deferred",
+    "ADR-014": "Deferred",
+    "ADR-015": "Deferred",
+    "ADR-016": "Deferred",
+    "ADR-017": "Accepted",
+    "ADR-018": "Accepted",
+    "ADR-019": "Open",
+    "ADR-020": "Accepted",
+    "ADR-021": "Accepted on the constraint · Open on variance-injection design",
+    "ADR-022": "Accepted",
+    "ADR-023": "Accepted",
+    "ADR-024": "Open",
+    "ADR-025": "Accepted",
+    "ADR-027": "Open"
+  },
+  "counts": {
+    "blocked": 5,
+    "done": 3,
+    "in_review": 3,
+    "ready": 10
+  },
+  "date": "2026-09-11",
+  "gates_done": 9,
+  "gates_total": 28,
+  "generated": "2026-09-11 05:41 UTC",
+  "main_sha": "75dfdae3",
+  "milestones": {
+    "M0": {
+      "done": 7,
+      "status": "partial",
+      "total": 8
+    },
+    "M1": {
+      "done": 1,
+      "status": "partial",
+      "total": 5
+    },
+    "M2": {
+      "done": 1,
+      "status": "partial",
+      "total": 5
+    },
+    "M3": {
+      "done": 0,
+      "status": "not_done",
+      "total": 6
+    },
+    "M4": {
+      "done": 0,
+      "status": "not_done",
+      "total": 4
+    }
+  },
+  "tickets": {
+    "45": "done",
+    "48": "in_review",
+    "49": "done",
+    "53": "done",
+    "54": "ready",
+    "56": "ready",
+    "57": "ready",
+    "58": "in_review",
+    "59": "in_review",
+    "60": "ready",
+    "61": "ready",
+    "62": "blocked",
+    "63": "blocked",
+    "64": "blocked",
+    "65": "blocked",
+    "66": "ready",
+    "73": "ready",
+    "74": "ready",
+    "75": "ready",
+    "76": "blocked",
+    "84": "ready"
+  }
+}
