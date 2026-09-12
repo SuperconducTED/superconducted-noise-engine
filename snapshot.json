@@ -1,9 +1,9 @@
 {
-  "generated": "2026-09-11 05:41 UTC",
+  "generated": "2026-09-12 05:41 UTC",
   "main": {
-    "sha": "75dfdae3",
-    "date": "2026-09-10",
-    "msg": "Merge pull request #90 from SuperconducTED/mert/issue-49-sweep",
+    "sha": "004e14ed",
+    "date": "2026-09-11",
+    "msg": "Merge pull request #95 from SuperconducTED/mert/issue-48-threshold-rows",
     "adr": {
       "ADR-001": "Accepted",
       "ADR-002": "Accepted",
@@ -172,7 +172,7 @@
           "createdAt": "2026-09-06T21:11:52Z",
           "headRefName": "bengisu/issue-58-benchmark-certification",
           "isDraft": true,
-          "mergeable": "CONFLICTING",
+          "mergeable": "UNKNOWN",
           "mergedAt": null,
           "number": 79,
           "reviewDecision": "REVIEW_REQUIRED",
@@ -245,7 +245,7 @@
           ],
           "checks_newest": "2026-09-06T21:11",
           "checks_failing": [],
-          "checks_stale_vs_main": true
+          "checks_stale_vs_main": false
         }
       ],
       "merged_pr": null,
@@ -262,14 +262,6 @@
         {
           "severity": "high",
           "text": "Still a draft: CI and reviewers will not treat it as ready."
-        },
-        {
-          "severity": "critical",
-          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
-        },
-        {
-          "severity": "high",
-          "text": "Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result."
         },
         {
           "severity": "high",
@@ -332,7 +324,7 @@
           "createdAt": "2026-09-04T13:03:49Z",
           "headRefName": "feature/issue-59-parameterization",
           "isDraft": true,
-          "mergeable": "CONFLICTING",
+          "mergeable": "UNKNOWN",
           "mergedAt": null,
           "number": 68,
           "reviewDecision": "APPROVED",
@@ -393,7 +385,7 @@
           ],
           "checks_newest": "2026-09-08T19:40",
           "checks_failing": [],
-          "checks_stale_vs_main": true
+          "checks_stale_vs_main": false
         }
       ],
       "merged_pr": null,
@@ -404,14 +396,6 @@
         {
           "severity": "high",
           "text": "Still a draft: CI and reviewers will not treat it as ready."
-        },
-        {
-          "severity": "critical",
-          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
-        },
-        {
-          "severity": "high",
-          "text": "Its green checks last ran 2026-09-08T19:40 against a main that has moved since; they are not evidence about the merge result."
         }
       ],
       "declared_unblocks": [
@@ -644,16 +628,10 @@
       "title": "Training-set builder: one row per distinct device state from a pinned archive ref, so the trainer is fit on the unit NC-012 actually counts and the results doc can name the commit it read",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/63",
       "issue_state": "OPEN",
-      "state": "blocked",
+      "state": "ready",
       "all_prs": [],
       "merged_pr": null,
-      "unmet_hard": [
-        {
-          "kind": "issue",
-          "id": 48,
-          "what": "FR-1's --scope qubits digest (his own ticket; the digest body must be locked before FR-1 is written)"
-        }
-      ],
+      "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [
         {
@@ -691,164 +669,40 @@
           "severity": "high"
         }
       ],
-      "unblocks": [
-        63
-      ],
+      "unblocks": [],
       "why_now": "Its prerequisite merged 2026-09-02 and #63 cannot start its FR-1 half until the digest body is settled.",
       "pr_hint": [
         70
       ],
       "title": "Pipeline-health dashboard on calibration-data: per-poll device-state telemetry + SVG readout, so a scheduler collapse shows in a day instead of a quarter",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/48",
-      "issue_state": "OPEN",
-      "state": "in_review",
-      "all_prs": [
-        {
-          "author": {
-            "id": "U_kgDOCJLpDw",
-            "is_bot": false,
-            "login": "mertefesensoy",
-            "name": "Mert Efe Şensoy"
-          },
-          "closingIssuesReferences": [
-            {
-              "id": "I_kwDOSW8yNc8AAAABO3IFfg",
-              "number": 48,
-              "repository": {
-                "id": "R_kgDOSW8yNQ",
-                "name": "superconducted-noise-engine",
-                "owner": {
-                  "id": "O_kgDOENg1ug",
-                  "login": "SuperconducTED"
-                }
-              },
-              "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/48"
-            }
-          ],
-          "createdAt": "2026-09-10T20:49:11Z",
-          "headRefName": "mert/issue-48-akba-handoff",
-          "isDraft": false,
-          "mergeable": "MERGEABLE",
-          "mergedAt": null,
-          "number": 94,
-          "reviewDecision": "REVIEW_REQUIRED",
-          "state": "OPEN",
-          "title": "docs: build the ADR-025 advisor handoff the deferral said already existed (#48)",
-          "updatedAt": "2026-09-10T21:29:18Z",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/94",
-          "headRefOid": "fbf33c5618485fd5401b80babb5892625bd97a06",
-          "additions": 511,
-          "deletions": 3,
-          "file_count": 5,
-          "latest_reviews": [],
-          "looked_since": [],
-          "checks": [
-            {
-              "name": "test (3.11)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T20:50"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T20:50"
-            },
-            {
-              "name": "Analyze (actions)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T20:50"
-            },
-            {
-              "name": "test (3.12)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T20:50"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T20:50"
-            },
-            {
-              "name": "CodeQL",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T20:51"
-            }
-          ],
-          "checks_newest": "2026-09-10T20:51",
-          "checks_failing": [],
-          "checks_stale_vs_main": false
+      "issue_state": "CLOSED",
+      "state": "done",
+      "all_prs": [],
+      "merged_pr": {
+        "author": {
+          "id": "U_kgDOCJLpDw",
+          "is_bot": false,
+          "login": "mertefesensoy",
+          "name": "Mert Efe Şensoy"
         },
-        {
-          "author": {
-            "id": "U_kgDOCJLpDw",
-            "is_bot": false,
-            "login": "mertefesensoy",
-            "name": "Mert Efe Şensoy"
-          },
-          "closingIssuesReferences": [],
-          "createdAt": "2026-09-10T20:58:34Z",
-          "headRefName": "mert/issue-48-threshold-rows",
-          "isDraft": false,
-          "mergeable": "MERGEABLE",
-          "mergedAt": null,
-          "number": 95,
-          "reviewDecision": "REVIEW_REQUIRED",
-          "state": "OPEN",
-          "title": "docs: register issue #48 §7.3's thresholds, and the distributions behind them",
-          "updatedAt": "2026-09-10T21:17:54Z",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/95",
-          "headRefOid": "fd66e4b7b21a2a521bdff1970a2a093c1bed4f90",
-          "additions": 556,
-          "deletions": 1,
-          "file_count": 4,
-          "latest_reviews": [],
-          "looked_since": [],
-          "checks": [
-            {
-              "name": "test (3.11)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T21:00"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T21:00"
-            },
-            {
-              "name": "Analyze (actions)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T21:00"
-            },
-            {
-              "name": "test (3.12)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T21:00"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T21:00"
-            },
-            {
-              "name": "CodeQL",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-10T21:00"
-            }
-          ],
-          "checks_newest": "2026-09-10T21:00",
-          "checks_failing": [],
-          "checks_stale_vs_main": false
-        }
-      ],
-      "merged_pr": null,
+        "closingIssuesReferences": [],
+        "createdAt": "2026-09-10T20:58:34Z",
+        "headRefName": "mert/issue-48-threshold-rows",
+        "isDraft": false,
+        "mergeable": "UNKNOWN",
+        "mergedAt": "2026-09-11T13:15:21Z",
+        "number": 95,
+        "reviewDecision": "APPROVED",
+        "state": "MERGED",
+        "title": "docs: register issue #48 §7.3's thresholds, and the distributions behind them",
+        "updatedAt": "2026-09-11T13:15:25Z",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/95"
+      },
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
-        {
-          "severity": "high",
-          "text": "No approving review yet: main's ruleset requires one."
-        },
         {
           "kind": "signoff",
           "text": "Decision 3: the --scope qubits digest body must be locked before FR-1 is written, because #63 consumes it.",
@@ -860,7 +714,7 @@
         49
       ],
       "notes_info": [],
-      "pr": 94
+      "pr": null
     },
     {
       "id": 49,
@@ -1618,7 +1472,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -6
+      "days_left": -7
     },
     {
       "id": "M1",
@@ -1660,7 +1514,7 @@
       "done": 1,
       "total": 5,
       "status": "partial",
-      "days_left": 0
+      "days_left": -1
     },
     {
       "id": "M2",
@@ -1686,7 +1540,7 @@
         },
         {
           "text": "Pipeline-health dashboard live (#48)",
-          "status": "partial",
+          "status": "done",
           "note": null
         },
         {
@@ -1700,10 +1554,10 @@
           "note": "#60 has no branch or PR yet. Its contract dependency (#57) merged 2026-09-08, so it is startable."
         }
       ],
-      "done": 1,
+      "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": 7
+      "days_left": 6
     },
     {
       "id": "M3",
@@ -1751,7 +1605,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": 14
+      "days_left": 13
     },
     {
       "id": "M4",
@@ -1789,7 +1643,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": 19
+      "days_left": 18
     }
   ]
 }
