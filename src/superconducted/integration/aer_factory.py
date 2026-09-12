@@ -38,6 +38,8 @@ Bootstrap status:
 from __future__ import annotations
 
 from collections.abc import Callable, Iterator, Sequence
+from math import isfinite
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -60,6 +62,42 @@ from ..types import CalibrationSnapshot
 # rate worth engineering for. A limit this generous therefore fails fast only
 # when the degeneracy is structural rather than an unlucky draw.
 DEFAULT_SEED_SEARCH_LIMIT: int = 64
+
+
+def _eligible_single_qubit_operations(
+    target: dict[str, Any] | None,
+) -> frozenset[tuple[str, tuple[int, ...]]]:
+    """Return calibrated physical operations eligible for single-qubit noise.
+
+    The serialized calibration target is authoritative: only operations with
+    a finite, strictly positive duration receive a channel. Invalid or missing
+    records are ignored so historical snapshots without target data fail
+    closed rather than attaching noise to virtual or control instructions.
+    """
+    if not isinstance(target, dict):
+        return frozenset()
+    operations = target.get("operations")
+    if not isinstance(operations, list):
+        return frozenset()
+
+    eligible: set[tuple[str, tuple[int, ...]]] = set()
+    for operation in operations:
+        if not isinstance(operation, dict):
+            continue
+        name = operation.get("name")
+        qargs = operation.get("qargs")
+        duration = operation.get("duration")
+        if not isinstance(name, str) or not name:
+            continue
+        if not isinstance(qargs, list) or len(qargs) != 1:
+            continue
+        if not isinstance(qargs[0], int) or isinstance(qargs[0], bool):
+            continue
+        if not isinstance(duration, (int, float)) or isinstance(duration, bool):
+            continue
+        if isfinite(duration) and duration > 0.0:
+            eligible.add((name, (qargs[0],)))
+    return frozenset(eligible)
 
 
 def is_identity_damping(crisp_params: npt.NDArray[np.float64]) -> bool:
@@ -196,7 +234,11 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
           now keeps callers correct when those land.
         """
 
+        eligible_operations = _eligible_single_qubit_operations(self._calibration.target)
+
         def error_provider(gate: Instruction, qubits: tuple[int, ...]) -> QuantumError | None:
+            if (gate.name, qubits) not in eligible_operations:
+                return None
             try:
                 return self._channel_projector.project(self._crisp_params, gate.name, qubits)
             except (NotImplementedError, ValueError):
