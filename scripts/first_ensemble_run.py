@@ -274,7 +274,7 @@ def _synthetic_snapshot() -> CalibrationSnapshot:
                 ]
             ]
         },
-        target={},
+        target={"operations": [{"name": "h", "qargs": [0], "duration": 24e-9}]},
         configuration={},
     )
 
