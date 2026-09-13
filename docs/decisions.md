@@ -321,6 +321,11 @@ are accumulated and a target-distribution definition exists.
 **Consequences**: Bootstrap's `from_grid` initializes consequents to
 zero. A model trained from scratch will need the trainer.
 
+> Revisited · 2026-09-07 · ADR-027 now provides a proposed calibration
+> target definition, so the second deferral condition is satisfied. The first
+> remains unmet: NC-025 records 504 distinct states, below the 630-state floor.
+> ADR-014 remains Deferred; no trainer implementation is accepted by this note.
+
 ---
 
 ## ADR-015 — Ensemble sampling mechanism
@@ -347,11 +352,13 @@ sampling lands later.
 
 **Status**: Deferred.
 
-**Context**: `simulate_engine` mean-aggregates counts at bootstrap.
+**Context**: `simulate_engine` sums counts element-wise at bootstrap
+(probability-equivalent to mean under normalized metrics).
 Interval-valued predictions need a different aggregation (e.g. min/max
 or quantile across members) to bracket real hardware behavior.
 
-**Decision (current)**: Mean aggregation now; revisit once ADR-015
+**Decision (current)**: Sum aggregation now, probability-equivalent to
+mean under normalized metrics; revisit once ADR-015
 delivers actual per-member variation worth bracketing.
 
 **Consequences**: Engine-vs-reference numbers at bootstrap are point
@@ -372,6 +379,18 @@ non-trivial.
 > `docs/architecture.md` (line 161) also describe the behavior as
 > "mean" — these are tracked as follow-up issues since they are outside
 > `docs/decisions.md`. Status remains Deferred.
+
+> Aligned · 2026-09-07 · Issue #25 Part 2. The Context and Decision text
+> above now describes current bootstrap aggregation as sum
+> (probability-equivalent to mean under normalized metrics), so the
+> 2026-05-25 note's opening sentence quotes the pre-alignment wording.
+> That note is left as written, per the dated-note convention. Both
+> follow-ups it tracks are closed by the same change: the `harness.py`
+> module docstring now matches `simulate_engine`'s own, and the
+> `docs/architecture.md` row now reads sum — that row is at line 166,
+> not the 161 recorded above. This aligns the DESCRIPTION only; the
+> mean-to-interval upgrade stays gated on ADR-015 and Status remains
+> Deferred.
 
 ---
 
@@ -426,6 +445,11 @@ follow-up will introduce
 `SkipStrategyVectorizer(CalibrationFeatureExtractor)` once a second
 consumer pattern emerges (e.g. when ANFIS training begins consuming
 vectorized features alongside the mean aggregates).
+
+> Promoted from draft to the ledger · 2026-06-19 · commit `105cf6c` (that
+> commit names no issue). The draft at
+> `docs/decisions/drafts/ADR-017-missing-per-qubit-calibration-fields-skip-strategy.md`
+> is retained as the authoring record; this ledger entry is canonical.
 
 ---
 
@@ -1164,3 +1188,188 @@ layout this extends), `.github/workflows/calibration-poll.yml`,
 
 > Extends ADR-020. `snapshots/` is unchanged; this entry adds
 > `ledger/` and `collisions/` alongside it.
+
+### ADR-025 amendment — 2026-09-05: pipeline-health tree
+
+`health/` is added as a third sibling tree on `calibration-data`:
+
+    health/state-index.tsv
+    health/metrics.json
+    health/progress.svg
+
+The state index is append-only **in the poll path**, and records one qubit-block
+canonical digest for each newly filed snapshot. That digest normalises away each
+parameter record's own `date`, by the same rule and the same code as the payload
+digest this ADR already relies on: within `properties.qubits` a `date` says when
+a value was measured, not what was measured, so a re-measurement that reproduced
+the identical value is one device state and a history-endpoint re-stamp is
+provenance. The full document digest keeps `date`, deliberately and unchanged,
+because the collision path compares two live payloads and any difference there
+belongs in front of a human. **One row of this index therefore means "a device
+state distinct in its measured values", not "a byte-distinct qubit block".**
+
+`is_new_state` records what the poller could see when it wrote the row and is
+not authoritative about chronology: a dispatched historical sweep appends
+documents older than rows already present, and the poller marks a state new
+whenever its digest is absent from the rows so far. Readers of this index must
+derive first sightings from `last_update_date`, as the metrics engine does,
+rather than trusting the column. The column stays because it records the
+observation and because a malformed one still means the file cannot be trusted.
+
+The dispatched backfill may
+regenerate it once in `last_update_date` order (`--rebuild`); this is the only
+permitted rewrite and exists because the hourly poller starts appending the
+moment this merges, which closes the append path for history and would leave
+`is_new_state` permanently mismarked.
+
+The generated JSON and SVG are derived only from the state index and ledger;
+scheduled rendering must not traverse `snapshots/`. Candidate training floors
+are configuration inputs supplied by the workflow and must be labelled in the
+rendered output; no floor value is a literal in the renderer. Each label names
+the register row it traces to, and the configured set must bracket the whole
+range that row reports rather than a part of it: the renderer scales the
+progress bar to the largest configured floor, so dropping the top of a measured
+range does not merely omit a tick, it makes the bar read fuller than the
+evidence supports.
+
+**`projected_days` and `projected_date` are not registrable claims.** They are a
+straight-line extrapolation of a single seven-day count and must never be cited
+in `docs/numerical-claims.md`, quoted as a date the project is working toward,
+or carried into a runbook expectation. NC-R002 is retired for being exactly
+this: a projected floor date that arrived with the gate unmet. The arithmetic is
+auditable and the inputs are published beside it, `states_added_7d` included, so
+a reader can see how much evidence the number rests on; that is the whole of
+what these two fields are for. `states_total`, `documents_total` and
+`duplication_ratio` are measurements and may be cited.
+
+The SVG carries **no clock reading**: every figure in it is a function of the
+committed index and ledger, plus the position of the two rolling windows FR-5
+mandates (the 72-hour poll strip and the 30-day acquisition sparkline).
+`generated_at` and the exact `hours_since_last_new_state` live in
+`metrics.json` alone, and the SVG renders the staleness as a band. This is what
+lets the health workflow commit only when rendered bytes change: a quiet
+archive reaches byte-stability within 30 days of its last new state, after
+which repeated renders produce no commit at all.
+
+`health/` is written by two workflows in separate concurrency groups, so their
+pushes can race. They resolve it by replaying onto the branch tip rather than
+by sharing a group, because a shared group lets a render cancel a queued poll
+and a cancelled poll writes no ledger row.
+
+The daily renderer uses a depth-one sparse checkout of `health/` and `ledger/`.
+The one-time backfill is explicitly dispatched and is the only health operation
+permitted to walk `snapshots/`. This amendment preserves ADR-020 snapshot
+semantics and ADR-025 ledger decisions.
+
+### ADR-025 amendment status, 2026-09-10: advisor sign-off outstanding
+
+**The 2026-09-05 amendment above is recorded but not ratified. Its status is Open.**
+
+`docs/team.md` makes Dr. Akba's out-of-band sign-off a precondition for a change that
+touches ADR ledger semantics, and this amendment is one: it changes what a row in
+`health/state-index.tsv` means, and with it the definition behind NC-025. That sign-off
+has not been obtained. PR #70 merged without it on 2026-09-10.
+
+This note exists so the deviation is visible to someone reading this file who never sees
+that pull request. The amendment text above is left exactly as written; a recorded gap is
+a record and a silence is not.
+
+| | |
+| --- | --- |
+| **Circulated** | Not yet. Brief written as `docs/advisor/2026-09-09-akba-brief/06-olcum-birimi.html`, riding with the 2026-09-09 batch |
+| **Travels with** | PR #55's `duplicate-partial` amendment, item 2 of the register. The same question from the other side: what does a ledger record? |
+| **Recorded in** | `docs/advisor/2026-09-03-decisions-from-akba.md`, item 14, appended 2026-09-10 |
+| **Owner** | Issue #84, which owns the advisor loop and the decisions register |
+| **Decision-by** | 2026-09-23 |
+| **Reversal cost** | One `workflow_dispatch` with `backfill=true rebuild=true`, one line in `canonical_snapshot_digest.py`, no data loss |
+
+Nothing on the archive is at risk while this is open: the definition change merges zero
+states at all three measured refs (894 documents to 504 states, 936 to 537, 994 to 563),
+so NC-025 and NC-047 both stand as registered.
+
+This status line is removed only by appending the answer to the decisions register. It is
+not cleared by a review, a merge, or the passage of the decision-by date.
+
+---
+
+## ADR-027 — Calibration training target
+
+**Status**: Open.
+
+**Context**: The single-qubit amplitude-plus-phase-damping channel needs one
+supervised target derived from archived IBM calibration data. Without an
+explicit derivation, training, anchored consequents, and the thermal reference
+can disagree on formulas, missing data, or gate duration.
+
+**Decision (proposed)**: For gate duration $t$ and a qubit's $T_1$, $T_2$, use
+
+$$
+\gamma = 1 - \exp(-t/T_1), \qquad
+\lambda = 1 - \exp[-t(2/T_2 - 1/T_1)].
+$$
+
+Accept only $T_2 \leq 2T_1$. Reject each qubit by its first applicable reason:
+missing/non-finite $T_1$, missing/non-finite $T_2$, missing/non-finite gate
+duration, non-positive physical values, then $T_2 > 2T_1$. Rejected rows retain
+their positional alignment with a NaN target and false usable mask.
+
+The snapshot target is the mean of usable per-qubit targets; standard deviation
+and the 10th, 50th, and 90th percentiles are retained. It is deliberately not
+the target evaluated at mean $T_1$/$T_2$, because the mapping is nonlinear.
+`training.targets.gate_lengths` reads only the requested one-qubit gate from
+the raw `properties.gates` envelope and requires the `ns` gate-length unit.
+
+A train/validation split is cut at a **snapshot boundary**, never inside one:
+`TrainingSet.time_split(cut)` sends rows with `timestamp < cut` left and
+`>= cut` right, so rows sharing a timestamp always stay together. NC-028 is the
+precedent. Its −0.585 R² was measured across a 20-day time split, and a cut
+placed inside a snapshot proved sensitive to the order of that snapshot's rows,
+while a cut placed between snapshots cannot be moved by any ordering. The split
+raises rather than returning an empty side, because a silently empty validation
+set is worse than a crash.
+
+**Not the target.** Two other quantities are *evaluation references* in phase 3
+and explicitly not regression targets:
+
+- **(B)** a distribution-level target derived from reference-simulation counts,
+  and
+- **(C)** hardware counts.
+
+Both are how a fitted model is *judged*; neither is what it regresses onto.
+Conflating them would let a model be trained against the same counts it is
+later scored on, and would silently change the target's units and support.
+
+**Consequences**: The proposal supplies one testable target to Issue #58's
+reference model and a future trainer. It deliberately introduces neither a
+multi-qubit, readout-error, nor non-zero-excited-population target: the current
+projector installs only a single-qubit channel, while readout error is an
+outside-the-channel measurement effect. On the fixture, the readout-error
+median is $2.191162109375 \times 10^{-2}$, the `sx` gate-error median is
+$3.110293362374808 \times 10^{-4}$, and mean $(\gamma, \lambda)$ is
+$(1.7266737044123665 \times 10^{-4}, 6.630210259092216 \times 10^{-4})$
+(NC-040). The target is raw-space; existing inference projection remains
+responsible for probability clipping.
+
+The snapshot aggregate is not a per-qubit training table and is not a richer
+feature-extractor decision under ADR-013. A future target-side upgrade may pair
+a per-qubit table with a per-qubit extractor, but must make that separate
+decision here. `HybridANFISTrainer`, its synthetic CLI, and synthetic smoke
+records are Issue #60 work: they must not land under this ADR while ADR-014 is
+Deferred and the NC-025 state-count gate is unmet.
+
+**Evidence**: `tests/test_aer_pin.py` matches Qiskit Aer's zero-temperature
+`thermal_relaxation_error` under `SuperOp` comparison across both Aer branches
+at 24 ns and 60 ns. NC-036 records maximum error below $10^{-12}$; NC-035 and
+NC-038 record the fixture's 24 ns gate duration and usable-row count. NC-039
+records the nonzero mean-of-targets versus target-at-mean-features gap.
+
+**Pending decisions**: Advisor/reviewer sign-off is required for raw-space
+training, raw gate-envelope parsing, the ordered skip policy, and mean of
+per-qubit targets. This entry remains Open until those decisions are recorded.
+
+**Source**: Issue #57; `docs/decisions/drafts/ADR-027-calibration-training-target.md`;
+`src/superconducted/training/targets.py`; `tests/training/test_targets.py`;
+`tests/training/test_aer_pin.py`; ADR-008, ADR-012, ADR-013, ADR-014, ADR-017,
+ADR-020, and ADR-024 clause 5 — the warm-start obligation the `TSKTrainer`
+docstring carries, which a trainer must either satisfy or replace with a
+recorded mechanism of its own. NC-028 is cited above for the split rule.

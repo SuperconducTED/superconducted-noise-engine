@@ -1,10 +1,12 @@
 """SuperconducTED: fuzzy-logic noise engine for Qiskit Aer.
 
-The package exposes nine ABCs in :mod:`superconducted.interfaces` covering
+The package exposes ten ABCs in :mod:`superconducted.interfaces` covering
 every research axis still in flux (membership shape, fuzzification placement,
 calibration vectorization, squashing, T1 vs IT2, normalization, defuzzification,
-channel projection, benchmark metrics) and four frozen-dataclass value types
-in :mod:`superconducted.types`. The TSK inference math is concrete and locked
+channel projection, benchmark metrics, trainer contract) and eight
+frozen-dataclass value types in :mod:`superconducted.types`. The counts are
+pinned by ``tests/test_interfaces.py``, so they cannot drift silently as
+research axes are added. The TSK inference math is concrete and locked
 in :mod:`superconducted.fuzzy.tsk`; the Aer Factory/Ensemble integration is
 concrete and locked in :mod:`superconducted.integration.aer_factory`.
 """
@@ -21,12 +23,17 @@ from .interfaces import (
     NormalizationStrategy,
     RuleBase,
     SquashingStrategy,
+    TSKTrainer,
 )
 from .types import (
     CalibrationSnapshot,
     MembershipDegree,
+    ParameterCount,
     RuleFiringResult,
     SimulationResult,
+    TrainingDiagnostics,
+    TrainingResult,
+    TrainingSet,
 )
 
 __version__ = "0.1.0"
@@ -41,9 +48,14 @@ __all__ = [
     "MembershipDegree",
     "MembershipFunction",
     "NormalizationStrategy",
+    "ParameterCount",
     "RuleBase",
     "RuleFiringResult",
     "SimulationResult",
     "SquashingStrategy",
+    "TSKTrainer",
+    "TrainingDiagnostics",
+    "TrainingResult",
+    "TrainingSet",
     "__version__",
 ]

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03 · Topluluk ve varyans (ADR-015, ADR-016) · SuperconducTED</title>
+<style>
+  :root{
+    --ink:#16212e; --ink-soft:#41505f; --line:#d8dee6; --paper:#fbfaf7;
+    --navy:#1a3a5c; --navy-soft:#e8eef5; --rust:#a8541c; --rust-soft:#fbf0e6;
+    --green:#2f6b45; --green-soft:#e9f3ec; --grey:#6b7684; --grey-soft:#eef0f3;
+    --red:#93321f; --red-soft:#fbeae6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:16px/1.65 Georgia,"Times New Roman",serif}
+  .wrap{max-width:860px;margin:0 auto;padding:44px 28px 96px}
+  a.back{font:600 12px/1 -apple-system,Segoe UI,sans-serif;color:var(--rust);
+    text-decoration:none;letter-spacing:.08em;text-transform:uppercase}
+  a.back:hover{text-decoration:underline}
+  header.mast{border-bottom:3px double var(--navy);padding-bottom:20px;margin:16px 0 32px}
+  .kicker{font:600 11px/1 -apple-system,Segoe UI,sans-serif;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--rust);margin-bottom:12px}
+  h1{font-size:29px;line-height:1.24;margin:0 0 12px;color:var(--navy);letter-spacing:-.01em}
+  .sub{color:var(--ink-soft);font-size:16.5px;margin:0}
+  h2{font-size:21px;margin:42px 0 6px;color:var(--navy);
+    border-bottom:1px solid var(--line);padding-bottom:7px}
+  p{margin:0 0 15px}
+  ul,ol{margin:0 0 15px;padding-left:22px}
+  li{margin-bottom:7px}
+  .qbox{border:1px solid var(--line);border-top:5px solid var(--navy);background:#fff;
+    border-radius:3px;padding:24px 26px;margin:26px 0}
+  .qbox.rat{border-top-color:var(--green)}
+  .qbox.no{border-top-color:var(--grey);background:#f7f8f9}
+  .qhead{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .qbox h4{margin:0;font-size:20px;color:var(--navy);flex:1;min-width:260px;line-height:1.3}
+  .qbox.no h4{color:var(--grey)}
+  .badge{display:inline-block;font:600 11px/1 -apple-system,Segoe UI,sans-serif;
+    padding:5px 9px;border-radius:3px;letter-spacing:.03em;white-space:nowrap}
+  .b-ask{background:var(--navy-soft);color:var(--navy)}
+  .b-rat{background:var(--green-soft);color:var(--green)}
+  .b-no{background:var(--grey-soft);color:var(--grey)}
+  .field{margin:16px 0 0}
+  .field .lbl{font:700 11px/1 -apple-system,Segoe UI,sans-serif;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--rust);display:block;margin-bottom:6px}
+  .field.why .lbl{color:var(--navy)}
+  .note{background:var(--rust-soft);border-left:4px solid var(--rust);
+    padding:15px 19px;margin:20px 0;border-radius:0 3px 3px 0}
+  .note strong{color:var(--rust)}
+  .note p:last-child{margin-bottom:0}
+  .warn{background:var(--red-soft);border-left:4px solid var(--red);
+    padding:15px 19px;margin:20px 0;border-radius:0 3px 3px 0}
+  .warn strong{color:var(--red)}
+  .warn p:last-child{margin-bottom:0}
+  .math{background:#fff;border:1px solid var(--line);border-radius:3px;
+    padding:20px 24px;margin:18px 0;text-align:center;
+    font:18px/2.1 "Cambria Math",Cambria,Georgia,serif}
+  .math .small{font-size:14px;color:var(--ink-soft);display:block;margin-top:8px;
+    font-family:-apple-system,Segoe UI,sans-serif}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+  th{text-align:left;background:var(--navy);color:#fff;padding:10px 12px;
+    font:600 12.5px/1.4 -apple-system,Segoe UI,sans-serif}
+  td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:nth-child(even) td{background:#fff}
+  code{font:13.5px/1.5 "SF Mono",Consolas,monospace;background:var(--grey-soft);
+    padding:1px 5px;border-radius:3px;color:var(--navy)}
+  figure{margin:24px 0;text-align:center}
+  figcaption{font:13.5px/1.6 -apple-system,Segoe UI,sans-serif;color:var(--ink-soft);
+    margin-top:10px;text-align:left}
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
+    font:13px/1.7 -apple-system,Segoe UI,sans-serif;color:var(--grey)}
+  @media print{body{background:#fff}.wrap{padding:0}a.back{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<a class="back" href="index.html">&larr; Karar dosyası</a>
+
+<header class="mast">
+  <div class="kicker">Dosya 03 · Faz 3 · Karar tarihi 23-30 Eylül 2026</div>
+  <h1>Topluluk ve varyans: belirsizliği nereye koyuyoruz ve nasıl raporluyoruz?</h1>
+  <p class="sub">ADR-015 ve ADR-016 · Eski Soru 1, 2 ve 4 &nbsp;·&nbsp;
+     Bugün topluluğun sekiz üyesi de birbirinin aynısı.</p>
+</header>
+
+<h2>Arka plan: bu bir tasarım tercihi değil, bir simülatör kısıtı</h2>
+
+<p>Hocam, 25 Mayıs'ta size sorduğumuz ilk soru buydu ve arkasındaki bulguyu
+tekrar hatırlatmak istiyorum, çünkü bütün mimari onun üzerine kurulu.</p>
+
+<p>Qiskit Aer'in kaynağını inceledik. Simülatör, gürültü modelinin tamamını
+gönderim anında <strong>bir kez</strong> C++ tarafına bir sözlük olarak
+serileştiriyor ve bütün atışları C++ içinde, Python'a hiç dönmeden koşuyor.
+Atış başına bir geri çağrı noktası yok, yeniden giriş noktası yok, atışlar
+arasında gürültü parametrelerini yeniden üretmenin bir yolu yok.</p>
+
+<figure>
+<svg viewBox="0 0 760 210" width="100%" style="max-width:760px" xmlns="http://www.w3.org/2000/svg"
+     role="img" aria-label="Aer gürültü modelini bir kez serileştirir; belirsizlik ancak N ayrı model ile ifade edilir">
+  <rect x="12" y="30" width="200" height="60" rx="4" fill="#fbeae6" stroke="#93321f" stroke-width="1.5"/>
+  <text x="112" y="52" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="12.5" font-weight="600" fill="#93321f">İstediğimiz ama olmayan</text>
+  <text x="112" y="72" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11.5" fill="#41505f">atış başına gürültü örnekle</text>
+  <line x1="24" y1="88" x2="200" y2="34" stroke="#93321f" stroke-width="2"/>
+
+  <rect x="12" y="118" width="200" height="72" rx="4" fill="#e8eef5" stroke="#1a3a5c" stroke-width="1.5"/>
+  <text x="112" y="140" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="12.5" font-weight="600" fill="#1a3a5c">Yapabildiğimiz</text>
+  <text x="112" y="160" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11.5" fill="#41505f">N ayrı gürültü modeli kur</text>
+  <text x="112" y="178" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11.5" fill="#41505f">Aer'i N kez çağır</text>
+
+  <path d="M212 154 L262 154" fill="none" stroke="#1a3a5c" stroke-width="1.8"/>
+  <polygon points="268,154 258,149 258,159" fill="#1a3a5c"/>
+
+  <rect x="272" y="26" width="150" height="34" rx="3" fill="#fff" stroke="#41505f" stroke-width="1.3"/>
+  <text x="347" y="48" text-anchor="middle" font-family="Consolas,monospace" font-size="11.5" fill="#16212e">üye 1 &#8594; sayımlar</text>
+  <rect x="272" y="68" width="150" height="34" rx="3" fill="#fff" stroke="#41505f" stroke-width="1.3"/>
+  <text x="347" y="90" text-anchor="middle" font-family="Consolas,monospace" font-size="11.5" fill="#16212e">üye 2 &#8594; sayımlar</text>
+  <text x="347" y="122" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="15" fill="#6b7684">&#8942;</text>
+  <rect x="272" y="134" width="150" height="34" rx="3" fill="#fff" stroke="#41505f" stroke-width="1.3"/>
+  <text x="347" y="156" text-anchor="middle" font-family="Consolas,monospace" font-size="11.5" fill="#16212e">üye N &#8594; sayımlar</text>
+
+  <path d="M422 97 L472 97" fill="none" stroke="#41505f" stroke-width="1.8"/>
+  <polygon points="478,97 468,92 468,102" fill="#41505f"/>
+
+  <rect x="482" y="60" width="266" height="74" rx="4" fill="#e9f3ec" stroke="#2f6b45" stroke-width="1.6"/>
+  <text x="615" y="84" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="12.5" font-weight="600" fill="#2f6b45">Birleştirme &#183; ADR-016</text>
+  <text x="615" y="105" text-anchor="middle" font-family="Consolas,monospace" font-size="11.5" fill="#41505f">eleman bazlı toplam</text>
+  <text x="615" y="123" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#41505f">toplam atış = N × atış/üye</text>
+
+  <text x="112" y="16" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="12" font-style="italic" fill="#6b7684">Aer: tek serileştirme, geri çağrı yok</text>
+</svg>
+<figcaption>Gecikme üye başına yaklaşık 0.12 saniye artıyor (ısınma sonrası,
+lineer). Bütün bağımlılık enjeksiyonu fabrikası bu kısıtın etrafına kuruldu.</figcaption>
+</figure>
+
+<div class="warn">
+  <p><strong>Bugünkü durum dürüstçe şu: topluluğun sekiz üyesi de birbirinin
+  aynısı.</strong> Eğitilmiş üyelik fonksiyonu yok, pertürbasyon mantığı bağlı
+  değil. Yani şu anda "topluluk" API kararlılığı için var; ürettiği belirsizlik
+  sıfır genişlikte. Bunu M4'te bir sonuç tablosuna koyarsak, N özdeş modelden
+  hesaplanmış bir "aralık" raporlamış oluruz ki bu yanıltıcı olur. #64 numaralı
+  bilet tam olarak bunun olmasını engellemek için açıldı.</p>
+</div>
+
+<h2>Sorular</h2>
+
+<div class="qbox">
+  <div class="qhead">
+    <h4>1 · Topluluk kalıcı varyans mekanizması olarak yeterli mi, yoksa bir kaçış yolu planlamalı mıyız?</h4>
+    <span class="badge b-ask">SOR</span>
+  </div>
+
+  <div class="field"><span class="lbl">Soru</span>
+    <p>Üç seçenek var. <b>A:</b> Topluluğu kalıcı ve tek varyans mekanizması
+    olarak kabul edip etrafında optimize etmek (paralelleştirme, önbellekleme).
+    <b>B:</b> Atış başına geri çağrıyı geri getirebilecek özel bir simülatör
+    arka ucunu araştıran bir dal tutmak. <b>C:</b> Yayın için topluluğu kalıcı
+    saymak ama soyut arayüzü koruyup ileride başka bir arka ucun takılabilmesini
+    sağlamak.</p>
+  </div>
+
+  <div class="field"><span class="lbl">Eğilimimiz</span>
+    <p>A, ve pratikte C'nin arayüzü zaten yerinde: soyut temel sınıf tasarımı
+    başka bir arka ucun takılmasına izin veriyor. Yani C'yi ayrıca yapmamız
+    gerekmiyor, sadece öyle olduğunu söylememiz yeterli.</p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden size soruyoruz, deneyip görmüyoruz</span>
+    <p>Çünkü bu bir <strong>bilimsel yeterlilik</strong> sorusu, bir performans
+    sorusu değil. Deneyerek öğrenebileceğimiz her şeyi öğrendik: Aer'in kısıtını
+    kaynak kodundan doğruladık, gecikmenin nasıl ölçeklendiğini ölçtük, mimariyi
+    kurduk ve çalışıyor. Ölçemediğimiz tek şey şu: <em>bir hakem, "atış başına
+    varyans olmadan bu bulanık sistem gerçekten belirsizliği temsil ediyor mu?"
+    diye sorarsa, topluluk düzeyinde varyans yeterli bir cevap mı?</em></p>
+    <p>Yanlış tarafı seçmenin bedeli asimetrik. Topluluk yeterliyse ve biz özel
+    bir arka uç yazmaya kalkarsak, aylarımızı kaybederiz. Yeterli değilse ve
+    biz farkına varmadan yayına gidersek, katkının kendisi sorgulanır. Bu ikisi
+    arasındaki farkı bize alan bilgisi söyler, bir deney değil.</p>
+  </div>
+</div>
+
+<div class="qbox">
+  <div class="qhead">
+    <h4>2 · Üyeler nasıl farklılaşmalı? (ADR-015)</h4>
+    <span class="badge b-ask">SOR · mekanizma</span>
+  </div>
+
+  <div class="field"><span class="lbl">Arka plan</span>
+    <p>Fabrikayı yeniden yapılandırmadan varyans enjekte edebileceğimiz üç
+    nokta belirledik:</p>
+    <table>
+      <tr><th>Mekanizma</th><th>Ne yapar</th><th>Bağımlılığı</th></tr>
+      <tr><td><b>Girdi vektörü pertürbasyonu</b></td>
+          <td>Çıkarılan kalibrasyon özniteliklerini (ortalama T1, T2, okuma hatası)
+              kural tabanına vermeden önce sarsar. Kalibrasyon verisinin
+              <em>kendi</em> ölçüm belirsizliğini taklit eder.</td>
+          <td>Yok. Bugün yapılabilir.</td></tr>
+      <tr><td><b>Öncül MF pertürbasyonu</b></td>
+          <td>Her üyenin üyelik fonksiyonu parametrelerini, eğitim sırasında
+              ortaya çıkan parametre varyansından çeker.</td>
+          <td>Eğiticinin parametre dağılımı üretmesi gerekir.</td></tr>
+      <tr><td><b>IT2 ayak izi örneklemesi</b></td>
+          <td>Her üye için Tip-2 belirsizlik zarfının içinden bir Tip-1 dilimi
+              örnekler.</td>
+          <td>ADR-009'un çözülmesi gerekir.</td></tr>
+    </table>
+  </div>
+
+  <div class="field"><span class="lbl">Eğilimimiz</span>
+    <p>Ara çözüm olarak birinci, eğitim sonrası ikinci veya üçüncü ile
+    değiştirilmek üzere. Ama bir sorumuz var: <strong>birden fazla kaynak
+    birlikte kullanılırsa belirsizlik iki kez sayılmaz mı?</strong> Girdi
+    pertürbasyonu da, öncül pertürbasyonu da aynı fiziksel belirsizliğin
+    (kalibrasyonun ne kadar güvenilir olduğu) farklı katmanlardaki
+    izdüşümü. İkisini toplarsak zarfı şişirmiş oluruz.</p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden size soruyoruz</span>
+    <p>Birinci mekanizmayı kendi başımıza seçebiliriz ve seçtik; o kısmı
+    sormuyoruz. Sorduğumuz şey <strong>bileşim kuralı</strong>: bulanık
+    sistemler literatüründe iki belirsizlik kaynağı aynı modele girdiğinde
+    çifte sayımı önlemenin kabul edilmiş bir yolu var mı? Bu bizim
+    ölçebileceğimiz bir şey değil, çünkü "doğru" zarfın ne olduğunu bilmiyoruz;
+    ölçsek de neye karşı doğruladığımızı söyleyemeyiz.</p>
+  </div>
+</div>
+
+<div class="qbox">
+  <div class="qhead">
+    <h4>3 · Sonuçlar nokta tahmini olarak mı, aralık olarak mı raporlansın? (ADR-016)</h4>
+    <span class="badge b-ask">SOR · semantik</span>
+  </div>
+
+  <div class="field"><span class="lbl">Arka plan · çözülmüş kısım</span>
+    <p>Bu maddenin bir yarısı artık kapalı, size sadece bilgi olarak yazıyoruz.
+    25 Mayıs'ta üç yerin birleştirmeyi farklı tarif ettiğini bildirmiştik.
+    2026-09-07'de hepsini kodun gerçekte yaptığı şeye hizaladık. Kod topluyor,
+    ortalama almıyor, ve normalize metriklerin altında bu ikisi aynı şey:</p>
+    <div class="math">
+      <i>C<sub>k</sub></i> / (<i>N s</i>) &nbsp;=&nbsp;
+      (1/<i>N</i>) &sum;<sub><i>m</i></sub> ( <i>c<sub>m,k</sub></i> / <i>s</i> )
+      <span class="small"><i>N</i> üye, üye başına <i>s</i> atış, <i>k</i> bit dizisi.
+        Sol taraf "topla ve toplam atışı ölçekle", sağ taraf "üye dağılımlarının
+        ortalaması". Hellinger, KL, sadakat ve R² hepsi toplam sayıma böldüğü için
+        aralarındaki farkı göremez.</span>
+    </div>
+    <p>Fark ham sayımlarda ortaya çıkar (ortalama <i>C<sub>k</sub></i>/<i>N</i>
+    olurdu, yuvarlama ile). Bu yüzden metni "toplam (normalize metriklerin altında
+    ortalamaya olasılık-eşdeğer)" diye yazdık, sadece "ortalama" değil.</p>
+  </div>
+
+  <div class="field"><span class="lbl">Açık kalan kısım · asıl soru</span>
+    <p>ADR-016 bugün Deferred, çünkü asıl karar başka: <strong>topluluk artık
+    anlamlı biçimde farklılaştığında, sonuçları hâlâ tek bir nokta tahmini
+    olarak mı raporlayacağız, yoksa üyeler arası bir aralık ve onun kapsama
+    ölçütü ile mi?</strong></p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden size soruyoruz</span>
+    <p>İki sebeple. Birincisi bir <em>yayın</em> sorusu: aralık raporlamak
+    dürüsttür ama karşılaştırma tablolarını okumayı zorlaştırır, ve hakemler
+    genellikle tek sayı bekler. İkincisi ve daha teknik olanı: yoğunluk
+    matrisi modunda birleştirme <em>toplam değil ortalama</em> olmak zorunda,
+    çünkü orada doğru analog bir karışım. Yani mod değiştiğinde birleştirme
+    kuralı da değişiyor ve bunu tek bir ADR cümlesinde tutarlı ifade etmek
+    lazım. Bu bir kayıt defteri kararı ve defterin sahibi sizsiniz.</p>
+    <p>Not: bu maddenin ölçüm tarafını #64 yapıyor. Sizden istediğimiz
+    ölçüm değil, <em>ne raporlayacağımıza dair yön</em>.</p>
+  </div>
+</div>
+
+<h2>Sormadıklarımız ve nedeni</h2>
+
+<div class="qbox no">
+  <div class="qhead">
+    <h4>Eski Soru 4 · "Harness ile duman testi betiği birleştirmede anlaşamıyor, hangisi doğru?"</h4>
+    <span class="badge b-no">SORMUYORUZ · çözüldü</span>
+  </div>
+  <p>Cevaplandı ve uygulandı. Kanonik harness toplam yapıyor; iki açıklama metnini
+  (<code>harness.py</code> modül belge dizesi ve <code>docs/architecture.md</code>
+  ADR-016 satırı) 2026-09-07'de koda hizaladık. Duman testi betiği
+  (<code>scripts/first_ensemble_run.py</code>) <em>gerçekten</em> ortalama alıyor
+  ve ona dokunmadık: bu bir metin farkı değil, davranış farkı, ve bu biletin
+  hiçbir çalışan satırı değiştirmeme kuralı var. Karar defterine bunun böyle
+  kaldığını yazdık.</p>
+</div>
+
+<div class="qbox no">
+  <div class="qhead">
+    <h4><code>MemberPerturbation</code> sözleşmesinin modül sahibi olarak okunması</h4>
+    <span class="badge b-no">SORMUYORUZ · ortada yok</span>
+  </div>
+  <p>İlk listemizde <code>interfaces.py</code> içindeki üç sözleşmenin sizin
+  tarafınızdan okunması vardı. Üçüncüsünü çıkardık, çünkü kontrol ettiğimizde
+  <strong>öyle bir sözleşme yok</strong>:
+  <code>grep -rn MemberPerturbation src/ tests/ docs/</code> komutu
+  <code>5f935ea</code>'da hiçbir sonuç döndürmüyor.</p>
+  <p>Planlanmış ama yazılmamış bir soyut sınıf; ADR-015'in uygulaması geldiğinde
+  doğacak. Var olmayan bir dosyayı okumanızı istemek yerine, yukarıdaki 2. soruya
+  (mekanizma seçimi) katladık. Sözleşme yazıldığında ayrıca göndeririz.</p>
+  <p style="color:#6b7684;font-size:14px">Bunu yazmamızın sebebi şeffaflık: ilk
+  liste on üç maddeydi ve bu madde oradaydı. Sessizce düşürmek yerine neden
+  düştüğünü kayda geçiriyoruz.</p>
+</div>
+
+<footer>
+  Kaynaklar: <code>docs/decisions.md</code> ADR-002, ADR-015, ADR-016 &nbsp;·&nbsp;
+  <code>src/superconducted/benchmarks/harness.py</code> &nbsp;·&nbsp;
+  <code>src/superconducted/integration/aer_factory.py</code> &nbsp;·&nbsp;
+  <code>docs/findings/aer-integration-walkthrough.md</code> &nbsp;·&nbsp;
+  biletler #58, #64 &nbsp;·&nbsp; ölçüm referansı <code>main @ 5f935ea</code>
+</footer>
+
+</div>
+</body>
+</html>

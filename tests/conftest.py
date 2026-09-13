@@ -90,6 +90,11 @@ def make_mock_service(
         backend = MagicMock()
         backend.target = None
         backend.configuration.return_value = None
+        # Null like the two above, and for the same reason: a bare MagicMock here
+        # serialises into the snapshot and blows up json.dump on save. Only the
+        # historical path touches it, which is why nothing needed it until a test
+        # persisted a swept snapshot rather than just fetching one.
+        backend.target_history = None
         if properties_side_effect is not None:
             backend.properties.side_effect = properties_side_effect
         else:

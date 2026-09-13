@@ -1,8 +1,11 @@
 """Benchmark harness — engine vs reference, returning a results table.
 
-Bootstrap status: full. Mean-aggregates ensemble counts (across members)
-into a single :class:`SimulationResult` per circuit. Interval-valued
-aggregation across ensemble members is deferred to ADR-016.
+Bootstrap status: full. Aggregates ensemble counts (across members) by
+element-wise sum, retaining the total shot count so metric functions
+normalize correctly, into a single :class:`SimulationResult` per circuit
+— probability-equivalent to a mean of per-member distributions under
+those normalized metrics. Interval-valued aggregation across ensemble
+members is deferred to ADR-016.
 """
 
 from __future__ import annotations

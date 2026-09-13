@@ -1,0 +1,31 @@
+{
+ "backend": "ibm_fez",
+ "last_update_date": "2026-09-01T06:00:00Z",
+ "properties": {
+  "backend_name": "ibm_fez",
+  "last_update_date": "2026-09-01T06:00:00Z",
+  "qubits": [
+   [
+    {
+     "date": "2026-09-01T05:30:00+00:00",
+     "name": "T1",
+     "unit": "us",
+     "value": 91.5
+    },
+    {
+     "date": "2026-09-01T05:30:00+00:00",
+     "name": "T2",
+     "unit": "us",
+     "value": 88.25
+    },
+    {
+     "date": "2026-09-01T05:30:00+00:00",
+     "name": "readout_error",
+     "unit": "",
+     "value": 0.0142
+    }
+   ]
+  ]
+ },
+ "schema_version": "1.0.0"
+}
