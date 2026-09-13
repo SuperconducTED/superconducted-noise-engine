@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-12 05:41 UTC · main at `004e14ed` (2026-09-11) · 18 days to 2026-09-30_
+_Generated 2026-09-13 13:17 UTC · main at `004e14ed` (2026-09-11) · 17 days to 2026-09-30_
 
 
 ## Milestones
@@ -84,8 +84,8 @@ _Generated 2026-09-12 05:41 UTC · main at `004e14ed` (2026-09-11) · 18 days to
 
 1. Start #60: ADR-014 hybrid ANFIS trainer
    - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.
-1. Start #73: Filter noise by physical gate semantics
-   - All stated upstream dependencies are met.
+1. Unstick PR #96 for #73: Filter noise by physical gate semantics
+   - No approving review yet: main's ruleset requires one.
 1. Start #74: first_ensemble_run must transpile before prepare
    - All stated upstream dependencies are met.
 
@@ -117,13 +117,17 @@ _Generated 2026-09-12 05:41 UTC · main at `004e14ed` (2026-09-11) · 18 days to
 
 **#58: Certify the benchmark instruments** (@bengisucvd)
 
+- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [high] Still a draft: CI and reviewers will not treat it as ready.
+- [high] Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result.
 - [high] No approving review yet: main's ruleset requires one.
 - [medium] Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
 
 **#59: Manual MF parameterization from the archive** (@yigit-arda)
 
+- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [high] Still a draft: CI and reviewers will not treat it as ready.
+- [high] Its green checks last ran 2026-09-08T19:40 against a main that has moved since; they are not evidence about the merge result.
 
 **#61: ADR-011 evidence + premise gradients** (@bengisucvd)
 
@@ -134,6 +138,10 @@ _Generated 2026-09-12 05:41 UTC · main at `004e14ed` (2026-09-11) · 18 days to
 - [critical] Every advisor item it carries (ADR-025 sign-off, ADR-009 flip, ADR-011 closure, ADR-014 read, the target ADR) needs Dr. Akba, who has no recorded answer to anything.
 - [high] #45 is still open; M0 is not closable until it is.
 - [high] #53's record (PR #78) is unmerged at CHANGES_REQUESTED.
+
+**#73: Filter noise by physical gate semantics** (@BurakOztekin)
+
+- [high] No approving review yet: main's ruleset requires one.
 
 **#75: Decide the LOCKED Kraus projector boundary** (@bengisucvd)
 
@@ -155,6 +163,7 @@ _Generated 2026-09-12 05:41 UTC · main at `004e14ed` (2026-09-11) · 18 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-13 | 10/28 | 10 | 3 | 4 | #73 Filter noise by physical gate semantics: ready to start to in review |
 | 2026-09-12 | 10/28 | 11 | 2 | 4 | +1 milestone gate (9 to 10 of 28); M2 1/5 to 2/5; #48 Pipeline-health dashboard: in review to closed; #63 Training-set builder (training/dataset.py): blocked upstream to ready to start; main moved to 004e14ed |
 | 2026-09-11 | 9/28 | 10 | 3 | 5 | +1 milestone gate (8 to 9 of 28); M2 0/5 to 1/5; #48 Pipeline-health dashboard: ready to start to in review; #49 Scheduled backfill sweep: in review to closed; main moved to 75dfdae3 |
 | 2026-09-10 | 8/28 | 11 | 3 | 5 | +1 milestone gate (7 to 8 of 28); M0 6/8 to 7/8; #45 Polling cadence no longer limits the dataset: ready to start to closed; #48 Pipeline-health dashboard: in review to ready to start; #49 Scheduled backfill sweep: ready to start to in review; main moved to d0d0b073 |

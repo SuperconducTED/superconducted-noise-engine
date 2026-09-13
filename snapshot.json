@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-12 05:41 UTC",
+  "generated": "2026-09-13 13:17 UTC",
   "main": {
     "sha": "004e14ed",
     "date": "2026-09-11",
@@ -172,7 +172,7 @@
           "createdAt": "2026-09-06T21:11:52Z",
           "headRefName": "bengisu/issue-58-benchmark-certification",
           "isDraft": true,
-          "mergeable": "UNKNOWN",
+          "mergeable": "CONFLICTING",
           "mergedAt": null,
           "number": 79,
           "reviewDecision": "REVIEW_REQUIRED",
@@ -245,7 +245,7 @@
           ],
           "checks_newest": "2026-09-06T21:11",
           "checks_failing": [],
-          "checks_stale_vs_main": false
+          "checks_stale_vs_main": true
         }
       ],
       "merged_pr": null,
@@ -262,6 +262,14 @@
         {
           "severity": "high",
           "text": "Still a draft: CI and reviewers will not treat it as ready."
+        },
+        {
+          "severity": "critical",
+          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
+        },
+        {
+          "severity": "high",
+          "text": "Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result."
         },
         {
           "severity": "high",
@@ -324,7 +332,7 @@
           "createdAt": "2026-09-04T13:03:49Z",
           "headRefName": "feature/issue-59-parameterization",
           "isDraft": true,
-          "mergeable": "UNKNOWN",
+          "mergeable": "CONFLICTING",
           "mergedAt": null,
           "number": 68,
           "reviewDecision": "APPROVED",
@@ -385,7 +393,7 @@
           ],
           "checks_newest": "2026-09-08T19:40",
           "checks_failing": [],
-          "checks_stale_vs_main": false
+          "checks_stale_vs_main": true
         }
       ],
       "merged_pr": null,
@@ -396,6 +404,14 @@
         {
           "severity": "high",
           "text": "Still a draft: CI and reviewers will not treat it as ready."
+        },
+        {
+          "severity": "critical",
+          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
+        },
+        {
+          "severity": "high",
+          "text": "Its green checks last ran 2026-09-08T19:40 against a main that has moved since; they are not evidence about the merge result."
         }
       ],
       "declared_unblocks": [
@@ -1197,8 +1213,84 @@
       "title": "Filter FuzzyNoiseModel noise by physical gate semantics so virtual and control instructions are not damped",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/73",
       "issue_state": "OPEN",
-      "state": "ready",
-      "all_prs": [],
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOENjDJQ",
+            "is_bot": false,
+            "login": "BurakOztekin",
+            "name": ""
+          },
+          "closingIssuesReferences": [
+            {
+              "id": "I_kwDOSW8yNc8AAAABP-gY_A",
+              "number": 73,
+              "repository": {
+                "id": "R_kgDOSW8yNQ",
+                "name": "superconducted-noise-engine",
+                "owner": {
+                  "id": "O_kgDOENg1ug",
+                  "login": "SuperconducTED"
+                }
+              },
+              "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/73"
+            }
+          ],
+          "createdAt": "2026-09-12T18:29:43Z",
+          "headRefName": "feature/issue-73-physical-gate-noise-filter",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 96,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "Fix fuzzy noise gate eligibility semantics",
+          "updatedAt": "2026-09-12T18:36:07Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/96",
+          "headRefOid": "bbdd4561ac99da8a19b0a09c8f62590963306940",
+          "additions": 199,
+          "deletions": 1,
+          "file_count": 4,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-12T18:29"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-12T18:29"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-12T18:29"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-12T18:29"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-12T18:29"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-12T18:30"
+            }
+          ],
+          "checks_newest": "2026-09-12T18:30",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
       "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
@@ -1209,10 +1301,15 @@
           "what": "established the defect"
         }
       ],
-      "blockers": [],
+      "blockers": [
+        {
+          "severity": "high",
+          "text": "No approving review yet: main's ruleset requires one."
+        }
+      ],
       "declared_unblocks": [],
       "notes_info": [],
-      "pr": null
+      "pr": 96
     },
     {
       "id": 74,
@@ -1472,7 +1569,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -7
+      "days_left": -8
     },
     {
       "id": "M1",
@@ -1514,7 +1611,7 @@
       "done": 1,
       "total": 5,
       "status": "partial",
-      "days_left": -1
+      "days_left": -2
     },
     {
       "id": "M2",
@@ -1557,7 +1654,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": 6
+      "days_left": 5
     },
     {
       "id": "M3",
@@ -1605,7 +1702,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": 13
+      "days_left": 12
     },
     {
       "id": "M4",
@@ -1643,7 +1740,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": 18
+      "days_left": 17
     }
   ]
 }
