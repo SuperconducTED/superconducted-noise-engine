@@ -14,7 +14,15 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 
-from superconducted.fuzzy.membership import GaussianMF, IntervalGaussianMF, TanhMF, TanhSigmoidMF
+from superconducted.fuzzy.membership import (
+    GaussianMF,
+    IntervalGaussianMF,
+    TanhBellMF,
+    TanhMF,
+    TanhSigmoidMF,
+    TrapezoidalMF,
+    TriangularMF,
+)
 from superconducted.fuzzy.tsk import TSKRule, TSKRuleBase
 from superconducted.interfaces import CalibrationFeatureExtractor, MembershipFunction
 from superconducted.types import CalibrationSnapshot
@@ -194,6 +202,30 @@ def grid_partition(
             right = e[j + 1] + m_r
 
             mfs.append(TanhMF(left, right, slope, slope))
+
+    elif shape is TriangularMF:
+        for j in range(k):
+
+            mfs.append(TriangularMF(e[j], c[j], e[j + 1]))
+
+    elif shape is TrapezoidalMF:
+        for j in range(k):
+
+            m_l = (c[j] - e[j]) / 4.0
+            m_r = (e[j + 1] - c[j]) / 4.0
+            mfs.append(TrapezoidalMF(e[j], c[j] - m_l, c[j] + m_r, e[j + 1]))
+
+    elif shape is TanhBellMF:
+        for j in range(k):
+
+            m_l = (c[j] - e[j]) / 4.0
+            m_r = (e[j + 1] - c[j]) / 4.0
+            min_m = min(m_l, m_r)
+            slope = math.atanh(0.8) / min_m
+
+            left = e[j] - m_l
+            right = e[j + 1] + m_r
+            mfs.append(TanhBellMF(left, right, slope))
 
     else:
         raise NotImplementedError(f"Mapping for {shape.__name__} has not landed yet (FR-5).")
