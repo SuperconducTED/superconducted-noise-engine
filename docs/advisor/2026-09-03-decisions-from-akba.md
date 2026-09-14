@@ -129,3 +129,64 @@ with zero merges under stripping at every one of the three refs. Reversal is one
 only the derived index is regenerated.
 
 ADR-025's amendment status stays **Open** until an answer is recorded below.
+
+## Circulation, as-of 2026-09-14
+
+Not a decision entry: the record of what happened to the batch itself. Appended rather
+than written into the 2026-09-09 or 2026-09-10 tables, both of which sit above this
+file's append marker and stand exactly as written.
+
+### The batch did not go out on 2026-09-09
+
+**The package has been ready since 2026-09-09 and unsent since 2026-09-09.** File 06
+joined it on 2026-09-10. As of 2026-09-14 no version of it has reached Dr. Akba, and no
+item in this register has an answer. Issue #84's own definition of done still carries
+`@mertefesensoy has sent it to Dr. Akba` unchecked.
+
+The cause is not a missing artifact. Every item's argument existed on `main` by
+2026-09-10; what did not happen is the send. It is recorded here because a five-day slip
+on the one channel this project has to its advisor is exactly the kind of thing that
+becomes invisible once the dates pass, and the 2026-05-25 set went unanswered for three
+months in precisely that way.
+
+The cover message @mertefesensoy sends is `docs/advisor/2026-09-14-akba-batch-cover.md`,
+committed so the repository records what was circulated rather than only that something
+was. The send date is appended below as its own line once the message has actually gone
+out; **nothing in this repository asserts a send that has not happened.**
+
+### Revised decision-by dates
+
+Each change carries its reason. Items not listed keep the date the 2026-09-09 and
+2026-09-10 tables gave them.
+
+| # | Item | Was | Now | Why |
+| --- | --- | --- | --- | --- |
+| 1, 2, 10, 12 | ADR-027 D1/D3/D4; ADR-025 `duplicate-partial`; the two `interfaces.py` owner reads | 2026-09-16 | **2026-09-21** | The original date assumed a 2026-09-09 send and gave him seven days. Sent on 2026-09-14 it gives him two. 2026-09-21 preserves the seven-day window the batch was designed around. None of the four gates M3. |
+| 3, 4, 6, 8, 13, 14 | ADR-009; ADR-011; ADR-015; ADR-019 closure; the six open 2026-05-25 questions; ADR-025 pipeline-health | 2026-09-23 | **unchanged** | M3's gate is 2026-09-23 to 25. An answer after it cannot open the work it gates, so moving the date past the gate would defeat the date rather than extend it. The consequence of the slip is carried here instead: **his window on these six shrinks from 14 days to 9**, and that cost is ours. |
+| 5 | ADR-014 status flip, Deferred to Accepted | 2026-09-30 | **2026-09-26** | Not a consequence of the slip. 2026-09-30 is the day phase 3 closes, and FR-11's close record reads ADR-014's status; an answer arriving that day cannot be carried by the record that reads it. This was wrong when it was written and is corrected here rather than repeated. |
+| 7 | ADR-016 interval aggregation | 2026-09-30 | **unchanged** | Gated on #64, which is itself scheduled W3 to W4, and it does not gate the phase-3 exit artifact. |
+
+The cluster's own `index.html` prints the superseded 16 Eylül and 30 Eylül rows. It is a
+dated document and is left unedited; the cover message names the two superseded rows, and
+where the two disagree **this table is authoritative**.
+
+### Two items had a date and no argument
+
+Auditing the package against this register before circulation found two items carrying a
+decision-by date that no file in `docs/advisor/2026-09-09-akba-brief/` argues:
+
+| # | Item | What was missing |
+| --- | --- | --- |
+| 12 | `MembershipFunction` docstring correction owner read | File 01's D5 asks him to read `interfaces.py` and `types.py` for the `TSKTrainer` ABC and the four value types. PR #69 changed a **third** thing in `interfaces.py`, the `MembershipFunction` docstring naming the trainer's module, and D5 does not name it. Verified by search: `MembershipFunction` appears in no file of the cluster. |
+| 5 | ADR-014 status flip | `ADR-014` appears only in `index.html`'s calendar row for 30 Eylül, in no content file. There is nothing to argue yet: the flip ratifies a trainer (#60) that merges at M3. |
+
+Both are asked in full in the cover message rather than by editing the dated cluster.
+Item 12 is one paragraph because it is one line of code; item 5 is stated as an advance
+notice of what arrives on 2026-09-26, with the reason it cannot be answered today written
+out, so he is not asked to ratify something that does not exist.
+
+### What is still true
+
+No decision has been recorded. Every item in this register is Outstanding. The
+`## Decisions` section above remains empty, and the first entry appended under its marker
+will be the first advisor answer this project has ever recorded.
