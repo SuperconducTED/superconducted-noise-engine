@@ -1,15 +1,14 @@
-run-token: 2026-09-13T13:17:14Z-208365
-outcome: ok: chore: phase-3 dashboard: state moved (2026-09-13)
+run-token: 2026-09-14T05:40:55Z-1870
+outcome: ok: chore: phase-3 dashboard: state moved (2026-09-14)
 
-**10/28 milestone gates met** · 17 days to 2026-09-30 · calendar 39% burned against 36% of gates, 3 points behind.
+**10/28 milestone gates met** · 16 days to 2026-09-30 · calendar 43% burned against 36% of gates, 7 points behind.
 
-**Since 2026-09-12:** #73 Filter noise by physical gate semantics: ready to start to in review.
+**Since 2026-09-13:** nothing moved.
 
 **Needs attention**
-- M0 (Queue clear) is 8 days past its 2026-09-05 target at 7/8
-- M1 (Contracts and instruments) is 2 days past its 2026-09-11 target at 1/5
+- M0 (Queue clear) is 9 days past its 2026-09-05 target at 7/8
+- M1 (Contracts and instruments) is 3 days past its 2026-09-11 target at 1/5
 - PR #79 (#58) conflicts with main, so its checks are not evidence and it cannot merge
-- PR #68 (#59) conflicts with main, so its checks are not evidence and it cannot merge
 - #63 is ready and holds up #60 (Baha Jarad)
 
 **Next action per person**

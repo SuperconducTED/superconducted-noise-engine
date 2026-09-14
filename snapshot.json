@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-13 13:17 UTC",
+  "generated": "2026-09-14 05:41 UTC",
   "main": {
     "sha": "004e14ed",
     "date": "2026-09-11",
@@ -332,18 +332,18 @@
           "createdAt": "2026-09-04T13:03:49Z",
           "headRefName": "feature/issue-59-parameterization",
           "isDraft": true,
-          "mergeable": "CONFLICTING",
+          "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 68,
           "reviewDecision": "APPROVED",
           "state": "OPEN",
           "title": "Feature/issue 59 parameterization",
-          "updatedAt": "2026-09-09T15:29:14Z",
+          "updatedAt": "2026-09-13T23:09:36Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/68",
-          "headRefOid": "5395e11df9a387f1bb13620316b6f89dd4a46102",
-          "additions": 4323,
-          "deletions": 2,
-          "file_count": 9,
+          "headRefOid": "0da080da6a98bd297c40c1d7f57500b9cc82d1a4",
+          "additions": 1552,
+          "deletions": 0,
+          "file_count": 5,
           "latest_reviews": [
             {
               "who": "BurakOztekin",
@@ -363,37 +363,37 @@
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-08T19:39"
+              "started": "2026-09-13T22:56"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-08T19:39"
+              "started": "2026-09-13T22:56"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-08T19:39"
+              "started": "2026-09-13T22:56"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-08T19:39"
+              "started": "2026-09-13T22:56"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-08T19:39"
+              "started": "2026-09-13T22:56"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-09-08T19:40"
+              "started": "2026-09-13T22:57"
             }
           ],
-          "checks_newest": "2026-09-08T19:40",
+          "checks_newest": "2026-09-13T22:57",
           "checks_failing": [],
-          "checks_stale_vs_main": true
+          "checks_stale_vs_main": false
         }
       ],
       "merged_pr": null,
@@ -404,14 +404,6 @@
         {
           "severity": "high",
           "text": "Still a draft: CI and reviewers will not treat it as ready."
-        },
-        {
-          "severity": "critical",
-          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
-        },
-        {
-          "severity": "high",
-          "text": "Its green checks last ran 2026-09-08T19:40 against a main that has moved since; they are not evidence about the merge result."
         }
       ],
       "declared_unblocks": [
@@ -1569,7 +1561,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -8
+      "days_left": -9
     },
     {
       "id": "M1",
@@ -1611,7 +1603,7 @@
       "done": 1,
       "total": 5,
       "status": "partial",
-      "days_left": -2
+      "days_left": -3
     },
     {
       "id": "M2",
@@ -1654,7 +1646,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": 5
+      "days_left": 4
     },
     {
       "id": "M3",
@@ -1702,7 +1694,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": 12
+      "days_left": 11
     },
     {
       "id": "M4",
@@ -1740,7 +1732,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": 17
+      "days_left": 16
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-13 13:17 UTC · main at `004e14ed` (2026-09-11) · 17 days to 2026-09-30_
+_Generated 2026-09-14 05:41 UTC · main at `004e14ed` (2026-09-11) · 16 days to 2026-09-30_
 
 
 ## Milestones
@@ -125,9 +125,7 @@ _Generated 2026-09-13 13:17 UTC · main at `004e14ed` (2026-09-11) · 17 days to
 
 **#59: Manual MF parameterization from the archive** (@yigit-arda)
 
-- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [high] Still a draft: CI and reviewers will not treat it as ready.
-- [high] Its green checks last ran 2026-09-08T19:40 against a main that has moved since; they are not evidence about the merge result.
 
 **#61: ADR-011 evidence + premise gradients** (@bengisucvd)
 
@@ -163,6 +161,7 @@ _Generated 2026-09-13 13:17 UTC · main at `004e14ed` (2026-09-11) · 17 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-14 | 10/28 | 10 | 3 | 4 | nothing moved |
 | 2026-09-13 | 10/28 | 10 | 3 | 4 | #73 Filter noise by physical gate semantics: ready to start to in review |
 | 2026-09-12 | 10/28 | 11 | 2 | 4 | +1 milestone gate (9 to 10 of 28); M2 1/5 to 2/5; #48 Pipeline-health dashboard: in review to closed; #63 Training-set builder (training/dataset.py): blocked upstream to ready to start; main moved to 004e14ed |
 | 2026-09-11 | 9/28 | 10 | 3 | 5 | +1 milestone gate (8 to 9 of 28); M2 0/5 to 1/5; #48 Pipeline-health dashboard: ready to start to in review; #49 Scheduled backfill sweep: in review to closed; main moved to 75dfdae3 |
