@@ -125,8 +125,16 @@ fuzzy / epistemic uncertainty manifests across ensemble members.
 ## Calibration polling
 
 The `superconducted-poll` console script archives `BackendProperties`
-snapshots so the team accumulates the ≥630 historical records needed
-for ANFIS training (≈ 126 trainable parameters × 5× rule of thumb).
+snapshots so the team accumulates the historical records needed for
+ANFIS training. The floor is **≥ 1170 distinct device states**, derived
+as the rule base's measured trainable-parameter count times the 5×
+samples-per-parameter rule of thumb — see `docs/numerical-claims.md`
+NC-045 for the measurement and NC-012 for the floor. This sentence read
+"≥630 ... (≈ 126 trainable parameters × 5× rule of thumb)" from
+2026-05-07 until 2026-09-09; no file ever derived that 126, and the
+measured count is 234 (NC-045). The floor moves with membership-function
+shape (NC-046), and ADR-009 is still `Open`, so it is stated against the
+configuration currently in use.
 
 - **Cadence**: cron-driven; one invocation per polling round. The
   script does NOT schedule itself. In cycle 1, polling runs hourly

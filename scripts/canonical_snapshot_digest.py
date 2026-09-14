@@ -20,6 +20,12 @@ which serialisation order was in force when each side was written. Everything
 else is already canonical — ``storage.py`` dumps with ``sort_keys=True``, and
 the nested lists inside ``properties`` arrive from IBM in a fixed order.
 
+The payload comparison used across fetch paths (``--payload-only``,
+``--compare-reread``) normalises one more provenance-dependent field for the
+same reason: each parameter's own ``date``. The history endpoint re-stamps the
+entries it synthesises, so a backfilled re-read of a document already archived
+differs in those stamps while every measurement matches. See ``_payload_body``.
+
 Contract: reads only, prints only. ``--compare A B`` exits **0** when the two
 snapshots are the same document, **1** when they differ, and **2** when either
 side could not be read or parsed — so it can be used directly as a shell
@@ -66,13 +72,102 @@ def _load(path: str | Path) -> dict[str, Any]:
     return doc
 
 
+def _strip_parameter_dates(node: Any) -> Any:
+    """Return ``node`` with the ``date`` dropped from every parameter record.
+
+    A parameter record is any dict carrying a ``value``. Inside ``properties``
+    that is exactly the three places IBM puts them — ``qubits[][]``,
+    ``gates[].parameters[]`` and ``general[]`` — each of shape
+    ``{date, name, unit, value}``. Keying on ``value`` rather than on those
+    three paths keeps the rule from touching anything else: ``last_update_date``
+    is a different key on a dict that has no ``value``, and a gate's own
+    ``name``/``gate``/``qubits`` survive untouched. It also survives IBM moving
+    a parameter block, which a hard-coded path list would not.
+
+    Pure: builds new containers rather than mutating the document, because the
+    caller still has to write that document out with its dates intact.
+    """
+    if isinstance(node, list):
+        return [_strip_parameter_dates(item) for item in node]
+    if not isinstance(node, dict):
+        return node
+    is_parameter = "value" in node
+    return {
+        key: _strip_parameter_dates(value)
+        for key, value in node.items()
+        if not (is_parameter and key == "date")
+    }
+
+
+def _payload_body(doc: dict[str, Any]) -> str:
+    """The canonical byte-string for the calibration payload alone.
+
+    Per-parameter ``date`` is normalised away, for the same reason
+    ``canonical_digest`` normalises ``target.operations`` order: it is decided
+    by which endpoint answered, not by the measurement. The live properties
+    endpoint returns IBM's stored document; the history endpoint reassembles
+    one, and re-stamps the entries it synthesises. Backfill run 34058863047
+    hit this on ``ibm_fez`` ``20260813T220506000000Z``: same
+    ``last_update_date``, same 156/1952/449 shape, ``qubits`` and ``general``
+    exactly equal, and 26 gate entries differing in nothing but a ``date``
+    about 11 minutes apart. Those 26 were *exactly* the 26 entries carrying
+    the ``gate_error = 1`` placeholder that means "not calibrated" — no
+    measured entry differed. Hashing that stamp made a re-read of a document
+    we already hold look like divergence and put a file in ``collisions/``,
+    the channel ADR-025 reserves for the real thing.
+
+    ``date`` is the only field dropped. Comparing values alone was the other
+    candidate and is worse: it would call a ``T1`` in ``us`` equal to one in
+    ``ns``, and a ``T1``/``T2`` swap equal to neither having moved. ``name``,
+    ``unit`` and ``value`` are measurement; only ``date`` is provenance.
+    """
+    return json.dumps(
+        {"properties": _strip_parameter_dates(doc.get("properties"))},
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
 def _payload_digest(doc: dict[str, Any]) -> str:
     """SHA-256 of the calibration payload alone."""
-    body = json.dumps({"properties": doc.get("properties")}, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(_payload_body(doc).encode("utf-8")).hexdigest()
+
+
+def qubit_digest(payload: dict[str, Any]) -> str:
+    """Return the canonical SHA-256 digest of a snapshot's qubit block.
+
+    This is the stable NC-025 definition of a device state. Invalid or missing
+    qubit data is undecidable, never a shared phantom digest.
+
+    Per-parameter ``date`` is normalised away through ``_strip_parameter_dates``,
+    for the same reason ``_payload_body`` drops it and by the same code, so this
+    module holds one answer to "is a parameter's ``date`` measurement?" rather
+    than two. The answer differs by *question*, not by scope: the full document
+    digest keeps ``date`` because it compares two live payloads and wants any
+    difference in front of a human, whereas this counts *device states*, where
+    a re-measurement that reproduced the identical value is the same state and
+    a history-endpoint re-stamp is provenance rather than a new measurement.
+    Counting one as two inflates ``states_total`` against a training floor whose
+    own caveat already says distinct is only an upper bound on independent.
+
+    The archive as it stands does not distinguish the two: over 60 consecutive
+    documents at ``f0930b9`` both definitions give 34 distinct states and no
+    pair merges only under stripping. That is what makes this safe to align
+    now; it is not a licence to leave two definitions in place, because
+    ``scope="qubits"`` feeds an **append-only** index that no later fix can
+    repair without a full ``--rebuild``.
+    """
+    properties = payload.get("properties")
+    if not isinstance(properties, dict) or not isinstance(properties.get("qubits"), list):
+        raise ValueError("snapshot properties.qubits must be a list")
+    qubits = _strip_parameter_dates(properties["qubits"])
+    body = json.dumps(qubits, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(body.encode("utf-8")).hexdigest()
 
 
-def canonical_digest(path: str | Path, *, payload_only: bool = False) -> str:
+def canonical_digest(
+    path: str | Path, *, payload_only: bool = False, scope: str = "document"
+) -> str:
     """SHA-256 of the snapshot with ``target.operations`` put in a fixed order.
 
     With ``payload_only``, digest **only** ``properties`` — the calibration
@@ -83,18 +178,42 @@ def canonical_digest(path: str | Path, *, payload_only: bool = False) -> str:
     document fetched two ways compares unequal in full while its measurements
     are identical. Comparing in full is right for two live payloads and wrong
     across fetch paths; this mode is what makes the difference visible.
+
+    ``payload_only`` also drops each parameter's ``date`` — see
+    ``_payload_body``. The full digest deliberately keeps it: that is the
+    live-vs-live comparison, where the safe answer is ``collision`` and a
+    difference of any kind belongs in front of a human.
+
+    With ``scope="qubits"`` the digest covers ``properties.qubits`` alone and
+    also drops per-parameter ``date``; see ``qubit_digest`` for why that is
+    the right answer for counting device states and the wrong one for the
+    collision path. ``payload_only`` and ``scope="qubits"`` both narrow what is
+    hashed, so combining them raises rather than silently applying one.
     """
     with Path(path).open(encoding="utf-8") as fh:
         doc = json.load(fh)
 
+    if scope not in {"document", "qubits"}:
+        raise ValueError(f"unknown digest scope: {scope}")
+    if scope == "qubits":
+        if payload_only:
+            # The CLI rejects this pair at line ~254; the importable API must
+            # agree, because silently honouring the narrower of two narrowing
+            # flags is the kind of guess this module exits 2 rather than make.
+            raise ValueError("payload_only and scope='qubits' both narrow the digest; pick one")
+        return qubit_digest(doc)
     if payload_only:
-        doc = {"properties": doc.get("properties")}
+        # Same byte-string as `_payload_digest`, deliberately: `--payload-only`
+        # and `--compare-reread` answer the same question about the same pair,
+        # and two copies of this line is how the per-parameter `date` came to
+        # be normalised in neither.
+        payload = _payload_body(doc)
     else:
         target = doc.get("target")
         if isinstance(target, dict) and isinstance(target.get("operations"), list):
             target["operations"] = sorted(target["operations"], key=_operation_key)
+        payload = json.dumps(doc, sort_keys=True, separators=(",", ":"))
 
-    payload = json.dumps(doc, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -139,6 +258,12 @@ def main(argv: Iterable[str] | None = None) -> int:
         "configuration. Use to compare a historical fetch against a live one.",
     )
     parser.add_argument(
+        "--scope",
+        choices=("document", "qubits"),
+        default="document",
+        help="Digest the canonical document (default) or properties.qubits only.",
+    )
+    parser.add_argument(
         "--compare-reread",
         action="store_true",
         help="Two paths NEW ARCHIVED: exit 0 only if NEW is a lossy historical re-read "
@@ -154,6 +279,13 @@ def main(argv: Iterable[str] | None = None) -> int:
         parser.error("--compare-reread takes exactly two paths")
     if args.compare and args.compare_reread:
         parser.error("--compare and --compare-reread are mutually exclusive")
+    if args.compare_reread and args.scope != "document":
+        parser.error("--compare-reread only supports --scope document")
+    if args.payload_only and args.scope != "document":
+        # Both flags narrow what is hashed, and --scope qubits is the narrower of
+        # the two, so combining them silently ignored --payload-only. This module
+        # exits 2 rather than guess anywhere else; it must not guess here either.
+        parser.error("--payload-only only supports --scope document")
 
     if args.compare_reread:
         try:
@@ -167,7 +299,10 @@ def main(argv: Iterable[str] | None = None) -> int:
         return 0 if _payload_digest(new_doc) == _payload_digest(archived_doc) else 1
 
     try:
-        digests = [canonical_digest(p, payload_only=args.payload_only) for p in args.paths]
+        digests = [
+            canonical_digest(p, payload_only=args.payload_only, scope=args.scope)
+            for p in args.paths
+        ]
     except (OSError, ValueError) as exc:
         # ValueError covers both json.JSONDecodeError and UnicodeDecodeError. The
         # latter matters: without it a non-UTF-8 payload escapes as a traceback,

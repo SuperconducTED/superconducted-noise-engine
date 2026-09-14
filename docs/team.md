@@ -4,7 +4,7 @@
 
 | Name | GitHub | Role | Primary modules |
 | --- | --- | --- | --- |
-| Dr. Fırat Akba | **none — reviews out-of-band** | Faculty advisor | Reviews `docs/architecture.md` and architectural ADRs |
+| Dr. Fırat Akba | **none — reviews out-of-band; sign-off recorded in `docs/advisor/2026-09-03-decisions-from-akba.md`** | Faculty advisor | Reviews `docs/architecture.md` and architectural ADRs |
 | Mert Efe Şensoy | `@mertefesensoy` | CS junior | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger |
 | Burak Öztekin | `@BurakOztekin` | CS&EE senior | `fuzzy/tsk.py` (LOCKED), `fuzzy/fuzzification.py`, `integration/aer_factory.py`, `benchmarks/harness.py` |
 | Baha Jarad | `@BahaJarad` | CS&EE junior | `calibration/poller.py`, `calibration/storage.py`, `calibration/features.py` |
@@ -69,8 +69,9 @@ collaborator — see "Reviews from outside GitHub" below.
 
 ## Documentation conventions
 
-Three house rules the cycle-2 opening batch surfaced. Ratified here so they are
-enforceable in review rather than re-litigated per PR.
+Five house rules. The first three were surfaced by the cycle-2 opening batch; the
+last two were added by Issue #56 FR-6 Part 3, which the phase-3 tickets cite. All
+are ratified here so they are enforceable in review rather than re-litigated per PR.
 
 - **Dated docs are append-only.** A dated document under `docs/roadmap/` or
   `docs/state-of-the-project/` is updated by appending a new as-of-stamped
@@ -100,9 +101,46 @@ enforceable in review rather than re-litigated per PR.
   used across the cycle-2 openers, and keeps callouts greppable and legible in
   terminals and diffs where emoji render inconsistently or not at all.
 
+- **Allocate ADR and NC identifiers at merge time, never in a draft.** Write
+  "the next free ADR id at merge time" in a branch and pick the actual number
+  when the PR is about to merge, renumbering if a concurrent branch took it
+  first. Two branches that each append "the next id" to a different decision
+  produce the same number against different content, and git shows only a text
+  conflict, so the collision survives a clean merge. This happened on
+  2026-08-31; the incident and the branch reissue it forced are written up in
+  `docs/implementations/2026-08-31-adr-nc-collision-and-branch-reissue.md`.
+  `scripts/check_ids.py` runs in CI and fails on a duplicate or colliding
+  identifier, but it cannot tell you which of two claimants should renumber, so
+  the rule still has to be followed by hand.
+
+- **Verification is batched on Burak's desktop, not filed per PR.** Canonical
+  verification runs on @BurakOztekin's desktop in two batches per phase, one
+  after M2 and one after M3. Each batch produces a single
+  `docs/verification/2026-09-XX-phase-3-batch-N-burak-desktop.md` covering every
+  PR merged since the previous batch. **A PR's numbers are verified when they
+  appear in the next batch record**, not when a per-PR record exists; there is
+  no per-PR verification record any more. The three
+  `docs/verification/2026-08-*-burak-desktop.md` files are the per-PR shape this
+  convention replaces, and they are kept as the file-shape precedent. Runs on any
+  other machine, the lead's laptop included, stay **provisional** and are cited
+  as such with the machine named; the batch record is the source of truth. Do not
+  claim a number is canonically verified before its batch record merges.
+
 ## Updating this file
 
 Update this file when:
 - A team member joins or leaves.
 - Module ownership shifts (record the date in the PR description).
 - A new module appears in the source tree — add a row before merging.
+
+**Package `__init__.py` files** (Issue #57 FR-14, settled 2026-09-08). The rule
+above says "a new module", and until Issue #57 the table listed no `__init__.py`
+at all although six package files existed, so "every module" and the practice
+disagreed. The settled reading is **(a)**: a package gets **one row naming the
+package**, which covers its `__init__.py` along with the modules listed beside
+it — as the `training/` row does. Reading (b), declaring docstring-only
+`__init__.py` files out of scope, was rejected because it leaves the ownership
+of a re-export surface unstated, and a package root that re-exports the ABCs is
+exactly where a cross-cutting change can hide. The six pre-existing package
+files are covered by their directory's row where one exists; adding rows for
+the rest is housekeeping, not a blocker on any ticket.
