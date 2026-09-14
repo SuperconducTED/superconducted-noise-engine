@@ -198,6 +198,15 @@ Expected, and measured on 2026-09-14:
 | `pytest` | **465 passed in 49.42s**, none skipped, none failed |
 | `check_ids.py` | `No duplicate or colliding ADR / NC identifiers.` |
 
+**Confirmed by CI, which is the authority.** PR #98 at `72cd567` ran all six checks green:
+`test (3.11)` and `test (3.12)` on `ubuntu-latest` both report **465 passed** (`15.45s` on
+3.12), alongside CodeQL and the two `Analyze` jobs. Every check run carries
+`head_sha = 72cd567`, which is the check that matters here: this repository has a failure
+mode where `ci.yml` does not dispatch on a conflicted PR while CodeQL keeps passing, so
+green checks can mean no tests ran. They ran, on this code, and `main` was still at
+`004e14e` at that moment, so the result describes the tree that will actually merge rather
+than a superseded one.
+
 The full run passing on Windows is worth one line, because the register's own NC-021 Notes
 record 8 `tests/test_file_snapshots.py` failures on this platform from an earlier round.
 They did not reproduce here. The interpreter is a clean CPython 3.12.10 at a short path
