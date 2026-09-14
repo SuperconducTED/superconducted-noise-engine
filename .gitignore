@@ -8,6 +8,7 @@ build/
 dist/
 .pytest_cache/
 .pytest-tmp/
+.pytest-tmp-*/
 pytest-cache-files-*/
 .mypy_cache/
 .ruff_cache/
@@ -41,7 +42,6 @@ qiskit-ibm.json
 # Calibration data — track only the .gitkeep so the directory survives
 data/*
 !data/.gitkeep
-
 
 
 

@@ -152,12 +152,12 @@ class TestBasicCalibrationVectorizer:
                     [
                         {"name": "T1", "value": 100e-6},
                         {"name": "T2", "value": float("nan")},
-                        {"name": "readout_error", "value": 0.01},
+                        {"name": "readout_error", "unit": "", "value": 0.01},
                     ],
                     [
                         {"name": "T1", "value": 90e-6},
                         {"name": "T2", "value": 80e-6},
-                        {"name": "readout_error", "value": 0.02},
+                        {"name": "readout_error", "unit": "", "value": 0.02},
                     ],
                 ]
             },

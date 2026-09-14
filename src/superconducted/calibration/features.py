@@ -17,7 +17,7 @@ import numpy.typing as npt
 
 from ..interfaces import CalibrationFeatureExtractor
 from ..types import CalibrationSnapshot
-from .loader import ParsedCalibrationSnapshot
+from .loader import _EXPECTED_UNITS, _UNIT_SCALE, CalibrationParseError, ParsedCalibrationSnapshot
 
 _DEFAULT_SCHEMA_VERSION: str = "1.0.0"
 _FEATURE_NAMES: tuple[str, ...] = ("mean_T1", "mean_T2", "mean_readout_error")
@@ -47,6 +47,11 @@ class BasicCalibrationVectorizer(CalibrationFeatureExtractor):
     non-finite per-qubit values are dropped before averaging. Raises
     :class:`ValueError` if any of the three feature lists is empty after
     filtering — the caller can decide whether to skip the snapshot.
+
+    Coherence outputs are SI seconds; readout error is dimensionless.
+    Declared units must match the loader's expected units. Legacy entries
+    without a unit are treated as already SI. Invalid declared units raise
+    :class:`CalibrationParseError`, even when the value would be skipped.
     """
 
     @property
@@ -62,12 +67,26 @@ class BasicCalibrationVectorizer(CalibrationFeatureExtractor):
         t1_values: list[float] = []
         t2_values: list[float] = []
         readout_values: list[float] = []
-        for qubit_props in qubits_section:
+        for qubit_index, qubit_props in enumerate(qubits_section):
             for nduv in qubit_props:
                 name = nduv.get("name")
+                if name not in ("T1", "T2", "readout_error"):
+                    continue
+                scale = 1.0
+                if "unit" in nduv:
+                    unit = nduv["unit"]
+                    expected_unit = _EXPECTED_UNITS[name]
+                    if unit != expected_unit:
+                        raise CalibrationParseError(
+                            f"backend {snapshot.backend!r} at {snapshot.timestamp.isoformat()}: "
+                            f"qubit {qubit_index} field {name!r}: expected unit "
+                            f"{expected_unit!r}, got {unit!r} (value={nduv.get('value')!r})"
+                        )
+                    scale = _UNIT_SCALE[expected_unit]
                 value = _coerce_finite_float(nduv.get("value"))
                 if value is None:
                     continue
+                value *= scale
                 if name == "T1":
                     t1_values.append(value)
                 elif name == "T2":

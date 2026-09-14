@@ -270,7 +270,7 @@ def _synthetic_snapshot() -> CalibrationSnapshot:
                 [
                     {"name": "T1", "value": 50e-6},
                     {"name": "T2", "value": 50e-6},
-                    {"name": "readout_error", "value": 0.01},
+                    {"name": "readout_error", "unit": "", "value": 0.01},
                 ]
             ]
         },
