@@ -518,6 +518,62 @@ the standing verdict; the 2026-09-08 `COMMENTED` review does not supersede it,
 and pushing fixes never clears a changes-request under this repository's ruleset.
 @bengisucvd has not yet reviewed and owns decision 3 with a share of decision 1.
 
+## As of 2026-09-14, recovered after the force-push
+
+Nothing above this line is edited. The rows in the 2026-09-08 sections describe
+the tree at `5395e11` and stay as written; this section records what moved under
+them.
+
+**What happened.** `feature/issue-59-parameterization` was force-pushed at
+2026-09-13T22:53:56Z. The push dropped `cd32c88`, `bd5f334`, `764f9c8`,
+`a0a13d8` and `0989949`, and with them the approved tips `3f5e0f9` and
+`5395e11`. None is an ancestor of the resulting head `0da080d`, and none had
+ever reached `main` or any remote branch, so this document, the 975-row survey,
+`tests/test_parameterization.py`, the NC rows and the `docs/team.md` row existed
+only in one laptop's object store between that push and this recovery. GitHub
+still reported the PR as `APPROVED` and `CLEAN`, because the `main` ruleset does
+not dismiss stale reviews on push: the two approvals pointed at a tree that no
+longer existed.
+
+**What this branch is.** `mert/issue-59-recover-5395e11` is `5395e11` with
+`main` @ `004e14e` merged in at `e3bd6a0`. It is the same deliverable, revalidated
+against 87 commits of `main` that landed after the branch's previous merge base
+`645b4d1`.
+
+**NC-021.** The `485` this document records at `3f5e0f9` is superseded. It
+described a tree based on `645b4d1` that nobody will merge, which is the failure
+mode NC-021's own note already records for the pre-rebase `379` at `51140cd`.
+Re-measured at the merge commit `e3bd6a0` per Rule 6 and recorded in the commit
+after it: **590** collected, 590 passed. The 125 tests this ticket adds (97 in
+`tests/test_parameterization.py`, 28 in `tests/test_feature_distribution.py`)
+are unchanged; only the base moved, from 360 to `main`'s 465.
+
+**NC-041 to NC-044 survived the id race.** `main` renumbered its own NC-042 to
+NC-047 before merging, explicitly to leave this block free, so the merge
+introduced no collision. `python scripts/check_ids.py` passes at `e3bd6a0`.
+
+**Decision 2 is still Burak's to close, and this tree still lets him close it
+either way.** @bengisucvd's decision record of 2026-09-13 ratified decisions 1
+and 3 and, for decision 2, recommended retaining half-reach slopes for all three
+features, asking @BurakOztekin to confirm or reject as the decision owner. This
+tree ships what the ticket recommended and what the 2026-09-08 record describes:
+the onsets are measured, four of the nine fall inside their box, so all three
+features take the per-feature equal-slope fallback, and the keyword-only
+`tanh_slopes` argument makes the counterfactual runnable. Bengisu measured her
+comparison at `5395e11` over the 975-row survey at `calibration-data@3d1569d`,
+which is exactly this tree, so her numbers describe what is here. They did not
+describe `0da080d`, where the survey is 930 rows from an unnamed ref.
+
+**The M2 shapes are deliberately absent.** `TriangularMF`, `TrapezoidalMF` and
+`TanhBellMF` raise `NotImplementedError` here, which is architect decision C3's
+M1 split. Yiğit's `e503e1e` implemented them on the force-pushed head, but put
+the triangular and trapezoidal feet on the bin edges rather than at
+`c_j ± 2 r_j` and `c_j ± 1.5 r_j`; measured on the committed quantiles, every
+level reads exactly `0.0` at every bin edge, so FR-9's bin-cover rule fails and
+`WeightedAverageDefuzzifier` raises `ZeroDivisionError` at the clamped corner.
+Carrying that commit across would have imported the defect, so M2 lands
+separately once the mapping matches section 6.3.
+
 ## Related docs
 
 - Issue #59 (this ticket), Issue #31 (the `endpoint`/`interior` layouts kept as
