@@ -170,10 +170,20 @@ Measured at `e3bd6a0` in a clean CPython 3.12.10 interpreter at a short path:
 | `mypy` (strict, `[tool.mypy] files`) | Success, no issues in 37 source files |
 | `scripts/check_ids.py` | No duplicate or colliding ADR / NC identifiers |
 
-All 590 also pass on Windows in that interpreter. `ubuntu-latest` remains the
-authority for the pass count per NC-021. These are provisional laptop
-measurements; canonical verification is the next phase-3 batch record of
-@BurakOztekin per architect decision C2 and `docs/team.md`.
+All 590 also pass on Windows in that interpreter.
+
+`ubuntu-latest` is the authority for the pass count per NC-021, and it agrees.
+Both `test (3.11)` and `test (3.12)` on the PR #97 CI report **589 passed, 1
+skipped** at `fbfe67a`, which is the same 590 collected. The single skip is
+`tests/test_feature_distribution.py::test_the_committed_survey_reproduces_from_the_archive`,
+the `slow` test that re-walks the pinned `calibration-data` ref and skips when
+that ref is not fetched on the runner. The laptop run had the archive fetched, so
+it executed that test and reached 590 passed. Nothing is skipped for a reason
+other than archive reachability.
+
+The laptop figures remain **provisional**; canonical verification is the next
+phase-3 batch record of @BurakOztekin per architect decision C2 and
+`docs/team.md`.
 
 Reproducing the two claims this record makes about the force-pushed head:
 
