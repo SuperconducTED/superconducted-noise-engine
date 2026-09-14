@@ -15,8 +15,9 @@ risk. That historical document is unchanged.
 | --- | --- |
 | `src/superconducted/calibration/features.py` | Validates declared units using the loader's expected-unit table and scales to SI using its conversion table. |
 | `scripts/first_ensemble_run.py` | Synthetic coherence inputs use `50e-6` in implicit SI seconds; readout error declares its dimensionless unit. |
-| `tests/conftest.py` | Shared dummy snapshot uses `XXXe-6` SI coherence values without unit fields. |
+| `tests/conftest.py` | Shared dummy snapshot drops the unit fields from T1 (`100e-6`, `110e-6`) and T2 (`80e-6`, `90e-6`), leaving them as unitless SI seconds. |
 | `tests/calibration/test_vectorizer_units.py` | Checks real-fixture agreement, grid firing and viable ensembles for both placements, invalid units and preservation of synthetic SI values. |
+| `src/superconducted/calibration/loader.py` | Review follow-up: `_EXPECTED_UNITS` and `_UNIT_SCALE` are renamed to public `EXPECTED_UNITS` and `UNIT_SCALE`, so the feature layer shares one table instead of importing another module's privates. Parsing behaviour is unchanged. |
 | `docs/decisions.md` | Clarifies ADR-010 units and tracks parser convergence under ADR-013. |
 | `docs/numerical-claims.md` | Registers the corrected reduced-fixture measurement and updates NC-021 differentially. |
 
@@ -46,7 +47,8 @@ quoted in the issue.
 Use option A as recommended by the issue. Option B (typed snapshot consumption)
 is tracked in the ADR-013 revisit note because it changes an ABC signature and
 requires reconciling parsing policies. Option C would retain inconsistent unit
-conventions. The loader, locked TSK and Kraus implementations are unchanged.
+conventions. The loader's parsing behaviour is unchanged, as are the locked TSK and Kraus
+implementations; the loader's only edit is the constant rename noted above.
 
 ## Verification
 
@@ -75,6 +77,44 @@ extract with `BasicCalibrationVectorizer`, and evaluate a `TSKRuleBase.from_grid
 with `_default_mfs_for_feature(name)` for each `feature_names` entry and
 `output_dim=2`; sum `evaluate(features).firing_strengths`. The regression tests
 compare coherence means directly to `load_snapshot` plus `mean_t1`/`mean_t2`.
+
+### Review verification, 2026-09-14
+
+The run above is the author's. It is recorded as measured and is not restated
+here. It used Python 3.14, which is outside what this project gates on:
+`.github/workflows/ci.yml` runs a 3.11 and 3.12 matrix, `pyproject.toml`
+declares `requires-python = ">=3.11"` with classifiers to 3.12, and
+`[tool.mypy]` pins `python_version = "3.11"`. So it is recorded as
+supplementary, and CI is the authority.
+
+Re-measured during review in a clean CPython 3.12.10 virtual environment at a
+short path (not the repository `.venv`, per the NC-021 note on that
+environment), running the same commands CI runs rather than per-file subsets:
+
+```bash
+ruff check .                       # All checks passed
+ruff format --check .              # 3 pre-existing files, identical on main
+python scripts/check_ids.py        # No duplicate or colliding ADR / NC identifiers
+mypy --strict                      # Success: no issues found in 35 source files
+pytest tests/ --collect-only -q -o addopts="" -p no:cacheprovider
+pytest tests/ -q -o addopts="" -p no:cacheprovider
+```
+
+Collection and full run both report **483**, matching the author's figure.
+`ruff format --check .` reports `docs/implementations/2026-09-06-*.md`,
+`docs/implementations/2026-09-08-*.md` and `tests/fixtures/calibration/README.md`;
+all three report identically at `004e14ed`, so they are pre-existing and not
+introduced here. `mypy --strict` needs `--python-version 3.12` locally because
+numpy 2.5.2's stubs use `type` statements that the configured 3.11 target
+rejects while parsing them; that failure also reproduces at `004e14ed` and is an
+environment artefact, not a finding against this branch. CI is green on both the
+3.11 and 3.12 legs.
+
+NC-052 was reproduced independently from the committed fixture and agrees to the
+last digit: T1 `0.0001551924205171878` s, T2 `0.00010959537464376821` s, readout
+error `0.03532605293469551`, endpoint-grid firing sum `0.10769113232875129`. The
+one-argument `_default_mfs_for_feature(name)` recipe above is correct because
+`DEFAULT_MF_PLACEMENT` is `endpoint`.
 
 ## Related docs
 

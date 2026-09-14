@@ -66,7 +66,12 @@ class CalibrationParseError(ValueError):
 # fields *in* this mapping, a unit mismatch is a hard parse error: the
 # loader scales by a fixed factor and a wrong unit silently corrupts
 # every downstream computation.
-_EXPECTED_UNITS: Final[Mapping[str, str]] = {
+#
+# Public rather than underscore-private: `calibration/features.py` validates
+# the same three fields against the same table (issue #66). One shared table
+# is the point, because two copies of "T1 is microseconds" is precisely the
+# class of defect that issue exists to close. Treat edits here as cross-module.
+EXPECTED_UNITS: Final[Mapping[str, str]] = {
     "T1": "us",
     "T2": "us",
     "readout_length": "ns",
@@ -77,8 +82,9 @@ _EXPECTED_UNITS: Final[Mapping[str, str]] = {
 }
 
 # Conversion factors from the source unit to SI (seconds) for time
-# fields. Dimensionless fields are stored as-is.
-_UNIT_SCALE: Final[Mapping[str, float]] = {
+# fields. Dimensionless fields are stored as-is. Public for the same reason
+# as EXPECTED_UNITS above.
+UNIT_SCALE: Final[Mapping[str, float]] = {
     "us": 1e-6,
     "ns": 1e-9,
     "": 1.0,
@@ -210,7 +216,7 @@ def _parse_value(
 
     Returns a :class:`ParsedFieldValue`. ``value`` is ``None`` for
     explicit-null inputs, ``float('nan')`` for NaN inputs, and otherwise
-    a finite float scaled by :data:`_UNIT_SCALE`.
+    a finite float scaled by :data:`UNIT_SCALE`.
     """
     if actual_unit != expected_unit:
         raise CalibrationParseError(
@@ -241,7 +247,7 @@ def _parse_value(
         return ParsedFieldValue(value=float("nan"), was_explicit_null=False, was_nan=True)
 
     return ParsedFieldValue(
-        value=as_float * _UNIT_SCALE[expected_unit],
+        value=as_float * UNIT_SCALE[expected_unit],
         was_explicit_null=False,
         was_nan=False,
     )
@@ -311,7 +317,7 @@ def load_snapshot(path: str | pathlib.Path) -> ParsedCalibrationSnapshot:
 
     backend_name = str(data.get("backend") or properties.get("backend_name") or "")
 
-    absent_counts: dict[str, int] = dict.fromkeys(_EXPECTED_UNITS, 0)
+    absent_counts: dict[str, int] = dict.fromkeys(EXPECTED_UNITS, 0)
     explicit_null_counts: dict[str, int] = {}
     nan_counts: dict[str, int] = {}
 
@@ -324,7 +330,7 @@ def load_snapshot(path: str | pathlib.Path) -> ParsedCalibrationSnapshot:
                 by_name[name] = entry
 
         field_values: dict[str, float | None] = {}
-        for field_name, expected_unit in _EXPECTED_UNITS.items():
+        for field_name, expected_unit in EXPECTED_UNITS.items():
             entry = by_name.get(field_name)
             if entry is None:
                 absent_counts[field_name] += 1
