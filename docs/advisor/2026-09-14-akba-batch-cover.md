@@ -1,187 +1,192 @@
-# Danışman toplu mesajı, kapak yazısı (2026-09-14)
+# Danışman toplu mesajı (2026-09-14)
 
-> **NOTE · What this file is.** The Turkish cover message for the single batched advisor
-> request of Issue #56 FR-12. It is the text @mertefesensoy pastes into the message he
-> sends Dr. Akba; the six HTML files of `docs/advisor/2026-09-09-akba-brief/` ride with it
-> unchanged. It is committed so the repository records what was circulated, not only that
-> something was.
+> **NOTE · What this file is.** The **exact plain-text e-mail to be sent** to Dr. Fırat
+> Akba for Issue #56 FR-12's single batched advisor request. It is committed so the
+> repository records what was circulated, not only that something was. The body below is
+> the message verbatim: if what actually goes out differs from it in any way, this file is
+> wrong and gets corrected, not the other way round. **As of this commit it has not been
+> sent.**
 >
-> **NOTE · This cover does not edit the 2026-09-09 cluster.** The cluster is a dated
-> document. Where a date in its own decision calendar is superseded, this file says so and
-> the cluster stays exactly as written. The authority for a decision-by date is
-> `docs/advisor/2026-09-03-decisions-from-akba.md`, its `## Circulation, as-of 2026-09-14`
-> section.
+> **NOTE · Nothing is attached.** The six HTML files of
+> `docs/advisor/2026-09-09-akba-brief/` are **internal working documents and are not sent.**
+> They were originally drafted as an attachment cluster; that plan was dropped on
+> 2026-09-14, before anything went out, in favour of one self-contained plain-text message.
+> Sending six styled HTML files to someone who has never answered a question from this
+> project asks him to open an archive before he can read a sentence. The cluster keeps its
+> value as the place each question's full argument is worked out, and this message is what
+> he actually receives. Where the cluster's own decision calendar disagrees with the dates
+> below, the decisions register's `## Circulation, as-of 2026-09-14` section is
+> authoritative.
 >
-> **NOTE · Written 2026-09-14, sent separately.** The send date is appended to the
-> decisions register once the message actually goes out. Nothing here asserts a send.
+> **NOTE · Written 2026-09-14, send recorded separately.** The send date and medium are
+> appended to `docs/advisor/2026-09-03-decisions-from-akba.md` once the message has
+> actually gone out. **Nothing here asserts a send.**
+>
+> **NOTE · Every figure below is sourced.** 1123 documents / 601 distinct states /
+> 46.5% duplication and the 29 November projection are `health/metrics.json` on
+> `calibration-data` @ `272a0c5`, generated 2026-09-14T09:03:34Z. The floor of 1170 and the
+> 234 parameter count are NC-045; the seven-shape spread including IntervalGaussianMF's 243
+> is NC-046; the 465 tests are NC-021. The 37 / 35 merged-PR counts were re-run today with
+> `gh pr list --state merged` filtered to `mergedAt >= 2026-05-25`, per the cycle-2 close
+> record's instruction that the count be re-measured rather than carried. The 11-of-26
+> Open/Deferred figure is a count of `**Status**` lines in `docs/decisions.md` at `004e14e`.
+>
+> **NOTE · The 29 November projection is deliberately not registered.** ADR-025's
+> amendment makes `projected_date` a non-registrable extrapolation, so it carries no NC row
+> and the message labels it a tahmin rather than an ölçüm. It is included because the
+> advisor is being asked about publication timing, and withholding the one number that
+> bears on it would be asking him to decide with less than we know.
+
+## Twelve register items, fourteen questions
+
+The decisions register carries **12 live items**; this message asks **14 questions**. The
+counts differ on purpose and the mapping is one-to-one in both directions, so no item is
+dropped and no question is invented:
+
+| Register item | Question(s) | Note |
+| --- | --- | --- |
+| 1 · ADR-027 target (D1, D3, D4) | **1, 2, 3** | Split. One item in the register, three genuinely separate decisions: the damping formula, the qubit rejection rule, and averaging per-qubit targets rather than evaluating at mean T1/T2. Asking them as one question invites one answer covering whichever he read first. |
+| 2 · ADR-025 `duplicate-partial` | 4 | |
+| 10 · `TSKTrainer` owner read | 5 | Covers `types.py`'s four value types too, as File 01's D5 does. |
+| 12 · `MembershipFunction` docstring | 6 | |
+| 3 · ADR-009 | 7 | |
+| 4 · ADR-011 | 8 | |
+| 6 · ADR-015 | 9 | |
+| 8 · ADR-019 closure | 10 | |
+| 14 · ADR-025 pipeline-health | 11 | |
+| 13 · the ten 2026-05-25 questions | **12** | Merged. Six are still open (Q1, Q3, Q5, Q6, Q8, Q9) and ride as one question with six clauses, because they are one conversation about what the field expects. Q2, Q4, Q7 and Q10 are answered in practice by the phase-3 plan and are not re-asked. |
+| 5 · ADR-014 status flip | 13 | |
+| 7 · ADR-016 | 14 | |
+
+The withdrawn items (1b, 9, 11) appear nowhere in the message, which is the point of
+withdrawing them. Their reasons stay recorded in the register.
 
 ---
 
-Sayın Hocam,
+```text
+Konu: SuperconducTED / Faz 3 durumu ve karar bekleyen maddeler
 
-Bu mesaj Faz 3'ün açık kalan bütün danışman maddelerini **tek seferde** önünüze
-koymak için yazıldı. Ekte altı dosyalık bir küme var; her dosya bir konu başlığını
-arka planı, sorusu ve gerekçesiyle anlatıyor. Bu kapak yazısı da hangi maddenin
-hangi dosyada olduğunu ve her biri için hangi tarihe kadar cevabınıza ihtiyacımız
-olduğunu listeliyor.
 
-Önce iki şeyi açıkça söylemem gerekiyor.
+Fırat Hocam merhaba,
 
-**Birincisi, bu mesaj gecikti.** Küme 9 Eylül'de hazırdı ve 14 Eylül'e kadar
-gönderilmedi. Gecikme sizin tarafınızda değil bizim tarafımızda, ve bunu deponun
-kaydına da böyle yazdık. Bunun sizin için tek pratik sonucu şu: ilk grup maddenin
-tarihi 16 Eylül'dü, size iki gün kalırdı; onu 21 Eylül'e çektim ki gerçekten
-okuyacak vaktiniz olsun. M3 kilometre taşına bağlı maddelerin 23 Eylül tarihini
-ise **değiştirmedim**, çünkü o tarih bir hedef değil bir kapı: 23 Eylül'den sonra
-gelen bir cevap o kararların bağlı olduğu işi artık açamıyor. Yani o gruptaki
-pencere 14 günden 9 güne indi, ve bunun sebebi bizim gecikmemiz.
+Projede Eylül sonuna kadar sürecek bir "Faz 3" tanımladık ve hedefi net: eğitilmiş
+bir modelin karşılaştırma tablosu. O tablonun çıkabilmesi için sizin kararınıza
+bağlı 14 soru var ve bunları tek tek değil, tek mesajda soruyorum. Sebebi şu: 25
+Mayıs'ta hazırladığımız on soruluk listenin hiçbirine kayıtlı bir cevap yok ve o
+liste soruları on üç ayrı yere dağıttığımız için kayboldu. Bu sefer hepsi burada,
+her maddenin bir tarihi var.
 
-**İkincisi, size sormadıklarımız da bu mesajın parçası.** İlk listede on üç madde
-vardı. Dördünü çıkardık: kendi ölçebileceğimiz ya da kendi aramızda çözmemiz
-gereken şeylerdi. Çıkardıklarımızın gerekçesi ilgili dosyanın sonunda yazıyor.
-Cevapsız kalan bir soru kadar, sorulmaması gereken bir soru da maliyetli, çünkü
-bu projenin size açılan tek kanalı var.
+Aşağıdaki sayıların hepsi bugün ölçüldü, hafızadan yazılmadı.
 
-Vaktiniz kısıtlıysa **Dosya 05 · Yayın stratejisi** ile başlayın. Diğer beş dosya
-teknik onay niteliğinde ve hızlı okunur; 05'teki üç sorunun cevabı ise bu depoda
-hiçbir yerde yok ve hiçbiri deneyle üretilemez.
 
----
+1) ŞU ANDA NEREDEYIZ
 
-## Maddeler, dosyaları ve karar tarihleri
+- Arşiv: 1123 kalibrasyon dokümanı, bunların 601'i ayrık cihaz durumu
+  (14 Eylül 09:03 UTC itibarıyla). Tekrar oranı yüzde 46,5.
+- Eğitim eşiği: 1170 ayrık durum. Yani eşiğin yüzde 51'indeyiz.
+- Parametre başına örnek: 2,57. Gereken 5.
+- Test paketi: 465 test, hepsi geçiyor.
+- Boru hattı uçtan uca çalışıyor; eksik olan eğitim, ölçüm değil.
 
-Sınıflandırma: **SOR** = cevap sizde, ölçerek elde edemeyeceğimiz bir yargı ya da
-yetki. **ONAYLA** = biz ölçtük, sizden tasarım değil teyit bekliyoruz.
+Mevcut hızla (son 30 günde 161 yeni durum, günde ~5,4) eşiği yaklaşık 29 Kasım'da
+geçiyoruz. Bu bir tahmin, ölçüm değil, ve bilerek hiçbir yere resmi olarak
+kaydetmiyoruz; ama Faz 3'ün 30 Eylül bitişinden iki ay sonrasına düştüğü için
+size söylemem gerek.
 
-### 21 Eylül'e kadar
 
-| # | Madde | Sınıf | Dosya |
-| --- | --- | --- | --- |
-| 1 | ADR-027 eğitim hedefi, kararlar D1, D3, D4 | ONAYLA | Dosya 01 |
-| 10 | `interfaces.py` ve `types.py`: `TSKTrainer` ile dört değer tipinin sahibi olarak okunması (D5) | SOR, yetki | Dosya 01 |
-| 12 | `interfaces.py`: `MembershipFunction` belge dizesi düzeltmesinin sahibi olarak okunması | SOR, yetki | bu kapakta, aşağıda |
-| 2 | ADR-025 `duplicate-partial` eki (PR #55'te borçlu) | SOR | Dosya 04 |
+2) 25 MAYIS'TAN BU YANA NE YAPTIK
 
-Bu grubun tarihi 16 Eylül'dü. Gecikme sebebiyle 21 Eylül'e alındı; içeriğin
-hiçbirinde değişiklik yok.
+- 37 pull request birleşti, 35'i ana dala.
+- Kalibrasyon arşivi ve onun bütünlük altyapısı: saatlik toplayıcı, kayıp
+  pencereleri geri dolduran mekanizma, ve her dokümanın ne olduğunu yazan bir
+  defter.
+- Sayısal iddia kaydı: projedeki her sayı artık bir satıra ve o satırın ölçüldüğü
+  commit'e bağlı. Uydurma rakam üretemiyoruz, bu kasıtlı bir kısıt.
+- Eğitim sözleşmesi: eğitici için soyut sınıf, değer tipleri, ve hedef formülü
+  (ADR-027, sizin onayınızı bekliyor).
+- Yedi üyelik fonksiyonu şeklinin tamamı için parametre sayımı ve kıyaslama
+  altyapısı.
 
-### 23 Eylül'e kadar
 
-Bu tarih **değişmedi**. M3 "kararlar" kilometre taşı 23 ile 25 Eylül arasında ve
-bu maddelerin hepsi o kapıdan geçen işi açıyor.
+3) EN ÖNEMLİ BULGU: EĞİTİM EŞİĞİ YANLIŞTI
 
-| # | Madde | Sınıf | Dosya |
-| --- | --- | --- | --- |
-| 3 | ADR-009, Tip-1 mi Aralık Tip-2 mi | SOR kapsam, ONAYLA kanıt | Dosya 02 |
-| 4 | ADR-011, Nie-Tan mı Karnik-Mendel mi | ONAYLA | Dosya 02 |
-| 8 | ADR-019 kapanışı, ablasyon kazananı | ONAYLA | Dosya 02, Dosya 05 |
-| 6 | ADR-015, topluluk üyelerinin nasıl farklılaşacağı | SOR | Dosya 03 |
-| 14 | ADR-025 boru hattı eki, cihaz durumunun tanımı (PR #70'te borçlu) | SOR x2, ONAYLA x1 | Dosya 06 |
-| 13 | 25 Mayıs 2026'nın on sorusundan açık kalan altısı: Q1, Q3, Q5, Q6, Q8, Q9 | karışık | Dosya 05, Dosya 04 |
+Bu maddeyi ayrı yazıyorum çünkü aleyhimize bir düzeltme.
 
-On sorunun dördü (Q2, Q4, Q7, Q10) Faz 3 planı ve 7 Eylül'deki ADR-016
-hizalamasıyla fiilen cevaplandı. Onları açıkta bırakmak yerine cevaplanmış olarak
-işaretledik; hangi cevabın hangi soruya karşılık geldiği ilgili dosyada yazıyor.
+Eşiği "yaklaşık 126 eğitilebilir parametre x 5 = 630" diye taşıyorduk. 126'yı
+hiçbir dosya türetmemiş; 7 Mayıs'ta bir cümleye girmiş ve o tarihte 27 kurallı
+ızgara henüz yokmuş. Kural tabanına sorduk: gerçek sayı 234, çünkü 126 iki
+çıkışlı bir modelin sonuç terimini tek çıkış üzerinden sayıyor.
 
-### 26 Eylül'e kadar
+Yani eşik 630 değil 1170. Daha önce "eşiği geçemedik" diyen her belge hala doğru,
+ama açık iki kat daha büyük.
 
-| # | Madde | Sınıf | Dosya |
-| --- | --- | --- | --- |
-| 5 | ADR-014 durum değişikliği, Deferred'dan Accepted'a | ONAYLA | aşağıda, ayrı başlık |
+Bunun yan ürünü sizin ADR-009 kararınızı doğrudan ilgilendiriyor: Aralık Tip-2'nin
+parametre sayısını ikiye katladığı itirazı bu yapılandırmada geçerli değil.
+IntervalGaussianMF 243, GaussianMF 234, yani 9 parametre fark, yüzde 3,8. Sebep,
+IT2'nin benzersiz üyelik fonksiyonu nesnesi başına bir parametre eklemesi ve
+burada sadece 9 nesne olması.
 
-Bu maddenin tarihi 30 Eylül'dü ve onu 26 Eylül'e çektim. Sebebi gecikme değil,
-bir tutarsızlık: 30 Eylül fazın kapandığı gün, ve o gün gelen bir cevap o günkü
-kapanış kaydını açamaz. Ayrıntısı aşağıda.
 
-### 30 Eylül'e kadar
+4) EKSİK OLANLAR
 
-| # | Madde | Sınıf | Dosya |
-| --- | --- | --- | --- |
-| 7 | ADR-016, aralık birleştirme semantiği | SOR | Dosya 03 |
+- Eğitici henüz yazılmadı; Faz 3'ün en uzun kalemi ve başlamadı.
+- Üyelik fonksiyonu şekil karşılaştırması (ablasyon) çalıştırılmadı.
+- Tip sistemi kararı alınmadığı için ondan sonra gelen üç karar da bekliyor.
+- 26 karar kaydının 11'i hala "Open" ya da "Deferred". Bunların yedisi doğrudan
+  sizin kararınıza bağlı (ADR-009, 011, 014, 015, 016, 019, 027), artı ADR-025'in
+  eki.
+- Projenin başından bu yana kayda geçmiş tek bir danışman kararı yok. Eksiğin
+  kaynağı bu.
 
-Bu maddenin ölçüm tarafını #64 yapıyor ve o iş zaten ayın son haftasında. Faz 3'ün
-çıktı ürününü kilitlemediği için tarihi olduğu gibi bıraktım.
 
----
+5) SORULAR
 
-## Kümede karşılığı olmayan iki madde
+Her madde tek cümle. Ayrıntısını isterseniz o maddeyi ayrıca açarım.
 
-Kapak yazısını hazırlarken kümeyi madde madde denetledim ve iki maddenin kayıt
-defterinde tarihi olduğu halde hiçbir dosyada anlatılmadığını gördüm. İkisini de
-uydurmak yerine burada, tam halleriyle soruyorum. Küme dosyalarına dokunmadım:
-onlar 9 Eylül tarihli bir kayıt ve öyle kalıyor.
+21 EYLÜL'E KADAR
 
-### Madde 12 · `MembershipFunction` belge dizesi düzeltmesi
+1. Eğitim hedefi olarak T1, T2 ve kapı süresinden türettiğimiz iki sönümleme
+   oranı formülünü onaylıyor musunuz (ADR-027)?
+2. Eksik alanlı kübitleri hedeften eleme kuralımız ve elenenlerin tabloda NaN
+   olarak yerinde bırakılması sizce doğru mu?
+3. Anlık görüntü hedefi olarak kübit hedeflerinin ortalamasını alıyoruz, ortalama
+   T1/T2'de hesaplamıyoruz; bu tercihi onaylıyor musunuz?
+4. Bir kalibrasyon kaydını geri doldururken daha eksik gelen kopyayı "kısmi
+   tekrar" sayıp atmamız sizce kabul edilebilir mi (ADR-025)?
+5. interfaces.py ve types.py sizin dosyalarınız; eğitici soyut sınıfını ve dört
+   değer tipini sahibi olarak bir gözden geçirir misiniz?
+6. Aynı dosyada eğiticinin hangi modülde yaşadığını söyleyen tek satırlık bir
+   belge düzeltmesi yaptık, onu da onaylar mısınız?
 
-**Arka plan.** `docs/team.md` sizi `src/superconducted/interfaces.py` dosyasının
-birincil sahibi olarak kaydediyor. Dosya 01'deki D5 maddesi zaten o dosyayı
-önünüze koyuyor, ama PR #69'un aynı dosyada yaptığı **üçüncü** değişikliği
-adıyla anmıyor. O değişiklik şu:
+23 EYLÜL'E KADAR
 
-`MembershipFunction` sınıfının belge dizesi, ANFIS eğiticisinin
-`superconducted.fuzzy.tsk` modülünde yaşadığını söylüyordu. Bu iki şeyle
-çelişiyordu: LOCKED olan o modülün kendi belge dizesi eğiticinin "kasten bu
-modülde olmadığını" söylüyor, ve eğitim paketi kararı eğiticiyi
-`superconducted.training` altına koyuyor. Tek satır düzeltildi ve bugün
-`superconducted.training` diyor.
+7. Tip-1 mi Aralık Tip-2 mi ilerliyoruz (ADR-009)?
+8. Durulaştırmada Nie-Tan kapalı formu mu, Karnik-Mendel yinelemeli indirgeme mi
+   (ADR-011)?
+9. Topluluk üyeleri birbirinden hangi mekanizmayla farklılaşsın (ADR-015)?
+10. Ablasyon kazananını ADR-019'un kapanış kararı olarak kabul edecek misiniz?
+11. Bir "cihaz durumu" ölçülen değerleriyle mi tanımlansın, ölçüm damgasıyla mı?
+12. Eski listeden altı soru hala açık: topluluk yaklaşımı mimari olarak yeterli
+    mi, metrik sıralaması ne olmalı, eksik kalibrasyon verisinde atlama mı bulanık
+    maksimum entropi mi, hangi mecraya ne zaman gidiyoruz, tek arka uçtan
+    çıkmalı mıyız, ve gerçek donanım doğrulaması ne kadar şart?
 
-**Ne rica ediyoruz.** D5 için `interfaces.py` dosyasına zaten bakacaksınız; bu
-satırı da o bakışın içine alın. Ölçülecek bir şey yok, bu bir yetki maddesi:
-sahibi olduğunuz bir dosyada sizin okumanız olmadan bir satır değişti ve boşluğu
-kapatmak istiyoruz.
+26 VE 30 EYLÜL
 
-### Madde 5 · ADR-014 durum değişikliği
+13. Eğitici M3'te birleştiğinde ADR-014'ü "Accepted" yapmayı onaylar mısınız
+    (26 Eylül)?
+14. Sonuçları tek sayı olarak mı yoksa üyeler arası aralık olarak mı raporlayalım
+    (ADR-016, 30 Eylül)?
 
-**Arka plan.** ADR-014 bugün `Deferred`. Kendi metnindeki not, hiçbir eğitici
-uygulamasının bu ADR altında kabul edilmediğini söylüyor. Faz 3'ün bitmesi için
-o durumun `Accepted` olması gerekiyor, çünkü fazın çıktı ürünü eğitilmiş bir
-modelin karşılaştırma tablosu ve o tablo ADR-014 altında yaşıyor.
+Vaktiniz kısıtlıysa 12. maddedeki yayın soruları en kritiği: cevabı bizde
+olmayan ve deneyle üretemeyeceğimiz tek grup o.
 
-**Ne rica ediyoruz.** Bugün cevaplayabileceğiniz bir soru **değil**, ve bunu
-peşinen söylüyorum: onaylayacağınız şey henüz yok. Hibrit eğitici (#60) M3'te
-tam döngüsüyle birleşecek, ilk arşiv uyumunu ve zaman bölmeli metriklerini
-üretecek; ondan sonra ADR-014'ün durumu sizin onayınıza hazır olur. Bu maddeyi
-kümeye şimdi koymamın sebebi tek: 26 Eylül'de size gelecek olan şeyin ne
-olduğunu önceden bilmeniz, ve o tarihte hazırlıksız yakalanmamanız.
 
-**Neden 30 değil de 26 Eylül.** Faz 3, 30 Eylül'de bir kapanış kaydıyla
-kapanıyor ve o kayıt ADR-014'ün durumunu okuyor. Cevabın kapanış günü gelmesi,
-kapanışın o cevabı taşıyamaması demek. Dört gün, hem eğiticinin M3'te birleşmesi
-hem de kapanış kaydının cevabı taşıması için gereken en kısa aralık.
+Cevaplarınızı depoda tarihli bir kayda geçiriyorum: soru, cevabınız, tarih, ve
+hangi kararı açtığı. Bir maddenin tarihinde cevapsız kalması sorun değil; o zaman
+ilgili karar "Open" kalır ve sorunun hangi tarihte gittiğini yazarız.
 
----
-
-## Cevaplar nereye yazılıyor
-
-Her cevap `docs/advisor/2026-09-03-decisions-from-akba.md` dosyasına bir tarihli
-kayıt olarak ekleniyor: soru, cevabınız, cevabın verildiği tarih, hangi mecradan
-geldiği, ve hangi PR'ı veya ADR'yi açtığı. Dosya yalnızca **ekleme** alıyor,
-üstündeki hiçbir satır düzenlenmiyor.
-
-Bir maddenin tarihinde cevapsız kalması bizim için sorun değil. Sorun, kayıtsız
-kalması. Cevap gelmezse ilgili ADR `Open` kalır ve kayda sorunun hangi tarihte
-gittiği yazılır, çünkü kaydedilmiş bir boşluk bir kayıttır, sessizlik değildir.
-
-Kolay gelsin, teşekkürler.
+Teşekkürler, iyi çalışmalar.
 
 Mert Efe Şensoy
-
----
-
-## Ekler
-
-| Dosya | Konu |
-| --- | --- |
-| `01-egitim-hedefi.html` | Eğitim hedefi, ADR-027, ve D5 sahiplik okuması |
-| `02-tip-sistemi.html` | Tip sistemi, ADR-009 ve ADR-011, ADR-019 ablasyonu |
-| `03-topluluk-ve-varyans.html` | Topluluk ve varyans, ADR-015 ve ADR-016 |
-| `04-veri-durustlugu.html` | Veri dürüstlüğü, ADR-025 eki ve eksik veri |
-| `05-yayin-stratejisi.html` | Yayın stratejisi, hedef mecra, donanım doğrulaması |
-| `06-olcum-birimi.html` | Ölçüm birimi, ADR-025 boru hattı eki |
-| `index.html` | Kümenin kapak sayfası ve kendi karar takvimi |
-
-> **NOTE · The cluster's own calendar is superseded on two rows.** `index.html` prints
-> 16 Eylül for the first group and 30 Eylül for ADR-014. Both are superseded by this
-> cover and by the `## Circulation, as-of 2026-09-14` section of the decisions register.
-> The cluster is a dated document and is left unedited; where the two disagree, the
-> register is authoritative.
+```
