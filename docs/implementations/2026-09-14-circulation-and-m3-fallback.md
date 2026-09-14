@@ -37,7 +37,7 @@ person's work. It changes no executable line.
 
 | File | One-sentence description |
 | --- | --- |
-| `docs/advisor/2026-09-14-akba-batch-cover.md` | *new* · the Turkish cover message for the batched request, listing all twelve live items with their revised decision-by dates and the brief file that argues each, plus the two items found to have a date and no argument. |
+| `docs/advisor/2026-09-14-akba-batch-cover.md` | *new* · the Turkish plain-text e-mail that **is** the batched request, verbatim: where the project stands, what is missing, what landed since 2026-05-25, and all fourteen questions as single sentences with a date each. Nothing is attached. |
 | `docs/advisor/2026-09-03-decisions-from-akba.md` | *append* · `## Circulation, as-of 2026-09-14`: the unsent-batch record, the revised dates with a reason per change, and the two-item coverage audit. Nothing above the append marker is touched. |
 | `docs/numerical-claims.md` | *modify* NC-045 · re-verified at `004e14e`, plus the FR-10.4 comparison against NC-047 and the `to be measured, #63` marker. *modify* NC-021 · Rule 6 confirmation that 465 survives the merge at `004e14e`. |
 | `docs/decisions.md` | *append* · a dated status block under ADR-009 (FR-15's second form) and one under ADR-011 (FR-16's second form). Neither `**Status**` line is changed. |
@@ -46,13 +46,25 @@ person's work. It changes no executable line.
 
 ## Implementation approach
 
-**The cover message is a new dated file, not an edit to the cluster.** The six HTML files
-of `docs/advisor/2026-09-09-akba-brief/` are a dated document, and PR #94 already spent the
-one defensible exception to append File 06 to it, on the explicit ground that the batch had
-not gone out. That ground still holds, but spending it twice would turn "the cluster is
-what we circulated" into "the cluster is whatever we last thought". So the cover is
-`docs/advisor/2026-09-14-akba-batch-cover.md`, it names the two rows of the cluster's own
-calendar that it supersedes, and the cluster is left byte-identical.
+**The message is one plain-text e-mail and nothing is attached.** The six HTML files of
+`docs/advisor/2026-09-09-akba-brief/` stay internal. They were drafted as an attachment
+cluster and that plan was dropped on 2026-09-14, before anything went out, which is the
+only window in which dropping it costs nothing.
+
+The reason is not presentation, it is the failure being fixed. Dr. Akba has never answered
+a question from this project. The 2026-05-25 set failed because it was spread across
+thirteen places and none of them was a message he could reply to; opening the replacement
+with six styled HTML attachments repeats the shape of that failure in a tidier form, since
+it asks him to open an archive before he can read a sentence. So every question is in the
+body, in one sentence, with its own date, and the detail is offered on request.
+
+The cluster is not wasted and is not deleted. It is where each question's full argument was
+worked out, and that work is what makes the one-sentence form defensible rather than glib:
+a question you can state in one line because you understand it reads differently from one
+stated in one line because you have not thought about it. If he asks for one item's
+background, that file goes out on its own as a separately dated document. The cluster is
+left byte-identical, and PR #94's one-time exception for appending File 06 is not spent
+again.
 
 **The revised dates are reasoned per item, not shifted uniformly.** A uniform five-day
 shift would have pushed the M3 group past M3's own gate, which converts a deadline into a
@@ -61,13 +73,15 @@ pre-M3 group moves to preserve its seven-day window, the M3 group does not move 
 the cost as a shorter window, and ADR-014 moves *earlier* for a reason unrelated to the
 slip.
 
-**The two coverage gaps are asked in the cover rather than patched into the cluster.** The
-audit that found them is a search of every file in the cluster for the item's own
-identifiers: `MembershipFunction` appears in no file, and `ADR-014` appears only in
-`index.html`'s calendar. Item 12 is one line of code and is stated in full in the cover.
-Item 5 is stated as advance notice of what arrives on 2026-09-26, with the reason it cannot
-be answered today written out, because asking someone to ratify a trainer that has not been
-built is how a batch earns a non-answer.
+**The two coverage gaps stopped mattering, but the audit still did its job.** Searching
+every file of the cluster for each item's own identifiers found that `MembershipFunction`
+appears in none of them and `ADR-014` only in `index.html`'s calendar, so items 12 and 5
+carried a decision-by date that nothing argued. Once the cluster is not sent, no question
+leans on an attachment and the gap closes by construction: item 12 is question 6 and item 5
+is question 13, in the same one-sentence form as the other twelve. The audit is recorded
+anyway, because it is the check that would have caught two unanswerable asks had the
+original plan gone out, and because item 5 still needs its 2026-09-26 framing as *what will
+be ready then* rather than as a ratification of a trainer that does not exist.
 
 **The ADR blocks use the ADR-025 precedent.** PR #94 established the shape for recording an
 unratified amendment in the ledger: a dated `###` sub-block under the ADR, a small table of
@@ -245,7 +259,7 @@ print(count_trainable_parameters(TSKRuleBase.from_grid(per_input, output_dim=2))
 - Issue #56 · FR-2, FR-10.4, FR-12, FR-13, FR-15, FR-16, NFR-2, NFR-3, NFR-4
 - Issue #84 · the ADR-027 advisor loop that shares `docs/advisor/2026-09-03-decisions-from-akba.md`
 - `docs/advisor/2026-09-03-decisions-from-akba.md` · `## Circulation, as-of 2026-09-14`
-- `docs/advisor/2026-09-09-akba-brief/` · the six-file cluster the cover message carries
+- `docs/advisor/2026-09-09-akba-brief/` · the six-file cluster, internal only, not sent
 - `docs/decisions.md` · ADR-009 and ADR-011 status blocks; the ADR-025 amendment status block this follows
 - `docs/numerical-claims.md` · NC-012, NC-021, NC-025, NC-045, NC-046, NC-047, NC-R001
 - `docs/implementations/2026-09-09-training-floor-derivation.md` · the derivation FR-10.4 completes

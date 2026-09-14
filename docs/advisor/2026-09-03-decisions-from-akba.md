@@ -149,10 +149,26 @@ on the one channel this project has to its advisor is exactly the kind of thing 
 becomes invisible once the dates pass, and the 2026-05-25 set went unanswered for three
 months in precisely that way.
 
-The cover message @mertefesensoy sends is `docs/advisor/2026-09-14-akba-batch-cover.md`,
+The message @mertefesensoy sends is `docs/advisor/2026-09-14-akba-batch-cover.md`,
 committed so the repository records what was circulated rather than only that something
-was. The send date is appended below as its own line once the message has actually gone
-out; **nothing in this repository asserts a send that has not happened.**
+was. The send date and medium are appended below as their own line once the message has
+actually gone out; **nothing in this repository asserts a send that has not happened.**
+
+**The package is one plain-text e-mail with nothing attached.** The six HTML files of
+`docs/advisor/2026-09-09-akba-brief/` were drafted as an attachment cluster and that plan
+was **dropped on 2026-09-14, before anything went out**. They stay in the repository as
+internal working documents: each is where one question's full argument was worked out, and
+that work is what makes the one-sentence form of the question in the e-mail defensible.
+None of them is sent.
+
+The reason is worth recording, because the cluster cost real effort. Dr. Akba has never
+answered a question from this project. Opening with six styled HTML attachments asks him to
+open an archive before he can read a sentence, and the failure mode being fixed here is
+not "he lacked detail", it is "nothing reached him in a form he could answer". So the
+e-mail carries the state of the project, what is missing, what has landed since
+2026-05-25, and all fourteen questions as single sentences, and it offers the detail on
+request rather than shipping it unasked. If he asks for one item's background, the cluster
+file for it is ready to send on its own, as a separately dated document.
 
 ### Revised decision-by dates
 
@@ -167,8 +183,11 @@ Each change carries its reason. Items not listed keep the date the 2026-09-09 an
 | 7 | ADR-016 interval aggregation | 2026-09-30 | **unchanged** | Gated on #64, which is itself scheduled W3 to W4, and it does not gate the phase-3 exit artifact. |
 
 The cluster's own `index.html` prints the superseded 16 Eylül and 30 Eylül rows. It is a
-dated document and is left unedited; the cover message names the two superseded rows, and
-where the two disagree **this table is authoritative**.
+dated document and is left unedited. Since the cluster is no longer sent, nothing Dr. Akba
+receives carries those rows: the e-mail states each question's date inline and this table
+is the authority behind it. The stale calendar is now an internal-only discrepancy, which
+is the weakest form it can take, but it is recorded here rather than silently tolerated so
+that anyone who later sends a cluster file on its own knows to correct its date first.
 
 ### Two items had a date and no argument
 
@@ -180,10 +199,11 @@ decision-by date that no file in `docs/advisor/2026-09-09-akba-brief/` argues:
 | 12 | `MembershipFunction` docstring correction owner read | File 01's D5 asks him to read `interfaces.py` and `types.py` for the `TSKTrainer` ABC and the four value types. PR #69 changed a **third** thing in `interfaces.py`, the `MembershipFunction` docstring naming the trainer's module, and D5 does not name it. Verified by search: `MembershipFunction` appears in no file of the cluster. |
 | 5 | ADR-014 status flip | `ADR-014` appears only in `index.html`'s calendar row for 30 Eylül, in no content file. There is nothing to argue yet: the flip ratifies a trainer (#60) that merges at M3. |
 
-Both are asked in full in the cover message rather than by editing the dated cluster.
-Item 12 is one paragraph because it is one line of code; item 5 is stated as an advance
-notice of what arrives on 2026-09-26, with the reason it cannot be answered today written
-out, so he is not asked to ratify something that does not exist.
+Both are asked in the e-mail rather than by editing the dated cluster: item 12 is
+question 6 and item 5 is question 13. In the one-sentence form the whole message uses,
+their lack of a cluster file costs nothing, because no question in this message leans on an
+attachment. Item 5 carries its own 2026-09-26 date and is phrased as what will be ready
+then, so he is not asked to ratify a trainer that does not exist yet.
 
 ### What is still true
 
