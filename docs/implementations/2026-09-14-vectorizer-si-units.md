@@ -66,9 +66,9 @@ Measurements are provisional; canonical verification remains the team batch reco
 Full suite: **483 passed**; direct collection: **483**, versus **465** on the base.
 Ruff and strict mypy checks pass. The sandbox run encountered temporary-directory
 permission errors; the successful full run used approved execution outside the
-sandbox with `--basetemp=.pytest-tmp-issue66-final`. NC-021 and NC-052 identify
-the base plus working-tree patch and must be pinned to the implementation commit
-before merge.
+sandbox with `--basetemp=.pytest-tmp-issue66-final`. NC-021 and NC-052 originally identified
+the base plus working-tree patch; both were re-pinned to `6394951` in the following
+commit, measured there rather than carried over.
 
 The archive-fixture smoke command completes for ensemble sizes 1, 8 and 16
 with viable consequent seed 0, and completes the final sanity simulation.
