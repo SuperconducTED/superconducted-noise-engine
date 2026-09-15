@@ -8,7 +8,7 @@
 | Mert Efe Şensoy | `@mertefesensoy` | CS junior | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger |
 | Burak Öztekin | `@BurakOztekin` | CS&EE senior | `fuzzy/tsk.py` (LOCKED), `fuzzy/fuzzification.py`, `integration/aer_factory.py`, `benchmarks/harness.py` |
 | Baha Jarad | `@BahaJarad` | CS&EE junior | `calibration/poller.py`, `calibration/storage.py`, `calibration/features.py` |
-| Yiğit Arda Kaderoğlu | `@yigit-arda` | CS sophomore | `fuzzy/membership.py`, `fuzzy/squashing.py`, `benchmarks/circuits.py` |
+| Yiğit Arda Kaderoğlu | `@yigit-arda` | CS sophomore | `fuzzy/membership.py`, `fuzzy/parameterization.py`, `fuzzy/squashing.py`, `benchmarks/circuits.py` |
 | Bengisu | `@bengisucvd` | Math junior | `fuzzy/defuzzification.py`, `channels/kraus.py` (LOCKED, co-owned), `benchmarks/metrics.py` |
 
 Handles are from `gh api repos/SuperconducTED/superconducted-noise-engine/collaborators`,
@@ -32,6 +32,7 @@ collaborator — see "Reviews from outside GitHub" below.
 | `calibration/features.py` | Baha Jarad | Bengisu |
 | `training/` (`__init__.py`, `parameters.py`, `targets.py`) | Mert Efe Şensoy | Burak Öztekin |
 | `fuzzy/membership.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
+| `fuzzy/parameterization.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
 | `fuzzy/tsk.py` (LOCKED) | Burak Öztekin | Mert Efe Şensoy + Bengisu |
 | `fuzzy/defuzzification.py` | Bengisu | Burak Öztekin |
 | `fuzzy/fuzzification.py` | Burak Öztekin | Mert Efe Şensoy |
