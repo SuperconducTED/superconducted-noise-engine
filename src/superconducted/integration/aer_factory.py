@@ -39,7 +39,6 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterator, Sequence
 from math import isfinite
-from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -51,9 +50,11 @@ from ..interfaces import (
     ChannelProjector,
     Defuzzifier,
     FuzzificationStrategy,
+    GateEligibilityPolicy,
     RuleBase,
     SquashingStrategy,
 )
+from ..training.targets import gate_lengths
 from ..types import CalibrationSnapshot
 
 # Upper bound on the deterministic seed search in :func:`first_viable_seed`.
@@ -64,40 +65,37 @@ from ..types import CalibrationSnapshot
 DEFAULT_SEED_SEARCH_LIMIT: int = 64
 
 
-def _eligible_single_qubit_operations(
-    target: dict[str, Any] | None,
-) -> frozenset[tuple[str, tuple[int, ...]]]:
-    """Return calibrated physical operations eligible for single-qubit noise.
+class CalibrationGateEligibilityPolicy(GateEligibilityPolicy):
+    """Derive physical noise eligibility from archived gate-length records.
 
-    The serialized calibration target is authoritative: only operations with
-    a finite, strictly positive duration receive a channel. Invalid or missing
-    records are ignored so historical snapshots without target data fail
-    closed rather than attaching noise to virtual or control instructions.
+    A physical single-qubit gate is eligible exactly when its calibration
+    ``properties.gates`` record supplies a finite, strictly positive
+    ``gate_length``. Gates absent from those records, including administrative
+    instructions such as ``delay`` and Aer save instructions, remain
+    noise-free. A virtual ``rz`` whose recorded length is zero is explicitly
+    ineligible rather than rejected due to missing metadata.
     """
-    if not isinstance(target, dict):
-        return frozenset()
-    operations = target.get("operations")
-    if not isinstance(operations, list):
-        return frozenset()
 
-    eligible: set[tuple[str, tuple[int, ...]]] = set()
-    for operation in operations:
-        if not isinstance(operation, dict):
-            continue
-        name = operation.get("name")
-        qargs = operation.get("qargs")
-        duration = operation.get("duration")
-        if not isinstance(name, str) or not name:
-            continue
-        if not isinstance(qargs, list) or len(qargs) != 1:
-            continue
-        if not isinstance(qargs[0], int) or isinstance(qargs[0], bool):
-            continue
-        if not isinstance(duration, (int, float)) or isinstance(duration, bool):
-            continue
-        if isfinite(duration) and duration > 0.0:
-            eligible.add((name, (qargs[0],)))
-    return frozenset(eligible)
+    def eligible_operations(
+        self,
+        snapshot: CalibrationSnapshot,
+    ) -> frozenset[tuple[str, tuple[int, ...]]]:
+        entries = snapshot.properties.get("gates")
+        if not isinstance(entries, list):
+            return frozenset()
+
+        gate_names: set[str] = set()
+        for entry in entries:
+            if isinstance(entry, dict):
+                gate_name = entry.get("gate")
+                if isinstance(gate_name, str):
+                    gate_names.add(gate_name)
+        eligible: set[tuple[str, tuple[int, ...]]] = set()
+        for gate_name in gate_names:
+            for qubit, duration in gate_lengths(snapshot.properties, gate_name).items():
+                if isfinite(duration) and duration > 0.0:
+                    eligible.add((gate_name, (qubit,)))
+        return frozenset(eligible)
 
 
 def is_identity_damping(crisp_params: npt.NDArray[np.float64]) -> bool:
@@ -160,9 +158,10 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
     Aer (which would have no errors attached).
 
     ADR-021 specifies this construction contract: the six injected
-    dependencies above are the swappable research axes, and the strict DI
-    surface is deliberate — it is what makes each axis independently
-    testable, at the cost of non-trivial factory construction.
+    dependencies above and optional :class:`GateEligibilityPolicy` are the
+    swappable research axes. The strict DI surface is deliberate — it is what
+    makes each axis independently testable, at the cost of non-trivial factory
+    construction.
     """
 
     def __init__(
@@ -174,6 +173,7 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
         squashing: SquashingStrategy,
         channel_projector: ChannelProjector,
         fuzzification_strategy: FuzzificationStrategy,
+        gate_eligibility_policy: GateEligibilityPolicy | None = None,
     ) -> None:
         super().__init__()
         self._calibration = calibration
@@ -183,6 +183,11 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
         self._squashing = squashing
         self._channel_projector = channel_projector
         self._fuzzification_strategy = fuzzification_strategy
+        self._gate_eligibility_policy = (
+            gate_eligibility_policy
+            if gate_eligibility_policy is not None
+            else CalibrationGateEligibilityPolicy()
+        )
         self._crisp_params: npt.NDArray[np.float64] = self._compute_crisp_params()
 
     def _compute_crisp_params(self) -> npt.NDArray[np.float64]:
@@ -214,7 +219,9 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
     def prepare(self, circuit: QuantumCircuit) -> tuple[QuantumCircuit, NoiseModel]:
         """Build a fresh ``NoiseModel`` for ``circuit`` via the fuzzification strategy.
 
-        The returned circuit may differ from the input (pre/between
+        ``circuit`` must already be compiled to the physical basis represented
+        by the calibration's gate-length records. The returned circuit may
+        differ from the input (pre/between
         strategies transform the circuit; post-gate leaves it untouched).
         The returned NoiseModel is fresh — repeated calls do not
         accumulate errors.
@@ -234,7 +241,7 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
           now keeps callers correct when those land.
         """
 
-        eligible_operations = _eligible_single_qubit_operations(self._calibration.target)
+        eligible_operations = self._gate_eligibility_policy.eligible_operations(self._calibration)
 
         def error_provider(gate: Instruction, qubits: tuple[int, ...]) -> QuantumError | None:
             if (gate.name, qubits) not in eligible_operations:
@@ -272,6 +279,7 @@ class FuzzyNoiseModelEnsemble:
         squashing: SquashingStrategy,
         channel_projector: ChannelProjector,
         fuzzification_strategy: FuzzificationStrategy,
+        gate_eligibility_policy: GateEligibilityPolicy | None = None,
         ensemble_size: int = 32,
         rng: np.random.Generator | None = None,
     ) -> None:
@@ -286,6 +294,7 @@ class FuzzyNoiseModelEnsemble:
         self._squashing = squashing
         self._channel_projector = channel_projector
         self._fuzzification_strategy = fuzzification_strategy
+        self._gate_eligibility_policy = gate_eligibility_policy
 
     def __iter__(self) -> Iterator[FuzzyNoiseModel]:
         for _ in range(self._size):
@@ -297,6 +306,7 @@ class FuzzyNoiseModelEnsemble:
                 squashing=self._squashing,
                 channel_projector=self._channel_projector,
                 fuzzification_strategy=self._fuzzification_strategy,
+                gate_eligibility_policy=self._gate_eligibility_policy,
             )
 
     def __len__(self) -> int:
