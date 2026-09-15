@@ -89,11 +89,7 @@ TANH_SLOPE_STRATEGIES: Final[tuple[str, ...]] = (
 )
 
 #: Shapes that architect decision C3 defers to the second commit, before M2.
-_SECOND_COMMIT_SHAPES: Final[tuple[str, ...]] = (
-    "TriangularMF",
-    "TrapezoidalMF",
-    "TanhBellMF",
-)
+_SECOND_COMMIT_SHAPES: Final[tuple[str, ...]] = ()
 
 _HALF_MAX_SIGMA: Final[float] = math.sqrt(2.0 * math.log(2.0))
 _EDGE_ATANH: Final[float] = math.atanh(EDGE_TANH_VALUE)

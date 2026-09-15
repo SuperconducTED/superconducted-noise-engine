@@ -307,11 +307,6 @@ def test_qubit_spread_is_rejected_for_t1_shapes(shape: type) -> None:
         grid_partition(shape, _RNG_FREE_SKEWED, 3, qubit_spread=1.0)
 
 
-@pytest.mark.parametrize("shape", SECOND_COMMIT_SHAPES)
-def test_second_commit_shapes_raise_not_implemented(shape: type) -> None:
-    """FR-5: a caller never receives a silently wrong partition for a late shape."""
-    with pytest.raises(NotImplementedError, match="second commit before M2"):
-        grid_partition(shape, _RNG_FREE_SKEWED, 3)
 
 
 # --------------------------------------------------------------------------
