@@ -418,11 +418,12 @@ def _triangular_partition(
 ) -> list[MembershipFunction]:
     del placement, qubit_spread, tanh_slopes
     c = layout.centers
-    r = layout.reaches  
+    r = layout.reaches
     return [
         TriangularMF(float(c[j] - 2.0 * r[j]), float(c[j]), float(c[j] + 2.0 * r[j]))
         for j in range(layout.k)
     ]
+
 
 def _trapezoidal_partition(
     layout: QuantileLayout, placement: str, qubit_spread: float | None, tanh_slopes: str | None
@@ -430,15 +431,21 @@ def _trapezoidal_partition(
     del placement, qubit_spread, tanh_slopes
     c = layout.centers
     e = layout.edges
-    r = layout.reaches  
-    mfs: list[MembershipFunction] = []  
+    r = layout.reaches
+    mfs: list[MembershipFunction] = []
     for j in range(layout.k):
         m_l = (c[j] - e[j]) / 4.0
         m_r = (e[j + 1] - c[j]) / 4.0
-        mfs.append(TrapezoidalMF(
-            float(c[j] - 1.5 * r[j]), float(c[j] - m_l), float(c[j] + m_r), float(c[j] + 1.5 * r[j])
-        ))
+        mfs.append(
+            TrapezoidalMF(
+                float(c[j] - 1.5 * r[j]),
+                float(c[j] - m_l),
+                float(c[j] + m_r),
+                float(c[j] + 1.5 * r[j]),
+            )
+        )
     return mfs
+
 
 def _tanh_bell_partition(
     layout: QuantileLayout, placement: str, qubit_spread: float | None, tanh_slopes: str | None
@@ -446,7 +453,7 @@ def _tanh_bell_partition(
     del placement, qubit_spread, tanh_slopes
     c = layout.centers
     e = layout.edges
-    mfs: list[MembershipFunction] = []  
+    mfs: list[MembershipFunction] = []
     for j in range(layout.k):
         m_l = (c[j] - e[j]) / 4.0
         m_r = (e[j + 1] - c[j]) / 4.0
