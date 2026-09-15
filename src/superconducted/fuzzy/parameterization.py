@@ -68,6 +68,15 @@ MARGIN_FRACTION: Final[float] = 0.25
 #: there is ``(1 + 0.8) / 2 = 0.9``. Also a default, not a measurement.
 EDGE_TANH_VALUE: Final[float] = 0.8
 
+#: Relative tolerance for "this bin's two half-reaches are equal". A symmetric
+#: bin reaches ``u`` and ``v`` through different floating-point paths, so they
+#: differ by a few ULPs rather than exactly, and an exact ``!=`` would call such
+#: a level skewed and hand back a huge finite onset where the contract promises
+#: ``inf``. Measured on the committed survey, a genuinely skewed level sits at
+#: ``|v - u| / max(|u|, |v|) >= 6.4e-02`` and a numerical tie at ``<= 2.1e-15``,
+#: so this threshold is unambiguous by eleven orders of magnitude either way.
+SKEW_RTOL: Final[float] = 1e-9
+
 PLACEMENT_QUANTILE: Final[str] = "quantile"
 PLACEMENT_ENDPOINT: Final[str] = "endpoint"
 PLACEMENT_INTERIOR: Final[str] = "interior"
@@ -244,7 +253,8 @@ def _onsets_for_layout(layout: QuantileLayout) -> npt.NDArray[np.float64]:
     """ADR-023 onsets for an already-computed layout. See :func:`tanh_floor_onsets`."""
     u = layout.centers - layout.edges[:-1]
     v = layout.edges[1:] - layout.centers
-    skewed = v != u
+    # Equal to within rounding, not bit-equal (SKEW_RTOL).
+    skewed = np.abs(v - u) > SKEW_RTOL * np.maximum(np.abs(u), np.abs(v))
     onsets = np.full(layout.k, np.inf, dtype=np.float64)
     onsets[skewed] = layout.centers[skewed] - 2.5 * u[skewed] * v[skewed] / (v[skewed] - u[skewed])
     return onsets
@@ -270,9 +280,10 @@ def tanh_floor_onsets(
         x*_j = c_j - 2.5 * u_j * v_j / (v_j - u_j),
         u_j = c_j - e_(j-1),   v_j = e_j - c_j
 
-    Returns ``+inf`` for a level whose half-reaches are equal, where the slopes
-    coincide and no floored tail exists. Measured, never assumed: on a
-    right-skewed feature an onset can land inside ``[lo, hi]``.
+    Returns ``+inf`` for a level whose half-reaches are equal to within
+    :data:`SKEW_RTOL`, where the slopes coincide and no floored tail exists.
+    Measured, never assumed: on a right-skewed feature an onset can land inside
+    ``[lo, hi]``.
     """
     return _onsets_for_layout(_quantile_layout(np.asarray(samples, dtype=np.float64), k, placement))
 

@@ -43,6 +43,7 @@ from superconducted.fuzzy.parameterization import (
     PLACEMENT_ENDPOINT,
     PLACEMENT_INTERIOR,
     PLACEMENT_QUANTILE,
+    SKEW_RTOL,
     TANH_SLOPES_EQUAL,
     TANH_SLOPES_HALF_REACH,
     ClampingFeatureExtractor,
@@ -65,8 +66,9 @@ from superconducted.types import CalibrationSnapshot
 
 #: Architect decision C3 split ADR-006's seven shapes into an M1 commit and a
 #: second commit before M2. Both have landed, so every shape-parametrized test
-#: below runs over `ALL_SHAPES`; the halves are kept as named tuples only where
-#: a test needs to say which one a shape came from.
+#: below runs over one of the tuples derived from `ALL_SHAPES`. The two halves
+#: are still named because the split is what the ticket, architect decision C3
+#: and the ablation talk about, not because any test filters on it.
 M1_SHAPES = (GaussianMF, TanhMF, TanhSigmoidMF, IntervalGaussianMF)
 M2_SHAPES = (TriangularMF, TrapezoidalMF, TanhBellMF)
 ALL_SHAPES = M1_SHAPES + M2_SHAPES
@@ -387,12 +389,24 @@ def test_tanh_sigmoid_shares_one_slope_across_levels() -> None:
 
 
 def test_tanh_floor_onset_matches_the_adr_023_closed_form() -> None:
+    """The closed form where the bin is skewed, ``inf`` where it is not.
+
+    Level 1 of this fixture is a *numerical* tie: its half-reaches agree to
+    about 1e-15 relative, so ``SKEW_RTOL`` reads it as unskewed and the onset is
+    ``inf``. Levels 2 and 3 are genuinely skewed, at 1.3e-01 and 8.7e-01
+    relative. Pinning the split as a literal is what keeps this a test of the
+    contract rather than of the module agreeing with itself.
+    """
     layout = _quantile_layout(_RNG_FREE_SKEWED, 3, PLACEMENT_QUANTILE)
     u = layout.centers - layout.edges[:-1]
     v = layout.edges[1:] - layout.centers
-    expected = layout.centers - 2.5 * u * v / (v - u)
+    skewed = np.abs(v - u) > SKEW_RTOL * np.maximum(np.abs(u), np.abs(v))
+    onsets = tanh_floor_onsets(_RNG_FREE_SKEWED, 3)
 
-    assert tanh_floor_onsets(_RNG_FREE_SKEWED, 3) == pytest.approx(expected)
+    assert skewed.tolist() == [False, True, True]
+    expected = layout.centers[skewed] - 2.5 * u[skewed] * v[skewed] / (v[skewed] - u[skewed])
+    assert onsets[skewed] == pytest.approx(expected)
+    assert np.all(np.isinf(onsets[~skewed]))
 
 
 def test_a_skewed_feature_takes_the_equal_slope_fallback() -> None:
@@ -434,17 +448,20 @@ def test_the_equal_slope_fallback_coincides_with_tanh_bell() -> None:
 
 
 def test_an_unskewed_feature_keeps_the_half_reach_slopes() -> None:
-    """A symmetric distribution puts every onset far outside the range, so no fallback.
+    """A symmetric distribution has no floored tail at all, so no fallback.
 
-    "Far outside" rather than "infinite": a uniform sample's half-reaches agree
-    only to floating-point rounding, so ``u != v`` by a few ULPs and the closed
-    form returns a huge finite number rather than ``inf``. Either way the floor
-    never binds inside the domain box, which is the property that matters.
+    Every level's half-reaches are equal to within ``SKEW_RTOL`` (0 to 1.8e-15
+    relative here), so every onset is exactly ``inf`` and the floor cannot bind
+    anywhere, let alone inside the domain box. An exact ``u != v`` returns a
+    huge finite number for two of these three levels instead: outside the box
+    too, but not what the contract says, and it leaves the shape of the
+    assertion depending on rounding.
     """
     symmetric = np.linspace(0.0, 100.0, 1001)
     layout = _quantile_layout(symmetric, 3, PLACEMENT_QUANTILE)
 
     onsets = tanh_floor_onsets(symmetric, 3)
+    assert np.all(np.isinf(onsets))
     assert not np.any((onsets >= layout.lo) & (onsets <= layout.hi))
     assert tanh_slope_strategy(symmetric, 3) == TANH_SLOPES_HALF_REACH
 

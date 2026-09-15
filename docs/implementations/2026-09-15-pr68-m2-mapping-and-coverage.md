@@ -38,7 +38,7 @@ have been closed honestly on the tree as it stood.
 
 | File | One-sentence description |
 | --- | --- |
-| `src/superconducted/fuzzy/parameterization.py` | `_trapezoidal_partition` and `_tanh_bell_partition` now implement section 6.3's mappings, and the dead `_SECOND_COMMIT_SHAPES` dispatch branch is removed. |
+| `src/superconducted/fuzzy/parameterization.py` | `_trapezoidal_partition` and `_tanh_bell_partition` now implement section 6.3's mappings; the skew test behind `tanh_floor_onsets` is relative (`SKEW_RTOL`) rather than exact; the dead `_SECOND_COMMIT_SHAPES` dispatch branch is removed. |
 | `tests/test_parameterization.py` | Every shape-parametrized test runs over all seven shapes; the bell-identity test compares two `grid_partition` results; step 5c's compact-support and unwrapped-raises cases are added. |
 | `docs/implementations/2026-09-08-mf-parameterization.md` | `## As of 2026-09-15` section correcting the two claims that went stale when the M2 shapes landed. |
 | `docs/implementations/2026-09-14-recover-pr68-approved-tip.md` | `## As of 2026-09-15` section recording that the M2 shapes did land and that the deviation the recovery predicted survived the crash fix. |
@@ -121,6 +121,35 @@ functions are therefore identical pointwise, not merely close, which is what
 makes decision 2's stated cost real: until the trainer runs, a feature on the
 fallback branch gives the same untrained ablation row for both shapes.
 
+**When two half-reaches count as equal.** `tanh_floor_onsets` returns `+inf` for
+a level whose bin is symmetric, because equal half-reaches give equal slopes and
+`TanhMF` then has no floored tail. The test for that was `v != u`, exact. A
+symmetric bin reaches `u_j` and `v_j` through different floating-point paths, so
+they differ by a few ULPs, and the exact test therefore called such a level
+skewed and evaluated `c_j - 2.5 u_j v_j / (v_j - u_j)` with a denominator of
+about 1e-15: a huge finite number where the contract promises `inf`. It sits
+outside the domain box either way, so no strategy decision ever changed, but the
+function contradicted its own docstring and two of the suite's three fixtures
+were on that path without saying so.
+
+The comparison is now relative, against `SKEW_RTOL = 1e-9`. The threshold is not
+tuned. Measured across every fixture and all three real features:
+
+| Fixture | Relative skew `|v_j - u_j| / max(|u_j|, |v_j|)` per level |
+| --- | --- |
+| `_RNG_FREE_SKEWED` | 9.8e-16, 1.3e-01, 8.7e-01 |
+| symmetric `linspace(0, 100, 1001)` | 0, 8.7e-16, 1.7e-15 |
+| `left_skewed` | 4.7e-01, 5.1e-16, 2.0e-15 |
+| `mean_T1` | 6.2e-01, 3.4e-01, 4.1e-01 |
+| `mean_T2` | 6.3e-01, 6.4e-02, 4.5e-01 |
+| `mean_readout_error` | 2.3e-01, 3.4e-01, 2.7e-01 |
+
+A genuine skew is at least 6.4e-02 and a numerical tie at most 2.1e-15. Nothing
+lies between, so the split is unambiguous by eleven orders of magnitude in both
+directions. All three real features are far above the threshold, so the nine
+pinned `x*_j`, the `equal-slope` branch each feature takes, NC-041 through
+NC-044 and the test count are all unchanged.
+
 **Measured, before and after**, on the 975-row committed survey at
 `calibration-data@3d1569d`, over a 3001-point grid across each feature's
 `[p1, p99]` box:
@@ -177,6 +206,15 @@ else: the defect this test was widened to catch read 0.400, four orders of
 magnitude outside the tolerance. Rounding the computed value instead would have
 hidden which side of the bound the shape was on, which is the thing worth
 knowing.
+
+**A relative tolerance for the skew test, not a looser docstring.** The
+alternative was to leave `v != u` alone and reword the docstring to describe
+what it actually did. That trades a correct contract for a description of an
+accident: the suite had two fixtures sitting on the huge-finite path and a
+docstring promising `inf`, which is exactly how the mismatch stayed invisible.
+Making the comparison relative makes the docstring true and lets
+`test_an_unskewed_feature_keeps_the_half_reach_slopes` assert `isinf`, which is
+strictly stronger than the old "not inside the box".
 
 **Removing `_SECOND_COMMIT_SHAPES` is adjacent scope, and is flagged as such.**
 With all seven shapes shipped the tuple is empty, which made its dispatch branch
