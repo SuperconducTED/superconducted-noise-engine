@@ -151,3 +151,124 @@ smoke command completes for all ensemble sizes and the sanity simulation.
 The numerical-claim source identifies this uncommitted patch explicitly;
 pin it to the implementation commit before merge. NC-052's measurement inputs
 and valid-unit calculation are unchanged, so its existing pinned source remains.
+
+## Second review follow-up, 2026-09-15
+
+This section is appended rather than edited into the sections above, which are
+dated and describe the trees they were written against. It records what the
+second PR #99 convention review found and what was done about it.
+
+### The pin the previous section left open
+
+The Blocker follow-up above says "These changes are an uncommitted patch on
+`5163db0`" and asks that the numerical claim be pinned to the implementation
+commit before merge. That commit exists: it is `9a294af`, and 486 reproduces
+there (486 collected, 486 passed) in a clean CPython 3.12.10 interpreter at a
+short path rather than the repository `.venv`. The TODO is therefore closed,
+and NC-021 no longer names a working tree. That mattered twice over: naming an
+uncommitted patch is the same failure the `370` entry in NC-021 records, and
+the first re-pin at `5163db0` had just finished correcting it.
+
+The ASCII `?` that `6394951` repaired in the ledger separator came back in
+`9a294af`, in the Blocker follow-up text appended to NC-021. It is repaired
+again, at byte level, and `docs/numerical-claims.md` now holds zero literal
+`?`, matching `004e14ed`. The cause is a non-UTF-8 write, so it will keep
+recurring until whatever writes those cells is fixed; worth knowing rather
+than only worth repairing.
+
+### Code changes, `6e10825`
+
+| Finding | Change |
+| --- | --- |
+| `validate_unit_scale` ended in `UNIT_SCALE[expected_unit]` | A field added to `EXPECTED_UNITS` with a unit that has no conversion factor would have raised a bare `KeyError`, breaking the promise in `CalibrationParseError`'s docstring that parse failures arrive as that error. The note added above `EXPECTED_UNITS` in `6394951` explicitly invites that edit, so the trap was live rather than theoretical. Now guarded, naming the offending unit. |
+| `actual_unit: Any`, `raw_value: Any` | Retyped to `object` on what became a public API in `6394951`. Both are only compared and repr'd in this function, so `object` is the accurate annotation and keeps `--strict` honest at the call sites. |
+| Three copies of `("T1", "T2", "readout_error")` | The new guard, the `if`/`elif` dispatch and `_FEATURE_NAMES` each held the field set. One `_NDUV_TO_FEATURE` table now drives all three. Issue #66 was a units defect, but its shape was two copies of one fact drifting apart, and a third copy of the field set is the same bet. |
+| Two tests for the guard above | One asserts `EXPECTED_UNITS` and `UNIT_SCALE` agree today; one asserts an unconvertible unit raises `CalibrationParseError`. |
+| `assert strengths.sum() > 0` | Replaced for the endpoint placement by NC-052's registered value. See below. |
+
+`extract` returns the same vector and raises the same unusable-snapshot
+message as before the refactor. All four NC-052 figures were re-measured at
+`6e10825` and are unchanged to the last digit, which is the check that the
+refactor was behaviour-preserving.
+
+### Mathematical / statistical details
+
+The replaced guard was weaker than it reads. Firing strength on a Gaussian
+grid falls off as `exp(-0.5 * d^2)` in units of sigma from the nearest
+centre, and `sigma` here is a quarter of each feature's range, so a value
+that is wrong by a constant factor is still strictly positive until the
+exponent underflows a double. Measured on this fixture, holding readout
+error fixed and scaling both coherence means:
+
+| coherence error | firing sum | passes `> 0`? |
+| --- | ---: | --- |
+| 1x (correct) | 1.076911e-01 | yes |
+| 2x | 6.045025e-21 | yes |
+| 5x | 4.158122e-229 | yes |
+| 10x | 0.000000e+00 | no |
+| 1e6x (the original defect) | 0.000000e+00 | no |
+
+So `> 0` caught the defect issue #66 was filed for and essentially nothing
+milder. Pinning NC-052's registered sum, `0.10769113232875129`, is what makes
+the third acceptance criterion ("a future unit change fails loudly") true for
+errors below 10x. The interior placement has no register row of its own and
+keeps the non-degeneracy check it was written with.
+
+### One review finding withdrawn
+
+The review flagged the two new tests that call
+`generate_safe_ensemble_with_seed` as missing `@pytest.mark.slow`, on the
+grounds that every existing caller carries it. That premise does not hold.
+Timing the five marked tests in `tests/test_first_ensemble_run.py`, only
+`test_run_ensemble_real_aer_one_qubit` is slow, at 6.14 s, and it is the only
+one that runs a real Aer circuit; `test_consequent_seed_search_is_deterministic`
+runs in 0.01 s, and `test_seed_limit_must_be_positive` calls the same function
+without the mark. The new tests run 21 cases in 0.46 s and never reach
+`simulator.run`, so they are not Aer-runtime tests under the project's rule.
+Marking them would remove this change's main regression guard from
+`-m "not slow"` runs and save 0.02 s. No change made, recorded here so the
+next reviewer does not re-raise it.
+
+Worth separating from that: the marks on
+`test_consequent_seed_search_is_deterministic` and
+`test_selected_seed_is_non_degenerate` are themselves over-applied relative to
+what `pyproject.toml` says the marker means. That is pre-existing and out of
+scope here.
+
+### Incidental, not part of the fix
+
+The `.pytest-tmp-*/` line added to `.gitignore` accommodates one workstation's
+`--basetemp` workaround and has nothing to do with units. It is harmless and
+is left in place, named here so it is not mistaken for part of the change.
+
+### Gates at `6e10825`
+
+Clean CPython 3.12.10 virtual environment at a short path, running the
+commands CI runs:
+
+```bash
+ruff check .                       # All checks passed
+ruff format --check .              # 61 files already formatted
+python scripts/check_ids.py        # No duplicate or colliding ADR / NC identifiers
+mypy --strict src/superconducted scripts   # Success: no issues found in 35 source files
+pytest tests/ --collect-only -q -o addopts="" -p no:cacheprovider   # 488
+pytest tests/ -q -o addopts="" -p no:cacheprovider                  # 488 passed
+```
+
+488 collected and 488 passed, registered as NC-021 at that commit and not
+derived from 486 + 2. `main` has not moved under this branch: its tip is still
+`004e14ed` and is still the merge base, so this is the tree that will merge. If
+`main` lands first, re-measure at the merge rather than carrying this figure
+across. CI on `ubuntu-latest` across the 3.11 and 3.12 legs remains the
+authority for the pass count.
+
+The fix was also re-verified end to end against a real archived document
+rather than only the committed reduced fixture, which is what acceptance
+criterion 4 asks for. Using
+`snapshots/2026-08/ibm_fez/20260831T203902000000Z.json` on the
+`calibration-data` branch, the document issue #66 quotes, the vectorizer
+returns `[1.214277e-04, 9.147555e-05, 1.936301e-02]`, all 27 rules fire, and
+`scripts/first_ensemble_run.py --snapshot` completes at ensemble sizes 1, 8
+and 16 plus the final sanity simulation. That is the measurement the issue
+predicted and the crash it was filed for is gone.
+
