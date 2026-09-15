@@ -1,5 +1,6 @@
 """Issue #66: archive units must agree with the typed loader and smoke grid."""
 
+import json
 from pathlib import Path
 
 import numpy as np
@@ -60,7 +61,24 @@ def test_invalid_declared_units_raise(name: str, unit: object) -> None:
         BasicCalibrationVectorizer().extract(snapshot)
 
 
-def test_synthetic_snapshot_preserves_unitless_si_values() -> None:
+def test_synthetic_snapshot_uses_archive_units() -> None:
     assert BasicCalibrationVectorizer().extract(_synthetic_snapshot()) == pytest.approx(
         [50e-6, 50e-6, 0.01]
     )
+
+
+@pytest.mark.parametrize("name", ["T1", "T2", "readout_error"])
+def test_missing_unit_rejected_by_both_parsers_and_smoke(name: str, tmp_path: Path) -> None:
+    data = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    entry = next(item for item in data["properties"]["qubits"][0] if item["name"] == name)
+    del entry["unit"]
+    path = tmp_path / "missing-unit.json"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    message = f"qubit 0 field '{name}': expected unit .*got None"
+    with pytest.raises(CalibrationParseError, match=message):
+        load_snapshot(path)
+    snapshot = _load_snapshot(path)
+    with pytest.raises(CalibrationParseError, match=message):
+        BasicCalibrationVectorizer().extract(snapshot)
+    with pytest.raises(CalibrationParseError, match=message):
+        generate_safe_ensemble_with_seed(snapshot, 1)

@@ -19,9 +19,8 @@ from ..interfaces import CalibrationFeatureExtractor
 from ..types import CalibrationSnapshot
 from .loader import (
     EXPECTED_UNITS,
-    UNIT_SCALE,
-    CalibrationParseError,
     ParsedCalibrationSnapshot,
+    validate_unit_scale,
 )
 
 _DEFAULT_SCHEMA_VERSION: str = "1.0.0"
@@ -54,8 +53,8 @@ class BasicCalibrationVectorizer(CalibrationFeatureExtractor):
     filtering — the caller can decide whether to skip the snapshot.
 
     Coherence outputs are SI seconds; readout error is dimensionless.
-    Declared units must match the loader's expected units. Legacy entries
-    without a unit are treated as already SI. Invalid declared units raise
+    Units must be present and match the loader's expected units. Missing
+    or invalid units raise
     :class:`CalibrationParseError`, even when the value would be skipped.
     """
 
@@ -77,17 +76,14 @@ class BasicCalibrationVectorizer(CalibrationFeatureExtractor):
                 name = nduv.get("name")
                 if name not in ("T1", "T2", "readout_error"):
                     continue
-                scale = 1.0
-                if "unit" in nduv:
-                    unit = nduv["unit"]
-                    expected_unit = EXPECTED_UNITS[name]
-                    if unit != expected_unit:
-                        raise CalibrationParseError(
-                            f"backend {snapshot.backend!r} at {snapshot.timestamp.isoformat()}: "
-                            f"qubit {qubit_index} field {name!r}: expected unit "
-                            f"{expected_unit!r}, got {unit!r} (value={nduv.get('value')!r})"
-                        )
-                    scale = UNIT_SCALE[expected_unit]
+                scale = validate_unit_scale(
+                    nduv.get("unit"),
+                    EXPECTED_UNITS[name],
+                    context=f"backend {snapshot.backend!r} at {snapshot.timestamp.isoformat()}",
+                    qubit_index=qubit_index,
+                    field_name=name,
+                    raw_value=nduv.get("value"),
+                )
                 value = _coerce_finite_float(nduv.get("value"))
                 if value is None:
                     continue

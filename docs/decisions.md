@@ -246,7 +246,7 @@ Adding more rules per input is the same.
 > Unit clarification · 2026-09-14 · Issue #66: `mean_T1` and `mean_T2`
 > are SI seconds; `mean_readout_error` is dimensionless. The vectorizer
 > now scales declared archive units consistently with the typed loader.
-> Unitless legacy inputs remain SI. See
+> Missing unit keys are rejected, matching the typed loader. See
 > `docs/implementations/2026-09-14-vectorizer-si-units.md`.
 
 ---

@@ -203,6 +203,28 @@ class ParsedFieldValue(NamedTuple):
     was_nan: bool
 
 
+def validate_unit_scale(
+    actual_unit: Any,
+    expected_unit: str,
+    *,
+    context: str,
+    qubit_index: int,
+    field_name: str,
+    raw_value: Any,
+) -> float:
+    """Validate an Nduv unit and return its SI scale.
+
+    Missing units (passed as ``None``) are mismatches, including on null
+    values. Both archive consumers use this check before parsing values.
+    """
+    if actual_unit != expected_unit:
+        raise CalibrationParseError(
+            f"{context}: qubit {qubit_index} field {field_name!r}: "
+            f"expected unit {expected_unit!r}, got {actual_unit!r} (value={raw_value!r})"
+        )
+    return UNIT_SCALE[expected_unit]
+
+
 def _parse_value(
     raw_value: Any,
     expected_unit: str,
@@ -218,15 +240,14 @@ def _parse_value(
     explicit-null inputs, ``float('nan')`` for NaN inputs, and otherwise
     a finite float scaled by :data:`UNIT_SCALE`.
     """
-    if actual_unit != expected_unit:
-        raise CalibrationParseError(
-            _format_error(
-                path,
-                qubit_index,
-                field_name,
-                f"expected unit {expected_unit!r}, got {actual_unit!r} (value={raw_value!r})",
-            )
-        )
+    scale = validate_unit_scale(
+        actual_unit,
+        expected_unit,
+        context=str(path),
+        qubit_index=qubit_index,
+        field_name=field_name,
+        raw_value=raw_value,
+    )
 
     if raw_value is None:
         return ParsedFieldValue(value=None, was_explicit_null=True, was_nan=False)
@@ -247,7 +268,7 @@ def _parse_value(
         return ParsedFieldValue(value=float("nan"), was_explicit_null=False, was_nan=True)
 
     return ParsedFieldValue(
-        value=as_float * UNIT_SCALE[expected_unit],
+        value=as_float * scale,
         was_explicit_null=False,
         was_nan=False,
     )

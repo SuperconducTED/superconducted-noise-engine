@@ -268,8 +268,8 @@ def _synthetic_snapshot() -> CalibrationSnapshot:
         properties={
             "qubits": [
                 [
-                    {"name": "T1", "value": 50e-6},
-                    {"name": "T2", "value": 50e-6},
+                    {"name": "T1", "value": 50.0, "unit": "us"},
+                    {"name": "T2", "value": 50.0, "unit": "us"},
                     {"name": "readout_error", "unit": "", "value": 0.01},
                 ]
             ]

@@ -14,10 +14,10 @@ risk. That historical document is unchanged.
 | File | Description |
 | --- | --- |
 | `src/superconducted/calibration/features.py` | Validates declared units using the loader's expected-unit table and scales to SI using its conversion table. |
-| `scripts/first_ensemble_run.py` | Synthetic coherence inputs use `50e-6` in implicit SI seconds; readout error declares its dimensionless unit. |
-| `tests/conftest.py` | Shared dummy snapshot drops the unit fields from T1 (`100e-6`, `110e-6`) and T2 (`80e-6`, `90e-6`), leaving them as unitless SI seconds. |
-| `tests/calibration/test_vectorizer_units.py` | Checks real-fixture agreement, grid firing and viable ensembles for both placements, invalid units and preservation of synthetic SI values. |
-| `src/superconducted/calibration/loader.py` | Review follow-up: `_EXPECTED_UNITS` and `_UNIT_SCALE` are renamed to public `EXPECTED_UNITS` and `UNIT_SCALE`, so the feature layer shares one table instead of importing another module's privates. Parsing behaviour is unchanged. |
+| `scripts/first_ensemble_run.py` | Synthetic coherence inputs use `50.0` with `unit: "us"`; readout error declares its dimensionless unit. |
+| `tests/conftest.py` | Shared dummy snapshot declares `us` for T1 (`100.0`, `110.0`) and T2 (`80.0`, `90.0`), preserving the physical values while exercising scaling. |
+| `tests/calibration/test_vectorizer_units.py` | Checks real-fixture agreement, grid firing and viable ensembles for both placements, invalid and missing units, and synthetic archive-unit conversion. |
+| `src/superconducted/calibration/loader.py` | Review follow-up: `_EXPECTED_UNITS` and `_UNIT_SCALE` are renamed to public `EXPECTED_UNITS` and `UNIT_SCALE`, so the feature layer shares one table instead of importing another module's privates. The shared `validate_unit_scale` helper now owns unit validation and returns the SI conversion factor; loader parsing behaviour is unchanged. |
 | `docs/decisions.md` | Clarifies ADR-010 units and tracks parser convergence under ADR-013. |
 | `docs/numerical-claims.md` | Registers the corrected reduced-fixture measurement and updates NC-021 differentially. |
 
@@ -29,8 +29,10 @@ remain ignored. Declared units must match the typed loader (`us` for T1/T2,
 empty string for readout error). A mismatch raises `CalibrationParseError`
 with backend, timestamp, qubit, field, unit and value, before filtering values.
 Missing/non-numeric/non-finite values retain the existing skip policy.
-Legacy entries with no unit key remain already-SI inputs; an explicit null
-or empty coherence unit is an error. Synthetic vectorizer and smoke-test inputs use unitless SI seconds; real archive fixtures retain their explicit units.
+Every consumed Nduv entry requires a unit key. Missing or explicit-null units
+are errors, as are empty coherence units. Both parsers call
+`validate_unit_scale` before filtering or parsing the value. Synthetic inputs
+now declare archive units, with numeric coherence values expressed in microseconds.
 
 ## Mathematical / Statistical details
 
@@ -48,7 +50,7 @@ Use option A as recommended by the issue. Option B (typed snapshot consumption)
 is tracked in the ADR-013 revisit note because it changes an ABC signature and
 requires reconciling parsing policies. Option C would retain inconsistent unit
 conventions. The loader's parsing behaviour is unchanged, as are the locked TSK and Kraus
-implementations; the loader's only edit is the constant rename noted above.
+implementations. Unit validation is extracted into one shared loader helper.
 
 ## Verification
 
@@ -121,3 +123,31 @@ one-argument `_default_mfs_for_feature(name)` recipe above is correct because
 - ADR-010, ADR-013 and ADR-017 in `docs/decisions.md`.
 - NC-021 and NC-052 in `docs/numerical-claims.md`.
 - Issue #66 and cycle-1 follow-up audit item 6.
+
+
+## Blocker follow-up
+
+The earlier unitless-SI fallback was incorrect: removing a unit key from real
+archive data reintroduced the microseconds/seconds mismatch. Both consumers now
+reject that document with `CalibrationParseError` through the same helper.
+The three new regression cases remove only the unit key from T1, T2 or
+readout error in the committed real fixture and verify rejection by the loader,
+vectorizer and smoke ensemble construction. Existing null/invalid-unit cases
+continue to check validation before missing-value filtering.
+
+Synthetic coherence inputs are now archive microseconds with explicit `us`
+units. This supersedes the earlier unitless-SI compatibility decision. The
+ABC input type and the existing numeric-value skip policy remain unchanged.
+
+These changes are an uncommitted patch on `5163db0`; the reviewer commits
+`6394951` and `5163db0` are preserved. The historical verification above records
+those earlier trees, not the blocker-fix test count.
+
+Blocker-fix validation on local Windows/Python 3.14: **486 collected and 486
+passed** (NC-021), using `--basetemp=.pytest-tmp-issue66-blockers` outside the
+sandbox for temporary-directory access. `ruff check .`, `ruff format --check .`,
+`mypy --strict` and `python scripts/check_ids.py` all pass. The real-fixture
+smoke command completes for all ensemble sizes and the sanity simulation.
+The numerical-claim source identifies this uncommitted patch explicitly;
+pin it to the implementation commit before merge. NC-052's measurement inputs
+and valid-unit calculation are unchanged, so its existing pinned source remains.

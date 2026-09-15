@@ -21,13 +21,13 @@ DEFAULT_PROPERTIES: dict[str, Any] = {
     "last_update_date": DEFAULT_TIMESTAMP.isoformat(),
     "qubits": [
         [
-            {"name": "T1", "value": 100e-6},
-            {"name": "T2", "value": 80e-6},
+            {"name": "T1", "value": 100.0, "unit": "us"},
+            {"name": "T2", "value": 80.0, "unit": "us"},
             {"name": "readout_error", "value": 0.01, "unit": ""},
         ],
         [
-            {"name": "T1", "value": 110e-6},
-            {"name": "T2", "value": 90e-6},
+            {"name": "T1", "value": 110.0, "unit": "us"},
+            {"name": "T2", "value": 90.0, "unit": "us"},
             {"name": "readout_error", "value": 0.012, "unit": ""},
         ],
     ],
