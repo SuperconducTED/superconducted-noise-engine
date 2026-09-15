@@ -39,7 +39,7 @@ have been closed honestly on the tree as it stood.
 | File | One-sentence description |
 | --- | --- |
 | `src/superconducted/fuzzy/parameterization.py` | `_trapezoidal_partition` and `_tanh_bell_partition` now implement section 6.3's mappings; the skew test behind `tanh_floor_onsets` is relative (`SKEW_RTOL`) rather than exact; the dead `_SECOND_COMMIT_SHAPES` dispatch branch is removed. |
-| `tests/test_parameterization.py` | Every shape-parametrized test runs over all seven shapes; the bell-identity test compares two `grid_partition` results; step 5c's compact-support and unwrapped-raises cases are added. |
+| `tests/test_parameterization.py` | Every shape-parametrized test runs over all seven shapes; the bell-identity test compares two `grid_partition` results; step 5c's compact-support and unwrapped-raises cases are added; FR-6's anchor-equals-center equality is asserted for all six peaked shapes rather than the Gaussian alone. |
 | `docs/implementations/2026-09-08-mf-parameterization.md` | `## As of 2026-09-15` section correcting the two claims that went stale when the M2 shapes landed. |
 | `docs/implementations/2026-09-14-recover-pr68-approved-tip.md` | `## As of 2026-09-15` section recording that the M2 shapes did land and that the deviation the recovery predicted survived the crash fix. |
 | `docs/numerical-claims.md` | NC-021 re-measured, in the docs-only commit following this one, per Rule 6. |
@@ -178,6 +178,41 @@ features. Those were already correct at `8ec7d897` and are still pinned by
 NC-041 through NC-044 are unaffected, and the nine `x*_j` onsets and the
 `equal-slope` branch each feature takes are unchanged.
 
+### FR-6 closed for all six peaked shapes
+
+The definition of done asks for the layout-identity test to pass "for all landed
+shapes", and FR-6 asks for a test pinning that the anchors are also the MF
+centers for the six peaked shapes. Only `GaussianMF` was pinned, both on the
+synthetic fixture and on the real quantiles. `test_peaked_shape_centers_are_the_anchors`
+now covers all six, and the real-quantile layout-identity test loops over them
+across all three features.
+
+Writing it surfaced two things worth recording rather than smoothing over.
+
+**`TanhMF` sits on its anchor only under the equal-slope branch.** Under
+half-reach its parameters are `left = e_(j-1) - u_j/4` and `right = e_j + v_j/4`,
+whose midpoint is
+
+    (left + right) / 2 = c_j + 0.625 * (v_j - u_j)
+
+which is the anchor only for a symmetric bin. FR-6's "for the six peaked shapes
+these are also the MF centers" is therefore true of the shipped partition
+because all three real features take decision 2's equal-slope fallback, not
+because it holds for `TanhMF` unconditionally. The test asserts the branch
+before it asserts the equality, so if decision 2 is answered the other way the
+test says so instead of silently changing meaning.
+
+**Three of the six agree only to rounding.** `GaussianMF`, `IntervalGaussianMF`
+and `TriangularMF` store the anchor as a parameter, so the equality is
+bit-exact. `TrapezoidalMF`, `TanhMF` and `TanhBellMF` reconstruct it as the
+midpoint of two symmetric endpoints, and `(c - h) + (c + h)` does not always
+round to exactly `2 c`: measured at exactly 1 ULP for `TanhMF` and `TanhBellMF`
+on `mean_T1` (1.4e-14) and `mean_readout_error` (3.5e-18), and exact elsewhere.
+The test splits the two cases rather than loosening both to a tolerance, so the
+shapes that can be exact are still held to it. The reconstructed ones use
+`rel=1e-12`, four orders above the observed rounding and many orders below a bin
+width.
+
 ## Design decisions
 
 **Fix the bell, not the `TanhMF` fallback.** The two disagreed, so one of them
@@ -242,15 +277,16 @@ python scripts/check_ids.py
 | `ruff check .` | All checks passed |
 | `ruff format --check .` | 3 files would be reformatted, all pre-existing on `main` at `004e14e` and none touched here |
 | `mypy --strict` | Success, 37 source files |
-| `pytest tests/ -q` | 611 passed |
-| `pytest --collect-only` | 611 collected |
+| `pytest tests/ -q` | 616 passed |
+| `pytest --collect-only` | 616 collected |
 | `scripts/check_ids.py` | No duplicate or colliding ADR / NC identifiers |
 
-`tests/test_parameterization.py` goes from 94 to 118 collected, so this change
-adds 24 tests and the suite moves 587 to 611. Both commands were run at
-`c24abdc`, the commit this document lands in, on a clean tree; NC-021 is moved to
-611 naming that commit in the docs-only commit that follows it, so the row can
-name the commit it was measured at, per `docs/numerical-claims.md` Rule 6.
+`tests/test_parameterization.py` goes from 94 to 123 collected, so this work
+adds 29 tests and the suite moves 587 to 616, across three commits: the mapping
+and coverage fixes, the `SKEW_RTOL` fix, and FR-6's anchor equality. NC-021 is
+re-measured on a clean tree and moved in the docs-only commit that follows the
+last of them, so the row can name the commit it was measured at, per
+`docs/numerical-claims.md` Rule 6.
 
 One environment note carried over from the review: `mypy --strict` as configured
 (`python_version = "3.11"`) aborts on a `numpy` 2.4.4 stub before checking

@@ -13,6 +13,7 @@ import csv
 import functools
 import itertools
 import math
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -87,6 +88,45 @@ BIN_COVER_TOLERANCE = 1e-12
 #: Every type-1 shape: `qubit_spread` sizes the IT2 footprint and is rejected
 #: for all of these.
 T1_SHAPES = tuple(shape for shape in ALL_SHAPES if shape is not IntervalGaussianMF)
+
+#: Where each peaked shape's parameter vector puts its center, so FR-6's
+#: "the anchors are also the MF centers" can be asserted uniformly rather than
+#: for the Gaussian alone. `TanhSigmoidMF` is absent on purpose: FR-6 excludes
+#: it, because its centers are the bin edges while its anchor stays the bin
+#: midpoint, so asserting agreement there would fail by construction.
+_ANCHOR_FROM_PARAMS: dict[type, Callable[[npt.NDArray[np.float64]], float]] = {
+    GaussianMF: lambda p: float(p[0]),
+    IntervalGaussianMF: lambda p: float(p[0]),
+    TriangularMF: lambda p: float(p[1]),
+    TrapezoidalMF: lambda p: float((p[1] + p[2]) / 2.0),
+    TanhMF: lambda p: float((p[0] + p[1]) / 2.0),
+    TanhBellMF: lambda p: float((p[0] + p[1]) / 2.0),
+}
+PEAKED_SHAPES = tuple(_ANCHOR_FROM_PARAMS)
+
+#: Of those, the shapes that store the anchor *as* a parameter, so FR-6's
+#: equality is bit-exact. The other three reconstruct it as the midpoint of two
+#: symmetric endpoints, where `(c - h) + (c + h)` need not round to exactly
+#: `2 c`: measured at 1 ULP for `TanhMF` and `TanhBellMF` on `mean_T1` and
+#: `mean_readout_error`, so those are compared with a relative tolerance.
+_STORED_CENTER_SHAPES = frozenset({GaussianMF, IntervalGaussianMF, TriangularMF})
+
+#: Relative tolerance for a reconstructed center: four orders above the 1 ULP
+#: observed and many orders below a bin width, so it absorbs rounding and
+#: nothing that could move a level.
+CENTER_RTOL = 1e-12
+
+
+def _assert_centers_are_anchors(
+    shape: type, mfs: list[Any], anchors: npt.NDArray[np.float64], label: str = ""
+) -> None:
+    """FR-6's equality, exact where the anchor is stored and within rounding where not."""
+    centers = np.array([_ANCHOR_FROM_PARAMS[shape](mf.parameters()) for mf in mfs])
+    if shape in _STORED_CENTER_SHAPES:
+        assert np.array_equal(centers, anchors), label
+    else:
+        assert centers == pytest.approx(anchors, rel=CENTER_RTOL), label
+
 
 #: The two compact-support shapes. Beyond their outermost feet every level reads
 #: exactly 0.0, which is the mechanism FR-12's clamp exists to stop; the other
@@ -301,11 +341,25 @@ def test_anchors_are_ascending_and_match_the_layout() -> None:
     assert np.array_equal(anchors, layout.centers)
 
 
-def test_gaussian_centers_are_the_anchors() -> None:
-    mfs = grid_partition(GaussianMF, _RNG_FREE_SKEWED, 3)
-    centers = np.array([mf.parameters()[0] for mf in mfs])
+@pytest.mark.parametrize("shape", PEAKED_SHAPES)
+def test_peaked_shape_centers_are_the_anchors(shape: type) -> None:
+    """FR-6: for the six peaked shapes the anchors are also the MF centers.
 
-    assert np.array_equal(centers, partition_anchors(_RNG_FREE_SKEWED, 3))
+    ``TanhSigmoidMF`` is excluded by FR-6 itself and so is absent from
+    ``PEAKED_SHAPES``.
+
+    One caveat worth pinning rather than assuming: ``TanhMF`` sits on its anchor
+    only under decision 2's equal-slope branch. Under half-reach its midpoint is
+    ``c_j + 0.625 * (v_j - u_j)``, which equals the anchor only for a symmetric
+    bin, so this asserts the branch before it asserts the equality. All three
+    real features are on the equal-slope branch, as is this fixture.
+    """
+    if shape is TanhMF:
+        assert tanh_slope_strategy(_RNG_FREE_SKEWED, 3) == TANH_SLOPES_EQUAL
+
+    mfs = grid_partition(shape, _RNG_FREE_SKEWED, 3, **_spread_for(shape, _RNG_FREE_SKEWED))
+
+    _assert_centers_are_anchors(shape, mfs, partition_anchors(_RNG_FREE_SKEWED, 3))
 
 
 def test_gaussian_sigma_puts_half_max_on_the_bin_edge() -> None:
@@ -1244,11 +1298,20 @@ def test_compare_mf_placement_still_runs_and_still_reports_27_rules(
 
 
 def test_layout_is_shared_between_partition_and_anchors_on_the_real_quantiles() -> None:
-    """FR-6's real invariant: no two callers ever see two different layouts."""
-    samples, _ = _committed_survey()
+    """FR-6's real invariant: no two callers ever see two different layouts.
 
-    for values in samples.values():
+    Over every landed peaked shape and all three real features, not the Gaussian
+    alone: the invariant is that no two callers see two different layouts, and
+    one shape cannot demonstrate that.
+    """
+    samples, spreads = _committed_survey()
+
+    for name, values in samples.items():
         layout: QuantileLayout = _quantile_layout(values, 3, PLACEMENT_QUANTILE)
         assert np.array_equal(partition_anchors(values, 3), layout.centers)
-        centers = np.array([mf.parameters()[0] for mf in grid_partition(GaussianMF, values, 3)])
-        assert np.array_equal(centers, layout.centers)
+
+        assert tanh_slope_strategy(values, 3) == TANH_SLOPES_EQUAL, name
+        for shape in PEAKED_SHAPES:
+            kwargs = {"qubit_spread": spreads[name]} if shape is IntervalGaussianMF else {}
+            mfs = grid_partition(shape, values, 3, **kwargs)
+            _assert_centers_are_anchors(shape, mfs, layout.centers, f"{name} / {shape.__name__}")
