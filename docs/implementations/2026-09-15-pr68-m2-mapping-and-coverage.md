@@ -209,9 +209,10 @@ python scripts/check_ids.py
 | `scripts/check_ids.py` | No duplicate or colliding ADR / NC identifiers |
 
 `tests/test_parameterization.py` goes from 94 to 118 collected, so this change
-adds 24 tests and the suite moves 587 to 611. NC-021 is moved to that value in
-the docs-only commit that follows this one, so the row can name the commit it was
-measured at, per `docs/numerical-claims.md` Rule 6.
+adds 24 tests and the suite moves 587 to 611. Both commands were run at
+`c24abdc`, the commit this document lands in, on a clean tree; NC-021 is moved to
+611 naming that commit in the docs-only commit that follows it, so the row can
+name the commit it was measured at, per `docs/numerical-claims.md` Rule 6.
 
 One environment note carried over from the review: `mypy --strict` as configured
 (`python_version = "3.11"`) aborts on a `numpy` 2.4.4 stub before checking
