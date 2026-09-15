@@ -283,10 +283,10 @@ python scripts/check_ids.py
 
 `tests/test_parameterization.py` goes from 94 to 123 collected, so this work
 adds 29 tests and the suite moves 587 to 616, across three commits: the mapping
-and coverage fixes, the `SKEW_RTOL` fix, and FR-6's anchor equality. NC-021 is
-re-measured on a clean tree and moved in the docs-only commit that follows the
-last of them, so the row can name the commit it was measured at, per
-`docs/numerical-claims.md` Rule 6.
+and coverage fixes (`c24abdc`), the `SKEW_RTOL` fix (`c97259d`), and FR-6's
+anchor equality (`7b36b8d`). NC-021 is re-measured on a clean tree at `7b36b8d`
+and moved to 616 in the docs-only commit that follows it, so the row can name
+the commit it was measured at, per `docs/numerical-claims.md` Rule 6.
 
 One environment note carried over from the review: `mypy --strict` as configured
 (`python_version = "3.11"`) aborts on a `numpy` 2.4.4 stub before checking
