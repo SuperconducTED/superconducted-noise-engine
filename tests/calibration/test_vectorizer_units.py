@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 from scripts.first_ensemble_run import (
+    DEFAULT_MF_PLACEMENT,
     _default_mfs_for_feature,
     _load_snapshot,
     _synthetic_snapshot,
@@ -13,13 +14,29 @@ from scripts.first_ensemble_run import (
 )
 
 from superconducted.calibration.features import BasicCalibrationVectorizer, mean_t1, mean_t2
-from superconducted.calibration.loader import CalibrationParseError, load_snapshot
+from superconducted.calibration.loader import (
+    EXPECTED_UNITS,
+    UNIT_SCALE,
+    CalibrationParseError,
+    load_snapshot,
+    validate_unit_scale,
+)
 from superconducted.fuzzy.tsk import TSKRuleBase
 
 FIXTURE = (
     Path(__file__).parents[1]
     / "fixtures/calibration/ibm_fez_20260513T121322Z_q72_missing_t1t2.json"
 )
+
+# NC-052's registered endpoint firing sum, pinned here rather than checked
+# with `> 0` alone. `> 0` is a far weaker guard than it looks: with the
+# coherence means 2x out the sum is still 6.0e-21, and 5x out it is
+# 4.2e-229, so nothing short of roughly 10x trips it. Issue #66's third
+# acceptance criterion asks that a future unit change fail loudly, and only
+# the registered value delivers that. NC-052 covers the endpoint placement,
+# which is `DEFAULT_MF_PLACEMENT`; interior has no register row, so it keeps
+# the non-degeneracy check it was written with.
+NC052_ENDPOINT_FIRING_SUM: float = 0.10769113232875129
 
 
 def test_real_fixture_matches_loader_seconds() -> None:
@@ -42,7 +59,10 @@ def test_real_fixture_fires_shipped_grid(placement: str) -> None:
     )
     strengths = grid.evaluate(vectorizer.extract(snapshot)).firing_strengths
     assert np.isfinite(strengths).all()
-    assert strengths.sum() > 0
+    if placement == DEFAULT_MF_PLACEMENT:
+        assert strengths.sum() == pytest.approx(NC052_ENDPOINT_FIRING_SUM, rel=1e-9)
+    else:
+        assert strengths.sum() > 0
     members, _ = generate_safe_ensemble_with_seed(snapshot, 1, placement)
     assert len(members) == 1
 
@@ -82,3 +102,27 @@ def test_missing_unit_rejected_by_both_parsers_and_smoke(name: str, tmp_path: Pa
         BasicCalibrationVectorizer().extract(snapshot)
     with pytest.raises(CalibrationParseError, match=message):
         generate_safe_ensemble_with_seed(snapshot, 1)
+
+
+def test_every_expected_unit_has_a_conversion_factor() -> None:
+    """The loader's two tables must agree on the units they describe."""
+    assert set(EXPECTED_UNITS.values()) <= set(UNIT_SCALE)
+
+
+def test_unit_without_conversion_factor_raises_parse_error() -> None:
+    """A unit absent from UNIT_SCALE raises this module's error, not KeyError.
+
+    The note on EXPECTED_UNITS invites cross-module edits to that table. If
+    one adds a field whose unit has no SI factor, the failure still has to
+    arrive as CalibrationParseError, which is what both archive consumers
+    catch and what the loader's docstring promises.
+    """
+    with pytest.raises(CalibrationParseError, match="no SI conversion factor"):
+        validate_unit_scale(
+            "GHz",
+            "GHz",
+            context="ctx",
+            qubit_index=0,
+            field_name="frequency",
+            raw_value=5.0,
+        )

@@ -204,25 +204,46 @@ class ParsedFieldValue(NamedTuple):
 
 
 def validate_unit_scale(
-    actual_unit: Any,
+    actual_unit: object,
     expected_unit: str,
     *,
     context: str,
     qubit_index: int,
     field_name: str,
-    raw_value: Any,
+    raw_value: object,
 ) -> float:
     """Validate an Nduv unit and return its SI scale.
 
     Missing units (passed as ``None``) are mismatches, including on null
     values. Both archive consumers use this check before parsing values.
+
+    Raises :class:`CalibrationParseError` when ``actual_unit`` differs from
+    ``expected_unit``, and also when ``expected_unit`` has no entry in
+    :data:`UNIT_SCALE`. The second case is a repository bug rather than a
+    bad document: it means :data:`EXPECTED_UNITS` gained a field whose unit
+    nothing can convert. It surfaces as this module's own error rather than
+    as a bare ``KeyError`` so that the promise made in
+    :class:`CalibrationParseError`'s docstring still holds for whoever makes
+    that edit, which the note on :data:`EXPECTED_UNITS` explicitly invites.
+
+    ``actual_unit`` and ``raw_value`` are typed ``object`` rather than
+    ``Any``: they arrive straight from parsed JSON and are only compared and
+    repr'd here, so ``object`` keeps ``--strict`` honest at the call sites
+    without costing anything.
     """
     if actual_unit != expected_unit:
         raise CalibrationParseError(
             f"{context}: qubit {qubit_index} field {field_name!r}: "
             f"expected unit {expected_unit!r}, got {actual_unit!r} (value={raw_value!r})"
         )
-    return UNIT_SCALE[expected_unit]
+    scale = UNIT_SCALE.get(expected_unit)
+    if scale is None:
+        raise CalibrationParseError(
+            f"{context}: qubit {qubit_index} field {field_name!r}: "
+            f"expected unit {expected_unit!r} has no SI conversion factor in UNIT_SCALE; "
+            "EXPECTED_UNITS and UNIT_SCALE have drifted apart"
+        )
+    return scale
 
 
 def _parse_value(
