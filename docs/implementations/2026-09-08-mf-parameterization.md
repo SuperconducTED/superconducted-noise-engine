@@ -588,3 +588,48 @@ separately once the mapping matches section 6.3.
   `docs/numerical-claims.md`
 - `docs/evidence/feature-distribution/README.md` — the survey and its provenance
 - `docs/roadmap/2026-09-03-phase-3-plan.md` — the M1 gate this lands against
+
+## As of 2026-09-15
+
+Two claims above went stale when the M2 shapes landed on this branch. The rows
+and paragraphs above are left as written; this section records what changed.
+
+**"The M2 shapes are deliberately absent" is no longer true.** That paragraph
+described the tree at `3f5e0f9`. `TriangularMF`, `TrapezoidalMF` and `TanhBellMF`
+were added at `e503e1e`, and the `ZeroDivisionError` it predicted was fixed at
+`afe4d58`. All three now build partitions through `grid_partition`, and nothing
+raises `NotImplementedError` for them. Architect decision C3's second commit has
+therefore landed inside this PR rather than after it, which means step 5c's test
+obligations land here too: the section 9.1 compact-support cases and the section
+9.2 unwrapped-raises contrast are in
+`tests/test_parameterization.py` as of 2026-09-15.
+
+The defect that paragraph named was only half fixed at `afe4d58`. The triangular
+feet were corrected to `c_j +- 2 r_j`, but the trapezoid kept a plateau at
+`c_j - u_j/4` and `c_j + v_j/4` instead of section 6.3's `c_j -+ 0.5 r_j`. That
+no longer crashed, because the memberships were 0.400 rather than 0.0 at the bin
+edges, but it still failed FR-9's bin-cover rule on all three features. It is
+fixed in `docs/implementations/2026-09-15-pr68-m2-mapping-and-coverage.md`.
+
+**The `TanhMF` / `TanhBellMF` identity claim was not true of the shipped bell.**
+The paragraph above states that under decision 2's equal-slope fallback the two
+shapes "coincide pointwise", and that this could not be shown until the second
+commit landed. The second commit landed with an edge-anchored bell mapping, so
+the claim became checkable and false: measured over each feature's domain box on
+the committed survey, the largest membership gap between the two shapes was
+0.9865 for `mean_T1`, 0.9891 for `mean_T2` and 0.8098 for `mean_readout_error`.
+
+`_tanh_bell_partition` now implements section 6.3's mapping, and the gap is
+exactly 0.0 on all three features. The identity is pinned by
+`test_the_equal_slope_fallback_coincides_with_tanh_bell`, which compares two
+`grid_partition` results rather than a `grid_partition` result against a
+hand-written copy of the mapping, so it now fails if either side moves.
+
+**Decision 2's status.** @bengisucvd ratified decisions 1 and 3 on 2026-09-13 and
+recommended retaining half-reach slopes for all three features, putting the
+choice to @BurakOztekin as decision 2's owner. That is still open, and it is now
+open against a correct measurement of what the fallback costs.
+
+**NC-021.** The 485 and 590 figures above describe earlier trees. The suite is
+611 at the head of this branch; NC-021 carries the value and the commit it was
+measured at.

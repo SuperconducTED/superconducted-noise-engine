@@ -88,9 +88,6 @@ TANH_SLOPE_STRATEGIES: Final[tuple[str, ...]] = (
     TANH_SLOPES_EQUAL,
 )
 
-#: Shapes that architect decision C3 defers to the second commit, before M2.
-_SECOND_COMMIT_SHAPES: Final[tuple[str, ...]] = ()
-
 _HALF_MAX_SIGMA: Final[float] = math.sqrt(2.0 * math.log(2.0))
 _EDGE_ATANH: Final[float] = math.atanh(EDGE_TANH_VALUE)
 
@@ -426,21 +423,20 @@ def _trapezoidal_partition(
 ) -> list[MembershipFunction]:
     del placement, qubit_spread, tanh_slopes
     c = layout.centers
-    e = layout.edges
     r = layout.reaches
-    mfs: list[MembershipFunction] = []
-    for j in range(layout.k):
-        m_l = (c[j] - e[j]) / 4.0
-        m_r = (e[j + 1] - c[j]) / 4.0
-        mfs.append(
-            TrapezoidalMF(
-                float(c[j] - 1.5 * r[j]),
-                float(c[j] - m_l),
-                float(c[j] + m_r),
-                float(c[j] + 1.5 * r[j]),
-            )
+    # Section 6.3: the plateau is the inner half of the bin and each ramp has
+    # length r_j, so membership is exactly 0.5 at c_j +- r_j, the bin's wider
+    # edge. That equality is what makes the bin-cover rule hold; a plateau
+    # narrower than 0.5 r_j drops the edge value below 0.5 and FR-9 fails.
+    return [
+        TrapezoidalMF(
+            float(c[j] - 1.5 * r[j]),
+            float(c[j] - 0.5 * r[j]),
+            float(c[j] + 0.5 * r[j]),
+            float(c[j] + 1.5 * r[j]),
         )
-    return mfs
+        for j in range(layout.k)
+    ]
 
 
 def _tanh_bell_partition(
@@ -448,22 +444,29 @@ def _tanh_bell_partition(
 ) -> list[MembershipFunction]:
     del placement, qubit_spread, tanh_slopes
     c = layout.centers
-    e = layout.edges
-    mfs: list[MembershipFunction] = []
-    for j in range(layout.k):
-        m_l = (c[j] - e[j]) / 4.0
-        m_r = (e[j + 1] - c[j]) / 4.0
-        min_m = min(m_l, m_r)
-        slope = math.atanh(0.8) / min_m
-        left = e[j] - m_l
-        right = e[j + 1] + m_r
-        mfs.append(TanhBellMF(float(left), float(right), float(slope)))
-    return mfs
+    r = layout.reaches
+    m = layout.margins
+    # Section 6.3: one slope over a band of 2 r_j + 2 m_j about the center. At
+    # the bin edge c_j + r_j the right tanh reads -0.8 and the left reads about
+    # +1, so membership is 0.9 and the bin-cover rule holds. This is also
+    # exactly what `_tanh_partition` builds under decision 2's equal-slope
+    # fallback, which is why that fallback collapses `TanhMF` onto this shape;
+    # the identity is pinned against this function rather than against a
+    # hand-written copy of the mapping.
+    return [
+        TanhBellMF(
+            float(c[j] - r[j] - m[j]),
+            float(c[j] + r[j] + m[j]),
+            _EDGE_ATANH / float(m[j]),
+        )
+        for j in range(layout.k)
+    ]
 
 
-#: The M1 shapes of architect decision C3's first commit. A shape absent from
-#: this table raises ``NotImplementedError`` rather than receiving a silently
-#: wrong partition (FR-5).
+#: All seven shapes of ADR-006's enumeration. Architect decision C3 split them
+#: into an M1 commit and a second commit before M2; both have now landed, so the
+#: table is complete. A shape absent from it raises ``NotImplementedError``
+#: rather than receiving a silently wrong partition (FR-5).
 _SHAPE_BUILDERS: Final[dict[type[MembershipFunction], _ShapeBuilder]] = {
     GaussianMF: _gaussian_partition,
     IntervalGaussianMF: _interval_gaussian_partition,
@@ -506,8 +509,8 @@ def grid_partition(
     Deterministic: no RNG anywhere.
 
     Raises ``ValueError`` on a degenerate layout or a misused ``qubit_spread``
-    or ``tanh_slopes``, and ``NotImplementedError`` for a shape whose commit has
-    not landed.
+    or ``tanh_slopes``, and ``NotImplementedError`` for a class that is not one
+    of the seven shapes in :data:`_SHAPE_BUILDERS`.
     """
     if shape is not IntervalGaussianMF and qubit_spread is not None:
         raise ValueError(f"qubit_spread is not supported for T1 shape {shape.__name__}.")
@@ -521,16 +524,9 @@ def grid_partition(
 
     builder = _SHAPE_BUILDERS.get(shape)
     if builder is None:
-        if shape.__name__ in _SECOND_COMMIT_SHAPES:
-            raise NotImplementedError(
-                f"{shape.__name__} lands in the second commit before M2 (architect "
-                f"decision C3, FR-5); the M1 commit ships "
-                f"{', '.join(s.__name__ for s in _SHAPE_BUILDERS)}."
-            )
         raise NotImplementedError(
             f"No grid_partition mapping for {shape.__name__}; the shipped shapes are "
-            f"{', '.join(s.__name__ for s in _SHAPE_BUILDERS)} and "
-            f"{', '.join(_SECOND_COMMIT_SHAPES)}."
+            f"{', '.join(s.__name__ for s in _SHAPE_BUILDERS)}."
         )
 
     layout = _quantile_layout(np.asarray(samples, dtype=np.float64), k, placement)

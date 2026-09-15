@@ -55,12 +55,48 @@ from superconducted.fuzzy.parameterization import (
     tanh_slope_strategy,
 )
 from superconducted.fuzzy.squashing import ProbabilityClip
-from superconducted.integration.aer_factory import FuzzyNoiseModelEnsemble, is_identity_damping
+from superconducted.integration.aer_factory import (
+    FuzzyNoiseModel,
+    FuzzyNoiseModelEnsemble,
+    is_identity_damping,
+)
 from superconducted.training.targets import feature_target_fn
 from superconducted.types import CalibrationSnapshot
 
+#: Architect decision C3 split ADR-006's seven shapes into an M1 commit and a
+#: second commit before M2. Both have landed, so every shape-parametrized test
+#: below runs over `ALL_SHAPES`; the halves are kept as named tuples only where
+#: a test needs to say which one a shape came from.
 M1_SHAPES = (GaussianMF, TanhMF, TanhSigmoidMF, IntervalGaussianMF)
-SECOND_COMMIT_SHAPES = (TriangularMF, TrapezoidalMF, TanhBellMF)
+M2_SHAPES = (TriangularMF, TrapezoidalMF, TanhBellMF)
+ALL_SHAPES = M1_SHAPES + M2_SHAPES
+
+#: FR-9 exempts the one monotone shape: `TanhSigmoidMF` satisfies section 6.3's
+#: ordering invariant instead of the bin-cover rule.
+COVERED_SHAPES = tuple(shape for shape in ALL_SHAPES if shape is not TanhSigmoidMF)
+
+#: The bin-cover bound is *attained*, not exceeded: `GaussianMF`, `TriangularMF`
+#: and `TrapezoidalMF` all read exactly 0.5 at `c_j +- r_j` by construction, so a
+#: dense grid that happens to sample that point computes 0.5 one ULP low. The
+#: tolerance absorbs that and nothing else: the trapezoid mapping defect this
+#: suite was extended to catch read 0.400, four orders of magnitude outside it.
+BIN_COVER_TOLERANCE = 1e-12
+
+#: Every type-1 shape: `qubit_spread` sizes the IT2 footprint and is rejected
+#: for all of these.
+T1_SHAPES = tuple(shape for shape in ALL_SHAPES if shape is not IntervalGaussianMF)
+
+#: The two compact-support shapes. Beyond their outermost feet every level reads
+#: exactly 0.0, which is the mechanism FR-12's clamp exists to stop; the other
+#: five shapes have unbounded support and cannot exercise it.
+COMPACT_SUPPORT_SHAPES = (TriangularMF, TrapezoidalMF)
+
+#: Step 9's acceptance matrix: every landed shape, `NieTanDefuzzifier` for the
+#: one IT2 shape and `WeightedAverageDefuzzifier` for the six type-1 shapes.
+ARCHIVE_ACCEPTANCE_CASES = tuple(
+    (shape, NieTanDefuzzifier if shape is IntervalGaussianMF else WeightedAverageDefuzzifier)
+    for shape in ALL_SHAPES
+)
 
 #: A right-skewed sample, so the quantile bins are genuinely unequal and the
 #: half-reach TanhMF mapping is exercised rather than collapsing to symmetry.
@@ -211,7 +247,7 @@ def test_unknown_placement_is_rejected() -> None:
 # --------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("shape", M1_SHAPES)
+@pytest.mark.parametrize("shape", ALL_SHAPES)
 def test_partition_round_trips_its_own_validation(shape: type) -> None:
     """FR-8: every MF survives reconstruction and set_parameters from its own vector.
 
@@ -229,7 +265,7 @@ def test_partition_round_trips_its_own_validation(shape: type) -> None:
         mf.set_parameters(params)
 
 
-@pytest.mark.parametrize("shape", [GaussianMF, TanhMF, IntervalGaussianMF])
+@pytest.mark.parametrize("shape", COVERED_SHAPES)
 def test_bin_cover_rule_holds_on_a_dense_grid(shape: type) -> None:
     """FR-9: the best MF at any x in [e_0, e_k] has degree.low >= 0.5.
 
@@ -241,10 +277,10 @@ def test_bin_cover_rule_holds_on_a_dense_grid(shape: type) -> None:
 
     xs = np.linspace(layout.edges[0], layout.edges[-1], 1001)
     worst = min(max(mf.degree(float(x)).low for mf in mfs) for x in xs)
-    assert worst >= 0.5
+    assert worst >= 0.5 - BIN_COVER_TOLERANCE
 
 
-@pytest.mark.parametrize("shape", M1_SHAPES)
+@pytest.mark.parametrize("shape", ALL_SHAPES)
 def test_partition_is_deterministic(shape: type) -> None:
     """FR-10: no RNG anywhere; two calls give identical parameter vectors."""
     kwargs = _spread_for(shape, _RNG_FREE_SKEWED)
@@ -301,7 +337,7 @@ def test_interval_gaussian_requires_a_finite_positive_spread(spread: float | Non
         grid_partition(IntervalGaussianMF, _RNG_FREE_SKEWED, 3, qubit_spread=spread)
 
 
-@pytest.mark.parametrize("shape", [GaussianMF, TanhMF, TanhSigmoidMF])
+@pytest.mark.parametrize("shape", T1_SHAPES)
 def test_qubit_spread_is_rejected_for_t1_shapes(shape: type) -> None:
     with pytest.raises(ValueError, match="not supported for T1 shape"):
         grid_partition(shape, _RNG_FREE_SKEWED, 3, qubit_spread=1.0)
@@ -372,25 +408,27 @@ def test_a_skewed_feature_takes_the_equal_slope_fallback() -> None:
 
 
 def test_the_equal_slope_fallback_coincides_with_tanh_bell() -> None:
-    """Decision 2's consequence, pinned: the untrained rows are identical.
+    """Decision 2's consequence, pinned against the *shipped* bell partition.
 
-    ``TanhBellMF`` is a second-commit shape, so this compares against the bell's
-    section 6.3 mapping constructed by hand rather than through
-    ``grid_partition``, which is exactly what the ticket says must be stated in
-    words until the second commit lands.
+    Both sides come from ``grid_partition``, so this fails if either mapping
+    moves. Comparing against a hand-written copy of section 6.3's bell mapping
+    does not: that version passed while ``_tanh_bell_partition`` shipped an
+    edge-anchored mapping differing from ``TanhMF`` by up to 0.9891 in
+    membership on the committed quantiles, which is the whole content of
+    decision 2's ratification request.
     """
     layout = _quantile_layout(_RNG_FREE_SKEWED, 3, PLACEMENT_QUANTILE)
     assert tanh_slope_strategy(_RNG_FREE_SKEWED, 3) == TANH_SLOPES_EQUAL
 
-    for j, mf in enumerate(grid_partition(TanhMF, _RNG_FREE_SKEWED, 3)):
-        c = float(layout.centers[j])
-        r = float(layout.reaches[j])
-        m = float(layout.margins[j])
-        bell = TanhBellMF(c - r - m, c + r + m, math.atanh(EDGE_TANH_VALUE) / m)
+    tanh_mfs = grid_partition(TanhMF, _RNG_FREE_SKEWED, 3)
+    bell_mfs = grid_partition(TanhBellMF, _RNG_FREE_SKEWED, 3)
+
+    for mf, bell in zip(tanh_mfs, bell_mfs, strict=True):
         left, right, slope_left, slope_right = mf.parameters()
-        assert (left, right) == pytest.approx(tuple(bell.parameters()[:2]))
-        assert slope_left == pytest.approx(bell.parameters()[2])
-        assert slope_right == pytest.approx(bell.parameters()[2])
+        bell_left, bell_right, bell_slope = bell.parameters()
+        assert (left, right) == pytest.approx((bell_left, bell_right))
+        assert slope_left == pytest.approx(bell_slope)
+        assert slope_right == pytest.approx(bell_slope)
         for x in np.linspace(layout.lo, layout.hi, 101):
             assert mf.degree(float(x)).low == pytest.approx(bell.degree(float(x)).low)
 
@@ -426,6 +464,53 @@ def test_half_reach_slopes_follow_the_section_6_3_mapping() -> None:
         assert right == pytest.approx(float(layout.edges[j + 1]) + m_right)
         assert slope_left == pytest.approx(math.atanh(EDGE_TANH_VALUE) / m_left)
         assert slope_right == pytest.approx(math.atanh(EDGE_TANH_VALUE) / m_right)
+
+
+# --------------------------------------------------------------------------
+# Compact support: the reason FR-12 exists (section 9.1, step 5c)
+# --------------------------------------------------------------------------
+
+
+#: Section 6.3's outermost foot, as a multiple of the reach: `c_j +- 2 r_j` for
+#: the triangle, `c_j +- 1.5 r_j` for the trapezoid.
+_COMPACT_FOOT_REACH: dict[type, float] = {TriangularMF: 2.0, TrapezoidalMF: 1.5}
+
+
+@pytest.mark.parametrize("shape", COMPACT_SUPPORT_SHAPES)
+def test_compact_support_reads_exactly_zero_beyond_every_foot(shape: type) -> None:
+    """Exactly ``0.0``, not merely small: that distinction is what crashes a run.
+
+    ``TriangularMF.degree`` returns ``MembershipDegree.crisp(0.0)`` for
+    ``x <= a or x >= c`` and ``TrapezoidalMF`` the same for ``x <= a or x >= d``.
+    Past the outermost foot all ``k`` levels of that feature read zero, and
+    ``TSKRule.firing_strength`` multiplies across the three inputs, so one such
+    feature zeroes all 27 rules.
+    """
+    layout = _quantile_layout(_RNG_FREE_SKEWED, 3, PLACEMENT_QUANTILE)
+    mfs = grid_partition(shape, _RNG_FREE_SKEWED, 3)
+    span = _COMPACT_FOOT_REACH[shape] * layout.reaches
+
+    for x in (float(np.min(layout.centers - span)), float(np.max(layout.centers + span))):
+        assert [mf.degree(x).low for mf in mfs] == [0.0, 0.0, 0.0]
+
+
+@pytest.mark.parametrize("shape", COMPACT_SUPPORT_SHAPES)
+def test_all_zero_firing_raises_in_the_defuzzifier(shape: type) -> None:
+    """The crash FR-12 prevents, demonstrated rather than asserted in prose.
+
+    Pinned so the clamp has a stated reason in the suite: without it this is
+    what an ablation row for these two shapes does on an archive tail.
+    """
+    layout = _quantile_layout(_RNG_FREE_SKEWED, 3, PLACEMENT_QUANTILE)
+    mfs = [grid_partition(shape, _RNG_FREE_SKEWED, 3) for _ in range(3)]
+    anchors = [partition_anchors(_RNG_FREE_SKEWED, 3) for _ in range(3)]
+    rule_base = anchored_rule_base(mfs, _synthetic_target, anchors=anchors)
+
+    beyond = float(np.max(layout.centers + 2.0 * layout.reaches)) + 1.0
+    outside = np.array([beyond, beyond, beyond], dtype=np.float64)
+
+    with pytest.raises(ZeroDivisionError):
+        WeightedAverageDefuzzifier().defuzzify(rule_base.evaluate(outside))
 
 
 # --------------------------------------------------------------------------
@@ -842,7 +927,7 @@ def _archive_partition(
     return mfs, anchors
 
 
-@pytest.mark.parametrize("shape", [GaussianMF, TanhMF, IntervalGaussianMF])
+@pytest.mark.parametrize("shape", COVERED_SHAPES)
 def test_bin_cover_holds_on_the_real_quantiles(shape: type) -> None:
     """Section 9.3: the Issue #31 property, asserted on the archive rather than a range."""
     samples, spreads = _committed_survey()
@@ -852,7 +937,8 @@ def test_bin_cover_holds_on_the_real_quantiles(shape: type) -> None:
         layout = _quantile_layout(values, 3, PLACEMENT_QUANTILE)
         mfs = grid_partition(shape, values, 3, **kwargs)
         xs = np.linspace(layout.edges[0], layout.edges[-1], 601)
-        assert min(max(mf.degree(float(x)).low for mf in mfs) for x in xs) >= 0.5
+        worst = min(max(mf.degree(float(x)).low for mf in mfs) for x in xs)
+        assert worst >= 0.5 - BIN_COVER_TOLERANCE
 
 
 def test_tanh_branch_taken_on_the_real_quantiles_is_pinned() -> None:
@@ -975,17 +1061,13 @@ def test_every_anchor_is_accepted_by_the_real_target() -> None:
     assert np.all((targets > 0.0) & (targets < 1.0))
 
 
-@pytest.mark.parametrize(
-    ("shape", "defuzzifier"),
-    [
-        (GaussianMF, WeightedAverageDefuzzifier),
-        (TanhMF, WeightedAverageDefuzzifier),
-        (TanhSigmoidMF, WeightedAverageDefuzzifier),
-        (IntervalGaussianMF, NieTanDefuzzifier),
-    ],
-)
+@pytest.mark.parametrize(("shape", "defuzzifier"), ARCHIVE_ACCEPTANCE_CASES)
 def test_anchored_base_is_never_degenerate_on_the_archive(shape: type, defuzzifier: type) -> None:
-    """FR-11, step 9: every surveyed vector, through the clamp, real target, every M1 shape.
+    """FR-11, step 9: every surveyed vector, through the clamp, real target, every landed shape.
+
+    Every shape, not the Gaussian alone: step 5c repeats this run after the M2
+    commit precisely because the Gaussian has unbounded support and would pass
+    while the two compact-support rows crashed.
 
     The clamp here is the real ``ClampingFeatureExtractor``, not a bare
     ``np.clip``: step 9 says this is "the exact object the ablation will hand to
@@ -1048,11 +1130,11 @@ def test_the_ensemble_evaluates_an_out_of_range_snapshot_through_the_clamp() -> 
     ``feature_extractor`` is the only way a caller that builds an ensemble can
     apply the out-of-range policy at all (architect decision B6).
 
-    The unwrapped contrast section 9.2 asks for -- the same snapshot raising for
-    ``TriangularMF`` and ``TrapezoidalMF`` -- cannot be asserted yet: those two
-    are the only compact-support shapes and they land in the second commit
-    (architect decision C3), while all four M1 shapes have unbounded support and
-    fire something everywhere. Step 5c adds it.
+    The unwrapped contrast section 9.2 asks for, the same snapshot raising for
+    ``TriangularMF`` and ``TrapezoidalMF``, is
+    ``test_the_unwrapped_extractor_raises_where_the_clamp_saves_the_run`` below,
+    added with step 5c's M2 commit. This case keeps the Gaussian ensemble path,
+    which is what the ablation builds.
     """
     samples, spreads = _committed_survey()
     mfs, anchors = _archive_partition(GaussianMF, samples, spreads)
@@ -1088,6 +1170,46 @@ def test_the_ensemble_evaluates_an_out_of_range_snapshot_through_the_clamp() -> 
     assert clamp.n_extractions == 4
     assert clamp.n_clamped_vectors == 4
     assert tuple(clamp.n_clamped_components) == (4, 4, 4)
+
+
+@pytest.mark.parametrize("shape", COMPACT_SUPPORT_SHAPES)
+def test_the_unwrapped_extractor_raises_where_the_clamp_saves_the_run(shape: type) -> None:
+    """Section 9.2, step 5c: the contrast that says *why* FR-12 exists.
+
+    The same out-of-range snapshot and the same rule base twice, differing only
+    in whether ``ClampingFeatureExtractor`` wraps the vectorizer. Only the two
+    compact-support shapes can show this, which is the point: an acceptance run
+    over the M1 four alone passes while these two rows crash unclamped.
+    """
+    samples, spreads = _committed_survey()
+    mfs, anchors = _archive_partition(shape, samples, spreads)
+    rule_base = anchored_rule_base(
+        mfs, functools.partial(feature_target_fn, t_seconds=SX_SECONDS), anchors=anchors
+    )
+    lo, hi = _domain_box(samples)
+
+    # Well outside the box on all three features, in both directions.
+    outside = _synthetic_snapshot(5000.0, 1.0, 0.9)
+    common = {
+        "calibration": outside,
+        "rule_base": rule_base,
+        "defuzzifier": WeightedAverageDefuzzifier(),
+        "squashing": ProbabilityClip(),
+        "channel_projector": KrausChannelProjector(NoOpNormalization()),
+        "fuzzification_strategy": PostGateFuzzification(),
+    }
+
+    with pytest.raises(ZeroDivisionError):
+        FuzzyNoiseModel(feature_extractor=BasicCalibrationVectorizer(), **common)
+
+    clamp = ClampingFeatureExtractor(BasicCalibrationVectorizer(), lo, hi)
+    model = FuzzyNoiseModel(feature_extractor=clamp, **common)
+
+    assert np.all(np.isfinite(model.crisp_params))
+    assert not model.is_degenerate
+    assert clamp.n_extractions == 1
+    assert clamp.n_clamped_vectors == 1
+    assert tuple(clamp.n_clamped_components) == (1, 1, 1)
 
 
 def test_compare_mf_placement_still_runs_and_still_reports_27_rules(

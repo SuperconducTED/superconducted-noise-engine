@@ -209,3 +209,56 @@ the statement that no backup of the approved tip was ever pushed.
 - NC-021, NC-041, NC-042, NC-043, NC-044 in `docs/numerical-claims.md`
 - ADR-006, ADR-009, ADR-010, ADR-018, ADR-019, ADR-023, ADR-024 in
   `docs/decisions.md`
+
+## As of 2026-09-15
+
+The plan recorded above was overtaken. This section records what actually
+happened; the sections above are left as written.
+
+**The M2 shapes were carried over after all.** The Design decisions section above
+says they are not, and gives the reason: `e503e1e` placed the triangular and
+trapezoidal feet on the bin edges, every level read exactly `0.0` at `lo` and
+`hi`, and the anchored rule base raised `ZeroDivisionError` at precisely the
+points `ClampingFeatureExtractor` maps out-of-range rows onto. That reading was
+correct for `e503e1e`.
+
+What followed was not the separate M2 PR this section planned. The recovery line
+and the author's line were merged at `afe4d58`, whose message records the crash
+fix, and the branch continued from there. At the PR head `8ec7d897` all seven
+shapes ship.
+
+**The crash was fixed; the deviation was not.** `afe4d58` corrected the
+triangular feet to section 6.3's `c_j +- 2 r_j`, which removed the
+`ZeroDivisionError`. It left two mappings off specification:
+
+- `_trapezoidal_partition` kept the plateau at `c_j - u_j/4` and `c_j + v_j/4`
+  instead of `c_j -+ 0.5 r_j`. Memberships at the bin edges were 0.400 rather
+  than 0.0, so nothing crashed, but FR-9's bin-cover rule failed on all three
+  features, and `scripts/compare_mf_placement.py`'s decision rule 2 rejects a
+  minimum coverage below 0.5.
+- `_tanh_bell_partition` kept an edge-anchored mapping, which broke the
+  `TanhMF` / `TanhBellMF` identity that section 7 decision 2's ratification
+  request rests on. The largest membership gap was 0.9865 / 0.9891 / 0.8098
+  across the three features, where the ticket's mapping gives exactly 0.0.
+
+None of this was caught because no test called `grid_partition` with any of the
+three shapes.
+
+**What was done instead of reverting.** Both mappings are corrected and the test
+suite is widened to all seven shapes, rather than dropping `e503e1e` and its
+descendants. The reasoning is in
+`docs/implementations/2026-09-15-pr68-m2-mapping-and-coverage.md`: the crash that
+justified separating the two lines is gone, the remaining deviation is two
+builder functions, and reverting would discard @yigit-arda's work and the crash
+fix to re-land them later.
+
+**Decision 2 is still open and still reversible**, as the section above says. The
+`tanh_slopes` override is unchanged. What has changed is that the cost being put
+to @BurakOztekin is now measured against a bell partition that matches section
+6.3, so @bengisucvd's 2026-09-13 recommendation can be answered against the right
+numbers.
+
+**NC-021.** The 590 recorded above was measured at `e3bd6a0` and is superseded:
+`f2c918a` removed three tests after that measurement, so the head collected 587,
+and the 2026-09-15 change adds 24 for a total of 611. The row carries the value
+and the commit it was measured at.
