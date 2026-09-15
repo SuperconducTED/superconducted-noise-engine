@@ -243,6 +243,12 @@ Adding more rules per input is the same.
 > The decision text itself is unchanged — this records the label fix
 > only, not a revisit. See issue #41.
 
+> Unit clarification · 2026-09-14 · Issue #66: `mean_T1` and `mean_T2`
+> are SI seconds; `mean_readout_error` is dimensionless. The vectorizer
+> now scales declared archive units consistently with the typed loader.
+> Missing unit keys are rejected, matching the typed loader. See
+> `docs/implementations/2026-09-14-vectorizer-si-units.md`.
+
 ---
 
 ## ADR-011 — Defuzzification method
@@ -304,6 +310,15 @@ Richer extractors implement `CalibrationFeatureExtractor`.
 
 **Consequences**: Future ADR will compare extractors empirically once
 ≥ 630 snapshots are accumulated.
+
+> Revisit note · 2026-09-14 · Issue #66 corrects the cycle-1 audit item 6
+> assessment that both Nduv parsers produced correct results: the vectorizer
+> ignored units and returned microseconds where consumers require seconds.
+> Option A now validates declared units and shares the loader conversion table.
+> Track option B here: converge on `ParsedCalibrationSnapshot`, including the
+> cross-cutting `CalibrationFeatureExtractor.extract` input-signature change
+> and reconciliation of missing/non-finite-value policies. The dated audit
+> `docs/audits/2026-05-25-followup-issues.md` remains unchanged.
 
 ---
 
