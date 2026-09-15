@@ -1,13 +1,13 @@
-run-token: 2026-09-14T05:40:55Z-1870
-outcome: ok: chore: phase-3 dashboard: state moved (2026-09-14)
+run-token: 2026-09-15T05:40:17Z-5798
+outcome: ok: chore: phase-3 dashboard: state moved (2026-09-15)
 
-**10/28 milestone gates met** · 16 days to 2026-09-30 · calendar 43% burned against 36% of gates, 7 points behind.
+**10/28 milestone gates met** · 15 days to 2026-09-30 · calendar 46% burned against 36% of gates, 10 points behind.
 
-**Since 2026-09-13:** nothing moved.
+**Since 2026-09-14:** #56 Clear the queue, keep the records honest: ready to start to in review; #66 Vectorizer returns µs where the repo assumes s: ready to start to in review.
 
 **Needs attention**
-- M0 (Queue clear) is 9 days past its 2026-09-05 target at 7/8
-- M1 (Contracts and instruments) is 3 days past its 2026-09-11 target at 1/5
+- M0 (Queue clear) is 10 days past its 2026-09-05 target at 7/8
+- M1 (Contracts and instruments) is 4 days past its 2026-09-11 target at 1/5
 - PR #79 (#58) conflicts with main, so its checks are not evidence and it cannot merge
 - #63 is ready and holds up #60 (Baha Jarad)
 

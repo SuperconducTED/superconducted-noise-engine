@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-14 05:41 UTC",
+  "generated": "2026-09-15 05:40 UTC",
   "main": {
     "sha": "004e14ed",
     "date": "2026-09-11",
@@ -323,6 +323,67 @@
       "all_prs": [
         {
           "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-09-14T11:50:35Z",
+          "headRefName": "mert/issue-59-recover-5395e11",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 97,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "Recover the approved PR #68 tip (issue #59 M1 deliverable)",
+          "updatedAt": "2026-09-14T12:13:08Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/97",
+          "headRefOid": "e140292bee38ae898d0de84b5e31b9b8f3a98c9a",
+          "additions": 4590,
+          "deletions": 2,
+          "file_count": 10,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T12:01"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T12:01"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T12:01"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T12:01"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T12:01"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T12:01"
+            }
+          ],
+          "checks_newest": "2026-09-14T12:01",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        },
+        {
+          "author": {
             "id": "U_kgDOC8hIVw",
             "is_bot": false,
             "login": "yigit-arda",
@@ -338,7 +399,7 @@
           "reviewDecision": "APPROVED",
           "state": "OPEN",
           "title": "Feature/issue 59 parameterization",
-          "updatedAt": "2026-09-13T23:09:36Z",
+          "updatedAt": "2026-09-14T11:51:02Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/68",
           "headRefOid": "0da080da6a98bd297c40c1d7f57500b9cc82d1a4",
           "additions": 1552,
@@ -942,32 +1003,79 @@
       "title": "Clear the queue and keep the records honest: merge #51 and #52, collect the sign-offs #55 still owes, run #53 before its 2026-09-05 guard, close #45 and #25, then derive the floor",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/56",
       "issue_state": "OPEN",
-      "state": "ready",
-      "all_prs": [],
-      "merged_pr": {
-        "author": {
-          "id": "U_kgDOCJLpDw",
-          "is_bot": false,
-          "login": "mertefesensoy",
-          "name": "Mert Efe Şensoy"
-        },
-        "closingIssuesReferences": [],
-        "createdAt": "2026-09-09T15:28:55Z",
-        "headRefName": "mert/issue-56-training-floor",
-        "isDraft": false,
-        "mergeable": "UNKNOWN",
-        "mergedAt": "2026-09-09T20:15:35Z",
-        "number": 87,
-        "reviewDecision": "APPROVED",
-        "state": "MERGED",
-        "title": "docs: derive the training floor from the rule base, correcting an undocumented 126 (#56 FR-10)",
-        "updatedAt": "2026-09-09T20:15:39Z",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/87"
-      },
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-09-14T12:20:18Z",
+          "headRefName": "mert/issue-56-circulation-and-m3-fallback",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 98,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "docs: circulate the advisor batch, complete FR-10.4, land the M3 ledger fallback (#56)",
+          "updatedAt": "2026-09-14T12:59:43Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/98",
+          "headRefOid": "a6bda5b04deb8c21d2413ddf4e61451d5e5c9ca3",
+          "additions": 616,
+          "deletions": 2,
+          "file_count": 5,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T12:48"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T12:48"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T12:48"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T12:48"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T12:48"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T12:49"
+            }
+          ],
+          "checks_newest": "2026-09-14T12:49",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
+      "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
+        {
+          "severity": "high",
+          "text": "No approving review yet: main's ruleset requires one."
+        },
         {
           "kind": "issue",
           "text": "#45 is still open; M0 is not closable until it is.",
@@ -989,7 +1097,7 @@
         84
       ],
       "notes_info": [],
-      "pr": null
+      "pr": 98
     },
     {
       "id": 66,
@@ -1007,16 +1115,90 @@
       "title": "BasicCalibrationVectorizer.extract returns microseconds where the rest of the repo assumes seconds, so the ratified grid fires at zero on real archived data",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/66",
       "issue_state": "OPEN",
-      "state": "ready",
-      "all_prs": [],
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOCWD9LQ",
+            "is_bot": false,
+            "login": "BahaJarad",
+            "name": ""
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-09-14T13:17:50Z",
+          "headRefName": "feature/basic-calibration-vectoriser",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 99,
+          "reviewDecision": "CHANGES_REQUESTED",
+          "state": "OPEN",
+          "title": "Issue #66 is completed",
+          "updatedAt": "2026-09-14T13:59:59Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/99",
+          "headRefOid": "5163db0b5cbf4a1e0acd18655977d2626cfb7266",
+          "additions": 253,
+          "deletions": 17,
+          "file_count": 10,
+          "latest_reviews": [
+            {
+              "who": "mertefesensoy",
+              "state": "CHANGES_REQUESTED",
+              "at": "2026-09-14",
+              "last_activity": "2026-09-14"
+            }
+          ],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T13:55"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T13:55"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T13:55"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T13:55"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T13:55"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-14T13:55"
+            }
+          ],
+          "checks_newest": "2026-09-14T13:55",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
       "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
-      "blockers": [],
+      "blockers": [
+        {
+          "severity": "critical",
+          "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
+        }
+      ],
       "declared_unblocks": [],
       "notes_info": [],
-      "pr": null
+      "pr": 99
     },
     {
       "id": 45,
@@ -1235,16 +1417,23 @@
           "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 96,
-          "reviewDecision": "REVIEW_REQUIRED",
+          "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "Fix fuzzy noise gate eligibility semantics",
-          "updatedAt": "2026-09-12T18:36:07Z",
+          "updatedAt": "2026-09-14T11:54:50Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/96",
           "headRefOid": "bbdd4561ac99da8a19b0a09c8f62590963306940",
           "additions": 199,
           "deletions": 1,
           "file_count": 4,
-          "latest_reviews": [],
+          "latest_reviews": [
+            {
+              "who": "mertefesensoy",
+              "state": "CHANGES_REQUESTED",
+              "at": "2026-09-14",
+              "last_activity": "2026-09-14"
+            }
+          ],
           "looked_since": [],
           "checks": [
             {
@@ -1295,8 +1484,8 @@
       ],
       "blockers": [
         {
-          "severity": "high",
-          "text": "No approving review yet: main's ruleset requires one."
+          "severity": "critical",
+          "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
         }
       ],
       "declared_unblocks": [],
@@ -1561,7 +1750,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -9
+      "days_left": -10
     },
     {
       "id": "M1",
@@ -1603,7 +1792,7 @@
       "done": 1,
       "total": 5,
       "status": "partial",
-      "days_left": -3
+      "days_left": -4
     },
     {
       "id": "M2",
@@ -1646,7 +1835,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": 4
+      "days_left": 3
     },
     {
       "id": "M3",
@@ -1694,7 +1883,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": 11
+      "days_left": 10
     },
     {
       "id": "M4",
@@ -1732,7 +1921,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": 16
+      "days_left": 15
     }
   ]
 }

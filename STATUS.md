@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-14 05:41 UTC · main at `004e14ed` (2026-09-11) · 16 days to 2026-09-30_
+_Generated 2026-09-15 05:40 UTC · main at `004e14ed` (2026-09-11) · 15 days to 2026-09-30_
 
 
 ## Milestones
@@ -68,8 +68,8 @@ _Generated 2026-09-14 05:41 UTC · main at `004e14ed` (2026-09-11) · 16 days to
 
 1. Start #63: Training-set builder (training/dataset.py)
    - The reader-and-dedup half has no hard dependency the plan recognises and W2 is where it starts; #60's first archive fit is waiting on it.
-1. Start #66: Vectorizer returns µs where the repo assumes s
-   - No dependencies in either direction, and it blocks running the shipped pipeline on real archived data, which phase 3 does throughout. On a real snapshot the ratified 3x3x3 grid fires at exactly zero and the bootstrap pipeline raises ZeroDivisionError.
+1. Unstick PR #99 for #66: Vectorizer returns µs where the repo assumes s
+   - CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **Bengisu Cıvdı** (@bengisucvd)
 
@@ -85,7 +85,7 @@ _Generated 2026-09-14 05:41 UTC · main at `004e14ed` (2026-09-11) · 16 days to
 1. Start #60: ADR-014 hybrid ANFIS trainer
    - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.
 1. Unstick PR #96 for #73: Filter noise by physical gate semantics
-   - No approving review yet: main's ruleset requires one.
+   - CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 1. Start #74: first_ensemble_run must transpile before prepare
    - All stated upstream dependencies are met.
 
@@ -95,8 +95,8 @@ _Generated 2026-09-14 05:41 UTC · main at `004e14ed` (2026-09-11) · 16 days to
    - FR-15 routes all advisor contact through the lead, so no one else can send it. The decision-by date was 2026-09-08 and has passed. ADR-027 stays Open, ADR-014 stays Deferred, and the M3 ADR-009 memo has no answer to build on until this goes out.
 1. Finish #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
    - The contract merged; only the advisor half of its definition of done is outstanding.
-1. Finish #56: Clear the queue, keep the records honest
-   - It is the M0 gate and M0 is three days past its 2026-09-05 target.
+1. Unstick PR #98 for #56: Clear the queue, keep the records honest
+   - No approving review yet: main's ruleset requires one.
 1. Start #54: Capture rate ~70% during normal operation
    - All stated upstream dependencies are met.
 
@@ -134,12 +134,17 @@ _Generated 2026-09-14 05:41 UTC · main at `004e14ed` (2026-09-11) · 16 days to
 **#56: Clear the queue, keep the records honest** (@mertefesensoy)
 
 - [critical] Every advisor item it carries (ADR-025 sign-off, ADR-009 flip, ADR-011 closure, ADR-014 read, the target ADR) needs Dr. Akba, who has no recorded answer to anything.
+- [high] No approving review yet: main's ruleset requires one.
 - [high] #45 is still open; M0 is not closable until it is.
 - [high] #53's record (PR #78) is unmerged at CHANGES_REQUESTED.
 
+**#66: Vectorizer returns µs where the repo assumes s** (@BahaJarad)
+
+- [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+
 **#73: Filter noise by physical gate semantics** (@BurakOztekin)
 
-- [high] No approving review yet: main's ruleset requires one.
+- [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **#75: Decide the LOCKED Kraus projector boundary** (@bengisucvd)
 
@@ -161,6 +166,7 @@ _Generated 2026-09-14 05:41 UTC · main at `004e14ed` (2026-09-11) · 16 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-15 | 10/28 | 8 | 5 | 4 | #56 Clear the queue, keep the records honest: ready to start to in review; #66 Vectorizer returns µs where the repo assumes s: ready to start to in review |
 | 2026-09-14 | 10/28 | 10 | 3 | 4 | nothing moved |
 | 2026-09-13 | 10/28 | 10 | 3 | 4 | #73 Filter noise by physical gate semantics: ready to start to in review |
 | 2026-09-12 | 10/28 | 11 | 2 | 4 | +1 milestone gate (9 to 10 of 28); M2 1/5 to 2/5; #48 Pipeline-health dashboard: in review to closed; #63 Training-set builder (training/dataset.py): blocked upstream to ready to start; main moved to 004e14ed |
