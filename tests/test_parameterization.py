@@ -307,8 +307,6 @@ def test_qubit_spread_is_rejected_for_t1_shapes(shape: type) -> None:
         grid_partition(shape, _RNG_FREE_SKEWED, 3, qubit_spread=1.0)
 
 
-
-
 # --------------------------------------------------------------------------
 # TanhSigmoidMF: cumulative levels (section 7 decision 1, section 9.3)
 # --------------------------------------------------------------------------
