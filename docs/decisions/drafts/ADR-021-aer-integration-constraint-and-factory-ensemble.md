@@ -90,12 +90,13 @@ refactoring the ensemble factory.
   construction non-trivial.
 - Callers of `prepare()` must pass `circuit.copy()` to prevent mutation
   leakage. This convention is enforced by code review (PR #13 blocker).
-- High-level circuits (QFT, `efficient_su2`) require explicit
-  `transpile(circuit, backend=sim)` before `AerSimulator.run()` with
-  custom noise models. Aer raises `unknown instruction` on
-  un-transpiled high-level gates.
-- Ensemble latency scales O(N) in members (per-member transpile plus
-  fresh `NoiseModel` install). Simulator hoisting amortizes cold-start.
+- High-level circuits (QFT, `efficient_su2`) must be compiled once to the
+  calibrated physical basis before `prepare()`. `prepare()` then registers
+  errors against those physical gate names; the returned circuit runs without
+  a second transpilation. Aer raises `unknown instruction` on un-transpiled
+  high-level gates.
+- Ensemble latency scales O(N) in members (per-member fresh `NoiseModel`
+  installation). Simulator hoisting amortizes cold-start.
 - Bootstrap measurements require non-zero consequent initialization
   (`consequent_init="random"`) to exercise real pipeline work. Zero
   consequents produce identity channels that mask pipeline latency.

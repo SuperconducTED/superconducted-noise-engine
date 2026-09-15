@@ -38,6 +38,7 @@ Bootstrap status:
 from __future__ import annotations
 
 from collections.abc import Callable, Iterator, Sequence
+from math import isfinite
 
 import numpy as np
 import numpy.typing as npt
@@ -49,9 +50,11 @@ from ..interfaces import (
     ChannelProjector,
     Defuzzifier,
     FuzzificationStrategy,
+    GateEligibilityPolicy,
     RuleBase,
     SquashingStrategy,
 )
+from ..training.targets import gate_lengths
 from ..types import CalibrationSnapshot
 
 # Upper bound on the deterministic seed search in :func:`first_viable_seed`.
@@ -60,6 +63,39 @@ from ..types import CalibrationSnapshot
 # rate worth engineering for. A limit this generous therefore fails fast only
 # when the degeneracy is structural rather than an unlucky draw.
 DEFAULT_SEED_SEARCH_LIMIT: int = 64
+
+
+class CalibrationGateEligibilityPolicy(GateEligibilityPolicy):
+    """Derive physical noise eligibility from archived gate-length records.
+
+    A physical single-qubit gate is eligible exactly when its calibration
+    ``properties.gates`` record supplies a finite, strictly positive
+    ``gate_length``. Gates absent from those records, including administrative
+    instructions such as ``delay`` and Aer save instructions, remain
+    noise-free. A virtual ``rz`` whose recorded length is zero is explicitly
+    ineligible rather than rejected due to missing metadata.
+    """
+
+    def eligible_operations(
+        self,
+        snapshot: CalibrationSnapshot,
+    ) -> frozenset[tuple[str, tuple[int, ...]]]:
+        entries = snapshot.properties.get("gates")
+        if not isinstance(entries, list):
+            return frozenset()
+
+        gate_names: set[str] = set()
+        for entry in entries:
+            if isinstance(entry, dict):
+                gate_name = entry.get("gate")
+                if isinstance(gate_name, str):
+                    gate_names.add(gate_name)
+        eligible: set[tuple[str, tuple[int, ...]]] = set()
+        for gate_name in gate_names:
+            for qubit, duration in gate_lengths(snapshot.properties, gate_name).items():
+                if isfinite(duration) and duration > 0.0:
+                    eligible.add((gate_name, (qubit,)))
+        return frozenset(eligible)
 
 
 def is_identity_damping(crisp_params: npt.NDArray[np.float64]) -> bool:
@@ -122,9 +158,10 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
     Aer (which would have no errors attached).
 
     ADR-021 specifies this construction contract: the six injected
-    dependencies above are the swappable research axes, and the strict DI
-    surface is deliberate — it is what makes each axis independently
-    testable, at the cost of non-trivial factory construction.
+    dependencies above and optional :class:`GateEligibilityPolicy` are the
+    swappable research axes. The strict DI surface is deliberate — it is what
+    makes each axis independently testable, at the cost of non-trivial factory
+    construction.
     """
 
     def __init__(
@@ -136,6 +173,7 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
         squashing: SquashingStrategy,
         channel_projector: ChannelProjector,
         fuzzification_strategy: FuzzificationStrategy,
+        gate_eligibility_policy: GateEligibilityPolicy | None = None,
     ) -> None:
         super().__init__()
         self._calibration = calibration
@@ -145,6 +183,11 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
         self._squashing = squashing
         self._channel_projector = channel_projector
         self._fuzzification_strategy = fuzzification_strategy
+        self._gate_eligibility_policy = (
+            gate_eligibility_policy
+            if gate_eligibility_policy is not None
+            else CalibrationGateEligibilityPolicy()
+        )
         self._crisp_params: npt.NDArray[np.float64] = self._compute_crisp_params()
 
     def _compute_crisp_params(self) -> npt.NDArray[np.float64]:
@@ -176,7 +219,9 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
     def prepare(self, circuit: QuantumCircuit) -> tuple[QuantumCircuit, NoiseModel]:
         """Build a fresh ``NoiseModel`` for ``circuit`` via the fuzzification strategy.
 
-        The returned circuit may differ from the input (pre/between
+        ``circuit`` must already be compiled to the physical basis represented
+        by the calibration's gate-length records. The returned circuit may
+        differ from the input (pre/between
         strategies transform the circuit; post-gate leaves it untouched).
         The returned NoiseModel is fresh — repeated calls do not
         accumulate errors.
@@ -196,7 +241,11 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
           now keeps callers correct when those land.
         """
 
+        eligible_operations = self._gate_eligibility_policy.eligible_operations(self._calibration)
+
         def error_provider(gate: Instruction, qubits: tuple[int, ...]) -> QuantumError | None:
+            if (gate.name, qubits) not in eligible_operations:
+                return None
             try:
                 return self._channel_projector.project(self._crisp_params, gate.name, qubits)
             except (NotImplementedError, ValueError):
@@ -230,6 +279,7 @@ class FuzzyNoiseModelEnsemble:
         squashing: SquashingStrategy,
         channel_projector: ChannelProjector,
         fuzzification_strategy: FuzzificationStrategy,
+        gate_eligibility_policy: GateEligibilityPolicy | None = None,
         ensemble_size: int = 32,
         rng: np.random.Generator | None = None,
     ) -> None:
@@ -244,6 +294,7 @@ class FuzzyNoiseModelEnsemble:
         self._squashing = squashing
         self._channel_projector = channel_projector
         self._fuzzification_strategy = fuzzification_strategy
+        self._gate_eligibility_policy = gate_eligibility_policy
 
     def __iter__(self) -> Iterator[FuzzyNoiseModel]:
         for _ in range(self._size):
@@ -255,6 +306,7 @@ class FuzzyNoiseModelEnsemble:
                 squashing=self._squashing,
                 channel_projector=self._channel_projector,
                 fuzzification_strategy=self._fuzzification_strategy,
+                gate_eligibility_policy=self._gate_eligibility_policy,
             )
 
     def __len__(self) -> int:
