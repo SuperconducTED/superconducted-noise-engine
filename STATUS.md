@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-15 05:40 UTC · main at `004e14ed` (2026-09-11) · 15 days to 2026-09-30_
+_Generated 2026-09-16 05:41 UTC · main at `004e14ed` (2026-09-11) · 14 days to 2026-09-30_
 
 
 ## Milestones
@@ -105,7 +105,7 @@ _Generated 2026-09-15 05:40 UTC · main at `004e14ed` (2026-09-11) · 15 days to
 1. Start #84: Close the #57 advisor loop
    - The only phase-3 blocker with a multi-week external latency tail, and the only M1 gate with no work in flight. Every day it waits is a day added to M3.
 1. Unstick PR #68 for #59: Manual MF parameterization from the archive
-   - Still a draft: CI and reviewers will not treat it as ready.
+   - Awaiting merge.
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -122,10 +122,6 @@ _Generated 2026-09-15 05:40 UTC · main at `004e14ed` (2026-09-11) · 15 days to
 - [high] Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result.
 - [high] No approving review yet: main's ruleset requires one.
 - [medium] Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
-
-**#59: Manual MF parameterization from the archive** (@yigit-arda)
-
-- [high] Still a draft: CI and reviewers will not treat it as ready.
 
 **#61: ADR-011 evidence + premise gradients** (@bengisucvd)
 
@@ -166,6 +162,7 @@ _Generated 2026-09-15 05:40 UTC · main at `004e14ed` (2026-09-11) · 15 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-16 | 10/28 | 8 | 5 | 4 | nothing moved |
 | 2026-09-15 | 10/28 | 8 | 5 | 4 | #56 Clear the queue, keep the records honest: ready to start to in review; #66 Vectorizer returns µs where the repo assumes s: ready to start to in review |
 | 2026-09-14 | 10/28 | 10 | 3 | 4 | nothing moved |
 | 2026-09-13 | 10/28 | 10 | 3 | 4 | #73 Filter noise by physical gate semantics: ready to start to in review |
