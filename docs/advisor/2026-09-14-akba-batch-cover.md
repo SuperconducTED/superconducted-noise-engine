@@ -86,7 +86,8 @@ Aşağıdaki sayıların hepsi bugün ölçüldü, hafızadan yazılmadı.
   (14 Eylül 09:03 UTC itibarıyla). Tekrar oranı yüzde 46,5.
 - Eğitim eşiği: 1170 ayrık durum. Yani eşiğin yüzde 51'indeyiz.
 - Parametre başına örnek: 2,57. Gereken 5.
-- Test paketi: 616 test, hepsi geçiyor.
+- Test paketi: 616 test; 615'i geçiyor, 1'i atlanıyor (atlanan tek test
+  kalibrasyon arşivinin ayrı bir checkout'unu istiyor, bir hata değil).
 - Boru hattı uçtan uca çalışıyor; eksik olan eğitim, ölçüm değil.
 
 Mevcut hızla (son 30 günde 161 yeni durum, günde ~5,4) eşiği yaklaşık 29 Kasım'da

@@ -353,3 +353,22 @@ rebase's to make:
    days from an assumed 2026-09-14 send. Each day the message waits, that window shrinks;
    at a 2026-09-16 send it is five days. Re-dating them is a judgement about what to ask of
    Dr. Akba, not a mechanical refresh, so it belongs to the send and not to this rebase.
+
+### CI on the rebased head, and one more correction it forced
+
+`ci.yml` had not run on this PR since 2026-09-14, because a conflicting PR is never
+dispatched. At `5d413d8` it ran and all six checks pass: `test (3.11)` and `test (3.12)`
+both report **615 passed, 1 skipped in 19.28s and 21.93s**, so the merged tree collects the
+616 NC-021 registers.
+
+The one skip is
+
+`tests/test_feature_distribution.py::test_the_committed_survey_reproduces_from_the_archive`
+
+which needs a separate `calibration-data` checkout. It is pre-existing, identical on
+`main`, and not a failure. It does mean the cover's corrected line was still wrong in a
+second way: it read `616 test, hepsi geçiyor`, all passing, carried over from the 465
+figure where the implementation record above could say "none skipped, none failed". At 616
+that is one test too many. The line now reads 615 passing and 1 skipped and says why the
+skip happens, because overstating a green suite by one test to the person being asked to
+trust the numbers costs more than the one test is worth.
