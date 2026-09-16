@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-16 05:41 UTC · main at `004e14ed` (2026-09-11) · 14 days to 2026-09-30_
+_Generated 2026-09-16 12:14 UTC · main at `125b7962` (2026-09-16) · 14 days to 2026-09-30_
 
 
 ## Milestones
@@ -19,14 +19,14 @@ _Generated 2026-09-16 05:41 UTC · main at `004e14ed` (2026-09-11) · 14 days to
 - ✅ #45 closed (dataset-yield finding)
 - ✅ #25 closed by the cycle-2 close record
 
-### 🟡 M1 · Contracts and instruments, target 2026-09-11 (1/5)
+### 🟡 M1 · Contracts and instruments, target 2026-09-11 (3/5)
 
 - ❌ Target ADR sent to Dr. Akba with a decision-by date
   - _ADR-027 merged with Status: Open. docs/advisor/ holds only the unanswered 2026-05-25 questions file. Issue #84 owns the brief; its own decision-by date was 2026-09-08._
 - ✅ TSKTrainer ABC and training value types merged
 - 🟡 Benchmark harness certified (#58)
-- 🟡 Premise parameterization for seven shapes merged (#59)
-- ❌ Feature-survey TSV committed
+- ✅ Premise parameterization for seven shapes merged (#59)
+- ✅ Feature-survey TSV committed
   - _Exists as docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv inside PR #68; not on main until #68 merges._
 
 ### 🟡 M2 · First measurements, target 2026-09-18 (2/5)
@@ -69,7 +69,7 @@ _Generated 2026-09-16 05:41 UTC · main at `004e14ed` (2026-09-11) · 14 days to
 1. Start #63: Training-set builder (training/dataset.py)
    - The reader-and-dedup half has no hard dependency the plan recognises and W2 is where it starts; #60's first archive fit is waiting on it.
 1. Unstick PR #99 for #66: Vectorizer returns µs where the repo assumes s
-   - CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+   - Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 
 **Bengisu Cıvdı** (@bengisucvd)
 
@@ -104,8 +104,6 @@ _Generated 2026-09-16 05:41 UTC · main at `004e14ed` (2026-09-11) · 14 days to
 
 1. Start #84: Close the #57 advisor loop
    - The only phase-3 blocker with a multi-week external latency tail, and the only M1 gate with no work in flight. Every day it waits is a day added to M3.
-1. Unstick PR #68 for #59: Manual MF parameterization from the archive
-   - Awaiting merge.
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -117,9 +115,7 @@ _Generated 2026-09-16 05:41 UTC · main at `004e14ed` (2026-09-11) · 14 days to
 
 **#58: Certify the benchmark instruments** (@bengisucvd)
 
-- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [high] Still a draft: CI and reviewers will not treat it as ready.
-- [high] Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result.
 - [high] No approving review yet: main's ruleset requires one.
 - [medium] Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
 
@@ -136,7 +132,9 @@ _Generated 2026-09-16 05:41 UTC · main at `004e14ed` (2026-09-11) · 14 days to
 
 **#66: Vectorizer returns µs where the repo assumes s** (@BahaJarad)
 
+- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+- [high] Its green checks last ran 2026-09-15T15:06 against a main that has moved since; they are not evidence about the merge result.
 
 **#73: Filter noise by physical gate semantics** (@BurakOztekin)
 
@@ -152,7 +150,7 @@ _Generated 2026-09-16 05:41 UTC · main at `004e14ed` (2026-09-11) · 14 days to
 
 ## Blocked upstream
 
-- **#62** Run the ADR-019 ablation, publish the table (@yigit-arda), waiting on #58 (certified harness (basis_gates, mode, seed, transpile-then-prepare, no silent NaN) and benchmarks/reference.py::build_reference); #59 (the parameterized rule bases under ablation)
+- **#62** Run the ADR-019 ablation, publish the table (@yigit-arda), waiting on #58 (certified harness (basis_gates, mode, seed, transpile-then-prepare, no silent NaN) and benchmarks/reference.py::build_reference)
 - **#64** ADR-015 / ADR-016 ensemble + intervals (@bengisucvd), waiting on #58 (density-matrix mode, transpile-then-prepare, no silent NaN, build_reference, simulate_engine signature); M3 gate (gated on the ADR-009 decision and #60's first archive fit)
 - **#65** ADR-007 pre/between-gates fuzzification (@BurakOztekin), waiting on #58 (certified harness and build_reference); M3 gate (phase 4; the M3 gate is the earliest conceivable start, not a promise)
 - **#76** Promote diagonal Hellinger to a certified metric (@bengisucvd), waiting on #58 (certified density-matrix harness); #62 (the helper and evidence format must stabilise first)
@@ -162,7 +160,7 @@ _Generated 2026-09-16 05:41 UTC · main at `004e14ed` (2026-09-11) · 14 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
-| 2026-09-16 | 10/28 | 8 | 5 | 4 | nothing moved |
+| 2026-09-16 | 12/28 | 8 | 4 | 4 | +2 milestone gates (10 to 12 of 28); M1 1/5 to 3/5; #59 Manual MF parameterization from the archive: in review to closed; main moved to 125b7962 |
 | 2026-09-15 | 10/28 | 8 | 5 | 4 | #56 Clear the queue, keep the records honest: ready to start to in review; #66 Vectorizer returns µs where the repo assumes s: ready to start to in review |
 | 2026-09-14 | 10/28 | 10 | 3 | 4 | nothing moved |
 | 2026-09-13 | 10/28 | 10 | 3 | 4 | #73 Filter noise by physical gate semantics: ready to start to in review |
