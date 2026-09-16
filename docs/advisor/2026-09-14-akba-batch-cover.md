@@ -26,10 +26,11 @@
 > 46.5% duplication and the 29 November projection are `health/metrics.json` on
 > `calibration-data` @ `272a0c5`, generated 2026-09-14T09:03:34Z. The floor of 1170 and the
 > 234 parameter count are NC-045; the seven-shape spread including IntervalGaussianMF's 243
-> is NC-046; the 465 tests are NC-021. The 37 / 35 merged-PR counts were re-run today with
-> `gh pr list --state merged` filtered to `mergedAt >= 2026-05-25`, per the cycle-2 close
-> record's instruction that the count be re-measured rather than carried. The 11-of-26
-> Open/Deferred figure is a count of `**Status**` lines in `docs/decisions.md` at `004e14e`.
+> is NC-046; the 616 tests are NC-021 at `main` @ `125b796`. The 37 / 35 merged-PR counts
+> were re-run today with `gh pr list --state merged` filtered to `mergedAt >= 2026-05-25`,
+> per the cycle-2 close record's instruction that the count be re-measured rather than
+> carried. The 11-of-26 Open/Deferred figure is a count of `**Status**` lines in
+> `docs/decisions.md` at `004e14e`.
 >
 > **NOTE · The 29 November projection is deliberately not registered.** ADR-025's
 > amendment makes `projected_date` a non-registrable extrapolation, so it carries no NC row
@@ -85,7 +86,7 @@ Aşağıdaki sayıların hepsi bugün ölçüldü, hafızadan yazılmadı.
   (14 Eylül 09:03 UTC itibarıyla). Tekrar oranı yüzde 46,5.
 - Eğitim eşiği: 1170 ayrık durum. Yani eşiğin yüzde 51'indeyiz.
 - Parametre başına örnek: 2,57. Gereken 5.
-- Test paketi: 465 test, hepsi geçiyor.
+- Test paketi: 616 test, hepsi geçiyor.
 - Boru hattı uçtan uca çalışıyor; eksik olan eğitim, ölçüm değil.
 
 Mevcut hızla (son 30 günde 161 yeni durum, günde ~5,4) eşiği yaklaşık 29 Kasım'da

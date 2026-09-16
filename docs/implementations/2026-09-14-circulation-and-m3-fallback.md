@@ -266,3 +266,90 @@ print(count_trainable_parameters(TSKRuleBase.from_grid(per_input, output_dim=2))
 - `docs/implementations/2026-09-10-adr-025-advisor-handoff.md` · the precedent for the ledger status block
 - `docs/roadmap/2026-09-03-phase-3-plan.md` · §4 lanes and §5 M0 to M4 gate text
 - Issues #60, #61, #62, #63 · the work FR-15, FR-16 and FR-10.4's canonical form wait on
+
+## Rebase onto `125b796` · as-of 2026-09-16
+
+Everything above describes the branch as it stood at base `004e14e` on 2026-09-14 and is
+left unedited. This section records the rebase and the one place where a figure above was
+superseded rather than merely re-confirmed.
+
+### Why
+
+The PR sat unreviewed from 2026-09-14 to 2026-09-16 while `main` took **37 commits**, one
+of them a pull-request merge (#68, Issue #59's membership-function parameterization). That
+made the PR `DIRTY`, and a conflicting PR does not get a fresh `ci.yml` run, so its green
+checks described a base nobody would merge. The three commits were rebased onto
+`main` @ `125b796`; nothing was squashed and no commit message changed.
+
+### The conflict, and how it was resolved
+
+`docs/numerical-claims.md`, two hunks, both created by PR #68's register work:
+
+| Hunk | `main` side | This branch's side | Resolution |
+| --- | --- | --- | --- |
+| NC-021 row | `616`, measured at `7b36b8d` | `465`, plus an appended Rule 6 confirmation at `004e14e` | **`main` kept; this branch's edit dropped** |
+| NC-041 .. NC-045 block | four new rows NC-041 .. NC-044, then the pre-PR NC-045 | the edited NC-045 alone | **both kept**: `main`'s four new rows, then this branch's NC-045 re-applied byte-identically |
+
+The resolved file differs from `main` by exactly one line, the NC-045 row, which is what
+this PR always intended to change.
+
+**Why the NC-021 annotation was dropped rather than re-anchored.** The Design decisions
+section above argues that a docs-only PR citing a count owes the check that the count
+describes the tree that will be merged. That argument stands; its conclusion does not
+survive the rebase. The 465 it confirmed at `004e14e` has since been superseded four times
+over on `main` (587, 611, 616), and appending a 2026-09-14 observation of 465 to the end of
+a Notes chain that already reads 616 would file an older measurement below a newer one and
+read as a regression. The citation fix Rule 6 asks for on the current value is PR #101's,
+which re-measures 616 at the merge commit `125b796` and touches the same row. Two open PRs
+editing one row is how identifier and value collisions happen, so this branch yields the
+row and keeps only NC-045.
+
+### The values this PR consumes, re-checked at the new base
+
+Rule 6 asks a number to name a commit it was measured at, and a rebase moves the commit the
+PR will merge into. All three were re-checked at `main` @ `125b796`:
+
+| Value | At `004e14e` | At `125b796` | Action |
+| --- | --- | --- | --- |
+| `count_trainable_parameters`, the configuration in use | `ParameterCount(premise=18, consequent=216, total=234)`, floor 1170 | **identical**, re-run in a clean CPython 3.12.10 | NC-045 Source cell and Notes record the third verification; value and `Last verified` moved together per Rule 3 |
+| NC-047, distinct device states at `calibration-data` @ `c63ce21` | 563 | unchanged, no PR touched the row | FR-10.4's comparison stands as written |
+| NC-012, the floor | 1170 | unchanged | no edit |
+| NC-021, test-suite size | 465 | **616** | the two citations in the cover message corrected, below |
+
+The parameter count is re-measured and not assumed: the only file the 37 commits add under
+`src/` is `fuzzy/parameterization.py` (`git diff --stat 004e14e..125b796 -- src/`), which
+`count_trainable_parameters` does not read, so the expectation was that it had not moved,
+and the run is what confirms it. Canonical verification remains @BurakOztekin's batch
+record; this is a laptop run and NC-045 still says provisional.
+
+### The one edit made to a dated file, and why it is not an NFR-2 violation
+
+`docs/advisor/2026-09-14-akba-batch-cover.md` cited NC-021 twice, once in its sourcing note
+and once in the message body's own status list (`Test paketi: 465 test`). Both now read
+616. That is an in-place edit of a dated document, which NFR-2 normally forbids, and it is
+correct here for a reason that will not generalise: **the file has never been on `main` and
+the message has never been sent.** Its own opening note states that it is the exact message
+to be sent and that if what goes out differs from it in any way, the file is wrong and gets
+corrected. An unsent draft is not yet a record of anything, so there is no history to
+preserve; sending a message that quotes a register value the register no longer carries is
+the failure NC-R001 exists to prevent. Once it is sent, the send is appended to
+`docs/advisor/2026-09-03-decisions-from-akba.md` and the cover becomes append-only like any
+other dated file.
+
+### What was deliberately not re-run
+
+Three classes of figure in the cover are anchored to a named ref or date and are therefore
+still honest as written, so the rebase left them alone. They are listed here because the
+send date decides whether any of them needs refreshing, and that decision is not this
+rebase's to make:
+
+1. **The archive figures** (1123 documents, 601 distinct states, 46.5% duplication, and the
+   29 November projection) name `health/metrics.json` on `calibration-data` @ `272a0c5`,
+   generated 2026-09-14T09:03:34Z. The archive grows hourly; the ref is what keeps the
+   sentence true.
+2. **The 37 / 35 merged-PR counts and the 11-of-26 Open/Deferred count** name `004e14e`.
+   `main` has since merged #68, so both are one PR behind the live tree.
+3. **The decision-by dates.** Items 1, 2, 10 and 12 carry 2026-09-21, calculated as seven
+   days from an assumed 2026-09-14 send. Each day the message waits, that window shrinks;
+   at a 2026-09-16 send it is five days. Re-dating them is a judgement about what to ask of
+   Dr. Akba, not a mechanical refresh, so it belongs to the send and not to this rebase.
