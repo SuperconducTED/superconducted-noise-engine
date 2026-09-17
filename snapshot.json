@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-16 12:14 UTC",
+  "generated": "2026-09-17 05:40 UTC",
   "main": {
     "sha": "125b7962",
     "date": "2026-09-16",
@@ -172,7 +172,7 @@
           "createdAt": "2026-09-06T21:11:52Z",
           "headRefName": "bengisu/issue-58-benchmark-certification",
           "isDraft": true,
-          "mergeable": "UNKNOWN",
+          "mergeable": "CONFLICTING",
           "mergedAt": null,
           "number": 79,
           "reviewDecision": "REVIEW_REQUIRED",
@@ -245,7 +245,7 @@
           ],
           "checks_newest": "2026-09-06T21:11",
           "checks_failing": [],
-          "checks_stale_vs_main": false
+          "checks_stale_vs_main": true
         }
       ],
       "merged_pr": null,
@@ -262,6 +262,14 @@
         {
           "severity": "high",
           "text": "Still a draft: CI and reviewers will not treat it as ready."
+        },
+        {
+          "severity": "critical",
+          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
+        },
+        {
+          "severity": "high",
+          "text": "Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result."
         },
         {
           "severity": "high",
@@ -860,17 +868,17 @@
           "createdAt": "2026-09-14T12:20:18Z",
           "headRefName": "mert/issue-56-circulation-and-m3-fallback",
           "isDraft": false,
-          "mergeable": "UNKNOWN",
+          "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 98,
           "reviewDecision": "REVIEW_REQUIRED",
           "state": "OPEN",
           "title": "docs: circulate the advisor batch, complete FR-10.4, land the M3 ledger fallback (#56)",
-          "updatedAt": "2026-09-14T12:59:43Z",
+          "updatedAt": "2026-09-16T12:38:57Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/98",
-          "headRefOid": "a6bda5b04deb8c21d2413ddf4e61451d5e5c9ca3",
-          "additions": 616,
-          "deletions": 2,
+          "headRefOid": "3dd7390bce546c4c355cb2c2971a7fcf332dff77",
+          "additions": 723,
+          "deletions": 1,
           "file_count": 5,
           "latest_reviews": [],
           "looked_since": [],
@@ -878,35 +886,35 @@
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-14T12:48"
+              "started": "2026-09-16T12:39"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-14T12:48"
+              "started": "2026-09-16T12:39"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-14T12:48"
+              "started": "2026-09-16T12:39"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-14T12:48"
+              "started": "2026-09-16T12:39"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-14T12:48"
+              "started": "2026-09-16T12:39"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-09-14T12:49"
+              "started": "2026-09-16T12:39"
             }
           ],
-          "checks_newest": "2026-09-14T12:49",
+          "checks_newest": "2026-09-16T12:39",
           "checks_failing": [],
           "checks_stale_vs_main": false
         }
@@ -1602,7 +1610,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -11
+      "days_left": -12
     },
     {
       "id": "M1",
@@ -1644,7 +1652,7 @@
       "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -5
+      "days_left": -6
     },
     {
       "id": "M2",
@@ -1687,7 +1695,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": 2
+      "days_left": 1
     },
     {
       "id": "M3",
@@ -1735,7 +1743,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": 9
+      "days_left": 8
     },
     {
       "id": "M4",
@@ -1773,7 +1781,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": 14
+      "days_left": 13
     }
   ]
 }

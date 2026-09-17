@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-16 12:14 UTC · main at `125b7962` (2026-09-16) · 14 days to 2026-09-30_
+_Generated 2026-09-17 05:40 UTC · main at `125b7962` (2026-09-16) · 13 days to 2026-09-30_
 
 
 ## Milestones
@@ -115,7 +115,9 @@ _Generated 2026-09-16 12:14 UTC · main at `125b7962` (2026-09-16) · 14 days to
 
 **#58: Certify the benchmark instruments** (@bengisucvd)
 
+- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [high] Still a draft: CI and reviewers will not treat it as ready.
+- [high] Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result.
 - [high] No approving review yet: main's ruleset requires one.
 - [medium] Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
 
@@ -160,6 +162,7 @@ _Generated 2026-09-16 12:14 UTC · main at `125b7962` (2026-09-16) · 14 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-17 | 12/28 | 8 | 4 | 4 | nothing moved |
 | 2026-09-16 | 12/28 | 8 | 4 | 4 | +2 milestone gates (10 to 12 of 28); M1 1/5 to 3/5; #59 Manual MF parameterization from the archive: in review to closed; main moved to 125b7962 |
 | 2026-09-15 | 10/28 | 8 | 5 | 4 | #56 Clear the queue, keep the records honest: ready to start to in review; #66 Vectorizer returns µs where the repo assumes s: ready to start to in review |
 | 2026-09-14 | 10/28 | 10 | 3 | 4 | nothing moved |
