@@ -402,3 +402,89 @@ dashboard heartbeat bound. That is the collision git cannot show, because two
 branches appending the same next id to different rows is a clean merge, so the
 check is `gh pr list` before claiming an id, not `check_ids.py` afterwards.
 NC-054 is the first genuinely free id.
+
+---
+
+## Fourth review follow-up, 2026-09-17
+
+The PR #99 convention review re-ran the measurements this document registers.
+Everything reproduced except one figure, and this section records the
+correction. Per the append-only rule for dated documents, the tables above are
+left exactly as they were written; this section is what supersedes them.
+
+### The drift bound did not reproduce
+
+The "Mathematical / statistical details" table in the third review follow-up
+(line 359) registers:
+
+| | |
+| --- | --- |
+| Maximum relative difference | `2.8e-16`, about one unit in the last place |
+
+Re-running NC-054's own command at its own ref, at `d5c6165`, and comparing
+row-wise against the committed TSV gives:
+
+| | measured at `d5c6165` |
+| --- | --- |
+| Rows differing | 733 of 975 |
+| Columns differing | `mean_T2` 551 rows, `mean_T1` 494 rows, nothing else |
+| Maximum relative difference | `4.3300e-16`, a distance of **3 ULP** |
+| Worst row | `snapshots/2026-07/ibm_fez/20260724T124953000000Z.json`, `mean_T2` |
+| Worst `mean_T1` row | `4.2735e-16`, 2 ULP |
+
+Every count reproduces exactly. Only the magnitude bound was wrong, and it was
+wrong in the direction that understates the drift: `4.33e-16` is about 1.5x the
+registered figure, and three units in the last place is not one.
+
+The conclusion the figure supports is unaffected, and that was checked rather
+than assumed. NC-041's nine quantiles and NC-042's three spreads were
+regenerated from a fresh survey at the same ref and agree to every digit they
+are registered to, and the `*_qubit_std` columns remain byte-identical because
+they never pass through `extract`. So "physically meaningless" still holds at 3
+ULP exactly as it would at 1. What failed was the number itself, and a register
+row whose headline value does not reproduce from the command printed beside it
+is the failure mode `docs/numerical-claims.md` exists to prevent, whatever the
+number's size.
+
+NC-054 is corrected to `4.3e-16, up to 3 ULP` and re-pinned from `0b36c64` to
+`d5c6165`. The two commits between them are documentation only and cannot move
+a survey, but Rule 6 asks for the commit a value was measured at, so the row
+names the commit the re-measurement actually ran at rather than carrying the
+old pin forward. The sentence in NC-054's notes reading "one unit in the last
+place" is corrected in the same way.
+
+Correspondingly, the design-decisions line at 379 calling the cost "the one-ULP
+drift recorded above" should be read as **up to three ULP**. The trade-off it
+describes is unchanged.
+
+### Two stale unit statements outside the register
+
+`docs/evidence/feature-distribution/README.md` still carried the pre-#66 units
+paragraph: that the TSV's units are "the vectorizer's own, with no scaling
+(NFR-8)", and that `scripts/first_ensemble_run.py::FEATURE_SCALES` "is in
+seconds and is not a source of truth for anything here or downstream". Both
+sentences are precisely what this issue refutes. The same two claims were
+corrected in `scripts/feature_distribution.py`'s module docstring by the third
+review follow-up, and the README beside the evidence was missed, which is
+awkward given NC-054's own notes name that README as the reason the row exists
+at all. A dated correction is appended there, leaving the original text intact.
+
+Its sixteen-digit claim, that the first five rows share a `mean_T1` of
+`155.1924205171878`, was checked against a fresh survey and still holds
+exactly, so it is left alone.
+
+NC-041's claim column named `BasicCalibrationVectorizer` as the unit source.
+After this branch that producer emits SI seconds, so the label read as seconds
+while every figure in the row is microseconds, an error of 1e6 sitting in the
+one column a reader scans to find out what a number means. It now names archive
+units, and the row's notes carry the correction plus a retraction of the older
+clause calling `FEATURE_SCALES`'s seconds "a separate defect". They were never
+a defect; the vectorizer was.
+
+### Gates at this commit
+
+Re-run in a clean CPython 3.12.10 at a short path, not the repository `.venv`:
+`ruff check .` and `ruff format --check .` clean over 65 files,
+`scripts/check_ids.py` clean, `mypy --strict` clean over 37 source files, and
+**652 collected, 652 passed**, matching NC-021 at `0b36c64`. These four commits
+are documentation only and change no collected test.
