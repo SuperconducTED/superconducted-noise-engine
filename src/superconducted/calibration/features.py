@@ -84,7 +84,13 @@ class BasicCalibrationVectorizer(CalibrationFeatureExtractor):
         for qubit_index, qubit_props in enumerate(qubits_section):
             for nduv in qubit_props:
                 name = nduv.get("name")
-                if name not in collected:
+                # `isinstance` before the membership test, not decoration: a
+                # JSON value may be a list or dict, and those are unhashable,
+                # so `name not in collected` raises TypeError on a dict where
+                # the previous tuple-membership guard simply did not match.
+                # A malformed entry has to be skipped like any other field
+                # this extractor does not consume, not crash the caller.
+                if not isinstance(name, str) or name not in collected:
                     continue
                 scale = validate_unit_scale(
                     nduv.get("unit"),
@@ -140,6 +146,30 @@ def mean_t2(snapshot: ParsedCalibrationSnapshot) -> float | None:
         q.t2_seconds
         for q in snapshot.qubits
         if q.t2_seconds is not None and not math.isnan(q.t2_seconds)
+    ]
+    if not values:
+        return None
+    return sum(values) / len(values)
+
+
+def mean_readout_error(snapshot: ParsedCalibrationSnapshot) -> float | None:
+    """Mean readout error (dimensionless) across qubits with a usable value.
+
+    See :func:`mean_t1` for the skip-strategy contract; readout error
+    mirrors it. Unlike T1 and T2 there is no unit conversion involved, only
+    the same exclusion of ``None`` and NaN, because the value is a
+    probability and :data:`~superconducted.calibration.loader.EXPECTED_UNITS`
+    records it as dimensionless.
+
+    This exists so that all three of the vectorizer's outputs can be checked
+    against the typed-loader path rather than two of them being checked and
+    the third re-derived by hand, which is what issue #66's second acceptance
+    criterion asks for.
+    """
+    values = [
+        q.readout_error
+        for q in snapshot.qubits
+        if q.readout_error is not None and not math.isnan(q.readout_error)
     ]
     if not values:
         return None

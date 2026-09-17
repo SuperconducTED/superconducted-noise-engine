@@ -13,7 +13,12 @@ from scripts.first_ensemble_run import (
     generate_safe_ensemble_with_seed,
 )
 
-from superconducted.calibration.features import BasicCalibrationVectorizer, mean_t1, mean_t2
+from superconducted.calibration.features import (
+    BasicCalibrationVectorizer,
+    mean_readout_error,
+    mean_t1,
+    mean_t2,
+)
 from superconducted.calibration.loader import (
     EXPECTED_UNITS,
     UNIT_SCALE,
@@ -40,11 +45,17 @@ NC052_ENDPOINT_FIRING_SUM: float = 0.10769113232875129
 
 
 def test_real_fixture_matches_loader_seconds() -> None:
+    """Every output agrees with the typed-loader path, none re-derived here.
+
+    Acceptance criterion 2 asks for agreement with the loader rather than
+    hand-written values. The readout third used to be a local comprehension
+    that filtered `None` but not NaN, so it encoded a slightly different
+    skip policy than the vectorizer and `mean_t1`/`mean_t2` do.
+    `mean_readout_error` removes that divergence.
+    """
     actual = BasicCalibrationVectorizer().extract(_load_snapshot(FIXTURE))
     parsed = load_snapshot(FIXTURE)
-    assert actual[:2] == pytest.approx([mean_t1(parsed), mean_t2(parsed)])
-    errors = [q.readout_error for q in parsed.qubits if q.readout_error is not None]
-    assert actual[2] == pytest.approx(np.mean(errors))
+    assert actual == pytest.approx([mean_t1(parsed), mean_t2(parsed), mean_readout_error(parsed)])
 
 
 @pytest.mark.parametrize("placement", ["endpoint", "interior"])
@@ -126,3 +137,19 @@ def test_unit_without_conversion_factor_raises_parse_error() -> None:
             field_name="frequency",
             raw_value=5.0,
         )
+
+
+@pytest.mark.parametrize("name", [[], {}, None, 5, ("T1",)])
+def test_malformed_nduv_name_is_skipped_not_raised(name: object) -> None:
+    """A malformed `name` is skipped, the way any unconsumed field is.
+
+    JSON values can be lists or dicts, which are unhashable, so testing
+    membership against a dict raises `TypeError` where the tuple-membership
+    guard this replaced simply did not match. Regression for `6e10825`,
+    which made that swap and turned a silent skip into an uncaught
+    `TypeError` that is not a `CalibrationParseError`, on a path
+    `integration/aer_factory.py` reaches with poller-built snapshots.
+    """
+    snapshot = _synthetic_snapshot()
+    snapshot.properties["qubits"][0].append({"name": name, "unit": "us", "value": 1.0})
+    assert BasicCalibrationVectorizer().extract(snapshot) == pytest.approx([50e-6, 50e-6, 0.01])
