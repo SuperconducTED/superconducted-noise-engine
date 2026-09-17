@@ -488,3 +488,90 @@ Re-run in a clean CPython 3.12.10 at a short path, not the repository `.venv`:
 `scripts/check_ids.py` clean, `mypy --strict` clean over 37 source files, and
 **652 collected, 652 passed**, matching NC-021 at `0b36c64`. These four commits
 are documentation only and change no collected test.
+
+---
+
+## Fifth review follow-up, 2026-09-17: the error-context hoist
+
+The one code finding left open by round 4, now fixed.
+
+### Problem
+
+`extract` passed `validate_unit_scale` a `context=` string built inline:
+
+```python
+context=f"backend {snapshot.backend!r} at {snapshot.timestamp.isoformat()}",
+```
+
+That expression depends only on the snapshot, never on the qubit or the field,
+so it is loop-invariant. It sat in the innermost loop and was therefore
+evaluated once per consumed Nduv entry: **467 times** on a 156-qubit archive
+document, each one calling `datetime.isoformat()` and formatting two values, to
+build a string that is discarded unless a unit is wrong. On the happy path,
+which is every document the archive actually holds, all 467 were thrown away.
+
+### Fix
+
+Hoist it above the loop and pass the local. That is the entire change: five
+lines of comment, one new line, one call-site edit.
+
+### Mathematical / statistical details
+
+Registered as NC-055. Measured on
+`snapshots/2026-08/ibm_fez/20260831T203902000000Z.json`, 156 qubits and 467
+consumed Nduv entries:
+
+| | before | after |
+| --- | ---: | ---: |
+| `extract` per snapshot | `0.84`-`0.88` ms | `0.28`-`0.32` ms |
+| Context strings built | 467 | 1 |
+| Speedup | | `2.76`-`2.99`x |
+
+Two things about how that was measured, both of which changed the answer.
+
+**It is stated differentially.** The pre-hoist `features.py` is read out of
+`7bfe3de` with `git show` and exec'd as a second module beside the current one,
+so both halves run in one process, on one document, interleaved, and differ
+only by the hoist. The absolute millisecond figures measure the laptop; the
+ratio measures the change, and only the ratio is the claim.
+
+**The first two numbers I produced were both wrong, in opposite directions.**
+The round-4 review estimated `69%` of runtime by timing the f-string alone
+inside a lambda; that lambda carries its own call overhead and overstated the
+share. A first differential attempt then timed the two halves in *separate*
+processes and reported `1.91`x, which did not reproduce. Only the interleaved
+form is stable, at `2.76`-`2.99`x over five independent processes. The figure
+is **provisional, laptop**, superseded by the next Burak-desktop batch record
+under architect decision C2, exactly as NC-044 is.
+
+This is a real speedup on `extract` in isolation and close to nothing in any
+caller that exists today. The archive survey spends its time in 975 `git show`
+subprocesses and about 1.2 GB of JSON parsing, so `extract` is well under 1% of
+it and NC-044's `55`-`64` s range is unmoved. The honest summary is that the
+method was spending two thirds of its time building text nobody reads, and now
+it does not.
+
+### Verification
+
+Behaviour preservation was shown, not asserted, in the way NC-052's notes
+already establish for this branch's earlier refactors. Captured either side of
+the hoist and diffed:
+
+- all four NC-052 figures, byte-identical: `T1 0.0001551924205171878`,
+  `T2 0.00010959537464376821`, readout `0.03532605293469551`, firing sum
+  `0.10769113232875129`;
+- the exact message text of all three of `extract`'s failure paths, a wrong
+  unit, a missing unit and an unusable snapshot, byte-identical including the
+  backend and timestamp the context string carries.
+
+The third of those is the one that matters: the point of the context string is
+to appear in an error, so a hoist that changed the message would be a
+regression no figure would catch.
+
+Gates at this commit, clean CPython 3.12.10 at a short path: `ruff check` and
+`ruff format --check` clean over 65 files, `scripts/check_ids.py` clean,
+`mypy --strict` clean over 37 source files, **652 collected, 652 passed**. No
+test is added: the hoist is behaviour-preserving by construction and the
+existing suite already pins both the figures and the error text it could have
+broken, so a new case would assert an implementation detail. NC-021 is
+therefore unchanged at 652.

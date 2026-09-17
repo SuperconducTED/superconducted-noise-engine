@@ -90,6 +90,14 @@ class BasicCalibrationVectorizer(CalibrationFeatureExtractor):
     def extract(self, snapshot: CalibrationSnapshot) -> npt.NDArray[np.float64]:
         qubits_section = snapshot.properties.get("qubits", [])
         collected: dict[str, list[float]] = {name: [] for name, _ in _NDUV_TO_FEATURE}
+        # Built once per snapshot, not once per Nduv entry. It depends only
+        # on the snapshot, so the inner loop rebuilt an identical string 467
+        # times on a 156-qubit document, `isoformat()` and all, to produce
+        # text that is discarded unless a unit is wrong. Hoisting it makes
+        # this method roughly 2.9x faster on that document (NC-055). The
+        # value handed to `validate_unit_scale` is unchanged, so every error
+        # message stays byte-identical; that was checked rather than assumed.
+        context = f"backend {snapshot.backend!r} at {snapshot.timestamp.isoformat()}"
         for qubit_index, qubit_props in enumerate(qubits_section):
             for nduv in qubit_props:
                 name = nduv.get("name")
@@ -104,7 +112,7 @@ class BasicCalibrationVectorizer(CalibrationFeatureExtractor):
                 scale = validate_unit_scale(
                     nduv.get("unit"),
                     EXPECTED_UNITS[name],
-                    context=f"backend {snapshot.backend!r} at {snapshot.timestamp.isoformat()}",
+                    context=context,
                     qubit_index=qubit_index,
                     field_name=name,
                     raw_value=nduv.get("value"),
