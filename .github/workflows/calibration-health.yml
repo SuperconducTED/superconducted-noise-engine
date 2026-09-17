@@ -55,8 +55,28 @@ on:
 # this pipeline does not decide the training floor, and NC-045 and NC-046 are
 # both still provisional laptop measurements awaiting the batch-2 canonical
 # record.
+
+# How old this dashboard's own heartbeat may get before something says so.
+#
+# NC-053 holds the derivation and is the source of truth for the value. Two
+# workflows carry it, and `tests/test_check_dashboard_freshness.py` asserts they
+# agree, so the copy in calibration-poll.yml cannot drift away from this one.
+#
+# Not a round number chosen for looking reasonable. Measured over the seven
+# intervals between the eight renders this workflow has published to
+# calibration-data: min 23.728 h, max 24.656 h, mean 24.050 h. A 24 h bound --
+# the obvious guess for a daily job -- fires on 3 of those 7 healthy intervals,
+# a 43% false-alarm rate, because GitHub starts a scheduled run late by a varying
+# amount (this cron asks for 03:17 UTC and has been served between 07:59 and
+# 09:03, a 64-minute spread). 25 h clears the observed record by 0.34 h, which is
+# less than that spread. 48 h is one whole missed render: GitHub documents
+# dropping scheduled runs under load, so a single miss is normal and not
+# actionable, and the alarm should want a second one before it speaks. It fires
+# 0/7 on the healthy record and still catches a dead renderer within two days,
+# against the quarter-scale blindness issue #48 exists to end.
 env:
   HEALTH_FLOORS: 'NC-012=1170 NC-046-TanhBellMF=1215 NC-046-max=1260'
+  DASHBOARD_MAX_AGE_HOURS: '48'
 
 # Deliberately NOT the poller's group. Sharing one would let a render cancel a
 # queued poll, and a cancelled poll writes no ledger row. The resulting push
@@ -138,6 +158,22 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      # Reads the heartbeat left by the PREVIOUS render, before this run
+      # overwrites it, so a renderer that has been down reports the gap it is
+      # closing. This cannot be the primary alarm and is not meant to be: a
+      # process cannot report its own death, so it speaks only once it is
+      # already alive again. calibration-poll.yml carries the alarm that works
+      # while this workflow does not.
+      #
+      # Never allowed to fail the job. A stale heartbeat is a reason to render,
+      # not a reason to refuse to.
+      - name: Report the render gap this run is closing
+        run: |
+          PYTHONPATH=source python source/scripts/check_dashboard_freshness.py \
+            --root data --max-age-hours "$DASHBOARD_MAX_AGE_HOURS" \
+            | tee -a "$GITHUB_STEP_SUMMARY" || true
+
       - name: Render metrics and SVG
         id: render
         env:
@@ -159,21 +195,56 @@ jobs:
           fi
           [ "$status" -eq 0 ] || exit "$status"
           echo 'published=true' >> "$GITHUB_OUTPUT"
-      - name: Commit only material health changes
+      - name: Commit the render
         if: steps.render.outputs.published == 'true'
         run: |
           cd data
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add health/
-          # metrics.json carries generated_at and so changes every render. The SVG
-          # carries no clock reading, so it changes only when the archive or the
-          # poll history did -- that is the commit-on-change signal (FR-6).
-          # state-index.tsv is not part of the gate: this job never writes it, and
-          # the backfill job above commits it itself.
+          # `git add` stages the whole tree, but a commit records only what
+          # actually changed: an unchanged progress.svg reuses its existing blob
+          # and contributes nothing to the commit. FR-6's churn budget is
+          # therefore still honoured where it was aimed -- the 8.5 KB graphic
+          # enters history only when its bytes move -- while the 2 KB
+          # metrics.json now commits on every render.
+          #
+          # That asymmetry is the whole point of this step. The previous shape
+          # ran `git restore --staged health/metrics.json` and exited whenever
+          # the SVG was unchanged, so a render that found nothing new committed
+          # nothing at all and `generated_at` did not advance. A quiet archive
+          # and a stopped renderer were then byte-identical on this branch,
+          # distinguishable only from Actions history, which expires at ~90
+          # days. ADR-025 records that exact failure for the poller -- "a quiet
+          # stretch looked identical to a stopped poller" -- and fixes it with a
+          # record written on every run including the no-ops. This is the same
+          # fix applied to the branch's second writer, which was added after that
+          # ADR was written. The commit history of metrics.json is the render log.
+          #
+          # Measured before the change: 8 runs on calibration-data (the
+          # 2026-09-10 dispatch and the 2026-09-11..17 scheduled runs) produced
+          # 8 commits, so the discarded-metrics guard had never once suppressed
+          # a commit. The added cost is zero in that observed regime and one
+          # 2 KB blob per day in a fully quiet one, which is precisely the
+          # regime the heartbeat exists to cover. NC-053 records the bound that
+          # reads this heartbeat and how it was derived.
+          #
+          # state-index.tsv is not written by this job; the backfill job above
+          # commits it itself.
           if git diff --cached --quiet -- health/progress.svg; then
-            git restore --staged health/metrics.json
+            # Keeps `health: refresh pipeline dashboard` meaning exactly what it
+            # meant before this change -- the rendered graphic moved -- so a
+            # reader scanning the log can still tell the two apart.
+            message='health: heartbeat, rendered dashboard unchanged'
+          else
+            message='health: refresh pipeline dashboard'
+          fi
+          # Written as an `if` rather than `... && exit 0` to match
+          # file_snapshots.sh's idiom, and because the `&&` form's safety under
+          # `set -e` rests on a bash subtlety a reviewer would have to re-derive.
+          if git diff --cached --quiet; then
+            echo '::warning::nothing staged after a successful render'
             exit 0
           fi
-          git commit -m 'health: refresh pipeline dashboard'
+          git commit -m "$message"
           ../source/scripts/push_with_retry.sh origin "$DATA_BRANCH"
