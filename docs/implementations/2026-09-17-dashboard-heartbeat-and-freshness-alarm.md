@@ -222,6 +222,16 @@ python -m pytest tests/ --collect-only -q -o addopts=""   # 643 collected
 python -m pytest tests/ -q -o addopts=""                  # 643 passed
 ```
 
+**`ubuntu-latest` is the authority for the pass count**, and PR #102's CI reports
+`642 passed, 1 skipped` at `f2b11b6` on both `test (3.11)` and `test (3.12)`,
+which is the same 643 collected. The single skip is the `slow`
+`tests/test_feature_distribution.py::test_the_committed_survey_reproduces_from_the_archive`,
+which skips when the pinned `calibration-data` ref is not fetched on the runner;
+the laptop run reached the archive and so passed all 643 there. CI ran at the
+head SHA, not a stale one, and the PR is `MERGEABLE` rather than `DIRTY` — worth
+stating because `ci.yml` does not dispatch on a conflicted PR while CodeQL keeps
+passing, so a green check set can otherwise mean no tests ran at all.
+
 **The commit step was executed, not reasoned about.** The `Commit the render`
 run block was extracted from the workflow YAML and run against a throwaway git
 repository, with `push_with_retry.sh` stubbed, over the three reachable cases:
