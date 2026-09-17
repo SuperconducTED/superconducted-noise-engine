@@ -272,3 +272,133 @@ returns `[1.214277e-04, 9.147555e-05, 1.936301e-02]`, all 27 rules fire, and
 and 16 plus the final sanity simulation. That is the measurement the issue
 predicted and the crash it was filed for is gone.
 
+## Third review follow-up, 2026-09-17
+
+Appended, not edited in, for the same reason as the section above. Two review
+findings were fixed, and then `main` moved and turned a small change into the
+interesting one.
+
+### The two findings
+
+| Finding | Change | Commit |
+| --- | --- | --- |
+| `extract` raised `TypeError` on a malformed `name` | `6e10825` swapped tuple membership for dict membership when it collapsed the field set onto one table. Those differ on malformed input: a JSON value can be a list or dict, and `x in some_dict` hashes `x`, so an entry carrying an unhashable name raised `TypeError: unhashable type` where the tuple form simply did not match. That is a regression against `main`, and the exception is not a `CalibrationParseError`, so callers catching this module's documented error miss it. Guarded with an `isinstance` test; reverting the guard fails the two unhashable cases. | `0625ab4` |
+| Acceptance criterion 2 was two thirds satisfied | The criterion asks the regression test to assert agreement with the loader "not hand-written values". T1 and T2 did. Readout could not, because no `mean_readout_error` existed, so the test re-derived it locally with a comprehension that filtered `None` but not NaN, a different skip policy than the vectorizer and its two siblings. Added `mean_readout_error` with the same ADR-017 contract, covered in the module that already covers the other two. | `0625ab4` |
+
+At `0625ab4` the branch collected and passed **497**.
+
+### Then main moved, and the merge was red
+
+`main` reached `125b7962`, landing PR #68. That made this PR `DIRTY`, which
+matters more than it sounds: `ci.yml` does not dispatch on a conflicting PR
+while CodeQL keeps reporting green, so the checks would have stayed green while
+nothing ran.
+
+The merge conflicted in one file, `docs/numerical-claims.md`, and it was the
+NC-021 row: both sides replaced it from the same `465` base, so git saw a
+one-line text conflict with no hint that the two sides count different trees.
+Resolved by keeping both narratives and re-measuring at the merge.
+
+The real problem was not the conflict. PR #68's parameterization stack is
+calibrated in **microseconds**: the committed survey TSV, the quantile layout
+derived from it, `EXPECTED_ONSETS`, and the pinned clamp counts. This branch
+makes `BasicCalibrationVectorizer` emit **seconds**. That is issue #66's own
+defect one layer up, a consumer calibrated in one unit fed by a producer in
+another, and the merge proved it rather than predicted it:
+
+| | `mean_T1` on the reduced fixture |
+| --- | --- |
+| Committed survey TSV, microseconds | `155.1924205171878` |
+| Merged tree's `extract`, seconds | `0.0001551924205171878` |
+
+Same significant digits, 1e6 apart. **23 tests failed at the merge commit
+`0276e1f`**, every one of them PR #68's.
+
+### Where the boundary went, and why there
+
+Both conventions are right for their own consumer, so neither is retired. What
+was missing was a named place where they meet. `ArchiveUnitFeatureExtractor`
+wraps any `CalibrationFeatureExtractor` and re-expresses its output in the
+units the archive declares.
+
+The factor is deliberately not a hardcoded 1e6. It is
+`1 / UNIT_SCALE[EXPECTED_UNITS[field]]` per feature, which is exactly the
+scaling `validate_unit_scale` applied on the way in, inverted. So the two
+directions cannot drift apart independently, a dimensionless feature passes
+through at `1.0` by construction rather than by a special case, and a feature
+the module cannot map back to an archive field raises at construction instead
+of passing through unscaled, which would be the precise error issue #66 exists
+to close. It sits behind the ABC and mirrors `ClampingFeatureExtractor`, so the
+composition is visible at the call site.
+
+`scripts/feature_distribution.py` extracts through it. Its header used to say
+the units were the vectorizer's own, the raw Nduv value with no scaling, and
+that `FEATURE_SCALES` was not a source of truth. That sentence was true only
+while the vectorizer was wrong. It now states that the units are the archive's,
+that the conversion is explicit, and what breaks if the wrapper is removed.
+
+PR #68's tests needed two corrections: its synthetic snapshots were unitless,
+which this branch now rejects, and its clamps wrapped the SI vectorizer against
+microsecond domain boxes. Editing another contributor's just-merged tests is
+not done lightly, and the justification is narrow: this branch changes the
+contract they were written against, so the alternative is leaving `main` red.
+Two bare-vectorizer uses are deliberately kept, the metadata-forwarding
+assertion and `NonFinite`, which overrides `extract` and never delegates.
+
+### Mathematical / statistical details
+
+Converting after the mean is not bitwise the same as converting before it. The
+committed evidence was produced when the mean was taken over microseconds; it
+is now taken over seconds and scaled afterwards, and each per-qubit scaling
+rounds before the average. Measured across the archive:
+
+| | |
+| --- | --- |
+| Rows differing | 733 of 975 |
+| Columns differing | `mean_T2` 551 rows, `mean_T1` 494 rows, nothing else |
+| Maximum relative difference | `2.8e-16`, about one unit in the last place |
+
+Registered as NC-054. It is worth a row only because the README beside that TSV
+tells a reader to re-run the command to reproduce it, and that instruction is
+now false at the byte level while remaining true at every registered digit.
+**NC-041's nine quantiles and NC-042's three spreads reproduce exactly** at the
+precision they are registered to, which is the claim that actually matters; the
+per-qubit spread columns behind NC-042 are byte-identical because they never
+went through `extract` at all. The dated evidence TSV is not regenerated, per
+the append-only rule for dated artefacts, and `tests/test_parameterization.py`
+reads the committed file as its durable record and passes against it.
+
+### Design decisions
+
+Three options were weighed. Re-running the survey in seconds and re-registering
+NC-041, NC-042, `EXPECTED_ONSETS` and the clamp counts would rewrite figures a
+teammate registered two days earlier and invalidate committed evidence, to no
+numerical benefit. Leaving the merge unresolved would have kept the PR `DIRTY`
+and CI silent. Converting at the boundary keeps every registered number intact,
+keeps ADR-010's seconds, and puts the conversion somewhere a reader can find
+it. The cost is one wrapper class and the one-ULP drift recorded above.
+
+### Gates at 0b36c64
+
+Clean CPython 3.12.10 at a short path, running what CI runs:
+
+```bash
+ruff check .
+ruff format --check .
+python scripts/check_ids.py
+mypy --strict
+pytest tests/ --collect-only -q -o addopts="" -p no:cacheprovider
+pytest tests/ -q -o addopts="" -p no:cacheprovider
+```
+
+All clean: 65 files formatted, no colliding identifiers, 37 source files typed,
+and **652 collected, 652 passed**, registered as NC-021 measured at that commit.
+Neither `616` nor `497` survives the merge and the value is not derived from
+them. `main` was `125b7962` when this was measured; if it moves again,
+re-measure at the new merge.
+
+NC-053 was **not** used for the drift row: PR #102 already claims it for the
+dashboard heartbeat bound. That is the collision git cannot show, because two
+branches appending the same next id to different rows is a clean merge, so the
+check is `gh pr list` before claiming an id, not `check_ids.py` afterwards.
+NC-054 is the first genuinely free id.

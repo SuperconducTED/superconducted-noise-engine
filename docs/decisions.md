@@ -249,6 +249,20 @@ Adding more rules per input is the same.
 > Missing unit keys are rejected, matching the typed loader. See
 > `docs/implementations/2026-09-14-vectorizer-si-units.md`.
 
+> Unit boundary · 2026-09-17 · Issue #66: the ratified features are SI
+> seconds, and that is unchanged. What this adds is where the other
+> convention lives. PR #68's archive survey, the quantile layout built
+> from it and the figures registered as NC-041 and NC-042 are all in the
+> archive's declared units, microseconds for coherence. Both are correct
+> for their own consumer, so neither is retired; they meet in exactly one
+> named place, `calibration/features.py::ArchiveUnitFeatureExtractor`,
+> which inverts the loader's own conversion table rather than hardcoding a
+> factor. A consumer that wants SI does not wrap. Recorded here because
+> ADR-010 is where a reader looks to find what unit these three features
+> are in, and the honest answer is now "seconds, unless the call site
+> wraps, and here is the only wrapper". See
+> `docs/implementations/2026-09-14-vectorizer-si-units.md`.
+
 ---
 
 ## ADR-011 — Defuzzification method
@@ -310,6 +324,14 @@ Richer extractors implement `CalibrationFeatureExtractor`.
 
 **Consequences**: Future ADR will compare extractors empirically once
 ≥ 630 snapshots are accumulated.
+
+> Figure correction · 2026-09-17 · The Consequences line above says
+> ≥ 630 snapshots. NC-012 has since moved to ≥ 1170 and 630 is retired.
+> The decision text is left as written, per the convention in this file
+> that a dated entry records rather than rewrites; this note is the
+> correction. Noticed while appending the issue #66 revisit note directly
+> below it, which is exactly where a reader meets the stale number. Cite
+> the register row, not this line.
 
 > Revisit note · 2026-09-14 · Issue #66 corrects the cycle-1 audit item 6
 > assessment that both Nduv parsers produced correct results: the vectorizer
