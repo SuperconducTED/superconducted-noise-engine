@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+import numpy.typing as npt
 import pytest
 from scripts.first_ensemble_run import (
     DEFAULT_MF_PLACEMENT,
@@ -14,6 +15,7 @@ from scripts.first_ensemble_run import (
 )
 
 from superconducted.calibration.features import (
+    ArchiveUnitFeatureExtractor,
     BasicCalibrationVectorizer,
     mean_readout_error,
     mean_t1,
@@ -27,6 +29,7 @@ from superconducted.calibration.loader import (
     validate_unit_scale,
 )
 from superconducted.fuzzy.tsk import TSKRuleBase
+from superconducted.interfaces import CalibrationFeatureExtractor
 
 FIXTURE = (
     Path(__file__).parents[1]
@@ -153,3 +156,61 @@ def test_malformed_nduv_name_is_skipped_not_raised(name: object) -> None:
     snapshot = _synthetic_snapshot()
     snapshot.properties["qubits"][0].append({"name": name, "unit": "us", "value": 1.0})
     assert BasicCalibrationVectorizer().extract(snapshot) == pytest.approx([50e-6, 50e-6, 0.01])
+
+
+def test_archive_unit_extractor_inverts_the_loader_scaling() -> None:
+    """The wrapper returns the number the source document carried.
+
+    Stated differentially against the SI vectorizer and the loader's own
+    tables rather than against literals, so it cannot drift if either table
+    changes. The archive declares `us` for coherence, so the factor is 1e6;
+    asserting that here would restate the table instead of checking it.
+    """
+    snapshot = _load_snapshot(FIXTURE)
+    si = BasicCalibrationVectorizer().extract(snapshot)
+    archive = ArchiveUnitFeatureExtractor().extract(snapshot)
+    expected = [
+        value / UNIT_SCALE[EXPECTED_UNITS[nduv]]
+        for value, nduv in zip(si, ("T1", "T2", "readout_error"), strict=True)
+    ]
+    assert archive == pytest.approx(expected)
+
+
+def test_archive_unit_extractor_leaves_dimensionless_features_untouched() -> None:
+    """Readout error has no unit, so wrapping must be a no-op for it."""
+    snapshot = _load_snapshot(FIXTURE)
+    si = BasicCalibrationVectorizer().extract(snapshot)
+    archive = ArchiveUnitFeatureExtractor().extract(snapshot)
+    assert archive[2] == si[2]
+    assert archive[0] != si[0]
+
+
+def test_archive_unit_extractor_forwards_metadata() -> None:
+    inner = BasicCalibrationVectorizer()
+    wrapped = ArchiveUnitFeatureExtractor(inner)
+    assert wrapped.output_dim == inner.output_dim
+    assert wrapped.feature_names == inner.feature_names
+
+
+def test_archive_unit_extractor_rejects_a_feature_it_cannot_map() -> None:
+    """An unmappable feature must fail loudly, not pass through unscaled.
+
+    Passing an unknown feature through at 1.0 would be a silent unit error,
+    which is the exact defect issue #66 exists to close, so the wrapper
+    refuses to be constructed rather than producing a plausible vector.
+    """
+
+    class Extra(CalibrationFeatureExtractor):
+        @property
+        def output_dim(self) -> int:
+            return 2
+
+        @property
+        def feature_names(self) -> tuple[str, ...]:
+            return ("mean_T1", "mean_frequency")
+
+        def extract(self, snapshot: object) -> npt.NDArray[np.float64]:
+            raise AssertionError("never reached; construction must fail first")
+
+    with pytest.raises(ValueError, match="no known archive unit"):
+        ArchiveUnitFeatureExtractor(Extra())
