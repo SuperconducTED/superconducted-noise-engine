@@ -29,7 +29,7 @@ from scripts.feature_distribution import (
     write_tsv,
 )
 
-from superconducted.calibration.features import BasicCalibrationVectorizer
+from superconducted.calibration.features import ArchiveUnitFeatureExtractor
 from superconducted.types import CalibrationSnapshot
 
 _HAS_GIT = shutil.which("git") is not None
@@ -39,11 +39,11 @@ _ARCHIVE_REF = "superconducted-noise-engine/calibration-data"
 def _qubit(t1: float | None, t2: float | None, readout: float | None) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
     if t1 is not None:
-        entries.append({"name": "T1", "value": t1})
+        entries.append({"name": "T1", "value": t1, "unit": "us"})
     if t2 is not None:
-        entries.append({"name": "T2", "value": t2})
+        entries.append({"name": "T2", "value": t2, "unit": "us"})
     if readout is not None:
-        entries.append({"name": "readout_error", "value": readout})
+        entries.append({"name": "readout_error", "value": readout, "unit": ""})
     return entries
 
 
@@ -106,7 +106,7 @@ def test_snapshot_row_means_equal_the_vectorizer() -> None:
 
     row = snapshot_row("snapshots/2026-05/ibm_fez/x.json", doc)
 
-    expected = BasicCalibrationVectorizer().extract(
+    expected = ArchiveUnitFeatureExtractor().extract(
         CalibrationSnapshot(
             backend="ibm_fez",
             timestamp=datetime.fromisoformat(row.timestamp),
@@ -168,7 +168,7 @@ def test_non_finite_and_non_numeric_values_are_dropped_like_extract_drops_them()
 def test_rejected_snapshot_keeps_its_reason_and_is_not_dropped() -> None:
     """A snapshot ``extract`` rejects is recorded with empty means, never skipped."""
     doc = _doc([_qubit(100.0, None, 0.01)])
-    doc["properties"]["qubits"] = [[{"name": "T1", "value": 100.0}]]
+    doc["properties"]["qubits"] = [[{"name": "T1", "value": 100.0, "unit": "us"}]]
 
     row = snapshot_row("a/b.json", doc)
 
@@ -209,7 +209,10 @@ def test_an_unparseable_timestamp_becomes_a_rejection_rather_than_an_exception()
         {"qubits": "not-a-list"},
         {"qubits": [None, 7, "nope"]},
         {"qubits": [[None, 7, "nope"]]},
-        {"qubits": [[{"name": "T1", "value": 100.0}]], "last_update_date": {"not": "a string"}},
+        {
+            "qubits": [[{"name": "T1", "value": 100.0, "unit": "us"}]],
+            "last_update_date": {"not": "a string"},
+        },
     ],
     ids=["properties", "qubits", "qubit-entries", "nduv-entries", "last-update-date"],
 )
