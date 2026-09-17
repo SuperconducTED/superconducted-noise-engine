@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-17 05:40 UTC · main at `125b7962` (2026-09-16) · 13 days to 2026-09-30_
+_Generated 2026-09-17 14:47 UTC · main at `125b7962` (2026-09-16) · 13 days to 2026-09-30_
 
 
 ## Milestones
@@ -69,7 +69,7 @@ _Generated 2026-09-17 05:40 UTC · main at `125b7962` (2026-09-16) · 13 days to
 1. Start #63: Training-set builder (training/dataset.py)
    - The reader-and-dedup half has no hard dependency the plan recognises and W2 is where it starts; #60's first archive fit is waiting on it.
 1. Unstick PR #99 for #66: Vectorizer returns µs where the repo assumes s
-   - Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
+   - CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **Bengisu Cıvdı** (@bengisucvd)
 
@@ -134,9 +134,7 @@ _Generated 2026-09-17 05:40 UTC · main at `125b7962` (2026-09-16) · 13 days to
 
 **#66: Vectorizer returns µs where the repo assumes s** (@BahaJarad)
 
-- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
-- [high] Its green checks last ran 2026-09-15T15:06 against a main that has moved since; they are not evidence about the merge result.
 
 **#73: Filter noise by physical gate semantics** (@BurakOztekin)
 

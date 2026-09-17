@@ -1,4 +1,4 @@
-run-token: 2026-09-17T05:40:10Z-1906
+run-token: 2026-09-17T14:47:01Z-5028
 outcome: ok: chore: phase-3 dashboard: state moved (2026-09-17)
 
 **12/28 milestone gates met** · 13 days to 2026-09-30 · calendar 54% burned against 43% of gates, 11 points behind.
@@ -9,7 +9,6 @@ outcome: ok: chore: phase-3 dashboard: state moved (2026-09-17)
 - M0 (Queue clear) is 12 days past its 2026-09-05 target at 7/8
 - M1 (Contracts and instruments) is 6 days past its 2026-09-11 target at 3/5
 - PR #79 (#58) conflicts with main, so its checks are not evidence and it cannot merge
-- PR #99 (#66) conflicts with main, so its checks are not evidence and it cannot merge
 - #63 is ready and holds up #60 (Baha Jarad)
 
 **Next action per person**

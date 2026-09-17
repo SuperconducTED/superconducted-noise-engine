@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-17 05:40 UTC",
+  "generated": "2026-09-17 14:47 UTC",
   "main": {
     "sha": "125b7962",
     "date": "2026-09-16",
@@ -599,31 +599,78 @@
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/48",
       "issue_state": "CLOSED",
       "state": "done",
-      "all_prs": [],
-      "merged_pr": {
-        "author": {
-          "id": "U_kgDOCJLpDw",
-          "is_bot": false,
-          "login": "mertefesensoy",
-          "name": "Mert Efe Şensoy"
-        },
-        "closingIssuesReferences": [],
-        "createdAt": "2026-09-10T20:58:34Z",
-        "headRefName": "mert/issue-48-threshold-rows",
-        "isDraft": false,
-        "mergeable": "UNKNOWN",
-        "mergedAt": "2026-09-11T13:15:21Z",
-        "number": 95,
-        "reviewDecision": "APPROVED",
-        "state": "MERGED",
-        "title": "docs: register issue #48 §7.3's thresholds, and the distributions behind them",
-        "updatedAt": "2026-09-11T13:15:25Z",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/95"
-      },
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-09-17T14:24:44Z",
+          "headRefName": "mert/issue-48-render-heartbeat",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 102,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "health: commit the dashboard heartbeat and give it a reader (#48)",
+          "updatedAt": "2026-09-17T14:44:39Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/102",
+          "headRefOid": "d9c1e05a1cb2f7114a86eeb60c87bc411041230b",
+          "additions": 906,
+          "deletions": 9,
+          "file_count": 7,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-17T14:44"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-17T14:44"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-17T14:44"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-17T14:44"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-17T14:44"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-17T14:45"
+            }
+          ],
+          "checks_newest": "2026-09-17T14:45",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
+      "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
+        {
+          "severity": "high",
+          "text": "No approving review yet: main's ruleset requires one."
+        },
         {
           "kind": "signoff",
           "text": "Decision 3: the --scope qubits digest body must be locked before FR-1 is written, because #63 consumes it.",
@@ -635,7 +682,7 @@
         49
       ],
       "notes_info": [],
-      "pr": null
+      "pr": 102
     },
     {
       "id": 49,
@@ -980,18 +1027,18 @@
           "createdAt": "2026-09-14T13:17:50Z",
           "headRefName": "feature/basic-calibration-vectoriser",
           "isDraft": false,
-          "mergeable": "CONFLICTING",
+          "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 99,
           "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "Issue #66 Basic Calibration Vectoriser",
-          "updatedAt": "2026-09-15T15:07:46Z",
+          "updatedAt": "2026-09-17T14:39:22Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/99",
-          "headRefOid": "1114535a9eb6d4075e46918b7c322c68d6acfc46",
-          "additions": 539,
-          "deletions": 52,
-          "file_count": 11,
+          "headRefOid": "d5c616541a3da033d56e68af561b1c1a402488d1",
+          "additions": 979,
+          "deletions": 83,
+          "file_count": 15,
           "latest_reviews": [
             {
               "who": "mertefesensoy",
@@ -1005,37 +1052,37 @@
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-15T15:05"
+              "started": "2026-09-17T14:39"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-15T15:05"
+              "started": "2026-09-17T14:39"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-15T15:05"
+              "started": "2026-09-17T14:39"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-15T15:05"
+              "started": "2026-09-17T14:39"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-15T15:05"
+              "started": "2026-09-17T14:39"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-09-15T15:06"
+              "started": "2026-09-17T14:39"
             }
           ],
-          "checks_newest": "2026-09-15T15:06",
+          "checks_newest": "2026-09-17T14:39",
           "checks_failing": [],
-          "checks_stale_vs_main": true
+          "checks_stale_vs_main": false
         }
       ],
       "merged_pr": null,
@@ -1043,14 +1090,6 @@
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
-        {
-          "severity": "critical",
-          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
-        },
-        {
-          "severity": "high",
-          "text": "Its green checks last ran 2026-09-15T15:06 against a main that has moved since; they are not evidence about the merge result."
-        },
         {
           "severity": "critical",
           "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
