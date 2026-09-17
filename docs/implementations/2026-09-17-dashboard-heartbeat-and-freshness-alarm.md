@@ -166,6 +166,35 @@ exists to cover.
 
 ## Design decisions
 
+**This relaxes FR-6 as literally written, deliberately.** FR-6 says "a run that
+changes nothing must produce no commit", and after this change a render that
+finds nothing new does produce one. Recorded here plainly rather than left for a
+reader to discover, because the requirement is quoted by name in the workflow and
+in `tests/test_pipeline_health.py::TestCommitOnChange`.
+
+The relaxation is bounded on three sides:
+
+1. **It is confined to the file it needs to reach.** FR-6's stated purpose is
+   NFR-9's churn budget on a 1.17 GB branch, and that is preserved for the
+   artifact it was aimed at. The 8.5 KB `progress.svg` still obeys FR-6 strictly,
+   and `TestCommitOnChange` still passes unchanged: a quiet archive still renders
+   byte-identical SVGs a day apart.
+2. **The measured cost is zero in the regime we are in.** All 8 renders to date
+   already committed, so nothing is added today. The 2039 B daily blob appears
+   only in a fully quiet archive, which is the regime the heartbeat exists to
+   cover, and is 0.06% of the branch per year.
+3. **Read strictly, FR-6 is self-defeating.** An instrument forbidden from
+   recording that it ran cannot be distinguished from one that stopped. §11 of
+   issue #48 states the pipeline's purpose as making a silent collapse visible
+   within a day; a renderer whose own silence is unobservable cannot deliver that.
+
+§7 decision 1 weighed the same trade-off for the SVG and chose daily rendering
+plus commit-on-change rather than hourly. This applies that reasoning one level
+down, separating the published graphic from the provenance record beside it. The
+decision is recorded in the ADR-025 amendment and in the #48 thread, so it is
+reversible by someone who disagrees: reverting one workflow step restores the old
+behaviour with no data loss and no rewrite.
+
 **Rejected: put `generated_at` in the SVG.** This is the most direct way to show
 dashboard age, and it is explicitly forbidden. NFR-3 and the ADR-025 amendment
 both state that the SVG carries no clock reading, because a timestamp in the
