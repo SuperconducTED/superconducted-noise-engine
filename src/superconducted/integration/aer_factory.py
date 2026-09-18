@@ -236,6 +236,16 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
             else CalibrationGateEligibilityPolicy()
         )
         self._crisp_params: npt.NDArray[np.float64] = self._compute_crisp_params()
+        # Resolved once, like _crisp_params: eligible_operations is a pure
+        # function of the snapshot, and CalibrationSnapshot is a frozen
+        # point-in-time record, so nothing can change the answer between
+        # prepare() calls. Resolving here also surfaces a malformed
+        # gate_length (CalibrationParseError) at construction rather than on
+        # some later prepare(), and keeps a 32-member ensemble from re-parsing
+        # the same ~1100 calibration records once per member.
+        self._eligible_operations: frozenset[tuple[str, tuple[int, ...]]] = (
+            self._gate_eligibility_policy.eligible_operations(self._calibration)
+        )
 
     def _compute_crisp_params(self) -> npt.NDArray[np.float64]:
         features = self._feature_extractor.extract(self._calibration)
@@ -287,6 +297,22 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
           that will transform it are still stubs pending ADR-007. Copying
           now keeps callers correct when those land.
 
+        **Basis and qubit contract.** ``circuit`` is matched against the
+        eligibility policy by ``(instruction name, qubit tuple)``, where the
+        qubit tuple is the instruction's *positional* index in
+        ``circuit.qubits`` and the policy's tuple is a *physical* qubit index
+        from the calibration. The two agree only when the circuit is compiled
+        to the calibrated device with a trivial layout, which in practice
+        means transpiling at full device width or with an explicit
+        ``initial_layout``. A 2-qubit circuit handed in directly is matched
+        against physical qubits 0 and 1 whatever it was meant to run on.
+
+        Today that mismatch is benign in magnitude, because ``crisp_params``
+        is snapshot-global and the channel does not vary per qubit, so a
+        wrong index still yields the same error. It is not benign in
+        *presence*: a qubit the calibration does not cover is silently
+        ineligible. Per-qubit channels (ADR-013) would make it both.
+
         A circuit that is not compiled to the calibrated physical basis
         matches no eligible operation, so nothing is installed and the
         caller silently simulates a noiseless circuit. That case warns via
@@ -294,7 +320,7 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
         a noise-free circuit is legal; see that function for the trade-off.
         """
 
-        eligible_operations = self._gate_eligibility_policy.eligible_operations(self._calibration)
+        eligible_operations = self._eligible_operations
 
         def error_provider(gate: Instruction, qubits: tuple[int, ...]) -> QuantumError | None:
             if (gate.name, qubits) not in eligible_operations:

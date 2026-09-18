@@ -189,3 +189,104 @@ warning is attributed to `harness.py:75`.
 
 - ADR-021 in `docs/decisions.md`
 - Issues #58, #73, #74; PR #79
+
+---
+
+## 2026-09-18 follow-up 2: close the two open acceptance criteria
+
+Added by @mertefesensoy. Scope: `aer_factory.py`, `interfaces.py` and
+`tests/test_noise_gate_eligibility.py`.
+
+### Problem
+
+Two of #73's eight acceptance criteria were not met at `f690652`, and two
+review findings shared a single fix.
+
+1. **Criterion 1, the test-only reproduction, had regressed.** It held at
+   `bbdd456`, whose test module imported only pre-fix API. The `940f2b7`
+   rewrite added `CalibrationGateEligibilityPolicy` and `GateEligibilityPolicy`
+   to the module's top-level imports, so against the pre-fix tree the file
+   raised `ImportError` at collection instead of failing on the bug.
+2. **Criterion 5, qubit-aware, had no test.** Every gate in the archive fixture
+   is calibrated on all 156 qubits, so no existing assertion could tell a
+   qubit-aware policy from one matching on gate name alone. The doc's "What
+   changed" table nonetheless claimed the case was covered.
+3. `eligible_operations` was re-resolved on every `prepare()` call from a
+   snapshot that cannot change: 2.52 ms per call, 80.7 ms per 32-member
+   ensemble pass on the 1132-record fixture, and a malformed `gate_length`
+   unit raised `CalibrationParseError` out of `prepare()` rather than at
+   construction, untested.
+4. The policy returns **physical** qubit indices while `PostGateFuzzification`
+   matches them against an instruction's **positional** index in
+   `circuit.qubits`. Nothing said so.
+
+### What changed
+
+| File | One-sentence description |
+| --- | --- |
+| `src/superconducted/integration/aer_factory.py` | Resolves eligibility once in `__init__` beside `_crisp_params`, and documents the positional-versus-physical qubit contract on `prepare()`. |
+| `src/superconducted/interfaces.py` | States on `GateEligibilityPolicy` that its qubit tuples are physical indices and that implementations must be pure in the snapshot. |
+| `tests/test_noise_gate_eligibility.py` | Restores the pre-fix reproduction, and adds qubit-aware, qubit-aware-through-installation, and construction-time-rejection cases. |
+
+### Implementation approach
+
+**Reproduction.** Module-level imports are held to the API that exists on the
+pre-fix tree, the two new names are imported inside the three tests that need
+them, and `_model` forwards `gate_eligibility_policy` only when one is given so
+the call does not hit an unknown keyword. Verified against `main` (`125b796`):
+the module collects, and
+`test_prepare_uses_real_gate_lengths_to_filter_physical_instructions` fails with
+
+    assert ['delay', 'rz', 'save_density_matrix', 'sx', 'x'] == ['sx', 'x']
+
+which is exactly the erroneous attachment #73 describes: `rz`, `delay` and
+`save_density_matrix` all receiving the damping channel.
+
+**Qubit-awareness.** `_properties_with_sx_disabled_on(qubit)` takes the real
+fixture and records one qubit's `sx` as 0 ns, which is the only way to
+distinguish the two policies on a device calibrated uniformly. Asserted at the
+policy (`("sx", (0,))` out, `("sx", (1,))` in, `("x", (0,))` untouched) and
+again through `prepare()`.
+
+**Hoisting.** Eligibility moves next to `_crisp_params`, which is the module's
+existing pattern for "resolve the pipeline once at construction". This is sound
+because `eligible_operations` is pure in the snapshot and `CalibrationSnapshot`
+is a frozen point-in-time record; that requirement is now written into the ABC
+rather than assumed.
+
+### Mathematical / statistical details
+
+N/A. No channel parameter, estimator or threshold changed. The 0 ns edit uses
+the same eligibility predicate as before: finite and strictly positive.
+
+### Design decisions
+
+**Local imports in tests over a second test module.** Splitting the pre-fix
+reproduction into its own file would have kept top-level imports clean, but it
+separates the assertion from the fixture helper and `_model` that give it
+meaning, and it leaves two files to keep in step. Three local imports are the
+smaller cost, and the module docstring says why they are there so nobody
+"tidies" them back up.
+
+**A per-qubit fixture edit over a synthetic snapshot.** A hand-written snapshot
+would have made the qubit-aware test trivial to write and worthless to read,
+which is the failure mode the first review round already caught once. Editing
+one record of the real archive fixture keeps every other field physical.
+
+### Verification
+
+Run from the repository root against the pins in `requirements*.txt`:
+
+- `pytest tests/ -q` gives 478 passed, up from 475
+- `ruff check .`, `ruff format --check .` (61 files), `python scripts/check_ids.py`
+- `mypy --strict` (35 source files)
+
+To confirm the reproduction still reproduces, copy
+`tests/test_noise_gate_eligibility.py` onto a checkout of `main` and run it:
+all 10 tests fail, and the one named above fails on the assertion quoted there
+rather than on an import.
+
+### Related docs
+
+- ADR-021 in `docs/decisions.md`
+- Issues #58, #73, #74; PR #79
