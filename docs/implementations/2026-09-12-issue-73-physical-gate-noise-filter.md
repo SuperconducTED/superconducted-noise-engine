@@ -295,3 +295,105 @@ rather than on an import.
 
 - ADR-021 in `docs/decisions.md`
 - Issues #58, #73, #74; PR #79
+
+---
+
+## 2026-09-18 follow-up 3: the decision record
+
+Added by @mertefesensoy after an independent convention audit of `42d8aa8`.
+Scope: `docs/decisions.md`, `docs/architecture.md`,
+`docs/decisions/drafts/ADR-021-*.md`, plus five code findings.
+
+### Problem
+
+The audit returned one blocker, and it was about the record rather than the
+code. ADR-021 is **Status: Accepted**, which the ledger preamble defines as
+"locked, do not revisit", and two of its Consequences bullets had been
+rewritten in place. That silently reversed a ratified contract: the original
+text puts `transpile(circuit, backend=sim)` *after* `prepare()` and before
+`AerSimulator.run()`, while the replacement required compilation *before*
+`prepare()`. Worse, the replacement was not true of the repository. No caller
+satisfied it.
+
+Three further governance gaps travelled with it: the promoted draft at
+`docs/decisions/drafts/ADR-021-*.md` had been edited although the ledger calls
+it the retained authoring record; the Decision (Accepted) body still enumerated
+six injected dependencies against a seven-argument constructor; and
+`GateEligibilityPolicy` was a new swappable axis with no ADR, although
+`interfaces.py`'s module docstring says every ABC corresponds to a decision
+recorded in the ledger and #73 framed the eligibility source as
+"Decision required".
+
+### What changed
+
+| File | One-sentence description |
+| --- | --- |
+| `docs/decisions.md` | Restores ADR-021's ratified Consequences, appends a dated amendment carrying the seventh dependency and the call-order clause plus a sign-off-outstanding note, and adds ADR-028 for the eligibility axis. |
+| `docs/decisions/drafts/ADR-021-*.md` | Reverted to `main`; a promoted draft is the authoring record and is not edited retroactively. |
+| `docs/architecture.md` | Adds the eligibility stage to the pipeline, which becomes 7-stage, and the ADR-028 row to the open-decisions cross-reference. |
+| `src/superconducted/integration/aer_factory.py` | Corrects a false comment, makes the ensemble's new parameter keyword-only, drops a dead `isfinite` guard, and makes the warning helper private. |
+| `tests/test_noise_gate_eligibility.py` | The feature-extractor stub subclasses its ABC, so the `# type: ignore[arg-type]` is gone. |
+
+### Implementation approach
+
+The amendment follows the shape the ledger already uses at
+`### ADR-025 amendment — 2026-09-05`, and the sign-off gap follows
+`### ADR-025 amendment status, 2026-09-10`, which records a merge that went
+ahead without Dr. Akba rather than hiding it. The precedent matters more than
+the wording here: it establishes that a recorded gap is a record and a silence
+is not.
+
+The amendment deliberately does **not** assert the new call order is honoured.
+It tabulates the opposite, measured:
+
+| Caller | Ordering | Installed errors |
+| --- | --- | --- |
+| `benchmarks/harness.py:75` | never transpiles | 0 on ghz, qft and vqe |
+| `scripts/first_ensemble_run.py:103` | `prepare()` then `transpile()` | 0 |
+
+ADR-028 records the decision #73 opened, chooses the calibration snapshot over
+an injected allowlist, and carries the four consequences that are easy to trip
+over later: physical-versus-positional qubit indices, fail-closed on a missing
+record against fail-loud on a corrupt one, and the two distinct empty-set cases
+that warn rather than raise.
+
+### Mathematical / statistical details
+
+N/A. No channel parameter, estimator or threshold changed.
+
+### Design decisions
+
+**Amend, do not rewrite.** Editing an Accepted ADR in place is cheaper and
+reads better, which is exactly why the ledger forbids it: the reader loses the
+ability to see that a contract moved, and when. The cost of the amendment shape
+is a longer file; the benefit is that the 2026-08-24 reading survives.
+
+**Record the sign-off gap rather than wait on it.** Dr. Akba's sign-off is a
+precondition, and it has not been obtained. Blocking the branch on a
+person-shaped dependency with a multi-day latency would hold four unrelated
+code fixes hostage, so the deviation is written into the ledger where a reader
+who never sees this PR will find it.
+
+**Leave NC-021 alone.** This PR changes what `pytest --collect-only` returns,
+which register Rule 6 puts on the PR that changes it. But #101 is already open
+against that exact row, and two PRs editing one row is the duplicate-row
+failure `scripts/check_ids.py` was built to catch. #101 merges first; this PR
+then appends its value measured at its own merge commit.
+
+**Leave `docs/implementations/2026-05-07-repo-bootstrap.md` alone.** It says
+"Canonical 6-stage pipeline", which is now stale as a description of the
+architecture but accurate as a record of 2026-05-07. Editing it would falsify
+the dated record.
+
+### Verification
+
+- `pytest tests/ -q` gives 478 passed
+- `ruff check .`, `ruff format --check .` (61 files)
+- `python scripts/check_ids.py`, which is what would catch an ADR-028 collision
+- `mypy --strict` (35 source files)
+
+### Related docs
+
+- ADR-021, its 2026-09-18 amendment, and ADR-028, all in `docs/decisions.md`
+- `docs/architecture.md` open-decisions cross-reference
+- Issues #58, #73, #74; PRs #79, #101
