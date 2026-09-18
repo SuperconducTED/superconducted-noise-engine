@@ -37,6 +37,7 @@ Bootstrap status:
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Callable, Iterator, Sequence
 from math import isfinite
 
@@ -96,6 +97,52 @@ class CalibrationGateEligibilityPolicy(GateEligibilityPolicy):
                 if isfinite(duration) and duration > 0.0:
                     eligible.add((gate_name, (qubit,)))
         return frozenset(eligible)
+
+
+def warn_if_nothing_was_installed(
+    circuit: QuantumCircuit,
+    eligible_operations: frozenset[tuple[str, tuple[int, ...]]],
+) -> None:
+    """Warn when :meth:`FuzzyNoiseModel.prepare` installed no error at all.
+
+    Two distinct configuration mistakes both land as an empty ``NoiseModel``,
+    and both were previously silent:
+
+    - the calibration snapshot carries no positive-duration single-qubit gate
+      record, so nothing is eligible against any circuit; or
+    - the snapshot is fine, but the circuit was never compiled to the
+      calibrated physical basis, so no instruction name can match.
+
+    Either way the engine returns a model that installs nothing, the caller
+    simulates a noiseless circuit, and the run still looks successful. That is
+    how a benchmark row can report a number measured from an engine that was
+    switched off. This warns instead of raising: ADR-021 fixes ``prepare``'s
+    return contract, and a circuit really can be legitimately noise-free (an
+    ``rz``-only or measure-only circuit is the honest example), so the
+    diagnostic is informational and a caller may filter it.
+
+    ``eligible_operations`` is the policy's decision for this snapshot;
+    ``circuit`` is the caller's input, because that is the thing they can fix.
+    No warning is emitted for an empty circuit, which has nothing to noise.
+    """
+    present = sorted({instruction.operation.name for instruction in circuit.data})
+    if not present:
+        return
+    if not eligible_operations:
+        warnings.warn(
+            "FuzzyNoiseModel.prepare installed no error: this calibration "
+            f"snapshot yields no eligible gate at all. Circuit instructions: {present}.",
+            stacklevel=3,
+        )
+        return
+    eligible_names = sorted({name for name, _ in eligible_operations})
+    warnings.warn(
+        "FuzzyNoiseModel.prepare installed no error: none of the circuit's "
+        f"instructions {present} is eligible under this calibration "
+        f"{eligible_names}. Compile the circuit to the calibrated physical "
+        "basis before calling prepare().",
+        stacklevel=3,
+    )
 
 
 def is_identity_damping(crisp_params: npt.NDArray[np.float64]) -> bool:
@@ -239,6 +286,12 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
           *same* circuit object unmutated, and the pre/between strategies
           that will transform it are still stubs pending ADR-007. Copying
           now keeps callers correct when those land.
+
+        A circuit that is not compiled to the calibrated physical basis
+        matches no eligible operation, so nothing is installed and the
+        caller silently simulates a noiseless circuit. That case warns via
+        :func:`warn_if_nothing_was_installed` rather than raising, because
+        a noise-free circuit is legal; see that function for the trade-off.
         """
 
         eligible_operations = self._gate_eligibility_policy.eligible_operations(self._calibration)
@@ -252,7 +305,12 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
                 return None
 
         fresh_noise_model: NoiseModel = NoiseModel()
-        return self._fuzzification_strategy.install(circuit, fresh_noise_model, error_provider)
+        prepared_circuit, prepared_noise_model = self._fuzzification_strategy.install(
+            circuit, fresh_noise_model, error_provider
+        )
+        if not prepared_noise_model.noise_instructions:
+            warn_if_nothing_was_installed(circuit, eligible_operations)
+        return prepared_circuit, prepared_noise_model
 
 
 class FuzzyNoiseModelEnsemble:

@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import json
+import warnings
 from datetime import UTC, datetime
 from pathlib import Path
 
 import numpy as np
+import pytest
 from qiskit import QuantumCircuit
 from qiskit_aer.library import SaveDensityMatrix
 
@@ -130,3 +132,49 @@ def test_prepare_uses_an_injected_gate_eligibility_policy() -> None:
     _, noise_model = _model(fixture["properties"], NoGateIsEligible()).prepare(circuit)
 
     assert noise_model.noise_instructions == []
+
+
+def test_prepare_warns_when_the_circuit_is_not_compiled_to_the_calibrated_basis() -> None:
+    """A logical circuit matches no physical gate name, so nothing installs.
+
+    This is the silent-no-op guard. `benchmarks/harness.py` hands `prepare()`
+    an untranspiled circuit and never transpiles, so without this warning the
+    engine measures a noiseless circuit and the run still looks successful.
+    The transpile itself belongs to #58; this only makes its absence audible.
+    """
+    fixture = json.loads(GATE_FIXTURE.read_text(encoding="utf-8"))
+    circuit = QuantumCircuit(2)
+    circuit.h(0)
+    circuit.cx(0, 1)
+
+    with pytest.warns(UserWarning, match=r"none of the circuit's instructions"):
+        _, noise_model = _model(fixture["properties"]).prepare(circuit)
+
+    assert noise_model.noise_instructions == []
+
+
+def test_prepare_warns_when_the_calibration_yields_no_eligible_gate() -> None:
+    """A snapshot with no usable gate record disables the engine entirely."""
+    circuit = QuantumCircuit(1)
+    circuit.sx(0)
+
+    with pytest.warns(UserWarning, match=r"yields no eligible gate at all"):
+        _, noise_model = _model({}).prepare(circuit)
+
+    assert noise_model.noise_instructions == []
+
+
+def test_prepare_is_silent_on_a_circuit_compiled_to_the_calibrated_basis() -> None:
+    """The guard must not fire on the path it is meant to protect."""
+    fixture = json.loads(GATE_FIXTURE.read_text(encoding="utf-8"))
+    circuit = QuantumCircuit(2)
+    circuit.sx(0)
+    circuit.rz(0.5, 0)
+    circuit.cz(0, 1)
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        _, noise_model = _model(fixture["properties"]).prepare(circuit)
+
+    assert noise_model.noise_instructions == ["sx"]
+    assert [w for w in caught if "installed no error" in str(w.message)] == []
