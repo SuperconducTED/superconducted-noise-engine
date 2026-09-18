@@ -26,7 +26,7 @@ for current status and [docs/decisions.md](docs/decisions.md) for the ADR ledger
 
 ## Architecture at a glance
 
-A six-stage pipeline: calibration ingestion → feature extraction → fuzzification +
+A seven-stage pipeline: calibration ingestion → feature extraction → fuzzification +
 TSK rule firing → defuzzification → squashing → channel projection. Aer
 integration uses a Factory/Ensemble pattern that respects Aer's
 no-per-shot-Python-hook constraint: epistemic uncertainty is realized at

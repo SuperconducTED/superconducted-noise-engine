@@ -180,7 +180,7 @@ def test_prepare_warns_when_the_circuit_is_not_compiled_to_the_calibrated_basis(
     circuit.h(0)
     circuit.cx(0, 1)
 
-    with pytest.warns(UserWarning, match=r"none of the circuit's instructions"):
+    with pytest.warns(UserWarning, match=r"none of the circuit's candidate instructions"):
         _, noise_model = _model(fixture["properties"]).prepare(circuit)
 
     assert noise_model.noise_instructions == []
@@ -256,7 +256,7 @@ def test_prepare_installs_nothing_for_a_qubit_whose_gate_is_uncalibrated() -> No
     circuit = QuantumCircuit(1)
     circuit.sx(0)
 
-    with pytest.warns(UserWarning, match=r"none of the circuit's instructions"):
+    with pytest.warns(UserWarning, match=r"none of the circuit's candidate instructions"):
         _, noise_model = _model(_properties_with_sx_disabled_on(0)).prepare(circuit)
 
     assert noise_model.noise_instructions == []

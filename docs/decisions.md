@@ -817,8 +817,17 @@ the tree at the time of writing. Measured against
 when it installs nothing, so the gap is audible rather than silent, and a
 phase-3 measurement run must not be taken from a tree where it still warns.
 
+**3. Two further arity notes**, recorded here so no stale count survives by
+omission. The first Consequences bullet says ensemble construction "requires
+wiring six ABC implementations"; read it as six required plus one optional.
+And `FuzzyNoiseModelEnsemble.__init__` now takes `gate_eligibility_policy`,
+`ensemble_size` and `rng` as **keyword-only**, where the Decision body describes
+the latter two as ordinary optional arguments. No caller in the tree breaks, but
+that is a narrowing of the ratified signature and it should not pass unrecorded.
+
 The Consequences bullets above are left exactly as ratified on 2026-08-24. This
-amendment supersedes their call-order clause and nothing else.
+amendment supersedes their call-order clause, and annotates rather than rewrites
+the two counts named in point 3.
 
 ---
 
@@ -838,8 +847,12 @@ left silent.
 | | |
 | --- | --- |
 | **Circulated** | Not yet. Rides with the next advisor batch. |
-| **Asks** | Does the seventh dependency belong in ADR-021, or does ADR-028 own the whole axis? Is the call-order clause superseded here, or does it wait for #58 to land and get rewritten once? |
+| **Recorded in** | `docs/advisor/2026-09-03-decisions-from-akba.md`, item 15 |
+| **Decision-by** | 2026-09-23 |
+| **Travels with** | Item 10, the `interfaces.py` `TSKTrainer` owner read. Same file, same question of what an ABC docstring may assert about a decision he has not yet ratified. |
+| **Asks** | Three, listed in full at item 15. One Ask: does ADR-021 own the seventh dependency, or does ADR-028 own the whole axis? Two Ratify: that the calibration record beats an allowlist as the source, and that the call-order clause is superseded now rather than after #58 lands. |
 | **Owner** | @mertefesensoy. `docs/team.md` names Dr. Akba primary on this file with Mert secondary, and Dr. Akba has no GitHub account, so this cannot be a review request. |
+| **Reversal cost** | One commit. The policy is injected and defaulted, so passing a permissive `GateEligibilityPolicy` restores the previous behaviour without touching any construction site, and the ledger text above is removed by appending the answer rather than by deletion. |
 
 ---
 

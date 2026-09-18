@@ -11,7 +11,8 @@ member.
 That invariant, and the Factory/Ensemble response to it, is ADR-002; any
 design proposing per-shot Python regeneration of noise channels is
 rejected on sight. ADR-021 extends ADR-002 with the dependency-injection
-contract this module implements — the six injected ABCs, the
+contract this module implements — the six injected ABCs plus the optional
+eligibility policy of ADR-028, the
 :meth:`FuzzyNoiseModel.prepare` contract, and the plug-in points where
 per-member variance will attach once ADR-015 resolves.
 
@@ -67,6 +68,8 @@ DEFAULT_SEED_SEARCH_LIMIT: int = 64
 
 class CalibrationGateEligibilityPolicy(GateEligibilityPolicy):
     """Derive physical noise eligibility from archived gate-length records.
+
+    The shipped :class:`GateEligibilityPolicy` of ADR-028.
 
     A physical single-qubit gate is eligible exactly when its calibration
     ``properties.gates`` record supplies a strictly positive ``gate_length``.
@@ -135,6 +138,9 @@ def _warn_if_nothing_was_installed(
     ``circuit`` is the caller's input, because that is the thing they can fix.
     No warning is emitted for an empty circuit, which has nothing to noise.
     """
+    # 'candidate' rather than 'all': the message lists what the circuit contains,
+    # including names the strategy never offers the policy (barrier, measure,
+    # reset), because the reader is comparing two name spaces, not auditing one.
     present = sorted({instruction.operation.name for instruction in circuit.data})
     if not present:
         return
@@ -148,7 +154,7 @@ def _warn_if_nothing_was_installed(
     eligible_names = sorted({name for name, _ in eligible_operations})
     warnings.warn(
         "FuzzyNoiseModel.prepare installed no error: none of the circuit's "
-        f"instructions {present} is eligible under this calibration "
+        f"candidate instructions {present} is eligible under this calibration "
         f"{eligible_names}. Compile the circuit to the calibrated physical "
         "basis before calling prepare().",
         stacklevel=3,

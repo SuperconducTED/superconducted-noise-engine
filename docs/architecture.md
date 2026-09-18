@@ -70,6 +70,9 @@ gate-qubit pair the target circuit uses).
 |      → frozenset of (gate_name, physical_qubits)                      |
 |    - Default: positive `gate_length` in `properties.gates`            |
 |    - Ineligible pairs get no channel; Stage 7 is never reached        |
+|    - NOTE: reads the snapshot, not stage 5's output. It resolves in   |
+|      `__init__` beside `crisp_params`, so it is parallel to stages    |
+|      2-5 rather than downstream of them; it gates stage 7, not 5.     |
 +--------------------------------+--------------------------------------+
                                  |
                                  v

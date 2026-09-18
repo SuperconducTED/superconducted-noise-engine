@@ -89,6 +89,9 @@ class CalibrationFeatureExtractor(abc.ABC):
 class GateEligibilityPolicy(abc.ABC):
     """Select physical gate-qubit pairs eligible for fuzzy noise.
 
+    Covers ADR-028: the calibration snapshot's positive-duration gate records
+    are the authority, with an injected allowlist as the alternative.
+
     The policy separates calibration-specific physical-gate semantics from
     :class:`ChannelProjector`, which only constructs a channel once a gate is
     eligible. Callers pass a circuit compiled to the physical basis whose

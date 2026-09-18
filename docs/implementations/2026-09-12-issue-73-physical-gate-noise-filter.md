@@ -17,6 +17,15 @@ relaxation interval.
 | `src/superconducted/integration/aer_factory.py` | Derives eligible single-qubit noise operations from positive-duration archived calibration gate-length records before invoking the channel projector. |
 | `scripts/first_ensemble_run.py` | Makes the synthetic calibration describe positive physical `sx` and zero-duration virtual `rz` gate-length records. |
 | `tests/test_noise_gate_eligibility.py` | Covers real calibrated, virtual, administrative, qubit-aware, missing-gate-length, and injected-policy cases. |
+| `src/superconducted/interfaces.py` | Adds the `GateEligibilityPolicy` ABC and widens `FuzzificationStrategy.install`'s `error_provider` to return `QuantumError | None`. |
+| `src/superconducted/fuzzy/fuzzification.py` | Same widening across all three strategy implementations, so `None` is a contract rather than a surprise. |
+| `src/superconducted/__init__.py` | Re-exports the new ABC and moves the docstring's count from ten to eleven. |
+| `tests/test_interfaces.py` | Adds the ABC to `ABCS` and a minimal stub, and re-pins the exported-surface counts that the package docstring asserts. |
+| `tests/test_first_ensemble_run.py` | Rewrites the real-Aer smoke test's circuit from `h` to `sx`, because `h` is no longer an eligible physical gate. |
+| `README.md` | The pipeline summary goes from six stages to seven. |
+| `docs/architecture.md` | Adds the eligibility stage and the ADR-028 cross-reference row. |
+| `docs/decisions.md` | ADR-021's dated amendment and its sign-off note, plus ADR-028. |
+| `docs/advisor/2026-09-03-decisions-from-akba.md` | Item 15, which carries the two ratifications and the one question to Dr. Akba. |
 
 ## Implementation approach
 
@@ -232,10 +241,11 @@ review findings shared a single fix.
    qubit-aware policy from one matching on gate name alone. The doc's "What
    changed" table nonetheless claimed the case was covered.
 3. `eligible_operations` was re-resolved on every `prepare()` call from a
-   snapshot that cannot change: 2.52 ms per call, 80.7 ms per 32-member
-   ensemble pass on the 1132-record fixture, and a malformed `gate_length`
-   unit raised `CalibrationParseError` out of `prepare()` rather than at
-   construction, untested.
+   snapshot that cannot change, and a malformed `gate_length` unit raised
+   `CalibrationParseError` out of `prepare()` rather than at construction,
+   untested. Resolving the set costs a **median 2.2 ms** on the 1132-record
+   fixture (min 1.6, max 2.6, over 7 reps of 20 on the lead's laptop; this is
+   the one figure this document quotes for it).
 4. The policy returns **physical** qubit indices while `PostGateFuzzification`
    matches them against an instruction's **positional** index in
    `circuit.qubits`. Nothing said so.
@@ -390,13 +400,21 @@ code fixes hostage, so the deviation is written into the ledger where a reader
 who never sees this PR will find it.
 
 **Leave NC-021 alone.** This PR changes what `pytest --collect-only` returns,
-which register Rule 6 puts on the PR that changes it. Four open PRs already
-change it, though, and they disagree: #98 (two rows), #99 (652), #101 (616) and
-#102 (643). Rule 6 cannot be satisfied by four branches at once, and the row's
+which register Rule 6 puts on the PR that changes it. Three other open PRs
+already change it, though, and they disagree: #99 (652), #101 (616) and #102
+(643). Rule 6 cannot be satisfied by four branches at once, and the row's
 own history records the resolution it has used before, namely that the value is
 measured at a merge commit and never derived by adding branch deltas. So the
 row is updated by whichever of the five lands **last**, measured at its own
 merge commit, in a following docs-only commit that names it.
+
+> **NOTE ·** An earlier version of this paragraph said *four* other PRs, and
+> counted #98 among them with "two rows". That was a degenerate grep: it ran
+> `gh pr diff 98 | grep '^+| NC-021'` without scoping to
+> `docs/numerical-claims.md`, so it matched NC-021 rows quoted inside #98's own
+> implementation doc. Re-derived per PR with
+> `git diff superconducted-noise-engine/main <head> -- docs/numerical-claims.md`,
+> #98 (`3dd7390`) changes only NC-045 and does not touch this row.
 
 What this PR contributes to that final measurement, recorded here so the last
 one home can check its arithmetic rather than trust it: **+13**, being the 10
@@ -453,7 +471,7 @@ listed so the change is visible rather than silent.
 One audit finding is deliberately **not** acted on.
 `CalibrationGateEligibilityPolicy.eligible_operations` calls
 `training.targets.gate_lengths` once per distinct gate name, and each call
-rescans all 1132 records, so resolving the set costs about 2.3 ms. A single
+rescans all 1132 records, which is where the 2.2 ms above goes. A single
 grouped pass would be faster. It would also fork #58's parser, which is the
 one thing ADR-028 says this policy must not do: the whole point of reading
 `gate_lengths` is that the engine and the reference model derive durations
