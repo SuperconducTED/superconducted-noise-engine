@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-17 14:47 UTC · main at `125b7962` (2026-09-16) · 13 days to 2026-09-30_
+_Generated 2026-09-18 06:43 UTC · main at `125b7962` (2026-09-16) · 12 days to 2026-09-30_
 
 
 ## Milestones
@@ -69,7 +69,7 @@ _Generated 2026-09-17 14:47 UTC · main at `125b7962` (2026-09-16) · 13 days to
 1. Start #63: Training-set builder (training/dataset.py)
    - The reader-and-dedup half has no hard dependency the plan recognises and W2 is where it starts; #60's first archive fit is waiting on it.
 1. Unstick PR #99 for #66: Vectorizer returns µs where the repo assumes s
-   - CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+   - Awaiting merge.
 
 **Bengisu Cıvdı** (@bengisucvd)
 
@@ -132,10 +132,6 @@ _Generated 2026-09-17 14:47 UTC · main at `125b7962` (2026-09-16) · 13 days to
 - [high] #45 is still open; M0 is not closable until it is.
 - [high] #53's record (PR #78) is unmerged at CHANGES_REQUESTED.
 
-**#66: Vectorizer returns µs where the repo assumes s** (@BahaJarad)
-
-- [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
-
 **#73: Filter noise by physical gate semantics** (@BurakOztekin)
 
 - [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
@@ -160,6 +156,7 @@ _Generated 2026-09-17 14:47 UTC · main at `125b7962` (2026-09-16) · 13 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-18 | 12/28 | 8 | 4 | 4 | nothing moved |
 | 2026-09-17 | 12/28 | 8 | 4 | 4 | nothing moved |
 | 2026-09-16 | 12/28 | 8 | 4 | 4 | +2 milestone gates (10 to 12 of 28); M1 1/5 to 3/5; #59 Manual MF parameterization from the archive: in review to closed; main moved to 125b7962 |
 | 2026-09-15 | 10/28 | 8 | 5 | 4 | #56 Clear the queue, keep the records honest: ready to start to in review; #66 Vectorizer returns µs where the repo assumes s: ready to start to in review |

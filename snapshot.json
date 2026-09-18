@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-17 14:47 UTC",
+  "generated": "2026-09-18 06:43 UTC",
   "main": {
     "sha": "125b7962",
     "date": "2026-09-16",
@@ -1023,28 +1023,42 @@
             "login": "BahaJarad",
             "name": ""
           },
-          "closingIssuesReferences": [],
+          "closingIssuesReferences": [
+            {
+              "id": "I_kwDOSW8yNc8AAAABPjCJLw",
+              "number": 66,
+              "repository": {
+                "id": "R_kgDOSW8yNQ",
+                "name": "superconducted-noise-engine",
+                "owner": {
+                  "id": "O_kgDOENg1ug",
+                  "login": "SuperconducTED"
+                }
+              },
+              "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/66"
+            }
+          ],
           "createdAt": "2026-09-14T13:17:50Z",
           "headRefName": "feature/basic-calibration-vectoriser",
           "isDraft": false,
           "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 99,
-          "reviewDecision": "CHANGES_REQUESTED",
+          "reviewDecision": "APPROVED",
           "state": "OPEN",
           "title": "Issue #66 Basic Calibration Vectoriser",
-          "updatedAt": "2026-09-17T14:39:22Z",
+          "updatedAt": "2026-09-17T20:46:04Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/99",
-          "headRefOid": "d5c616541a3da033d56e68af561b1c1a402488d1",
-          "additions": 979,
+          "headRefOid": "a6e96f9f51f0cf7005832dd167244d406a5c3ef4",
+          "additions": 1197,
           "deletions": 83,
-          "file_count": 15,
+          "file_count": 16,
           "latest_reviews": [
             {
               "who": "mertefesensoy",
-              "state": "CHANGES_REQUESTED",
-              "at": "2026-09-14",
-              "last_activity": "2026-09-14"
+              "state": "APPROVED",
+              "at": "2026-09-17",
+              "last_activity": "2026-09-17"
             }
           ],
           "looked_since": [],
@@ -1052,35 +1066,35 @@
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-17T14:39"
+              "started": "2026-09-17T15:28"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-17T14:39"
+              "started": "2026-09-17T15:28"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-17T14:39"
+              "started": "2026-09-17T15:28"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-17T14:39"
+              "started": "2026-09-17T15:28"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-17T14:39"
+              "started": "2026-09-17T15:28"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-09-17T14:39"
+              "started": "2026-09-17T15:29"
             }
           ],
-          "checks_newest": "2026-09-17T14:39",
+          "checks_newest": "2026-09-17T15:29",
           "checks_failing": [],
           "checks_stale_vs_main": false
         }
@@ -1089,12 +1103,7 @@
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
-      "blockers": [
-        {
-          "severity": "critical",
-          "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
-        }
-      ],
+      "blockers": [],
       "declared_unblocks": [],
       "notes_info": [],
       "pr": 99
@@ -1649,7 +1658,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -12
+      "days_left": -13
     },
     {
       "id": "M1",
@@ -1691,7 +1700,7 @@
       "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -6
+      "days_left": -7
     },
     {
       "id": "M2",
@@ -1734,7 +1743,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": 1
+      "days_left": 0
     },
     {
       "id": "M3",
@@ -1782,7 +1791,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": 8
+      "days_left": 7
     },
     {
       "id": "M4",
@@ -1820,7 +1829,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": 13
+      "days_left": 12
     }
   ]
 }
