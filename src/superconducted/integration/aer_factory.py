@@ -39,7 +39,6 @@ from __future__ import annotations
 
 import warnings
 from collections.abc import Callable, Iterator, Sequence
-from math import isfinite
 
 import numpy as np
 import numpy.typing as npt
@@ -70,11 +69,19 @@ class CalibrationGateEligibilityPolicy(GateEligibilityPolicy):
     """Derive physical noise eligibility from archived gate-length records.
 
     A physical single-qubit gate is eligible exactly when its calibration
-    ``properties.gates`` record supplies a finite, strictly positive
-    ``gate_length``. Gates absent from those records, including administrative
-    instructions such as ``delay`` and Aer save instructions, remain
-    noise-free. A virtual ``rz`` whose recorded length is zero is explicitly
-    ineligible rather than rejected due to missing metadata.
+    ``properties.gates`` record supplies a strictly positive ``gate_length``.
+    Gates absent from those records, including administrative instructions such
+    as ``delay`` and Aer save instructions, remain noise-free. A virtual ``rz``
+    whose recorded length is zero is explicitly ineligible rather than rejected
+    due to missing metadata.
+
+    Note the asymmetry: a *missing* or non-positive record fails closed and is
+    simply ineligible, but a *corrupt* one (non-numeric, non-finite, or a unit
+    other than ``ns``) fails loudly, because
+    :func:`~superconducted.training.targets.gate_lengths` raises
+    :class:`~superconducted.calibration.loader.CalibrationParseError` before
+    this method sees it. Silently treating unparseable calibration as physical
+    is the worse of the two failures.
     """
 
     def eligible_operations(
@@ -94,12 +101,15 @@ class CalibrationGateEligibilityPolicy(GateEligibilityPolicy):
         eligible: set[tuple[str, tuple[int, ...]]] = set()
         for gate_name in gate_names:
             for qubit, duration in gate_lengths(snapshot.properties, gate_name).items():
-                if isfinite(duration) and duration > 0.0:
+                # No isfinite() guard: gate_lengths -> _parse_gate_length already
+                # raises CalibrationParseError on a non-finite value, so a
+                # corrupt record fails loudly instead of being filtered out.
+                if duration > 0.0:
                     eligible.add((gate_name, (qubit,)))
         return frozenset(eligible)
 
 
-def warn_if_nothing_was_installed(
+def _warn_if_nothing_was_installed(
     circuit: QuantumCircuit,
     eligible_operations: frozenset[tuple[str, tuple[int, ...]]],
 ) -> None:
@@ -241,8 +251,10 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
         # point-in-time record, so nothing can change the answer between
         # prepare() calls. Resolving here also surfaces a malformed
         # gate_length (CalibrationParseError) at construction rather than on
-        # some later prepare(), and keeps a 32-member ensemble from re-parsing
-        # the same ~1100 calibration records once per member.
+        # some later prepare(). Note what this does NOT save: __iter__ builds a
+        # fresh FuzzyNoiseModel per ensemble member, so each member still pays
+        # one parse. The saving is on repeated prepare() calls within a member,
+        # which is the harness loop of members x circuits.
         self._eligible_operations: frozenset[tuple[str, tuple[int, ...]]] = (
             self._gate_eligibility_policy.eligible_operations(self._calibration)
         )
@@ -316,7 +328,7 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
         A circuit that is not compiled to the calibrated physical basis
         matches no eligible operation, so nothing is installed and the
         caller silently simulates a noiseless circuit. That case warns via
-        :func:`warn_if_nothing_was_installed` rather than raising, because
+        :func:`_warn_if_nothing_was_installed` rather than raising, because
         a noise-free circuit is legal; see that function for the trade-off.
         """
 
@@ -335,7 +347,7 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
             circuit, fresh_noise_model, error_provider
         )
         if not prepared_noise_model.noise_instructions:
-            warn_if_nothing_was_installed(circuit, eligible_operations)
+            _warn_if_nothing_was_installed(circuit, eligible_operations)
         return prepared_circuit, prepared_noise_model
 
 
@@ -363,6 +375,7 @@ class FuzzyNoiseModelEnsemble:
         squashing: SquashingStrategy,
         channel_projector: ChannelProjector,
         fuzzification_strategy: FuzzificationStrategy,
+        *,
         gate_eligibility_policy: GateEligibilityPolicy | None = None,
         ensemble_size: int = 32,
         rng: np.random.Generator | None = None,

@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
+import numpy.typing as npt
 import pytest
 from qiskit import QuantumCircuit
 from qiskit_aer.library import SaveDensityMatrix
@@ -30,6 +31,7 @@ from superconducted.fuzzy.membership import GaussianMF
 from superconducted.fuzzy.squashing import ProbabilityClip
 from superconducted.fuzzy.tsk import TSKRuleBase
 from superconducted.integration.aer_factory import FuzzyNoiseModel
+from superconducted.interfaces import CalibrationFeatureExtractor
 from superconducted.types import CalibrationSnapshot
 
 if TYPE_CHECKING:
@@ -54,9 +56,17 @@ def _model(
         rng=np.random.default_rng(0),
     )
 
-    class ConstantExtractor:
-        def extract(self, calibration: CalibrationSnapshot) -> np.ndarray:
-            return np.array([0.0])
+    class ConstantExtractor(CalibrationFeatureExtractor):
+        def extract(self, snapshot: CalibrationSnapshot) -> npt.NDArray[np.float64]:
+            return np.array([0.0], dtype=np.float64)
+
+        @property
+        def output_dim(self) -> int:
+            return 1
+
+        @property
+        def feature_names(self) -> tuple[str, ...]:
+            return ("constant",)
 
     return FuzzyNoiseModel(
         calibration=CalibrationSnapshot(
@@ -67,7 +77,7 @@ def _model(
             target=None,
             configuration=None,
         ),
-        feature_extractor=ConstantExtractor(),  # type: ignore[arg-type]
+        feature_extractor=ConstantExtractor(),
         rule_base=rule_base,
         defuzzifier=WeightedAverageDefuzzifier(),
         squashing=ProbabilityClip(),

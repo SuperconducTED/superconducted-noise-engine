@@ -65,10 +65,15 @@ placement under ADR-007, or revise snapshot persistence.
 
 ## Verification
 
-- `.venv/bin/python -m pytest -q`
-- `.venv/bin/python -m ruff check .`
-- `.venv/bin/python -m ruff format --check .`
-- `.venv/bin/python -m mypy`
+Run from the repository root against the pins in `requirements*.txt`, which is
+what CI installs. All five gates, in the order `.github/workflows/ci.yml` runs
+them:
+
+- `ruff check .`
+- `ruff format --check .`
+- `python scripts/check_ids.py`
+- `mypy --strict`
+- `pytest tests/ -q`
 
 ## Related docs
 
