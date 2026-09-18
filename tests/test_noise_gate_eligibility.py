@@ -136,8 +136,12 @@ def test_prepare_without_gate_lengths_fails_closed_and_is_idempotent() -> None:
     circuit.sx(0)
 
     model = _model({})
-    _, first = model.prepare(circuit)
-    _, second = model.prepare(circuit)
+    # The guard fires on both calls; asserting it here keeps the suite's warning
+    # summary to cases that are actually about the warning.
+    with pytest.warns(UserWarning, match=r"yields no eligible gate at all"):
+        _, first = model.prepare(circuit)
+    with pytest.warns(UserWarning, match=r"yields no eligible gate at all"):
+        _, second = model.prepare(circuit)
 
     assert first.noise_instructions == []
     assert second.noise_instructions == []
@@ -157,7 +161,8 @@ def test_prepare_uses_an_injected_gate_eligibility_policy() -> None:
     circuit.sx(0)
     fixture = json.loads(GATE_FIXTURE.read_text(encoding="utf-8"))
 
-    _, noise_model = _model(fixture["properties"], NoGateIsEligible()).prepare(circuit)
+    with pytest.warns(UserWarning, match=r"yields no eligible gate at all"):
+        _, noise_model = _model(fixture["properties"], NoGateIsEligible()).prepare(circuit)
 
     assert noise_model.noise_instructions == []
 

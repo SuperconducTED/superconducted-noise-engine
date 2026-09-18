@@ -50,6 +50,10 @@ N/A - no channel parameters or statistical estimators changed. For a calibrated
 gate length $t$, the eligibility predicate is $t \in \mathbb{R}$,
 $\operatorname{isfinite}(t)$, and $t > 0$.
 
+> **NOTE ·** Superseded by follow-up 3. The live predicate is $t > 0$ alone.
+> Finiteness is enforced upstream and raises rather than filtering, so it was
+> never a second conjunct of this test; see that section.
+
 ## Design decisions
 
 Issue #73 offered calibration records or an explicit allowlist as the source
@@ -104,18 +108,29 @@ Measured against `tests/fixtures/calibration/ibm_fez_20260513T121322Z_with_gates
 | `ghz_state_circuit(3)` | `['h']`, 1 error | `[]`, 0 errors |
 | `qft_circuit(3)` | `[]`, 0 errors | `[]`, 0 errors |
 | `vqe_ansatz_circuit(3)` | `['ry', 'rz']`, 6 errors | `[]`, 0 errors |
-| `random_clifford_circuit(3, 3)` | `['h','s','sdg','x','z']`, 14 errors | `['x']`, 1 error |
+| `random_clifford_circuit(3, 3, rng=default_rng(0))` | `['h','s','sdg','x','y','z']`, 15 errors | `['x']`, 3 errors |
+
+The Clifford row must be seeded to mean anything: `random_clifford_circuit`
+defaults to an unseeded `np.random.default_rng()`, so an unseeded row is not a
+measurement. The row above passes `rng=np.random.default_rng(0)` and is
+identical across five rebuilds on both trees. A first version of this table,
+and the PR comment quoting it, recorded `['h','s','sdg','x','z']`, 14 and
+`['x']`, 1 from an unseeded draw; both are superseded by the seeded values
+above.
 
 The same filter is correct once the circuit is compiled:
 `transpile(ghz_state_circuit(3), basis_gates=['id','rz','sx','x','cz'],
 optimization_level=1, seed_transpiler=0)` then `prepare()` installs `['sx']`,
-3 errors, with `rz` and `cz` correctly excluded.
+3 errors, with `rz` and `cz` correctly excluded. Running that same compiled
+circuit on `main` installs `['rz','sx']` and 6 errors, so the compiled path is
+where the bug is most visible: a zero-duration virtual `rz` was carrying half
+the installed noise.
 
 ### What changed
 
 | File | One-sentence description |
 | --- | --- |
-| `src/superconducted/integration/aer_factory.py` | `prepare()` warns through `warn_if_nothing_was_installed` when it installs no error, distinguishing "this snapshot has no eligible gate" from "this circuit is not in the calibrated basis". |
+| `src/superconducted/integration/aer_factory.py` | `prepare()` warns through `_warn_if_nothing_was_installed` when it installs no error, distinguishing "this snapshot has no eligible gate" from "this circuit is not in the calibrated basis". |
 | `tests/test_noise_gate_eligibility.py` | Pins both warning messages and pins silence on a circuit already in the calibrated basis. |
 
 ### Implementation approach
@@ -331,7 +346,7 @@ recorded in the ledger and #73 framed the eligibility source as
 | `docs/decisions.md` | Restores ADR-021's ratified Consequences, appends a dated amendment carrying the seventh dependency and the call-order clause plus a sign-off-outstanding note, and adds ADR-028 for the eligibility axis. |
 | `docs/decisions/drafts/ADR-021-*.md` | Reverted to `main`; a promoted draft is the authoring record and is not edited retroactively. |
 | `docs/architecture.md` | Adds the eligibility stage to the pipeline, which becomes 7-stage, and the ADR-028 row to the open-decisions cross-reference. |
-| `src/superconducted/integration/aer_factory.py` | Corrects a false comment, makes the ensemble's new parameter keyword-only, drops a dead `isfinite` guard, and makes the warning helper private. |
+| `src/superconducted/integration/aer_factory.py` | Corrects a false comment, makes the new parameter keyword-only on **both** constructors, drops a dead `isfinite` guard, and renames `warn_if_nothing_was_installed` to `_warn_if_nothing_was_installed`. |
 | `tests/test_noise_gate_eligibility.py` | The feature-extractor stub subclasses its ABC, so the `# type: ignore[arg-type]` is gone. |
 
 ### Implementation approach
@@ -375,10 +390,26 @@ code fixes hostage, so the deviation is written into the ledger where a reader
 who never sees this PR will find it.
 
 **Leave NC-021 alone.** This PR changes what `pytest --collect-only` returns,
-which register Rule 6 puts on the PR that changes it. But #101 is already open
-against that exact row, and two PRs editing one row is the duplicate-row
-failure `scripts/check_ids.py` was built to catch. #101 merges first; this PR
-then appends its value measured at its own merge commit.
+which register Rule 6 puts on the PR that changes it. Four open PRs already
+change it, though, and they disagree: #98 (two rows), #99 (652), #101 (616) and
+#102 (643). Rule 6 cannot be satisfied by four branches at once, and the row's
+own history records the resolution it has used before, namely that the value is
+measured at a merge commit and never derived by adding branch deltas. So the
+row is updated by whichever of the five lands **last**, measured at its own
+merge commit, in a following docs-only commit that names it.
+
+What this PR contributes to that final measurement, recorded here so the last
+one home can check its arithmetic rather than trust it: **+13**, being the 10
+new cases in `tests/test_noise_gate_eligibility.py`, 1 new stub in
+`tests/test_interfaces.py`, and 2 from adding one entry to the twice-parametrized
+`ABCS` list. Measured, not derived: `main` at `125b796` collects 616 and the
+merge of this branch into it collects 629.
+
+Note this is *not* the failure `scripts/check_ids.py` catches. That script fires
+on a **second row** claiming an id already defined; four branches rewriting one
+row produces an ordinary git text conflict, which the script never sees. The
+precedent for the duplicate-row form is PR #69, recorded in the script's own
+docstring.
 
 **Leave `docs/implementations/2026-05-07-repo-bootstrap.md` alone.** It says
 "Canonical 6-stage pipeline", which is now stale as a description of the
@@ -396,4 +427,35 @@ the dated record.
 
 - ADR-021, its 2026-09-18 amendment, and ADR-028, all in `docs/decisions.md`
 - `docs/architecture.md` open-decisions cross-reference
-- Issues #58, #73, #74; PRs #79, #101
+- Issues #58, #73, #74; PRs #79, #98, #99, #101, #102
+
+### Corrections to the sections above
+
+A second audit pass caught four things in this document that were wrong or
+stale. They are corrected in place, because nothing here has merged yet, and
+listed so the change is visible rather than silent.
+
+- Follow-up 2's `warn_if_nothing_was_installed` is now
+  `_warn_if_nothing_was_installed`. It was module-level public API for
+  something purely internal.
+- Follow-up 1's `random_clifford_circuit(3, 3)` row was an unseeded draw and
+  did not reproduce. It now carries `rng=np.random.default_rng(0)` and is
+  stable across five rebuilds; both cells changed.
+- The Mathematical section's predicate listed finiteness as a conjunct of the
+  eligibility test. The live predicate is $t > 0$ alone: `gate_lengths` calls
+  `_parse_gate_length`, which raises `CalibrationParseError` on a non-finite
+  value before eligibility is evaluated. So a corrupt record does not fail the
+  predicate, it fails the parse, which is the louder and better failure.
+- The NC-021 note named only #101 as a competing claimant and mis-attributed
+  the failure mode to `scripts/check_ids.py`. Four PRs contend for the row, and
+  the collision would be a text conflict, not a duplicate id.
+
+One audit finding is deliberately **not** acted on.
+`CalibrationGateEligibilityPolicy.eligible_operations` calls
+`training.targets.gate_lengths` once per distinct gate name, and each call
+rescans all 1132 records, so resolving the set costs about 2.3 ms. A single
+grouped pass would be faster. It would also fork #58's parser, which is the
+one thing ADR-028 says this policy must not do: the whole point of reading
+`gate_lengths` is that the engine and the reference model derive durations
+through the same code. The cost is paid once per model, is disclosed in the
+comment at the call site, and is not worth a second parser.

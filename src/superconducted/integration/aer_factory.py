@@ -230,6 +230,7 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
         squashing: SquashingStrategy,
         channel_projector: ChannelProjector,
         fuzzification_strategy: FuzzificationStrategy,
+        *,
         gate_eligibility_policy: GateEligibilityPolicy | None = None,
     ) -> None:
         super().__init__()

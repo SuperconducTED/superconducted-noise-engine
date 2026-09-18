@@ -1498,6 +1498,18 @@ what the ABC is for and what
 - A missing or non-positive record fails closed. A *corrupt* one fails loudly,
   because `training/targets.py::gate_lengths` raises `CalibrationParseError`
   first. Treating unparseable calibration as physical is the worse failure.
+- **Every multi-qubit gate is categorically ineligible**, whatever its
+  calibrated duration, because `gate_lengths` filters `len(qubits) != 1`. On the
+  reference snapshot `cz` carries a positive 68-88 ns `gate_length` on all 352
+  of its records and still never enters the eligible set. Today that matches
+  `ChannelProjector`, which is single-qubit only, so nothing is lost. But #58's
+  reference model *does* cover `cz` (its `basis_gates` are
+  `{cz, id, rx, rz, sx, x}`), so a residual engine-versus-reference scope
+  difference survives this fix, on two-qubit gates instead of virtual ones.
+  Whoever implements a multi-qubit channel under ADR-008 must change **this
+  policy** as well as the projector; changing only the projector will leave the
+  channel unreachable and the failure will be silent, because an ineligible pair
+  simply yields no error.
 - The eligible set can be empty, or can fail to intersect the circuit, and both
   produce a `NoiseModel` that installs nothing while every call still succeeds.
   `prepare()` warns in both cases rather than raising, because an `rz`-only
