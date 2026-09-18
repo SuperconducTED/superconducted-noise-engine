@@ -20,7 +20,7 @@ underlying calibration evolves.
 The pipeline supports both Type-1 and Interval Type-2 inference paths.
 ADR-009 records the empirical winner selection as still open.
 
-## The 6-stage pipeline
+## The 7-stage pipeline
 
 The TSK fuzzy pipeline takes one calibration snapshot in and produces
 one set of `qiskit_aer.noise.QuantumError` instances out (one per
@@ -65,7 +65,16 @@ gate-qubit pair the target circuit uses).
                                  |
                                  v
 +-----------------------------------------------------------------------+
-|  Stage 6: Channel projection                                          |
+|  Stage 6: Gate eligibility                                            |
+|    - `GateEligibilityPolicy.eligible_operations(snapshot)`            |
+|      → frozenset of (gate_name, physical_qubits)                      |
+|    - Default: positive `gate_length` in `properties.gates`            |
+|    - Ineligible pairs get no channel; Stage 7 is never reached        |
++--------------------------------+--------------------------------------+
+                                 |
+                                 v
++-----------------------------------------------------------------------+
+|  Stage 7: Channel projection                                          |
 |    - `ChannelProjector.project(crisp, gate_name, qubits)`             |
 |      → `qiskit_aer.noise.QuantumError`                                |
 |    - LOCKED CPTP math in `channels.kraus`                             |
@@ -172,3 +181,4 @@ configuration currently in use.
 | ADR-014 TSK trainer | (in `fuzzy.tsk`) | none — manual params | hybrid LSE + SGD ANFIS |
 | ADR-015 Ensemble sampling | (in `integration.aer_factory`) | identical (no perturbation) | input-vector / MF / IT2 perturbation |
 | ADR-016 Benchmark aggregation | (in `benchmarks.harness`) | sum (probability-equivalent to mean under normalized metrics) | interval-valued |
+| ADR-028 Gate eligibility | `GateEligibilityPolicy` | CalibrationGateEligibilityPolicy (positive `gate_length`) | injected allowlist |
