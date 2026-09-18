@@ -157,9 +157,9 @@ the circuit's instruction names and the calibration's eligible gate names side
 by side, so the mismatch is readable at a glance:
 
     FuzzyNoiseModel.prepare installed no error: none of the circuit's
-    instructions ['barrier', 'cx', 'h', 'measure'] is eligible under this
-    calibration ['id', 'rx', 'sx', 'x']. Compile the circuit to the
-    calibrated physical basis before calling prepare().
+    candidate instructions ['barrier', 'cx', 'h', 'measure'] is eligible
+    under this calibration ['id', 'rx', 'sx', 'x']. Compile the circuit to
+    the calibrated physical basis before calling prepare().
 
 `stacklevel=3` attributes the warning to the caller, so the harness path
 reports it at `harness.py:75` rather than inside the library.

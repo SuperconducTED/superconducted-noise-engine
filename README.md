@@ -27,8 +27,8 @@ for current status and [docs/decisions.md](docs/decisions.md) for the ADR ledger
 ## Architecture at a glance
 
 A seven-stage pipeline: calibration ingestion → feature extraction → fuzzification +
-TSK rule firing → defuzzification → squashing → channel projection. Aer
-integration uses a Factory/Ensemble pattern that respects Aer's
+TSK rule firing → defuzzification → squashing → gate eligibility → channel
+projection. Aer integration uses a Factory/Ensemble pattern that respects Aer's
 no-per-shot-Python-hook constraint: epistemic uncertainty is realized at
 ensemble construction time, not at simulation time. See [docs/architecture.md](docs/architecture.md)
 for the full picture and [docs/decisions.md](docs/decisions.md) for the ADR ledger.
