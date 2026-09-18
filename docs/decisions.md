@@ -771,6 +771,91 @@ refactoring the ensemble factory.
 
 ---
 
+### ADR-021 amendment — 2026-09-18: gate eligibility, and where the circuit is compiled
+
+**Status: Open. Recorded, not ratified.** See the sign-off note below.
+
+Issue #73 found that `prepare()` passed every single-qubit instruction to the
+channel projector, which ignores `gate_name`, so the damping channel reached
+zero-duration virtual `rz` gates and could reach `delay` and Aer save
+instructions. PR #96 filters on the calibration's own
+`properties.gates[*].parameters[gate_length]` records. Two parts of the
+Accepted decision above move as a result.
+
+**1. A seventh injected dependency.** The Decision (Accepted) enumerates six.
+`FuzzyNoiseModel.__init__` now also takes
+
+7. `gate_eligibility_policy: GateEligibilityPolicy | None = None`
+
+defaulting to `CalibrationGateEligibilityPolicy`. It is optional and defaulted,
+so every existing construction site is unchanged, but the count in the Decision
+body is now seven and the DI surface this ADR ratifies is seven wide. The new
+axis itself is ADR-028.
+
+**2. Where the circuit is compiled is now load-bearing.** The Consequences
+above say high-level circuits "require explicit `transpile(circuit,
+backend=sim)` before `AerSimulator.run()`", which places compilation *after*
+`prepare()`. Once eligibility is keyed on physical gate names that ordering
+installs nothing: `prepare()` sees `h`, `cx`, `ry` or a composite `qft`, while
+the calibration offers `id`, `rx`, `sx`, `x`, `cz`. The correct contract is
+compile once to the calibrated basis, call `prepare()` on the compiled circuit,
+then run the returned circuit without a second transpilation, which is the
+invariant Issue #58 certifies.
+
+**This amendment does not claim that contract is met.** It is not, anywhere in
+the tree at the time of writing. Measured against
+`tests/fixtures/calibration/ibm_fez_20260513T121322Z_with_gates.json`:
+
+| Caller | Ordering | Installed errors |
+| --- | --- | --- |
+| `benchmarks/harness.py:75` | never transpiles | 0 on ghz, qft and vqe |
+| `scripts/first_ensemble_run.py:103` | `prepare()` then `transpile()` | 0 |
+
+`benchmarks/harness.py` is Issue #58's scope (FR-3, written on PR #79);
+`scripts/first_ensemble_run.py` is Issue #74's, which explicitly excludes
+`harness.py`. Until at least the former lands, `FuzzyNoiseModel.prepare` warns
+when it installs nothing, so the gap is audible rather than silent, and a
+phase-3 measurement run must not be taken from a tree where it still warns.
+
+**3. Two further arity notes**, recorded here so no stale count survives by
+omission. The first Consequences bullet says ensemble construction "requires
+wiring six ABC implementations"; read it as six required plus one optional.
+And `FuzzyNoiseModelEnsemble.__init__` now takes `gate_eligibility_policy`,
+`ensemble_size` and `rng` as **keyword-only**, where the Decision body describes
+the latter two as ordinary optional arguments. No caller in the tree breaks, but
+that is a narrowing of the ratified signature and it should not pass unrecorded.
+
+The Consequences bullets above are left exactly as ratified on 2026-08-24. This
+amendment supersedes their call-order clause, and annotates rather than rewrites
+the two counts named in point 3.
+
+---
+
+### ADR-021 amendment status, 2026-09-18: advisor sign-off outstanding
+
+**The 2026-09-18 amendment above is recorded but not ratified. Its status is Open.**
+
+`docs/team.md` makes Dr. Akba's out-of-band sign-off a precondition for a change
+that touches ADR ledger semantics, and this amendment is one: it changes the
+arity of the DI contract this ADR ratifies, and it supersedes a clause of its
+Consequences. That sign-off has not been obtained.
+
+This follows the shape set by the ADR-025 amendment status note below. The
+amendment text is left exactly as written, and the gap is recorded rather than
+left silent.
+
+| | |
+| --- | --- |
+| **Circulated** | Not yet. Rides with the next advisor batch. |
+| **Recorded in** | `docs/advisor/2026-09-03-decisions-from-akba.md`, item 15 |
+| **Decision-by** | 2026-09-23 |
+| **Travels with** | Item 10, the `interfaces.py` `TSKTrainer` owner read. Same file, same question of what an ABC docstring may assert about a decision he has not yet ratified. |
+| **Asks** | Three, listed in full at item 15. One Ask: does ADR-021 own the seventh dependency, or does ADR-028 own the whole axis? Two Ratify: that the calibration record beats an allowlist as the source, and that the call-order clause is superseded now rather than after #58 lands. |
+| **Owner** | @mertefesensoy. `docs/team.md` names Dr. Akba primary on this file with Mert secondary, and Dr. Akba has no GitHub account, so this cannot be a review request. |
+| **Reversal cost** | One commit. The policy is injected and defaulted, so passing a permissive `GateEligibilityPolicy` restores the previous behaviour without touching any construction site, and the ledger text above is removed by appending the answer rather than by deletion. |
+
+---
+
 ## ADR-022 — Benchmark validation criteria
 
 **Status**: Accepted.
@@ -1373,3 +1458,80 @@ per-qubit targets. This entry remains Open until those decisions are recorded.
 ADR-020, and ADR-024 clause 5 — the warm-start obligation the `TSKTrainer`
 docstring carries, which a trainer must either satisfy or replace with a
 recorded mechanism of its own. NC-028 is cited above for the split rule.
+
+---
+
+## ADR-028 — Physical-gate eligibility as an injected policy
+
+**Status**: Open.
+
+> **NOTE ·** The id is claimed at merge time per `docs/team.md`. ADR-027 is the
+> highest in this ledger and there is deliberately no ADR-026 (recorded in
+> `docs/state-of-the-project/2026-09-09-cycle-2-close.md`), so ADR-028 is the
+> next free id. No other open PR claimed it on 2026-09-18. Renumber if one
+> lands first; `scripts/check_ids.py` catches a collision but cannot say which
+> claimant should move.
+
+**Context**: `ChannelProjector` builds a channel for a `(gate_name, qubits)`
+pair but deliberately ignores `gate_name` while doing so, and
+`channels/kraus.py` is LOCKED. Something else therefore has to decide *which*
+instructions are physical enough to carry noise at all. Issue #73 posed this as
+a decision with two candidate sources: the calibration snapshot's
+positive-duration single-qubit records, or an explicit injected allowlist.
+
+**Decision**: The authority is the calibration snapshot, behind an ABC.
+`GateEligibilityPolicy.eligible_operations(snapshot)` returns a frozen set of
+`(gate_name, physical_qubits)` pairs. `CalibrationGateEligibilityPolicy` is the
+shipped implementation and admits a single-qubit gate exactly when its
+`properties.gates[*].parameters[gate_length]` record is strictly positive.
+Implementations must be pure in the snapshot, so a caller may resolve the set
+once per model, and `FuzzyNoiseModel` does.
+
+An allowlist was rejected as the *default*: it is a second place to keep the
+device's physics, it drifts silently when the backend recalibrates, and it
+cannot express a per-qubit fact. It remains available by injection, which is
+what the ABC is for and what
+`test_prepare_uses_an_injected_gate_eligibility_policy` pins.
+
+**Consequences**:
+
+- A virtual `rz` is excluded on physical grounds, because its recorded
+  `gate_length` is 0 ns on all 156 qubits of the reference snapshot, not
+  because its metadata is missing. `delay` and Aer save instructions are
+  excluded because they have no `properties.gates` record at all.
+- Eligibility is qubit-aware: a gate calibrated on one qubit does not authorize
+  the same gate on another.
+- The returned qubit indices are **physical**, while `FuzzificationStrategy`
+  matches them against an instruction's **positional** index in
+  `circuit.qubits`. The two agree only under a trivial layout. This is benign
+  in magnitude today, because `crisp_params` is snapshot-global, but not in
+  presence: a qubit the calibration does not cover is silently ineligible.
+  Per-qubit channels (ADR-013) would make it both, and this clause is the
+  warning for whoever opens that.
+- A missing or non-positive record fails closed. A *corrupt* one fails loudly,
+  because `training/targets.py::gate_lengths` raises `CalibrationParseError`
+  first. Treating unparseable calibration as physical is the worse failure.
+- **Every multi-qubit gate is categorically ineligible**, whatever its
+  calibrated duration, because `gate_lengths` filters `len(qubits) != 1`. On the
+  reference snapshot `cz` carries a positive 68-88 ns `gate_length` on all 352
+  of its records and still never enters the eligible set. Today that matches
+  `ChannelProjector`, which is single-qubit only, so nothing is lost. But #58's
+  reference model *does* cover `cz` (its `basis_gates` are
+  `{cz, id, rx, rz, sx, x}`), so a residual engine-versus-reference scope
+  difference survives this fix, on two-qubit gates instead of virtual ones.
+  Whoever implements a multi-qubit channel under ADR-008 must change **this
+  policy** as well as the projector; changing only the projector will leave the
+  channel unreachable and the failure will be silent, because an ineligible pair
+  simply yields no error.
+- The eligible set can be empty, or can fail to intersect the circuit, and both
+  produce a `NoiseModel` that installs nothing while every call still succeeds.
+  `prepare()` warns in both cases rather than raising, because an `rz`-only
+  circuit is legitimately noise-free. See the ADR-021 amendment above.
+
+**Source**: Issue #73; PR #96; `src/superconducted/interfaces.py`
+(`GateEligibilityPolicy`); `src/superconducted/integration/aer_factory.py`
+(`CalibrationGateEligibilityPolicy`); `tests/test_noise_gate_eligibility.py`;
+`docs/implementations/2026-09-12-issue-73-physical-gate-noise-filter.md`.
+Related: ADR-002 and ADR-021 (the DI contract), ADR-007 (fuzzification
+placement), ADR-013 (per-qubit features), Issues #58 and #74 (where the circuit
+is compiled).

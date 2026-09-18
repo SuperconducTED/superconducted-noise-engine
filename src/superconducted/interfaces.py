@@ -86,6 +86,37 @@ class CalibrationFeatureExtractor(abc.ABC):
         """Human-readable names of the features, in vector order."""
 
 
+class GateEligibilityPolicy(abc.ABC):
+    """Select physical gate-qubit pairs eligible for fuzzy noise.
+
+    Covers ADR-028: the calibration snapshot's positive-duration gate records
+    are the authority, with an injected allowlist as the alternative.
+
+    The policy separates calibration-specific physical-gate semantics from
+    :class:`ChannelProjector`, which only constructs a channel once a gate is
+    eligible. Callers pass a circuit compiled to the physical basis whose
+    names this policy returns.
+
+    The returned qubit tuples are **physical** indices as the calibration
+    numbers them. :class:`FuzzificationStrategy` implementations match them
+    against an instruction's *positional* index in ``circuit.qubits``, so the
+    two only line up when the circuit was compiled to that device with a
+    trivial layout. See :meth:`FuzzyNoiseModel.prepare` for what goes wrong
+    otherwise.
+
+    Implementations must be pure in ``snapshot``: callers are free to resolve
+    the set once and reuse it for the lifetime of a model, and
+    :class:`FuzzyNoiseModel` does exactly that.
+    """
+
+    @abc.abstractmethod
+    def eligible_operations(
+        self,
+        snapshot: CalibrationSnapshot,
+    ) -> frozenset[tuple[str, tuple[int, ...]]]:
+        """Return eligible ``(gate_name, physical_qubits)`` pairs."""
+
+
 class FuzzificationStrategy(abc.ABC):
     """Strategy for placing fuzzy-derived noise relative to gates in a circuit.
 
@@ -100,13 +131,14 @@ class FuzzificationStrategy(abc.ABC):
         self,
         circuit: QuantumCircuit,
         noise_model: NoiseModel,
-        error_provider: Callable[[Instruction, tuple[int, ...]], QuantumError],
+        error_provider: Callable[[Instruction, tuple[int, ...]], QuantumError | None],
     ) -> tuple[QuantumCircuit, NoiseModel]:
         """Apply this fuzzification strategy.
 
-        ``error_provider(gate, qubits) -> QuantumError`` lets the strategy
-        request the right error for any gate-qubit pair without knowing
-        anything about the TSK pipeline.
+        ``error_provider(gate, qubits) -> QuantumError | None`` lets the
+        strategy request an error for any eligible gate-qubit pair without
+        knowing anything about the TSK pipeline. ``None`` leaves the
+        instruction noise-free.
 
         Returns ``(circuit, noise_model)``: the circuit is unchanged for
         post-gate strategies and transformed for pre/between; the noise

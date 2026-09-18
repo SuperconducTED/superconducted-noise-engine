@@ -272,7 +272,19 @@ def _synthetic_snapshot() -> CalibrationSnapshot:
                     {"name": "T2", "value": 50e-6},
                     {"name": "readout_error", "value": 0.01},
                 ]
-            ]
+            ],
+            "gates": [
+                {
+                    "gate": "sx",
+                    "qubits": [0],
+                    "parameters": [{"name": "gate_length", "unit": "ns", "value": 24}],
+                },
+                {
+                    "gate": "rz",
+                    "qubits": [0],
+                    "parameters": [{"name": "gate_length", "unit": "ns", "value": 0}],
+                },
+            ],
         },
         target={},
         configuration={},

@@ -145,8 +145,8 @@ def test_run_ensemble_real_aer_one_qubit() -> None:
     members = generate_safe_ensemble(snapshot, n=1)
     assert len(members) == 1
 
-    qc = QuantumCircuit(1)
-    qc.h(0)
+    qc = QuantumCircuit(1, name="physical_sx")
+    qc.sx(0)
     qc.measure_all()
 
     _, prepared_nm = members[0].prepare(qc.copy())
