@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-18 06:43 UTC · main at `125b7962` (2026-09-16) · 12 days to 2026-09-30_
+_Generated 2026-09-19 06:07 UTC · main at `125b7962` (2026-09-16) · 11 days to 2026-09-30_
 
 
 ## Milestones
@@ -156,6 +156,7 @@ _Generated 2026-09-18 06:43 UTC · main at `125b7962` (2026-09-16) · 12 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-19 | 12/28 | 8 | 4 | 4 | nothing moved |
 | 2026-09-18 | 12/28 | 8 | 4 | 4 | nothing moved |
 | 2026-09-17 | 12/28 | 8 | 4 | 4 | nothing moved |
 | 2026-09-16 | 12/28 | 8 | 4 | 4 | +2 milestone gates (10 to 12 of 28); M1 1/5 to 3/5; #59 Manual MF parameterization from the archive: in review to closed; main moved to 125b7962 |
