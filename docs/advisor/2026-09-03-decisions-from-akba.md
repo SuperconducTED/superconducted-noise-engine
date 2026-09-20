@@ -129,3 +129,43 @@ with zero merges under stripping at every one of the three refs. Reversal is one
 only the derived index is regenerated.
 
 ADR-025's amendment status stays **Open** until an answer is recorded below.
+
+## Outstanding items, as of 2026-09-18
+
+Same form as the 2026-09-10 addition above: appended rather than added as a row
+to the 2026-09-09 table, because that table sits above this file's append marker.
+
+| # | Item | Class | Decision-by | Status |
+| --- | --- | --- | --- | --- |
+| 15 | ADR-021 amendment and ADR-028, gate eligibility (owed on PR #96, Issue #73) | Ask (principle) x1, Ratify x2 | 2026-09-23 | Outstanding, **not yet circulated**; deviation recorded in `docs/decisions.md` at "ADR-021 amendment status, 2026-09-18" |
+
+**The three asks, in the order they matter.**
+
+1. **Ask.** Does ADR-021 own the seventh injected dependency, or does ADR-028
+   own the whole eligibility axis and ADR-021 merely note the arity change? This
+   is the only one that is genuinely his to give: it is a question about how
+   this ledger partitions a decision, not about physics, and we cannot settle it
+   by measuring.
+2. **Ratify.** That eligibility derives from the calibration snapshot's
+   `properties.gates[*].parameters[gate_length]` rather than an injected
+   allowlist. Measured and not in doubt: `rz` is 0 ns on all 156 qubits of the
+   reference snapshot while `sx`, `x`, `rx` and `id` are 24 ns, so the virtual
+   gate is excluded on physical grounds. We need his confirmation, not his
+   design.
+3. **Ratify.** That ADR-021's call-order clause is superseded now, while no
+   caller in the tree satisfies the new ordering, rather than waiting for #58 to
+   land and rewriting it once. The amendment states the gap in a table instead
+   of hiding it.
+
+**It travels with item 10.** Item 10 is the `interfaces.py` `TSKTrainer` owner
+read: same file, same question of what an ABC's docstring may assert about a
+decision that is not yet recorded. `docs/team.md` makes Dr. Akba primary owner
+of `interfaces.py`, so ADR-028's new ABC needs his read on the same grounds.
+
+**Why it is being merged ahead of the answer**, if it is: the engine currently
+attaches a damping channel to zero-duration virtual gates, which makes every
+engine-versus-reference number wrong in a direction #58 already documented.
+Holding the fix for a circulation that has not gone out trades a measured defect
+for a paperwork gap. The reversal is one commit: the policy is injected and
+defaulted, so passing a permissive `GateEligibilityPolicy` restores the previous
+behaviour without touching any construction site.
