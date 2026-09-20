@@ -164,7 +164,7 @@ def test_load_snapshot(tmp_path: Path) -> None:
         "backend": "ibm_fez",
         "timestamp": "2026-05-01T00:00:00Z",
         "schema_version": "1.0",
-        "properties": {"qubits": [[{"name": "T1", "value": 50e-6}]]},
+        "properties": {"qubits": [[{"name": "T1", "value": 50.0, "unit": "us"}]]},
         "target": None,
         "configuration": None,
     }
