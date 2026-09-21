@@ -1,15 +1,16 @@
-run-token: 2026-09-19T06:07:03Z-60029
-outcome: ok: chore: phase-3 dashboard: state moved (2026-09-19)
+run-token: 2026-09-21T12:05:18Z-1373
+outcome: ok: chore: phase-3 dashboard: state moved (2026-09-21)
 
-**12/28 milestone gates met** · 11 days to 2026-09-30 · calendar 61% burned against 43% of gates, 18 points behind.
+**12/28 milestone gates met** · 9 days to 2026-09-30 · calendar 68% burned against 43% of gates, 25 points behind.
 
-**Since 2026-09-18:** nothing moved.
+**Since 2026-09-19:** #66 Vectorizer returns µs where the repo assumes s: in review to closed; #73 Filter noise by physical gate semantics: in review to closed; main moved to 1fa5bef7.
 
 **Needs attention**
-- M0 (Queue clear) is 14 days past its 2026-09-05 target at 7/8
-- M1 (Contracts and instruments) is 8 days past its 2026-09-11 target at 3/5
-- M2 (First measurements) is 1 days past its 2026-09-18 target at 2/5
-- PR #79 (#58) conflicts with main, so its checks are not evidence and it cannot merge
+- M0 (Queue clear) is 16 days past its 2026-09-05 target at 7/8
+- M1 (Contracts and instruments) is 10 days past its 2026-09-11 target at 3/5
+- M2 (First measurements) is 3 days past its 2026-09-18 target at 2/5
+- PR #102 (#48) conflicts with main, so its checks are not evidence and it cannot merge
+- PR #98 (#56) conflicts with main, so its checks are not evidence and it cannot merge
 - #63 is ready and holds up #60 (Baha Jarad)
 
 **Next action per person**

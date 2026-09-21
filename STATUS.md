@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-19 06:07 UTC · main at `125b7962` (2026-09-16) · 11 days to 2026-09-30_
+_Generated 2026-09-21 12:05 UTC · main at `1fa5bef7` (2026-09-20) · 9 days to 2026-09-30_
 
 
 ## Milestones
@@ -68,8 +68,6 @@ _Generated 2026-09-19 06:07 UTC · main at `125b7962` (2026-09-16) · 11 days to
 
 1. Start #63: Training-set builder (training/dataset.py)
    - The reader-and-dedup half has no hard dependency the plan recognises and W2 is where it starts; #60's first archive fit is waiting on it.
-1. Unstick PR #99 for #66: Vectorizer returns µs where the repo assumes s
-   - Awaiting merge.
 
 **Bengisu Cıvdı** (@bengisucvd)
 
@@ -84,8 +82,6 @@ _Generated 2026-09-19 06:07 UTC · main at `125b7962` (2026-09-16) · 11 days to
 
 1. Start #60: ADR-014 hybrid ANFIS trainer
    - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.
-1. Unstick PR #96 for #73: Filter noise by physical gate semantics
-   - CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 1. Start #74: first_ensemble_run must transpile before prepare
    - All stated upstream dependencies are met.
 
@@ -96,7 +92,7 @@ _Generated 2026-09-19 06:07 UTC · main at `125b7962` (2026-09-16) · 11 days to
 1. Finish #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
    - The contract merged; only the advisor half of its definition of done is outstanding.
 1. Unstick PR #98 for #56: Clear the queue, keep the records honest
-   - No approving review yet: main's ruleset requires one.
+   - Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 1. Start #54: Capture rate ~70% during normal operation
    - All stated upstream dependencies are met.
 
@@ -115,9 +111,7 @@ _Generated 2026-09-19 06:07 UTC · main at `125b7962` (2026-09-16) · 11 days to
 
 **#58: Certify the benchmark instruments** (@bengisucvd)
 
-- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [high] Still a draft: CI and reviewers will not treat it as ready.
-- [high] Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result.
 - [high] No approving review yet: main's ruleset requires one.
 - [medium] Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
 
@@ -127,14 +121,12 @@ _Generated 2026-09-19 06:07 UTC · main at `125b7962` (2026-09-16) · 11 days to
 
 **#56: Clear the queue, keep the records honest** (@mertefesensoy)
 
+- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [critical] Every advisor item it carries (ADR-025 sign-off, ADR-009 flip, ADR-011 closure, ADR-014 read, the target ADR) needs Dr. Akba, who has no recorded answer to anything.
+- [high] Its green checks last ran 2026-09-16T12:39 against a main that has moved since; they are not evidence about the merge result.
 - [high] No approving review yet: main's ruleset requires one.
 - [high] #45 is still open; M0 is not closable until it is.
 - [high] #53's record (PR #78) is unmerged at CHANGES_REQUESTED.
-
-**#73: Filter noise by physical gate semantics** (@BurakOztekin)
-
-- [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-09-14). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **#75: Decide the LOCKED Kraus projector boundary** (@bengisucvd)
 
@@ -156,6 +148,7 @@ _Generated 2026-09-19 06:07 UTC · main at `125b7962` (2026-09-16) · 11 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-21 | 12/28 | 8 | 2 | 4 | #66 Vectorizer returns µs where the repo assumes s: in review to closed; #73 Filter noise by physical gate semantics: in review to closed; main moved to 1fa5bef7 |
 | 2026-09-19 | 12/28 | 8 | 4 | 4 | nothing moved |
 | 2026-09-18 | 12/28 | 8 | 4 | 4 | nothing moved |
 | 2026-09-17 | 12/28 | 8 | 4 | 4 | nothing moved |
