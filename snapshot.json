@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-21 12:05 UTC",
+  "generated": "2026-09-22 05:47 UTC",
   "main": {
     "sha": "1fa5bef7",
     "date": "2026-09-20",
@@ -173,7 +173,7 @@
           "createdAt": "2026-09-06T21:11:52Z",
           "headRefName": "bengisu/issue-58-benchmark-certification",
           "isDraft": true,
-          "mergeable": "UNKNOWN",
+          "mergeable": "CONFLICTING",
           "mergedAt": null,
           "number": 79,
           "reviewDecision": "REVIEW_REQUIRED",
@@ -246,7 +246,7 @@
           ],
           "checks_newest": "2026-09-06T21:11",
           "checks_failing": [],
-          "checks_stale_vs_main": false
+          "checks_stale_vs_main": true
         }
       ],
       "merged_pr": null,
@@ -263,6 +263,14 @@
         {
           "severity": "high",
           "text": "Still a draft: CI and reviewers will not treat it as ready."
+        },
+        {
+          "severity": "critical",
+          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
+        },
+        {
+          "severity": "high",
+          "text": "Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result."
         },
         {
           "severity": "high",
@@ -1562,7 +1570,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -16
+      "days_left": -17
     },
     {
       "id": "M1",
@@ -1604,7 +1612,7 @@
       "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -10
+      "days_left": -11
     },
     {
       "id": "M2",
@@ -1647,7 +1655,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -3
+      "days_left": -4
     },
     {
       "id": "M3",
@@ -1695,7 +1703,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": 4
+      "days_left": 3
     },
     {
       "id": "M4",
@@ -1733,7 +1741,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": 9
+      "days_left": 8
     }
   ]
 }

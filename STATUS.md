@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-21 12:05 UTC · main at `1fa5bef7` (2026-09-20) · 9 days to 2026-09-30_
+_Generated 2026-09-22 05:47 UTC · main at `1fa5bef7` (2026-09-20) · 8 days to 2026-09-30_
 
 
 ## Milestones
@@ -111,7 +111,9 @@ _Generated 2026-09-21 12:05 UTC · main at `1fa5bef7` (2026-09-20) · 9 days to 
 
 **#58: Certify the benchmark instruments** (@bengisucvd)
 
+- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [high] Still a draft: CI and reviewers will not treat it as ready.
+- [high] Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result.
 - [high] No approving review yet: main's ruleset requires one.
 - [medium] Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
 
@@ -148,6 +150,7 @@ _Generated 2026-09-21 12:05 UTC · main at `1fa5bef7` (2026-09-20) · 9 days to 
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-22 | 12/28 | 8 | 2 | 4 | nothing moved |
 | 2026-09-21 | 12/28 | 8 | 2 | 4 | #66 Vectorizer returns µs where the repo assumes s: in review to closed; #73 Filter noise by physical gate semantics: in review to closed; main moved to 1fa5bef7 |
 | 2026-09-19 | 12/28 | 8 | 4 | 4 | nothing moved |
 | 2026-09-18 | 12/28 | 8 | 4 | 4 | nothing moved |
