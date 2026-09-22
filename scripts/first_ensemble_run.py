@@ -10,9 +10,10 @@ from __future__ import annotations
 import argparse
 import json
 import time
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Final
+from typing import Final, cast
 
 import numpy as np
 from qiskit import QuantumCircuit, transpile
@@ -71,6 +72,51 @@ FEATURE_SCALES: Final[dict[str, tuple[float, float]]] = {
     "mean_T2": (0.0, 100e-6),
     "mean_readout_error": (0.0, 0.1),
 }
+NON_UNITARY_BASIS_GATES: Final[frozenset[str]] = frozenset({"measure", "measure_2", "reset"})
+
+
+def _calibration_basis_gates(snapshot: CalibrationSnapshot) -> tuple[str, ...]:
+    """Return deterministic unitary transpilation gates from a calibration snapshot."""
+    entries = snapshot.properties.get("gates")
+    if not isinstance(entries, list):
+        raise ValueError("Calibration properties has no usable 'gates' list for transpilation")
+    basis_gates = {
+        gate_name
+        for entry in entries
+        if isinstance(entry, dict)
+        and isinstance((gate_name := entry.get("gate")), str)
+        and gate_name not in NON_UNITARY_BASIS_GATES
+    }
+    if not basis_gates:
+        raise ValueError("Calibration properties has no unitary gates for transpilation")
+    return tuple(sorted(basis_gates))
+
+
+def _transpile_to_calibration_basis(
+    circuit: QuantumCircuit, basis_gates: Sequence[str]
+) -> QuantumCircuit:
+    """Compile once for preparation against the calibrated physical gate names."""
+    return cast(
+        QuantumCircuit,
+        transpile(
+            circuit,
+            basis_gates=list(basis_gates),
+            optimization_level=1,
+            seed_transpiler=0,
+        ),
+    )
+
+
+def _validate_circuit_width(snapshot: CalibrationSnapshot, circuit: QuantumCircuit) -> None:
+    """Reject circuits that cannot retain the calibration's identity qubit mapping."""
+    qubits = snapshot.properties.get("qubits")
+    if not isinstance(qubits, list):
+        raise ValueError("Calibration properties has no usable 'qubits' list for transpilation")
+    if circuit.num_qubits > len(qubits):
+        raise ValueError(
+            f"Circuit width {circuit.num_qubits} exceeds calibration width {len(qubits)}; "
+            "cannot preserve the physical qubit mapping"
+        )
 
 
 def run_ensemble(
@@ -78,6 +124,8 @@ def run_ensemble(
     circuit: QuantumCircuit,
     shots: int,
     simulator: AerSimulator,
+    *,
+    basis_gates: Sequence[str],
 ) -> dict[str, int]:
     """Run each ensemble member and mean-aggregate counts per ADR-016.
 
@@ -98,12 +146,12 @@ def run_ensemble(
     if not members:
         raise ValueError("Cannot run with an empty ensemble")
 
+    transpiled_circuit = _transpile_to_calibration_basis(circuit, basis_gates)
     per_member: list[dict[str, int]] = []
     for nm in members:
-        prepared_circuit, actual_noise_model = nm.prepare(circuit.copy())
-        transpiled_circuit = transpile(prepared_circuit, backend=simulator)
+        prepared_circuit, actual_noise_model = nm.prepare(transpiled_circuit.copy())
         result = simulator.run(
-            transpiled_circuit, shots=shots, noise_model=actual_noise_model
+            prepared_circuit, shots=shots, noise_model=actual_noise_model
         ).result()
         per_member.append(dict(result.get_counts()))
 
@@ -261,6 +309,22 @@ def _load_snapshot(path: Path) -> CalibrationSnapshot:
 
 
 def _synthetic_snapshot() -> CalibrationSnapshot:
+    single_qubit_gate_lengths_ns = {
+        "id": 24,
+        "rx": 24,
+        "rz": 0,
+        "sx": 24,
+        "x": 24,
+    }
+    single_qubit_gates = [
+        {
+            "gate": gate_name,
+            "qubits": [qubit_index],
+            "parameters": [{"name": "gate_length", "unit": "ns", "value": gate_length_ns}],
+        }
+        for qubit_index in range(2)
+        for gate_name, gate_length_ns in single_qubit_gate_lengths_ns.items()
+    ]
     return CalibrationSnapshot(
         backend="ibm_fez",
         timestamp=datetime.now(UTC),
@@ -271,18 +335,19 @@ def _synthetic_snapshot() -> CalibrationSnapshot:
                     {"name": "T1", "value": 50.0, "unit": "us"},
                     {"name": "T2", "value": 50.0, "unit": "us"},
                     {"name": "readout_error", "unit": "", "value": 0.01},
-                ]
+                ],
+                [
+                    {"name": "T1", "value": 50.0, "unit": "us"},
+                    {"name": "T2", "value": 50.0, "unit": "us"},
+                    {"name": "readout_error", "unit": "", "value": 0.01},
+                ],
             ],
             "gates": [
+                *single_qubit_gates,
                 {
-                    "gate": "sx",
-                    "qubits": [0],
-                    "parameters": [{"name": "gate_length", "unit": "ns", "value": 24}],
-                },
-                {
-                    "gate": "rz",
-                    "qubits": [0],
-                    "parameters": [{"name": "gate_length", "unit": "ns", "value": 0}],
+                    "gate": "cz",
+                    "qubits": [0, 1],
+                    "parameters": [{"name": "gate_length", "unit": "ns", "value": 80}],
                 },
             ],
         },
@@ -328,8 +393,10 @@ def main(argv: list[str] | None = None) -> None:
         raise ValueError(f"--qubits must be positive; got {args.qubits}")
 
     snapshot = _load_snapshot(args.snapshot) if args.snapshot else _synthetic_snapshot()
+    basis_gates = _calibration_basis_gates(snapshot)
 
     circuit = qft_circuit(args.qubits)
+    _validate_circuit_width(snapshot, circuit)
 
     # One AerSimulator instance shared across the warmup and every timed
     # run_ensemble call below, so the warmup actually amortizes the C++
@@ -342,11 +409,17 @@ def main(argv: list[str] | None = None) -> None:
         print(f"  [n={n}] mf_placement={args.mf_placement} consequent_seed={consequent_seed}")
         # Warmup the shared AerSimulator instance to amortize C++ init out of
         # the timed run_ensemble calls below.
-        prep_circ_w, prep_nm_w = members[0].prepare(circuit.copy())
-        transpiled_w = transpile(prep_circ_w, backend=simulator)
-        simulator.run(transpiled_w, shots=1, noise_model=prep_nm_w).result()
+        transpiled_w = _transpile_to_calibration_basis(circuit, basis_gates)
+        prep_circ_w, prep_nm_w = members[0].prepare(transpiled_w.copy())
+        simulator.run(prep_circ_w, shots=1, noise_model=prep_nm_w).result()
         t0 = time.perf_counter()
-        counts = run_ensemble(members, circuit, SHOTS_PER_MEMBER, simulator)
+        counts = run_ensemble(
+            members,
+            circuit,
+            SHOTS_PER_MEMBER,
+            simulator,
+            basis_gates=basis_gates,
+        )
         elapsed = time.perf_counter() - t0
         print(f"N={n} elapsed={elapsed:.2f}s members={n} shots_per_member={SHOTS_PER_MEMBER}")
         print(f"  counts: {counts}\n")
@@ -354,9 +427,9 @@ def main(argv: list[str] | None = None) -> None:
     print("--- Sanity Check (Single Member, 8192 Shots) ---")
     single_member = generate_safe_ensemble(snapshot, 1)[0]
     t0_sanity = time.perf_counter()
-    prep_circ, prep_nm = single_member.prepare(circuit.copy())
-    transpiled_sanity = transpile(prep_circ, backend=simulator)
-    result_sanity = simulator.run(transpiled_sanity, shots=8192, noise_model=prep_nm).result()
+    transpiled_sanity = _transpile_to_calibration_basis(circuit, basis_gates)
+    prep_circ, prep_nm = single_member.prepare(transpiled_sanity.copy())
+    result_sanity = simulator.run(prep_circ, shots=8192, noise_model=prep_nm).result()
     sanity_counts = result_sanity.get_counts()
     elapsed_sanity = time.perf_counter() - t0_sanity
     print(f"Sanity Run elapsed={elapsed_sanity:.2f}s total_shots=8192")
