@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-22 05:47 UTC · main at `1fa5bef7` (2026-09-20) · 8 days to 2026-09-30_
+_Generated 2026-09-23 17:38 UTC · main at `1fa5bef7` (2026-09-20) · 7 days to 2026-09-30_
 
 
 ## Milestones
@@ -19,14 +19,14 @@ _Generated 2026-09-22 05:47 UTC · main at `1fa5bef7` (2026-09-20) · 8 days to 
 - ✅ #45 closed (dataset-yield finding)
 - ✅ #25 closed by the cycle-2 close record
 
-### 🟡 M1 · Contracts and instruments, target 2026-09-11 (3/5)
+### 🟡 M1 · Contracts and instruments, target 2026-09-11 (2/5)
 
 - ❌ Target ADR sent to Dr. Akba with a decision-by date
   - _ADR-027 merged with Status: Open. docs/advisor/ holds only the unanswered 2026-05-25 questions file. Issue #84 owns the brief; its own decision-by date was 2026-09-08._
 - ✅ TSKTrainer ABC and training value types merged
 - 🟡 Benchmark harness certified (#58)
 - ✅ Premise parameterization for seven shapes merged (#59)
-- ✅ Feature-survey TSV committed
+- ❌ Feature-survey TSV committed
   - _Exists as docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv inside PR #68; not on main until #68 merges._
 
 ### 🟡 M2 · First measurements, target 2026-09-18 (2/5)
@@ -82,8 +82,8 @@ _Generated 2026-09-22 05:47 UTC · main at `1fa5bef7` (2026-09-20) · 8 days to 
 
 1. Start #60: ADR-014 hybrid ANFIS trainer
    - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.
-1. Start #74: first_ensemble_run must transpile before prepare
-   - All stated upstream dependencies are met.
+1. Unstick PR #103 for #74: first_ensemble_run must transpile before prepare
+   - No approving review yet: main's ruleset requires one.
 
 **Mert Efe Şensoy** (@mertefesensoy)
 
@@ -130,6 +130,10 @@ _Generated 2026-09-22 05:47 UTC · main at `1fa5bef7` (2026-09-20) · 8 days to 
 - [high] #45 is still open; M0 is not closable until it is.
 - [high] #53's record (PR #78) is unmerged at CHANGES_REQUESTED.
 
+**#74: first_ensemble_run must transpile before prepare** (@BurakOztekin)
+
+- [high] No approving review yet: main's ruleset requires one.
+
 **#75: Decide the LOCKED Kraus projector boundary** (@bengisucvd)
 
 - [medium] Touches LOCKED src/superconducted/channels/kraus.py: needs a decision, not just a patch.
@@ -150,6 +154,7 @@ _Generated 2026-09-22 05:47 UTC · main at `1fa5bef7` (2026-09-20) · 8 days to 
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-23 | 11/28 | 7 | 3 | 4 | -1 milestone gate (12 to 11 of 28); M1 3/5 to 2/5; #74 first_ensemble_run must transpile before prepare: ready to start to in review |
 | 2026-09-22 | 12/28 | 8 | 2 | 4 | nothing moved |
 | 2026-09-21 | 12/28 | 8 | 2 | 4 | #66 Vectorizer returns µs where the repo assumes s: in review to closed; #73 Filter noise by physical gate semantics: in review to closed; main moved to 1fa5bef7 |
 | 2026-09-19 | 12/28 | 8 | 4 | 4 | nothing moved |

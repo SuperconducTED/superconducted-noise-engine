@@ -1,14 +1,14 @@
-run-token: 2026-09-22T05:47:50Z-442
-outcome: ok: chore: phase-3 dashboard: state moved (2026-09-22)
+run-token: 2026-09-23T17:38:10Z-133
+outcome: ok: chore: phase-3 dashboard: state moved (2026-09-23)
 
-**12/28 milestone gates met** · 8 days to 2026-09-30 · calendar 71% burned against 43% of gates, 28 points behind.
+**11/28 milestone gates met** · 7 days to 2026-09-30 · calendar 75% burned against 39% of gates, 36 points behind.
 
-**Since 2026-09-21:** nothing moved.
+**Since 2026-09-22:** -1 milestone gate (12 to 11 of 28); M1 3/5 to 2/5; #74 first_ensemble_run must transpile before prepare: ready to start to in review.
 
 **Needs attention**
-- M0 (Queue clear) is 17 days past its 2026-09-05 target at 7/8
-- M1 (Contracts and instruments) is 11 days past its 2026-09-11 target at 3/5
-- M2 (First measurements) is 4 days past its 2026-09-18 target at 2/5
+- M0 (Queue clear) is 18 days past its 2026-09-05 target at 7/8
+- M1 (Contracts and instruments) is 12 days past its 2026-09-11 target at 2/5
+- M2 (First measurements) is 5 days past its 2026-09-18 target at 2/5
 - PR #79 (#58) conflicts with main, so its checks are not evidence and it cannot merge
 - PR #102 (#48) conflicts with main, so its checks are not evidence and it cannot merge
 - PR #98 (#56) conflicts with main, so its checks are not evidence and it cannot merge

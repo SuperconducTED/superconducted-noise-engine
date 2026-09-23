@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-22 05:47 UTC",
+  "generated": "2026-09-23 17:38 UTC",
   "main": {
     "sha": "1fa5bef7",
     "date": "2026-09-20",
@@ -34,7 +34,7 @@
       "ADR-028": "Open"
     },
     "paths": {
-      "docs/evidence/feature-distribution": true
+      "docs/evidence/feature-distribution": false
     }
   },
   "tickets": [
@@ -1334,8 +1334,84 @@
       "title": "Fix first_ensemble_run to transpile once before prepare against an explicit basis",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/74",
       "issue_state": "OPEN",
-      "state": "ready",
-      "all_prs": [],
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOENjDJQ",
+            "is_bot": false,
+            "login": "BurakOztekin",
+            "name": ""
+          },
+          "closingIssuesReferences": [
+            {
+              "id": "I_kwDOSW8yNc8AAAABP-gecQ",
+              "number": 74,
+              "repository": {
+                "id": "R_kgDOSW8yNQ",
+                "name": "superconducted-noise-engine",
+                "owner": {
+                  "id": "O_kgDOENg1ug",
+                  "login": "SuperconducTED"
+                }
+              },
+              "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/74"
+            }
+          ],
+          "createdAt": "2026-09-22T21:11:30Z",
+          "headRefName": "feature/issue-74-smoke-transpilation",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 103,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "Transpile smoke circuits before preparing noise (#74)",
+          "updatedAt": "2026-09-22T21:11:30Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/103",
+          "headRefOid": "cc469023a19a6c772090975869d3fe5c41ee8e08",
+          "additions": 288,
+          "deletions": 26,
+          "file_count": 3,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-22T21:11"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-22T21:11"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-22T21:11"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-22T21:11"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-22T21:11"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-09-22T21:12"
+            }
+          ],
+          "checks_newest": "2026-09-22T21:12",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
       "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
@@ -1346,10 +1422,15 @@
           "what": "certifies the opposite invariant"
         }
       ],
-      "blockers": [],
+      "blockers": [
+        {
+          "severity": "high",
+          "text": "No approving review yet: main's ruleset requires one."
+        }
+      ],
       "declared_unblocks": [],
       "notes_info": [],
-      "pr": null
+      "pr": 103
     },
     {
       "id": 75,
@@ -1570,7 +1651,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -17
+      "days_left": -18
     },
     {
       "id": "M1",
@@ -1605,14 +1686,14 @@
         },
         {
           "text": "Feature-survey TSV committed",
-          "status": "done",
+          "status": "not_done",
           "note": "Exists as docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv inside PR #68; not on main until #68 merges."
         }
       ],
-      "done": 3,
+      "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -11
+      "days_left": -12
     },
     {
       "id": "M2",
@@ -1655,7 +1736,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -4
+      "days_left": -5
     },
     {
       "id": "M3",
@@ -1703,7 +1784,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": 3
+      "days_left": 2
     },
     {
       "id": "M4",
@@ -1741,7 +1822,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": 8
+      "days_left": 7
     }
   ]
 }
