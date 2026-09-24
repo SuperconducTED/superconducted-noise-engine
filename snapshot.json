@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-23 17:38 UTC",
+  "generated": "2026-09-24 07:28 UTC",
   "main": {
     "sha": "1fa5bef7",
     "date": "2026-09-20",
@@ -34,7 +34,7 @@
       "ADR-028": "Open"
     },
     "paths": {
-      "docs/evidence/feature-distribution": false
+      "docs/evidence/feature-distribution": true
     }
   },
   "tickets": [
@@ -1651,7 +1651,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -18
+      "days_left": -19
     },
     {
       "id": "M1",
@@ -1686,14 +1686,14 @@
         },
         {
           "text": "Feature-survey TSV committed",
-          "status": "not_done",
+          "status": "done",
           "note": "Exists as docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv inside PR #68; not on main until #68 merges."
         }
       ],
-      "done": 2,
+      "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -12
+      "days_left": -13
     },
     {
       "id": "M2",
@@ -1736,7 +1736,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -5
+      "days_left": -6
     },
     {
       "id": "M3",
@@ -1784,7 +1784,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": 2
+      "days_left": 1
     },
     {
       "id": "M4",
@@ -1822,7 +1822,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": 7
+      "days_left": 6
     }
   ]
 }

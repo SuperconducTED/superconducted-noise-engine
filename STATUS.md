@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-23 17:38 UTC · main at `1fa5bef7` (2026-09-20) · 7 days to 2026-09-30_
+_Generated 2026-09-24 07:28 UTC · main at `1fa5bef7` (2026-09-20) · 6 days to 2026-09-30_
 
 
 ## Milestones
@@ -19,14 +19,14 @@ _Generated 2026-09-23 17:38 UTC · main at `1fa5bef7` (2026-09-20) · 7 days to 
 - ✅ #45 closed (dataset-yield finding)
 - ✅ #25 closed by the cycle-2 close record
 
-### 🟡 M1 · Contracts and instruments, target 2026-09-11 (2/5)
+### 🟡 M1 · Contracts and instruments, target 2026-09-11 (3/5)
 
 - ❌ Target ADR sent to Dr. Akba with a decision-by date
   - _ADR-027 merged with Status: Open. docs/advisor/ holds only the unanswered 2026-05-25 questions file. Issue #84 owns the brief; its own decision-by date was 2026-09-08._
 - ✅ TSKTrainer ABC and training value types merged
 - 🟡 Benchmark harness certified (#58)
 - ✅ Premise parameterization for seven shapes merged (#59)
-- ❌ Feature-survey TSV committed
+- ✅ Feature-survey TSV committed
   - _Exists as docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv inside PR #68; not on main until #68 merges._
 
 ### 🟡 M2 · First measurements, target 2026-09-18 (2/5)
@@ -154,6 +154,7 @@ _Generated 2026-09-23 17:38 UTC · main at `1fa5bef7` (2026-09-20) · 7 days to 
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-24 | 12/28 | 7 | 3 | 4 | +1 milestone gate (11 to 12 of 28); M1 2/5 to 3/5 |
 | 2026-09-23 | 11/28 | 7 | 3 | 4 | -1 milestone gate (12 to 11 of 28); M1 3/5 to 2/5; #74 first_ensemble_run must transpile before prepare: ready to start to in review |
 | 2026-09-22 | 12/28 | 8 | 2 | 4 | nothing moved |
 | 2026-09-21 | 12/28 | 8 | 2 | 4 | #66 Vectorizer returns µs where the repo assumes s: in review to closed; #73 Filter noise by physical gate semantics: in review to closed; main moved to 1fa5bef7 |
