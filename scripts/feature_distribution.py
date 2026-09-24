@@ -6,10 +6,21 @@ features, plus the per-qubit spread of the values each feature averages over.
 ``scripts/feature_distribution.py::summarize`` reduces those rows to the
 quantiles ``superconducted.fuzzy.parameterization`` consumes.
 
-Units are the vectorizer's own (NFR-8): **microseconds** for ``mean_T1`` and
-``mean_T2``, dimensionless for ``mean_readout_error``. That is the raw Nduv
-value with no scaling. ``scripts/first_ensemble_run.py::FEATURE_SCALES`` is in
-seconds and is **not** a source of truth for anything here.
+Units are the **archive's own**: **microseconds** for ``mean_T1`` and
+``mean_T2``, dimensionless for ``mean_readout_error``. That is the number the
+source document carried, and the columns here, the committed TSV and the
+NC-041/NC-042 quantiles derived from them are all in those units.
+
+This used to be the same statement as "the vectorizer's own units, the raw Nduv
+value with no scaling", because ``BasicCalibrationVectorizer`` returned the
+unscaled value. Issue #66 ended that: the vectorizer emits SI seconds, which is
+what ADR-010 ratifies and what ``first_ensemble_run.py::FEATURE_SCALES`` has
+always assumed. The two statements are no longer the same, so the conversion is
+now explicit and named: this survey extracts through
+``calibration/features.py::ArchiveUnitFeatureExtractor``, which inverts exactly
+the scaling the loader applied on the way in. Swapping that wrapper for a bare
+``BasicCalibrationVectorizer`` would silently move every column in this file by
+1e6 and is the one edit to make carefully here.
 
 ``*_qubit_std`` is the **sample** standard deviation, ``numpy.std(v, ddof=1)``,
 written empty when fewer than two values are usable -- a spread over one value
@@ -55,7 +66,10 @@ from scripts.init_error_analysis import _git, list_snapshots, read_snapshot
 # would let the two drift silently, which is the one failure this column exists
 # to rule out. #64 makes `calibration/features.py::per_qubit_spread` the single
 # home for this loop; when it lands, import that instead.
-from superconducted.calibration.features import BasicCalibrationVectorizer, _coerce_finite_float
+from superconducted.calibration.features import (
+    ArchiveUnitFeatureExtractor,
+    _coerce_finite_float,
+)
 from superconducted.types import CalibrationSnapshot
 
 _STEM_TIMESTAMP_FORMAT = "%Y%m%dT%H%M%S%fZ"
@@ -188,14 +202,15 @@ def snapshot_row(path: str, doc: dict[str, Any]) -> SnapshotFeatureRow:
     mean_ro: float | None = None
     if rejection_reason is None:
         try:
-            means = BasicCalibrationVectorizer().extract(snapshot)
+            means = ArchiveUnitFeatureExtractor().extract(snapshot)
             mean_t1, mean_t2, mean_ro = float(means[0]), float(means[1]), float(means[2])
         except ValueError as exc:
             # The documented rejection: a feature with no usable value.
             rejection_reason = str(exc)
         except (AttributeError, TypeError) as exc:
             # A malformed document, caught here rather than fixed upstream.
-            # `BasicCalibrationVectorizer.extract` assumes `properties.qubits`
+            # `BasicCalibrationVectorizer.extract`, which the wrapper above
+            # delegates to, assumes `properties.qubits`
             # is a list of lists of dicts and raises `AttributeError` when the
             # archive disagrees; `calibration/features.py` is Baha's and Issue
             # #59 consumes it without editing it, so widening the guard at the
