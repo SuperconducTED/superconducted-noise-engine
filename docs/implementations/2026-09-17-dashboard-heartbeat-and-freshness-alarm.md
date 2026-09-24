@@ -305,3 +305,79 @@ and the first heartbeat-only commit may be considerably later.
   bounds, which measure the *device* clock, not this one), NC-053 (this bound)
 - `docs/implementations/2026-08-29-calibration-yield-and-poller-defects.md` — #45,
   the outage whose cost motivates the whole pipeline
+
+## Merge of `main`, 2026-09-24
+
+Appended, not edited in: the sections above describe the branch at `d119e50` and
+stay true of that commit.
+
+While this PR was open, `main` moved from `125b796` to `1fa5bef`, landing PR #96
+(issue #73, physical-gate eligibility) and PR #99 (issue #66, vectorizer SI
+units). That made the PR `DIRTY`, and in that state `ci.yml` does not dispatch
+while CodeQL keeps reporting green, so the check set would have looked healthy
+with no tests running.
+
+### The conflict
+
+One file, `docs/numerical-claims.md`, in two hunks. Both were additive: each side
+added text to the same base and neither removed anything the other relied on.
+
+| Hunk | `main` | This branch | Resolution |
+| --- | --- | --- | --- |
+| NC-021 | `652` at `0b36c64`, with the issue #66 measurement chain | `643` at `d119e50`, with the heartbeat chain | One row: `main`'s chain first, then this branch's, then a merge note. Re-measured at the merge in the docs-only commit that follows, never derived |
+| Tail rows | added NC-052, NC-054, NC-055, leaving NC-053 free for this PR | added NC-053 | All four, in id order |
+
+Merged, not rebased: register rows and this doc pin `d119e50` and `f2b11b6`, and
+a rebase would dangle both.
+
+### What was checked beyond the conflict
+
+A clean text merge does not show whether `main` changed something this PR
+depends on, so that was checked directly against `125b796..1fa5bef`:
+
+- Neither workflow file, `scripts/check_dashboard_freshness.py`, nor its tests
+  changed on `main`.
+- `docs/decisions.md` auto-merged. `main`'s ADR-021 amendment and new ADR-028 sit
+  in their own sections, this branch's ADR-025 amendment is still under ADR-025,
+  and `scripts/check_ids.py` reports no duplicate or colliding identifier.
+- Of the register rows `main` edited, NC-041, NC-042 and NC-052 to NC-055 are
+  vectorizer figures this PR does not consume. NC-050, NC-051 and NC-053, the
+  rows it does cite, are unchanged on `main`.
+
+### Re-measured at the merge commit `d9f3440`
+
+Clean Python 3.12.10 at a short path, with the six gate-relevant pins matching
+`requirements*.txt`:
+
+```bash
+python -m ruff check .                       # All checks passed
+python -m ruff format --check .              # 68 files already formatted
+python -m mypy --strict                      # no issues in 38 source files
+python scripts/check_ids.py                  # no duplicate or colliding ids
+python -m pytest tests/ --collect-only -q -o addopts="" -p no:cacheprovider   # 692 collected
+python -m pytest tests/ -q -p no:cacheprovider                                 # 692 passed
+```
+
+| Tree | Collected |
+| --- | --- |
+| merge base `125b796` | 616 |
+| `main` after PR #96, `c19a31f` | 629 |
+| `main` tip `1fa5bef` | 665 |
+| this branch before the merge, `d9c1e05` | 643 |
+| the merge, `d9f3440` | **692** |
+
+Every figure is a direct collection at the named commit. `main`'s NC-021 still
+read `652` at `1fa5bef`, a figure measured on PR #99's branch before PR #96
+landed, so the register already understated `main` by 13 before this merge.
+Recording `692` at the merge corrects that as a side effect.
+
+One run is worth recording rather than smoothing over. The first full run at
+`d9f3440` reported `691 passed, 1 failed`: the archive-backed
+`test_the_committed_survey_reproduces_from_the_archive` got exit 128 from
+`git show` while other `git worktree` commands were running against the same
+object store. The identical `git show` succeeded by hand straight afterwards,
+the test passed on its own at both `d9f3440` and `1fa5bef`, and a second full
+run with nothing else touching the repository gave `692 passed`. The recorded
+figure is that clean run.
+
+`ubuntu-latest` remains the authority for the pass count.
