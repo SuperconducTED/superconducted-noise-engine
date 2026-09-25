@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import ast
 import json
+import math
 import re
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -34,6 +35,7 @@ from scripts.check_dashboard_freshness import (
     evaluate,
     main,
     read_generated_at,
+    validate_bound,
 )
 from scripts.pipeline_health import build_metrics
 
@@ -114,6 +116,18 @@ class TestEvaluate:
         """UC-6: a reader must be able to tell what number produced the verdict."""
         assert "tolerance 48 h" in evaluate(NOW, NOW, MAX_AGE).message()
 
+    @pytest.mark.parametrize("bound", [math.inf, math.nan, 0.0, -12.0])
+    def test_a_bound_that_cannot_be_compared_honestly_is_refused(self, bound: float) -> None:
+        """Refused where the verdict is built, not only at the CLI.
+
+        ``inf`` calls every age fresh, so the alarm is off. ``nan`` makes every
+        comparison false, so ``is_fresh`` says stale while ``message`` falls
+        through to the "refreshed" wording. ``evaluate`` is a public entry
+        point, so guarding only the CLI would leave both reachable.
+        """
+        with pytest.raises(ValueError, match="finite, positive"):
+            evaluate(NOW - timedelta(hours=576), NOW, bound)
+
 
 class TestReadGeneratedAt:
     """Every unreadable shape collapses to "cannot judge", never to "stopped"."""
@@ -184,6 +198,20 @@ class TestExitCodes:
             main(["--root", str(tmp_path), "--max-age-hours", bound])
         assert excinfo.value.code == 2
 
+    @pytest.mark.parametrize("bound", ["inf", "Infinity", "1e999", "nan", "NaN"])
+    def test_a_non_finite_bound_is_rejected(self, tmp_path: Path, bound: str) -> None:
+        """Python's ``float`` parses every one of these, and all are positive or unordered.
+
+        Before this guard, ``inf`` judged a 576 h old heartbeat fresh and exited
+        0, and ``nan`` exited 1 under a message saying the dashboard was
+        refreshed (raised in the PR #102 review). The stale heartbeat is written
+        so that a regression shows up as a verdict instead of as exit 3.
+        """
+        _write_metrics(tmp_path, {"generated_at": "2026-09-01T00:00:00Z"})
+        with pytest.raises(SystemExit) as excinfo:
+            _run(tmp_path, now="2026-09-25T00:00:00Z", bound=bound)
+        assert excinfo.value.code == 2
+
 
 class TestWorkflowWiring:
     """The half no unit test can reach: what the workflows do with the result."""
@@ -231,7 +259,9 @@ class TestWorkflowWiring:
         health = _env_value(HEALTH_WORKFLOW.read_text(encoding="utf-8"), "DASHBOARD_MAX_AGE_HOURS")
         poll = _env_value(POLL_WORKFLOW.read_text(encoding="utf-8"), "DASHBOARD_MAX_AGE_HOURS")
         assert health == poll
-        assert float(health) > 0
+        # The script's own check, so any value CI accepts is one the alarm
+        # accepts. ``float(health) > 0`` alone accepted 'inf'.
+        validate_bound(float(health))
 
     def test_the_bound_is_not_a_literal_in_the_checker(self) -> None:
         """FR-7, as ``TestFloorsAreConfiguration`` applies it to the floors.

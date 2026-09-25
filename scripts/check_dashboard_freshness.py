@@ -35,7 +35,9 @@ no archive traversal (NFR-1); stdlib only.
 supplied by the workflow, and never a literal in code, applies to this threshold
 for the same reason it applies to the candidate training floors: a number baked
 in here could not be changed without a code review, and could not state its own
-source.
+source. It must also be finite and positive (``validate_bound``): ``float``
+parses ``inf`` and ``nan``, and either one would disable the alarm without
+saying so.
 
 Exit codes: **0** the dashboard is fresh, **1** it is stale or its heartbeat
 cannot be trusted, **3** no dashboard could be read, so freshness is not
@@ -47,6 +49,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -68,6 +71,28 @@ jitter.
 """
 
 
+def validate_bound(max_age_hours: float) -> float:
+    """Return ``max_age_hours`` unchanged, or raise ``ValueError`` if it cannot be a bound.
+
+    A staleness bound has to be a finite, positive number of hours, and
+    ``float`` accepts two values that are neither and would each switch the
+    alarm off quietly. ``inf`` is greater than every age, so a heartbeat of any
+    age reads as fresh. ``nan`` compares false against everything, so the
+    verdict says stale while ``Freshness.message`` falls through to its
+    "refreshed" wording. Zero and negatives were already refused by the CLI and
+    are refused here as well, so there is one rule rather than two.
+
+    There is deliberately no upper limit: one would be a number written into
+    this module, which FR-7 rules out. A very large finite bound is still a
+    visible, reviewable edit to the workflow's env block.
+    """
+    if not math.isfinite(max_age_hours) or max_age_hours <= 0:
+        raise ValueError(
+            f"the staleness bound must be a finite, positive number of hours, not {max_age_hours!r}"
+        )
+    return max_age_hours
+
+
 @dataclass(frozen=True)
 class Freshness:
     """A freshness verdict together with the evidence it rests on."""
@@ -75,6 +100,10 @@ class Freshness:
     generated_at: datetime
     age_hours: float
     max_age_hours: float
+
+    def __post_init__(self) -> None:
+        """Refuse a bound no verdict can honestly be reached against."""
+        validate_bound(self.max_age_hours)
 
     @property
     def is_fresh(self) -> bool:
@@ -158,8 +187,10 @@ def main(argv: Iterable[str] | None = None) -> int:
         "--now", type=parse_time, default=None, help="UTC instant to judge against (for tests)."
     )
     args = parser.parse_args(list(argv) if argv is not None else None)
-    if args.max_age_hours <= 0:
-        parser.error("--max-age-hours must be positive")
+    try:
+        validate_bound(args.max_age_hours)
+    except ValueError as error:
+        parser.error(f"--max-age-hours: {error}")
     generated_at = read_generated_at(args.root / "health" / "metrics.json")
     if generated_at is None:
         print(
