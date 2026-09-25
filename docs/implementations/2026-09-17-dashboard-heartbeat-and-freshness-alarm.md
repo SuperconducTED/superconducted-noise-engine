@@ -381,3 +381,97 @@ run with nothing else touching the repository gave `692 passed`. The recorded
 figure is that clean run.
 
 `ubuntu-latest` remains the authority for the pass count.
+
+## Review follow-up, 2026-09-25: a bound that cannot be compared
+
+Appended, not edited in, for the same reason as the section above.
+
+### Problem
+
+@BahaJarad asked in review whether `--max-age-hours`, typed `float`, could let a
+value through that makes a stale dashboard pass as fresh. It could. Reproduced at
+`281f0ef` against a heartbeat 576 h old, which is stale under any sane bound:
+
+| `--max-age-hours` | Exit | Output |
+| --- | --- | --- |
+| `48` | 1 | `::warning::` ... `576.0 h ago (tolerance 48 h)`, correct |
+| `inf`, `Infinity`, `1e999` | **0** | `::notice::pipeline-health dashboard refreshed ... 576.0 h ago (tolerance inf h)` |
+| `nan`, `NaN` | 1 | `::warning::pipeline-health dashboard refreshed ...`, the "fresh" wording under a warning |
+| `0`, `-5`, empty | 2 | argparse error, already refused |
+
+`inf` is the serious case: it turns the alarm off while announcing that all is
+well. The workflow pin test did not catch it either, because it asserted only
+`float(value) > 0`, which `'inf'` satisfies.
+
+### What changed
+
+| File | Change |
+| --- | --- |
+| `scripts/check_dashboard_freshness.py` | New `validate_bound` (finite and > 0), called from `Freshness.__post_init__` and from the CLI, which turns its `ValueError` into an argparse exit 2 |
+| `tests/test_check_dashboard_freshness.py` | 9 new cases: 4 on `evaluate` (`inf`, `nan`, `0`, `-12`), 5 on the CLI (`inf`, `Infinity`, `1e999`, `nan`, `NaN`); the workflow pin test now calls `validate_bound` instead of `float(value) > 0` |
+| `docs/numerical-claims.md` | NC-021 to `701`, measured at `6630fca` |
+
+### Mathematical details
+
+IEEE 754 gives the two values opposite failure modes, which is why they surface
+differently:
+
+- `inf` is ordered and greater than every finite number, so
+  `-FUTURE_TOLERANCE_HOURS <= age <= inf` holds for every finite age. The
+  verdict is "fresh" unconditionally.
+- `nan` is unordered: `x <= nan`, `x > nan` and `nan <= 0` are all false. So the
+  CLI's old `max_age_hours <= 0` check let it through, `is_fresh` evaluated false
+  (stale, exit 1), and `message()`, whose stale branch tests `age > max_age`,
+  also evaluated false and fell through to the "refreshed" sentence.
+
+`math.isfinite(x) and x > 0` excludes both, plus zero and negatives, in one
+predicate. The age side needs no guard: it is a difference of two `datetime`
+values divided by 3600, which is always finite.
+
+### Design decisions
+
+- **Guarded in the dataclass, not only the CLI.** `evaluate` is a public entry
+  point, the same reasoning `_as_utc` already applies to naive datetimes. A
+  CLI-only guard would leave both failure modes reachable from Python.
+- **The pin test calls the same function.** Both workflow steps end in
+  `|| true`, so a bad bound reaching the runner would exit 2 and be swallowed.
+  The pin test is therefore the real enforcement point for configuration, and it
+  now applies exactly the runtime rule, so CI cannot accept a value the alarm
+  would refuse.
+- **No upper limit.** Any cap would be a number written into the module, which
+  FR-7 forbids. A very large finite bound still requires a visible edit to a
+  workflow env block, which is reviewed.
+- **The existing `test_a_non_positive_bound_is_rejected` is kept.** The new
+  predicate subsumes it, but it pins the old contract, and deleting it would make
+  the change look larger than it is.
+
+### Verification
+
+Reproduced before fixing: with the new tests in place and `validate_bound`
+temporarily stubbed to the old behaviour, all 9 new cases failed and the other 27
+passed. After the fix, at `6630fca`, clean Python 3.12.10 at a short path:
+
+```bash
+python -m ruff check .                       # All checks passed
+python -m ruff format --check .              # 68 files already formatted
+python -m mypy --strict                      # no issues in 38 source files
+python scripts/check_ids.py                  # no duplicate or colliding ids
+python -m pytest tests/test_check_dashboard_freshness.py -q -o addopts=""   # 36 passed
+python -m pytest tests/ --collect-only -q -o addopts="" -p no:cacheprovider  # 701 collected
+python -m pytest tests/ -q -p no:cacheprovider                              # 701 passed
+```
+
+The CLI table above, re-run at `6630fca`: `48` still exits 1 with the stale
+warning; `inf`, `Infinity`, `1e999`, `nan`, `0` and `-5` all exit 2 with
+`--max-age-hours: the staleness bound must be a finite, positive number of hours,
+not <value>`.
+
+### The review's first question, recorded
+
+Baha also asked whether a strict 48-hour warning rule exists. It does, and it
+originates in this PR: `DASHBOARD_MAX_AGE_HOURS: '48'` in both workflow env
+blocks, registered as NC-053, and deliberately absent from the script under
+FR-7. It is a `::warning::` annotation that never fails either job, and it is
+inclusive: exactly 48.0 h is still fresh, and it fires above that. The only other
+"48 h" on `main` is the trailing window of the #49 backfill sweep, which is
+unrelated.
