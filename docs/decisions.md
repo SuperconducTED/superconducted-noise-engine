@@ -1412,6 +1412,54 @@ so NC-025 and NC-047 both stand as registered.
 This status line is removed only by appending the answer to the decisions register. It is
 not cleared by a review, a merge, or the passage of the decision-by date.
 
+### ADR-025 amendment — 2026-09-17: the renderer records that it ran
+
+Appended rather than folded into the 2026-09-05 amendment above, which is left exactly as
+written. This changes one clause of it.
+
+That amendment closes by saying that a quiet archive "reaches byte-stability within 30 days
+of its last new state, after which repeated renders produce no commit at all." That is
+accurate about the SVG and was implemented for **both** generated files: the workflow staged
+`health/`, and whenever `health/progress.svg` was unchanged it ran
+`git restore --staged health/metrics.json` and exited, committing nothing.
+
+The consequence is the defect this ADR's own Context paragraph records for the poller. With
+no commit, `generated_at` does not advance, and a quiet archive becomes byte-indistinguishable
+from a renderer that stopped weeks ago. "A quiet stretch looked identical to a stopped poller,
+and the run history that could have told them apart expires at ~90 days" is the sentence that
+justified the poll ledger; `health/` was added here as the branch's second writer after it was
+written, and the principle was never carried across.
+
+**Amendment.** `health/metrics.json` is written on **every** render, unconditionally, on the
+same rule this ADR already applies to a ledger row: a scheduled writer to this branch records
+that it ran, including when it observed nothing. `health/progress.svg` is unchanged and stays
+under the commit-on-change guard, so the clause above still holds for the rendered graphic and
+FR-6's churn budget is untouched where it was aimed. Staging an unchanged file contributes
+nothing to a commit, so the two coexist in one `git add`.
+
+No new file is added to the tree this amendment enumerates. Because every render now produces
+exactly one commit, the commit history of `health/metrics.json` *is* the append-only render
+log, and a separate `health/render-log.tsv` was designed and then dropped as redundant with
+what git already holds.
+
+Two commit messages now distinguish the cases, so the log stays readable:
+`health: refresh pipeline dashboard` keeps its existing meaning, that the graphic moved, and
+`health: heartbeat, rendered dashboard unchanged` marks a render that only advanced the
+heartbeat.
+
+The heartbeat is read by `scripts/check_dashboard_freshness.py` against
+`DASHBOARD_MAX_AGE_HOURS`, registered as NC-053 and derived from the observed render cadence
+rather than chosen. The **hourly poller** carries that check, not only the renderer: a process
+cannot report its own death, so the alarm must be raised by a job that is still running. It is
+the poll job's last step and can never fail it, because a dashboard problem must not cost a
+poll or the ledger row that makes scheduler degradation visible.
+
+| | |
+| --- | --- |
+| **Ledger semantics** | Unchanged. No existing row, column, unit or decision vocabulary is redefined; NC-025's definition and the meaning of a `health/state-index.tsv` row are untouched. What changes is *when* one generated file is committed. |
+| **Advisor sign-off** | `docs/team.md` requires Dr. Akba's out-of-band sign-off for changes that touch ADR ledger semantics. On the reading above this does not, so none was sought. **Recorded here as a question rather than assumed**, because the 2026-09-05 amendment is itself still Open on that exact test and a second silent judgement call on the same ADR is what this file exists to prevent. If the reviewer reads the `health/` commit contract as ledger semantics, this needs the same routing as that amendment and must not be merged before it. |
+| **Reversal cost** | One revert of the workflow step. No data loss, no rewrite, no dispatch: the extra commits are additive and any already made stay valid. |
+
 ---
 
 ## ADR-027 — Calibration training target
