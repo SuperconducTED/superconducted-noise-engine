@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-27 05:37 UTC · main at `1fa5bef7` (2026-09-20) · 3 days to 2026-09-30_
+_Generated 2026-09-28 05:36 UTC · main at `110cfad8` (2026-09-27) · 2 days to 2026-09-30_
 
 
 ## Milestones
@@ -111,9 +111,7 @@ _Generated 2026-09-27 05:37 UTC · main at `1fa5bef7` (2026-09-20) · 3 days to 
 
 **#58: Certify the benchmark instruments** (@bengisucvd)
 
-- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [high] Still a draft: CI and reviewers will not treat it as ready.
-- [high] Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result.
 - [high] No approving review yet: main's ruleset requires one.
 - [medium] Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
 
@@ -154,6 +152,7 @@ _Generated 2026-09-27 05:37 UTC · main at `1fa5bef7` (2026-09-20) · 3 days to 
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-28 | 12/28 | 7 | 3 | 4 | main moved to 110cfad8 |
 | 2026-09-27 | 12/28 | 7 | 3 | 4 | nothing moved |
 | 2026-09-26 | 12/28 | 7 | 3 | 4 | nothing moved |
 | 2026-09-25 | 12/28 | 7 | 3 | 4 | nothing moved |
