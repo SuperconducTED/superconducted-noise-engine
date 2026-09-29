@@ -1,4 +1,5 @@
-"""Skip-strategy aggregator tests for ``mean_t1`` and ``mean_t2``.
+"""Skip-strategy aggregator tests for ``mean_t1``, ``mean_t2`` and
+``mean_readout_error``.
 
 Mirrors the contract in ADR-017: missing (``None``) and NaN per-qubit
 values are excluded from the mean and counted separately in
@@ -14,7 +15,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from superconducted.calibration.features import mean_t1, mean_t2
+from superconducted.calibration.features import mean_readout_error, mean_t1, mean_t2
 from superconducted.calibration.loader import (
     FieldMissingness,
     MissingnessStats,
@@ -36,12 +37,13 @@ def _qubit(
     *,
     t1: float | None,
     t2: float | None = 1e-4,
+    readout: float | None = 0.01,
 ) -> ParsedQubitCalibration:
     return ParsedQubitCalibration(
         index=index,
         t1_seconds=t1,
         t2_seconds=t2,
-        readout_error=0.01,
+        readout_error=readout,
         prob_meas0_prep1=0.02,
         prob_meas1_prep0=0.015,
         init_error=0.002,
@@ -149,5 +151,47 @@ def test_mean_t2_on_exemplar_uses_155_qubits() -> None:
     ]
     assert len(values) == 155
     result = mean_t2(snapshot)
+    assert result is not None
+    assert result == pytest.approx(sum(values) / len(values))
+
+
+def test_mean_readout_error_skips_missing_qubits() -> None:
+    snapshot = _snapshot(
+        [
+            _qubit(0, t1=100e-6, readout=None),
+            _qubit(1, t1=100e-6, readout=0.01),
+            _qubit(2, t1=100e-6, readout=0.03),
+        ]
+    )
+    assert mean_readout_error(snapshot) == pytest.approx(0.02)
+
+
+def test_mean_readout_error_skips_nan() -> None:
+    """NaN is excluded, matching T1 and T2 rather than poisoning the mean."""
+    snapshot = _snapshot(
+        [
+            _qubit(0, t1=100e-6, readout=float("nan")),
+            _qubit(1, t1=100e-6, readout=0.01),
+            _qubit(2, t1=100e-6, readout=0.03),
+        ]
+    )
+    assert mean_readout_error(snapshot) == pytest.approx(0.02)
+
+
+def test_mean_readout_error_returns_none_when_all_missing() -> None:
+    snapshot = _snapshot([_qubit(0, t1=100e-6, readout=None), _qubit(1, t1=100e-6, readout=None)])
+    assert mean_readout_error(snapshot) is None
+
+
+def test_mean_readout_error_on_exemplar_uses_every_qubit() -> None:
+    """The exemplar has no absent or NaN readout value, unlike T1 and T2."""
+    snapshot = load_snapshot(FIXTURE)
+    values = [
+        q.readout_error
+        for q in snapshot.qubits
+        if q.readout_error is not None and not math.isnan(q.readout_error)
+    ]
+    assert len(values) == 156
+    result = mean_readout_error(snapshot)
     assert result is not None
     assert result == pytest.approx(sum(values) / len(values))

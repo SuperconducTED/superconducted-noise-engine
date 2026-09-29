@@ -11,7 +11,8 @@ member.
 That invariant, and the Factory/Ensemble response to it, is ADR-002; any
 design proposing per-shot Python regeneration of noise channels is
 rejected on sight. ADR-021 extends ADR-002 with the dependency-injection
-contract this module implements — the six injected ABCs, the
+contract this module implements — the six injected ABCs plus the optional
+eligibility policy of ADR-028, the
 :meth:`FuzzyNoiseModel.prepare` contract, and the plug-in points where
 per-member variance will attach once ADR-015 resolves.
 
@@ -37,6 +38,7 @@ Bootstrap status:
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Callable, Iterator, Sequence
 
 import numpy as np
@@ -49,9 +51,11 @@ from ..interfaces import (
     ChannelProjector,
     Defuzzifier,
     FuzzificationStrategy,
+    GateEligibilityPolicy,
     RuleBase,
     SquashingStrategy,
 )
+from ..training.targets import gate_lengths
 from ..types import CalibrationSnapshot
 
 # Upper bound on the deterministic seed search in :func:`first_viable_seed`.
@@ -60,6 +64,101 @@ from ..types import CalibrationSnapshot
 # rate worth engineering for. A limit this generous therefore fails fast only
 # when the degeneracy is structural rather than an unlucky draw.
 DEFAULT_SEED_SEARCH_LIMIT: int = 64
+
+
+class CalibrationGateEligibilityPolicy(GateEligibilityPolicy):
+    """Derive physical noise eligibility from archived gate-length records.
+
+    The shipped :class:`GateEligibilityPolicy` of ADR-028.
+
+    A physical single-qubit gate is eligible exactly when its calibration
+    ``properties.gates`` record supplies a strictly positive ``gate_length``.
+    Gates absent from those records, including administrative instructions such
+    as ``delay`` and Aer save instructions, remain noise-free. A virtual ``rz``
+    whose recorded length is zero is explicitly ineligible rather than rejected
+    due to missing metadata.
+
+    Note the asymmetry: a *missing* or non-positive record fails closed and is
+    simply ineligible, but a *corrupt* one (non-numeric, non-finite, or a unit
+    other than ``ns``) fails loudly, because
+    :func:`~superconducted.training.targets.gate_lengths` raises
+    :class:`~superconducted.calibration.loader.CalibrationParseError` before
+    this method sees it. Silently treating unparseable calibration as physical
+    is the worse of the two failures.
+    """
+
+    def eligible_operations(
+        self,
+        snapshot: CalibrationSnapshot,
+    ) -> frozenset[tuple[str, tuple[int, ...]]]:
+        entries = snapshot.properties.get("gates")
+        if not isinstance(entries, list):
+            return frozenset()
+
+        gate_names: set[str] = set()
+        for entry in entries:
+            if isinstance(entry, dict):
+                gate_name = entry.get("gate")
+                if isinstance(gate_name, str):
+                    gate_names.add(gate_name)
+        eligible: set[tuple[str, tuple[int, ...]]] = set()
+        for gate_name in gate_names:
+            for qubit, duration in gate_lengths(snapshot.properties, gate_name).items():
+                # No isfinite() guard: gate_lengths -> _parse_gate_length already
+                # raises CalibrationParseError on a non-finite value, so a
+                # corrupt record fails loudly instead of being filtered out.
+                if duration > 0.0:
+                    eligible.add((gate_name, (qubit,)))
+        return frozenset(eligible)
+
+
+def _warn_if_nothing_was_installed(
+    circuit: QuantumCircuit,
+    eligible_operations: frozenset[tuple[str, tuple[int, ...]]],
+) -> None:
+    """Warn when :meth:`FuzzyNoiseModel.prepare` installed no error at all.
+
+    Two distinct configuration mistakes both land as an empty ``NoiseModel``,
+    and both were previously silent:
+
+    - the calibration snapshot carries no positive-duration single-qubit gate
+      record, so nothing is eligible against any circuit; or
+    - the snapshot is fine, but the circuit was never compiled to the
+      calibrated physical basis, so no instruction name can match.
+
+    Either way the engine returns a model that installs nothing, the caller
+    simulates a noiseless circuit, and the run still looks successful. That is
+    how a benchmark row can report a number measured from an engine that was
+    switched off. This warns instead of raising: ADR-021 fixes ``prepare``'s
+    return contract, and a circuit really can be legitimately noise-free (an
+    ``rz``-only or measure-only circuit is the honest example), so the
+    diagnostic is informational and a caller may filter it.
+
+    ``eligible_operations`` is the policy's decision for this snapshot;
+    ``circuit`` is the caller's input, because that is the thing they can fix.
+    No warning is emitted for an empty circuit, which has nothing to noise.
+    """
+    # 'candidate' rather than 'all': the message lists what the circuit contains,
+    # including names the strategy never offers the policy (barrier, measure,
+    # reset), because the reader is comparing two name spaces, not auditing one.
+    present = sorted({instruction.operation.name for instruction in circuit.data})
+    if not present:
+        return
+    if not eligible_operations:
+        warnings.warn(
+            "FuzzyNoiseModel.prepare installed no error: this calibration "
+            f"snapshot yields no eligible gate at all. Circuit instructions: {present}.",
+            stacklevel=3,
+        )
+        return
+    eligible_names = sorted({name for name, _ in eligible_operations})
+    warnings.warn(
+        "FuzzyNoiseModel.prepare installed no error: none of the circuit's "
+        f"candidate instructions {present} is eligible under this calibration "
+        f"{eligible_names}. Compile the circuit to the calibrated physical "
+        "basis before calling prepare().",
+        stacklevel=3,
+    )
 
 
 def is_identity_damping(crisp_params: npt.NDArray[np.float64]) -> bool:
@@ -122,9 +221,10 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
     Aer (which would have no errors attached).
 
     ADR-021 specifies this construction contract: the six injected
-    dependencies above are the swappable research axes, and the strict DI
-    surface is deliberate — it is what makes each axis independently
-    testable, at the cost of non-trivial factory construction.
+    dependencies above and optional :class:`GateEligibilityPolicy` are the
+    swappable research axes. The strict DI surface is deliberate — it is what
+    makes each axis independently testable, at the cost of non-trivial factory
+    construction.
     """
 
     def __init__(
@@ -136,6 +236,8 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
         squashing: SquashingStrategy,
         channel_projector: ChannelProjector,
         fuzzification_strategy: FuzzificationStrategy,
+        *,
+        gate_eligibility_policy: GateEligibilityPolicy | None = None,
     ) -> None:
         super().__init__()
         self._calibration = calibration
@@ -145,7 +247,24 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
         self._squashing = squashing
         self._channel_projector = channel_projector
         self._fuzzification_strategy = fuzzification_strategy
+        self._gate_eligibility_policy = (
+            gate_eligibility_policy
+            if gate_eligibility_policy is not None
+            else CalibrationGateEligibilityPolicy()
+        )
         self._crisp_params: npt.NDArray[np.float64] = self._compute_crisp_params()
+        # Resolved once, like _crisp_params: eligible_operations is a pure
+        # function of the snapshot, and CalibrationSnapshot is a frozen
+        # point-in-time record, so nothing can change the answer between
+        # prepare() calls. Resolving here also surfaces a malformed
+        # gate_length (CalibrationParseError) at construction rather than on
+        # some later prepare(). Note what this does NOT save: __iter__ builds a
+        # fresh FuzzyNoiseModel per ensemble member, so each member still pays
+        # one parse. The saving is on repeated prepare() calls within a member,
+        # which is the harness loop of members x circuits.
+        self._eligible_operations: frozenset[tuple[str, tuple[int, ...]]] = (
+            self._gate_eligibility_policy.eligible_operations(self._calibration)
+        )
 
     def _compute_crisp_params(self) -> npt.NDArray[np.float64]:
         features = self._feature_extractor.extract(self._calibration)
@@ -176,7 +295,9 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
     def prepare(self, circuit: QuantumCircuit) -> tuple[QuantumCircuit, NoiseModel]:
         """Build a fresh ``NoiseModel`` for ``circuit`` via the fuzzification strategy.
 
-        The returned circuit may differ from the input (pre/between
+        ``circuit`` must already be compiled to the physical basis represented
+        by the calibration's gate-length records. The returned circuit may
+        differ from the input (pre/between
         strategies transform the circuit; post-gate leaves it untouched).
         The returned NoiseModel is fresh — repeated calls do not
         accumulate errors.
@@ -194,16 +315,47 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
           *same* circuit object unmutated, and the pre/between strategies
           that will transform it are still stubs pending ADR-007. Copying
           now keeps callers correct when those land.
+
+        **Basis and qubit contract.** ``circuit`` is matched against the
+        eligibility policy by ``(instruction name, qubit tuple)``, where the
+        qubit tuple is the instruction's *positional* index in
+        ``circuit.qubits`` and the policy's tuple is a *physical* qubit index
+        from the calibration. The two agree only when the circuit is compiled
+        to the calibrated device with a trivial layout, which in practice
+        means transpiling at full device width or with an explicit
+        ``initial_layout``. A 2-qubit circuit handed in directly is matched
+        against physical qubits 0 and 1 whatever it was meant to run on.
+
+        Today that mismatch is benign in magnitude, because ``crisp_params``
+        is snapshot-global and the channel does not vary per qubit, so a
+        wrong index still yields the same error. It is not benign in
+        *presence*: a qubit the calibration does not cover is silently
+        ineligible. Per-qubit channels (ADR-013) would make it both.
+
+        A circuit that is not compiled to the calibrated physical basis
+        matches no eligible operation, so nothing is installed and the
+        caller silently simulates a noiseless circuit. That case warns via
+        :func:`_warn_if_nothing_was_installed` rather than raising, because
+        a noise-free circuit is legal; see that function for the trade-off.
         """
 
+        eligible_operations = self._eligible_operations
+
         def error_provider(gate: Instruction, qubits: tuple[int, ...]) -> QuantumError | None:
+            if (gate.name, qubits) not in eligible_operations:
+                return None
             try:
                 return self._channel_projector.project(self._crisp_params, gate.name, qubits)
             except (NotImplementedError, ValueError):
                 return None
 
         fresh_noise_model: NoiseModel = NoiseModel()
-        return self._fuzzification_strategy.install(circuit, fresh_noise_model, error_provider)
+        prepared_circuit, prepared_noise_model = self._fuzzification_strategy.install(
+            circuit, fresh_noise_model, error_provider
+        )
+        if not prepared_noise_model.noise_instructions:
+            _warn_if_nothing_was_installed(circuit, eligible_operations)
+        return prepared_circuit, prepared_noise_model
 
 
 class FuzzyNoiseModelEnsemble:
@@ -230,6 +382,8 @@ class FuzzyNoiseModelEnsemble:
         squashing: SquashingStrategy,
         channel_projector: ChannelProjector,
         fuzzification_strategy: FuzzificationStrategy,
+        *,
+        gate_eligibility_policy: GateEligibilityPolicy | None = None,
         ensemble_size: int = 32,
         rng: np.random.Generator | None = None,
     ) -> None:
@@ -244,6 +398,7 @@ class FuzzyNoiseModelEnsemble:
         self._squashing = squashing
         self._channel_projector = channel_projector
         self._fuzzification_strategy = fuzzification_strategy
+        self._gate_eligibility_policy = gate_eligibility_policy
 
     def __iter__(self) -> Iterator[FuzzyNoiseModel]:
         for _ in range(self._size):
@@ -255,6 +410,7 @@ class FuzzyNoiseModelEnsemble:
                 squashing=self._squashing,
                 channel_projector=self._channel_projector,
                 fuzzification_strategy=self._fuzzification_strategy,
+                gate_eligibility_policy=self._gate_eligibility_policy,
             )
 
     def __len__(self) -> int:

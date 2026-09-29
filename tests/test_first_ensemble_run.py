@@ -145,8 +145,8 @@ def test_run_ensemble_real_aer_one_qubit() -> None:
     members = generate_safe_ensemble(snapshot, n=1)
     assert len(members) == 1
 
-    qc = QuantumCircuit(1)
-    qc.h(0)
+    qc = QuantumCircuit(1, name="physical_sx")
+    qc.sx(0)
     qc.measure_all()
 
     _, prepared_nm = members[0].prepare(qc.copy())
@@ -164,7 +164,7 @@ def test_load_snapshot(tmp_path: Path) -> None:
         "backend": "ibm_fez",
         "timestamp": "2026-05-01T00:00:00Z",
         "schema_version": "1.0",
-        "properties": {"qubits": [[{"name": "T1", "value": 50e-6}]]},
+        "properties": {"qubits": [[{"name": "T1", "value": 50.0, "unit": "us"}]]},
         "target": None,
         "configuration": None,
     }

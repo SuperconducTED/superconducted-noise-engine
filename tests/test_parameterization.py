@@ -25,7 +25,10 @@ from scripts.compare_mf_placement import main as compare_mf_placement_main
 from scripts.compare_mf_placement import rule_count
 from scripts.first_ensemble_run import mf_centers
 
-from superconducted.calibration.features import BasicCalibrationVectorizer
+from superconducted.calibration.features import (
+    ArchiveUnitFeatureExtractor,
+    BasicCalibrationVectorizer,
+)
 from superconducted.channels.kraus import KrausChannelProjector, NoOpNormalization
 from superconducted.fuzzy.defuzzification import NieTanDefuzzifier, WeightedAverageDefuzzifier
 from superconducted.fuzzy.fuzzification import PostGateFuzzification
@@ -206,9 +209,9 @@ def _synthetic_snapshot(t1: float, t2: float, readout: float) -> CalibrationSnap
         properties={
             "qubits": [
                 [
-                    {"name": "T1", "value": t1},
-                    {"name": "T2", "value": t2},
-                    {"name": "readout_error", "value": readout},
+                    {"name": "T1", "value": t1, "unit": "us"},
+                    {"name": "T2", "value": t2, "unit": "us"},
+                    {"name": "readout_error", "value": readout, "unit": ""},
                 ]
             ]
         },
@@ -797,7 +800,7 @@ def test_zero_length_target_is_rejected() -> None:
 @pytest.fixture
 def clamp() -> ClampingFeatureExtractor:
     return ClampingFeatureExtractor(
-        BasicCalibrationVectorizer(),
+        ArchiveUnitFeatureExtractor(),
         np.array([100.0, 80.0, 0.01]),
         np.array([200.0, 120.0, 0.05]),
     )
@@ -850,8 +853,9 @@ def test_clamp_counter_arrays_are_copies(clamp: ClampingFeatureExtractor) -> Non
 
 
 def test_clamp_returns_a_fresh_array_and_does_not_mutate_inner() -> None:
-    class Recording(BasicCalibrationVectorizer):
+    class Recording(ArchiveUnitFeatureExtractor):
         def __init__(self) -> None:
+            super().__init__()
             self.last: npt.NDArray[np.float64] | None = None
 
         def extract(self, snapshot: CalibrationSnapshot) -> npt.NDArray[np.float64]:
@@ -912,7 +916,7 @@ def test_clamp_constructor_rejects_bad_bounds(
     lo: npt.NDArray[np.float64], hi: npt.NDArray[np.float64], match: str
 ) -> None:
     with pytest.raises(ValueError, match=match):
-        ClampingFeatureExtractor(BasicCalibrationVectorizer(), lo, hi)
+        ClampingFeatureExtractor(ArchiveUnitFeatureExtractor(), lo, hi)
 
 
 # --------------------------------------------------------------------------
@@ -1157,7 +1161,7 @@ def test_anchored_base_is_never_degenerate_on_the_archive(shape: type, defuzzifi
     rb = anchored_rule_base(mfs, target, anchors=anchors)
 
     lo, hi = _domain_box(samples)
-    clamp = ClampingFeatureExtractor(BasicCalibrationVectorizer(), lo, hi)
+    clamp = ClampingFeatureExtractor(ArchiveUnitFeatureExtractor(), lo, hi)
     raw_vectors = _committed_feature_vectors()
 
     biases = np.array([rule.consequent_params[:, -1] for rule in rb.rules])
@@ -1182,7 +1186,7 @@ def test_the_measured_clamp_rate_is_pinned() -> None:
     _require_pinned_survey()
     samples, _ = _committed_survey()
     lo, hi = _domain_box(samples)
-    clamp = ClampingFeatureExtractor(BasicCalibrationVectorizer(), lo, hi)
+    clamp = ClampingFeatureExtractor(ArchiveUnitFeatureExtractor(), lo, hi)
 
     vectors = _committed_feature_vectors()
     for row in vectors:
@@ -1214,7 +1218,7 @@ def test_the_ensemble_evaluates_an_out_of_range_snapshot_through_the_clamp() -> 
     )
 
     lo, hi = _domain_box(samples)
-    clamp = ClampingFeatureExtractor(BasicCalibrationVectorizer(), lo, hi)
+    clamp = ClampingFeatureExtractor(ArchiveUnitFeatureExtractor(), lo, hi)
 
     # Well outside the box on all three features, in both directions.
     outside = _synthetic_snapshot(5000.0, 1.0, 0.9)
@@ -1271,9 +1275,9 @@ def test_the_unwrapped_extractor_raises_where_the_clamp_saves_the_run(shape: typ
     }
 
     with pytest.raises(ZeroDivisionError):
-        FuzzyNoiseModel(feature_extractor=BasicCalibrationVectorizer(), **common)
+        FuzzyNoiseModel(feature_extractor=ArchiveUnitFeatureExtractor(), **common)
 
-    clamp = ClampingFeatureExtractor(BasicCalibrationVectorizer(), lo, hi)
+    clamp = ClampingFeatureExtractor(ArchiveUnitFeatureExtractor(), lo, hi)
     model = FuzzyNoiseModel(feature_extractor=clamp, **common)
 
     assert np.all(np.isfinite(model.crisp_params))

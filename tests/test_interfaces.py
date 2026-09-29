@@ -22,6 +22,7 @@ from superconducted.interfaces import (
     ChannelProjector,
     Defuzzifier,
     FuzzificationStrategy,
+    GateEligibilityPolicy,
     MembershipFunction,
     NormalizationStrategy,
     RuleBase,
@@ -41,6 +42,7 @@ from superconducted.types import (
 ABCS = [
     MembershipFunction,
     CalibrationFeatureExtractor,
+    GateEligibilityPolicy,
     FuzzificationStrategy,
     RuleBase,
     TSKTrainer,
@@ -117,6 +119,29 @@ def test_minimal_feature_extractor_stub() -> None:
             return ("zero",)
 
     assert StubExtractor().output_dim == 1
+
+
+def test_minimal_gate_eligibility_policy_stub() -> None:
+    class StubPolicy(GateEligibilityPolicy):
+        def eligible_operations(
+            self,
+            snapshot: CalibrationSnapshot,
+        ) -> frozenset[tuple[str, tuple[int, ...]]]:
+            return frozenset()
+
+    assert (
+        StubPolicy().eligible_operations(
+            CalibrationSnapshot(
+                backend="test",
+                timestamp=datetime(2026, 9, 15, tzinfo=UTC),
+                schema_version="1.0",
+                properties={},
+                target=None,
+                configuration=None,
+            )
+        )
+        == frozenset()
+    )
 
 
 def test_minimal_fuzzification_stub() -> None:
@@ -242,13 +267,13 @@ def test_package_docstring_counts_match_the_exported_surface() -> None:
         if dataclasses.is_dataclass(getattr(types, name))
         and getattr(types, name).__module__ == types.__name__
     ]
-    assert len(exported_abcs) == 10
+    assert len(exported_abcs) == 11
     assert len(value_types) == 8
     doc = superconducted.__doc__ or ""
-    assert "ten ABCs" in doc
+    assert "eleven ABCs" in doc
     assert "eight" in doc
     # Every ABC is re-exported from the package root; TSKTrainer was the one
-    # that was not, while the other nine were.
+    # that was not, while the other ten were.
     for declared in exported_abcs:
         assert declared.__name__ in superconducted.__all__
         assert getattr(superconducted, declared.__name__) is declared

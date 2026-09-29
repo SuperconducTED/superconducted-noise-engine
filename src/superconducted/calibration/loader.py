@@ -66,7 +66,12 @@ class CalibrationParseError(ValueError):
 # fields *in* this mapping, a unit mismatch is a hard parse error: the
 # loader scales by a fixed factor and a wrong unit silently corrupts
 # every downstream computation.
-_EXPECTED_UNITS: Final[Mapping[str, str]] = {
+#
+# Public rather than underscore-private: `calibration/features.py` validates
+# the same three fields against the same table (issue #66). One shared table
+# is the point, because two copies of "T1 is microseconds" is precisely the
+# class of defect that issue exists to close. Treat edits here as cross-module.
+EXPECTED_UNITS: Final[Mapping[str, str]] = {
     "T1": "us",
     "T2": "us",
     "readout_length": "ns",
@@ -77,8 +82,9 @@ _EXPECTED_UNITS: Final[Mapping[str, str]] = {
 }
 
 # Conversion factors from the source unit to SI (seconds) for time
-# fields. Dimensionless fields are stored as-is.
-_UNIT_SCALE: Final[Mapping[str, float]] = {
+# fields. Dimensionless fields are stored as-is. Public for the same reason
+# as EXPECTED_UNITS above.
+UNIT_SCALE: Final[Mapping[str, float]] = {
     "us": 1e-6,
     "ns": 1e-9,
     "": 1.0,
@@ -197,6 +203,49 @@ class ParsedFieldValue(NamedTuple):
     was_nan: bool
 
 
+def validate_unit_scale(
+    actual_unit: object,
+    expected_unit: str,
+    *,
+    context: str,
+    qubit_index: int,
+    field_name: str,
+    raw_value: object,
+) -> float:
+    """Validate an Nduv unit and return its SI scale.
+
+    Missing units (passed as ``None``) are mismatches, including on null
+    values. Both archive consumers use this check before parsing values.
+
+    Raises :class:`CalibrationParseError` when ``actual_unit`` differs from
+    ``expected_unit``, and also when ``expected_unit`` has no entry in
+    :data:`UNIT_SCALE`. The second case is a repository bug rather than a
+    bad document: it means :data:`EXPECTED_UNITS` gained a field whose unit
+    nothing can convert. It surfaces as this module's own error rather than
+    as a bare ``KeyError`` so that the promise made in
+    :class:`CalibrationParseError`'s docstring still holds for whoever makes
+    that edit, which the note on :data:`EXPECTED_UNITS` explicitly invites.
+
+    ``actual_unit`` and ``raw_value`` are typed ``object`` rather than
+    ``Any``: they arrive straight from parsed JSON and are only compared and
+    repr'd here, so ``object`` keeps ``--strict`` honest at the call sites
+    without costing anything.
+    """
+    if actual_unit != expected_unit:
+        raise CalibrationParseError(
+            f"{context}: qubit {qubit_index} field {field_name!r}: "
+            f"expected unit {expected_unit!r}, got {actual_unit!r} (value={raw_value!r})"
+        )
+    scale = UNIT_SCALE.get(expected_unit)
+    if scale is None:
+        raise CalibrationParseError(
+            f"{context}: qubit {qubit_index} field {field_name!r}: "
+            f"expected unit {expected_unit!r} has no SI conversion factor in UNIT_SCALE; "
+            "EXPECTED_UNITS and UNIT_SCALE have drifted apart"
+        )
+    return scale
+
+
 def _parse_value(
     raw_value: Any,
     expected_unit: str,
@@ -210,17 +259,16 @@ def _parse_value(
 
     Returns a :class:`ParsedFieldValue`. ``value`` is ``None`` for
     explicit-null inputs, ``float('nan')`` for NaN inputs, and otherwise
-    a finite float scaled by :data:`_UNIT_SCALE`.
+    a finite float scaled by :data:`UNIT_SCALE`.
     """
-    if actual_unit != expected_unit:
-        raise CalibrationParseError(
-            _format_error(
-                path,
-                qubit_index,
-                field_name,
-                f"expected unit {expected_unit!r}, got {actual_unit!r} (value={raw_value!r})",
-            )
-        )
+    scale = validate_unit_scale(
+        actual_unit,
+        expected_unit,
+        context=str(path),
+        qubit_index=qubit_index,
+        field_name=field_name,
+        raw_value=raw_value,
+    )
 
     if raw_value is None:
         return ParsedFieldValue(value=None, was_explicit_null=True, was_nan=False)
@@ -241,7 +289,7 @@ def _parse_value(
         return ParsedFieldValue(value=float("nan"), was_explicit_null=False, was_nan=True)
 
     return ParsedFieldValue(
-        value=as_float * _UNIT_SCALE[expected_unit],
+        value=as_float * scale,
         was_explicit_null=False,
         was_nan=False,
     )
@@ -311,7 +359,7 @@ def load_snapshot(path: str | pathlib.Path) -> ParsedCalibrationSnapshot:
 
     backend_name = str(data.get("backend") or properties.get("backend_name") or "")
 
-    absent_counts: dict[str, int] = dict.fromkeys(_EXPECTED_UNITS, 0)
+    absent_counts: dict[str, int] = dict.fromkeys(EXPECTED_UNITS, 0)
     explicit_null_counts: dict[str, int] = {}
     nan_counts: dict[str, int] = {}
 
@@ -324,7 +372,7 @@ def load_snapshot(path: str | pathlib.Path) -> ParsedCalibrationSnapshot:
                 by_name[name] = entry
 
         field_values: dict[str, float | None] = {}
-        for field_name, expected_unit in _EXPECTED_UNITS.items():
+        for field_name, expected_unit in EXPECTED_UNITS.items():
             entry = by_name.get(field_name)
             if entry is None:
                 absent_counts[field_name] += 1

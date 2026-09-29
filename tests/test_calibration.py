@@ -150,14 +150,14 @@ class TestBasicCalibrationVectorizer:
             properties={
                 "qubits": [
                     [
-                        {"name": "T1", "value": 100e-6},
-                        {"name": "T2", "value": float("nan")},
-                        {"name": "readout_error", "value": 0.01},
+                        {"name": "T1", "value": 100.0, "unit": "us"},
+                        {"name": "T2", "value": float("nan"), "unit": "us"},
+                        {"name": "readout_error", "unit": "", "value": 0.01},
                     ],
                     [
-                        {"name": "T1", "value": 90e-6},
-                        {"name": "T2", "value": 80e-6},
-                        {"name": "readout_error", "value": 0.02},
+                        {"name": "T1", "value": 90.0, "unit": "us"},
+                        {"name": "T2", "value": 80.0, "unit": "us"},
+                        {"name": "readout_error", "unit": "", "value": 0.02},
                     ],
                 ]
             },

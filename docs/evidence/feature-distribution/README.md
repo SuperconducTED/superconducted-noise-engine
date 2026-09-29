@@ -49,6 +49,42 @@ The vectorizer's own, with no scaling (NFR-8):
 `scripts/first_ensemble_run.py::FEATURE_SCALES` is in **seconds** and is not a
 source of truth for anything here or downstream.
 
+> **Unit correction · 2026-09-17 · Issue #66 (PR #99).** The two statements
+> above are superseded, and the original wording is left in place because this
+> file documents a dated artefact. Both were true only while
+> `BasicCalibrationVectorizer` was wrong.
+>
+> The units of this TSV are still microseconds for `mean_T1` and `mean_T2` and
+> dimensionless for `mean_readout_error`, so **every figure in this file is
+> unchanged**. What changed is where they come from. The vectorizer now emits
+> **SI seconds**, which is what ADR-010 ratifies, so the survey no longer
+> inherits the archive's units by accident: it converts back to them explicitly
+> through `calibration/features.py::ArchiveUnitFeatureExtractor`, which inverts
+> the loader's own conversion table rather than applying a hardcoded 1e6.
+> Swapping that wrapper for a bare `BasicCalibrationVectorizer` would move every
+> `mean_T1` and `mean_T2` column here by 1e6.
+>
+> `FEATURE_SCALES` is in seconds and **was correct all along**. Calling it "not
+> a source of truth" inverted the fault: the defect was the vectorizer's, and
+> issue #66 is the ticket that closes it. On a real archived snapshot the old
+> code drove all 27 rules of the ratified grid to a firing strength of exactly
+> zero, so `scripts/first_ensemble_run.py --snapshot` terminated rather than
+> producing a degenerate result.
+>
+> A fresh survey at this ref no longer reproduces this TSV **byte for byte**,
+> because scaling each per-qubit value before averaging is not bitwise the same
+> as averaging and then scaling. The command in Provenance above is therefore
+> exact at every digit registered here and inexact in the last bit or two. The
+> difference is bounded by NC-054: 733 of 975 rows, `mean_T1` and `mean_T2`
+> only, at most `4.3e-16` relative, 3 units in the last place. Every figure in
+> the Summary table below, and every `*_qubit_std` value, reproduces exactly;
+> the spread columns are byte-identical because they never pass through
+> `extract`. The TSV is **not** regenerated, per the append-only rule for dated
+> evidence.
+>
+> See `docs/implementations/2026-09-14-vectorizer-si-units.md` and ADR-010's
+> unit-boundary note in `docs/decisions.md`.
+
 `*_qubit_std` is the **sample** standard deviation, `numpy.std(v, ddof=1)`,
 empty when fewer than two per-qubit values are usable. `ddof=1` matches
 `calibration/features.py::per_qubit_spread` (#64), which becomes the single
