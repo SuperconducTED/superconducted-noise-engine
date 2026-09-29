@@ -40,6 +40,12 @@ attribution of any document. A dispatched backfill is counted as ``sweep``;
 there is none in the registered windows (every ``workflow_dispatch`` of
 ``calibration-poll.yml`` predates 2026-09-10).
 
+"Sweep" means the sweep *run*, not only its historical walk: ``poll_once``
+fetches the current document before any historical query
+(``src/superconducted/calibration/poller.py``), so a sweep run also files the
+live document under its ``poll_time``. That is one document per run at most,
+and NC-056 carries the bound it implies (15 of the 16 runs in its window).
+
 Window conventions
 ------------------
 

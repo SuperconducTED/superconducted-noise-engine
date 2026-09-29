@@ -105,3 +105,29 @@ all 27 missed ones.
   unknown until they are recovered, and until then there is no way to say whether any carries
   a state the archive lacks. NC-057 measures the state-level effect of the sweep itself.
 - Nothing about a quiet period. This is ordinary operation at about 32 documents a day.
+
+## As of 2026-09-29: after the backfill
+
+Everything above describes `calibration-data` @ `b70d7b4` and is left as it was written.
+
+**The 27 were recovered** by Actions run
+[36520763479](https://github.com/SuperconducTED/superconducted-noise-engine/actions/runs/36520763479),
+a `calibration-poll.yml` dispatch over the same window at the same 15 min step, filed at
+`calibration-data` @ `41ebadc`. Its ledger rows: 28 `new`, 90 `duplicate`, 111
+`duplicate-partial`, 0 `collision`. The 28 `new` are exactly the 27 `MISSED` stamps plus
+`20260929T031811000000Z`, the run's live document: `poll_once` fetches the current document
+before any historical query, and no hourly poll had fired since it was published at 03:18.
+
+**The measurement is now vacuous at the tip, as NC-058 predicted.** The command above, run
+at `41ebadc`, reads 227 captured, 0 `MISSED`, 227/227. Cite NC-058 at `b70d7b4`.
+
+**The backfill made the state question answerable.** With the 27 archived, their qubit
+digests are in `health/state-index.tsv`. Of the 48 device states first seen in the window,
+**one** is carried by no document other than the 27 (first carried by
+`20260918T025004000000Z`); the other 26 missed documents repeated a state already held. So
+the document leak of about 12% (NC-058) was a state leak of about 2% (NC-060, `<= 47/48`).
+
+**One correction to the attribution above.** Because a sweep run makes that live fetch too,
+its newest document may have come from the live call rather than the historical walk. The
+`first_filed_by` column reads "filed by a sweep run", which is what it measures; NC-056
+records the bound this puts on the hourly share.
