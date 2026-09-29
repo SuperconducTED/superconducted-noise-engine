@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-29 06:19 UTC · main at `110cfad8` (2026-09-27) · 1 days to 2026-09-30_
+_Generated 2026-09-29 07:20 UTC · main at `110cfad8` (2026-09-27) · 1 days to 2026-09-30_
 
 
 ## Milestones
@@ -92,7 +92,7 @@ _Generated 2026-09-29 06:19 UTC · main at `110cfad8` (2026-09-27) · 1 days to 
 1. Finish #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
    - The contract merged; only the advisor half of its definition of done is outstanding.
 1. Unstick PR #98 for #56: Clear the queue, keep the records honest
-   - Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
+   - No approving review yet: main's ruleset requires one.
 1. Unstick PR #105 for #54: Capture rate ~70% during normal operation
    - No approving review yet: main's ruleset requires one.
 
@@ -123,9 +123,7 @@ _Generated 2026-09-29 06:19 UTC · main at `110cfad8` (2026-09-27) · 1 days to 
 
 **#56: Clear the queue, keep the records honest** (@mertefesensoy)
 
-- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [critical] Every advisor item it carries (ADR-025 sign-off, ADR-009 flip, ADR-011 closure, ADR-014 read, the target ADR) needs Dr. Akba, who has no recorded answer to anything.
-- [high] Its green checks last ran 2026-09-16T12:39 against a main that has moved since; they are not evidence about the merge result.
 - [high] No approving review yet: main's ruleset requires one.
 - [high] #45 is still open; M0 is not closable until it is.
 - [high] #53's record (PR #78) is unmerged at CHANGES_REQUESTED.

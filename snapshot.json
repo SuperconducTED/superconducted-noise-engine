@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-29 06:19 UTC",
+  "generated": "2026-09-29 07:20 UTC",
   "main": {
     "sha": "110cfad8",
     "date": "2026-09-27",
@@ -179,7 +179,7 @@
           "reviewDecision": "REVIEW_REQUIRED",
           "state": "OPEN",
           "title": "Certify benchmark harness modes and calibration reference (#58) ",
-          "updatedAt": "2026-09-08T12:50:30Z",
+          "updatedAt": "2026-09-29T06:44:30Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/79",
           "headRefOid": "5400702579c31ad9d2a57a871db5f3cd358b197d",
           "additions": 3215,
@@ -869,16 +869,16 @@
           "createdAt": "2026-09-14T12:20:18Z",
           "headRefName": "mert/issue-56-circulation-and-m3-fallback",
           "isDraft": false,
-          "mergeable": "CONFLICTING",
+          "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 98,
           "reviewDecision": "REVIEW_REQUIRED",
           "state": "OPEN",
           "title": "docs: circulate the advisor batch, complete FR-10.4, land the M3 ledger fallback (#56)",
-          "updatedAt": "2026-09-16T12:38:57Z",
+          "updatedAt": "2026-09-29T06:49:29Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/98",
-          "headRefOid": "3dd7390bce546c4c355cb2c2971a7fcf332dff77",
-          "additions": 723,
+          "headRefOid": "0acb8e08880907c1bd730f24a473a3dde5027005",
+          "additions": 942,
           "deletions": 1,
           "file_count": 5,
           "latest_reviews": [],
@@ -887,37 +887,37 @@
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-16T12:39"
+              "started": "2026-09-29T06:49"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-16T12:39"
+              "started": "2026-09-29T06:49"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-16T12:39"
+              "started": "2026-09-29T06:49"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-16T12:39"
+              "started": "2026-09-29T06:49"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-16T12:39"
+              "started": "2026-09-29T06:49"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-09-16T12:39"
+              "started": "2026-09-29T06:50"
             }
           ],
-          "checks_newest": "2026-09-16T12:39",
+          "checks_newest": "2026-09-29T06:50",
           "checks_failing": [],
-          "checks_stale_vs_main": true
+          "checks_stale_vs_main": false
         }
       ],
       "merged_pr": null,
@@ -925,14 +925,6 @@
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
-        {
-          "severity": "critical",
-          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
-        },
-        {
-          "severity": "high",
-          "text": "Its green checks last ran 2026-09-16T12:39 against a main that has moved since; they are not evidence about the merge result."
-        },
         {
           "severity": "high",
           "text": "No approving review yet: main's ruleset requires one."
