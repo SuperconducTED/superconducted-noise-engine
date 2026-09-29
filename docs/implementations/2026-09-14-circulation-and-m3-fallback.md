@@ -372,3 +372,132 @@ figure where the implementation record above could say "none skipped, none faile
 that is one test too many. The line now reads 615 passing and 1 skipped and says why the
 skip happens, because overstating a green suite by one test to the person being asked to
 trust the numbers costs more than the one test is worth.
+
+## Merge of `main` @ `110cfad` · as-of 2026-09-29
+
+Everything above is left unedited. This section records the second time `main` moved
+under this PR, and why it was merged rather than rebased this time.
+
+### Why
+
+From 2026-09-16 to 2026-09-29 `main` took **36 commits**, three of them pull-request
+merges: #96 (Issue #73's physical-gate eligibility filter), #99 (the vectorizer's SI units)
+and #102 (Issue #48's dashboard heartbeat). #96 carried `a76c208`, which appended its own
+section to the advisor register, and that made this PR `DIRTY` again from 2026-09-20. The
+last `ci.yml` run on this PR is from 2026-09-16 at `3dd7390`, and its checkout was
+`3dd7390` merged into `125b796`. Nothing had tested this branch against a later `main`,
+while its checks kept reading green.
+
+**Merged, not rebased.** The 2026-09-16 rebase left `72cd567` unreachable from this
+branch, and the Verification section above still cites it as the head CI confirmed.
+`5d413d8` and `3dd7390`, which the rebase section cites, would have gone the same way. A
+merge keeps every SHA this document names reachable.
+
+### The conflict, and how it was resolved
+
+`docs/advisor/2026-09-03-decisions-from-akba.md`, one hunk: both sides appended a section
+after the same last line.
+
+| Side | Section | Placement |
+| --- | --- | --- |
+| `main` | `## Outstanding items, as of 2026-09-18`, item 15, from PR #96 | kept in place, byte-identical |
+| this branch | `## Circulation, as-of 2026-09-14` | appended after it, byte-identical |
+
+The resolution was built from the three index stages rather than by editing conflict
+markers: the merge base, then `main`'s appended bytes, then this branch's, with an
+assertion that `main`'s whole file is a byte prefix of the result. Measured against `main`,
+the file therefore only grows at its tail. The two sections sit in merge order rather than
+date order. The register's own `## Merge reconciliation, as-of 2026-09-29` section, appended
+in the commit after the merge, says why and records what a reader of both needs. The item
+with consequences is that item 15 is not among the cover's fourteen questions.
+
+`docs/decisions.md` and `docs/numerical-claims.md` merged without a conflict, which is not
+the same as merging correctly, so both were checked. The merged tree differs from `main` by
+exactly the lines this branch changes relative to `125b796`, file for file: the same five
+files, 723 insertions and 1 deletion. `scripts/check_ids.py` reports no collision, since
+this branch allocates no new ADR or NC id. `main` changed neither ADR-009's nor ADR-011's
+`**Status**` line, which both status blocks above rely on.
+
+### The values this PR consumes, re-checked at the merge
+
+| Value | At `125b796` | At `727d5cd` | Action |
+| --- | --- | --- | --- |
+| `count_trainable_parameters`, the configuration in use | `ParameterCount(premise=18, consequent=216, total=234)`, floor 1170 | **identical** | NC-045's Source, `Last verified` and Notes record the fourth verification |
+| NC-012, NC-025, NC-037, NC-044, NC-046, NC-047, NC-R001 | as registered | rows byte-identical | no edit; FR-10.4's 563 / 1170 stands |
+| NC-021, test-suite size | 616 | **701** on `main`, measured at `6630fca`; `727d5cd` collects **701** | NC-021 not edited, see below |
+| ADR records in `docs/decisions.md` | 26 | **27**: ADR-028 added by #96, `**Status**: Open.` | the cover's count left as written, see below |
+
+The parameter count was re-run, not assumed. The three merges changed six files under
+`src/` (`__init__.py`, `calibration/features.py`, `calibration/loader.py`,
+`fuzzy/fuzzification.py`, `integration/aer_factory.py`, `interfaces.py`), and
+`interfaces.py` is imported by the modules the count uses, so the count was re-run rather
+than argued from the diff. It did not move. `src/` at `727d5cd` is identical to `110cfad`
+because this PR changes only `docs/`.
+
+**NC-021 is not edited.** The row reads 701 at `6630fca` and says only `docs/` changed after
+that commit. This PR adds no test and changes only `docs/`, so that sentence stays true of
+the merged tree. The merge collects 701, as the row predicts. For the reason the rebase
+section gives, two open PRs editing one row is how value collisions happen, and a docs-only
+PR has nothing to add to it.
+
+**The cover's drifted figures are recorded here, not corrected.** On 2026-09-16 the cover's
+two NC-021 citations were corrected in place, on the argument that an unsent draft is not
+yet a record and the message was about to go out. That argument rested on an imminent send.
+As of this merge no send is recorded, and whether this message goes out as written is
+undecided. Refreshing its figures would be a judgement about the send, the same class of
+change the rebase section declined to make for the decision-by dates. What has drifted, for
+whoever decides the send:
+
+1. **NC-021.** The body line `Test paketi: 616 test; 615'i geçiyor, 1'i atlanıyor` names no
+   commit and is now 85 tests behind the register. The sourcing note's `the 616 tests are
+   NC-021 at main @ 125b796` names its commit and stays true as written.
+2. **The ADR count.** `26 karar kaydının 11'i hala "Open" ya da "Deferred"` was counted at
+   `004e14e`. At `727d5cd` there are 27 records; the added one, ADR-028, reads Open, so on
+   the cover's own reading 11 becomes 12. A re-measurer should know what that reading is:
+   counting every `**Status**` line matching `Open` or `Deferred` gives **12** at `004e14e`,
+   not 11. The cover's figure leaves out ADR-021, whose status line is `Accepted on the
+   constraint · Open on variance-injection design`, and a re-count must apply the same
+   exclusion or it will report a phantom change.
+3. **The ADRs awaiting him.** The cover names seven (ADR-009, 011, 014, 015, 016, 019, 027)
+   plus ADR-025's amendment (`artı ADR-025'in eki`). ADR-028 and the ADR-021 amendment,
+   register item 15, are now
+   also his, and the cover does not name them.
+4. **Unchanged in kind.** The 37 / 35 merged-PR counts are anchored to `004e14e` and are now
+   four pull requests behind `main` rather than one (#68, #96, #99, #102). The decision-by
+   dates have all passed but one, as the register's reconciliation section lists.
+
+### Verification at the merge commit
+
+At `727d5cd`, in a CPython 3.12.10 venv at a short path built from `requirements.txt` and
+`requirements-dev.txt`, pins checked before running (`numpy 2.4.4`, `ruff 0.15.12`,
+`mypy 1.20.2`, `qiskit 2.4.1`, `qiskit-aer 0.17.2`, `pytest 9.0.3`), with `PYTHONPATH`
+pointing at this tree's `src/`:
+
+```bash
+python -m ruff check .
+python -m ruff format --check .
+python scripts/check_ids.py
+python -m mypy --strict
+python -m pytest tests/ --collect-only -q -o addopts="" -p no:cacheprovider
+python -m pytest tests/ -q -p no:cacheprovider
+```
+
+| Check | Result |
+| --- | --- |
+| `ruff check` | `All checks passed!` |
+| `ruff format --check` | `68 files already formatted` |
+| `check_ids.py` | `No duplicate or colliding ADR / NC identifiers.` |
+| `mypy --strict` | `Success: no issues found in 38 source files` |
+| `pytest --collect-only` | **701 collected**, equal to NC-021 on `main` |
+| `pytest` | **701 passed in 236.35s**, none skipped, none failed; the archive-backed survey test ran because this checkout has the `calibration-data` blobs locally |
+
+**`mypy --strict` runs clean here.** The 2026-09-14 NOTE above said it could not run in a
+3.12 interpreter because of numpy's stubs. That failure came from a venv whose numpy had
+drifted off the `2.4.4` pin, not from the interpreter; on the pinned venv it passes.
+
+The parameter count was re-run with the same snippet as the Verification section above,
+and printed `ParameterCount(premise=18, consequent=216, total=234)`.
+
+These are laptop measurements and stay provisional. CI on `ubuntu-latest` is the authority
+for the pass count, and its run on the pushed head postdates this commit, so it is not
+recorded here.

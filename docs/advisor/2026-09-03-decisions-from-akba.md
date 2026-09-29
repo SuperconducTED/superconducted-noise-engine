@@ -250,3 +250,33 @@ then, so he is not asked to ratify a trainer that does not exist yet.
 No decision has been recorded. Every item in this register is Outstanding. The
 `## Decisions` section above remains empty, and the first entry appended under its marker
 will be the first advisor answer this project has ever recorded.
+
+## Merge reconciliation, as-of 2026-09-29
+
+Both sections above stand exactly as written. This one records why they sit in this order
+and what a reader of both needs to know, because neither was written with the other in
+view.
+
+**The order is merge order, not date order.** The 2026-09-18 section reached `main` with
+PR #96, merged 2026-09-20 as `c19a31f`. The 2026-09-14 section was written on PR #98's
+branch, which had not merged, and entered this file only when `main` @ `110cfad` was merged
+into that branch as `727d5cd`. It is placed after the 2026-09-18 section rather than above
+it so that, measured against `main`, this file only grows at its tail: text already on
+`main` is never displaced by text that was not.
+
+Three consequences follow for anyone reading both:
+
+1. **Item 15 is not in the 2026-09-14 message.** `2026-09-14-akba-batch-cover.md` asks
+   fourteen questions that map one-to-one onto items 1 to 14. Item 15 was registered four
+   days later and appears nowhere in it, so the 2026-09-18 section's "not yet circulated"
+   is its status, and sending that cover as committed would leave item 15 unasked.
+2. **Item 15 travels with item 10, but on two dates.** The 2026-09-14 table moved item 10
+   from 2026-09-16 to 2026-09-21. The 2026-09-18 section gave item 15 2026-09-23 without
+   reference to that move. Neither section is edited to reconcile them.
+3. **Every decision-by date in this file but one has passed.** As of 2026-09-29, items 1,
+   2, 10 and 12 (2026-09-21), items 3, 4, 6, 8, 13, 14 and 15 (2026-09-23) and item 5
+   (2026-09-26) are past; only item 7 (2026-09-30) is not. No send is recorded in this
+   file, and Issue #84's `@mertefesensoy has sent it to Dr. Akba` is unchecked. By the
+   2026-09-14 section's own rule, nothing here asserts a send. Re-dating any item is a
+   judgement about what to ask and when, which belongs to whoever decides the send; a merge
+   does not make it.
