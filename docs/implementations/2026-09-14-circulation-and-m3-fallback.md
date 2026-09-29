@@ -501,3 +501,63 @@ and printed `ParameterCount(premise=18, consequent=216, total=234)`.
 These are laptop measurements and stay provisional. CI on `ubuntu-latest` is the authority
 for the pass count, and its run on the pushed head postdates this commit, so it is not
 recorded here.
+
+## NC-045's `\times`, repaired · as-of 2026-09-29
+
+Everything above is left unedited. This section records one formatting repair to the NC-045
+row, made after the merge section above was pushed.
+
+### What was wrong
+
+NC-045 carried five **TAB characters** (byte 9) where `\times` belonged: `$234 <TAB>imes 5
+= 1170$` in the Value cell, and three more `\times` in the Notes' composition formula and
+`The $<TAB>imes 5$`. Something that wrote the row read the `\t` of `\times` as a TAB escape.
+It entered `main` in `725040c` with PR #87 (`c3c54f9`, 2026-09-09), and this PR's edits
+carried it along unchanged. No other row and no other tracked file has the pattern
+(`git grep -lP '\times'` returns nothing outside the register).
+
+It was a reader-facing defect, not a cosmetic one. TeX treats a TAB as whitespace, so the
+Value cell rendered as "234 *imes* 5". The fifth occurrence did not render as math at all:
+inline math cannot open on whitespace, so `$<TAB>imes 5$` was shown as literal text with
+its dollar signs.
+
+### Why here and not on `main`
+
+This PR already edits the NC-045 row. The same repair made on `main` while this PR is open
+would put two branches on one register row, which is the collision the rebase section above
+steps around for NC-021. After this PR merges, `main` has the repaired row.
+
+### How
+
+A byte-level replacement confined to the NC-045 row: each 5-byte `TAB imes` became the
+6-byte `\times`, so the file grows by exactly 5 bytes. The script asserted, before writing,
+that the row held exactly five TABs and every one was a mangled `\times`, that it held no
+correct `\times` yet, that no other line of the file changed, and that no TAB remains
+anywhere in the register afterwards. The needles were built from byte codes (`bytes([9])`,
+`bytes([92])`) rather than written as escaped string literals. A first attempt that wrote
+them as `"\times"` and `"\\times"` was caught by those assertions: one layer of escaping
+between the shell and Python collapsed `\\` to `\`, so both needles were the same TAB
+string and the replacement would have been a silent no-op. That is the same class of defect
+the repair removes.
+
+**Nothing was re-measured.** The value, the Source cell and `Last verified` are unchanged,
+because Rule 3 advances the date only when someone re-confirms the value against its
+source, and this edit does not.
+
+### Verification
+
+Rendered through GitHub's own Markdown renderer, `gh api markdown -f mode=gfm`, with the
+NC-045 row under the register's table header:
+
+| | Inline-math spans | Spans containing a TAB | Spans containing `\times` |
+| --- | --- | --- | --- |
+| Before, at `d2c4f36` | 6 | 3 | 0 |
+| After | 7 | 0 | 4, carrying all five `\times` |
+
+The seventh span is the `$\times 5$` that previously rendered as text.
+
+```bash
+grep -c $'\t' docs/numerical-claims.md        # 0
+git diff --word-diff=plain d2c4f36 -- docs/numerical-claims.md   # five [-<TAB>imes-]{+\times+}
+python scripts/check_ids.py
+```
