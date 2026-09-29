@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-28 05:36 UTC · main at `110cfad8` (2026-09-27) · 2 days to 2026-09-30_
+_Generated 2026-09-29 06:19 UTC · main at `110cfad8` (2026-09-27) · 1 days to 2026-09-30_
 
 
 ## Milestones
@@ -83,7 +83,7 @@ _Generated 2026-09-28 05:36 UTC · main at `110cfad8` (2026-09-27) · 2 days to 
 1. Start #60: ADR-014 hybrid ANFIS trainer
    - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.
 1. Unstick PR #103 for #74: first_ensemble_run must transpile before prepare
-   - No approving review yet: main's ruleset requires one.
+   - CHANGES_REQUESTED standing from @mertefesensoy (2026-09-28). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **Mert Efe Şensoy** (@mertefesensoy)
 
@@ -93,8 +93,8 @@ _Generated 2026-09-28 05:36 UTC · main at `110cfad8` (2026-09-27) · 2 days to 
    - The contract merged; only the advisor half of its definition of done is outstanding.
 1. Unstick PR #98 for #56: Clear the queue, keep the records honest
    - Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
-1. Start #54: Capture rate ~70% during normal operation
-   - All stated upstream dependencies are met.
+1. Unstick PR #105 for #54: Capture rate ~70% during normal operation
+   - No approving review yet: main's ruleset requires one.
 
 **Yiğit Arda Kaderoğlu** (@yigit-arda)
 
@@ -111,7 +111,9 @@ _Generated 2026-09-28 05:36 UTC · main at `110cfad8` (2026-09-27) · 2 days to 
 
 **#58: Certify the benchmark instruments** (@bengisucvd)
 
+- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [high] Still a draft: CI and reviewers will not treat it as ready.
+- [high] Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result.
 - [high] No approving review yet: main's ruleset requires one.
 - [medium] Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
 
@@ -128,9 +130,13 @@ _Generated 2026-09-28 05:36 UTC · main at `110cfad8` (2026-09-27) · 2 days to 
 - [high] #45 is still open; M0 is not closable until it is.
 - [high] #53's record (PR #78) is unmerged at CHANGES_REQUESTED.
 
-**#74: first_ensemble_run must transpile before prepare** (@BurakOztekin)
+**#54: Capture rate ~70% during normal operation** (@mertefesensoy)
 
 - [high] No approving review yet: main's ruleset requires one.
+
+**#74: first_ensemble_run must transpile before prepare** (@BurakOztekin)
+
+- [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-09-28). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **#75: Decide the LOCKED Kraus projector boundary** (@bengisucvd)
 
@@ -152,6 +158,7 @@ _Generated 2026-09-28 05:36 UTC · main at `110cfad8` (2026-09-27) · 2 days to 
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-29 | 12/28 | 6 | 4 | 4 | #54 Capture rate ~70% during normal operation: ready to start to in review |
 | 2026-09-28 | 12/28 | 7 | 3 | 4 | main moved to 110cfad8 |
 | 2026-09-27 | 12/28 | 7 | 3 | 4 | nothing moved |
 | 2026-09-26 | 12/28 | 7 | 3 | 4 | nothing moved |
