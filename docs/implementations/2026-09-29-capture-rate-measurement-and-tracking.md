@@ -148,11 +148,26 @@ ruff check . && ruff format --check . && python scripts/check_ids.py && mypy --s
 python -m pytest tests/ -q      # 740 passed at 4ae436e
 ```
 
-Still owed, and only possible after merge: the first scheduled `Calibration Pipeline Health`
-run must show a `capture` job that records `today - 3` (plus up to two catch-up days), a
-`health: record calibration capture` commit on `calibration-data`, and a `metrics.json`
-whose `capture_days_7d` is non-zero. Its `capture_7d` should sit near NC-058, about 88%, while
-the sweep stays at 1 h.
+**Pre-merge validation of the capture job, end to end.** `Calibration Pipeline Health` was
+dispatched from this branch (run
+[36523409692](https://github.com/SuperconducTED/superconducted-noise-engine/actions/runs/36523409692))
+with `data_branch` set to `scratch/issue-54-capture`, a ref pushed at the `calibration-data`
+tip `41ebadc`, so the real branch was not written. All jobs succeeded: `backfill` skipped,
+`capture` in 6 min 5 s of its 15, then `render`. The scratch branch gained
+`health: record calibration capture` followed by `health: refresh pipeline dashboard`.
+
+- It recorded 2026-09-26, 09-25 and 09-24, the newest settled day and two catch-up days, 108
+  rows, all with step `0.25` and the run's id.
+- Each day's held set equals the `health/state-index.tsv` stamps for that day (32, 31, 27).
+- None of its 18 `MISSED` stamps is on the branch at `41ebadc`, so they are real misses.
+- Two rows are `archived_not_served`, the first time a 15 min pass has failed to serve a held
+  document (88 of 90 on these days, against NC-059's 200 of 200): the upper-bound caveat,
+  observed.
+- `metrics.json` read `capture_7d` 0.833 (90 of 108) over 3 of 7 days, and the SVG line
+  rendered those figures. This is a validation reading, not a registered claim.
+
+Still owed after merge: the first scheduled run against `calibration-data` itself, which
+should show the same shape: a `capture` commit and a non-zero `capture_days_7d`.
 
 ## Related docs
 
