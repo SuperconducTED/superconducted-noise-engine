@@ -132,8 +132,99 @@ jobs:
           git commit -m 'health: backfill state index'
           ../source/scripts/push_with_retry.sh origin "$DATA_BRANCH"
 
-  render:
+  # Capture (#54): what share of the documents IBM publishes the archive holds.
+  # The ledger cannot answer that, because a document nobody fetched is in no
+  # ledger row, so this job asks IBM's own history. It enumerates each settled
+  # day read-only at a grid four times finer than the daily sweep's, diffs the
+  # stamps served against health/state-index.tsv, and appends the per-document
+  # result to health/capture.tsv, a file only this job writes (ADR-025
+  # amendment, 2026-09-29). NC-058 is the one-off measurement this repeats.
+  #
+  # It must never cost a render: the render is the heartbeat NC-053 reads, so an
+  # IBM outage here is a warning and the day stays pending for the next run.
+  capture:
     needs: backfill
+    if: ${{ always() && (needs.backfill.result == 'success' || needs.backfill.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    # Up to three days of about 97 queries each at 1.0-1.2 s (measured, NC-058's
+    # runs) is about six minutes, plus the install.
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      DATA_BRANCH: ${{ inputs.data_branch || 'calibration-data' }}
+      # Finer than the sweep's 1 h, or the enumeration shares its blind spots and
+      # finds nothing the sweep missed. 15 min served 200 of 200 held documents
+      # over 2026-09-13..20 (NC-059).
+      CAPTURE_STEP_HOURS: '0.25'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: source
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DATA_BRANCH }}
+          path: data
+          fetch-depth: 1
+          sparse-checkout: |
+            health
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: source/requirements.txt
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r source/requirements.txt
+          python -m pip install -e source --no-deps
+      - name: Enumerate settled days and record capture
+        env:
+          IBM_QUANTUM_TOKEN: ${{ secrets.IBM_QUANTUM_TOKEN }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          days=$(PYTHONPATH=source python source/scripts/capture_record.py pending \
+            --root data --today "$(date -u +%F)")
+          if [ -z "$days" ]; then
+            echo "every settled day is already recorded" | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          for day in $days; do
+            next=$(date -u -d "$day + 1 day" +%F)
+            rm -f served.txt
+            # The probe writes served.txt only when every query was honoured, so
+            # a failed day leaves nothing to record and stays pending.
+            if PYTHONPATH=source python source/scripts/probe_historical_properties.py \
+                --backend ibm_fez --served-out served.txt \
+                --enumerate "${day}T00:00:00Z" "${next}T00:00:00Z" "$CAPTURE_STEP_HOURS" \
+                > "probe-$day.log" 2>&1 && [ -f served.txt ]; then
+              PYTHONPATH=source python source/scripts/capture_record.py record \
+                --root data --day "$day" --served served.txt \
+                --step "$CAPTURE_STEP_HOURS" --run-id "$RUN_ID" | tee -a "$GITHUB_STEP_SUMMARY"
+            else
+              tail -n 5 "probe-$day.log"
+              echo "::warning::enumeration of $day did not complete; it stays pending"
+            fi
+          done
+      - name: Commit the capture record
+        run: |
+          cd data
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add health/capture.tsv 2>/dev/null || true
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'health: record calibration capture'
+          ../source/scripts/push_with_retry.sh origin "$DATA_BRANCH"
+
+  render:
+    # `capture` is listed so the render reads the day it just recorded, and is
+    # deliberately absent from the condition: a failed capture must still render.
+    needs: [backfill, capture]
     if: ${{ always() && (needs.backfill.result == 'success' || needs.backfill.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5

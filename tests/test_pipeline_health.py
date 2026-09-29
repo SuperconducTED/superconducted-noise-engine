@@ -6,13 +6,14 @@ import json
 import os
 import re
 import shutil
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any, ClassVar
 from xml.etree import ElementTree
 
 import pytest
 from scripts.backfill_state_index import main as backfill_main
+from scripts.capture_record import CaptureRow
 from scripts.pipeline_health import (
     FONT_PX,
     NOTHING_TO_PUBLISH,
@@ -124,7 +125,7 @@ def test_svg_is_deterministic_well_formed_and_safe() -> None:
     assert svg == render_svg(metrics)
     assert "<script" not in svg and "<foreignObject" not in svg and "href=" not in svg
     root = ElementTree.fromstring(svg)
-    assert root.attrib["viewBox"] == "0 0 900 480"
+    assert root.attrib["viewBox"] == "0 0 900 510"
     assert 'fill="#f8fafc"' in svg
     assert 'y="207"' in svg and 'y="222"' in svg
 
@@ -155,11 +156,15 @@ def test_cli_writes_deterministic_artifacts_from_index_and_ledger(tmp_path: Path
 
 
 NUMBER = re.compile(r"\d+(?:\.\d+)?")
+SVG_TEXT = "{http://www.w3.org/2000/svg}text"
+"""The namespaced tag, spelled out. ``Element.iter`` does not expand the ``{*}``
+wildcard (only the ``find`` family does), so ``iter("{*}text")`` matched nothing
+and every test built on these two helpers passed without looking at a node."""
 
 
 def _text_nodes(svg: str) -> list[str]:
     """Every rendered text node, which is where a figure becomes a published claim."""
-    return [node.text or "" for node in ElementTree.fromstring(svg).iter("{*}text")]
+    return [node.text or "" for node in ElementTree.fromstring(svg).iter(SVG_TEXT)]
 
 
 def _escapes_the_canvas(svg: str) -> list[str]:
@@ -167,7 +172,7 @@ def _escapes_the_canvas(svg: str) -> list[str]:
     root = ElementTree.fromstring(svg)
     canvas = float(root.attrib["viewBox"].split()[2])
     offenders = []
-    for node in root.iter("{*}text"):
+    for node in root.iter(SVG_TEXT):
         left, right = text_span(
             float(node.attrib["x"]),
             node.text or "",
@@ -196,13 +201,37 @@ def _renderable_numbers(metrics: dict[str, Any]) -> set[str]:
     for floor in metrics["floors"]:
         allowed.add(str(floor["value"]))
         allowed.update(NUMBER.findall(str(floor["label"])))
+    allowed.update({str(metrics["capture_span_days"]), str(metrics["capture_days_7d"])})
+    if metrics["capture_7d"] is not None:
+        allowed.add(f"{float(metrics['capture_7d']) * 100:.1f}")
+        allowed.update({str(metrics["capture_missed_7d"]), str(metrics["capture_exist_7d"])})
     return allowed
+
+
+def _capture_rows(day: date, statuses: dict[str, int]) -> list[CaptureRow]:
+    """``statuses`` counts per status for one enumerated day, as the capture job writes them."""
+    rows: list[CaptureRow] = []
+    for status, count in statuses.items():
+        for _ in range(count):
+            served, held = status != "archived_not_served", status != "MISSED"
+            minute = len(rows)
+            stem = f"{day:%Y%m%d}T{minute // 60:02d}{minute % 60:02d}00000000Z"
+            rows.append(CaptureRow(day, stem, served, held, status, "0.25", "1"))
+    return rows
 
 
 class TestConformance:
     """Issue #48 section 9.3: assert the output is fit to publish, not merely correct."""
 
-    def test_every_number_rendered_in_the_svg_is_traceable_to_metrics(self) -> None:
+    def test_the_text_helper_sees_every_text_node(self) -> None:
+        """Every check below reads text through `_text_nodes`; a helper that finds none
+
+        makes each of them pass vacuously, which is what `iter("{*}text")` did."""
+        svg = render_svg(build_metrics([], [], [("NC-012", 1170)], NOW))
+        assert len(_text_nodes(svg)) == svg.count("<text ") > 0
+
+    @pytest.mark.parametrize("measured", [False, True], ids=["no-capture", "capture"])
+    def test_every_number_rendered_in_the_svg_is_traceable_to_metrics(self, measured: bool) -> None:
         """A rendered figure nothing can trace is the failure the NC register exists to stop."""
         states = [
             StateRow("a.json", NOW - timedelta(days=3), "a", True),
@@ -212,9 +241,18 @@ class TestConformance:
         polls = [
             PollRow(NOW - timedelta(hours=hour), f"poll{hour}", "new") for hour in range(1, 40)
         ]
-        metrics = build_metrics(states, polls, [("NC-012", 1170), ("TanhBellMF", 1215)], NOW)
+        capture = (
+            _capture_rows(NOW.date() - timedelta(days=3), {"captured": 29, "MISSED": 4})
+            if measured
+            else []
+        )
+        metrics = build_metrics(
+            states, polls, [("NC-012", 1170), ("TanhBellMF", 1215)], NOW, capture
+        )
         allowed = _renderable_numbers(metrics)
-        for node in _text_nodes(render_svg(metrics)):
+        nodes = _text_nodes(render_svg(metrics))
+        assert nodes, "no text nodes read, so nothing below would be checked"
+        for node in nodes:
             unlicensed = set(NUMBER.findall(node)) - allowed
             assert not unlicensed, f"{node!r} renders {unlicensed}, absent from metrics.json"
 
@@ -536,6 +574,73 @@ class TestFloorsAreConfiguration:
         with pytest.raises(SystemExit) as excinfo:
             main(["--root", str(tmp_path)])
         assert excinfo.value.code == 2
+
+
+class TestCapture:
+    """#54: the one figure the ledger and the index cannot produce, read from capture.tsv."""
+
+    SETTLED: ClassVar[date] = NOW.date() - timedelta(days=3)
+
+    def _metrics(self, capture: list[CaptureRow]) -> dict[str, Any]:
+        return build_metrics([], [], [("NC-012", 1170)], NOW, capture)
+
+    def test_not_measured_is_none_not_zero(self) -> None:
+        """ "Not measured" and "captured nothing" must not share a value."""
+        metrics = self._metrics([])
+        assert metrics["capture_7d"] is None
+        assert metrics["capture_days_7d"] == 0
+        assert "not yet measured (0 of 7 days)" in render_svg(metrics)
+
+    def test_rate_is_held_over_proven_to_exist(self) -> None:
+        """archived_not_served is held; MISSED is not; all three exist."""
+        rows = _capture_rows(self.SETTLED, {"captured": 29, "MISSED": 4, "archived_not_served": 1})
+        metrics = self._metrics(rows)
+        assert metrics["capture_exist_7d"] == 34
+        assert metrics["capture_held_7d"] == 30
+        assert metrics["capture_missed_7d"] == 4
+        assert metrics["capture_7d"] == pytest.approx(30 / 34)
+        assert "88.2% (4 of 34 missed; 1 of 7 days measured)" in render_svg(metrics)
+
+    def test_a_day_outside_the_settled_span_is_not_current(self) -> None:
+        """A capture job that stops must drain the figure, not freeze it."""
+        stale = _capture_rows(self.SETTLED - timedelta(days=7), {"captured": 30})
+        assert self._metrics(stale)["capture_7d"] is None
+
+    def test_an_unsettled_day_is_not_counted(self) -> None:
+        """Days newer than the settle lag may still be recovered by a sweep."""
+        fresh = _capture_rows(self.SETTLED + timedelta(days=1), {"MISSED": 30})
+        assert self._metrics(fresh)["capture_days_7d"] == 0
+
+    def test_an_empty_day_counts_as_measured_but_proves_nothing(self) -> None:
+        empty = [CaptureRow(self.SETTLED, "-", False, False, "no_documents", "0.25", "1")]
+        metrics = self._metrics(empty)
+        assert metrics["capture_days_7d"] == 1
+        assert metrics["capture_7d"] is None
+
+    def test_the_capture_line_fits_the_canvas_at_its_widest(self) -> None:
+        rows = _capture_rows(self.SETTLED, {"captured": 999, "MISSED": 999})
+        for offset in range(1, 7):
+            rows += _capture_rows(self.SETTLED - timedelta(days=offset), {"captured": 1})
+        assert not _escapes_the_canvas(render_svg(self._metrics(rows)))
+
+    def test_the_cli_reads_capture_tsv_when_present(self, tmp_path: Path) -> None:
+        health = tmp_path / "health"
+        health.mkdir()
+        (health / "state-index.tsv").write_text(
+            "snapshot_filename\tlast_update_date\tqubit_digest\tis_new_state\n"
+            "a.json\t2026-09-04T10:00:00Z\ta\t1\n",
+            encoding="utf-8",
+        )
+        (health / "capture.tsv").write_text(
+            "day\tlast_update_date\tserved\theld\tstatus\tstep_hours\trun_id\n"
+            "2026-09-01\t20260901T010000000000Z\tyes\tyes\tcaptured\t0.25\t1\n"
+            "2026-09-01\t20260901T020000000000Z\tyes\tno\tMISSED\t0.25\t1\n",
+            encoding="utf-8",
+        )
+        args = ["--root", str(tmp_path), "--now", "2026-09-04T12:00:00Z", "--floor", "c=9"]
+        assert main(args) == 0
+        metrics = json.loads((health / "metrics.json").read_text(encoding="utf-8"))
+        assert metrics["capture_7d"] == 0.5 and metrics["capture_days_7d"] == 1
 
 
 class TestIndexParsing:
