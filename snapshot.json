@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-29 07:20 UTC",
+  "generated": "2026-09-30 08:51 UTC",
   "main": {
     "sha": "110cfad8",
     "date": "2026-09-27",
@@ -1199,7 +1199,7 @@
           "reviewDecision": "REVIEW_REQUIRED",
           "state": "OPEN",
           "title": "feat: measure calibration capture after the sweep, and track it daily (#54)",
-          "updatedAt": "2026-09-29T04:59:34Z",
+          "updatedAt": "2026-09-29T07:25:26Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/105",
           "headRefOid": "5b6223d732e45b998e289d36b65f7cc4eb9e5c22",
           "additions": 1881,
@@ -1676,7 +1676,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -24
+      "days_left": -25
     },
     {
       "id": "M1",
@@ -1718,7 +1718,7 @@
       "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -18
+      "days_left": -19
     },
     {
       "id": "M2",
@@ -1761,7 +1761,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -11
+      "days_left": -12
     },
     {
       "id": "M3",
@@ -1809,7 +1809,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": -4
+      "days_left": -5
     },
     {
       "id": "M4",
@@ -1847,7 +1847,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": 1
+      "days_left": 0
     }
   ]
 }

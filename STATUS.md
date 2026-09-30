@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-29 07:20 UTC · main at `110cfad8` (2026-09-27) · 1 days to 2026-09-30_
+_Generated 2026-09-30 08:51 UTC · main at `110cfad8` (2026-09-27) · 0 days to 2026-09-30_
 
 
 ## Milestones
@@ -156,6 +156,7 @@ _Generated 2026-09-29 07:20 UTC · main at `110cfad8` (2026-09-27) · 1 days to 
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-09-30 | 12/28 | 6 | 4 | 4 | nothing moved |
 | 2026-09-29 | 12/28 | 6 | 4 | 4 | #54 Capture rate ~70% during normal operation: ready to start to in review |
 | 2026-09-28 | 12/28 | 7 | 3 | 4 | main moved to 110cfad8 |
 | 2026-09-27 | 12/28 | 7 | 3 | 4 | nothing moved |
