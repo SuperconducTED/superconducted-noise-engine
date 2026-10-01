@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-30 08:51 UTC",
+  "generated": "2026-10-01 06:05 UTC",
   "main": {
     "sha": "110cfad8",
     "date": "2026-09-27",
@@ -1196,16 +1196,23 @@
           "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 105,
-          "reviewDecision": "REVIEW_REQUIRED",
+          "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "feat: measure calibration capture after the sweep, and track it daily (#54)",
-          "updatedAt": "2026-09-29T07:25:26Z",
+          "updatedAt": "2026-09-30T19:17:11Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/105",
           "headRefOid": "5b6223d732e45b998e289d36b65f7cc4eb9e5c22",
           "additions": 1881,
           "deletions": 14,
           "file_count": 18,
-          "latest_reviews": [],
+          "latest_reviews": [
+            {
+              "who": "BahaJarad",
+              "state": "CHANGES_REQUESTED",
+              "at": "2026-09-30",
+              "last_activity": "2026-09-30"
+            }
+          ],
           "looked_since": [],
           "checks": [
             {
@@ -1250,8 +1257,8 @@
       "unmet_soft": [],
       "blockers": [
         {
-          "severity": "high",
-          "text": "No approving review yet: main's ruleset requires one."
+          "severity": "critical",
+          "text": "CHANGES_REQUESTED standing from @BahaJarad (2026-09-30). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
         }
       ],
       "declared_unblocks": [],
@@ -1676,7 +1683,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -25
+      "days_left": -26
     },
     {
       "id": "M1",
@@ -1718,7 +1725,7 @@
       "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -19
+      "days_left": -20
     },
     {
       "id": "M2",
@@ -1761,7 +1768,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -12
+      "days_left": -13
     },
     {
       "id": "M3",
@@ -1809,7 +1816,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": -5
+      "days_left": -6
     },
     {
       "id": "M4",
@@ -1847,7 +1854,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": 0
+      "days_left": -1
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-09-30 08:51 UTC · main at `110cfad8` (2026-09-27) · 0 days to 2026-09-30_
+_Generated 2026-10-01 06:05 UTC · main at `110cfad8` (2026-09-27) · -1 days to 2026-09-30_
 
 
 ## Milestones
@@ -68,6 +68,8 @@ _Generated 2026-09-30 08:51 UTC · main at `110cfad8` (2026-09-27) · 0 days to 
 
 1. Start #63: Training-set builder (training/dataset.py)
    - The reader-and-dedup half has no hard dependency the plan recognises and W2 is where it starts; #60's first archive fit is waiting on it.
+1. Re-review PR #105 (#54: Capture rate ~70% during normal operation)
+   - Your CHANGES_REQUESTED from 2026-09-30 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 
 **Bengisu Cıvdı** (@bengisucvd)
 
@@ -94,7 +96,7 @@ _Generated 2026-09-30 08:51 UTC · main at `110cfad8` (2026-09-27) · 0 days to 
 1. Unstick PR #98 for #56: Clear the queue, keep the records honest
    - No approving review yet: main's ruleset requires one.
 1. Unstick PR #105 for #54: Capture rate ~70% during normal operation
-   - No approving review yet: main's ruleset requires one.
+   - CHANGES_REQUESTED standing from @BahaJarad (2026-09-30). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **Yiğit Arda Kaderoğlu** (@yigit-arda)
 
@@ -130,7 +132,7 @@ _Generated 2026-09-30 08:51 UTC · main at `110cfad8` (2026-09-27) · 0 days to 
 
 **#54: Capture rate ~70% during normal operation** (@mertefesensoy)
 
-- [high] No approving review yet: main's ruleset requires one.
+- [critical] CHANGES_REQUESTED standing from @BahaJarad (2026-09-30). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **#74: first_ensemble_run must transpile before prepare** (@BurakOztekin)
 
@@ -156,6 +158,7 @@ _Generated 2026-09-30 08:51 UTC · main at `110cfad8` (2026-09-27) · 0 days to 
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-10-01 | 12/28 | 6 | 4 | 4 | nothing moved |
 | 2026-09-30 | 12/28 | 6 | 4 | 4 | nothing moved |
 | 2026-09-29 | 12/28 | 6 | 4 | 4 | #54 Capture rate ~70% during normal operation: ready to start to in review |
 | 2026-09-28 | 12/28 | 7 | 3 | 4 | main moved to 110cfad8 |
