@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-10-01 06:05 UTC · main at `110cfad8` (2026-09-27) · -1 days to 2026-09-30_
+_Generated 2026-10-02 05:37 UTC · main at `110cfad8` (2026-09-27) · -2 days to 2026-09-30_
 
 
 ## Milestones
@@ -84,6 +84,8 @@ _Generated 2026-10-01 06:05 UTC · main at `110cfad8` (2026-09-27) · -1 days to
 
 1. Start #60: ADR-014 hybrid ANFIS trainer
    - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.
+1. Re-review PR #105 (#54: Capture rate ~70% during normal operation)
+   - Your CHANGES_REQUESTED from 2026-10-02 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Unstick PR #103 for #74: first_ensemble_run must transpile before prepare
    - CHANGES_REQUESTED standing from @mertefesensoy (2026-09-28). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
@@ -96,7 +98,7 @@ _Generated 2026-10-01 06:05 UTC · main at `110cfad8` (2026-09-27) · -1 days to
 1. Unstick PR #98 for #56: Clear the queue, keep the records honest
    - No approving review yet: main's ruleset requires one.
 1. Unstick PR #105 for #54: Capture rate ~70% during normal operation
-   - CHANGES_REQUESTED standing from @BahaJarad (2026-09-30). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+   - CHANGES_REQUESTED standing from @BahaJarad (2026-09-30), @BurakOztekin (2026-10-02). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **Yiğit Arda Kaderoğlu** (@yigit-arda)
 
@@ -132,7 +134,7 @@ _Generated 2026-10-01 06:05 UTC · main at `110cfad8` (2026-09-27) · -1 days to
 
 **#54: Capture rate ~70% during normal operation** (@mertefesensoy)
 
-- [critical] CHANGES_REQUESTED standing from @BahaJarad (2026-09-30). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+- [critical] CHANGES_REQUESTED standing from @BahaJarad (2026-09-30), @BurakOztekin (2026-10-02). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **#74: first_ensemble_run must transpile before prepare** (@BurakOztekin)
 
@@ -158,6 +160,7 @@ _Generated 2026-10-01 06:05 UTC · main at `110cfad8` (2026-09-27) · -1 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-10-02 | 12/28 | 6 | 4 | 4 | nothing moved |
 | 2026-10-01 | 12/28 | 6 | 4 | 4 | nothing moved |
 | 2026-09-30 | 12/28 | 6 | 4 | 4 | nothing moved |
 | 2026-09-29 | 12/28 | 6 | 4 | 4 | #54 Capture rate ~70% during normal operation: ready to start to in review |

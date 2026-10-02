@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-01 06:05 UTC",
+  "generated": "2026-10-02 05:37 UTC",
   "main": {
     "sha": "110cfad8",
     "date": "2026-09-27",
@@ -1199,10 +1199,10 @@
           "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "feat: measure calibration capture after the sweep, and track it daily (#54)",
-          "updatedAt": "2026-09-30T19:17:11Z",
+          "updatedAt": "2026-10-02T04:51:23Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/105",
-          "headRefOid": "5b6223d732e45b998e289d36b65f7cc4eb9e5c22",
-          "additions": 1881,
+          "headRefOid": "e39a158f1d16a98d76b199160f88cca4a815da0a",
+          "additions": 2292,
           "deletions": 14,
           "file_count": 18,
           "latest_reviews": [
@@ -1211,6 +1211,12 @@
               "state": "CHANGES_REQUESTED",
               "at": "2026-09-30",
               "last_activity": "2026-09-30"
+            },
+            {
+              "who": "BurakOztekin",
+              "state": "CHANGES_REQUESTED",
+              "at": "2026-10-02",
+              "last_activity": "2026-10-02"
             }
           ],
           "looked_since": [],
@@ -1218,35 +1224,35 @@
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-29T04:59"
+              "started": "2026-10-02T03:19"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-29T04:59"
+              "started": "2026-10-02T03:19"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-29T04:59"
+              "started": "2026-10-02T03:19"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-29T04:59"
+              "started": "2026-10-02T03:19"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-29T04:59"
+              "started": "2026-10-02T03:19"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-09-29T04:59"
+              "started": "2026-10-02T03:20"
             }
           ],
-          "checks_newest": "2026-09-29T04:59",
+          "checks_newest": "2026-10-02T03:20",
           "checks_failing": [],
           "checks_stale_vs_main": false
         }
@@ -1258,7 +1264,7 @@
       "blockers": [
         {
           "severity": "critical",
-          "text": "CHANGES_REQUESTED standing from @BahaJarad (2026-09-30). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
+          "text": "CHANGES_REQUESTED standing from @BahaJarad (2026-09-30), @BurakOztekin (2026-10-02). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
         }
       ],
       "declared_unblocks": [],
@@ -1392,12 +1398,12 @@
           "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "Transpile smoke circuits before preparing noise (#74)",
-          "updatedAt": "2026-09-28T20:52:23Z",
+          "updatedAt": "2026-10-02T02:13:31Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/103",
-          "headRefOid": "cc469023a19a6c772090975869d3fe5c41ee8e08",
-          "additions": 288,
-          "deletions": 26,
-          "file_count": 3,
+          "headRefOid": "b6693cee79a04071966a5b2cfe96d8a2d6929454",
+          "additions": 328,
+          "deletions": 30,
+          "file_count": 6,
           "latest_reviews": [
             {
               "who": "mertefesensoy",
@@ -1411,35 +1417,35 @@
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-22T21:11"
+              "started": "2026-10-02T01:58"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-22T21:11"
+              "started": "2026-10-02T01:58"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-22T21:11"
+              "started": "2026-10-02T01:58"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-22T21:11"
+              "started": "2026-10-02T01:58"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-22T21:11"
+              "started": "2026-10-02T01:58"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-09-22T21:12"
+              "started": "2026-10-02T01:58"
             }
           ],
-          "checks_newest": "2026-09-22T21:12",
+          "checks_newest": "2026-10-02T01:58",
           "checks_failing": [],
           "checks_stale_vs_main": false
         }
@@ -1683,7 +1689,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -26
+      "days_left": -27
     },
     {
       "id": "M1",
@@ -1725,7 +1731,7 @@
       "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -20
+      "days_left": -21
     },
     {
       "id": "M2",
@@ -1768,7 +1774,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -13
+      "days_left": -14
     },
     {
       "id": "M3",
@@ -1816,7 +1822,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": -6
+      "days_left": -7
     },
     {
       "id": "M4",
@@ -1854,7 +1860,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": -1
+      "days_left": -2
     }
   ]
 }
