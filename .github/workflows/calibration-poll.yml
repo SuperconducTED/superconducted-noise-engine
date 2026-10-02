@@ -66,6 +66,11 @@ env:
   SWEEP_CRON: '41 4 * * *'
   SWEEP_WINDOW_HOURS: '48'
   SWEEP_STEP_HOURS: '1'
+  # Must equal calibration-health.yml's value, which carries the derivation;
+  # NC-053 is the source of truth and a test pins the two files together. It
+  # lives here as well because this workflow is the one that can still speak
+  # when the renderer cannot -- see the freshness step at the end of this job.
+  DASHBOARD_MAX_AGE_HOURS: '48'
 
 concurrency:
   # A health render must not cancel a queued poll: absent ledger rows are the
@@ -165,3 +170,35 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           bash scripts/file_snapshots.sh
+
+      # The dead-man's switch for the DAILY renderer, carried by the HOURLY
+      # poller on purpose.
+      #
+      # calibration-health.yml publishes health/metrics.json and
+      # health/progress.svg. Nothing else on this branch records that it ran, so
+      # if it stops, the last dashboard it published stays on the branch looking
+      # exactly as it did the day it was written, and the archive can then
+      # degrade with a green graphic sitting over it. That is #45's failure mode
+      # relocated into the instrument built to prevent it. A renderer cannot
+      # report its own death, so the alarm has to be raised by something that is
+      # still running -- this job, twenty-four times a day.
+      #
+      # Free: file_snapshots.sh has already materialised the data branch in a
+      # worktree, so this is one file read against a path that is on disk. It
+      # touches nothing in the filing path.
+      #
+      # `|| true` is not decoration. This job's contract is to fetch calibration
+      # and file it; a stale dashboard must never cost a poll or a ledger row,
+      # which are the evidence ADR-025 exists to keep. It reports and yields.
+      - name: Check pipeline-health dashboard freshness
+        if: always()
+        env:
+          DATA_WORKTREE: ${{ runner.temp }}/calibration-data
+        run: |
+          if [ ! -d "$DATA_WORKTREE/health" ]; then
+            echo "::notice::no data worktree on disk, so dashboard freshness was not checked"
+            exit 0
+          fi
+          PYTHONPATH=. python scripts/check_dashboard_freshness.py \
+            --root "$DATA_WORKTREE" --max-age-hours "$DASHBOARD_MAX_AGE_HOURS" \
+            | tee -a "$GITHUB_STEP_SUMMARY" || true
