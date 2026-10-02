@@ -193,7 +193,7 @@ jobs:
         # the commit step below, which is `always()`, still pushes every day
         # already recorded; each record is an atomic replace, so a kill mid-write
         # leaves the previous file whole.
-        timeout-minutes: 11
+        timeout-minutes: 3
         env:
           IBM_QUANTUM_TOKEN: ${{ secrets.IBM_QUANTUM_TOKEN }}
           RUN_ID: ${{ github.run_id }}
