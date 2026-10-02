@@ -73,6 +73,8 @@ FEATURE_SCALES: Final[dict[str, tuple[float, float]]] = {
     "mean_readout_error": (0.0, 0.1),
 }
 NON_UNITARY_BASIS_GATES: Final[frozenset[str]] = frozenset({"measure", "measure_2", "reset"})
+_TRANSPILE_OPTIMIZATION_LEVEL: Final[int] = 1
+_TRANSPILE_SEED: Final[int] = 0
 
 
 def _calibration_basis_gates(snapshot: CalibrationSnapshot) -> tuple[str, ...]:
@@ -85,6 +87,7 @@ def _calibration_basis_gates(snapshot: CalibrationSnapshot) -> tuple[str, ...]:
         for entry in entries
         if isinstance(entry, dict)
         and isinstance((gate_name := entry.get("gate")), str)
+        and gate_name
         and gate_name not in NON_UNITARY_BASIS_GATES
     }
     if not basis_gates:
@@ -101,8 +104,8 @@ def _transpile_to_calibration_basis(
         transpile(
             circuit,
             basis_gates=list(basis_gates),
-            optimization_level=1,
-            seed_transpiler=0,
+            optimization_level=_TRANSPILE_OPTIMIZATION_LEVEL,
+            seed_transpiler=_TRANSPILE_SEED,
         ),
     )
 
@@ -128,6 +131,14 @@ def run_ensemble(
     basis_gates: Sequence[str],
 ) -> dict[str, int]:
     """Run each ensemble member and mean-aggregate counts per ADR-016.
+
+    ``basis_gates`` must be the calibrated unitary basis from
+    :func:`_calibration_basis_gates`. The source circuit is transpiled once
+    with ``optimization_level=1`` and ``seed_transpiler=0`` before every member
+    receives a copy through :meth:`FuzzyNoiseModel.prepare`. The circuit that
+    ``prepare`` returns is submitted directly: transpiling again would replace
+    its physical instructions and make attached errors fail to fire. This is
+    the ADR-021 amendment's compile-before-prepare contract.
 
     The ``simulator`` is caller-owned so the caller can warm it before
     timing and share one instance across calls (the smoke harness does
@@ -409,9 +420,7 @@ def main(argv: list[str] | None = None) -> None:
         print(f"  [n={n}] mf_placement={args.mf_placement} consequent_seed={consequent_seed}")
         # Warmup the shared AerSimulator instance to amortize C++ init out of
         # the timed run_ensemble calls below.
-        transpiled_w = _transpile_to_calibration_basis(circuit, basis_gates)
-        prep_circ_w, prep_nm_w = members[0].prepare(transpiled_w.copy())
-        simulator.run(prep_circ_w, shots=1, noise_model=prep_nm_w).result()
+        run_ensemble(members[:1], circuit, 1, simulator, basis_gates=basis_gates)
         t0 = time.perf_counter()
         counts = run_ensemble(
             members,
@@ -425,12 +434,9 @@ def main(argv: list[str] | None = None) -> None:
         print(f"  counts: {counts}\n")
 
     print("--- Sanity Check (Single Member, 8192 Shots) ---")
-    single_member = generate_safe_ensemble(snapshot, 1)[0]
+    single_member = generate_safe_ensemble(snapshot, 1, args.mf_placement)[0]
     t0_sanity = time.perf_counter()
-    transpiled_sanity = _transpile_to_calibration_basis(circuit, basis_gates)
-    prep_circ, prep_nm = single_member.prepare(transpiled_sanity.copy())
-    result_sanity = simulator.run(prep_circ, shots=8192, noise_model=prep_nm).result()
-    sanity_counts = result_sanity.get_counts()
+    sanity_counts = run_ensemble([single_member], circuit, 8192, simulator, basis_gates=basis_gates)
     elapsed_sanity = time.perf_counter() - t0_sanity
     print(f"Sanity Run elapsed={elapsed_sanity:.2f}s total_shots=8192")
     print(f"  counts: {sanity_counts}")

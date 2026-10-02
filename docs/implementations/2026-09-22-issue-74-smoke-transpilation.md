@@ -54,11 +54,14 @@ unchanged.
 
 ## Design decisions
 
-The basis is derived from all unitary gate names in calibration, rather than
-from the smaller set of positive-duration noise-eligible gates. Using the latter
-would incorrectly omit virtual `rz` from the compiler's target basis. Aer
-defaults are intentionally not used because they are not the calibrated device
-basis and can leave an `sx` error with no matching instruction.
+The basis is derived from all non-empty unitary gate names in calibration,
+rather than from the smaller set of positive-duration noise-eligible gates.
+Using the latter would incorrectly omit virtual `rz` from the compiler's target
+basis. Aer defaults are intentionally not used because they are not the
+calibrated device basis and can leave an `sx` error with no matching instruction.
+This matches #58's `benchmarks/reference.py` basis helper and fixed transpiler
+controls; when that helper reaches `main`, this script should be revisited to
+consume it instead of maintaining a parallel reader.
 
 This change is confined to the smoke script. `benchmarks/harness.py` remains
 Issue #58's scope, while `channels/kraus.py`, `fuzzy/tsk.py`, `types.py`, and
@@ -68,11 +71,20 @@ An explicit `initial_layout` was not added: the documented convention for this
 path is identity mapping without a coupling map. Instead, the width guard makes
 that assumption valid for the smoke script's positional-qubit matching.
 
+Without a coupling map, transpilation can select a multi-qubit pair that has no
+matching calibration gate record. ADR-028 currently makes this harmless because
+all multi-qubit operations remain ineligible for the engine's single-qubit
+channel; a future ADR-008 multi-qubit channel must revisit this positional versus
+physical mapping before relying on the smoke path.
+
 ## Verification
 
 - `.venv/bin/python -m pytest tests/test_first_ensemble_run.py -q`
 - `.venv/bin/python -m ruff check scripts/first_ensemble_run.py tests/test_first_ensemble_run.py`
 - `.venv/bin/python -m ruff format --check scripts/first_ensemble_run.py tests/test_first_ensemble_run.py`
+- `.venv/bin/python -m pytest tests/ -q`
+- `.venv/bin/python -m mypy --strict`
+- `.venv/bin/python scripts/check_ids.py`
 - `.venv/bin/python scripts/first_ensemble_run.py --qubits 2`
 - `.venv/bin/python scripts/first_ensemble_run.py --qubits 3` (fails before simulation)
 

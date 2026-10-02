@@ -90,6 +90,7 @@ def test_run_ensemble_aggregates_counts(monkeypatch: Any) -> None:
     assert members[0].prepared_circuits[0] is not members[1].prepared_circuits[0]
 
 
+@pytest.mark.slow
 def test_run_ensemble_sx_noise_fires_after_physical_basis_transpilation() -> None:
     """Regression for Issue #74: this fails when transpilation follows prepare()."""
     circuit = qft_circuit(1)
@@ -108,7 +109,8 @@ def test_run_ensemble_sx_noise_fires_after_physical_basis_transpilation() -> Non
         basis_gates=CALIBRATION_BASIS,
     )
 
-    assert with_sx_noise != noiseless
+    assert noiseless != with_sx_noise
+    assert with_sx_noise == {"0": 256}
 
 
 def test_calibration_basis_gates_excludes_nonunitary_operations() -> None:
@@ -117,6 +119,7 @@ def test_calibration_basis_gates_excludes_nonunitary_operations() -> None:
     snapshot = _synthetic_snapshot()
     snapshot.properties["gates"].extend(
         [
+            {"gate": "", "qubits": [0], "parameters": []},
             {"gate": "measure", "qubits": [0], "parameters": []},
             {"gate": "measure_2", "qubits": [0], "parameters": []},
             {"gate": "reset", "qubits": [0], "parameters": []},
@@ -232,7 +235,6 @@ def test_run_ensemble_real_aer_one_qubit() -> None:
     Closes the gap left by test_run_ensemble_aggregates_counts, which
     only verifies aggregation via DummySimulator monkeypatching.
     """
-    from qiskit_aer import AerSimulator
     from scripts.first_ensemble_run import (
         _synthetic_snapshot,
         generate_safe_ensemble,

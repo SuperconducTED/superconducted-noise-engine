@@ -157,6 +157,13 @@ to the 2026-09-09 table, because that table sits above this file's append marker
    land and rewriting it once. The amendment states the gap in a table instead
    of hiding it.
 
+**As of 2026-10-02.** Issue #74 / PR #103 satisfies this ordering for the
+smoke caller: it compiles once to the calibrated basis before `prepare()` and
+runs the returned circuit without another transpilation. The premise remains
+true for `benchmarks/harness.py`, which is Issue #58 / PR #79's scope. This
+narrows the recorded gap; it does not answer the ratification question or alter
+the item's Outstanding status.
+
 **It travels with item 10.** Item 10 is the `interfaces.py` `TSKTrainer` owner
 read: same file, same question of what an ABC's docstring may assert about a
 decision that is not yet recorded. `docs/team.md` makes Dr. Akba primary owner
