@@ -64,19 +64,34 @@ class TestStateCounterfactual:
     def test_state_seen_again_later_by_the_hourly_poll_was_not_lost(self) -> None:
         """Sweep recovers state X on the 12th; the hourly poll sees X again on the 20th."""
         index = [IndexRow(_stem(12, 3), "X"), IndexRow(_stem(20, 3), "X")]
-        first = {_stem(12, 3): cra.SWEEP, _stem(20, 3): cra.HOURLY}
-        assert cra.state_counterfactual(index, first, _at(11), _at(13)) == (1, 1, 0)
+        assert cra.state_counterfactual(index, {_stem(20, 3)}, _at(11), _at(13)) == (1, 1, 0)
 
     def test_state_carried_only_by_sweep_documents_is_sweep_only(self) -> None:
         index = [IndexRow(_stem(12, 3), "X"), IndexRow(_stem(12, 5), "Y")]
-        first = {_stem(12, 3): cra.SWEEP, _stem(12, 5): cra.HOURLY}
-        assert cra.state_counterfactual(index, first, _at(11), _at(13)) == (2, 1, 1)
+        assert cra.state_counterfactual(index, {_stem(12, 5)}, _at(11), _at(13)) == (2, 1, 1)
 
     def test_state_first_seen_before_the_window_is_not_new(self) -> None:
         """Earliest stamp decides, whatever order the index was appended in."""
         index = [IndexRow(_stem(12, 3), "X"), IndexRow(_stem(10, 3), "X")]
-        first = {_stem(12, 3): cra.SWEEP, _stem(10, 3): cra.SWEEP}
-        assert cra.state_counterfactual(index, first, _at(11), _at(13)) == (0, 0, 0)
+        assert cra.state_counterfactual(index, set(), _at(11), _at(13)) == (0, 0, 0)
+
+    def test_an_hourly_duplicate_of_a_sweep_filing_is_a_retrieval(self) -> None:
+        """PR #105 review: the sweep files X at 09:30, an hourly poll fetches X at 10:07.
+
+        The hourly row is a `duplicate`, so X's first filer is the sweep, but the
+        sampler did catch X: without the sweep that poll would have filed it. X's
+        state is therefore reachable from the hourly path, not sweep-only.
+        """
+        rows = [
+            _row("2026-09-12T09:30:00Z", _stem(12, 9)),
+            _row("2026-09-12T09:30:00Z", _stem(11, 20)),
+            _row("2026-09-12T10:07:00Z", _stem(12, 9), "duplicate"),
+        ]
+        assert cra.first_filed_by(rows)[_stem(12, 9)] == cra.SWEEP
+        hourly = cra.hourly_retrieved(rows)
+        assert hourly == {_stem(12, 9)}
+        index = [IndexRow(_stem(12, 9), "X")]
+        assert cra.state_counterfactual(index, hourly, _at(12), _at(13)) == (1, 1, 0)
 
 
 _CLEAN_LOG = (

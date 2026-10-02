@@ -398,7 +398,11 @@ def build_metrics(
         "capture_days_7d": captured.days,
         "capture_exist_7d": captured.exist,
         "capture_held_7d": captured.held,
+        # Missed by the unattended pipeline, including documents a person later
+        # recovered by dispatch; those are also counted on their own, so a manual
+        # backfill can never raise the capture rate (PR #105 review).
         "capture_missed_7d": captured.missed,
+        "capture_backfilled_7d": captured.backfilled,
     }
 
 

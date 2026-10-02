@@ -213,10 +213,12 @@ def _capture_rows(day: date, statuses: dict[str, int]) -> list[CaptureRow]:
     rows: list[CaptureRow] = []
     for status, count in statuses.items():
         for _ in range(count):
-            served, held = status != "archived_not_served", status != "MISSED"
+            served = status != "archived_not_served"
+            held = status != "MISSED"
+            retrieved = status in ("captured", "archived_not_served")
             minute = len(rows)
             stem = f"{day:%Y%m%d}T{minute // 60:02d}{minute % 60:02d}00000000Z"
-            rows.append(CaptureRow(day, stem, served, held, status, "0.25", "1"))
+            rows.append(CaptureRow(day, stem, served, held, retrieved, status, "0.25", "1"))
     return rows
 
 
@@ -601,6 +603,15 @@ class TestCapture:
         assert metrics["capture_7d"] == pytest.approx(30 / 34)
         assert "88.2% (4 of 34 missed; 1 of 7 days measured)" in render_svg(metrics)
 
+    def test_a_manually_backfilled_document_counts_as_missed(self) -> None:
+        """PR #105 review: held, but only because a person recovered it by dispatch."""
+        rows = _capture_rows(self.SETTLED, {"captured": 29, "MISSED": 2, "backfilled": 3})
+        metrics = self._metrics(rows)
+        assert metrics["capture_held_7d"] == 29
+        assert metrics["capture_missed_7d"] == 5
+        assert metrics["capture_backfilled_7d"] == 3
+        assert metrics["capture_7d"] == pytest.approx(29 / 34)
+
     def test_a_day_outside_the_settled_span_is_not_current(self) -> None:
         """A capture job that stops must drain the figure, not freeze it."""
         stale = _capture_rows(self.SETTLED - timedelta(days=7), {"captured": 30})
@@ -612,7 +623,7 @@ class TestCapture:
         assert self._metrics(fresh)["capture_days_7d"] == 0
 
     def test_an_empty_day_counts_as_measured_but_proves_nothing(self) -> None:
-        empty = [CaptureRow(self.SETTLED, "-", False, False, "no_documents", "0.25", "1")]
+        empty = [CaptureRow(self.SETTLED, "-", False, False, False, "no_documents", "0.25", "1")]
         metrics = self._metrics(empty)
         assert metrics["capture_days_7d"] == 1
         assert metrics["capture_7d"] is None
@@ -632,9 +643,9 @@ class TestCapture:
             encoding="utf-8",
         )
         (health / "capture.tsv").write_text(
-            "day\tlast_update_date\tserved\theld\tstatus\tstep_hours\trun_id\n"
-            "2026-09-01\t20260901T010000000000Z\tyes\tyes\tcaptured\t0.25\t1\n"
-            "2026-09-01\t20260901T020000000000Z\tyes\tno\tMISSED\t0.25\t1\n",
+            "day\tlast_update_date\tserved\theld\tretrieved\tstatus\tstep_hours\trun_id\n"
+            "2026-09-01\t20260901T010000000000Z\tyes\tyes\tyes\tcaptured\t0.25\t1\n"
+            "2026-09-01\t20260901T020000000000Z\tyes\tno\tno\tMISSED\t0.25\t1\n",
             encoding="utf-8",
         )
         args = ["--root", str(tmp_path), "--now", "2026-09-04T12:00:00Z", "--floor", "c=9"]

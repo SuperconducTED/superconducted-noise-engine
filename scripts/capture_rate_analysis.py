@@ -11,8 +11,9 @@ hourly poll and the daily sweep of #49, so the question now splits in three:
   on its own", which is the aliasing loss #54 described, measured without any
   IBM call because the ADR-025 ledger already records every filing.
 - **ledger, state counterfactual** -- Of the distinct device states first seen
-  in the window, how many are carried by *no* hourly-filed document anywhere
-  in the archive? Those states exist only because the sweep ran. This is the
+  in the window, how many are carried by *no* document any hourly poll
+  retrieved, anywhere in the archive? Those states exist only because the sweep
+  ran. This is the
   unit the training floor counts (NC-012), and it is smaller than the document
   loss because about half of all documents repeat the previous state.
 - **enumeration** -- Given the output of a read-only ``--enumerate`` probe
@@ -36,9 +37,10 @@ sweep writes one per distinct document its window returned.
 The rule misreads one case: a sweep whose whole window returned a single
 document, which needs IBM to publish nothing for 48 h. That row is then a
 ``duplicate`` of a document already held, never ``new``, so it cannot move the
-attribution of any document. A dispatched backfill is counted as ``sweep``;
-there is none in the registered windows (every ``workflow_dispatch`` of
-``calibration-poll.yml`` predates 2026-09-10).
+attribution of any document. A dispatched backfill is counted as ``sweep`` and
+a dispatched blank poll as ``hourly``; there is neither in the registered
+windows (the five ``workflow_dispatch`` runs of ``calibration-poll.yml`` filed at
+2026-09-02, 09-06 and 09-29, outside 2026-09-11..27).
 
 "Sweep" means the sweep *run*, not only its historical walk: ``poll_once``
 fetches the current document before any historical query
@@ -156,8 +158,21 @@ def ledger_split(
     )
 
 
+def hourly_retrieved(rows: Sequence[LedgerRow]) -> set[str]:
+    """Stems some hourly poll retrieved, whatever the ledger decided about them.
+
+    A ``duplicate`` row is a retrieval: the hourly poll fetched the document and
+    found it already filed, so without whatever filed it first, that poll would
+    have filed it itself. Counting only the first filer would call a document
+    the sweep filed at 09:30 and an hourly poll fetched again at 10:07 a sweep
+    exclusive, when the sampler did catch it (PR #105 review).
+    """
+    kind = classify_polls(rows)
+    return {row.stem for row in rows if kind[row.poll_time] == HOURLY}
+
+
 def state_counterfactual(
-    index: Sequence[IndexRow], first: dict[str, str], start: datetime, end: datetime
+    index: Sequence[IndexRow], hourly: set[str], start: datetime, end: datetime
 ) -> tuple[int, int, int]:
     """``(new_states, reachable_from_hourly, sweep_only)`` for states first seen in the window.
 
@@ -167,10 +182,11 @@ def state_counterfactual(
     index's own ``is_new_state`` column is decided by append order, which a
     sweep makes non-chronological.
 
-    A new state is *sweep-only* when no document filed by the hourly path, at
-    any stamp in the archive, carries its digest. Looking beyond the window
-    matters: a state the sweep recovered on Tuesday that the hourly poll saw
-    again on Thursday was not lost to the sampler, only delayed.
+    A new state is *sweep-only* when no document the hourly path retrieved
+    (``hourly_retrieved``: any decision, at any stamp in the archive) carries
+    its digest. Looking beyond the window matters: a state the sweep recovered
+    on Tuesday that the hourly poll saw again on Thursday was not lost to the
+    sampler, only delayed.
     """
     earliest: dict[str, datetime] = {}
     for row in index:
@@ -179,7 +195,7 @@ def state_counterfactual(
         if seen is None or moment < seen:
             earliest[row.digest] = moment
     new_states = {digest for digest, moment in earliest.items() if start <= moment < end}
-    hourly_states = {row.digest for row in index if first.get(row.stem) == HOURLY}
+    hourly_states = {row.digest for row in index if row.stem in hourly}
     reachable = new_states & hourly_states
     return len(new_states), len(reachable), len(new_states - reachable)
 
@@ -303,13 +319,16 @@ def _run_ledger(args: argparse.Namespace, repo: Path) -> int:
     print(f"  first filed by hourly poll : {_share(split[HOURLY], held)}")
     print(f"  first filed by sweep       : {_share(split[SWEEP], held)}")
     print(f"  unledgered                 : {split[UNLEDGERED]}")
+    hourly = hourly_retrieved(rows)
+    seen = sum(1 for stem in archive if start <= parse_stem(stem) < end and stem in hourly)
+    print(f"  retrieved by an hourly poll, any decision : {_share(seen, held)}")
     print(f"sweep poll instants inside the window: {len(in_run)}")
     new_states, reachable, sweep_only = state_counterfactual(
-        read_index(repo, args.ref), first, start, end
+        read_index(repo, args.ref), hourly, start, end
     )
     print(f"device states first seen in the window : {new_states}")
-    print(f"  carried by some hourly-filed document : {_share(reachable, new_states)}")
-    print(f"  carried ONLY by sweep-filed documents : {_share(sweep_only, new_states)}")
+    print(f"  carried by some hourly-retrieved document : {_share(reachable, new_states)}")
+    print(f"  carried by no hourly-retrieved document   : {_share(sweep_only, new_states)}")
     if split[UNLEDGERED]:
         print("\nATTRIBUTION INCOMPLETE: unledgered documents inside the window.")
         return 1
