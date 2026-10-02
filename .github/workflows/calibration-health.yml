@@ -148,7 +148,7 @@ jobs:
     runs-on: ubuntu-latest
     # Up to three days of about 97 queries each at 1.0-1.2 s (measured, NC-058's
     # runs) is about six minutes, plus the install.
-    timeout-minutes: 15
+    timeout-minutes: 3
     permissions:
       contents: write
     env:
