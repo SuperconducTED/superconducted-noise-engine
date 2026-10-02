@@ -177,3 +177,31 @@ should show the same shape: a `capture` commit and a non-zero `capture_days_7d`.
 - ADR-025 and its amendments in `docs/decisions.md`
 - `docs/evidence/capture-rate-2026-09/README.md`; `docs/evidence/aug-gap-enumeration/README.md`
 - `docs/implementations/2026-09-17-dashboard-heartbeat-and-freshness-alarm.md`
+
+## Review round 1 (2026-10-02)
+
+Two reviews requested changes on PR #105, with three findings. Each was reproduced before it
+was fixed, and each fix was mutation-checked: the guard pinned for it was broken on purpose,
+seen to fail, and restored byte-identical.
+
+| # | Reviewer | Finding | Reproduced | Fix |
+| --- | --- | --- | --- | --- |
+| 1 | Baha | The sweep-only counterfactual counted a state as reachable from the hourly path only through documents the hourly poll *first* filed, so a later hourly `duplicate` of a sweep filing read as sweep-only. | Correct as a definition; on the data it changes nothing: none of the 222 sweep-first documents at `b70d7b4` was later fetched by an hourly poll, so NC-056 (214 of 436) and NC-057 (24 of 114) stand, recorded in both rows. | `hourly_retrieved`: every hourly ledger row, any decision. |
+| 2 | Baha | Days already measured were lost when the job timed out, because the commit ran only after the whole loop. | For real, on the old code, run [36958446803](https://github.com/SuperconducTED/superconducted-noise-engine/actions/runs/36958446803): day 09-29 measured in the log, job cancelled during day 2, commit skipped, no `capture.tsv` on the branch. | The enumeration step has its own timeout (11 min) inside the job's (15), the commit step runs `always()`, and every write is an atomic replace. |
+| 3 | Burak | A manual backfill dispatched before the job runs files the documents the pipeline missed, and a diff against the archive then records them as captured, permanently. | Present in live data: the 09-29 backfill dispatch filed `20260929T031811` first. | Capture is now judged against what **scheduled** runs retrieved (a new `retrieved` column); a document held only through a dispatch is `backfilled` and counts as missed. Dispatches come from the Actions API; 549 of 549 ledger poll times at `7bc549d` fall inside exactly one serialised run. |
+
+Findings 1 and 3 needed each other. The document `20260929T031811` was first filed by a
+dispatch, then fetched twice more by the scheduled sweep (`duplicate-partial`), so the
+pipeline did catch it. "First filer" would call it a dispatch's; "exclude whatever a dispatch
+filed" would call it missed. Only "retrieved by a scheduled run, with any decision" calls it
+captured, and the recorded row says exactly that.
+
+**Verified for real.** Run
+[36959157587](https://github.com/SuperconducTED/superconducted-noise-engine/actions/runs/36959157587),
+the fixed code with the enumeration step's timeout cut to 3 minutes, against the same scratch
+data branch the reproduction used: the step timed out after measuring 09-29 and 09-28, the
+`always()` commit pushed both (`health: record calibration capture`), and the render followed.
+`20260929T031811` was recorded `retrieved=yes`, `captured`.
+
+**Gates after the round:** `ruff check`, `ruff format --check`, `scripts/check_ids.py`,
+`mypy --strict` clean; the full suite figure is in the commit that records it.

@@ -1473,19 +1473,31 @@ measured once and never again is the failure #48 exists to end, so it is now mea
 **Amendment.** One file is added to the `health/` tree:
 
     health/capture.tsv
-      day <TAB> last_update_date <TAB> served <TAB> held <TAB> status <TAB> step_hours <TAB> run_id
+      day <TAB> last_update_date <TAB> served <TAB> held <TAB> retrieved <TAB> status <TAB> step_hours <TAB> run_id
 
-Append-only, one row per document proven to exist on an enumerated UTC day. `status` is
-`captured`, `MISSED` (IBM serves it and the archive does not hold it) or
-`archived_not_served`, the vocabulary of the committed evidence TSVs, plus `no_documents`,
-one sentinel row for a day on which nothing existed, so that an empty day is recorded
-instead of re-enumerated forever. Its writer is a new `capture` job in
+Append-only, one row per document proven to exist on an enumerated UTC day. What it
+measures is what the **unattended** pipeline retrieved, not what the archive holds: a
+document is `retrieved` when a ledger row from a *scheduled* run names it, with any
+decision, since a scheduled run that found a document already filed would otherwise have
+filed it. A row belongs to a dispatch when its `poll_time_utc` falls inside the run window
+of a `workflow_dispatch` run of `calibration-poll.yml`, read from the Actions API; the
+workflow's concurrency group serialises its runs, and 549 of 549 ledger poll times at
+`calibration-data` @ `7bc549d` fell inside exactly one run. `status` is `captured`,
+`MISSED` (IBM serves it and the archive does not hold it) or `archived_not_served`, the
+vocabulary of the committed evidence TSVs, plus `backfilled` (held only because a dispatch
+filed it, counted as missed, so a manual backfill can never raise the figure) and
+`no_documents`, one sentinel row for a day on which nothing existed, so that an empty day
+is recorded instead of re-enumerated forever. Both `backfilled` and the "any decision"
+rule come from the PR #105 review, as does the next guarantee: a day measured before the
+job is stopped reaches the branch, because the enumeration step has its own timeout inside
+the job's, the commit step runs `always()`, and every write is an atomic file replace. Its writer is a new `capture` job in
 `calibration-health.yml`, which enumerates each *settled* day (`today - 3`, the newest day
 both of its daily sweeps have covered) at 15 minutes, finer than the sweep's 1 h so that it
 does not share the sweep's blind spots, and catches up at most three missed days per run.
 It is the only writer of this file, which keeps `scripts/push_with_retry.sh`'s
 one-tree-per-writer replay rule intact. `render` reads it and publishes `capture_7d` with
-the evidence it rests on (`capture_days_7d`, `capture_exist_7d`, `capture_missed_7d`), and
+the evidence it rests on (`capture_days_7d`, `capture_exist_7d`, `capture_missed_7d`,
+`capture_backfilled_7d`), and
 a failed capture never costs the render, because the render is the heartbeat NC-053 reads.
 
 The job records and never recovers: a `MISSED` row names a document still inside the 60-day
@@ -1495,7 +1507,7 @@ became vacuous.
 
 | | |
 | --- | --- |
-| **Ledger semantics** | Unchanged. No existing file, row, column, unit or decision vocabulary is redefined; the ledger, `health/state-index.tsv` (which the job only reads) and NC-025's definition are untouched. What changes is that the branch gains a third writer and a file only it writes. |
+| **Ledger semantics** | Unchanged. No existing file, row, column, unit or decision vocabulary is redefined; the ledger and `health/state-index.tsv`, which the job only reads, and NC-025's definition are untouched. What changes is that the branch gains a third writer and a file only it writes. |
 | **Advisor sign-off** | Not sought, on the same reading as the 2026-09-17 amendment above, and **recorded as a question rather than assumed** for the same reason: the 2026-09-05 amendment is still Open on this test. If the reviewer reads a new `health/` file as ledger semantics, this needs that amendment's routing and must not merge before it. |
 | **Reversal cost** | Remove the `capture` job and the `needs` entry. `health/capture.tsv` stays on the branch as history; the renderer reads a missing or stale file as "not yet measured", never as zero. |
 
