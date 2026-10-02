@@ -1460,6 +1460,57 @@ poll or the ledger row that makes scheduler degradation visible.
 | **Advisor sign-off** | `docs/team.md` requires Dr. Akba's out-of-band sign-off for changes that touch ADR ledger semantics. On the reading above this does not, so none was sought. **Recorded here as a question rather than assumed**, because the 2026-09-05 amendment is itself still Open on that exact test and a second silent judgement call on the same ADR is what this file exists to prevent. If the reviewer reads the `health/` commit contract as ledger semantics, this needs the same routing as that amendment and must not be merged before it. |
 | **Reversal cost** | One revert of the workflow step. No data loss, no rewrite, no dispatch: the extra commits are additive and any already made stay valid. |
 
+### ADR-025 amendment, 2026-09-29: the capture record
+
+**Context.** Issue #54 asked what share of the calibration documents IBM publishes the
+archive captures. The ledger this ADR defines cannot answer it: a row exists only for a
+document some poll fetched, so a document nobody fetched is absent from every ratio the
+ledger can form. NC-058 answered it once, by enumerating IBM's own history for
+2026-09-13..20 read-only and diffing the result against the archive: `<= 88.1%` with the
+daily sweep live, 27 documents missed, every one superseded within 45 minutes. A figure
+measured once and never again is the failure #48 exists to end, so it is now measured daily.
+
+**Amendment.** One file is added to the `health/` tree:
+
+    health/capture.tsv
+      day <TAB> last_update_date <TAB> served <TAB> held <TAB> retrieved <TAB> status <TAB> step_hours <TAB> run_id
+
+Append-only, one row per document proven to exist on an enumerated UTC day. What it
+measures is what the **unattended** pipeline retrieved, not what the archive holds: a
+document is `retrieved` when a ledger row from a *scheduled* run names it, with any
+decision, since a scheduled run that found a document already filed would otherwise have
+filed it. A row belongs to a dispatch when its `poll_time_utc` falls inside the run window
+of a `workflow_dispatch` run of `calibration-poll.yml`, read from the Actions API; the
+workflow's concurrency group serialises its runs, and 549 of 549 ledger poll times at
+`calibration-data` @ `7bc549d` fell inside exactly one run. `status` is `captured`,
+`MISSED` (IBM serves it and the archive does not hold it) or `archived_not_served`, the
+vocabulary of the committed evidence TSVs, plus `backfilled` (held only because a dispatch
+filed it, counted as missed, so a manual backfill can never raise the figure) and
+`no_documents`, one sentinel row for a day on which nothing existed, so that an empty day
+is recorded instead of re-enumerated forever. Both `backfilled` and the "any decision"
+rule come from the PR #105 review, as does the next guarantee: a day measured before the
+job is stopped reaches the branch, because the enumeration step has its own timeout inside
+the job's, the commit step runs `always()`, and every write is an atomic file replace. Its writer is a new `capture` job in
+`calibration-health.yml`, which enumerates each *settled* day (`today - 3`, the newest day
+both of its daily sweeps have covered) at 15 minutes, finer than the sweep's 1 h so that it
+does not share the sweep's blind spots, and catches up at most three missed days per run.
+It is the only writer of this file, which keeps `scripts/push_with_retry.sh`'s
+one-tree-per-writer replay rule intact. `render` reads it and publishes `capture_7d` with
+the evidence it rests on (`capture_days_7d`, `capture_exist_7d`, `capture_missed_7d`,
+`capture_backfilled_7d`), and
+a failed capture never costs the render, because the render is the heartbeat NC-053 reads.
+
+The job records and never recovers: a `MISSED` row names a document still inside the 60-day
+retention (NC-026) and leaves the decision to backfill it to a person. A job that healed
+what it measured would make its own figure read 100% by construction, which is how NC-032
+became vacuous.
+
+| | |
+| --- | --- |
+| **Ledger semantics** | Unchanged. No existing file, row, column, unit or decision vocabulary is redefined; the ledger and `health/state-index.tsv`, which the job only reads, and NC-025's definition are untouched. What changes is that the branch gains a third writer and a file only it writes. |
+| **Advisor sign-off** | Not sought, on the same reading as the 2026-09-17 amendment above, and **recorded as a question rather than assumed** for the same reason: the 2026-09-05 amendment is still Open on this test. If the reviewer reads a new `health/` file as ledger semantics, this needs that amendment's routing and must not merge before it. |
+| **Reversal cost** | Remove the `capture` job and the `needs` entry. `health/capture.tsv` stays on the branch as history; the renderer reads a missing or stale file as "not yet measured", never as zero. |
+
 ---
 
 ## ADR-027 — Calibration training target

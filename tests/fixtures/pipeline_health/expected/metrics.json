@@ -1,4 +1,11 @@
 {
+  "capture_7d": null,
+  "capture_backfilled_7d": 0,
+  "capture_days_7d": 0,
+  "capture_exist_7d": 0,
+  "capture_held_7d": 0,
+  "capture_missed_7d": 0,
+  "capture_span_days": 7,
   "documents_total": 4,
   "duplication_ratio": 0.5,
   "floors": [
