@@ -243,6 +243,18 @@ argument this configuration does not support.
 flipping the `**Status**` line with its own dated block. It is not cleared by the memo
 landing, by the ablation running, or by the passage of 2026-09-23.
 
+**As-of 2026-10-03.** The send this block waited on will not happen. On 2026-09-29 the
+lead replaced the batched e-mail with team decisions posted on Issue #84, and he now
+approves those decisions in the advisor role (decisions register, `## Advisor loop
+reshaped, as-of 2026-10-03`). Dr. Akba approved, in person between 2026-09-29 and
+2026-10-02, the decisions of File 02, which argues this ADR, as they were presented to
+him. That approval is recorded in the register; it flips nothing here. ADR-009 stays
+**Open** and still needs its evidence. The table above names Issue #62's table and Issue
+#60's memo; File 02's approved decisions make a time-split drift/coverage test the primary
+evidence, with #62's single-snapshot table supporting, and keep this ADR's own overturn
+clause (T1 wins unless IT2 beats both Gaussian T1 and a parameter-matched T1). The flip
+lands with that evidence and the lead's recorded approval, tracked in Issue #109.
+
 
 ---
 
@@ -349,6 +361,14 @@ rule base whose type nobody has decided.
 **What clears this block.** Issue #61's measurement, then Dr. Akba's ratification appended
 to the decisions register, then the closure text as its own dated block here. It is not
 cleared by a review, a merge, or the passage of 2026-09-23.
+
+**As-of 2026-10-03.** As under ADR-009's block: no e-mail will be sent. File 02 argues
+this ADR alongside ADR-009, and its decisions were approved by Dr. Akba in person between
+2026-09-29 and 2026-10-02, as presented. That approval is recorded in the decisions
+register and closes nothing here. ADR-011 stays **Open** and still needs its evidence:
+the table above names Issue #61's measurement, and File 02's approved decision (Q2) settles
+the point reducer by a pre-registered spike. The closure lands with that evidence, after
+ADR-009, on the lead's recorded approval, tracked in Issue #109.
 
 
 ---

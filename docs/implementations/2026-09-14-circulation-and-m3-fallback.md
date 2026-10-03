@@ -561,3 +561,13 @@ grep -c $'\t' docs/numerical-claims.md        # 0
 git diff --word-diff=plain d2c4f36 -- docs/numerical-claims.md   # five [-<TAB>imes-]{+\times+}
 python scripts/check_ids.py
 ```
+
+## The circulation plan, superseded · as-of 2026-10-03
+
+Everything above stands as the record of the 2026-09-14 plan. That plan was overtaken
+before it executed. The e-mail was never sent. On 2026-09-29 the lead replaced it with
+team decisions posted on Issue #84 and approved by him in the advisor role, and Dr. Akba
+approved that process and the six files' decisions in person between 2026-09-29 and
+2026-10-02. The FR-10.4 note and the NC-045 repair above are unaffected. What changed, and
+why, is recorded in
+`docs/implementations/2026-10-03-advisor-loop-reshape-and-m3-as-of.md`.

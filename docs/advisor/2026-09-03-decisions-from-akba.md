@@ -280,3 +280,76 @@ Three consequences follow for anyone reading both:
    2026-09-14 section's own rule, nothing here asserts a send. Re-dating any item is a
    judgement about what to ask and when, which belongs to whoever decides the send; a merge
    does not make it.
+
+## Advisor loop reshaped, as-of 2026-10-03
+
+Not a decision entry: the record of what replaced the circulation the 2026-09-14 section
+prepared. Every section above stands exactly as written.
+
+**The 2026-09-14 cover was never sent.** No version of the batch reached Dr. Akba by
+e-mail. `docs/advisor/2026-09-14-akba-batch-cover.md` stays in the repository as the
+record of what was prepared. It is not a record of anything delivered.
+
+**On 2026-09-29 the lead replaced the batched ask.** Each teammate researched the brief
+files assigned to them, the team decided on that evidence, and each file's decisions were
+posted on Issue #84:
+
+| File | Posted by | Date | Comment |
+| --- | --- | --- | --- |
+| 01 · Eğitim hedefi | @BahaJarad | 2026-09-21 | [#84, 5763872729](https://github.com/SuperconducTED/superconducted-noise-engine/issues/84#issuecomment-5763872729) |
+| 02 · Tip sistemi | @mertefesensoy | 2026-09-29 | [#84, 5885404218](https://github.com/SuperconducTED/superconducted-noise-engine/issues/84#issuecomment-5885404218) |
+| 03 · Topluluk ve varyans | @bengisucvd | 2026-10-03 | [#84, 5970300012](https://github.com/SuperconducTED/superconducted-noise-engine/issues/84#issuecomment-5970300012) |
+| 04 · Veri dürüstlüğü | @BurakOztekin | 2026-10-02 | [#84, 5945384243](https://github.com/SuperconducTED/superconducted-noise-engine/issues/84#issuecomment-5945384243) |
+| 05 · Yayın stratejisi | @mertefesensoy | 2026-09-29 | [#84, 5885405870](https://github.com/SuperconducTED/superconducted-noise-engine/issues/84#issuecomment-5885405870) |
+| 06 · Ölçüm birimi | @yigit-arda, then @mertefesensoy | 2026-09-20, 2026-09-29 | [#84, 5750773289](https://github.com/SuperconducTED/superconducted-noise-engine/issues/84#issuecomment-5750773289); [#84, 5885407524](https://github.com/SuperconducTED/superconducted-noise-engine/issues/84#issuecomment-5885407524) |
+
+**The approver changes; this file does not.** @mertefesensoy, as lead, takes on the
+advisor's approval responsibility for these decisions and records his approvals here.
+Issue #56 FR-12 made this path the single location phase-3 tickets cite, so a second
+register would split the trail, and renaming this one would break every citation. Its
+title still reads "Decisions from Dr. Akba". Read it as the advisor decision register:
+from this section on, each entry names its approver.
+
+**The decision-by dates are not re-dated.** Every date in the tables above has passed with
+no e-mail sent. They described a circulation that did not happen, so moving them would
+date an ask nobody is making. Each item now closes through an entry below, not through a
+send.
+
+## Decision, 2026-10-03: Dr. Akba approves the process and all six brief files, as presented
+
+This is the first decision this register records. The `## Decisions` placeholder above ("No
+decision has been recorded yet") sits above the append marker and stays as written; this
+entry supersedes it.
+
+| | |
+| --- | --- |
+| **Question** | (a) May the team decide the 2026-09-09 brief questions itself, with the lead approving in the advisor role? (b) Do the team's decisions on Files 01 to 06 stand? |
+| **Answer** | Yes to both, for the decisions as @mertefesensoy presented them, with one direction (below). |
+| **Approver** | Dr. Fırat Akba |
+| **Date given** | Between 2026-09-29 and 2026-10-02. The exact day was not recorded. |
+| **Medium** | In person, with @mertefesensoy, who recorded it here on 2026-10-03. |
+| **Unblocks** | The lead's approval session, which maps these decisions onto the outstanding items above and lands each one's ledger form once that item's own evidence exists (ADR-019, for one, still waits on Issue #62's table). The ADR-025 amendments are the exception noted below. Tracked in Issue #109. |
+
+**The direction: three engine modes.** Two fuzzy engines, Type-1 and Interval Type-2, and
+one deep-learning model. Dr. Akba and @mertefesensoy plan the deep-learning model in detail
+in the week of 2026-10-05. File 02's team decision (Q1d) proposed a hand-written,
+parameter-matched NumPy MLP inside ADR-005 ("No ML frameworks"). That planning session
+settles the design, and a design that needs an ML framework is an ADR-005 question, not a
+detail.
+
+**The scope of this approval, stated exactly.**
+
+- Files 03 and 04 were posted on #84 on 2026-10-03 and 2026-10-02, after or close to the
+  meeting. For those two files the approval covers what was presented in person, not the
+  posted text verbatim.
+- This entry flips no `**Status**` line in `docs/decisions.md`. Every item in the tables
+  above stays Outstanding on the ledger until the lead's approval session records it, one
+  entry per item, naming the decision and the ADR it lands in.
+- **The ADR-025 amendments are not answered by this entry.** They were not discussed when
+  Dr. Akba gave this approval (@mertefesensoy, 2026-10-03). Files 04 and 06 carry them:
+  register items 2 (`duplicate-partial`) and 14 (the 2026-09-05 state definition), plus
+  the 2026-09-17 heartbeat amendment and PR #105's capture amendment, which have no
+  register item. All four stay Outstanding, and how they are answered is open in Issue
+  #109.
+- The deep-learning model's design is outstanding until the planning session in the week
+  of 2026-10-05.
