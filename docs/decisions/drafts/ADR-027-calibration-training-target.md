@@ -51,6 +51,14 @@ consumers, `feature_target_fn` separately evaluates the proposed target from
 `BasicCalibrationVectorizer`'s mean features and states its current
 microsecond input convention.
 
+> NOTE (units, as-of 2026-10-03): the paragraph above is left unedited. Since
+> issue #66 (PR #99), `BasicCalibrationVectorizer.extract` emits SI seconds,
+> so its mean features are no longer valid `feature_target_fn` input.
+> `feature_target_fn` keeps the microsecond convention and, from `eb30ca7`,
+> raises `ValueError` when `mean_T1 < 1.0`. Feed it
+> `ArchiveUnitFeatureExtractor` output instead. See
+> `docs/implementations/2026-10-03-feature-target-fn-units.md`.
+
 Gate durations are currently parsed from the raw `properties.gates` envelope in
 `training/targets.py`. Only a requested single-qubit gate is accepted; a
 gate-length unit other than nanoseconds is a parse error.
