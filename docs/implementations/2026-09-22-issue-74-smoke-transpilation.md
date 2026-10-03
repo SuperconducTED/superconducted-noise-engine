@@ -18,6 +18,11 @@ without another transpilation.
 | --- | --- |
 | `scripts/first_ensemble_run.py` | Derives a unitary basis from calibration gate records, rejects circuits wider than their calibration, compiles before preparation with fixed controls, and uses that ordering in ensemble, warm-up, and sanity paths. |
 | `tests/test_first_ensemble_run.py` | Adds the `sx`-only regression reproduction and pins one transpilation per ensemble call, explicit controls, copy isolation, non-unitary basis exclusion, synthetic per-qubit coverage, and the calibration-width guard. |
+| `docs/decisions.md` | Appends "ADR-021 amendment as of 2026-10-02: smoke caller conforms" after the amendment's status note; the amendment's table and status are left as written. |
+| `docs/advisor/2026-09-03-decisions-from-akba.md` | Appends an "Outstanding items, as of 2026-10-02" section recording that item 15 ask 3's premise no longer holds for the smoke caller. |
+| `docs/numerical-claims.md` | NC-021 re-measured per Rule 6. |
+| `docs/implementations/2026-09-22-issue-74-smoke-transpilation.md` | This document. |
+| `docs/implementations/2026-10-03-pr103-review-fixes.md` | Records the 2026-10-02 review round's fixes, landed on this branch. |
 
 ## Implementation approach
 
@@ -32,7 +37,11 @@ thermal-noise error.
 the member loop with `optimization_level=1` and `seed_transpiler=0`, and passes a
 copy of that one compiled circuit to each `prepare()` call. The circuit returned
 by `prepare()` goes directly to `AerSimulator.run()`. The warm-up and
-single-member sanity paths use the same compile-then-prepare order. No coupling
+single-member sanity paths call `run_ensemble()` itself, so the
+compile-then-prepare order lives in one tested function. The sanity member is
+now built with the requested `--mf-placement`; it previously ignored the flag
+and always used the default layout, so `--mf-placement interior` sanity output
+changes accordingly. No coupling
 map is supplied, retaining the project convention that circuit qubit $i$ maps to
 physical qubit $i$.
 
@@ -59,9 +68,14 @@ rather than from the smaller set of positive-duration noise-eligible gates.
 Using the latter would incorrectly omit virtual `rz` from the compiler's target
 basis. Aer defaults are intentionally not used because they are not the
 calibrated device basis and can leave an `sx` error with no matching instruction.
-This matches #58's `benchmarks/reference.py` basis helper and fixed transpiler
-controls; when that helper reaches `main`, this script should be revisited to
-consume it instead of maintaining a parallel reader.
+This matches the name rule of `_basis_gates` in PR #79's
+`src/superconducted/benchmarks/reference.py` (Issue #58) and its fixed
+transpiler controls (`_TRANSPILE_OPTIMIZATION_LEVEL = 1`, `_TRANSPILE_SEED = 0`
+in PR #79's `harness.py`). One difference is deliberate: a non-mapping gate
+entry is skipped here, as `CalibrationGateEligibilityPolicy` and
+`training.targets.gate_lengths` skip it on `main`, while #79 raises; a test pins
+the skip. When that helper reaches `main`, this script should be revisited to
+consume it instead of maintaining a parallel reader, and that test flipped.
 
 This change is confined to the smoke script. `benchmarks/harness.py` remains
 Issue #58's scope, while `channels/kraus.py`, `fuzzy/tsk.py`, `types.py`, and
@@ -95,4 +109,5 @@ and 16, followed by the 8192-shot sanity run.
 
 - ADR-021 amendment and ADR-028 in `docs/decisions.md`
 - `docs/implementations/2026-09-12-issue-73-physical-gate-noise-filter.md`
+- `docs/implementations/2026-10-03-pr103-review-fixes.md`
 - Issues #58, #73, and #74

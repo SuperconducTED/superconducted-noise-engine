@@ -63,10 +63,15 @@ class DummySimulator:
 def test_run_ensemble_aggregates_counts(monkeypatch: Any) -> None:
     expected_counts = [{"0": 9, "1": 6}, {"0": 3, "1": 0}]
     transpile_calls: list[tuple[QuantumCircuit, dict[str, Any]]] = []
+    source = QuantumCircuit(1)
+    # Distinguishable from the source, so a member handed the uncompiled
+    # circuit fails the content check below rather than passing by accident.
+    compiled = QuantumCircuit(1)
+    compiled.sx(0)
 
     def fake_transpile(circuit: QuantumCircuit, **kwargs: Any) -> QuantumCircuit:
         transpile_calls.append((circuit, kwargs))
-        return circuit.copy()
+        return compiled
 
     monkeypatch.setattr("scripts.first_ensemble_run.transpile", fake_transpile)
 
@@ -74,7 +79,7 @@ def test_run_ensemble_aggregates_counts(monkeypatch: Any) -> None:
     members = [DummyMember({}), DummyMember({})]
     actual = run_ensemble(
         members,
-        QuantumCircuit(1),
+        source,
         shots=1024,
         simulator=sim,
         basis_gates=CALIBRATION_BASIS,
@@ -82,12 +87,19 @@ def test_run_ensemble_aggregates_counts(monkeypatch: Any) -> None:
 
     assert actual == {"0": 6, "1": 3}
     assert len(transpile_calls) == 1
+    assert transpile_calls[0][0] is source
     assert transpile_calls[0][1] == {
         "basis_gates": list(CALIBRATION_BASIS),
         "optimization_level": 1,
         "seed_transpiler": 0,
     }
-    assert members[0].prepared_circuits[0] is not members[1].prepared_circuits[0]
+    first, second = (member.prepared_circuits[0] for member in members)
+    # Issue #74: every member sees the same compiled circuit, each through its own copy.
+    assert first == compiled
+    assert second == compiled
+    assert first is not compiled
+    assert second is not compiled
+    assert first is not second
 
 
 @pytest.mark.slow
@@ -147,6 +159,89 @@ def test_circuit_wider_than_calibration_is_rejected() -> None:
 
     with pytest.raises(ValueError, match="exceeds calibration width"):
         _validate_circuit_width(_synthetic_snapshot(), qft_circuit(3))
+
+
+def test_circuit_as_wide_as_calibration_is_accepted() -> None:
+    """Pins the boundary: the CLI's default two-qubit QFT on the two-qubit snapshot."""
+    from scripts.first_ensemble_run import _synthetic_snapshot, _validate_circuit_width
+
+    _validate_circuit_width(_synthetic_snapshot(), qft_circuit(2))
+
+
+def test_validate_circuit_width_requires_a_qubits_list() -> None:
+    from scripts.first_ensemble_run import _synthetic_snapshot, _validate_circuit_width
+
+    snapshot = _synthetic_snapshot()
+    del snapshot.properties["qubits"]
+
+    with pytest.raises(ValueError, match="no usable 'qubits' list"):
+        _validate_circuit_width(snapshot, qft_circuit(1))
+
+
+def test_main_rejects_a_circuit_wider_than_its_calibration_before_simulating(
+    monkeypatch: Any,
+) -> None:
+    """The CLI must refuse ``--qubits 3`` on the two-qubit synthetic snapshot.
+
+    Testing the helper alone would pass even if ``main`` stopped calling it.
+    Replacing ``AerSimulator`` with a tripwire pins "before simulation": a
+    guard moved below the simulator's construction fails here with an
+    ``AssertionError`` instead of the expected ``ValueError``.
+    """
+    from scripts.first_ensemble_run import main
+
+    def tripwire(*args: Any, **kwargs: Any) -> None:
+        raise AssertionError("AerSimulator was constructed before the width check")
+
+    monkeypatch.setattr("scripts.first_ensemble_run.AerSimulator", tripwire)
+
+    with pytest.raises(ValueError, match="exceeds calibration width"):
+        main(["--qubits", "3"])
+
+
+@pytest.mark.parametrize("gates", [None, {}], ids=["missing", "not-a-list"])
+def test_calibration_basis_gates_requires_a_gates_list(gates: Any) -> None:
+    from scripts.first_ensemble_run import _synthetic_snapshot
+
+    snapshot = _synthetic_snapshot()
+    if gates is None:
+        del snapshot.properties["gates"]
+    else:
+        snapshot.properties["gates"] = gates
+
+    with pytest.raises(ValueError, match="no usable 'gates' list"):
+        _calibration_basis_gates(snapshot)
+
+
+def test_calibration_basis_gates_requires_a_unitary_gate() -> None:
+    from scripts.first_ensemble_run import _synthetic_snapshot
+
+    snapshot = _synthetic_snapshot()
+    snapshot.properties["gates"] = [
+        {"gate": "", "qubits": [0], "parameters": []},
+        {"gate": "measure", "qubits": [0], "parameters": []},
+        {"gate": "reset", "qubits": [0], "parameters": []},
+    ]
+
+    with pytest.raises(ValueError, match="no unitary gates"):
+        _calibration_basis_gates(snapshot)
+
+
+def test_calibration_basis_gates_skips_a_non_mapping_entry_like_the_engine() -> None:
+    """A non-mapping gate entry is skipped, as the engine on ``main`` skips it.
+
+    ``CalibrationGateEligibilityPolicy.eligible_operations`` and
+    ``training.targets.gate_lengths`` both skip such an entry, so this smoke
+    basis agrees with the engine it exercises. PR #79's
+    ``src/superconducted/benchmarks/reference.py::_basis_gates`` raises instead;
+    once that helper lands and this script consumes it, flip this test on purpose.
+    """
+    from scripts.first_ensemble_run import _synthetic_snapshot
+
+    snapshot = _synthetic_snapshot()
+    snapshot.properties["gates"].extend(["sx", None, 7])
+
+    assert _calibration_basis_gates(snapshot) == CALIBRATION_BASIS
 
 
 def test_default_mfs_for_feature_raises_on_unknown() -> None:

@@ -78,7 +78,15 @@ _TRANSPILE_SEED: Final[int] = 0
 
 
 def _calibration_basis_gates(snapshot: CalibrationSnapshot) -> tuple[str, ...]:
-    """Return deterministic unitary transpilation gates from a calibration snapshot."""
+    """Return deterministic unitary transpilation gates from a calibration snapshot.
+
+    Same name rule as ``_basis_gates`` in PR #79's
+    ``src/superconducted/benchmarks/reference.py`` (Issue #58): non-empty names,
+    ``NON_UNITARY_BASIS_GATES`` excluded, sorted. One deliberate difference:
+    a non-mapping entry is skipped here, as ``CalibrationGateEligibilityPolicy``
+    and ``training.targets.gate_lengths`` skip it on ``main``, where #79
+    raises. Route through #79's helper once it lands.
+    """
     entries = snapshot.properties.get("gates")
     if not isinstance(entries, list):
         raise ValueError("Calibration properties has no usable 'gates' list for transpilation")

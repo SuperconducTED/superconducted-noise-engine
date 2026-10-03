@@ -900,6 +900,14 @@ installed error fires. `benchmarks/harness.py` remains non-conforming: it is
 Issue #58 / PR #79's scope and is unchanged here. This is a fact record only;
 the amendment remains Open and awaits the advisor sign-off recorded above.
 
+In the table's own measure, against the same
+`tests/fixtures/calibration/ibm_fez_20260513T121322Z_with_gates.json`: the
+script's default `qft_circuit(2)` now installs `['rx', 'sx']`, 4 errors (both
+gates on qubits 0 and 1), and `prepare()` no longer warns; the old order still
+installs `[]`, 0 errors, with the warning. `qft_circuit(3)` installs the same two
+gates, 6 errors. Measured on the PR #103 review-fix commit; see
+`docs/implementations/2026-10-03-pr103-review-fixes.md`.
+
 ---
 
 ## ADR-022 — Benchmark validation criteria
