@@ -1,9 +1,9 @@
-run-token: 2026-10-03T05:36:44Z-485
+run-token: 2026-10-03T20:19:10Z-1881
 outcome: ok: chore: phase-3 dashboard: state moved (2026-10-03)
 
-**12/28 milestone gates met** · -3 days to 2026-09-30 · calendar 111% burned against 43% of gates, 68 points behind.
+**12/28 milestone gates met** · 28 days to 2026-10-31 · calendar 53% burned against 43% of gates, 10 points behind.
 
-**Since 2026-10-02:** nothing moved.
+**Since 2026-10-02:** #56 Clear the queue, keep the records honest: in review to closed.
 
 **Needs attention**
 - M0 (Queue clear) is 28 days past its 2026-09-05 target at 7/8

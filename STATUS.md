@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-10-03 05:36 UTC · main at `110cfad8` (2026-09-27) · -3 days to 2026-09-30_
+_Generated 2026-10-03 20:19 UTC · main at `110cfad8` (2026-09-27) · 28 days to 2026-10-31_
 
 
 ## Milestones
@@ -95,10 +95,10 @@ _Generated 2026-10-03 05:36 UTC · main at `110cfad8` (2026-09-27) · -3 days to
    - FR-15 routes all advisor contact through the lead, so no one else can send it. The decision-by date was 2026-09-08 and has passed. ADR-027 stays Open, ADR-014 stays Deferred, and the M3 ADR-009 memo has no answer to build on until this goes out.
 1. Finish #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
    - The contract merged; only the advisor half of its definition of done is outstanding.
-1. Unstick PR #98 for #56: Clear the queue, keep the records honest
-   - No approving review yet: main's ruleset requires one.
 1. Unstick PR #105 for #54: Capture rate ~70% during normal operation
    - CHANGES_REQUESTED standing from @BahaJarad (2026-09-30), @BurakOztekin (2026-10-02). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+1. Re-review PR #103 (#74: first_ensemble_run must transpile before prepare)
+   - Your CHANGES_REQUESTED from 2026-09-28 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 
 **Yiğit Arda Kaderoğlu** (@yigit-arda)
 
@@ -124,13 +124,6 @@ _Generated 2026-10-03 05:36 UTC · main at `110cfad8` (2026-09-27) · -3 days to
 **#61: ADR-011 evidence + premise gradients** (@bengisucvd)
 
 - [low] FR-4's consequent convention and the raw-space vs logit-space choice both depend on #57's decision.
-
-**#56: Clear the queue, keep the records honest** (@mertefesensoy)
-
-- [critical] Every advisor item it carries (ADR-025 sign-off, ADR-009 flip, ADR-011 closure, ADR-014 read, the target ADR) needs Dr. Akba, who has no recorded answer to anything.
-- [high] No approving review yet: main's ruleset requires one.
-- [high] #45 is still open; M0 is not closable until it is.
-- [high] #53's record (PR #78) is unmerged at CHANGES_REQUESTED.
 
 **#54: Capture rate ~70% during normal operation** (@mertefesensoy)
 
@@ -160,7 +153,7 @@ _Generated 2026-10-03 05:36 UTC · main at `110cfad8` (2026-09-27) · -3 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
-| 2026-10-03 | 12/28 | 6 | 4 | 4 | nothing moved |
+| 2026-10-03 | 12/28 | 6 | 3 | 4 | #56 Clear the queue, keep the records honest: in review to closed |
 | 2026-10-02 | 12/28 | 6 | 4 | 4 | nothing moved |
 | 2026-10-01 | 12/28 | 6 | 4 | 4 | nothing moved |
 | 2026-09-30 | 12/28 | 6 | 4 | 4 | nothing moved |
