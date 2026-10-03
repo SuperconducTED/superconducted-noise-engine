@@ -891,6 +891,23 @@ left silent.
 | **Owner** | @mertefesensoy. `docs/team.md` names Dr. Akba primary on this file with Mert secondary, and Dr. Akba has no GitHub account, so this cannot be a review request. |
 | **Reversal cost** | One commit. The policy is injected and defaulted, so passing a permissive `GateEligibilityPolicy` restores the previous behaviour without touching any construction site, and the ledger text above is removed by appending the answer rather than by deletion. |
 
+### ADR-021 amendment as of 2026-10-02: smoke caller conforms
+
+`scripts/first_ensemble_run.py` now compiles once to the calibrated basis before
+calling `prepare()` and runs the returned circuit without another transpilation
+(Issue #74, PR #103). Its fixed-seed `sx`-only regression demonstrates that the
+installed error fires. `benchmarks/harness.py` remains non-conforming: it is
+Issue #58 / PR #79's scope and is unchanged here. This is a fact record only;
+the amendment remains Open and awaits the advisor sign-off recorded above.
+
+In the table's own measure, against the same
+`tests/fixtures/calibration/ibm_fez_20260513T121322Z_with_gates.json`: the
+script's default `qft_circuit(2)` now installs `['rx', 'sx']`, 4 errors (both
+gates on qubits 0 and 1), and `prepare()` no longer warns; the old order still
+installs `[]`, 0 errors, with the warning. `qft_circuit(3)` installs the same two
+gates, 6 errors. Measured on the PR #103 review-fix commit; see
+`docs/implementations/2026-10-03-pr103-review-fixes.md`.
+
 ---
 
 ## ADR-022 — Benchmark validation criteria

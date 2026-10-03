@@ -169,3 +169,16 @@ Holding the fix for a circulation that has not gone out trades a measured defect
 for a paperwork gap. The reversal is one commit: the policy is injected and
 defaulted, so passing a permissive `GateEligibilityPolicy` restores the previous
 behaviour without touching any construction site.
+
+## Outstanding items, as of 2026-10-02
+
+Not a decision entry and not a new item: a fact update on item 15 (the
+2026-09-18 section above), appended here in the same form as the 2026-09-10
+and 2026-09-18 additions, because the 2026-09-18 section stands as written.
+
+**Item 15, ask 3.** Issue #74 / PR #103 satisfies the ADR-021 amendment's
+compile-before-prepare ordering for the smoke caller: it compiles once to the calibrated basis before `prepare()` and
+runs the returned circuit without another transpilation. The premise remains
+true for `benchmarks/harness.py`, which is Issue #58 / PR #79's scope. This
+narrows the recorded gap; it does not answer the ratification question or alter
+the item's Outstanding status.
