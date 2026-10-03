@@ -117,12 +117,16 @@ every command, is the second PR comment of this round; it pins the PR head SHA
 and stops if the checkout differs. Its steps, each with a differential or
 self-consistent expectation:
 
-1. Fresh clone into a new directory, check out `feature/issue-74-smoke-transpilation`,
-   stop unless `git rev-parse HEAD` equals the SHA in the comment.
-2. New venv from `requirements.txt` and `requirements-dev.txt`, editable install,
-   machine fingerprint.
-3. The five gates, plus `mypy --strict src/superconducted`.
-4. NC-021 against a live `--collect-only` and the full run: three equal numbers.
+1. Fresh single-branch clone of `feature/issue-74-smoke-transpilation` into a
+   new directory, plus `origin/main`; stop unless `git rev-parse HEAD` equals
+   the SHA in the comment.
+2. New venv from `requirements.txt` and `requirements-dev.txt` (the six key
+   packages checked against the pins), editable install, machine fingerprint.
+3. The five gates, plus `mypy --strict src/superconducted`, with no
+   `--python-version` override.
+4. NC-021 equal to a live `--collect-only`; the full run passes all but one,
+   which skips. The single-branch clone has no `calibration-data`, so the
+   archive-backed survey test skips exactly as it does on CI.
 5. Finding 1: no `NC-` row lacks its closing `|`.
 6. Finding 2: `git diff -U0 origin/main` on the advisor file is one hunk that
    starts after `main`'s last line and removes nothing.
