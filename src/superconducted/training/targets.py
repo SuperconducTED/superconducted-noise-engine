@@ -2,7 +2,8 @@
 
 The target is the ``(gamma, lambda)`` pair consumed by the single-qubit
 amplitude-plus-phase-damping channel. Inputs and outputs use SI seconds and
-dimensionless probabilities respectively.
+dimensionless probabilities respectively, with one exception:
+:func:`feature_target_fn` takes its two coherence features in microseconds.
 """
 
 from __future__ import annotations
@@ -17,6 +18,12 @@ import numpy as np
 import numpy.typing as npt
 
 from ..calibration.loader import CalibrationParseError, ParsedCalibrationSnapshot
+
+# Smallest `mean_T1` that `feature_target_fn` reads as microseconds. A device
+# mean T1 is of order 1e2 in microseconds and of order 1e-4 in seconds, so a
+# value below 1.0 can only be seconds, and both sides sit orders of magnitude
+# clear of the line.
+_MIN_MEAN_T1_MICROSECONDS = 1.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -194,12 +201,21 @@ def snapshot_target(targets: QubitTargets) -> SnapshotTarget | None:
 def feature_target_fn(
     features: npt.NDArray[np.float64], *, t_seconds: float
 ) -> npt.NDArray[np.float64]:
-    """Map BasicCalibrationVectorizer features to a ``(gamma, lambda)`` target.
+    """Map microsecond calibration features to a ``(gamma, lambda)`` target.
 
     ``features`` is ``(mean_T1, mean_T2, mean_readout_error)`` where the two
-    coherence values are in microseconds, matching BasicCalibrationVectorizer.
-    ``t_seconds`` is the reference gate duration in seconds. This map evaluated
-    at mean features is not, in general, the mean of per-qubit targets.
+    coherence values are in microseconds, as in the feature-distribution survey
+    TSV and :class:`~superconducted.calibration.features.ArchiveUnitFeatureExtractor`,
+    NOT ``BasicCalibrationVectorizer.extract``, which emits SI seconds since
+    issue #66. To feed this from a snapshot, wrap the vectorizer in
+    ``ArchiveUnitFeatureExtractor``. ``t_seconds`` is the reference gate
+    duration in seconds. This map evaluated at mean features is not, in
+    general, the mean of per-qubit targets.
+
+    Raises :class:`ValueError` when ``mean_T1 < 1.0``, which can only be SI
+    seconds: scaled by ``1e-6`` a second time it would give T1 near ``1e-10``
+    seconds and, at nanosecond gate durations, a gamma that rounds to exactly
+    ``1.0``, with nothing else to flag it.
     """
     values = np.asarray(features, dtype=np.float64)
     if values.shape != (3,) or not np.all(np.isfinite(values)):
@@ -209,6 +225,12 @@ def feature_target_fn(
     t1_seconds, t2_seconds = values[:2] * 1e-6
     if t1_seconds <= 0.0 or t2_seconds <= 0.0:
         raise ValueError("mean_T1 and mean_T2 must be positive")
+    if values[0] < _MIN_MEAN_T1_MICROSECONDS:
+        raise ValueError(
+            f"mean_T1 {float(values[0])!r} is below {_MIN_MEAN_T1_MICROSECONDS} microseconds, "
+            "so it can only be SI seconds; feature_target_fn takes microseconds, so wrap "
+            "BasicCalibrationVectorizer in ArchiveUnitFeatureExtractor"
+        )
     if t2_seconds > 2.0 * t1_seconds:
         raise ValueError("mean_T2 must not exceed twice mean_T1")
     return np.asarray(

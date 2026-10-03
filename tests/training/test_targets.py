@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import json
+import math
 import pathlib
 from datetime import UTC, datetime
 
 import numpy as np
 import pytest
 
-from superconducted.calibration.features import BasicCalibrationVectorizer
+from superconducted.calibration.features import (
+    ArchiveUnitFeatureExtractor,
+    BasicCalibrationVectorizer,
+)
 from superconducted.calibration.loader import (
     FieldMissingness,
     MissingnessStats,
@@ -31,6 +35,25 @@ GATE_FIXTURE = (
     / "calibration"
     / "ibm_fez_20260513T121322Z_with_gates.json"
 )
+Q72_FIXTURE = GATE_FIXTURE.parent / "ibm_fez_20260513T121322Z_q72_missing_t1t2.json"
+SX_SECONDS = 24e-9
+
+#: NC-039: target at mean features minus mean of per-qubit targets, on the
+#: gate-bearing fixture at 24 ns.
+NC_039_GAP = (-1.8032599909555808e-05, -3.7973319935037924e-04)
+
+
+def _calibration_snapshot(path: pathlib.Path) -> CalibrationSnapshot:
+    """Build the raw envelope the feature extractors take from a fixture file."""
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    return CalibrationSnapshot(
+        backend=raw["backend"],
+        timestamp=datetime.fromisoformat(raw["timestamp"].replace("Z", "+00:00")),
+        schema_version=raw["schema_version"],
+        properties=raw["properties"],
+        target=raw.get("target"),
+        configuration=raw.get("configuration"),
+    )
 
 
 def _snapshot(*qubits: ParsedQubitCalibration) -> ParsedCalibrationSnapshot:
@@ -161,6 +184,48 @@ def test_feature_target_fn_rejects_invalid_inputs(features: np.ndarray, duration
         feature_target_fn(features, t_seconds=duration)
 
 
+def test_feature_target_fn_rejects_si_seconds_from_the_vectorizer() -> None:
+    """The trap the guard closes: ``extract`` emits SI seconds since issue #66.
+
+    Without the guard these features are scaled by ``1e-6`` a second time, T1
+    becomes about ``1.6e-10`` s, and gamma and lambda both come back as exactly
+    ``1.0`` with no error raised.
+    """
+    features = BasicCalibrationVectorizer().extract(_calibration_snapshot(Q72_FIXTURE))
+    assert 0.0 < features[0] < 1.0, "precondition: the vectorizer emits seconds"
+    with pytest.raises(ValueError, match="seconds"):
+        feature_target_fn(features, t_seconds=SX_SECONDS)
+
+
+def test_feature_target_fn_takes_archive_unit_features_for_the_same_snapshot() -> None:
+    """The supported path: wrap the vectorizer to get microseconds back.
+
+    The result has to equal the closed form evaluated on the vectorizer's own
+    SI seconds, so the conversion out of SI and the ``1e-6`` back into it are
+    checked against each other rather than against a remembered magnitude.
+    """
+    snapshot = _calibration_snapshot(Q72_FIXTURE)
+    t1, t2, _ = BasicCalibrationVectorizer().extract(snapshot)
+    gamma, lam = feature_target_fn(
+        ArchiveUnitFeatureExtractor().extract(snapshot), t_seconds=SX_SECONDS
+    )
+    assert gamma == pytest.approx(1.0 - math.exp(-SX_SECONDS / t1), rel=1e-12)
+    assert lam == pytest.approx(1.0 - math.exp(-SX_SECONDS * (2.0 / t2 - 1.0 / t1)), rel=1e-12)
+    assert 1e-5 < gamma < 1e-3, f"gamma {gamma:.3e} is not of order 1e-4"
+
+
+@pytest.mark.parametrize("mean_t1", [np.nextafter(1.0, 0.0), 100e-6])
+def test_feature_target_fn_rejects_mean_t1_below_one_microsecond(mean_t1: float) -> None:
+    with pytest.raises(ValueError, match="seconds"):
+        feature_target_fn(np.array([mean_t1, mean_t1, 0.01]), t_seconds=SX_SECONDS)
+
+
+def test_feature_target_fn_accepts_mean_t1_of_exactly_one_microsecond() -> None:
+    gamma, lam = feature_target_fn(np.array([1.0, 1.0, 0.01]), t_seconds=SX_SECONDS)
+    assert gamma == pytest.approx(1.0 - math.exp(-SX_SECONDS / 1e-6))
+    assert lam == pytest.approx(gamma)
+
+
 def test_real_fixture_derives_targets_from_all_sx_gate_lengths() -> None:
     raw = json.loads(GATE_FIXTURE.read_text(encoding="utf-8"))
     parsed = load_snapshot(GATE_FIXTURE)
@@ -179,15 +244,11 @@ def test_real_fixture_derives_targets_from_all_sx_gate_lengths() -> None:
     assert summary is not None
     assert summary.n_usable == 155
 
-    raw_snapshot = CalibrationSnapshot(
-        backend=raw["backend"],
-        timestamp=datetime.fromisoformat(raw["timestamp"].replace("Z", "+00:00")),
-        schema_version=raw["schema_version"],
-        properties=properties,
-        target=raw.get("target"),
-        configuration=raw.get("configuration"),
-    )
     target_at_mean_features = feature_target_fn(
-        BasicCalibrationVectorizer().extract(raw_snapshot), t_seconds=24e-9
+        ArchiveUnitFeatureExtractor().extract(_calibration_snapshot(GATE_FIXTURE)),
+        t_seconds=SX_SECONDS,
     )
-    assert not np.allclose(target_at_mean_features, summary.mean, rtol=0.0, atol=1e-12)
+    # Pinned to NC-039 rather than asserted unequal: once issue #66 made the
+    # bare vectorizer emit seconds, the gap here became about 1 instead of
+    # about 4e-4, and `not np.allclose(...)` kept passing on the wrong value.
+    assert target_at_mean_features - summary.mean == pytest.approx(NC_039_GAP, rel=1e-9)
