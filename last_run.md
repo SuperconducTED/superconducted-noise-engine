@@ -1,16 +1,16 @@
-run-token: 2026-10-03T20:19:10Z-1881
-outcome: ok: chore: phase-3 dashboard: state moved (2026-10-03)
+run-token: 2026-10-04T05:36:48Z-455
+outcome: ok: chore: phase-3 dashboard: state moved (2026-10-04)
 
-**12/28 milestone gates met** · 28 days to 2026-10-31 · calendar 53% burned against 43% of gates, 10 points behind.
+**12/28 milestone gates met** · 27 days to 2026-10-31 · calendar 54% burned against 43% of gates, 11 points behind.
 
-**Since 2026-10-02:** #56 Clear the queue, keep the records honest: in review to closed.
+**Since 2026-10-03:** nothing moved.
 
 **Needs attention**
-- M0 (Queue clear) is 28 days past its 2026-09-05 target at 7/8
-- M1 (Contracts and instruments) is 22 days past its 2026-09-11 target at 3/5
-- M2 (First measurements) is 15 days past its 2026-09-18 target at 2/5
-- M3 (Decisions) is 8 days past its 2026-09-25 target at 0/6
-- M4 (ANFIS results) is 3 days past its 2026-09-30 target at 0/4
+- M0 (Queue clear) is 29 days past its 2026-09-05 target at 7/8
+- M1 (Contracts and instruments) is 23 days past its 2026-09-11 target at 3/5
+- M2 (First measurements) is 16 days past its 2026-09-18 target at 2/5
+- M3 (Decisions) is 9 days past its 2026-09-25 target at 0/6
+- M4 (ANFIS results) is 4 days past its 2026-09-30 target at 0/4
 - PR #79 (#58) conflicts with main, so its checks are not evidence and it cannot merge
 - #63 is ready and holds up #60 (Baha Jarad)
 
