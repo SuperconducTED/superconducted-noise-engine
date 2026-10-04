@@ -26,7 +26,8 @@ architecture decisions of 2026-10-04.
 | File | One-sentence description |
 | --- | --- |
 | `docs/roadmap/2026-10-04-three-engine-and-deep-model-plan.md` | The dated plan: the three engines and what they share, the two-stage deep model, scenario enumeration and permutation importance, the parameter budget, the engine seam, the ledger tasks, a gated task list, risks, and the questions for Dr. Akba. |
-| `docs/advisor/2026-10-04-uc-motor-ve-derin-model-ozeti.md` | A Turkish summary of the plan for the lead to walk Dr. Akba through, ending with the six decisions that are his. |
+| `docs/roadmap/2026-10-04-deep-engine-architecture-research.md` | The architecture research Dr. Akba asked for: four strategy families judged against the forecasting task, the T1/T2 epoch finding, a recommended first version (documented, not adopted), a fair test of supervised contrastive learning, and 68 sources, 67 of them with identifiers verified. |
+| `docs/advisor/2026-10-04-uc-motor-ve-derin-model-ozeti.md` | A Turkish summary of the plan and the research for the lead to walk Dr. Akba through, ending with the ten decisions that are his. |
 | `docs/implementations/2026-10-04-three-engine-deep-model-plan.md` | This record. |
 
 No code, test, ADR or register row changes. The ledger changes the plan needs are tasks in
@@ -142,3 +143,66 @@ branch's base.
 - ADR-005, ADR-013, ADR-017, ADR-021 and ADR-027 in `docs/decisions.md`
 - `docs/roadmap/2026-09-03-phase-3-plan.md` §5 (gates are artifacts)
 - `docs/implementations/2026-09-09-training-floor-derivation.md` (NC-045, NC-046)
+- `docs/roadmap/2026-10-04-deep-engine-architecture-research.md` (the research, added the
+  same day)
+
+## Same-day amendment · 2026-10-04: the learning task, the research, and the SCL test
+
+The first push of this PR (`2d840d7`) had a flaw the lead's next request exposed. Dr.
+Akba also asked him to research which architectural strategy to follow, for example
+supervised contrastive learning or reinforcement learning. Framing that question showed
+the plan never said **what the deep model predicts**, and ADR-027's target is a
+closed-form function of the same state's `T1`, `T2` and gate length. A same-snapshot
+deep model would learn a known formula, its band would shrink to nothing, and stage 1's
+ranking would rediscover `T1` and `T2`. The lead chose forecasting (decision A7), and the
+plan now says so in its §2.0, with stage 1, the band and tasks T4 and T5 redefined for a
+horizon `h` and two new measurement tasks (T12, T13) to choose it. The plan was edited in
+place because it is unmerged and unreviewed; nothing on `main` changed.
+
+**The research.** Four independent passes, one per family (contrastive and
+representation, reinforcement learning, forecasting with drift-robust bands, structure and
+physics), were each given the same problem statement and asked to argue fit against it.
+Each citation had to carry an identifier the pass had fetched. Afterwards:
+
+- all 62 arXiv IDs were resolved against the arXiv API and all 5 DOIs against Crossref,
+  with every title matching;
+- the load-bearing content claims were checked against each paper's abstract;
+- one figure a pass took from a search snippet (an "80% to 94%" accuracy) was excluded by
+  the pass itself;
+- one detail that did not reproduce (the share of qubits on the modal `T1` date) was left
+  out.
+
+**The finding that changes the evaluation.** A research pass found, and an independent
+script then re-measured over all 1,697 `ibm_fez` files at `calibration-data` `43607a2`,
+that the archive holds only 132 distinct `T1` vectors (and 132 `T2`). The `T1` vector
+changes in 131 of 1,696 consecutive file pairs, so 92.3% of consecutive files repeat it,
+and the gap between re-measurements is 3.9 h at minimum, 24.7 h at the median and 134.2 h
+at most. A split-conformal band calibrated on such rows can have zero width and still
+report about 92% coverage. The research doc documents the remedy (epochs as rows, coverage
+on change events). The lead kept it as a recommendation, not a decision, and flags it only
+on Issue #110.
+
+**The lead's decisions in this amendment.** A7 (forecasting) and A8 (test supervised
+contrastive learning, because Dr. Akba raised it; task T14, with the fair-test design in
+the research doc §2.1a). The research's other recommendations (adaptive conformal with
+asymmetric scores, a grey-box residual forecaster, the epoch protocol) are documented and
+not adopted; A1 to A6 stay as written until after the meeting.
+
+**The epoch arithmetic, stated.** With `C` the number of consecutive pairs whose `T1`
+vector changes and `P` the number of consecutive pairs, the zero-residual fraction under
+one-step persistence is `f = 1 - C/P = 1 - 131/1696 = 0.923`. Split conformal's quantile
+is the `ceil((n + 1)(1 - alpha))`-th smallest score, which is zero whenever at least that
+many scores are zero, i.e. when `f >= 1 - alpha` (up to the `n + 1` correction). At
+`alpha = 0.1` that holds.
+
+**Verification of the amendment** (laptop, provisional, same environment as above):
+
+- `ruff check`: `All checks passed!`
+- `ruff format --check`: `68 files already formatted`
+- `scripts/check_ids.py`: no duplicate or colliding ids
+- `mypy --strict`: `Success: no issues found in 38 source files`
+- `pytest`: 701 collected and 701 passed
+
+Only line wrapping changed after the full run, and `ruff format --check` and
+`check_ids.py` were re-run after it. The epoch script and the citation checks are scratch
+tools, not committed. T12 registers the epoch count properly.

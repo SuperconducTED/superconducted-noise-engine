@@ -38,6 +38,8 @@ on them:
 | A4 | **NumPy by hand.** No new dependency; the deep engine stays inside ADR-005's spirit, as File 02 Q1d proposed. | 2026-10-04 |
 | A5 | **Band by split conformal prediction**, because the comparison's primary metric is the band (File 05 Q1a on Issue #84). | 2026-10-04 |
 | A6 | **Future work, recorded and not built:** (a) the stage-1 ranking selects the inputs of all three engines; (b) a stacked neuro-fuzzy model, where the deep network's hidden layer feeds the fuzzy rule base. | 2026-10-04 |
+| A7 | **The deep engine forecasts.** Inputs come from the state at `t`, optionally with a history window; the target is ADR-027's `(gamma, lambda)` computed on a later state, `t + h`. Same-snapshot targets are ruled out because they leak (§2.0). | 2026-10-04 |
+| A8 | **Test supervised contrastive learning** (§2.5), because Dr. Akba raised it. The research document's recommendations stay recommendations: the decisions above are kept as written until after the meeting with him. | 2026-10-04 |
 
 ## 1. The three engines
 
@@ -51,12 +53,12 @@ on them:
 | Inputs | Today's three features | Today's three features | All candidates (stage 1), engineered subset (stage 2) |
 | Tickets | #60 trainer, #62 ablation | #60, #61, #64 | Issue #110 |
 
-**What all three share, so the comparison isolates the engine.** The same training target
-(ADR-027: the snapshot target in stage A, the per-qubit target in stage B), the same
-time split, the same downstream layers (squashing, Kraus projection, Aer), the same
-circuits and metrics (band coverage and width first, Hellinger as the point metric; File
-05 Q1a and Q1b), and the same test: paired Wilcoxon signed-rank at alpha = 0.05 over
-snapshots x circuits (File 02 Q1b).
+**What all three share, so the comparison isolates the engine.** The same evaluation
+target (ADR-027's `(gamma, lambda)` on later, held-out states: the snapshot target in
+stage A, the per-qubit target in stage B), the same time split, the same downstream
+layers (squashing, Kraus projection, Aer), the same circuits and metrics (band coverage
+and width first, Hellinger as the point metric; File 05 Q1a and Q1b), and the same test:
+paired Wilcoxon signed-rank at alpha = 0.05 over snapshots x circuits (File 02 Q1b).
 
 ### 1.1 One band question this plan raises and does not settle
 
@@ -68,6 +70,31 @@ method rather than engine. Two consistent options: conformalize all three, or co
 three raw and report coverage. This goes to the 2026-10-05 week meeting (§9).
 
 ## 2. The deep model, stage by stage
+
+### 2.0 The learning task: forecasting, because a same-snapshot target leaks
+
+ADR-027's target for a state is a closed-form function of that same state's `T1`, `T2`
+and gate length: `gamma = 1 - exp(-t/T1)`, `lambda = 1 - exp(-t(2/T2 - 1/T1))`
+(`training/targets.py`, `qubit_targets`). A model that sees a state's `T1` and `T2` and
+is asked for that state's target is learning a known formula. Its held-out error would be
+near zero, its conformal band near zero width, and stage 1's ranking would rediscover
+`T1` and `T2`. None of that is a finding. **So the deep engine forecasts (decision A7):**
+
+- **Inputs:** the features of the state at `t`, optionally with those of the previous `w`
+  states (a history window).
+- **Target:** ADR-027's `(gamma, lambda)` computed on a later state, `t + h`.
+- **Horizon `h`:** a parameter, chosen from measurement rather than taste (tasks T12 and
+  T13 below). That is the "band design, measure first" item File 02 already named.
+
+**What this makes of the comparison.** E1 and E2 are anchored on the state at `t` and
+judged on later states (File 02 §2.2). In effect they forecast by persistence: the noise
+at `t + h` is predicted to be the noise at `t`, with a band around it. E3 is a *learned*
+forecast with a band. The three-engine comparison is therefore persistence-with-band
+against learned-forecast-with-band. A learned forecast matters only where it beats
+persistence, and that is a result to report either way.
+
+The choice of architecture for E3 under this task is surveyed in
+`docs/roadmap/2026-10-04-deep-engine-architecture-research.md`.
 
 ### 2.1 Stage 0: inventory and scenarios (Dr. Akba's first question)
 
@@ -111,9 +138,9 @@ need on those features (today's 3 features give 27 cells and 27 rules).
 | --- | --- |
 | Rows | Stage A: one per distinct device state, from Issue #63's training-set builder at its pinned archive ref. 740 distinct states exist at `43607a2` (`health/metrics.json`, `states_total`, generated 2026-10-03T09:15Z; provisional until #63 registers its own count). |
 | Inputs | Every candidate from T1 that has full history, aggregated over usable qubits (mean, and a spread statistic to be chosen in T1). Standardized with training-portion statistics only. |
-| Target | ADR-027's snapshot target, `(gamma, lambda)`: `SnapshotTarget.mean` |
+| Target | ADR-027's snapshot target, `(gamma, lambda)`: `SnapshotTarget.mean` of the state at `t + h` (§2.0) |
 | Model | NumPy MLP, one or two hidden layers, `tanh` or ReLU; Adam; early stopping on a validation slice of the training portion |
-| Output | A ranked list of features by permutation importance (§2.3). Stage 1 is not an engine and is never compared. |
+| Output | A ranked list of features by permutation importance for predicting noise at `t + h` (§2.3). Stage 1 is not an engine and is never compared. |
 
 ### 2.3 Permutation feature importance
 
@@ -125,9 +152,13 @@ I_j = (1/R) * sum_{r=1..R} [ L(f, X with column j permuted by shuffle r) - L(f, 
 ```
 
 It is computed on held-out data, never on the training rows, and reported with its spread
-over the `R` shuffles. **Known weakness, planned for:** when two features are correlated
-(`T1` and `T2` are the obvious pair), shuffling one leaves its information in the other,
-and both look unimportant. T5 therefore also runs **grouped** permutation, shuffling a
+over the `R` shuffles. Under the forecasting task, `I_j` measures how much feature `j` at
+`t` (or in the history window) tells the model about noise at `t + h`. That is a question
+about drift, not about the ADR-027 formula.
+
+**Known weakness, planned for:** when two features are correlated (`T1` and `T2` are the
+obvious pair), shuffling one leaves its information in the other, and both look
+unimportant. T5 therefore also runs **grouped** permutation, shuffling a
 correlated group together, with groups set by a correlation threshold chosen before the
 run.
 
@@ -155,7 +186,19 @@ band(x) = [ f(x) - q_hat , f(x) + q_hat ]
 On exchangeable data this covers the true value with probability at least `1 - alpha`. The
 time split deliberately breaks exchangeability. Whether coverage holds on later snapshots
 is exactly the drift question File 02 Q1a makes primary, so the measured coverage is a
-result, not a formality.
+result, not a formality. Because the residuals are forecast errors at horizon `h`, the band's
+width is a measured drift scale at that horizon. Variants built for non-exchangeable data
+are compared in the research document (§2.0).
+
+### 2.5 The supervised contrastive learning test (decision A8, task T14)
+
+The design is in the research document (§2.1a there). In short: SupCon classes built on
+the change `y(t + h) - y(t)`, not on the future value. The same network at `beta = 0` is
+the control, with Rank-N-Contrast and the forecasting references alongside, on the same
+split, under a success rule written before the run. Stage B is the scale where it can show
+anything. It runs under whichever evaluation protocol the lead adopts. The research
+document recommends one (rows as `T1`/`T2` re-measurement epochs, coverage on change
+events) but it is not decided, so that decision comes before T14's gate.
 
 ## 3. Sample unit: stage A, then stage B
 
@@ -163,7 +206,7 @@ result, not a formality.
 | --- | --- | --- |
 | Row | One distinct device state | One qubit in one distinct state |
 | Rows available | 740 at `43607a2` (provisional, see §2.2) | About 740 x 156 = 115,440, **not independent**: the 156 rows of one state share a calibration run |
-| Target | `SnapshotTarget.mean` | `QubitTargets` (already in `training/targets.py`) |
+| Target (at `t + h`) | `SnapshotTarget.mean` | `QubitTargets` (already in `training/targets.py`) |
 | Features | Aggregates over qubits | Each qubit's own values, plus its incident-edge `cz` / `rzz` errors |
 | Splits | By time | By time, and never splitting one state's qubits across train and test |
 | Precondition | Issue #63's builder | The engine emits per-qubit noise, which it does not today (§5) |
@@ -249,14 +292,17 @@ Gates are artifacts or decisions; dates are the ambition (the phase-3 plan's §5
 | T1 | Feature inventory, registered | NC row; the §2.1 table re-measured over distinct states at a pinned ref | T0 |
 | T2 | Scenario enumeration, stage A | NC row: theoretical, occupied, samples per cell | T1 |
 | T3 | NumPy MLP core: forward, backprop, Adam, early stopping | Tests, including a finite-difference gradient check in the style of #61 | T0 |
-| T4 | Stage-A dataset | #63's builder at its pinned ref, extended with T1's features | #63, T1 |
-| T5 | Stage 1 training and permutation importance, single and grouped | NC row for the ranking, with its spread | T3, T4 |
+| T4 | Stage-A dataset of `(state at t, target at t + h)` pairs | #63's builder at its pinned ref, extended with T1's features and paired at the `h` that T13 justifies | #63, T1, T13 |
+| T5 | Stage 1 training and permutation importance for `t + h`, single and grouped | NC row for the ranking, with its spread | T3, T4 |
 | T6 | Feature engineering, `F*` | Each kept, dropped or transformed feature justified in writing | T5 |
 | T7 | Stage 2 and its split-conformal band | Trained engine; band coverage on the calibration slice | T6 |
 | T8 | Seam ADR and parameter-model ABC; MLP as an implementation | ADR merged; all three engines run through one noise-model path | T3 |
 | T9 | ADR-005 scoping note and ADR-013 revisit note | Both appended, with the lead's recorded approval | T0 |
 | T10 | Stage B: per-qubit inventory, scenarios and noise emission | Its own ADR and tasks, planned after stage A | T7, T8 |
 | T11 | Three-engine comparison | Band interval score and Hellinger, paired Wilcoxon, on the time split, in `docs/findings/` with NC rows | T7, T8, #58, #62, #64 |
+| T12 | Drift frequency: how often `T1` and `T2` change between consecutive distinct states, per qubit and for the snapshot mean | NC row | T0 |
+| T13 | Drift magnitude by lag: the distribution of the change in `(gamma, lambda)` between states `k` apart, for a range of `k`; persistence's error at each lag | NC row; the horizon `h` chosen from it, in writing | T12 |
+| T14 | Supervised contrastive learning test (§2.5) | Labels, `beta` grid and success rule written before the run; result registered, positive or negative | T3, T4, T13, the lead's evaluation-protocol decision |
 
 Verification is batched on @BurakOztekin's desktop (`docs/team.md`): every number above is
 provisional until it appears in a batch record.
@@ -269,6 +315,7 @@ provisional until it appears in a batch record.
 | Correlated per-qubit rows | 156 rows per state are not 156 samples | Split by state and time; count states, not rows, for any floor |
 | Correlated features fool permutation importance | `T1` and `T2` share information | Grouped permutation, groups fixed before the run |
 | Conformal coverage under drift | Exchangeability fails on a time split | That failure is the measurement; report coverage per horizon |
+| The learned forecast does not beat persistence | Short, noisy series often favour the last value | Persistence is reported as its own row in T11; a deep engine that loses to it is a result, not a failure to hide |
 | Hand-written backprop bugs | No autograd | Finite-difference gradient check as a gate on T3 |
 | Unfair band comparison | Conformal versus Karnik-Mendel calibration | §1.1, decided with Dr. Akba |
 | Inexact parameter matching | `(d + 3)h + 2` rarely hits 243 | The matching rule in §4, both counts reported |
@@ -288,6 +335,13 @@ The architecture is the lead's. These are the questions that are his:
 5. The missing-data rule for partial-history fields: skip, or fuzzy maximum entropy (old
    question Q5)?
 6. The two future-work proposals (A6): worth naming in the paper?
+7. Supervised contrastive learning (A8): SupCon on classes of the change, or a regression
+   form such as Rank-N-Contrast? T14 runs both.
+
+The research document (`docs/roadmap/2026-10-04-deep-engine-architecture-research.md`,
+§7) repeats question 7 and adds three more: whether a negative stage-A result is an
+acceptable contribution, whether band coverage is claimed per output or jointly, and
+whether the paper should state that reinforcement learning has no role in the engine.
 
 ## 10. Future work (A6), recorded and not built
 
