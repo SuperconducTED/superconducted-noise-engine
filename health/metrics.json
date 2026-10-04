@@ -1,33 +1,40 @@
 {
-  "documents_total": 1706,
-  "duplication_ratio": 0.5609613130128956,
+  "capture_7d": 0.8214285714285714,
+  "capture_backfilled_7d": 0,
+  "capture_days_7d": 3,
+  "capture_exist_7d": 112,
+  "capture_held_7d": 92,
+  "capture_missed_7d": 20,
+  "capture_span_days": 7,
+  "documents_total": 1721,
+  "duplication_ratio": 0.5647879140034864,
   "floors": [
     {
       "label": "NC-012",
-      "projected_date": "2026-11-24",
-      "projected_days": 50.8103448275862,
+      "projected_date": "2026-11-25",
+      "projected_days": 51.70175438596492,
       "states_remaining": 421,
       "value": 1170
     },
     {
       "label": "NC-046-TanhBellMF",
-      "projected_date": "2026-11-29",
-      "projected_days": 56.241379310344826,
+      "projected_date": "2026-11-30",
+      "projected_days": 57.2280701754386,
       "states_remaining": 466,
       "value": 1215
     },
     {
       "label": "NC-046-max",
-      "projected_date": "2026-12-05",
-      "projected_days": 61.672413793103445,
+      "projected_date": "2026-12-06",
+      "projected_days": 62.75438596491229,
       "states_remaining": 511,
       "value": 1260
     }
   ],
-  "generated_at": "2026-10-04T09:54:43.261455Z",
-  "hours_since_last_new_state": 1.6159059597222223,
-  "index_head": "20261004T081746000000Z.json",
-  "ledger_hour_coverage_72h": 0.5972222222222222,
+  "generated_at": "2026-10-04T12:07:48.949628Z",
+  "hours_since_last_new_state": 3.8341526744444447,
+  "index_head": "20261004T102456000000Z.json",
+  "ledger_hour_coverage_72h": 0.5833333333333334,
   "new_states_per_day_30d": [
     6,
     4,
@@ -61,9 +68,6 @@
     6
   ],
   "poll_hours_72h": [
-    true,
-    false,
-    true,
     false,
     true,
     true,
@@ -132,13 +136,16 @@
     true,
     false,
     true,
-    true
+    true,
+    false,
+    true,
+    false
   ],
-  "polls_fired_24h": 22,
-  "polls_yielding_new_state_24h": 12,
+  "polls_fired_24h": 23,
+  "polls_yielding_new_state_24h": 7,
   "staleness_band": "under 24 h",
-  "states_added_24h": 6,
-  "states_added_7d": 58,
-  "states_per_day_7d": 8.285714285714286,
+  "states_added_24h": 5,
+  "states_added_7d": 57,
+  "states_per_day_7d": 8.142857142857142,
   "states_total": 749
 }
