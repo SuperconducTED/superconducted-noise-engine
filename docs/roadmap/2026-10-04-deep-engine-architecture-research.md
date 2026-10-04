@@ -68,8 +68,8 @@ has to live with them:
 | --- | --- | --- | --- |
 | Contrastive and representation | Rank-N-Contrast on the *change* in `(gamma, lambda)`, as an auxiliary loss on stage 2 | Conditional | Only the change is learnable; a contrastive loss on the raw future label relearns persistence. SupCon needs class labels and would bin a continuous target. |
 | Reinforcement learning | None as the engine | Does not fit | IBM publishes the next calibration whatever we predict, and the realized target scores every possible forecast. The problem is online supervised learning; RL only adds variance. |
-| Forecasting with drift-robust bands | A linear forecaster on lags, shared across qubits, with adaptive conformal inference | Adopt for version 1 | Simple forecasters beat deep ones on short series, and adaptive conformal keeps long-run coverage without exchangeability |
-| Structure and physics | A grey-box residual: forecast log decay rates as a baseline plus a learned correction, then apply ADR-027's formula | Adopt for version 1 | It keeps the physics fixed, learns only drift, and can guarantee `T2 <= 2 T1` by construction |
+| Forecasting with drift-robust bands | A linear forecaster on lags, shared across qubits, with adaptive conformal inference | Recommended for version-1 evaluation | Simple forecasters beat deep ones on short series, and adaptive conformal keeps long-run coverage without exchangeability |
+| Structure and physics | A grey-box residual: forecast log decay rates as a baseline plus a learned correction, then apply ADR-027's formula | Recommended for version-1 evaluation | It keeps the physics fixed, learns only drift, and can guarantee `T2 <= 2 T1` by construction |
 
 ## 2. Each family in detail
 
