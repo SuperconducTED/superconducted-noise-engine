@@ -31,8 +31,8 @@
       "value": 1260
     }
   ],
-  "generated_at": "2026-10-04T11:46:56.997838Z",
-  "hours_since_last_new_state": 60.56749939944445,
+  "generated_at": "2026-10-04T11:48:16.385242Z",
+  "hours_since_last_new_state": 60.58955145611111,
   "index_head": "20261002T012506000000Z.json",
   "ledger_hour_coverage_72h": 0.125,
   "new_states_per_day_30d": [
