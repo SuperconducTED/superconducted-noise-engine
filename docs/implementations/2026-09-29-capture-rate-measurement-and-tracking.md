@@ -205,3 +205,47 @@ data branch the reproduction used: the step timed out after measuring 09-29 and 
 
 **Gates after the round:** `ruff check`, `ruff format --check`, `scripts/check_ids.py`,
 `mypy --strict` clean; the full suite figure is in the commit that records it.
+
+## Review round 2 (2026-10-04)
+
+Baha accepted round 1 and found one more defect. Burak's round-1 finding is fixed and awaits
+his re-review.
+
+**Finding.** `read_dispatch_windows` built each dispatch's window from the run's
+`createdAt .. updatedAt`. `calibration-poll`'s concurrency group makes a dispatch created
+while a scheduled sweep holds the group wait, so the sweep's ledger rows fall inside the
+dispatch's window, read as the dispatch's, and are recorded `backfilled`: counted as missed
+although the pipeline caught them. The same root cause had two worse cases the review did not
+name: a dispatch still waiting got `(createdAt, None)`, an open-ended window claiming every
+later scheduled row, and a dispatch cancelled while pending could leave a window spanning a
+whole sweep it never ran beside.
+
+**Why "use `startedAt`" would not have fixed it, observed for real.** Two back-to-back
+`calibration-health` dispatches on a scratch data branch put the second in its group's queue
+(run [37199708102](https://github.com/SuperconducTED/superconducted-noise-engine/actions/runs/37199708102)).
+While it waited, its run-level `run_started_at` equalled `created_at` (11:43:39) and the
+jobs API returned no jobs. After it ran, its `capture` job showed `created_at` 11:47:01 and
+`started_at` 11:47:03, the moment the first run finished. A run's start is its queue time;
+only jobs carry the real one. History could not have shown this: in 1,000 `calibration-poll`
+runs from 2026-08-09 to 10-04, `startedAt` equals `createdAt` in every run and none was
+created while another ran, so the defect was latent and no registered figure was affected.
+
+**Fix.** Dispatch windows are the jobs' `started_at .. completed_at`, from
+`actions/runs/{id}/jobs?filter=all` (re-run attempts included). A waiting dispatch has no
+job and owns nothing; a skipped job is ignored; a running job owns only what follows its
+start.
+
+**Invariant, re-measured under the stricter rule.** At `calibration-data` @ `0c798dc`, the
+600 job intervals of the poll runs since 2026-09-02 do not overlap, and 596 of 596 ledger
+poll times fall inside exactly one of them (591 scheduled, 5 dispatched, the five known
+dispatches). So `POLL_TIME` is stamped inside the job, which the rule relies on.
+
+**Tests and mutation checks.** Baha's scenario is pinned
+(`test_a_dispatch_queued_behind_a_sweep_does_not_claim_the_sweep`: created 09:00, the sweep
+files at 09:30, the dispatch's job starts at 09:35), with the waiting, running and skipped
+cases. Starting every window an hour early, as a queue-time start would, fails two tests;
+counting skipped jobs fails one; reading only the latest attempt fails the workflow pin.
+
+**Not reproduced end to end, deliberately.** The misattribution itself needs the poller
+dispatched against the real `calibration-data` while a sweep runs. The mechanism was observed
+on a real run, and the misattribution is pinned by unit test.

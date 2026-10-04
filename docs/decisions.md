@@ -1479,10 +1479,14 @@ Append-only, one row per document proven to exist on an enumerated UTC day. What
 measures is what the **unattended** pipeline retrieved, not what the archive holds: a
 document is `retrieved` when a ledger row from a *scheduled* run names it, with any
 decision, since a scheduled run that found a document already filed would otherwise have
-filed it. A row belongs to a dispatch when its `poll_time_utc` falls inside the run window
-of a `workflow_dispatch` run of `calibration-poll.yml`, read from the Actions API; the
-workflow's concurrency group serialises its runs, and 549 of 549 ledger poll times at
-`calibration-data` @ `7bc549d` fell inside exactly one run. `status` is `captured`,
+filed it. A row belongs to a dispatch when its `poll_time_utc` falls inside the execution
+interval of a job of a `workflow_dispatch` run of `calibration-poll.yml`, read from the
+Actions jobs API (every attempt). Job intervals, not run windows: a run queued behind
+another in the concurrency group keeps its creation time as its run-level start (observed
+in run 37199708102), so a run window would claim the scheduled run it waited behind (PR
+#105 review, round 2). The group serialises the runs, so their jobs never overlap: at
+`calibration-data` @ `0c798dc`, the 600 job intervals since 2026-09-02 do not overlap and
+596 of 596 ledger poll times fall inside exactly one of them. `status` is `captured`,
 `MISSED` (IBM serves it and the archive does not hold it) or `archived_not_served`, the
 vocabulary of the committed evidence TSVs, plus `backfilled` (held only because a dispatch
 filed it, counted as missed, so a manual backfill can never raise the figure) and

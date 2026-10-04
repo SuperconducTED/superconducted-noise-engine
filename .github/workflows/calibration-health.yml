@@ -209,12 +209,27 @@ jobs:
           # Manual dispatches of the poller, whose ledger rows must not count as
           # the pipeline's own retrievals. Without this list a day cannot be told
           # apart from one a person healed, so nothing is recorded at all.
-          if ! gh run list -R "$GITHUB_REPOSITORY" --workflow calibration-poll.yml \
-              --event workflow_dispatch --limit 500 \
-              --json databaseId,createdAt,updatedAt,status,event > dispatches.json; then
-            echo "::warning::could not list poller dispatches; every day stays pending"
+          #
+          # The jobs of each dispatch, every attempt, not the runs: a run queued
+          # behind a scheduled poll keeps its creation time as its run-level start,
+          # so a run window would claim that poll's rows (PR #105 review, round 2).
+          # A job's started_at is when a runner took it. `set -e` is off inside a
+          # function called from `if`, hence the explicit `|| return 1`.
+          list_dispatch_jobs() {
+            local ids id
+            ids=$(gh run list -R "$GITHUB_REPOSITORY" --workflow calibration-poll.yml \
+              --event workflow_dispatch --limit 500 --json databaseId --jq '.[].databaseId') \
+              || return 1
+            for id in $ids; do
+              gh api "repos/$GITHUB_REPOSITORY/actions/runs/$id/jobs?filter=all&per_page=100" \
+                --jq '.jobs[] | {run_id, started_at, completed_at, conclusion}' || return 1
+            done
+          }
+          if ! list_dispatch_jobs > dispatch-jobs.jsonl; then
+            echo "::warning::could not list poller dispatch jobs; every day stays pending"
             exit 0
           fi
+          jq -s . dispatch-jobs.jsonl > dispatches.json
           for day in $days; do
             next=$(date -u -d "$day + 1 day" +%F)
             rm -f served.txt

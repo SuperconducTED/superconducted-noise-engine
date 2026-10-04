@@ -54,12 +54,12 @@ def _root(
 
 A, B, C = "20260926T010000000000Z", "20260926T020000000000Z", "20260926T030000000000Z"
 DISPATCH = {
-    "databaseId": 1,
-    "event": "workflow_dispatch",
-    "status": "completed",
-    "createdAt": "2026-09-27T04:00:00Z",
-    "updatedAt": "2026-09-27T04:30:00Z",
+    "run_id": 1,
+    "started_at": "2026-09-27T04:00:00Z",
+    "completed_at": "2026-09-27T04:30:00Z",
+    "conclusion": "success",
 }
+"""One job of a dispatched poll run, as the jobs API returns it."""
 
 
 class TestSettledDays:
@@ -113,23 +113,53 @@ class TestScheduledRetrievals:
         (_at("2026-09-27T09:30:00Z"), C),  # scheduled sweep, after the dispatch
     )
 
-    def test_rows_filed_inside_a_dispatch_window_are_not_the_pipelines(self) -> None:
-        windows = [(_at(DISPATCH["createdAt"]), _at(DISPATCH["updatedAt"]))]
+    def _windows(
+        self, tmp_path: Path, *jobs: dict[str, Any]
+    ) -> list[tuple[datetime, datetime | None]]:
+        listing = tmp_path / "dispatches.json"
+        listing.write_text(json.dumps(list(jobs)), encoding="utf-8")
+        return cr.read_dispatch_windows(listing)
+
+    def test_rows_filed_while_a_dispatch_job_ran_are_not_the_pipelines(
+        self, tmp_path: Path
+    ) -> None:
+        windows = self._windows(tmp_path, DISPATCH)
         assert cr.scheduled_retrievals(self.POLLS, windows) == {A, C}
 
-    def test_a_running_dispatch_owns_everything_after_its_start(self) -> None:
-        windows: list[tuple[datetime, datetime | None]] = [(_at("2026-09-27T04:00:00Z"), None)]
+    def test_a_dispatch_queued_behind_a_sweep_does_not_claim_the_sweep(
+        self, tmp_path: Path
+    ) -> None:
+        """PR #105 review, round 2. Created 09:00 while a sweep held the group.
+
+        The sweep files at 09:30; the dispatch's job starts only at 09:35. Its run
+        was created at 09:00 and, as observed in run 37199708102, keeps 09:00 as
+        its run-level start too, so a run window would make the sweep's rows a
+        dispatch's and mark them `backfilled`. The job window cannot.
+        """
+        queued = {
+            **DISPATCH,
+            "started_at": "2026-09-27T09:35:00Z",
+            "completed_at": "2026-09-27T10:00:00Z",
+        }
+        polls = [(_at("2026-09-27T09:30:00Z"), C), (_at("2026-09-27T09:40:00Z"), B)]
+        assert cr.scheduled_retrievals(polls, self._windows(tmp_path, queued)) == {C}
+
+    def test_a_dispatch_still_waiting_owns_nothing(self, tmp_path: Path) -> None:
+        """A run waiting on the concurrency group has no jobs, observed in run 37199708102."""
+        assert self._windows(tmp_path) == []
+        assert cr.scheduled_retrievals(self.POLLS, []) == {A, B, C}
+
+    def test_a_running_dispatch_job_owns_only_what_follows_its_start(self, tmp_path: Path) -> None:
+        running = {**DISPATCH, "completed_at": None, "conclusion": None}
+        windows = self._windows(tmp_path, running)
+        assert windows == [(_at(DISPATCH["started_at"]), None)]
         assert cr.scheduled_retrievals(self.POLLS, windows) == {A}
 
-    def test_dispatch_listing_is_read_with_open_ends_for_running_runs(self, tmp_path: Path) -> None:
-        listing = tmp_path / "d.json"
-        running = {**DISPATCH, "status": "in_progress"}
-        scheduled = {**DISPATCH, "event": "schedule"}
-        listing.write_text(json.dumps([DISPATCH, running, scheduled]), encoding="utf-8")
-        assert cr.read_dispatch_windows(listing) == [
-            (_at(DISPATCH["createdAt"]), _at(DISPATCH["updatedAt"])),
-            (_at(DISPATCH["createdAt"]), None),
-        ]
+    def test_a_job_that_never_ran_owns_nothing(self, tmp_path: Path) -> None:
+        """A skipped job carries a zero-length interval at the moment it was skipped."""
+        skipped = {**DISPATCH, "completed_at": DISPATCH["started_at"], "conclusion": "skipped"}
+        unstarted = {**DISPATCH, "started_at": None, "completed_at": None, "conclusion": None}
+        assert self._windows(tmp_path, skipped, unstarted) == []
 
 
 class TestRecordCli:
@@ -332,6 +362,9 @@ class TestWorkflowPins:
         assert re.search(r"^            ledger$", job, re.MULTILINE)
         enumerate_step = _step(job, "Enumerate settled days and record capture")
         assert "--event workflow_dispatch" in enumerate_step
+        # Job intervals, every attempt: a run window claims the run it queued behind.
+        assert "/jobs?filter=all" in enumerate_step
+        assert "started_at, completed_at" in enumerate_step
         assert "--dispatches dispatches.json" in enumerate_step
 
 

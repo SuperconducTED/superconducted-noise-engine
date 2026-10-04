@@ -20,11 +20,15 @@ decision: a ``duplicate`` row is as much a retrieval as a ``new`` one, because a
 scheduled run that found a document already filed would have filed it otherwise
 (PR #105 review, the same correction applied to NC-057's counterfactual).
 
-A row comes from a dispatch when its ``poll_time_utc`` falls inside the run
-window of a ``workflow_dispatch`` run of ``calibration-poll.yml``, read from the
-Actions API. That mapping is exact because the workflow's concurrency group
-serialises its runs: at ``calibration-data`` @ ``7bc549d``, 549 of 549 ledger
-poll times inside the run history fell inside exactly one run.
+A row comes from a dispatch when its ``poll_time_utc`` falls inside the
+execution interval of a job of a ``workflow_dispatch`` run of
+``calibration-poll.yml``, read from the Actions jobs API. Job intervals, not run
+windows: a queued run's run-level start is its creation time, so a run window
+would claim the scheduled run it was queued behind (``read_dispatch_windows``).
+The mapping is exact because the workflow's concurrency group serialises its
+runs, so jobs never overlap: at ``calibration-data`` @ ``0c798dc``, the 600 job
+intervals of the poll runs since 2026-09-02 do not overlap, and 596 of 596
+ledger poll times fall inside exactly one of them.
 
 Contract
 --------
@@ -226,18 +230,28 @@ def read_ledger_polls(directory: Path) -> list[tuple[datetime, str]]:
 
 
 def read_dispatch_windows(path: Path) -> list[tuple[datetime, datetime | None]]:
-    """Run windows of ``calibration-poll.yml`` dispatches, from ``gh run list --json``.
+    """Execution intervals of ``calibration-poll.yml`` dispatches, one per job attempt.
 
-    ``createdAt .. updatedAt`` brackets every ledger row a run filed, because the
-    row's ``poll_time_utc`` is stamped inside the run. A run that has not
-    completed gets an open end: whatever it files later is still a dispatch's.
+    The input is the jobs API (``actions/runs/{id}/jobs?filter=all``) for every
+    dispatch run: ``run_id``, ``started_at``, ``completed_at`` and ``conclusion``
+    per job. A row's ``poll_time_utc`` is stamped while the job runs, so the
+    job's ``started_at .. completed_at`` brackets every row the dispatch filed.
+
+    Job times, never run times (PR #105 review, round 2). A run created while
+    another poll run holds the concurrency group waits; its run-level
+    ``created_at`` and ``run_started_at`` both stay at the moment it was queued
+    (observed: run 37199708102 queued 11:43:39, ``run_started_at`` 11:43:39,
+    job started 11:47:03), so a window built from them claims the rows of the
+    scheduled run it was waiting behind. A run still waiting has no jobs at all,
+    so it owns nothing; a skipped job never ran; a job still running owns
+    everything after its start.
     """
     windows: list[tuple[datetime, datetime | None]] = []
-    for run in json.loads(path.read_text(encoding="utf-8")):
-        if run.get("event", "workflow_dispatch") != "workflow_dispatch":
+    for job in json.loads(path.read_text(encoding="utf-8")):
+        if not job.get("started_at") or job.get("conclusion") == "skipped":
             continue
-        end = _utc(run["updatedAt"]) if run.get("status") == "completed" else None
-        windows.append((_utc(run["createdAt"]), end))
+        end = _utc(job["completed_at"]) if job.get("completed_at") else None
+        windows.append((_utc(job["started_at"]), end))
     return windows
 
 
@@ -387,8 +401,8 @@ def main(argv: Iterable[str] | None = None) -> int:
         "--dispatches",
         type=Path,
         required=True,
-        help="`gh run list --workflow calibration-poll.yml --event workflow_dispatch "
-        "--json createdAt,updatedAt,status,event` output",
+        help="JSON array of the jobs (`actions/runs/{id}/jobs?filter=all`: run_id, "
+        "started_at, completed_at, conclusion) of every calibration-poll.yml dispatch",
     )
     record.add_argument("--step", required=True, help="enumeration step in hours, recorded")
     record.add_argument("--run-id", required=True, help="Actions run id, recorded")
