@@ -17,6 +17,7 @@ nor the baseline it must beat can be argued from data.
 | File | One-sentence description |
 | --- | --- |
 | `scripts/feature_patterns.py` | New two-stage script: `extract` reads every snapshot blob at a pinned `calibration-data` ref into a value-and-date cache, `analyze` turns the cache into a JSON report of re-measurement events, cadence, temporal memory, horizon skill, cross-field signal, coherence-limit share, readout noise floor, faults and neighbour correlation. |
+| `tests/test_feature_patterns.py` | Pins the event rule and its placeholder mask, the local-level algebra (round trip of `q`, the Riccati condition, recovery of a simulated `q`), the coherence-limit formula, `extract` and the cache round trip on a fake archive, and the blob reader against the request volume that deadlocked the first version. |
 | `docs/roadmap/2026-10-05-feature-patterns-and-method.md` | The findings, the literature verdict and the recommended method for both targets, with the model-building steps as gated tasks. |
 | `docs/roadmap/2026-10-04-three-engine-and-deep-model-plan.md` | Appended a dated as-of section recording decision A9 and the A1 to A8 assumption; the original text is untouched. |
 | `docs/implementations/2026-10-05-feature-pattern-analysis.md` | This record. |
@@ -151,10 +152,15 @@ In a Python 3.12 venv built from `requirements.txt` (numpy 2.4.4, scipy 1.17.1):
 git fetch origin calibration-data
 python -m scripts.feature_patterns extract --repo . --ref 09fcc4561e74d7ca619f738cbb3370eeced5ee89 --out fp_cache.npz
 python -m scripts.feature_patterns analyze --cache fp_cache.npz --out fp_report.json
-ruff check scripts/feature_patterns.py
-ruff format --check scripts/feature_patterns.py
+python -m pytest tests/test_feature_patterns.py -q
+ruff check scripts/feature_patterns.py tests/test_feature_patterns.py
+ruff format --check scripts/feature_patterns.py tests/test_feature_patterns.py
 mypy scripts/feature_patterns.py
 ```
+
+The deadlock test was mutation-checked on 2026-10-05: with the previous reader (write every
+request, then read) it hangs; with the current one it reads all 2,000 blobs. The full suite
+passed (721 tests) with `PYTHONPATH=src` in that venv.
 
 Expected, self-consistent rather than absolute: `extract` prints `1753 files, 176 edges`;
 in `fp_report.json`, `extract_checks.alias_value_mismatch` and

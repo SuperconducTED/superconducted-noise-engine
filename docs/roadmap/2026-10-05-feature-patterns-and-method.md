@@ -87,7 +87,10 @@ Readout is the exception, with about 580. At the moment of a file, the median fi
 | lambda | -0.50 | | | | | | 0.81 | 11.9% |
 
 All in `log10` units; skill is mean absolute error relative to persistence (below 1 is
-better); `q` is the variance of the level's step over the variance of the noise, read from
+better), over every event from the fifth on. The EWMA weight used here and in P3 is the
+Kalman weight derived from the whole archive's lag-1 autocorrelation, one scalar per family
+(a mild look-ahead); the fixed weights 0.1, 0.3 and 0.5, also measured, bracket the same
+skill, and step M2 fits the weight on the training portion only; `q` is the variance of the level's step over the variance of the noise, read from
 the lag-1 autocorrelation as `q = -1/rho_1 - 2`; `measure_2`'s `rho_1` is just below -0.5,
 which is pure noise around a fixed level. `gamma` and `lambda` move with `T1` and `T2`, as
 their formula requires.
@@ -110,7 +113,9 @@ What this says:
 ### P3. Nothing else moves the next value (linear, out of time)
 
 Response: the next value's deviation from the target's own EWMA level. Fitted before the 70%
-time cut, scored after it.
+time cut, scored after it. The "EWMA level / persistence" column is therefore the test period
+only, which is why it differs from P2's whole-archive figures (for example `T1` 0.73 here,
+0.80 there).
 
 | Target | Other fields at `t` | Test events | EWMA level / persistence | + own deviation / EWMA level | + other fields / EWMA level |
 | --- | --- | --- | --- | --- | --- |
