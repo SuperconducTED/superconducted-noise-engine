@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-04 05:37 UTC",
+  "generated": "2026-10-05 05:37 UTC",
   "main": {
     "sha": "110cfad8",
     "date": "2026-09-27",
@@ -860,16 +860,23 @@
           "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 98,
-          "reviewDecision": "REVIEW_REQUIRED",
+          "reviewDecision": "APPROVED",
           "state": "OPEN",
           "title": "docs: record the advisor-loop reshape and Dr. Akba's approval, the M3 as-of, FR-10.4 and the M3 ledger fallback (#56)",
-          "updatedAt": "2026-10-03T20:14:00Z",
+          "updatedAt": "2026-10-04T16:17:28Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/98",
           "headRefOid": "dd805cbb41a9a3284d98f5c9f8e5477c3c9698ad",
           "additions": 1288,
           "deletions": 1,
           "file_count": 7,
-          "latest_reviews": [],
+          "latest_reviews": [
+            {
+              "who": "BurakOztekin",
+              "state": "APPROVED",
+              "at": "2026-10-04",
+              "last_activity": "2026-10-04"
+            }
+          ],
           "looked_since": [],
           "checks": [
             {
@@ -913,10 +920,6 @@
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
-        {
-          "severity": "high",
-          "text": "No approving review yet: main's ruleset requires one."
-        },
         {
           "kind": "issue",
           "text": "#45 is still open; M0 is not closable until it is.",
@@ -1184,27 +1187,27 @@
           "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 105,
-          "reviewDecision": "CHANGES_REQUESTED",
+          "reviewDecision": "APPROVED",
           "state": "OPEN",
           "title": "feat: measure calibration capture after the sweep, and track it daily (#54)",
-          "updatedAt": "2026-10-03T12:06:10Z",
+          "updatedAt": "2026-10-04T18:39:47Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/105",
-          "headRefOid": "e39a158f1d16a98d76b199160f88cca4a815da0a",
-          "additions": 2292,
-          "deletions": 14,
+          "headRefOid": "4228c3edf066e06a890690dccbe196b92408f7f4",
+          "additions": 2403,
+          "deletions": 15,
           "file_count": 18,
           "latest_reviews": [
             {
               "who": "BahaJarad",
-              "state": "CHANGES_REQUESTED",
-              "at": "2026-09-30",
-              "last_activity": "2026-09-30"
+              "state": "APPROVED",
+              "at": "2026-10-04",
+              "last_activity": "2026-10-04"
             },
             {
               "who": "BurakOztekin",
-              "state": "CHANGES_REQUESTED",
-              "at": "2026-10-02",
-              "last_activity": "2026-10-02"
+              "state": "APPROVED",
+              "at": "2026-10-04",
+              "last_activity": "2026-10-04"
             }
           ],
           "looked_since": [],
@@ -1212,35 +1215,35 @@
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-02T03:19"
+              "started": "2026-10-04T15:14"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-02T03:19"
+              "started": "2026-10-04T15:14"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-02T03:19"
+              "started": "2026-10-04T15:14"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-02T03:19"
+              "started": "2026-10-04T15:14"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-02T03:19"
+              "started": "2026-10-04T15:14"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-10-02T03:20"
+              "started": "2026-10-04T15:14"
             }
           ],
-          "checks_newest": "2026-10-02T03:20",
+          "checks_newest": "2026-10-04T15:14",
           "checks_failing": [],
           "checks_stale_vs_main": false
         }
@@ -1249,12 +1252,7 @@
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
-      "blockers": [
-        {
-          "severity": "critical",
-          "text": "CHANGES_REQUESTED standing from @BahaJarad (2026-09-30), @BurakOztekin (2026-10-02). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
-        }
-      ],
+      "blockers": [],
       "declared_unblocks": [],
       "notes_info": [],
       "pr": 105
@@ -1386,12 +1384,12 @@
           "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "Transpile smoke circuits before preparing noise (#74)",
-          "updatedAt": "2026-10-03T12:19:04Z",
+          "updatedAt": "2026-10-04T17:02:04Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/103",
-          "headRefOid": "9e180675311c354541873b6ee82b5142dedce8c2",
-          "additions": 616,
+          "headRefOid": "1662ddb71c89ee0539884f9156b00ad4a8bdaea0",
+          "additions": 680,
           "deletions": 30,
-          "file_count": 7,
+          "file_count": 8,
           "latest_reviews": [
             {
               "who": "mertefesensoy",
@@ -1405,35 +1403,35 @@
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-03T12:16"
+              "started": "2026-10-04T14:32"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-03T12:16"
+              "started": "2026-10-04T14:32"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-03T12:16"
+              "started": "2026-10-04T14:32"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-03T12:16"
+              "started": "2026-10-04T14:32"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-03T12:16"
+              "started": "2026-10-04T14:32"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-10-03T12:16"
+              "started": "2026-10-04T14:32"
             }
           ],
-          "checks_newest": "2026-10-03T12:16",
+          "checks_newest": "2026-10-04T14:32",
           "checks_failing": [],
           "checks_stale_vs_main": false
         }
@@ -1677,7 +1675,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -29
+      "days_left": -30
     },
     {
       "id": "M1",
@@ -1719,7 +1717,7 @@
       "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -23
+      "days_left": -24
     },
     {
       "id": "M2",
@@ -1762,7 +1760,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -16
+      "days_left": -17
     },
     {
       "id": "M3",
@@ -1810,7 +1808,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": -9
+      "days_left": -10
     },
     {
       "id": "M4",
@@ -1848,7 +1846,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": -4
+      "days_left": -5
     }
   ]
 }

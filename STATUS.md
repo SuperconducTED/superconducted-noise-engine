@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-10-04 05:37 UTC · main at `110cfad8` (2026-09-27) · 27 days to 2026-10-31_
+_Generated 2026-10-05 05:37 UTC · main at `110cfad8` (2026-09-27) · 26 days to 2026-10-31_
 
 
 ## Milestones
@@ -68,8 +68,6 @@ _Generated 2026-10-04 05:37 UTC · main at `110cfad8` (2026-09-27) · 27 days to
 
 1. Start #63: Training-set builder (training/dataset.py)
    - The reader-and-dedup half has no hard dependency the plan recognises and W2 is where it starts; #60's first archive fit is waiting on it.
-1. Re-review PR #105 (#54: Capture rate ~70% during normal operation)
-   - Your CHANGES_REQUESTED from 2026-09-30 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 
 **Bengisu Cıvdı** (@bengisucvd)
 
@@ -84,8 +82,6 @@ _Generated 2026-10-04 05:37 UTC · main at `110cfad8` (2026-09-27) · 27 days to
 
 1. Start #60: ADR-014 hybrid ANFIS trainer
    - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.
-1. Re-review PR #105 (#54: Capture rate ~70% during normal operation)
-   - Your CHANGES_REQUESTED from 2026-10-02 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Unstick PR #103 for #74: first_ensemble_run must transpile before prepare
    - CHANGES_REQUESTED standing from @mertefesensoy (2026-09-28). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
@@ -96,7 +92,7 @@ _Generated 2026-10-04 05:37 UTC · main at `110cfad8` (2026-09-27) · 27 days to
 1. Finish #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
    - The contract merged; only the advisor half of its definition of done is outstanding.
 1. Unstick PR #105 for #54: Capture rate ~70% during normal operation
-   - CHANGES_REQUESTED standing from @BahaJarad (2026-09-30), @BurakOztekin (2026-10-02). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+   - Awaiting merge.
 1. Re-review PR #103 (#74: first_ensemble_run must transpile before prepare)
    - Your CHANGES_REQUESTED from 2026-09-28 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 
@@ -125,10 +121,6 @@ _Generated 2026-10-04 05:37 UTC · main at `110cfad8` (2026-09-27) · 27 days to
 
 - [low] FR-4's consequent convention and the raw-space vs logit-space choice both depend on #57's decision.
 
-**#54: Capture rate ~70% during normal operation** (@mertefesensoy)
-
-- [critical] CHANGES_REQUESTED standing from @BahaJarad (2026-09-30), @BurakOztekin (2026-10-02). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
-
 **#74: first_ensemble_run must transpile before prepare** (@BurakOztekin)
 
 - [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-09-28). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
@@ -153,6 +145,7 @@ _Generated 2026-10-04 05:37 UTC · main at `110cfad8` (2026-09-27) · 27 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-10-05 | 12/28 | 6 | 3 | 4 | nothing moved |
 | 2026-10-04 | 12/28 | 6 | 3 | 4 | nothing moved |
 | 2026-10-03 | 12/28 | 6 | 3 | 4 | #56 Clear the queue, keep the records honest: in review to closed |
 | 2026-10-02 | 12/28 | 6 | 4 | 4 | nothing moved |
