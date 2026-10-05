@@ -1,0 +1,1174 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>ibm_fez kapı hataları</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one centred column; summary tiles, then one wide chart card (real-time strip fanning into one column per calibration round), notes, table, provenance. */
+:root {
+  --bg: #f3f5f7;
+  --surface: #fbfcfd;
+  --ink: #0e1620;
+  --ink-2: #4a5563;
+  --muted: #6f7987;
+  --grid: #e3e7ec;
+  --axis: #c3cad3;
+  --line: rgba(14, 22, 32, 0.10);
+  --wash: rgba(14, 22, 32, 0.05);
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --s3: #1baf7a;
+  --crit: #d03b3b;
+  --f-display: "Bricolage Grotesque", "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-data: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b0f13; --surface: #141a20; --ink: #eef2f6; --ink-2: #bcc5cf; --muted: #8a94a1;
+    --grid: #222a32; --axis: #36404a; --line: rgba(255, 255, 255, 0.10); --wash: rgba(255, 255, 255, 0.06);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --crit: #d03b3b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b0f13; --surface: #141a20; --ink: #eef2f6; --ink-2: #bcc5cf; --muted: #8a94a1;
+  --grid: #222a32; --axis: #36404a; --line: rgba(255, 255, 255, 0.10); --wash: rgba(255, 255, 255, 0.06);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --crit: #d03b3b;
+  color-scheme: dark;
+}
+
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 48px; display: grid; gap: 28px; }
+@media (max-width: 520px) { .wrap { padding-inline: 16px; padding-block: 24px 36px; } }
+
+.head { display: grid; gap: 8px; }
+.eyebrow { margin: 0; font-family: var(--f-data); font-size: 12px; letter-spacing: 0.02em; color: var(--muted); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: clamp(30px, 4.2vw, 44px); line-height: 1.08; letter-spacing: -0.015em; text-wrap: balance; }
+h1 code { font-family: inherit; }
+.lede { margin: 0; max-width: 66ch; color: var(--ink-2); font-size: 16px; }
+h2 { margin: 0; font-family: var(--f-body); font-weight: 600; font-size: 17px; letter-spacing: -0.005em; text-wrap: balance; }
+code, .mono { font-family: var(--f-data); font-size: 0.88em; }
+
+/* summary tiles */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 2px; align-content: start; min-width: 0; }
+.t-label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); font-weight: 500; }
+.t-val { font-size: 26px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; margin-top: 4px; }
+.t-sub { font-size: 12.5px; color: var(--muted); }
+.t-sub b { color: var(--ink-2); font-weight: 500; }
+.key { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.key.q1 { background: var(--s1); } .key.q2 { background: var(--s2); } .key.ro { background: var(--s3); }
+.xkey { width: 10px; height: 10px; flex: none; color: var(--crit); }
+.tile.ph { border-color: color-mix(in srgb, var(--crit) 35%, var(--line)); }
+
+/* chart card */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding-block: 18px 10px; display: grid; gap: 12px; min-width: 0; }
+.card-head { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; align-items: flex-start; padding-inline: 20px; }
+.card-head > div:first-child { min-width: 0; flex: 1 1 380px; display: grid; gap: 4px; }
+.sub { margin: 0; color: var(--ink-2); font-size: 13.5px; max-width: 72ch; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; padding: 2px; background: var(--bg); }
+.seg button { font: 500 13px var(--f-body); color: var(--ink-2); background: transparent; border: 0; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--line); }
+.seg button:hover { color: var(--ink); }
+.seg button:focus-visible, summary:focus-visible, select:focus-visible, th button:focus-visible, a:focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; }
+.legend { list-style: none; margin: 0; padding-inline: 20px; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--ink-2); }
+.legend li { display: flex; align-items: center; gap: 7px; }
+.legend .mline { width: 16px; height: 0; border-top: 2px solid var(--ink); flex: none; }
+.scroller { position: relative; overflow-x: auto; overflow-y: hidden; }
+#chart { display: block; }
+#chart text { font-family: var(--f-body); }
+#chart .tick-lab { font-family: var(--f-data); font-size: 11px; fill: var(--muted); }
+#chart .cap { font-size: 11px; fill: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
+#chart .day { font-size: 11px; fill: var(--muted); }
+#chart .gl { stroke: var(--grid); stroke-width: 1; }
+#chart .ax { stroke: var(--axis); stroke-width: 1; }
+#chart .dot { stroke: none; }
+#chart .q1 { fill: var(--s1); } #chart .q2 { fill: var(--s2); } #chart .ro { fill: var(--s3); }
+#chart .fan { fill: none; stroke-width: 1.2; opacity: 0.55; }
+#chart .fan.q1 { stroke: var(--s1); } #chart .fan.q2 { stroke: var(--s2); } #chart .fan.ro { stroke: var(--s3); }
+#chart .tl-dot { stroke: var(--surface); stroke-width: 2; }
+#chart .xmark { stroke: var(--crit); stroke-width: 2; stroke-linecap: round; fill: none; }
+#chart .median { stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; opacity: 0.85; }
+#chart .s-kind { font-size: 12.5px; font-weight: 600; fill: var(--ink); }
+#chart .s-meta { font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+#chart .s-med { font-size: 11px; fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+#chart .maxlab { font-size: 11px; fill: var(--ink-2); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; font-variant-numeric: tabular-nums; }
+#chart .ph-note { font-size: 11px; fill: var(--muted); font-style: italic; }
+#chart .hl { fill: none; stroke: var(--ink); stroke-width: 2; pointer-events: none; }
+.tip { position: absolute; z-index: 2; pointer-events: none; min-width: 190px; max-width: 280px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.14); padding: 10px 12px; font-size: 12.5px; line-height: 1.45; display: grid; gap: 3px; }
+.tip .tv { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.tip .tv small { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 6px; }
+.tip .tn { display: flex; align-items: center; gap: 7px; font-family: var(--f-data); font-size: 12px; color: var(--ink-2); }
+.tip .lk { width: 14px; height: 0; border-top: 2px solid currentColor; flex: none; }
+.tip .tm { color: var(--muted); }
+.tip .warn { color: var(--ink-2); }
+.c-q1 { color: var(--s1); } .c-q2 { color: var(--s2); } .c-ro { color: var(--s3); } .c-ph { color: var(--crit); }
+
+/* notes */
+.notes { display: grid; gap: 10px; }
+.notes ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; max-width: 78ch; color: var(--ink-2); }
+.notes li b { color: var(--ink); font-weight: 600; }
+
+/* table */
+details.tablebox { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding-block: 4px; min-width: 0; }
+details.tablebox summary { cursor: pointer; padding: 12px 20px; font-weight: 600; font-size: 15px; }
+.tcontrols { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding: 4px 20px 12px; font-size: 13px; color: var(--ink-2); }
+.tcontrols select { font: 13px var(--f-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; }
+.tscroll { overflow: auto; max-height: 520px; border-top: 1px solid var(--line); }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: left; padding: 7px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { position: sticky; top: 0; background: var(--surface); z-index: 1; font-weight: 600; color: var(--ink-2); }
+th button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+th button[data-dir]::after { content: attr(data-dir); margin-left: 4px; color: var(--muted); }
+td.num { font-family: var(--f-data); font-size: 12.5px; font-variant-numeric: tabular-nums; text-align: right; }
+th.num { text-align: right; }
+td.mono { font-family: var(--f-data); font-size: 12.5px; }
+tr.phrow td { color: var(--ink-2); }
+td .key, td .xkey { display: inline-block; vertical-align: middle; margin-right: 6px; }
+
+footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; max-width: 90ch; }
+footer a { color: var(--ink-2); }
+.hint { margin: 0; padding-inline: 20px; font-size: 12.5px; color: var(--muted); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* report parts: section menu, part headings, pattern cards, compact charts and tables */
+.toc { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); margin-inline: -20px; padding: 8px 20px; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+@media (max-width: 520px) { .toc { margin-inline: -16px; padding-inline: 16px; } }
+.toc a { flex: none; font-size: 13.5px; font-weight: 500; color: var(--ink-2); text-decoration: none; padding: 6px 12px; border-radius: 999px; }
+.toc a:hover { background: var(--wash); color: var(--ink); }
+.toc a:focus-visible { outline: 2px solid var(--s1); outline-offset: 1px; }
+.part { display: grid; gap: 22px; scroll-margin-top: 64px; min-width: 0; }
+.part + .part, footer { border-top: 1px solid var(--line); padding-top: 32px; }
+.part-head { display: grid; gap: 6px; }
+.part-title { font-family: var(--f-display); font-weight: 600; font-size: clamp(24px, 3vw, 30px); letter-spacing: -0.01em; line-height: 1.15; }
+.part-sub { margin: 0; color: var(--ink-2); max-width: 72ch; }
+.badge { display: inline-flex; align-items: center; gap: 6px; width: fit-content; font-size: 12px; font-weight: 500; color: var(--ink-2); background: var(--wash); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; }
+.answer { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; display: grid; gap: 8px; }
+.answer h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.answer p { margin: 0; max-width: 80ch; color: var(--ink); }
+.pcard { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; display: grid; gap: 12px; min-width: 0; }
+.pcard h3 { margin: 0; font-size: 16.5px; font-weight: 600; letter-spacing: -0.005em; text-wrap: balance; }
+.pcard h3 .pid { font-family: var(--f-data); font-size: 12.5px; font-weight: 500; color: var(--muted); margin-right: 8px; }
+.pcard p, .pcard ul, .pcard ol { margin: 0; color: var(--ink-2); max-width: 80ch; }
+.pcard ul, .pcard ol { padding-left: 20px; display: grid; gap: 6px; }
+.pcard b { color: var(--ink); font-weight: 600; }
+.pcard .note { font-size: 12.5px; color: var(--muted); }
+.twocol { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px 28px; align-items: start; }
+.twocol > * { min-width: 0; }
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+.tbl table { font-size: 12.5px; }
+.tbl th, .tbl td { padding: 6px 10px; }
+.tbl th { position: static; white-space: normal; vertical-align: bottom; min-width: 64px; }
+.tbl td.lab { font-weight: 500; color: var(--ink); }
+.tbl tr:last-child td { border-bottom: 0; }
+.minitiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.mt { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
+.mt .v { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+.mt .l { font-size: 12.5px; color: var(--muted); }
+.fchart { position: relative; min-width: 0; }
+.fchart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.fchart text { font-family: var(--f-body); }
+.fchart .lab { font-size: 12px; fill: var(--ink-2); }
+.fchart .tick { font-family: var(--f-data); font-size: 10.5px; fill: var(--muted); }
+.fchart .gl { stroke: var(--grid); stroke-width: 1; }
+.fchart .ref { stroke: var(--ink-2); stroke-width: 1.5; }
+.fchart .reflab { font-size: 11px; fill: var(--ink-2); }
+.fchart .conn { stroke: var(--axis); stroke-width: 2; }
+.fchart .ma { fill: var(--s1); stroke: var(--surface); stroke-width: 2; }
+.fchart .mb { fill: var(--s2); stroke: var(--surface); stroke-width: 2; }
+.fchart .bar { fill: var(--s1); }
+.fchart .bar.mute { fill: var(--axis); }
+.fchart .val { font-size: 11.5px; fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+.fchart .hit { fill: transparent; cursor: default; }
+.flegend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--ink-2); }
+.flegend li { display: flex; align-items: center; gap: 6px; }
+.flegend svg { width: 12px; height: 12px; flex: none; }
+.ftip { position: absolute; z-index: 3; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14); padding: 8px 10px; font-size: 12.5px; display: grid; gap: 2px; min-width: 150px; }
+.ftip .tv { font-size: 16px; font-weight: 600; }
+.ftip .tm { color: var(--muted); }
+.steps td:first-child { font-family: var(--f-data); font-weight: 500; color: var(--ink); white-space: nowrap; }
+.steps td { white-space: normal; vertical-align: top; }
+.decide { counter-reset: d; list-style: none; padding: 0 !important; }
+.decide li { counter-increment: d; display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; }
+.decide li::before { content: counter(d); font-family: var(--f-data); font-weight: 500; font-size: 13px; color: var(--ink); background: var(--wash); border: 1px solid var(--line); border-radius: 50%; width: 26px; height: 26px; display: grid; place-items: center; }
+.srcs { columns: 2 340px; column-gap: 28px; padding-left: 18px !important; font-size: 13px; }
+.srcs li { break-inside: avoid; margin-bottom: 6px; }
+.srcs a { color: var(--ink-2); }
+.srcs .id { font-family: var(--f-data); font-size: 12px; color: var(--muted); }
+.pcard .flegend { display: flex; padding-left: 0; }
+.pcard .srcs { display: block; }
+.tbl td { white-space: normal; }
+.tbl td.num { white-space: nowrap; }
+</style>
+
+<main class="wrap" lang="tr">
+  <header class="head">
+    <p class="eyebrow" id="eyebrow">ibm_fez</p>
+    <h1>ibm_fez kapı hataları</h1>
+    <p class="lede">Bir anlık görüntüdeki kapı hataları, arşivin tamamından çıkan özellik paternleri ve bu hataları tahmin edecek model için önerilen yöntem.</p>
+  </header>
+
+  <nav class="toc" aria-label="Bölümler">
+    <a href="#anlik">Anlık görüntü</a>
+    <a href="#paternler">Özellik paternleri</a>
+    <a href="#yontem">Literatür ve yöntem</a>
+    <a href="#adimlar">Protokol ve sonraki adımlar</a>
+  </nav>
+
+  <section class="part" id="anlik" aria-labelledby="pAnlik">
+    <div class="part-head">
+      <h2 class="part-title" id="pAnlik">Anlık görüntü: 1 Ekim 2026</h2>
+      <p class="part-sub">Tek bir dosya: her nokta, IBM'in bir kuantum kapısı için ölçtüğü hata olasılığı. Noktalar ölçüldükleri kalibrasyon turuna göre zaman sırasıyla dizilir; dikey eksen 0 ile 1 arasındaki hatayı gösterir.</p>
+    </div>
+
+  <section class="tiles" id="tiles" aria-label="Kapı tiplerine göre özet"></section>
+
+  <section class="card" aria-labelledby="chartTitle">
+    <div class="card-head">
+      <div>
+        <h2 id="chartTitle">Kalibrasyon turlarına göre kapı hataları</h2>
+        <p class="sub">Üstteki çizgi her turun gerçek zamanını (UTC) gösterir. Alttaki her sütun bir turdur, sütundaki her nokta bir kapıdır. Bir noktanın üzerine gelince ayrıntısı açılır.</p>
+      </div>
+      <div class="seg" role="group" aria-label="Dikey eksen ölçeği">
+        <button type="button" id="bLog" aria-pressed="true">Logaritmik</button>
+        <button type="button" id="bLin" aria-pressed="false">Doğrusal 0–1</button>
+      </div>
+    </div>
+    <ul class="legend" aria-label="Gösterim anahtarı">
+      <li><span class="key q1"></span>1-kübit kapılar (sx = x = rx = id = xslow)</li>
+      <li><span class="key q2"></span>2-kübit kapılar (cz, rzz)</li>
+      <li><span class="key ro"></span>Okuma (measure, measure_2)</li>
+      <li><svg class="xkey" viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 1.5L8.5 8.5M1.5 8.5L8.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Kalibre edilmedi (değer = 1, IBM yer tutucusu)</li>
+      <li><span class="mline"></span>Turun medyanı (20 ve üzeri kapı)</li>
+    </ul>
+    <div class="scroller" id="scroller">
+      <svg id="chart" role="img" aria-labelledby="chartTitle chartDesc"></svg>
+      <div class="tip" id="tip" hidden></div>
+    </div>
+    <p class="hint" id="hint" hidden>Grafik yana kaydırılabilir; en kalabalık turlar sağdadır.</p>
+    <p class="sr" id="chartDesc"></p>
+  </section>
+
+  <section class="notes" aria-labelledby="notesTitle">
+    <h2 id="notesTitle">Nasıl okunmalı</h2>
+    <ul>
+      <li><b>Bu bir zaman serisi değil.</b> Dosya tek bir anlık görüntüdür: her kapının tek bir hata değeri vardır. Yatay eksen bu değerin hangi kalibrasyon turunda ölçüldüğünü, yani ne kadar taze olduğunu gösterir. Örneğin 1-kübit değerlerinin çoğu 30 Eyl 22:31'de, cz değerlerinin çoğu 1 Eki 00:09'da ölçülmüş. Değerlerin zaman içindeki değişimi için birden çok anlık görüntü gerekir.</li>
+      <li><b>1.952 kayıt, 820 bağımsız ölçüm.</b> sx, x, rx, id ve xslow her kübitte aynı sayıyı taşır (156 kübitin 156'sında). cz ve rzz her kübit çiftini iki yönde aynı değerle listeler (176 çiftin 176'sında). Grafik her ölçümü bir kez çizer.</li>
+      <li><b>rz çizilmedi.</b> rz sanal bir kapıdır (faz, donanımda değil yazılımda güncellenir) ve 156 kaydın hepsinde hatası tam 0'dır; logaritmik eksende 0 gösterilemez.</li>
+      <li><b>Değer = 1 bir ölçüm değildir.</b> <span id="phNote">11 kapı (25 kayıt)</span> IBM'in "kalibre edilmedi" yer tutucusunu taşır. Bu kayıtların zaman damgaları (1 Eki 00:32 ile 00:33 arası) anlık görüntü zamanından (00:26:43) sonraya düşer; ölçüm anını değil yanıtın oluşturulduğu anı gösterirler. Bu yüzden zaman çizgisine bağlanmadılar.</li>
+      <li><b>Neden logaritmik?</b> Ölçülen değerler 0,000125 ile 0,43 arasındadır, yani yaklaşık üç buçuk mertebe. Doğrusal 0–1 eksende cz medyanı (0,0027) 480 piksel yüksekliğindeki grafikte tabandan yaklaşık 1 piksel yukarıda kalır ve noktaların neredeyse hepsi üst üste biner. Karşılaştırmak için yukarıdaki "Doğrusal 0–1" düğmesini kullanabilirsiniz.</li>
+      <li><b>measure, readout_error ile aynıdır.</b> measure kapısının hatası, dosyanın qubits bölümündeki readout_error ile 156 kübitin 156'sında birebir aynıdır. measure_2 ayrı bir okuma kalibrasyonudur ve yalnızca 3 kübitte measure ile aynı değeri verir.</li>
+    </ul>
+  </section>
+
+  <details class="tablebox" id="tablebox">
+    <summary>Tüm ölçümler tablo olarak (<span id="tcount">820</span> satır)</summary>
+    <div class="tcontrols">
+      <label for="tfilter">Kapı tipi</label>
+      <select id="tfilter">
+        <option value="all">Tümü</option>
+        <option value="1q">1-kübit</option>
+        <option value="cz">cz</option>
+        <option value="rzz">rzz</option>
+        <option value="measure">measure</option>
+        <option value="measure_2">measure_2</option>
+        <option value="ph">Kalibre edilmedi</option>
+      </select>
+      <span id="tshown"></span>
+    </div>
+    <div class="tscroll">
+      <table>
+        <thead><tr>
+          <th><button type="button" data-key="n">Kapı</button></th>
+          <th><button type="button" data-key="k">Tip</button></th>
+          <th><button type="button" data-key="q">Kübit</button></th>
+          <th class="num"><button type="button" data-key="v" data-dir="↓">Hata (0–1)</button></th>
+          <th class="num">Yüzde</th>
+          <th><button type="button" data-key="ms">Kalibrasyon (UTC)</button></th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </details>
+  </section>
+
+  <section class="part" id="paternler" aria-labelledby="pPat">
+    <div class="part-head">
+      <h2 class="part-title" id="pPat">Özellik paternleri: arşivin tamamı</h2>
+      <p class="part-sub">calibration-data dalının <span class="mono">09fcc45</span> commit'indeki 1.753 ibm_fez dosyası (13 Mayıs ile 5 Ekim 2026 arası), 5 Ekim'de <span class="mono">scripts/feature_patterns.py</span> ile ölçüldü. İki hedef var (karar A9): kapı hatalarının kendisi ve ADR-027'nin (gamma, lambda) değeri.</p>
+      <span class="badge">Bütün sayılar geçici: Burak'ın masaüstünde yeniden çalıştırılana kadar numerical-claims kaydına girmez</span>
+    </div>
+
+    <div class="answer">
+      <h3>Kısa cevap</h3>
+      <p>Arşivdeki bütün kalibrasyon değerleri, kapı hataları da T1/T2 de, aynı biçimde davranıyor: her kübitin ya da kuplörün yavaş kayan bir seviyesi var ve ölçümler bu seviyenin etrafında, kaymaya göre büyük bir gürültüyle dağılıyor. Son değeri bu seviyeye doğru çekmek (yerel seviye modelinin verdiği ağırlıkla EWMA), 1'den 16'ya kadar her ufukta log hatada persistence'tan %12 ile %26 arası daha iyi. Zaman dışı doğrusal bir testte başka hiçbir alan (T1, T2, okuma, sx, aynı kuplördeki öteki 2-kübit kapı), hatta serinin kendi son sapması bile bu seviyenin ötesine bir şey katmıyor. T1/T2, bir kapının ne kadar kötü olduğunun üçte biri ile beşte ikisini açıklıyor, ne zaman değiştiğini ise neredeyse hiç açıklamıyor; yani iki hedef büyük ölçüde bağımsız sinyal taşıyor.</p>
+      <p>Literatürde bu büyüklüklerin hiçbiri için persistence'a karşı tahmin becerisi raporlanmamış. Bu yüzden önerilen yöntem bir sıralamadan okunmadı; literatür, fizik ve bu ölçümler birleştirilerek kuruldu: log uzayında global bir yerel seviye tahmincisi ve çevrimiçi conformal bantlar. Öğrenen her model bunu yenmek zorunda. Öğrenen bir artığın gerçekten değer katıp katmadığı, aşama 1'in cevaplayacağı açık soru.</p>
+    </div>
+
+    <div class="pcard">
+      <h3>Birim: yeniden ölçüm olayı</h3>
+      <ul>
+        <li>Bir seri, bir kübit ya da kuplör üzerindeki tek bir alandır. <b>Olay</b>, hem değerin hem de IBM'in damgaladığı tarihin yeni olduğu dosyadır. Yalnızca önceki değeri tekrar eden dosyalar satır sayılmaz.</li>
+        <li><b>gate_error = 1 yer tutucuları maskelendi.</b> Tarihleri her belge oluşturulduğunda yeniden damgalandığı için aksi halde her dosyada bir olay sayılırlardı.</li>
+        <li><b>Kopyalar birleştirilmeden önce arşivin tamamında kontrol edildi.</b> id, rx, x ve xslow hataları <span data-fp="alias"></span> karşılaştırmanın hepsinde sx ile aynı; bir kuplörün iki yönü <span data-fp="edges"></span> karşılaştırmanın hepsinde aynı; measure, 273.468 kübit kaydının hepsinde readout_error ile aynı.</li>
+        <li><b>Olay kuralı temiz çıktı.</b> Hiçbir damga geriye gitmedi. Tek uyuşmazlık, aynı değeri döndüren okuma ölçümleri (readout_error'da 1.742, measure_2'de 187); okuma nicemlendiği için bu mümkün (P5).</li>
+        <li><b>Eksik alanlar.</b> q72'nin T2'si her dosyada, T1'i 36 dosyada yok; kübit kayıtlarının %0,16'sında T2 &gt; 2·T1. init_error 4 Ağustos'ta, measure_2 7 Ağustos'ta, measure_reset ve reset_2 2 Eylül'de başlıyor.</li>
+      </ul>
+    </div>
+
+    <div class="pcard">
+      <h3><span class="pid">P1</span>İki saat: günlük turlar ve dört saatte bir okuma</h3>
+      <div class="twocol">
+        <div class="fchart" id="chCad" role="img" aria-label="Aile başına, seri başına medyan yeniden ölçüm sayısı"></div>
+        <div style="display:grid;gap:10px">
+          <p>Kapı hataları T1/T2'den <b>daha fazla geçiş taşımıyor</b>: varlık başına ikisi de beş ayda yaklaşık 130. İstisna okuma, yaklaşık 580.</p>
+          <p>Bir tur, cihaz genelinde bir ölçüm patlamasıdır (damgalar 15 dakikadan uzun aralıkla ayrılır). 135 sx turunun 132'sinde cihazın en az yarısı yeniden ölçüldü. Bir dosya anında alanların medyan yaşı yaklaşık 12 saat, okumanınki 2,5 saat.</p>
+        </div>
+      </div>
+      <div class="tbl" id="tbCad"></div>
+    </div>
+
+    <div class="pcard">
+      <h3><span class="pid">P2</span>Her seri, gürültünün ardındaki bir seviye</h3>
+      <ul class="flegend" aria-hidden="true">
+        <li><svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="var(--s1)"/></svg>EWMA, Kalman ağırlığı</li>
+        <li><svg viewBox="0 0 12 12"><path d="M6 0.8L11.2 6L6 11.2L0.8 6Z" fill="var(--s2)"/></svg>Tüm geçmişin ortalaması</li>
+        <li><svg viewBox="0 0 12 12"><path d="M6 0V12" stroke="var(--ink-2)" stroke-width="1.5"/></svg>Persistence = 1</li>
+      </ul>
+      <div class="fchart" id="chMem" role="img" aria-label="Bir adım sonrası hata, persistence'a oranla, aile başına"></div>
+      <p class="note">Bir adım ileri (h = 1), log10 ortalama mutlak hata, persistence'a oranla; 1'in solu daha iyi. Değerler aşağıdaki tabloda.</p>
+      <ul>
+        <li><b>Hiçbir aile rastgele yürüyüş değil.</b> Rastgele yürüyüşte ardışık değişimlerin korelasyonu 0 olur; her aile -0,42 ile -0,50 arasında. Bir değişimin büyük kısmını bir sonraki geri alıyor.</li>
+        <li><b>T1, T2 ve sx'te seviye çok kararlı</b> (q 0,05'in altında): tüm geçmişin ortalaması basit yöntemlerin hepsi kadar iyi. <b>cz, rzz ve okuma daha çok kayıyor</b> (q yaklaşık 0,2 ile 0,35): yerel seviye (EWMA ağırlığı 0,38 ile 0,44) tüm geçmişin ortalamasını yeniyor; okumada tüm geçmişin ortalaması persistence'tan bile kötü, çünkü seviye aylar içinde geziniyor.</li>
+        <li><b>Beceri ufukla neredeyse azalmıyor.</b> Persistence'ın kendi hatası yavaş büyüyor (sx'te h = 1'de <span data-fp="sxh1"></span>, h = 16'da <span data-fp="sxh16"></span> dekad). h seçimi kullanım amacına bağlı; tahminin bittiği bir ufuk yok.</li>
+        <li><b>Kuyruklar gerçek.</b> Değişimlerin %5 ile %13'ü 2 kattan büyük, en büyükleri yaklaşık iki dekad. Bantlar asimetrik, nokta kaybı sağlam (robust) olmalı.</li>
+      </ul>
+      <div class="tbl" id="tbMem"></div>
+      <p class="note">q, seviye adımının varyansının gürültü varyansına oranı: q = −1/ρ₁ − 2. Kalman ağırlığı = (−q + √(q² + 4q)) / 2. measure_2'nin ρ₁'i −0,5'in hemen altında, yani sabit bir seviye etrafında salt gürültü; orada ağırlık 0,2 alındı. Ağırlık arşivin tamamındaki ρ₁'den türetildi (aile başına tek sayılık hafif bir ileriye bakış); ayrıca ölçülen sabit 0,1, 0,3 ve 0,5 ağırlıkları aynı beceriyi çevreliyor. M2 adımı ağırlığı yalnızca eğitim diliminde uyduracak. gamma ve lambda, formülleri gereği T1 ve T2 ile birlikte hareket ediyor.</p>
+    </div>
+
+    <div class="pcard">
+      <h3><span class="pid">P3</span>Başka hiçbir alan bir sonraki değeri oynatmıyor (doğrusal, zaman dışı)</h3>
+      <ul class="flegend" aria-hidden="true">
+        <li><svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="var(--s1)"/></svg>Seviye + kendi sapması</li>
+        <li><svg viewBox="0 0 12 12"><path d="M6 0.8L11.2 6L6 11.2L0.8 6Z" fill="var(--s2)"/></svg>Seviye + kendi sapması + diğer alanlar</li>
+        <li><svg viewBox="0 0 12 12"><path d="M6 0V12" stroke="var(--ink-2)" stroke-width="1.5"/></svg>Yalnız EWMA seviyesi = 1</li>
+      </ul>
+      <div class="fchart" id="chPanel" role="img" aria-label="Ek özelliklerin EWMA seviyesine göre test hatası"></div>
+      <p>Yanıt, bir sonraki değerin hedefin kendi EWMA seviyesinden sapması. Model %70 zaman kesiminden önce uyduruldu, sonrasında puanlandı; bu yüzden "EWMA seviyesi / persistence" sütunu yalnızca test dönemini gösterir (örneğin T1 burada 0,73, P2'de 0,80). EWMA seviyesi tek başına test döneminde persistence'ın %15 ile %27 altında; <b>doğrusal hiçbir ekleme %0,6'dan fazla katkı vermiyor</b>. sx için ayrı bir testte, iki sx turu arasındaki koherens sınırı değişimi de aynı sonucu verdi (yalnız ortalamaya çekme persistence'ın 0,747'si, koherens değişimi eklenince 0,748).</p>
+      <div class="tbl" id="tbPanel"></div>
+      <p class="note">Bu doğrusal bir tarama. Doğrusal olmayan etkileşimler ve nadir olay yapısı test edilmedi; onları test etmek aşama 1'in işi.</p>
+    </div>
+
+    <div class="pcard">
+      <h3><span class="pid">P4</span>T1 ve T2 hangi kapının kötü olduğunu biraz açıklıyor, ne zaman değiştiğini açıklamıyor</h3>
+      <p>Bir kapının koherens sınırı, kendi süresinin yalnızca T1 ve T2 altında yol açacağı hatadır: 1-kübit için 1 − (3 + e<sup>−t/T1</sup> + 2e<sup>−t/T2</sup>)/6, 2-kübit için iki kübitin süreç sadakatlerinin çarpımından.</p>
+      <div class="tbl" id="tbCoh"></div>
+      <ul>
+        <li>Medyanda sınır, raporlanan hatanın üçte biri ile beşte ikisi: <b>hatanın çoğu kapı sırasındaki dekoheranstan gelmiyor</b>.</li>
+        <li>Koherensi zayıf varlıkların kapıları daha kötü olma eğiliminde (varlıklar arasında yaklaşık 0,3 ile 0,35), ama bir varlığın kapı hatası zaman içinde kendi T1/T2'sini izlemiyor (0,05 ile 0,09).</li>
+        <li>sx kayıtlarının %10,5'inde oran 1'in üstünde: sınır başka bir turda damgalanmış T1/T2'den hesaplandığı için kesin bir alt sınır değil, bir vekil.</li>
+        <li><b>A9 için sonuç:</b> kapı hatası hedefi, ADR-027 hedefinin kılık değiştirmiş hali değil; iki hedef büyük ölçüde bağımsız zamansal sinyal taşıyor.</li>
+      </ul>
+    </div>
+
+    <div class="pcard">
+      <h3><span class="pid">P5</span>Okuma kısmen atış gürültüsü, gürültü düzeyi de biliniyor</h3>
+      <div class="minitiles" id="mtShot"></div>
+      <p>prob_meas0_prep1 ve prob_meas1_prep0 her biri 4.096 atışın bir kesri (kayıtların %100'ü). readout_error, ikisi aynı turda damgalandığında (%99,999) bunların ortalaması. Bu yüzden <b>her okuma değerinin ölçüm gürültüsü hesaplanabiliyor</b>. Kayıtların çoğunda büyük olan prob_meas0_prep1 (medyan oran <span data-fp="p01p10"></span>), ama okuma sırasında beklenen bozunmayla neredeyse ilişkisiz (Spearman <span data-fp="decay"></span>).</p>
+    </div>
+
+    <div class="pcard">
+      <h3><span class="pid">P6</span>Komşu sinyali yok, cihaz genelinde ortak hareket yok (sx)</h3>
+      <div class="minitiles" id="mtNb"></div>
+      <p>En az 20 kübitin yeniden ölçüldüğü <span data-fp="nbrounds"></span> turda, turun ortalama değişimi sx değişimlerinin varyansının yalnızca küçük bir kısmını açıklıyor. Bu ortak kısım çıkarıldıktan sonra komşu çiftler de uzak çiftler de birlikte hareket etmiyor. Bu, 10-04 taramasındaki yerel, TLS kaynaklı dalgalanma önbilgisiyle uyumlu ve bu aşamada graf modellerine gerekçe bırakmıyor.</p>
+    </div>
+
+    <div class="pcard">
+      <h3><span class="pid">P7</span>Arızalar olay değil, durum</h3>
+      <div class="tbl" id="tbFault"></div>
+      <p>q102-103 (cz) dosyaların %89'unda 1. Aile başına en fazla 13 girişle <b>bir kapının ne zaman bozulacağını öğrenecek veri yok</b>; arızalı varlıklar kuralla dışarıda bırakılıp listelenir ve sürüm 1'de arıza kanalı yok.</p>
+    </div>
+
+    <div class="pcard">
+      <h3><span class="pid">P8</span>A aşamasının cihaz ortalaması kayıyor</h3>
+      <div class="tbl" id="tbDev"></div>
+      <p>Cihaz genelinde ortalama alınınca gürültü kısmen birbirini götürüyor ve geriye aylar içinde hareket eden bir seviye kalıyor: tüm geçmişin ortalaması altı serinin dördünde persistence'tan kötü. Yaklaşık 130 puanlanan olayla %10'luk farklar gürültü içinde. <b>Modelin kullanabileceği yapı kübit ve kuplör başına (aşama B) duruyor</b>; 10-04 taraması da bunu öngörmüştü.</p>
+    </div>
+  </section>
+
+  <section class="part" id="yontem" aria-labelledby="pYon">
+    <div class="part-head">
+      <h2 class="part-title" id="pYon">Literatür ve yöntem</h2>
+      <p class="part-sub">10-04 taramasının kapsamadığı alanlar için ikinci bir tarama (5 Ekim, 52 kaynak): kapı ve okuma hatası tahmini, koherens sınırı, arıza olayları ve kısa ilişkili seriler için 2023-2026 yöntemleri. Önerinin dayandığı 16 kaynak arXiv API'sinden yeniden çözümlendi ve başlıkların hepsi eşleşti.</p>
+    </div>
+
+    <div class="pcard">
+      <h3>Literatür ne diyor</h3>
+      <ul>
+        <li><b>"En başarılı" sorusunu yayımlanmış bir sonuç cevaplamıyor.</b> Hiçbir çalışma bir süperiletken bulut cihazının kapı hatalarını, okuma hatalarını, T1'ini ya da T2'sini zaman bölümüyle tahmin edip persistence'a karşı beceri raporlamıyor. En yakın çalışma kalibrasyon verisi politikalarını derlenmiş devre sadakatiyle değerlendiriyor ve geçmiş kalibrasyon verisini işlemenin, güncel veri yokken sadakati artırdığını buluyor (Kurniawan et al. 2024). Bu, seviyeye çekme için dolaylı bir destek; P2 bunu doğrudan ölçüyor.</li>
+        <li><b>10-04 taramasına bir düzeltme.</b> Tarama ajanı Baheri et al. 2022'yi tam okudu: MAPE, "Fits" etiketli serilerde raporlanıyor; ayrılmış bir test dilimi, ufuk ya da naif referans tanımlanmıyor. Yani veri hakkında kanıt, tahmin becerisi hakkında değil. (Makale açık erişimli olmadığı için bu okuma 5 Ekim'de tekrarlanamadı.)</li>
+        <li><b>Basit global modeller.</b> Popüler doğrusal tahmin varyantlarının birçoğu sınırsız doğrusal regresyona eşdeğer ve kapalı form çözümler test ayarlarının %72'sinde daha iyi tahmin ediyor (Toner ve Darlow 2024). Birçok ilişkili seri üzerinde eğitilen modeller, tahmin arşivi literatürünün işaret ettiği yön (Godahewa et al. 2021). 10-04 taramasındaki Zeng et al., Makridakis et al. ve Montero-Manso ve Hyndman ile birlikte bu, bir ailenin 155-172 serisi için tek bir ortak model kullanmanın kanıtı.</li>
+        <li><b>Temel (foundation) modeller motor değil, referans.</b> TabPFN-TS (11M parametre) değişkenli kıyaslamalarda en iyi sonuçları veriyor (Hoo et al. 2025). Bulut verisinde sıfır-atış temel modeller basit doğrusal referanslara sürekli yenildi (Toner et al. 2025). 30 veri setinde 15'inde kazandılar, diğerlerinde 21 ile 2.768 eğitim örneğiyle klasik yöntemlere yenildiler (Tan Jerome ve Simon 2026). Bu arşivin hangi rejimde olduğu ampirik bir soru; üstelik bir çerçeve (framework) gerektiriyorlar (A4), bu yüzden yalnızca dış referans olabilirler.</li>
+        <li><b>Yaklaşık 130 turluk bir seri için bantlar.</b> Azalan adımlı çevrimiçi conformal tahmin, keyfi diziler için geriye dönük kapsama garantisini koruyor ve dağılım kararlıyken her zaman noktasında hedefe yakın kapsama veriyor (Angelopoulos, Barber ve Bates 2024). Betting tabanlı conformal adım boyu seçimini kaldırıyor (Podkopaev et al. 2024). h &gt; 1 için optimal h-adım hataları h − 1 gecikmeye kadar korelasyonlu ve AcMCP bunu kullanıyor (Wang ve Hyndman 2024). Hepsi NumPy ile yazılabilir.</li>
+        <li><b>Koherens sınırı parça parça kaynaklanabiliyor.</b> T1, T2 cinsinden genlik ve faz sönümleme kanalı ile Pauli biçimi süreç sadakatini veriyor (Ghosh, Fowler ve Geller 2012); ortalama sadakatin süreç sadakatinden hesabı, Nielsen'in yeniden kanıtladığı Horodecki formülü (Nielsen 2002); Abad et al. 2022 çok-kübitli birinci dereceden biçimi veriyor. Hiçbir kaynak kapalı formu birebir yazmıyor ve Heron sınıfı kapıların bu sınırın ne kadar üstünde olduğunu ölçmüyor; P4 artık ölçüyor.</li>
+        <li><b>Gürültünün fiziği.</b> TLS dinamikleri kübit ömürlerini saatler mertebesinde bozuyor ve bir radyasyon çarpması birkaç TLS'nin aynı anda sıçramasına yol açabiliyor (Thorbeck et al. 2023). Günlük yeniden ölçümde bu, bir seviye etrafında gürültüye dönüşüyor; P2'nin gösterdiği tam olarak bu.</li>
+        <li><b>Projenin bilmesi gereken ilgili çalışma.</b> Hassan ve Kaabouch 2026, ibm_fez (ve ikinci bir Heron r2) üzerinde doğrulanmış bir ANFIS çerçevesi. Metinlerinde, çalışmayan bir kübitin 1,0 değerini raporladığı ve ortalama 1-kübit kapı hatasını yaklaşık 25 kat şişirdiği, bu yüzden medyan kullandıkları yazıyor. Gürültü tahmincisi değil, hata mı gürültü mü sınıflandırıcısı; ama aynı backend üzerinde bir ANFIS makalesi.</li>
+      </ul>
+    </div>
+
+    <div class="pcard">
+      <h3>Önerilen yöntem, iki hedef için de (öneri, karar değil)</h3>
+      <p>A1-A9 kararları, lider aksine karar verene kadar planda yazıldığı gibi geçerli.</p>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>Referans</th><th>z<sub>k+h</sub> tahmini (hedefin log10'u)</th><th>Parametre</th></tr></thead>
+          <tbody>
+            <tr><td class="lab">R0</td><td>Persistence, z<sub>k</sub></td><td>0</td></tr>
+            <tr><td class="lab">R1</td><td>Varlığın geçmişinin genişleyen ortalaması</td><td>0</td></tr>
+            <tr><td class="lab">R2</td><td><b>Global yerel seviye (Kalman) tahmincisi</b>: aile başına tek kazançlı EWMA, her kübit ya da kuplör aynı kazancı paylaşır, kazanç eğitim diliminde uydurulur</td><td>Aile başına 1</td></tr>
+            <tr><td class="lab">R3</td><td>sx, cz, rzz için: R2 + t anındaki koherens sınırı değişken olarak (varlıklar arası bilgi, P4)</td><td>Aile başına 2-3</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li><b>Çekirdek R2.</b> P2'ye göre veri tam olarak bu modele benziyor ve tek parametreye mal oluyor.</li>
+        <li><b>Bilinen gürültü varyansıyla okuma.</b> Okumada her değerin gözlem gürültüsü p01, p10 ve 4.096 atıştan hesaplanabiliyor (P5); Kalman filtresi sabit bir varyans yerine olay başına bu varyansı kullanabilir. Fiziksel bir gerçeğin, verinin tek başına vermediği bir şeyi modele verdiği tek yer burası.</li>
+        <li><b>Sağlam güncellemeler.</b> Değişimlerin %5 ile %13'ü 2 katın üstünde olduğundan (P2), Huber ya da Student-t gözlem adımı tek bir aykırı değerin seviyeyi sürüklemesini önler.</li>
+        <li><b>Hedef 1, kapı hataları:</b> sx, cz, rzz, okuma ve measure_2 hatalarının log10'u, varlık başına; yer tutucular maskeli, kalıcı arızalı varlıklar dışarıda (P7); o ailenin h tur sonrası tahmin edilir.</li>
+        <li><b>Hedef 2, ADR-027:</b> varlığın log(1/T1) ve log(1/T2) oranları aynı yöntemle tahmin edilir, sonra ADR-027 formülü uygulanır; 10-04 taramasının önerdiği T2 ≤ 2·T1 parametrelemesiyle. gamma ve lambda, bandı monoton dönüşüm üzerinden devralır.</li>
+        <li><b>Öğrenen kısım (üçüncü motor, A1 ve A7):</b> ham değeri değil, <b>R2 seviyesinden sapmayı</b> (z<sub>k+h</sub> − L<sub>k</sub>) tahmin eden bir NumPy MLP. t anındaki aday girdiler: varlığın seviyesi ve sapması, son oynaklığı, her alanın yaşı, aynı kübitteki (ya da kuplörün iki kübitindeki) diğer ailelerin seviye ve sapmaları, koherens sınırı oranı. Bu artık hedef üzerinde aşama 1'in permutation importance'ı (tekli ve gruplu) belirleyici deney: P3 doğrusal sinyal bulmadı; ya aşama 1 doğrusal olmayan bir sinyal bulur, ya da motor bantlı R2'ye indirgenir. İkisi de sonuçtur; ikincisi, 10-04 taramasının A aşaması için öngördüğü şey.</li>
+        <li><b>Bantlar:</b> log10 uzayında asimetrik skorlar; kontrol olarak split conformal, adaylar olarak azalan adımlı çevrimiçi conformal ve betting conformal, h &gt; 1 için AcMCP. Her motor için tek bir sarmalayıcı; bu, planın §1.1 adalet sorusunu da çözer.</li>
+        <li><b>Örnek birimi:</b> yapı varlık başına (aşama B) duruyor (P2, P8); A aşaması için cihaz düzeyinde bir sayı, varlık başına tahminlerin ortalamasıyla üretilebilir. Aşamaların sırasını değiştirmek A3'ün kararı.</li>
+      </ul>
+    </div>
+
+    <div class="pcard">
+      <h3>Kaynaklar</h3>
+      <p class="note">5 Ekim 2026'da arXiv API'sinden çözümlendi, başlıklar eşleşti. Baheri et al. 2022 tarama ajanından yeniden çözümlenmeden alındı. Geri kalan her şey 10-04 taramasına (docs/roadmap/2026-10-04-deep-engine-architecture-research.md, §8) dayanıyor.</p>
+      <ul class="srcs" id="srcList"></ul>
+    </div>
+  </section>
+
+  <section class="part" id="adimlar" aria-labelledby="pAdim">
+    <div class="part-head">
+      <h2 class="part-title" id="pAdim">Protokol ve sonraki adımlar</h2>
+      <p class="part-sub">Performans karşılaştırmasının iki hedef için de aynı koşullarda yapılması için protokol bir kez yazıldı. Adımlar koşu değil, kapısı olan görevler; her biri lider başlat dediğinde başlar.</p>
+    </div>
+
+    <div class="pcard">
+      <h3>Ortak değerlendirme protokolü</h3>
+      <ol>
+        <li><b>Satırlar:</b> hedef ailenin yeniden ölçüm olayları, varlık başına; yer tutucular maskeli, kalıcı arızalı varlıklar (P7) dışarıda ve listeli.</li>
+        <li><b>Zamana göre bölme, kesim tarihleri herhangi bir koşudan önce yazılır:</b> eğitim, bantlar için bir kalibrasyon dilimi, sonra test. Hiçbir varlığın geleceği kendi geçmişine girmez.</li>
+        <li><b>Ufuklar hedef ailenin turlarıyla:</b> günlük aileler için h = 1, 4, 16. Okumada h = 6 yaklaşık bir gün olduğu için onun yanında raporlanır.</li>
+        <li><b>Nokta hatası:</b> log10'da ortalama mutlak hata, hem R0'a hem R2'ye oranla.</li>
+        <li><b>Bant:</b> testte kapsama ve binom aralığı, aralık skoru (interval score) ve medyan genişlik, aile başına; kapsama ayrıca yalnızca değişim olaylarında (10-04 taramasının sıfır genişlik uyarısı).</li>
+        <li><b>Test:</b> varlıklar üzerinden eşleştirilmiş Wilcoxon işaretli sıra testi (her varlığın ortalama hatası), alfa = 0,05; çünkü bir varlığın olayları bağımsız değil.</li>
+      </ol>
+    </div>
+
+    <div class="pcard">
+      <h3>Birlikte yürüteceğimiz model kurma adımları</h3>
+      <div class="tbl">
+        <table class="steps">
+          <thead><tr><th>Adım</th><th>Ne</th><th>Kapı (ne zaman tamam)</th></tr></thead>
+          <tbody>
+            <tr><td>M0</td><td>Protokolü onaylamak: kesim tarihleri, ufuklar, alfa, hangi referansların zorunlu olduğu</td><td>Lider tarafından karar kaydına yazıldığında</td></tr>
+            <tr><td>M1</td><td>Önbellekten olay tablosu üreticisi: her olay için t anındaki özellikler ve t + h'deki hedef, iki hedef için</td><td>Olay kuralını ve sızıntısız hizalamayı sabitleyen testler; tablo özeti (hash) kayıtlı</td></tr>
+            <tr><td>M2</td><td>R0-R3 referansları, atış gürültüsü varyanslı okuma Kalman'ı dahil</td><td>Protokole göre nokta hatası tablosu</td></tr>
+            <tr><td>M3</td><td>R2 üzerinde bantlar: split, azalan adımlı, betting, AcMCP</td><td>Protokole göre kapsama ve aralık skoru tablosu</td></tr>
+            <tr><td>M4</td><td>Aşama 1 (plan T3 ve T5): tüm adaylarla artık hedef üzerinde NumPy MLP; tekli ve gruplu permutation importance</td><td>Karıştırmalar üzerindeki yayılımıyla birlikte sıralama</td></tr>
+            <tr><td>M5</td><td>Özellik mühendisliği, F* (plan T6)</td><td>Tutulan, atılan ya da dönüştürülen her özelliğin M4 ile gerekçelendirilmesi</td></tr>
+            <tr><td>M6</td><td>Aşama 2 (plan T7): parametre bütçesi içinde artık MLP</td><td>İki hedef için R2'ye karşı nokta ve bant sonuçları</td></tr>
+            <tr><td>M7</td><td>Hedefler ve motorlar arası performans karşılaştırması</td><td>Eşleştirilmiş testlerle bulgular belgesi</td></tr>
+            <tr><td>M8</td><td>Doğrulama masaüstünde yeniden çalıştırma</td><td>numerical-claims satırları</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <h3>M0 için yalnızca sizin verebileceğiniz kararlar</h3>
+      <ol class="decide">
+        <li><span><b>Zaman bölümünün tarihleri.</b> Eğitim, kalibrasyon ve test dilimleri hangi tarihlerde kesilecek? Arşiv 13 Mayıs'ta başlıyor; measure_2 7 Ağustos'tan, init_error 4 Ağustos'tan beri var.</span></li>
+        <li><span><b>Ufuklar.</b> Günlük aileler için h = 1, 4, 16 tur ve okuma için ek olarak h = 6 (yaklaşık bir gün) uygun mu?</span></li>
+        <li><span><b>Kazanç düzeyi.</b> R2'nin kazancı aile başına tek bir değer mi olsun (öneri: P2'deki aile içi yapı aynı), yoksa her kübit ya da kuplör için ayrı mı?</span></li>
+      </ol>
+    </div>
+
+    <div class="pcard">
+      <h3>Bu öneri şu durumlarda yanlış olur</h3>
+      <ul>
+        <li>Aşama 1, R2'nin ötesinde zaman dışı beceri taşıyan özellikler bulursa (o zaman öğrenen artık yerini hak eder; üçüncü motor için iyi sonuç budur).</li>
+        <li>Eğitim diliminde uydurulan yerel seviye kazancı, arşivin tamamındakinden belirgin biçimde farklı çıkarsa (o zaman seviye dinamiği durağan değildir ve kazanç uyarlanmalıdır).</li>
+        <li>Değişim olaylarındaki conformal kapsama hedefin çok altına düşerse (o zaman bant değişimleri değil tekrarları kapsıyordur).</li>
+        <li>Test döneminde cihaz çapında bir rejim değişimi görülürse, örneğin IBM'in kalibrasyon prosedüründe bir değişiklik (P8'deki kayma bunun uyarı işareti).</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <span>Kaynak: <a id="srcLink" href="https://github.com/SuperconducTED/superconducted-noise-engine/blob/a0d2e7d9839a95f3a70b96b7d68a69d45d7781d6/snapshots/2026-10/ibm_fez/20261001T002643000000Z.json" target="_blank" rel="noopener">snapshots/2026-10/ibm_fez/20261001T002643000000Z.json</a>, calibration-data dalı, commit <span class="mono">a0d2e7d</span>, blob <span class="mono">d74784d</span>.</span>
+    <span id="metaLine"></span>
+    <span>Arşiv analizi: <span class="mono">scripts/feature_patterns.py</span>, calibration-data <span class="mono">09fcc45</span> üzerindeki 1.753 dosya; ayrıntılar PR #111'deki <span class="mono">docs/roadmap/2026-10-05-feature-patterns-and-method.md</span> belgesinde (commit <span class="mono">56aba5e</span>).</span>
+    <span>Tüm saatler UTC'dir. Türkiye saati için 3 saat ekleyin.</span>
+  </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+(function () {
+  "use strict";
+  const DATA = {"meta":{"backend":"ibm_fez","backend_version":"1.3.37","last_update_date":"2026-10-01T00:26:43+00:00","timestamp":"2026-10-01T00:26:43+00:00","n_qubits":156,"n_gate_error_rows":1952,"snap_ms":1790814403000},"summary":{"1q":{"n":155,"n_ph":1,"min":0.0001251986623489679,"q1":0.0002508762702891042,"median":0.00031648599833708973,"q3":0.0004414546217646543,"max":0.017060418805944156,"max_name":"sx149","batches":[{"start":"2026-09-26T22:26:07+00:00","end":"2026-09-26T22:26:07+00:00","n":1},{"start":"2026-09-29T21:16:34+00:00","end":"2026-09-29T21:16:36+00:00","n":3},{"start":"2026-09-30T22:31:00+00:00","end":"2026-09-30T22:31:03+00:00","n":151}]},"cz":{"n":172,"n_ph":4,"min":0.0011525013683996166,"q1":0.0021800854523910396,"median":0.002665298176480188,"q3":0.0044666310517518515,"max":0.07413748502479683,"max_name":"cz102_103","batches":[{"start":"2026-09-29T23:28:41+00:00","end":"2026-09-29T23:28:44+00:00","n":4},{"start":"2026-10-01T00:09:02+00:00","end":"2026-10-01T00:09:07+00:00","n":168}]},"rzz":{"n":170,"n_ph":6,"min":0.001497589601929028,"q1":0.0021305759122240003,"median":0.0025883152491454897,"q3":0.003827819168244699,"max":0.11291735151065535,"max_name":"rzz102_103","batches":[{"start":"2026-09-28T05:45:20+00:00","end":"2026-09-28T05:45:20+00:00","n":1},{"start":"2026-09-29T07:15:49+00:00","end":"2026-09-29T07:15:53+00:00","n":4},{"start":"2026-09-30T01:27:53+00:00","end":"2026-09-30T01:28:09+00:00","n":165}]},"measure":{"n":156,"n_ph":0,"min":0.002197265625,"q1":0.00634765625,"median":0.010498046875,"q3":0.01824951171875,"max":0.329345703125,"max_name":"measure72","batches":[{"start":"2026-09-30T19:59:17+00:00","end":"2026-09-30T20:00:09+00:00","n":156}]},"measure_2":{"n":156,"n_ph":0,"min":0.001953125,"q1":0.00634765625,"median":0.0146484375,"q3":0.0369873046875,"max":0.430419921875,"max_name":"measure_272","batches":[{"start":"2026-09-30T20:13:29+00:00","end":"2026-09-30T20:13:33+00:00","n":156}]}},"rows":[{"k":"1q","n":"sx0","q":[0],"v":0.001992598601512147,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx1","q":[1],"v":0.00048246404493028014,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx2","q":[2],"v":0.00015396882045845878,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx3","q":[3],"v":0.000198718131678447,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx4","q":[4],"v":0.000446890980490336,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx5","q":[5],"v":0.0004045192880885252,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx6","q":[6],"v":0.0003102717989444131,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx7","q":[7],"v":0.0007251791422805986,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx8","q":[8],"v":0.00042942565965026506,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx9","q":[9],"v":0.0002612577435232811,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx10","q":[10],"v":0.00019330278637388936,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx11","q":[11],"v":0.0018184809863107153,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx12","q":[12],"v":0.0004055495201680629,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx13","q":[13],"v":0.0004440132509239682,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx14","q":[14],"v":0.0002524733091266115,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx15","q":[15],"v":0.0002257816847906704,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx16","q":[16],"v":0.00040522201274167333,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx17","q":[17],"v":0.0003036783879226454,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx18","q":[18],"v":0.0003203083234976057,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx19","q":[19],"v":0.00044026304244004674,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx20","q":[20],"v":0.0010506048269104014,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx21","q":[21],"v":0.00041387043053985707,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx22","q":[22],"v":0.00014962934398038001,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx23","q":[23],"v":0.0001927635191011248,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx24","q":[24],"v":0.0015002774358529934,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx25","q":[25],"v":0.00022536947899449856,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx26","q":[26],"v":0.00027661108362251165,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx27","q":[27],"v":0.004168087771032353,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx28","q":[28],"v":0.00022022008449857066,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx29","q":[29],"v":0.0002598323847526062,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx30","q":[30],"v":0.00027665599867372716,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx31","q":[31],"v":0.00039153587334900334,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx32","q":[32],"v":0.00031648599833708973,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx33","q":[33],"v":0.00019669573431381048,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx34","q":[34],"v":0.0007437304389086763,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx35","q":[35],"v":0.000281893969377545,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx36","q":[36],"v":0.0005362566182320281,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx37","q":[37],"v":0.0004369831508579217,"ph":false,"ms":1790716596000,"b":1},{"k":"1q","n":"sx38","q":[38],"v":0.0003076455500618499,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx39","q":[39],"v":0.0006161844408346601,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx40","q":[40],"v":0.0002533780881807677,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx41","q":[41],"v":0.00020259280491599594,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx42","q":[42],"v":0.0010912530206399237,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx43","q":[43],"v":0.0002508762702891042,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx44","q":[44],"v":0.0004934425709785007,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx45","q":[45],"v":0.0002486548717537509,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx46","q":[46],"v":0.00044000653016362383,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx47","q":[47],"v":0.0003399662423225245,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx48","q":[48],"v":0.00042486505602164643,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx49","q":[49],"v":0.000542535633303399,"ph":false,"ms":1790716594000,"b":1},{"k":"1q","n":"sx50","q":[50],"v":0.00033988848004107915,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx51","q":[51],"v":0.00028345853730663603,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx52","q":[52],"v":0.0003228269098717993,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx53","q":[53],"v":0.000307670657201193,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx54","q":[54],"v":0.0006014791325167996,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx55","q":[55],"v":0.00047204036284405256,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx56","q":[56],"v":0.0005268169851051299,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx57","q":[57],"v":0.002264012464780201,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx58","q":[58],"v":0.0003684061415483491,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx59","q":[59],"v":0.0005924216218982498,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx60","q":[60],"v":0.0003558518613848796,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx61","q":[61],"v":0.00033183416724554335,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx62","q":[62],"v":0.00030616077428513485,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx63","q":[63],"v":0.0005138853231677619,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx64","q":[64],"v":0.0005661775160512808,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx65","q":[65],"v":0.00029763970055375963,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx66","q":[66],"v":0.00023176323823018337,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx67","q":[67],"v":0.00031512370797451956,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx68","q":[68],"v":0.0003265698093292105,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx69","q":[69],"v":0.0002690807763041504,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx70","q":[70],"v":0.0005253240505442387,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx71","q":[71],"v":0.0003107847728694211,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx72","q":[72],"v":1,"ph":true,"ms":1790814779000},{"k":"1q","n":"sx73","q":[73],"v":0.00028371299025264224,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx74","q":[74],"v":0.0003808275627976209,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx75","q":[75],"v":0.0004013342838245891,"ph":false,"ms":1790807460000,"b":2},{"k":"1q","n":"sx76","q":[76],"v":0.00029396765374147004,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx77","q":[77],"v":0.0004154440640072926,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx78","q":[78],"v":0.0003546952387941851,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx79","q":[79],"v":0.0002421887731770932,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx80","q":[80],"v":0.0002211292261883774,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx81","q":[81],"v":0.00021410452129870124,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx82","q":[82],"v":0.00035831747769622083,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx83","q":[83],"v":0.00021947497007283572,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx84","q":[84],"v":0.00044524204569807867,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx85","q":[85],"v":0.0003121603932809521,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx86","q":[86],"v":0.00040498184972111547,"ph":false,"ms":1790807462000,"b":2},{"k":"1q","n":"sx87","q":[87],"v":0.00029890496324607704,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx88","q":[88],"v":0.0003142675932799852,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx89","q":[89],"v":0.00021225795483918681,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx90","q":[90],"v":0.0005102363366892966,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx91","q":[91],"v":0.000311039038882743,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx92","q":[92],"v":0.0004421085930596824,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx93","q":[93],"v":0.0002680612328725682,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx94","q":[94],"v":0.0004082307658537676,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx95","q":[95],"v":0.00033687260342288305,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx96","q":[96],"v":0.0002278460790824982,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx97","q":[97],"v":0.0004414546217646543,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx98","q":[98],"v":0.0002929499376155097,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx99","q":[99],"v":0.0002739306984867499,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx100","q":[100],"v":0.001713326974359462,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx101","q":[101],"v":0.00041678478912094617,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx102","q":[102],"v":0.0022791594776009998,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx103","q":[103],"v":0.0002230501096985113,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx104","q":[104],"v":0.00028231729333601593,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx105","q":[105],"v":0.00029149715513954557,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx106","q":[106],"v":0.00023542109023025603,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx107","q":[107],"v":0.0003111387123054044,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx108","q":[108],"v":0.0005577072041010936,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx109","q":[109],"v":0.00026555708210707166,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx110","q":[110],"v":0.0002160556754817829,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx111","q":[111],"v":0.00023194277832504277,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx112","q":[112],"v":0.000274084303145719,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx113","q":[113],"v":0.00036717760612754903,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx114","q":[114],"v":0.00030499944973699404,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx115","q":[115],"v":0.000269659226563028,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx116","q":[116],"v":0.00026476028861749346,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx117","q":[117],"v":0.00036398569821412415,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx118","q":[118],"v":0.0002699039090999062,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx119","q":[119],"v":0.0005035352393533066,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx120","q":[120],"v":0.00016616409909000462,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx121","q":[121],"v":0.0001731061860924134,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx122","q":[122],"v":0.0004869432316730042,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx123","q":[123],"v":0.00021161188164042004,"ph":false,"ms":1790716595000,"b":1},{"k":"1q","n":"sx124","q":[124],"v":0.00042424735900581194,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx125","q":[125],"v":0.00016890293423578546,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx126","q":[126],"v":0.0011064699350091017,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx127","q":[127],"v":0.0004608711949697958,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx128","q":[128],"v":0.00022045782323331815,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx129","q":[129],"v":0.00021287717373460273,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx130","q":[130],"v":0.0005145072182378397,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx131","q":[131],"v":0.00016524165529286457,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx132","q":[132],"v":0.00017916358652917322,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx133","q":[133],"v":0.0001972273428113681,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx134","q":[134],"v":0.00043700178631556687,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx135","q":[135],"v":0.00017829135964122575,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx136","q":[136],"v":0.00034012351843180157,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx137","q":[137],"v":0.00027798006435225827,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx138","q":[138],"v":0.00037218315102605115,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx139","q":[139],"v":0.0005915705243712816,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx140","q":[140],"v":0.00032846786158672453,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx141","q":[141],"v":0.00018528544029029688,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx142","q":[142],"v":0.0003001898797764297,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx143","q":[143],"v":0.00015191366595435464,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx144","q":[144],"v":0.00035132418271382657,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx145","q":[145],"v":0.0002605495348246282,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx146","q":[146],"v":0.0001972587746439327,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx147","q":[147],"v":0.000381916971635815,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx148","q":[148],"v":0.0004179687078863666,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx149","q":[149],"v":0.017060418805944156,"ph":false,"ms":1790461567000,"b":0},{"k":"1q","n":"sx150","q":[150],"v":0.0007189143802133289,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx151","q":[151],"v":0.0001251986623489679,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx152","q":[152],"v":0.000493852984603953,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx153","q":[153],"v":0.00041974576829645175,"ph":false,"ms":1790807461000,"b":2},{"k":"1q","n":"sx154","q":[154],"v":0.0002496667197858093,"ph":false,"ms":1790807463000,"b":2},{"k":"1q","n":"sx155","q":[155],"v":0.00024143873405665835,"ph":false,"ms":1790807461000,"b":2},{"k":"cz","n":"cz72_73","q":[72,73],"v":1,"ph":true,"ms":1790814779487},{"k":"cz","n":"cz7_17","q":[7,17],"v":0.002782024161569252,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz67_68","q":[67,68],"v":0.002697837452539348,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz44_45","q":[44,45],"v":0.0024469316734424817,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz8_9","q":[8,9],"v":0.0019516238140296904,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz40_41","q":[40,41],"v":0.00160612130279697,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz100_101","q":[100,101],"v":0.003542948412153135,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz91_98","q":[91,98],"v":0.0021705701428422486,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz132_133","q":[132,133],"v":0.0026442525814984186,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz41_42","q":[41,42],"v":0.0023205572669432184,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz55_59","q":[55,59],"v":0.0023721997796717076,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz73_74","q":[73,74],"v":0.0021767669442291915,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz133_134","q":[133,134],"v":0.002636284997742322,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz59_75","q":[59,75],"v":0.002657678922525969,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz14_15","q":[14,15],"v":0.005244762926428781,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz9_10","q":[9,10],"v":0.0017926603510058925,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz74_75","q":[74,75],"v":0.00257813464340631,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz39_53","q":[39,53],"v":0.0068833863404355045,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz129_130","q":[129,130],"v":0.0028977523120309323,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz106_107","q":[106,107],"v":0.0023258985740270965,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz83_96","q":[83,96],"v":0.002307596158804215,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz111_112","q":[111,112],"v":0.0022230130643075274,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz138_151","q":[138,151],"v":0.002589340265690715,"ph":false,"ms":1790813347000,"b":1},{"k":"cz","n":"cz47_48","q":[47,48],"v":0.0020205260804831704,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz42_43","q":[42,43],"v":0.002765016758948108,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz47_57","q":[47,57],"v":0.004989493755383323,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz107_108","q":[107,108],"v":0.003435905615300272,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz134_135","q":[134,135],"v":0.0024623374171674484,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz144_145","q":[144,145],"v":0.0020605583399428695,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz48_49","q":[48,49],"v":0.04361590642136093,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz77_85","q":[77,85],"v":0.0025381850108520954,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz103_104","q":[103,104],"v":0.003476208714751655,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz80_81","q":[80,81],"v":0.00204264108845148,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz85_86","q":[85,86],"v":0.0029757054285023676,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz131_138","q":[131,138],"v":0.0019319716252305663,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz140_141","q":[140,141],"v":0.002102380221549044,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz36_41","q":[36,41],"v":0.0022381230176516387,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz71_72","q":[71,72],"v":1,"ph":true,"ms":1790814779821},{"k":"cz","n":"cz81_82","q":[81,82],"v":0.02718568093023893,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz108_109","q":[108,109],"v":0.003582276203948964,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz12_13","q":[12,13],"v":0.0033771481631276745,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz99_115","q":[99,115],"v":0.0020897732880913733,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz22_23","q":[22,23],"v":0.0017442383024016128,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz29_38","q":[29,38],"v":0.0019444361066816296,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz49_50","q":[49,50],"v":0.004492582556996028,"ph":false,"ms":1790724524000,"b":0},{"k":"cz","n":"cz104_105","q":[104,105],"v":0.002767811903181594,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz114_115","q":[114,115],"v":0.002643499057403964,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz109_110","q":[109,110],"v":0.0021288676174943677,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz13_14","q":[13,14],"v":0.0019235969919728646,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz123_136","q":[123,136],"v":0.004478153956542608,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz151_152","q":[151,152],"v":0.0024678182434575147,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz45_46","q":[45,46],"v":0.0031855192918307518,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz110_111","q":[110,111],"v":0.002229507655634344,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz50_51","q":[50,51],"v":0.0023759162587775884,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz96_103","q":[96,103],"v":0.013171772641003415,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz105_106","q":[105,106],"v":0.0025590960037948085,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz82_83","q":[82,83],"v":0.007742772514947371,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz147_148","q":[147,148],"v":0.004938618121960059,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz137_147","q":[137,147],"v":0.004432062337379583,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz51_52","q":[51,52],"v":0.001894278937213112,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz142_143","q":[142,143],"v":0.0020061619621235816,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz46_47","q":[46,47],"v":0.002793016833530948,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz23_24","q":[23,24],"v":0.007975508482317872,"ph":false,"ms":1790813347000,"b":1},{"k":"cz","n":"cz143_144","q":[143,144],"v":0.0021362006808069434,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz21_36","q":[21,36],"v":0.006353583597236423,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz83_84","q":[83,84],"v":0.0021762841077756223,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz113_119","q":[113,119],"v":0.002284787175087871,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz76_81","q":[76,81],"v":0.0019808067495709625,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz24_25","q":[24,25],"v":0.03173528755708138,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz105_117","q":[105,117],"v":0.0032910045382428255,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz20_21","q":[20,21],"v":0.0032285929113505807,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz52_53","q":[52,53],"v":0.0021426381267579953,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz139_155","q":[139,155],"v":0.0027027261447413187,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz69_78","q":[69,78],"v":0.002353711265788011,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz112_113","q":[112,113],"v":0.002665474880765767,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz89_90","q":[89,90],"v":0.004605316853767832,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz149_150","q":[149,150],"v":0.03877822193769645,"ph":false,"ms":1790724523000,"b":0},{"k":"cz","n":"cz53_54","q":[53,54],"v":0.004583205920244221,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz11_18","q":[11,18],"v":0.014146577996705462,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz30_31","q":[30,31],"v":0.004153736116169565,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz25_26","q":[25,26],"v":0.0026190746934678655,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz16_23","q":[16,23],"v":0.002373223376249539,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz90_91","q":[90,91],"v":0.0060050767062996,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz136_143","q":[136,143],"v":0.005781020602046605,"ph":false,"ms":1790813347000,"b":1},{"k":"cz","n":"cz145_146","q":[145,146],"v":0.001928322224834439,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz26_27","q":[26,27],"v":0.0294682593343088,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz21_22","q":[21,22],"v":0.0020219742006631902,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz3_16","q":[3,16],"v":0.0018392957567051338,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz31_32","q":[31,32],"v":0.03858161987885517,"ph":false,"ms":1790813347000,"b":1},{"k":"cz","n":"cz58_71","q":[58,71],"v":0.0028176441348472803,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz86_87","q":[86,87],"v":0.0030400878454391878,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz141_142","q":[141,142],"v":0.0020258985887043057,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz95_99","q":[95,99],"v":0.0026770702606458696,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz61_76","q":[61,76],"v":0.0025142331073120527,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz113_114","q":[113,114],"v":0.003165750284196106,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz123_124","q":[123,124],"v":0.002496868559994342,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz27_28","q":[27,28],"v":1,"ph":true,"ms":1790814780381},{"k":"cz","n":"cz17_27","q":[17,27],"v":0.02748731177750613,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz54_55","q":[54,55],"v":0.00260254750200839,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz64_65","q":[64,65],"v":0.0028645703620292506,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz146_147","q":[146,147],"v":0.004968690816725629,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz5_6","q":[5,6],"v":0.002436052060534405,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz51_58","q":[51,58],"v":0.0032318319427530884,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz60_61","q":[60,61],"v":0.0019109301032551873,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz87_88","q":[87,88],"v":0.0027678017928670084,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz38_49","q":[38,49],"v":0.03130083189989552,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz152_153","q":[152,153],"v":0.0030026152182938415,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz87_97","q":[87,97],"v":0.003994760238302614,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz1_2","q":[1,2],"v":0.002468216256270972,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz28_29","q":[28,29],"v":0.0036608564095149676,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz93_94","q":[93,94],"v":0.002902662990648508,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz148_149","q":[148,149],"v":0.05622639172621299,"ph":false,"ms":1790724521000,"b":0},{"k":"cz","n":"cz19_35","q":[19,35],"v":0.002726651959157167,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz88_89","q":[88,89],"v":0.00305358839272446,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz117_125","q":[117,125],"v":0.0023727060669918587,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz120_121","q":[120,121],"v":0.0019073007500031713,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz56_63","q":[56,63],"v":0.005035399997270235,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz29_30","q":[29,30],"v":0.0019690139464510203,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz84_85","q":[84,85],"v":0.002133468074197703,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz61_62","q":[61,62],"v":0.002499433245122862,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz43_56","q":[43,56],"v":0.0023720249298476714,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz98_111","q":[98,111],"v":0.003179993990029245,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz126_127","q":[126,127],"v":0.007471798392933632,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz121_122","q":[121,122],"v":0.0028952635082484524,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz135_139","q":[135,139],"v":0.003559578986066625,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz101_116","q":[101,116],"v":0.002180332336179952,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz153_154","q":[153,154],"v":0.0021962123660307087,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz2_3","q":[2,3],"v":0.0019306293137442698,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz122_123","q":[122,123],"v":0.002888085754410158,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz57_67","q":[57,67],"v":0.007721105090529035,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz62_63","q":[62,63],"v":0.011461999166904574,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz94_95","q":[94,95],"v":0.0025680251969484313,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz154_155","q":[154,155],"v":0.0023049369893824723,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz119_133","q":[119,133],"v":0.003143983669531253,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz3_4","q":[3,4],"v":0.0017722817514505551,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz33_39","q":[33,39],"v":0.0014627319410560335,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz150_151","q":[150,151],"v":0.008016412574623322,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz127_128","q":[127,128],"v":0.02078479867117325,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz78_89","q":[78,89],"v":0.0037256480469656794,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz127_137","q":[127,137],"v":0.002122456768753833,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz91_92","q":[91,92],"v":0.001876415393011005,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz68_69","q":[68,69],"v":0.002943978379863904,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz37_45","q":[37,45],"v":0.0023591311681047944,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz63_64","q":[63,64],"v":0.07239280671565851,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz128_129","q":[128,129],"v":0.004852876308681198,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz32_33","q":[32,33],"v":1,"ph":true,"ms":1790814780822},{"k":"cz","n":"cz4_5","q":[4,5],"v":0.0021800031577947354,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz79_93","q":[79,93],"v":0.004631606261802257,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz25_37","q":[25,37],"v":0.0025369265030663612,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz69_70","q":[69,70],"v":0.005631593064500062,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz18_31","q":[18,31],"v":0.004646991980494841,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz101_102","q":[101,102],"v":0.0056964967164400415,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz116_121","q":[116,121],"v":0.0016782342014911855,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz124_125","q":[124,125],"v":0.0017369147469836754,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz0_1","q":[0,1],"v":0.006868222965512899,"ph":false,"ms":1790813342000,"b":1},{"k":"cz","n":"cz10_11","q":[10,11],"v":0.01354877772357127,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz65_66","q":[65,66],"v":0.0026062356069103676,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz92_93","q":[92,93],"v":0.001806185880172645,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz97_107","q":[97,107],"v":0.0020556667237142945,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz102_103","q":[102,103],"v":0.07413748502479683,"ph":false,"ms":1790724523000,"b":0},{"k":"cz","n":"cz109_118","q":[109,118],"v":0.00286086564456553,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz6_7","q":[6,7],"v":0.002577800989269158,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz15_19","q":[15,19],"v":0.006497488223992848,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz33_34","q":[33,34],"v":0.00200938842289064,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz43_44","q":[43,44],"v":0.0028511537983502144,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz73_79","q":[73,79],"v":0.0025584991388174494,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz70_71","q":[70,71],"v":0.0028111876093771804,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz125_126","q":[125,126],"v":0.0038871266022797446,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz118_129","q":[118,129],"v":0.0024606535672630214,"ph":false,"ms":1790813346000,"b":1},{"k":"cz","n":"cz130_131","q":[130,131],"v":0.0016391000098454345,"ph":false,"ms":1790813343000,"b":1},{"k":"cz","n":"cz34_35","q":[34,35],"v":0.001438822595846101,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz11_12","q":[11,12],"v":0.008244269197105941,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz66_67","q":[66,67],"v":0.002548037137118986,"ph":false,"ms":1790813345000,"b":1},{"k":"cz","n":"cz65_77","q":[65,77],"v":0.006919132283033175,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz131_132","q":[131,132],"v":0.0011525013683996166,"ph":false,"ms":1790813344000,"b":1},{"k":"cz","n":"cz7_8","q":[7,8],"v":0.0026651214721946093,"ph":false,"ms":1790813344000,"b":1},{"k":"rzz","n":"rzz72_73","q":[72,73],"v":1,"ph":true,"ms":1790814779492},{"k":"rzz","n":"rzz7_17","q":[7,17],"v":0.004652183527328768,"ph":false,"ms":1790731684000,"b":2},{"k":"rzz","n":"rzz67_68","q":[67,68],"v":0.002415684040568855,"ph":false,"ms":1790731687000,"b":2},{"k":"rzz","n":"rzz44_45","q":[44,45],"v":0.0022531996238225604,"ph":false,"ms":1790731684000,"b":2},{"k":"rzz","n":"rzz8_9","q":[8,9],"v":0.00209619209196113,"ph":false,"ms":1790731674000,"b":2},{"k":"rzz","n":"rzz40_41","q":[40,41],"v":0.0023010253057366425,"ph":false,"ms":1790731684000,"b":2},{"k":"rzz","n":"rzz100_101","q":[100,101],"v":0.00569404601914994,"ph":false,"ms":1790731675000,"b":2},{"k":"rzz","n":"rzz91_98","q":[91,98],"v":0.0019268017844517593,"ph":false,"ms":1790731678000,"b":2},{"k":"rzz","n":"rzz132_133","q":[132,133],"v":0.0024007578564277654,"ph":false,"ms":1790731683000,"b":2},{"k":"rzz","n":"rzz41_42","q":[41,42],"v":0.002779343047412397,"ph":false,"ms":1790731686000,"b":2},{"k":"rzz","n":"rzz55_59","q":[55,59],"v":0.0025781813705312295,"ph":false,"ms":1790731677000,"b":2},{"k":"rzz","n":"rzz73_74","q":[73,74],"v":0.0022558153949734094,"ph":false,"ms":1790731680000,"b":2},{"k":"rzz","n":"rzz133_134","q":[133,134],"v":0.0022980288611065547,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz59_75","q":[59,75],"v":0.00290792022671324,"ph":false,"ms":1790731685000,"b":2},{"k":"rzz","n":"rzz14_15","q":[14,15],"v":0.003998187331739067,"ph":false,"ms":1790731679000,"b":2},{"k":"rzz","n":"rzz9_10","q":[9,10],"v":0.0015641898461230264,"ph":false,"ms":1790731676000,"b":2},{"k":"rzz","n":"rzz74_75","q":[74,75],"v":0.0019722227334553755,"ph":false,"ms":1790731682000,"b":2},{"k":"rzz","n":"rzz39_53","q":[39,53],"v":0.0053921790787554436,"ph":false,"ms":1790731682000,"b":2},{"k":"rzz","n":"rzz129_130","q":[129,130],"v":0.0022007277869893482,"ph":false,"ms":1790731686000,"b":2},{"k":"rzz","n":"rzz106_107","q":[106,107],"v":0.006434735161493649,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz83_96","q":[83,96],"v":0.0020536234476581094,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz111_112","q":[111,112],"v":0.0020278536005461367,"ph":false,"ms":1790731687000,"b":2},{"k":"rzz","n":"rzz138_151","q":[138,151],"v":0.0019689178068751367,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz47_48","q":[47,48],"v":0.0016993229313326808,"ph":false,"ms":1790731677000,"b":2},{"k":"rzz","n":"rzz42_43","q":[42,43],"v":0.0026132377804076456,"ph":false,"ms":1790731674000,"b":2},{"k":"rzz","n":"rzz47_57","q":[47,57],"v":0.004622584290668003,"ph":false,"ms":1790731680000,"b":2},{"k":"rzz","n":"rzz107_108","q":[107,108],"v":0.0040287331437275364,"ph":false,"ms":1790731685000,"b":2},{"k":"rzz","n":"rzz134_135","q":[134,135],"v":0.0022808215151735867,"ph":false,"ms":1790731676000,"b":2},{"k":"rzz","n":"rzz144_145","q":[144,145],"v":0.0015310631281231502,"ph":false,"ms":1790731676000,"b":2},{"k":"rzz","n":"rzz48_49","q":[48,49],"v":0.04492605587930171,"ph":false,"ms":1790731684000,"b":2},{"k":"rzz","n":"rzz77_85","q":[77,85],"v":0.002638414046349652,"ph":false,"ms":1790731682000,"b":2},{"k":"rzz","n":"rzz103_104","q":[103,104],"v":0.0026721860706390155,"ph":false,"ms":1790731685000,"b":2},{"k":"rzz","n":"rzz80_81","q":[80,81],"v":0.0028770754559678535,"ph":false,"ms":1790731685000,"b":2},{"k":"rzz","n":"rzz85_86","q":[85,86],"v":0.0032446679403423384,"ph":false,"ms":1790731687000,"b":2},{"k":"rzz","n":"rzz131_138","q":[131,138],"v":0.0021625254550553252,"ph":false,"ms":1790731679000,"b":2},{"k":"rzz","n":"rzz140_141","q":[140,141],"v":0.001497589601929028,"ph":false,"ms":1790731676000,"b":2},{"k":"rzz","n":"rzz36_41","q":[36,41],"v":0.0019352064667658708,"ph":false,"ms":1790731682000,"b":2},{"k":"rzz","n":"rzz71_72","q":[71,72],"v":1,"ph":true,"ms":1790814779826},{"k":"rzz","n":"rzz81_82","q":[81,82],"v":0.010153765676766874,"ph":false,"ms":1790731687000,"b":2},{"k":"rzz","n":"rzz108_109","q":[108,109],"v":0.003191945578867844,"ph":false,"ms":1790731675000,"b":2},{"k":"rzz","n":"rzz12_13","q":[12,13],"v":0.002845165040877451,"ph":false,"ms":1790731674000,"b":2},{"k":"rzz","n":"rzz99_115","q":[99,115],"v":1,"ph":true,"ms":1790814779863},{"k":"rzz","n":"rzz22_23","q":[22,23],"v":0.001732822357209035,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz29_38","q":[29,38],"v":0.0021440690471281887,"ph":false,"ms":1790731679000,"b":2},{"k":"rzz","n":"rzz49_50","q":[49,50],"v":0.02458149776507046,"ph":false,"ms":1790731686000,"b":2},{"k":"rzz","n":"rzz104_105","q":[104,105],"v":0.0019593134443909033,"ph":false,"ms":1790731675000,"b":2},{"k":"rzz","n":"rzz114_115","q":[114,115],"v":0.0025818592425086995,"ph":false,"ms":1790731683000,"b":2},{"k":"rzz","n":"rzz109_110","q":[109,110],"v":0.0022566519345692537,"ph":false,"ms":1790731681000,"b":2},{"k":"rzz","n":"rzz13_14","q":[13,14],"v":0.0016023086025106492,"ph":false,"ms":1790731677000,"b":2},{"k":"rzz","n":"rzz123_136","q":[123,136],"v":0.001890483954536587,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz151_152","q":[151,152],"v":0.0019956184349484984,"ph":false,"ms":1790731683000,"b":2},{"k":"rzz","n":"rzz45_46","q":[45,46],"v":0.0036461599875397543,"ph":false,"ms":1790731686000,"b":2},{"k":"rzz","n":"rzz110_111","q":[110,111],"v":0.0019512007267998566,"ph":false,"ms":1790731683000,"b":2},{"k":"rzz","n":"rzz50_51","q":[50,51],"v":0.0027544210910347977,"ph":false,"ms":1790731674000,"b":2},{"k":"rzz","n":"rzz96_103","q":[96,103],"v":0.00429170826644501,"ph":false,"ms":1790731680000,"b":2},{"k":"rzz","n":"rzz105_106","q":[105,106],"v":0.0020399913610818776,"ph":false,"ms":1790731678000,"b":2},{"k":"rzz","n":"rzz82_83","q":[82,83],"v":0.002350125147105586,"ph":false,"ms":1790731675000,"b":2},{"k":"rzz","n":"rzz147_148","q":[147,148],"v":0.002848117235342673,"ph":false,"ms":1790731683000,"b":2},{"k":"rzz","n":"rzz137_147","q":[137,147],"v":0.002243448442690338,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz51_52","q":[51,52],"v":0.0020983912047421727,"ph":false,"ms":1790731677000,"b":2},{"k":"rzz","n":"rzz142_143","q":[142,143],"v":0.0020653465770556767,"ph":false,"ms":1790731681000,"b":2},{"k":"rzz","n":"rzz46_47","q":[46,47],"v":0.0033471610723556644,"ph":false,"ms":1790731674000,"b":2},{"k":"rzz","n":"rzz23_24","q":[23,24],"v":0.005246038632635203,"ph":false,"ms":1790731689000,"b":2},{"k":"rzz","n":"rzz143_144","q":[143,144],"v":0.0021387316642304532,"ph":false,"ms":1790731683000,"b":2},{"k":"rzz","n":"rzz21_36","q":[21,36],"v":0.004708145913197209,"ph":false,"ms":1790731679000,"b":2},{"k":"rzz","n":"rzz83_84","q":[83,84],"v":0.0024274989189783935,"ph":false,"ms":1790731678000,"b":2},{"k":"rzz","n":"rzz113_119","q":[113,119],"v":0.004611661532427286,"ph":false,"ms":1790731678000,"b":2},{"k":"rzz","n":"rzz76_81","q":[76,81],"v":0.0024034575245877876,"ph":false,"ms":1790731680000,"b":2},{"k":"rzz","n":"rzz24_25","q":[24,25],"v":0.01850221897652865,"ph":false,"ms":1790731674000,"b":2},{"k":"rzz","n":"rzz105_117","q":[105,117],"v":0.0027933568444735157,"ph":false,"ms":1790731687000,"b":2},{"k":"rzz","n":"rzz20_21","q":[20,21],"v":0.004850477343070536,"ph":false,"ms":1790731674000,"b":2},{"k":"rzz","n":"rzz52_53","q":[52,53],"v":0.0033609705130124012,"ph":false,"ms":1790731684000,"b":2},{"k":"rzz","n":"rzz139_155","q":[139,155],"v":0.0023800069737407725,"ph":false,"ms":1790666150000,"b":1},{"k":"rzz","n":"rzz69_78","q":[69,78],"v":0.0021511568754819244,"ph":false,"ms":1790731680000,"b":2},{"k":"rzz","n":"rzz112_113","q":[112,113],"v":0.0023580603722816174,"ph":false,"ms":1790731675000,"b":2},{"k":"rzz","n":"rzz89_90","q":[89,90],"v":0.0028352559300169333,"ph":false,"ms":1790731687000,"b":2},{"k":"rzz","n":"rzz149_150","q":[149,150],"v":0.0442239997394176,"ph":false,"ms":1790666152000,"b":1},{"k":"rzz","n":"rzz53_54","q":[53,54],"v":0.004005901751300389,"ph":false,"ms":1790731687000,"b":2},{"k":"rzz","n":"rzz11_18","q":[11,18],"v":0.012358706347845388,"ph":false,"ms":1790731684000,"b":2},{"k":"rzz","n":"rzz30_31","q":[30,31],"v":0.002360267695905832,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz25_26","q":[25,26],"v":0.0022384007648062476,"ph":false,"ms":1790731677000,"b":2},{"k":"rzz","n":"rzz16_23","q":[16,23],"v":0.0021572324338321736,"ph":false,"ms":1790731686000,"b":2},{"k":"rzz","n":"rzz90_91","q":[90,91],"v":0.004643645126030438,"ph":false,"ms":1790731675000,"b":2},{"k":"rzz","n":"rzz136_143","q":[136,143],"v":0.01601249401288901,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz145_146","q":[145,146],"v":0.0016901519355933536,"ph":false,"ms":1790731686000,"b":2},{"k":"rzz","n":"rzz26_27","q":[26,27],"v":0.03250659754207075,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz21_22","q":[21,22],"v":0.002028358461931251,"ph":false,"ms":1790731677000,"b":2},{"k":"rzz","n":"rzz3_16","q":[3,16],"v":0.0015254779777801875,"ph":false,"ms":1790731684000,"b":2},{"k":"rzz","n":"rzz31_32","q":[31,32],"v":0.010175917671567364,"ph":false,"ms":1790731689000,"b":2},{"k":"rzz","n":"rzz58_71","q":[58,71],"v":0.0018281500167151854,"ph":false,"ms":1790731682000,"b":2},{"k":"rzz","n":"rzz86_87","q":[86,87],"v":0.002426006717558049,"ph":false,"ms":1790731675000,"b":2},{"k":"rzz","n":"rzz141_142","q":[141,142],"v":0.001831009063202077,"ph":false,"ms":1790731679000,"b":2},{"k":"rzz","n":"rzz95_99","q":[95,99],"v":1,"ph":true,"ms":1790814780347},{"k":"rzz","n":"rzz61_76","q":[61,76],"v":0.0032447030752855432,"ph":false,"ms":1790731677000,"b":2},{"k":"rzz","n":"rzz113_114","q":[113,114],"v":0.002575245469744164,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz123_124","q":[123,124],"v":0.0018574185039248736,"ph":false,"ms":1790731678000,"b":2},{"k":"rzz","n":"rzz27_28","q":[27,28],"v":1,"ph":true,"ms":1790814780386},{"k":"rzz","n":"rzz17_27","q":[17,27],"v":0.03585741070701792,"ph":false,"ms":1790731686000,"b":2},{"k":"rzz","n":"rzz54_55","q":[54,55],"v":0.004751524376132132,"ph":false,"ms":1790731674000,"b":2},{"k":"rzz","n":"rzz64_65","q":[64,65],"v":0.0024099380368813317,"ph":false,"ms":1790731675000,"b":2},{"k":"rzz","n":"rzz146_147","q":[146,147],"v":0.0021061086562046416,"ph":false,"ms":1790731681000,"b":2},{"k":"rzz","n":"rzz5_6","q":[5,6],"v":0.003676882470524473,"ph":false,"ms":1790731676000,"b":2},{"k":"rzz","n":"rzz51_58","q":[51,58],"v":0.002429064477140669,"ph":false,"ms":1790731680000,"b":2},{"k":"rzz","n":"rzz60_61","q":[60,61],"v":0.002089585292341656,"ph":false,"ms":1790731675000,"b":2},{"k":"rzz","n":"rzz87_88","q":[87,88],"v":0.0023596206748624227,"ph":false,"ms":1790731678000,"b":2},{"k":"rzz","n":"rzz38_49","q":[38,49],"v":0.022905974025187598,"ph":false,"ms":1790574320000,"b":0},{"k":"rzz","n":"rzz152_153","q":[152,153],"v":0.0024371221050227543,"ph":false,"ms":1790731676000,"b":2},{"k":"rzz","n":"rzz87_97","q":[87,97],"v":0.0024575905945210808,"ph":false,"ms":1790731680000,"b":2},{"k":"rzz","n":"rzz1_2","q":[1,2],"v":0.0034662399221257745,"ph":false,"ms":1790731676000,"b":2},{"k":"rzz","n":"rzz28_29","q":[28,29],"v":0.0025948329352728783,"ph":false,"ms":1790731674000,"b":2},{"k":"rzz","n":"rzz93_94","q":[93,94],"v":0.00259477125578228,"ph":false,"ms":1790731687000,"b":2},{"k":"rzz","n":"rzz148_149","q":[148,149],"v":0.04304081641064969,"ph":false,"ms":1790666149000,"b":1},{"k":"rzz","n":"rzz19_35","q":[19,35],"v":0.0018856634136920902,"ph":false,"ms":1790731674000,"b":2},{"k":"rzz","n":"rzz88_89","q":[88,89],"v":0.002815043584117105,"ph":false,"ms":1790731685000,"b":2},{"k":"rzz","n":"rzz117_125","q":[117,125],"v":0.0017038659998177552,"ph":false,"ms":1790731681000,"b":2},{"k":"rzz","n":"rzz120_121","q":[120,121],"v":0.0021748981641172005,"ph":false,"ms":1790731683000,"b":2},{"k":"rzz","n":"rzz56_63","q":[56,63],"v":0.0052262045250560385,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz29_30","q":[29,30],"v":0.002295027230615726,"ph":false,"ms":1790731677000,"b":2},{"k":"rzz","n":"rzz84_85","q":[84,85],"v":0.0024359768031977924,"ph":false,"ms":1790731685000,"b":2},{"k":"rzz","n":"rzz61_62","q":[61,62],"v":0.0028382201663838813,"ph":false,"ms":1790731682000,"b":2},{"k":"rzz","n":"rzz43_56","q":[43,56],"v":0.0022079668466710445,"ph":false,"ms":1790731680000,"b":2},{"k":"rzz","n":"rzz98_111","q":[98,111],"v":0.003067897006346826,"ph":false,"ms":1790731685000,"b":2},{"k":"rzz","n":"rzz126_127","q":[126,127],"v":0.004152333420748416,"ph":false,"ms":1790731676000,"b":2},{"k":"rzz","n":"rzz121_122","q":[121,122],"v":0.0029821607774521697,"ph":false,"ms":1790731685000,"b":2},{"k":"rzz","n":"rzz135_139","q":[135,139],"v":0.0032046788513623303,"ph":false,"ms":1790731679000,"b":2},{"k":"rzz","n":"rzz101_116","q":[101,116],"v":0.003570357412215147,"ph":false,"ms":1790731687000,"b":2},{"k":"rzz","n":"rzz153_154","q":[153,154],"v":0.0025102134272564913,"ph":false,"ms":1790731686000,"b":2},{"k":"rzz","n":"rzz2_3","q":[2,3],"v":0.0015340692050540283,"ph":false,"ms":1790731679000,"b":2},{"k":"rzz","n":"rzz122_123","q":[122,123],"v":0.002620611688786051,"ph":false,"ms":1790731676000,"b":2},{"k":"rzz","n":"rzz57_67","q":[57,67],"v":0.005556969120078498,"ph":false,"ms":1790731682000,"b":2},{"k":"rzz","n":"rzz62_63","q":[62,63],"v":0.010352314812366065,"ph":false,"ms":1790731684000,"b":2},{"k":"rzz","n":"rzz94_95","q":[94,95],"v":0.0019706262104763894,"ph":false,"ms":1790731675000,"b":2},{"k":"rzz","n":"rzz154_155","q":[154,155],"v":0.0028344257385511107,"ph":false,"ms":1790666153000,"b":1},{"k":"rzz","n":"rzz119_133","q":[119,133],"v":0.003040451515234216,"ph":false,"ms":1790731686000,"b":2},{"k":"rzz","n":"rzz3_4","q":[3,4],"v":0.0036043058246298665,"ph":false,"ms":1790731681000,"b":2},{"k":"rzz","n":"rzz33_39","q":[33,39],"v":0.0024506006290151705,"ph":false,"ms":1790731680000,"b":2},{"k":"rzz","n":"rzz150_151","q":[150,151],"v":0.00769830147414427,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz127_128","q":[127,128],"v":0.004392776546093657,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz78_89","q":[78,89],"v":0.0033348174196364544,"ph":false,"ms":1790731682000,"b":2},{"k":"rzz","n":"rzz127_137","q":[127,137],"v":0.0018430670005790684,"ph":false,"ms":1790731679000,"b":2},{"k":"rzz","n":"rzz91_92","q":[91,92],"v":0.002068854359536909,"ph":false,"ms":1790731680000,"b":2},{"k":"rzz","n":"rzz68_69","q":[68,69],"v":0.0037190826433117774,"ph":false,"ms":1790731675000,"b":2},{"k":"rzz","n":"rzz37_45","q":[37,45],"v":0.0016928463993255705,"ph":false,"ms":1790731682000,"b":2},{"k":"rzz","n":"rzz63_64","q":[63,64],"v":0.06371869101200028,"ph":false,"ms":1790731687000,"b":2},{"k":"rzz","n":"rzz128_129","q":[128,129],"v":0.0026128042641409277,"ph":false,"ms":1790731683000,"b":2},{"k":"rzz","n":"rzz32_33","q":[32,33],"v":1,"ph":true,"ms":1790814780827},{"k":"rzz","n":"rzz4_5","q":[4,5],"v":0.00222840180531661,"ph":false,"ms":1790731674000,"b":2},{"k":"rzz","n":"rzz79_93","q":[79,93],"v":0.005065200158768435,"ph":false,"ms":1790731685000,"b":2},{"k":"rzz","n":"rzz25_37","q":[25,37],"v":0.0015959939899493902,"ph":false,"ms":1790731679000,"b":2},{"k":"rzz","n":"rzz69_70","q":[69,70],"v":0.003771029780413243,"ph":false,"ms":1790731678000,"b":2},{"k":"rzz","n":"rzz18_31","q":[18,31],"v":0.0035188045534628176,"ph":false,"ms":1790731686000,"b":2},{"k":"rzz","n":"rzz101_102","q":[101,102],"v":0.008547047470345709,"ph":false,"ms":1790731678000,"b":2},{"k":"rzz","n":"rzz116_121","q":[116,121],"v":0.0017490439454528606,"ph":false,"ms":1790731681000,"b":2},{"k":"rzz","n":"rzz124_125","q":[124,125],"v":0.0018323096352483859,"ph":false,"ms":1790731683000,"b":2},{"k":"rzz","n":"rzz0_1","q":[0,1],"v":0.00774070360740009,"ph":false,"ms":1790731673000,"b":2},{"k":"rzz","n":"rzz10_11","q":[10,11],"v":0.008174988250895993,"ph":false,"ms":1790731679000,"b":2},{"k":"rzz","n":"rzz65_66","q":[65,66],"v":0.0027783759206631287,"ph":false,"ms":1790731677000,"b":2},{"k":"rzz","n":"rzz92_93","q":[92,93],"v":0.0023400074544161764,"ph":false,"ms":1790731682000,"b":2},{"k":"rzz","n":"rzz97_107","q":[97,107],"v":0.00325204590309075,"ph":false,"ms":1790731683000,"b":2},{"k":"rzz","n":"rzz102_103","q":[102,103],"v":0.11291735151065535,"ph":false,"ms":1790731683000,"b":2},{"k":"rzz","n":"rzz109_118","q":[109,118],"v":0.0016754546802742465,"ph":false,"ms":1790731678000,"b":2},{"k":"rzz","n":"rzz6_7","q":[6,7],"v":0.004417526860715865,"ph":false,"ms":1790731679000,"b":2},{"k":"rzz","n":"rzz15_19","q":[15,19],"v":0.0023699661097760782,"ph":false,"ms":1790731682000,"b":2},{"k":"rzz","n":"rzz33_34","q":[33,34],"v":0.0027994571156575443,"ph":false,"ms":1790731677000,"b":2},{"k":"rzz","n":"rzz43_44","q":[43,44],"v":0.0024724180508036153,"ph":false,"ms":1790731677000,"b":2},{"k":"rzz","n":"rzz73_79","q":[73,79],"v":0.002446313729302707,"ph":false,"ms":1790731678000,"b":2},{"k":"rzz","n":"rzz70_71","q":[70,71],"v":0.0031079449812759508,"ph":false,"ms":1790731684000,"b":2},{"k":"rzz","n":"rzz125_126","q":[125,126],"v":0.0070793958527843315,"ph":false,"ms":1790731685000,"b":2},{"k":"rzz","n":"rzz118_129","q":[118,129],"v":0.0021435007989605848,"ph":false,"ms":1790731688000,"b":2},{"k":"rzz","n":"rzz130_131","q":[130,131],"v":0.0018074706965174603,"ph":false,"ms":1790731676000,"b":2},{"k":"rzz","n":"rzz34_35","q":[34,35],"v":0.002011219144107762,"ph":false,"ms":1790731684000,"b":2},{"k":"rzz","n":"rzz11_12","q":[11,12],"v":0.008570182764754186,"ph":false,"ms":1790731681000,"b":2},{"k":"rzz","n":"rzz66_67","q":[66,67],"v":0.0032692333295832876,"ph":false,"ms":1790731684000,"b":2},{"k":"rzz","n":"rzz65_77","q":[65,77],"v":0.0033156156933108194,"ph":false,"ms":1790731680000,"b":2},{"k":"rzz","n":"rzz131_132","q":[131,132],"v":0.0017313780752011287,"ph":false,"ms":1790731681000,"b":2},{"k":"rzz","n":"rzz7_8","q":[7,8],"v":0.003054794508152492,"ph":false,"ms":1790731681000,"b":2},{"k":"measure","n":"measure0","q":[0],"v":0.027099609375,"ph":false,"ms":1790798357000,"b":0},{"k":"measure","n":"measure1","q":[1],"v":0.019775390625,"ph":false,"ms":1790798357000,"b":0},{"k":"measure","n":"measure2","q":[2],"v":0.004150390625,"ph":false,"ms":1790798357000,"b":0},{"k":"measure","n":"measure3","q":[3],"v":0.022705078125,"ph":false,"ms":1790798358000,"b":0},{"k":"measure","n":"measure4","q":[4],"v":0.0048828125,"ph":false,"ms":1790798358000,"b":0},{"k":"measure","n":"measure5","q":[5],"v":0.010986328125,"ph":false,"ms":1790798358000,"b":0},{"k":"measure","n":"measure6","q":[6],"v":0.003173828125,"ph":false,"ms":1790798359000,"b":0},{"k":"measure","n":"measure7","q":[7],"v":0.01904296875,"ph":false,"ms":1790798359000,"b":0},{"k":"measure","n":"measure8","q":[8],"v":0.002197265625,"ph":false,"ms":1790798359000,"b":0},{"k":"measure","n":"measure9","q":[9],"v":0.01318359375,"ph":false,"ms":1790798360000,"b":0},{"k":"measure","n":"measure10","q":[10],"v":0.003662109375,"ph":false,"ms":1790798360000,"b":0},{"k":"measure","n":"measure11","q":[11],"v":0.04296875,"ph":false,"ms":1790798360000,"b":0},{"k":"measure","n":"measure12","q":[12],"v":0.0126953125,"ph":false,"ms":1790798360000,"b":0},{"k":"measure","n":"measure13","q":[13],"v":0.013671875,"ph":false,"ms":1790798361000,"b":0},{"k":"measure","n":"measure14","q":[14],"v":0.00244140625,"ph":false,"ms":1790798361000,"b":0},{"k":"measure","n":"measure15","q":[15],"v":0.016845703125,"ph":false,"ms":1790798361000,"b":0},{"k":"measure","n":"measure16","q":[16],"v":0.01025390625,"ph":false,"ms":1790798362000,"b":0},{"k":"measure","n":"measure17","q":[17],"v":0.007568359375,"ph":false,"ms":1790798362000,"b":0},{"k":"measure","n":"measure18","q":[18],"v":0.0078125,"ph":false,"ms":1790798362000,"b":0},{"k":"measure","n":"measure19","q":[19],"v":0.015380859375,"ph":false,"ms":1790798363000,"b":0},{"k":"measure","n":"measure20","q":[20],"v":0.008056640625,"ph":false,"ms":1790798363000,"b":0},{"k":"measure","n":"measure21","q":[21],"v":0.03662109375,"ph":false,"ms":1790798363000,"b":0},{"k":"measure","n":"measure22","q":[22],"v":0.00537109375,"ph":false,"ms":1790798363000,"b":0},{"k":"measure","n":"measure23","q":[23],"v":0.009033203125,"ph":false,"ms":1790798364000,"b":0},{"k":"measure","n":"measure24","q":[24],"v":0.009521484375,"ph":false,"ms":1790798364000,"b":0},{"k":"measure","n":"measure25","q":[25],"v":0.0068359375,"ph":false,"ms":1790798364000,"b":0},{"k":"measure","n":"measure26","q":[26],"v":0.0048828125,"ph":false,"ms":1790798365000,"b":0},{"k":"measure","n":"measure27","q":[27],"v":0.0107421875,"ph":false,"ms":1790798365000,"b":0},{"k":"measure","n":"measure28","q":[28],"v":0.0078125,"ph":false,"ms":1790798365000,"b":0},{"k":"measure","n":"measure29","q":[29],"v":0.0166015625,"ph":false,"ms":1790798366000,"b":0},{"k":"measure","n":"measure30","q":[30],"v":0.007080078125,"ph":false,"ms":1790798366000,"b":0},{"k":"measure","n":"measure31","q":[31],"v":0.00927734375,"ph":false,"ms":1790798366000,"b":0},{"k":"measure","n":"measure32","q":[32],"v":0.026611328125,"ph":false,"ms":1790798366000,"b":0},{"k":"measure","n":"measure33","q":[33],"v":0.0166015625,"ph":false,"ms":1790798367000,"b":0},{"k":"measure","n":"measure34","q":[34],"v":0.00830078125,"ph":false,"ms":1790798367000,"b":0},{"k":"measure","n":"measure35","q":[35],"v":0.016845703125,"ph":false,"ms":1790798367000,"b":0},{"k":"measure","n":"measure36","q":[36],"v":0.005615234375,"ph":false,"ms":1790798368000,"b":0},{"k":"measure","n":"measure37","q":[37],"v":0.00830078125,"ph":false,"ms":1790798368000,"b":0},{"k":"measure","n":"measure38","q":[38],"v":0.010009765625,"ph":false,"ms":1790798368000,"b":0},{"k":"measure","n":"measure39","q":[39],"v":0.01953125,"ph":false,"ms":1790798369000,"b":0},{"k":"measure","n":"measure40","q":[40],"v":0.015625,"ph":false,"ms":1790798369000,"b":0},{"k":"measure","n":"measure41","q":[41],"v":0.0908203125,"ph":false,"ms":1790798369000,"b":0},{"k":"measure","n":"measure42","q":[42],"v":0.0048828125,"ph":false,"ms":1790798369000,"b":0},{"k":"measure","n":"measure43","q":[43],"v":0.087158203125,"ph":false,"ms":1790798370000,"b":0},{"k":"measure","n":"measure44","q":[44],"v":0.01318359375,"ph":false,"ms":1790798370000,"b":0},{"k":"measure","n":"measure45","q":[45],"v":0.03125,"ph":false,"ms":1790798370000,"b":0},{"k":"measure","n":"measure46","q":[46],"v":0.00830078125,"ph":false,"ms":1790798371000,"b":0},{"k":"measure","n":"measure47","q":[47],"v":0.012451171875,"ph":false,"ms":1790798371000,"b":0},{"k":"measure","n":"measure48","q":[48],"v":0.003173828125,"ph":false,"ms":1790798371000,"b":0},{"k":"measure","n":"measure49","q":[49],"v":0.046142578125,"ph":false,"ms":1790798372000,"b":0},{"k":"measure","n":"measure50","q":[50],"v":0.00537109375,"ph":false,"ms":1790798372000,"b":0},{"k":"measure","n":"measure51","q":[51],"v":0.02880859375,"ph":false,"ms":1790798372000,"b":0},{"k":"measure","n":"measure52","q":[52],"v":0.01708984375,"ph":false,"ms":1790798373000,"b":0},{"k":"measure","n":"measure53","q":[53],"v":0.045166015625,"ph":false,"ms":1790798373000,"b":0},{"k":"measure","n":"measure54","q":[54],"v":0.00634765625,"ph":false,"ms":1790798373000,"b":0},{"k":"measure","n":"measure55","q":[55],"v":0.04833984375,"ph":false,"ms":1790798373000,"b":0},{"k":"measure","n":"measure56","q":[56],"v":0.009033203125,"ph":false,"ms":1790798374000,"b":0},{"k":"measure","n":"measure57","q":[57],"v":0.0107421875,"ph":false,"ms":1790798374000,"b":0},{"k":"measure","n":"measure58","q":[58],"v":0.00390625,"ph":false,"ms":1790798374000,"b":0},{"k":"measure","n":"measure59","q":[59],"v":0.005615234375,"ph":false,"ms":1790798375000,"b":0},{"k":"measure","n":"measure60","q":[60],"v":0.03369140625,"ph":false,"ms":1790798375000,"b":0},{"k":"measure","n":"measure61","q":[61],"v":0.059326171875,"ph":false,"ms":1790798375000,"b":0},{"k":"measure","n":"measure62","q":[62],"v":0.015380859375,"ph":false,"ms":1790798376000,"b":0},{"k":"measure","n":"measure63","q":[63],"v":0.031005859375,"ph":false,"ms":1790798376000,"b":0},{"k":"measure","n":"measure64","q":[64],"v":0.002685546875,"ph":false,"ms":1790798376000,"b":0},{"k":"measure","n":"measure65","q":[65],"v":0.06689453125,"ph":false,"ms":1790798376000,"b":0},{"k":"measure","n":"measure66","q":[66],"v":0.006103515625,"ph":false,"ms":1790798377000,"b":0},{"k":"measure","n":"measure67","q":[67],"v":0.039306640625,"ph":false,"ms":1790798377000,"b":0},{"k":"measure","n":"measure68","q":[68],"v":0.00732421875,"ph":false,"ms":1790798377000,"b":0},{"k":"measure","n":"measure69","q":[69],"v":0.0146484375,"ph":false,"ms":1790798378000,"b":0},{"k":"measure","n":"measure70","q":[70],"v":0.005126953125,"ph":false,"ms":1790798378000,"b":0},{"k":"measure","n":"measure71","q":[71],"v":0.004638671875,"ph":false,"ms":1790798378000,"b":0},{"k":"measure","n":"measure72","q":[72],"v":0.329345703125,"ph":false,"ms":1790798379000,"b":0},{"k":"measure","n":"measure73","q":[73],"v":0.009033203125,"ph":false,"ms":1790798379000,"b":0},{"k":"measure","n":"measure74","q":[74],"v":0.007080078125,"ph":false,"ms":1790798379000,"b":0},{"k":"measure","n":"measure75","q":[75],"v":0.002685546875,"ph":false,"ms":1790798379000,"b":0},{"k":"measure","n":"measure76","q":[76],"v":0.022216796875,"ph":false,"ms":1790798380000,"b":0},{"k":"measure","n":"measure77","q":[77],"v":0.010498046875,"ph":false,"ms":1790798380000,"b":0},{"k":"measure","n":"measure78","q":[78],"v":0.013916015625,"ph":false,"ms":1790798380000,"b":0},{"k":"measure","n":"measure79","q":[79],"v":0.00927734375,"ph":false,"ms":1790798381000,"b":0},{"k":"measure","n":"measure80","q":[80],"v":0.015625,"ph":false,"ms":1790798382000,"b":0},{"k":"measure","n":"measure81","q":[81],"v":0.0302734375,"ph":false,"ms":1790798382000,"b":0},{"k":"measure","n":"measure82","q":[82],"v":0.00634765625,"ph":false,"ms":1790798382000,"b":0},{"k":"measure","n":"measure83","q":[83],"v":0.11962890625,"ph":false,"ms":1790798382000,"b":0},{"k":"measure","n":"measure84","q":[84],"v":0.0068359375,"ph":false,"ms":1790798383000,"b":0},{"k":"measure","n":"measure85","q":[85],"v":0.00732421875,"ph":false,"ms":1790798383000,"b":0},{"k":"measure","n":"measure86","q":[86],"v":0.004150390625,"ph":false,"ms":1790798383000,"b":0},{"k":"measure","n":"measure87","q":[87],"v":0.031005859375,"ph":false,"ms":1790798384000,"b":0},{"k":"measure","n":"measure88","q":[88],"v":0.006591796875,"ph":false,"ms":1790798384000,"b":0},{"k":"measure","n":"measure89","q":[89],"v":0.01171875,"ph":false,"ms":1790798384000,"b":0},{"k":"measure","n":"measure90","q":[90],"v":0.00439453125,"ph":false,"ms":1790798385000,"b":0},{"k":"measure","n":"measure91","q":[91],"v":0.019287109375,"ph":false,"ms":1790798385000,"b":0},{"k":"measure","n":"measure92","q":[92],"v":0.016357421875,"ph":false,"ms":1790798385000,"b":0},{"k":"measure","n":"measure93","q":[93],"v":0.033447265625,"ph":false,"ms":1790798385000,"b":0},{"k":"measure","n":"measure94","q":[94],"v":0.00390625,"ph":false,"ms":1790798386000,"b":0},{"k":"measure","n":"measure95","q":[95],"v":0.0068359375,"ph":false,"ms":1790798386000,"b":0},{"k":"measure","n":"measure96","q":[96],"v":0.012939453125,"ph":false,"ms":1790798386000,"b":0},{"k":"measure","n":"measure97","q":[97],"v":0.0126953125,"ph":false,"ms":1790798387000,"b":0},{"k":"measure","n":"measure98","q":[98],"v":0.00537109375,"ph":false,"ms":1790798387000,"b":0},{"k":"measure","n":"measure99","q":[99],"v":0.02978515625,"ph":false,"ms":1790798387000,"b":0},{"k":"measure","n":"measure100","q":[100],"v":0.009521484375,"ph":false,"ms":1790798388000,"b":0},{"k":"measure","n":"measure101","q":[101],"v":0.035888671875,"ph":false,"ms":1790798388000,"b":0},{"k":"measure","n":"measure102","q":[102],"v":0.107421875,"ph":false,"ms":1790798388000,"b":0},{"k":"measure","n":"measure103","q":[103],"v":0.01806640625,"ph":false,"ms":1790798389000,"b":0},{"k":"measure","n":"measure104","q":[104],"v":0.0048828125,"ph":false,"ms":1790798389000,"b":0},{"k":"measure","n":"measure105","q":[105],"v":0.01123046875,"ph":false,"ms":1790798389000,"b":0},{"k":"measure","n":"measure106","q":[106],"v":0.0087890625,"ph":false,"ms":1790798391000,"b":0},{"k":"measure","n":"measure107","q":[107],"v":0.006103515625,"ph":false,"ms":1790798392000,"b":0},{"k":"measure","n":"measure108","q":[108],"v":0.009765625,"ph":false,"ms":1790798392000,"b":0},{"k":"measure","n":"measure109","q":[109],"v":0.01171875,"ph":false,"ms":1790798392000,"b":0},{"k":"measure","n":"measure110","q":[110],"v":0.004638671875,"ph":false,"ms":1790798393000,"b":0},{"k":"measure","n":"measure111","q":[111],"v":0.006591796875,"ph":false,"ms":1790798393000,"b":0},{"k":"measure","n":"measure112","q":[112],"v":0.01025390625,"ph":false,"ms":1790798393000,"b":0},{"k":"measure","n":"measure113","q":[113],"v":0.09521484375,"ph":false,"ms":1790798394000,"b":0},{"k":"measure","n":"measure114","q":[114],"v":0.00390625,"ph":false,"ms":1790798394000,"b":0},{"k":"measure","n":"measure115","q":[115],"v":0.0068359375,"ph":false,"ms":1790798394000,"b":0},{"k":"measure","n":"measure116","q":[116],"v":0.024658203125,"ph":false,"ms":1790798394000,"b":0},{"k":"measure","n":"measure117","q":[117],"v":0.011474609375,"ph":false,"ms":1790798395000,"b":0},{"k":"measure","n":"measure118","q":[118],"v":0.00439453125,"ph":false,"ms":1790798395000,"b":0},{"k":"measure","n":"measure119","q":[119],"v":0.0078125,"ph":false,"ms":1790798395000,"b":0},{"k":"measure","n":"measure120","q":[120],"v":0.01171875,"ph":false,"ms":1790798396000,"b":0},{"k":"measure","n":"measure121","q":[121],"v":0.009765625,"ph":false,"ms":1790798396000,"b":0},{"k":"measure","n":"measure122","q":[122],"v":0.018310546875,"ph":false,"ms":1790798396000,"b":0},{"k":"measure","n":"measure123","q":[123],"v":0.105712890625,"ph":false,"ms":1790798397000,"b":0},{"k":"measure","n":"measure124","q":[124],"v":0.00341796875,"ph":false,"ms":1790798397000,"b":0},{"k":"measure","n":"measure125","q":[125],"v":0.013916015625,"ph":false,"ms":1790798397000,"b":0},{"k":"measure","n":"measure126","q":[126],"v":0.052734375,"ph":false,"ms":1790798398000,"b":0},{"k":"measure","n":"measure127","q":[127],"v":0.015869140625,"ph":false,"ms":1790798398000,"b":0},{"k":"measure","n":"measure128","q":[128],"v":0.014892578125,"ph":false,"ms":1790798398000,"b":0},{"k":"measure","n":"measure129","q":[129],"v":0.01513671875,"ph":false,"ms":1790798399000,"b":0},{"k":"measure","n":"measure130","q":[130],"v":0.007080078125,"ph":false,"ms":1790798399000,"b":0},{"k":"measure","n":"measure131","q":[131],"v":0.06494140625,"ph":false,"ms":1790798399000,"b":0},{"k":"measure","n":"measure132","q":[132],"v":0.005859375,"ph":false,"ms":1790798400000,"b":0},{"k":"measure","n":"measure133","q":[133],"v":0.00830078125,"ph":false,"ms":1790798400000,"b":0},{"k":"measure","n":"measure134","q":[134],"v":0.00390625,"ph":false,"ms":1790798400000,"b":0},{"k":"measure","n":"measure135","q":[135],"v":0.03271484375,"ph":false,"ms":1790798401000,"b":0},{"k":"measure","n":"measure136","q":[136],"v":0.010498046875,"ph":false,"ms":1790798401000,"b":0},{"k":"measure","n":"measure137","q":[137],"v":0.005615234375,"ph":false,"ms":1790798401000,"b":0},{"k":"measure","n":"measure138","q":[138],"v":0.006591796875,"ph":false,"ms":1790798402000,"b":0},{"k":"measure","n":"measure139","q":[139],"v":0.0107421875,"ph":false,"ms":1790798402000,"b":0},{"k":"measure","n":"measure140","q":[140],"v":0.01220703125,"ph":false,"ms":1790798402000,"b":0},{"k":"measure","n":"measure141","q":[141],"v":0.007568359375,"ph":false,"ms":1790798403000,"b":0},{"k":"measure","n":"measure142","q":[142],"v":0.004150390625,"ph":false,"ms":1790798403000,"b":0},{"k":"measure","n":"measure143","q":[143],"v":0.00439453125,"ph":false,"ms":1790798403000,"b":0},{"k":"measure","n":"measure144","q":[144],"v":0.00439453125,"ph":false,"ms":1790798403000,"b":0},{"k":"measure","n":"measure145","q":[145],"v":0.0126953125,"ph":false,"ms":1790798404000,"b":0},{"k":"measure","n":"measure146","q":[146],"v":0.003662109375,"ph":false,"ms":1790798404000,"b":0},{"k":"measure","n":"measure147","q":[147],"v":0.01220703125,"ph":false,"ms":1790798404000,"b":0},{"k":"measure","n":"measure148","q":[148],"v":0.011474609375,"ph":false,"ms":1790798406000,"b":0},{"k":"measure","n":"measure149","q":[149],"v":0.047607421875,"ph":false,"ms":1790798407000,"b":0},{"k":"measure","n":"measure150","q":[150],"v":0.0048828125,"ph":false,"ms":1790798407000,"b":0},{"k":"measure","n":"measure151","q":[151],"v":0.009521484375,"ph":false,"ms":1790798407000,"b":0},{"k":"measure","n":"measure152","q":[152],"v":0.010498046875,"ph":false,"ms":1790798408000,"b":0},{"k":"measure","n":"measure153","q":[153],"v":0.021728515625,"ph":false,"ms":1790798408000,"b":0},{"k":"measure","n":"measure154","q":[154],"v":0.00439453125,"ph":false,"ms":1790798408000,"b":0},{"k":"measure","n":"measure155","q":[155],"v":0.01513671875,"ph":false,"ms":1790798409000,"b":0},{"k":"measure_2","n":"measure_20","q":[0],"v":0.018310546875,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_21","q":[1],"v":0.020263671875,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_22","q":[2],"v":0.004150390625,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_23","q":[3],"v":0.066162109375,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_24","q":[4],"v":0.028076171875,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_25","q":[5],"v":0.01806640625,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_26","q":[6],"v":0.004150390625,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_27","q":[7],"v":0.046630859375,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_28","q":[8],"v":0.005859375,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_29","q":[9],"v":0.0751953125,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_210","q":[10],"v":0.003662109375,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_211","q":[11],"v":0.045166015625,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_212","q":[12],"v":0.033935546875,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_213","q":[13],"v":0.071044921875,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_214","q":[14],"v":0.00341796875,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_215","q":[15],"v":0.044677734375,"ph":false,"ms":1790799209000,"b":0},{"k":"measure_2","n":"measure_216","q":[16],"v":0.007568359375,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_217","q":[17],"v":0.006591796875,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_218","q":[18],"v":0.00439453125,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_219","q":[19],"v":0.022216796875,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_220","q":[20],"v":0.005126953125,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_221","q":[21],"v":0.0146484375,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_222","q":[22],"v":0.001953125,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_223","q":[23],"v":0.00732421875,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_224","q":[24],"v":0.0126953125,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_225","q":[25],"v":0.012939453125,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_226","q":[26],"v":0.00439453125,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_227","q":[27],"v":0.012451171875,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_228","q":[28],"v":0.004638671875,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_229","q":[29],"v":0.057373046875,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_230","q":[30],"v":0.003173828125,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_231","q":[31],"v":0.025634765625,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_232","q":[32],"v":0.024169921875,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_233","q":[33],"v":0.04638671875,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_234","q":[34],"v":0.012939453125,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_235","q":[35],"v":0.037109375,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_236","q":[36],"v":0.00732421875,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_237","q":[37],"v":0.006591796875,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_238","q":[38],"v":0.003662109375,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_239","q":[39],"v":0.007080078125,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_240","q":[40],"v":0.02490234375,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_241","q":[41],"v":0.120849609375,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_242","q":[42],"v":0.011474609375,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_243","q":[43],"v":0.140625,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_244","q":[44],"v":0.018310546875,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_245","q":[45],"v":0.0517578125,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_246","q":[46],"v":0.025390625,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_247","q":[47],"v":0.02880859375,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_248","q":[48],"v":0.007568359375,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_249","q":[49],"v":0.03662109375,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_250","q":[50],"v":0.01513671875,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_251","q":[51],"v":0.070068359375,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_252","q":[52],"v":0.017333984375,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_253","q":[53],"v":0.077392578125,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_254","q":[54],"v":0.003662109375,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_255","q":[55],"v":0.1201171875,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_256","q":[56],"v":0.0087890625,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_257","q":[57],"v":0.00830078125,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_258","q":[58],"v":0.004150390625,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_259","q":[59],"v":0.01318359375,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_260","q":[60],"v":0.030517578125,"ph":false,"ms":1790799210000,"b":0},{"k":"measure_2","n":"measure_261","q":[61],"v":0.043701171875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_262","q":[62],"v":0.03857421875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_263","q":[63],"v":0.04345703125,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_264","q":[64],"v":0.011474609375,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_265","q":[65],"v":0.1025390625,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_266","q":[66],"v":0.0078125,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_267","q":[67],"v":0.079833984375,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_268","q":[68],"v":0.00830078125,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_269","q":[69],"v":0.009521484375,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_270","q":[70],"v":0.001953125,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_271","q":[71],"v":0.0107421875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_272","q":[72],"v":0.430419921875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_273","q":[73],"v":0.02197265625,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_274","q":[74],"v":0.0048828125,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_275","q":[75],"v":0.01416015625,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_276","q":[76],"v":0.040771484375,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_277","q":[77],"v":0.01123046875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_278","q":[78],"v":0.024658203125,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_279","q":[79],"v":0.02587890625,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_280","q":[80],"v":0.0126953125,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_281","q":[81],"v":0.0576171875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_282","q":[82],"v":0.005126953125,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_283","q":[83],"v":0.170654296875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_284","q":[84],"v":0.005126953125,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_285","q":[85],"v":0.0205078125,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_286","q":[86],"v":0.001953125,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_287","q":[87],"v":0.0859375,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_288","q":[88],"v":0.003173828125,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_289","q":[89],"v":0.028076171875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_290","q":[90],"v":0.004638671875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_291","q":[91],"v":0.04296875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_292","q":[92],"v":0.010009765625,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_293","q":[93],"v":0.09521484375,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_294","q":[94],"v":0.004638671875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_295","q":[95],"v":0.018310546875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_296","q":[96],"v":0.010986328125,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_297","q":[97],"v":0.005615234375,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_298","q":[98],"v":0.00634765625,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_299","q":[99],"v":0.01904296875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_2100","q":[100],"v":0.016357421875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_2101","q":[101],"v":0.076171875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_2102","q":[102],"v":0.09326171875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_2103","q":[103],"v":0.02294921875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_2104","q":[104],"v":0.006591796875,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_2105","q":[105],"v":0.028564453125,"ph":false,"ms":1790799211000,"b":0},{"k":"measure_2","n":"measure_2106","q":[106],"v":0.005615234375,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2107","q":[107],"v":0.004150390625,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2108","q":[108],"v":0.00439453125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2109","q":[109],"v":0.02001953125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2110","q":[110],"v":0.00390625,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2111","q":[111],"v":0.01806640625,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2112","q":[112],"v":0.0078125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2113","q":[113],"v":0.12890625,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2114","q":[114],"v":0.00634765625,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2115","q":[115],"v":0.017333984375,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2116","q":[116],"v":0.03466796875,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2117","q":[117],"v":0.0224609375,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2118","q":[118],"v":0.0078125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2119","q":[119],"v":0.01318359375,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2120","q":[120],"v":0.0146484375,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2121","q":[121],"v":0.021728515625,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2122","q":[122],"v":0.00341796875,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2123","q":[123],"v":0.275634765625,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2124","q":[124],"v":0.003662109375,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2125","q":[125],"v":0.02587890625,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2126","q":[126],"v":0.0888671875,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2127","q":[127],"v":0.032470703125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2128","q":[128],"v":0.01953125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2129","q":[129],"v":0.051513671875,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2130","q":[130],"v":0.0078125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2131","q":[131],"v":0.101806640625,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2132","q":[132],"v":0.00244140625,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2133","q":[133],"v":0.054443359375,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2134","q":[134],"v":0.00439453125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2135","q":[135],"v":0.1181640625,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2136","q":[136],"v":0.005126953125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2137","q":[137],"v":0.00341796875,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2138","q":[138],"v":0.0048828125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2139","q":[139],"v":0.00830078125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2140","q":[140],"v":0.00830078125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2141","q":[141],"v":0.010986328125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2142","q":[142],"v":0.00439453125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2143","q":[143],"v":0.009033203125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2144","q":[144],"v":0.007080078125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2145","q":[145],"v":0.044921875,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2146","q":[146],"v":0.0078125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2147","q":[147],"v":0.015380859375,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2148","q":[148],"v":0.00439453125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2149","q":[149],"v":0.052734375,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2150","q":[150],"v":0.005859375,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2151","q":[151],"v":0.0400390625,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2152","q":[152],"v":0.009033203125,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2153","q":[153],"v":0.033447265625,"ph":false,"ms":1790799212000,"b":0},{"k":"measure_2","n":"measure_2154","q":[154],"v":0.00439453125,"ph":false,"ms":1790799213000,"b":0},{"k":"measure_2","n":"measure_2155","q":[155],"v":0.02685546875,"ph":false,"ms":1790799213000,"b":0}]};
+
+  const KIND = {
+    "1q":      { label: "1-kübit",   long: "1-kübit kapılar", fam: "q1", note: "sx, x, rx, id ve xslow bu kübitte aynı değeri taşır." },
+    "cz":      { label: "cz",        long: "cz",              fam: "q2", note: "2-kübit dolanıklık kapısı; iki yönü aynı değeri taşır." },
+    "rzz":     { label: "rzz",       long: "rzz",             fam: "q2", note: "2-kübit ZZ dönmesi; iki yönü aynı değeri taşır." },
+    "measure": { label: "measure",   long: "measure",         fam: "ro", note: "Okuma hatası; qubits bölümündeki readout_error ile aynı sayı." },
+    "measure_2": { label: "measure_2", long: "measure_2",     fam: "ro", note: "İkinci okuma kalibrasyonu." }
+  };
+  const ORDER = ["1q", "cz", "rzz", "measure", "measure_2"];
+
+  const nf = new Intl.NumberFormat("tr-TR", { maximumSignificantDigits: 3 });
+  const pf = new Intl.NumberFormat("tr-TR", { style: "percent", maximumSignificantDigits: 3 });
+  const dfMin = new Intl.DateTimeFormat("tr-TR", { timeZone: "UTC", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  const dfSec = new Intl.DateTimeFormat("tr-TR", { timeZone: "UTC", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const dfDay = new Intl.DateTimeFormat("tr-TR", { timeZone: "UTC", day: "numeric", month: "short" });
+  const dfTime = new Intl.DateTimeFormat("tr-TR", { timeZone: "UTC", hour: "2-digit", minute: "2-digit" });
+  const dfFull = new Intl.DateTimeFormat("tr-TR", { timeZone: "UTC", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  const fv = (v) => nf.format(v);
+  const qLabel = (r) => r.q.length === 1 ? "q" + r.q[0] : "q" + r.q[0] + "–" + r.q[1];
+  const qLong = (r) => r.q.length === 1 ? "Kübit " + r.q[0] : "Kübitler " + r.q[0] + " ve " + r.q[1];
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function ago(ms) {
+    const m = Math.round((DATA.meta.snap_ms - ms) / 60000);
+    if (m < 60) return m + " dk";
+    const h = Math.floor(m / 60), mm = m % 60;
+    if (h < 48) return h + " sa" + (mm ? " " + mm + " dk" : "");
+    const d = Math.floor(h / 24), hh = h % 24;
+    return d + " gün" + (hh ? " " + hh + " sa" : "");
+  }
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function xIcon() {
+    const ns = "http://www.w3.org/2000/svg";
+    const s = document.createElementNS(ns, "svg");
+    s.setAttribute("viewBox", "0 0 10 10"); s.setAttribute("class", "xkey"); s.setAttribute("aria-hidden", "true");
+    const p = document.createElementNS(ns, "path");
+    p.setAttribute("d", "M1.5 1.5L8.5 8.5M1.5 8.5L8.5 1.5"); p.setAttribute("stroke", "currentColor");
+    p.setAttribute("stroke-width", "2"); p.setAttribute("stroke-linecap", "round");
+    s.appendChild(p);
+    return s;
+  }
+
+  const rows = DATA.rows;
+  const measured = rows.filter((r) => !r.ph);
+  const placeholders = rows.filter((r) => r.ph);
+  const rawPh = d3.sum(placeholders, (r) => (r.k === "1q" ? 5 : 2));
+  const phOn72 = placeholders.filter((r) => r.q.includes(72)).length;
+
+  /* ---------- header, tiles ---------- */
+  document.getElementById("eyebrow").textContent =
+    "Kalibrasyon anlık görüntüsü · " + dfFull.format(DATA.meta.snap_ms) + " UTC · " + DATA.meta.n_qubits + " kübit";
+  document.getElementById("metaLine").textContent =
+    "backend_version " + DATA.meta.backend_version + " · last_update_date " + DATA.meta.last_update_date +
+    " · " + DATA.meta.n_gate_error_rows.toLocaleString("tr-TR") + " gate_error kaydı, " + rows.length + " benzersiz değer.";
+  document.getElementById("phNote").textContent = placeholders.length + " kapı (" + rawPh + " kayıt)";
+
+  const tiles = document.getElementById("tiles");
+  for (const k of ORDER) {
+    const xs = measured.filter((r) => r.k === k);
+    const worst = xs.reduce((a, b) => (b.v > a.v ? b : a));
+    const t = el("div", "tile");
+    const lab = el("div", "t-label");
+    lab.append(el("span", "key " + KIND[k].fam), document.createTextNode(KIND[k].long));
+    const sub1 = el("div", "t-sub");
+    sub1.append(document.createTextNode("medyan · n = " + xs.length));
+    const sub2 = el("div", "t-sub");
+    sub2.append(document.createTextNode("en kötü "), el("b", null, fv(worst.v)), document.createTextNode(" (" + qLabel(worst) + ")"));
+    t.append(lab, el("div", "t-val", fv(d3.median(xs, (r) => r.v))), sub1, sub2);
+    tiles.appendChild(t);
+  }
+  {
+    const t = el("div", "tile ph");
+    const lab = el("div", "t-label");
+    lab.append(xIcon(), document.createTextNode("Kalibre edilmedi"));
+    const sub1 = el("div", "t-sub", rawPh + " kayıtta değer = 1");
+    const sub2 = el("div", "t-sub", phOn72 + " tanesi q72'ye bağlı");
+    t.append(lab, el("div", "t-val", placeholders.length + " kapı"), sub1, sub2);
+    tiles.appendChild(t);
+  }
+
+  /* ---------- slots (one per calibration round) ---------- */
+  const slots = d3.groups(measured, (r) => r.k + "|" + r.b).map(([key, items]) => ({
+    key, kind: items[0].k, fam: KIND[items[0].k].fam, items,
+    start: d3.min(items, (d) => d.ms), n: items.length, median: d3.median(items, (d) => d.v)
+  })).sort((a, b) => a.start - b.start);
+  const phSlot = { key: "ph", kind: "ph", fam: "ph", items: placeholders, n: placeholders.length };
+  const allSlots = slots.concat([phSlot]);
+
+  document.getElementById("chartDesc").textContent =
+    slots.length + " kalibrasyon turunda " + measured.length + " ölçülmüş kapı hatası ve " + placeholders.length +
+    " kalibre edilmemiş kapı. Tüm değerler aşağıdaki tabloda.";
+
+  const R = 2.1, D = 2 * R + 0.8, PAD = 8, GAP = 8, PH_GAP = 30, PH_STEP = 9.5, HALF_MAX = 70;
+  const ML = 68, MR = 14, CAP_Y = 16, DAY_Y = 33, TL_Y = 46;
+  const PLOT_TOP = 140, PLOT_H = 480, PLOT_BOT = PLOT_TOP + PLOT_H, LAB_Y = PLOT_BOT + 28, H = LAB_Y + 80;
+  const BR_Y = PLOT_TOP - 24;
+  const yLog = d3.scaleLog().domain([1e-4, 1]).range([PLOT_BOT, PLOT_TOP]);
+  const yLin = d3.scaleLinear().domain([0, 1]).range([PLOT_BOT, PLOT_TOP]);
+  let mode = "log";
+  const Y = () => (mode === "log" ? yLog : yLin);
+
+  // Beeswarm on the log scale: each dot takes the x offset closest to the
+  // column centre that does not overlap a dot already placed. Offsets are
+  // kept in linear mode, so switching scale only moves dots vertically.
+  function swarm(slot) {
+    const nodes = slot.items.map((d) => ({ d, y: yLog(d.v), x: 0 })).sort((a, b) => a.y - b.y);
+    const placed = [];
+    for (const n of nodes) {
+      const near = placed.filter((p) => Math.abs(p.y - n.y) < D);
+      const cands = [0];
+      for (const p of near) {
+        const dx = Math.sqrt(D * D - (p.y - n.y) ** 2);
+        cands.push(p.x + dx, p.x - dx);
+      }
+      cands.sort((a, b) => Math.abs(a) - Math.abs(b));
+      const free = cands.find((c) => Math.abs(c) <= HALF_MAX &&
+        near.every((p) => (p.x - c) ** 2 + (p.y - n.y) ** 2 >= D * D - 1e-6));
+      if (free !== undefined) {
+        n.x = free;
+      } else {
+        // The densest cores would push a column past HALF_MAX; there the dot
+        // takes the in-bounds x with the fewest overlaps instead.
+        let best = 0, bestHits = Infinity;
+        for (let c = 0; c <= HALF_MAX; c += 0.5) {
+          for (const s of c ? [c, -c] : [0]) {
+            const hits = near.reduce((k, p) => k + ((p.x - s) ** 2 + (p.y - n.y) ** 2 < D * D ? 1 : 0), 0);
+            if (hits < bestHits) { best = s; bestHits = hits; }
+          }
+        }
+        n.x = best;
+      }
+      placed.push(n);
+    }
+    for (const n of nodes) n.d.dx = n.x;
+    slot.half = d3.max(nodes, (n) => Math.abs(n.x)) || 0;
+  }
+  for (const s of slots) {
+    swarm(s);
+    s.natW = Math.max(s.n >= 20 ? 104 : 56, 2 * s.half + 2 * R + 2 * PAD);
+  }
+  phSlot.items.slice().sort((a, b) => a.k.localeCompare(b.k) || a.q[0] - b.q[0])
+    .forEach((d, i, arr) => { d.dx = (i - (arr.length - 1) / 2) * PH_STEP; });
+  phSlot.natW = Math.max(116, (phSlot.n - 1) * PH_STEP + 24);
+
+  const maxByKind = {};
+  for (const k of ORDER) maxByKind[k] = measured.filter((r) => r.k === k).reduce((a, b) => (b.v > a.v ? b : a));
+
+  /* ---------- drawing ---------- */
+  const svg = d3.select("#chart");
+  const scroller = document.getElementById("scroller");
+  const tip = document.getElementById("tip");
+  let W = 0, delaunay = null, points = [];
+
+  function layout(avail) {
+    const natural = ML + MR + d3.sum(allSlots, (s) => s.natW) + GAP * (slots.length - 1) + PH_GAP;
+    W = Math.max(natural, Math.floor(avail));
+    const extra = (W - natural) / allSlots.length;
+    let x = ML;
+    slots.forEach((s) => { s.x0 = x; s.w = s.natW + extra; s.cx = x + s.w / 2; x += s.w + GAP; });
+    x += PH_GAP - GAP;
+    phSlot.x0 = x; phSlot.w = phSlot.natW + extra; phSlot.cx = x + phSlot.w / 2;
+  }
+
+  function draw() {
+    svg.selectAll("*").remove();
+    svg.attr("width", W).attr("height", H).attr("viewBox", "0 0 " + W + " " + H);
+
+    // real-time strip
+    const t0 = d3.min(slots, (s) => s.start) - 10 * 3600e3;
+    const t1 = DATA.meta.snap_ms + 6 * 3600e3;
+    const tx = d3.scaleUtc().domain([t0, t1]).range([ML, W - MR]);
+    const top = svg.append("g");
+    top.append("text").attr("class", "cap").attr("x", ML).attr("y", CAP_Y).text("Kalibrasyon zamanı (UTC)");
+    top.append("line").attr("class", "ax").attr("x1", ML).attr("x2", W - MR).attr("y1", TL_Y).attr("y2", TL_Y);
+    for (const day of d3.utcDay.range(new Date(t0), new Date(t1))) {
+      const x = tx(day);
+      top.append("line").attr("class", "ax").attr("x1", x).attr("x2", x).attr("y1", TL_Y - 5).attr("y2", TL_Y + 5);
+      top.append("text").attr("class", "day").attr("x", x).attr("y", DAY_Y).attr("text-anchor", "middle").text(dfDay.format(day));
+    }
+    for (const s of slots) {
+      const x1 = tx(s.start), y1 = TL_Y + 4, x2 = s.cx, y2 = BR_Y, ym = (y1 + y2) / 2;
+      top.append("path").attr("class", "fan " + s.fam).attr("d", `M${x1},${y1} C${x1},${ym} ${x2},${ym} ${x2},${y2}`);
+      top.append("path").attr("class", "fan " + s.fam)
+        .attr("d", `M${s.x0 + 6},${BR_Y + 7} V${BR_Y} H${s.x0 + s.w - 6} V${BR_Y + 7}`);
+    }
+    for (const s of slots) {
+      top.append("circle").attr("class", "tl-dot " + s.fam).attr("cx", tx(s.start)).attr("cy", TL_Y).attr("r", 4.5);
+    }
+    top.append("text").attr("class", "ph-note").attr("x", phSlot.cx).attr("y", BR_Y + 4).attr("text-anchor", "middle").text("ölçüm değil");
+    top.append("line").attr("class", "ax")
+      .attr("x1", phSlot.x0 - PH_GAP / 2).attr("x2", phSlot.x0 - PH_GAP / 2)
+      .attr("y1", BR_Y - 6).attr("y2", H - 6);
+
+    // axes and grid (rebuilt on scale change)
+    svg.append("g").attr("class", "grid");
+    svg.append("text").attr("class", "cap ytitle")
+      .attr("transform", `translate(14,${(PLOT_TOP + PLOT_BOT) / 2}) rotate(-90)`).attr("text-anchor", "middle");
+
+    // dots
+    const gDots = svg.append("g");
+    for (const s of slots) {
+      gDots.selectAll(null).data(s.items).join("circle")
+        .attr("class", "dot " + s.fam).attr("r", R)
+        .attr("cx", (d) => s.cx + d.dx);
+    }
+    // medians
+    const gMed = svg.append("g");
+    gMed.selectAll("line").data(slots.filter((s) => s.n >= 20)).join("line")
+      .attr("class", "median")
+      .attr("x1", (s) => s.x0 + PAD / 2).attr("x2", (s) => s.x0 + s.w - PAD / 2);
+
+    // placeholders: an x-mark, never colour alone
+    svg.append("g").selectAll("path").data(phSlot.items).join("path")
+      .attr("class", "xmark")
+      .attr("d", (d) => { const x = phSlot.cx + d.dx, y = yLog(1); return `M${x - 2.8},${y - 2.8}L${x + 2.8},${y + 2.8}M${x - 2.8},${y + 2.8}L${x + 2.8},${y - 2.8}`; });
+
+    // direct labels on the worst measured gate of each type
+    const gMax = svg.append("g");
+    for (const s of slots) {
+      const m = maxByKind[s.kind];
+      if (!s.items.includes(m)) continue;
+      const txt = qLabel(m) + " · " + fv(m.v);
+      const half = txt.length * 3.1;
+      const x = Math.min(Math.max(s.cx + m.dx, s.x0 + half), s.x0 + s.w - half);
+      gMax.append("text").datum(m).attr("class", "maxlab").attr("x", x).attr("text-anchor", "middle").text(txt);
+    }
+
+    // column labels
+    const gLab = svg.append("g");
+    for (const s of allSlots) {
+      const g = gLab.append("g").attr("transform", `translate(${s.cx},${LAB_Y})`).attr("text-anchor", "middle");
+      if (s.kind === "ph") {
+        g.append("text").attr("class", "s-kind").text("Kalibre edilmedi");
+        g.append("text").attr("class", "s-meta").attr("y", 16).text("değer = 1");
+        g.append("text").attr("class", "s-meta").attr("y", 31).text(s.n + " kapı");
+      } else {
+        g.append("text").attr("class", "s-kind").text(KIND[s.kind].label);
+        g.append("text").attr("class", "s-meta").attr("y", 16).text(dfDay.format(s.start));
+        g.append("text").attr("class", "s-meta").attr("y", 30).text(dfTime.format(s.start));
+        g.append("text").attr("class", "s-meta").attr("y", 45).text("n = " + s.n);
+        if (s.n >= 20) g.append("text").attr("class", "s-med").attr("y", 60).text("medyan " + fv(s.median));
+      }
+    }
+
+    svg.append("circle").attr("class", "hl").attr("r", R + 3).style("display", "none");
+    svg.append("rect").attr("class", "hit")
+      .attr("x", ML - 6).attr("y", PLOT_TOP - 12).attr("width", W - ML - MR + 12).attr("height", PLOT_H + 20)
+      .attr("fill", "transparent")
+      .on("pointermove", onMove).on("pointerdown", onMove).on("pointerleave", hideTip);
+
+    gDots.attr("data-role", "dots"); gMed.attr("data-role", "med"); gMax.attr("data-role", "max");
+    applyY(false);
+  }
+
+  function applyY(animate) {
+    const y = Y();
+    const g = svg.select("g.grid");
+    g.selectAll("*").remove();
+    const ticks = mode === "log" ? [1e-4, 1e-3, 1e-2, 1e-1, 1] : [0, 0.2, 0.4, 0.6, 0.8, 1];
+    for (const v of ticks) {
+      g.append("line").attr("class", "gl").attr("x1", ML).attr("x2", W - MR).attr("y1", y(v)).attr("y2", y(v));
+      g.append("text").attr("class", "tick-lab").attr("x", ML - 10).attr("y", y(v) + 4).attr("text-anchor", "end").text(fv(v));
+    }
+    if (mode === "log") {
+      for (let e = -4; e < 0; e++) for (let m = 2; m <= 9; m++) {
+        const v = m * Math.pow(10, e);
+        g.append("line").attr("class", "ax").attr("x1", ML - 4).attr("x2", ML).attr("y1", y(v)).attr("y2", y(v));
+      }
+    }
+    g.append("line").attr("class", "ax").attr("x1", ML).attr("x2", ML).attr("y1", PLOT_TOP).attr("y2", PLOT_BOT);
+    svg.select(".ytitle").text(mode === "log" ? "Hata olasılığı (0–1, log)" : "Hata olasılığı (0–1, doğrusal)");
+
+    const dur = animate && !reduceMotion ? 550 : 0;
+    const sel = (role, s) => svg.select(`g[data-role="${role}"]`).selectAll(s);
+    const tr = (selection) => (dur ? selection.transition().duration(dur).ease(d3.easeCubicInOut) : selection);
+    tr(sel("dots", "circle")).attr("cy", (d) => y(d.v));
+    tr(sel("med", "line")).attr("y1", (s) => y(s.median)).attr("y2", (s) => y(s.median));
+    tr(sel("max", "text")).attr("y", (d) => y(d.v) - 8);
+
+    points = [];
+    for (const s of slots) for (const d of s.items) points.push({ d, x: s.cx + d.dx, y: y(d.v), fam: s.fam });
+    for (const d of phSlot.items) points.push({ d, x: phSlot.cx + d.dx, y: y(1), fam: "ph" });
+    delaunay = d3.Delaunay.from(points, (p) => p.x, (p) => p.y);
+    hideTip();
+  }
+
+  function onMove(ev) {
+    const [mx, my] = d3.pointer(ev, svg.node());
+    const i = delaunay.find(mx, my);
+    const p = points[i];
+    if (!p || Math.hypot(p.x - mx, p.y - my) > 18) { hideTip(); return; }
+    showTip(p);
+  }
+  function hideTip() {
+    tip.hidden = true;
+    svg.select(".hl").style("display", "none");
+  }
+  function showTip(p) {
+    const d = p.d;
+    svg.select(".hl").style("display", null).attr("cx", p.x).attr("cy", p.y);
+    tip.replaceChildren();
+    const tv = el("div", "tv", d.ph ? "1" : fv(d.v));
+    if (!d.ph) tv.appendChild(el("small", null, pf.format(d.v)));
+    const tn = el("div", "tn c-" + p.fam);
+    tn.append(el("span", "lk"), el("span", null, d.n));
+    tn.lastChild.style.color = "var(--ink-2)";
+    tip.append(tv, tn, el("div", null, qLong(d) + " · " + KIND[d.k].long));
+    if (d.ph) {
+      tip.append(el("div", "warn", "Kalibre edilmedi: IBM bu kapıya ölçüm yerine 1 yazdı."));
+      tip.append(el("div", "tm", "Zaman damgası (" + dfSec.format(d.ms) + ") ölçüm anı değil."));
+    } else {
+      tip.append(el("div", "tm", "Kalibrasyon: " + dfSec.format(d.ms) + " UTC"));
+      tip.append(el("div", "tm", "Anlık görüntüden " + ago(d.ms) + " önce"));
+      tip.append(el("div", "tm", KIND[d.k].note));
+    }
+    tip.hidden = false;
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    const viewL = scroller.scrollLeft, viewR = viewL + scroller.clientWidth;
+    let left = p.x + 14;
+    if (left + tw > viewR - 8) left = p.x - 14 - tw;
+    left = Math.max(viewL + 8, left);
+    let topY = p.y - th / 2;
+    topY = Math.min(Math.max(8, topY), H - th - 8);
+    tip.style.left = left + "px";
+    tip.style.top = topY + "px";
+  }
+
+  function setMode(m) {
+    if (m === mode) return;
+    mode = m;
+    document.getElementById("bLog").setAttribute("aria-pressed", String(m === "log"));
+    document.getElementById("bLin").setAttribute("aria-pressed", String(m === "lin"));
+    applyY(true);
+  }
+  document.getElementById("bLog").addEventListener("click", () => setMode("log"));
+  document.getElementById("bLin").addEventListener("click", () => setMode("lin"));
+
+  let lastW = -1, raf = 0;
+  function refit() {
+    const w = scroller.clientWidth;
+    if (w === lastW) return;
+    lastW = w;
+    layout(w);
+    draw();
+    document.getElementById("hint").hidden = !(W > w + 1);
+  }
+  refit();
+  new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(refit); }).observe(scroller);
+
+  /* ---------- table ---------- */
+  const tbody = document.getElementById("tbody");
+  const tfilter = document.getElementById("tfilter");
+  const sortState = { key: "v", dir: -1 };
+  const kindLabel = (r) => (r.ph ? "Kalibre edilmedi" : KIND[r.k].label);
+  function sortVal(r, key) {
+    if (key === "q") return r.q[0] * 1000 + (r.q[1] ?? -1);
+    if (key === "k") return ORDER.indexOf(r.k) + (r.ph ? 10 : 0);
+    if (key === "ms") return r.ph ? Infinity : r.ms;
+    return r[key];
+  }
+  function renderTable() {
+    const f = tfilter.value;
+    const rs = rows.filter((r) => f === "all" || (f === "ph" ? r.ph : (!r.ph && r.k === f)));
+    const { key, dir } = sortState;
+    rs.sort((a, b) => {
+      const va = sortVal(a, key), vb = sortVal(b, key);
+      return (va < vb ? -1 : va > vb ? 1 : 0) * dir || a.n.localeCompare(b.n);
+    });
+    const frag = document.createDocumentFragment();
+    for (const r of rs) {
+      const tr = document.createElement("tr");
+      if (r.ph) tr.className = "phrow";
+      const c1 = el("td", "mono"); c1.append(r.ph ? xIcon() : el("span", "key " + KIND[r.k].fam), document.createTextNode(r.n));
+      tr.append(c1, el("td", null, kindLabel(r) + (r.ph ? " (" + KIND[r.k].label + ")" : "")), el("td", "mono", qLabel(r)),
+        el("td", "num", r.ph ? "1 (yer tutucu)" : fv(r.v)), el("td", "num", r.ph ? "" : pf.format(r.v)),
+        el("td", null, r.ph ? "ölçüm yok" : dfSec.format(r.ms)));
+      frag.appendChild(tr);
+    }
+    tbody.replaceChildren(frag);
+    document.getElementById("tshown").textContent = rs.length + " satır gösteriliyor";
+  }
+  document.getElementById("tcount").textContent = rows.length;
+  tfilter.addEventListener("change", renderTable);
+  document.querySelectorAll("th button[data-key]").forEach((b) => {
+    b.addEventListener("click", () => {
+      const k = b.dataset.key;
+      sortState.dir = sortState.key === k ? -sortState.dir : (k === "v" ? -1 : 1);
+      sortState.key = k;
+      document.querySelectorAll("th button[data-key]").forEach((o) => o.removeAttribute("data-dir"));
+      b.setAttribute("data-dir", sortState.dir < 0 ? "↓" : "↑");
+      renderTable();
+    });
+  });
+  renderTable();
+})();
+</script>
+<script>
+(function () {
+  "use strict";
+  const FP = {"ref": "09fcc45", "files": 1753, "checks": {"alias_value_mismatch": 0, "alias_compared": 955344, "edge_direction_value_mismatch": 0, "edge_direction_compared": 617056, "unit_unexpected": 0}, "measure_eq_readout": 1.0, "readout_mean_rule": 0.9999893089863315, "p01p10_grid": 1.0, "cadence": [{"fam": "sx", "label": "sx (1-kübit)", "series": 155, "rounds": 135, "gap_h": 24.926111, "events": 132.0, "transitions": 20052}, {"fam": "cz", "label": "cz", "series": 172, "rounds": 132, "gap_h": 25.136389, "events": 131.0, "transitions": 21920}, {"fam": "rzz", "label": "rzz", "series": 171, "rounds": 110, "gap_h": 25.303611, "events": 110.0, "transitions": 18039}, {"fam": "readout_error", "label": "okuma (= measure)", "series": 156, "rounds": 596, "gap_h": 4.450278, "events": 579.0, "transitions": 90099}, {"fam": "measure_2", "label": "measure_2", "series": 156, "rounds": 51, "gap_h": 24.6775, "events": 51.0, "transitions": 7769}, {"fam": "T1", "label": "T1", "series": 156, "rounds": 138, "gap_h": 24.770278, "events": 130.0, "transitions": 19907}, {"fam": "T2", "label": "T2", "series": 155, "rounds": 135, "gap_h": 24.728056, "events": 134.0, "transitions": 20471}, {"fam": "gamma", "label": "gamma (ADR-027)", "series": 155, "rounds": null, "gap_h": 24.770278, "events": 130.0, "transitions": 19862}, {"fam": "lambda", "label": "lambda (ADR-027)", "series": 155, "rounds": null, "gap_h": 24.7275, "events": 134.0, "transitions": 20554}], "memory": [{"fam": "sx", "label": "sx (1-kübit)", "lag1": -0.4895, "q": 0.0429, "q_note": null, "alpha": 0.1868, "ewma_h1": 0.7614, "ewma_h4": 0.7666, "ewma_h16": 0.7688, "mean_h1": 0.7641, "best_fixed_ewma_h1": 0.7548, "share2x": 0.050468781168960704}, {"fam": "cz", "label": "cz", "lag1": -0.4479, "q": 0.2326, "q_note": null, "alpha": 0.3798, "ewma_h1": 0.8497, "ewma_h4": 0.8361, "ewma_h16": 0.8482, "mean_h1": 0.8974, "best_fixed_ewma_h1": 0.8411, "share2x": 0.05615875912408759}, {"fam": "rzz", "label": "rzz", "lag1": -0.4249, "q": 0.3535, "q_note": null, "alpha": 0.4435, "ewma_h1": 0.8641, "ewma_h4": 0.8655, "ewma_h16": 0.8757, "mean_h1": 0.9448, "best_fixed_ewma_h1": 0.8543, "share2x": 0.061644215311270026}, {"fam": "readout_error", "label": "okuma (= measure)", "lag1": -0.4493, "q": 0.2257, "q_note": null, "alpha": 0.3754, "ewma_h1": 0.8192, "ewma_h4": 0.8122, "ewma_h16": 0.8285, "mean_h1": 1.1552, "best_fixed_ewma_h1": 0.7933, "share2x": 0.09258704314143332}, {"fam": "measure_2", "label": "measure_2", "lag1": -0.504, "q": null, "q_note": "yaklaşık 0", "alpha": null, "ewma_h1": 0.7497, "ewma_h4": 0.7697, "ewma_h16": 0.785, "mean_h1": 0.7475, "best_fixed_ewma_h1": 0.755, "share2x": 0.13180589522461064}, {"fam": "T1", "label": "T1", "lag1": -0.4956, "q": 0.0178, "q_note": null, "alpha": 0.1247, "ewma_h1": 0.7987, "ewma_h4": 0.797, "ewma_h16": 0.7457, "mean_h1": 0.8004, "best_fixed_ewma_h1": 0.7952, "share2x": 0.07886673029587582}, {"fam": "T2", "label": "T2", "lag1": -0.4996, "q": 0.0016, "q_note": null, "alpha": 0.0392, "ewma_h1": 0.8239, "ewma_h4": 0.8022, "ewma_h16": 0.7366, "mean_h1": 0.8252, "best_fixed_ewma_h1": 0.8025, "share2x": 0.07532607102730692}, {"fam": "gamma", "label": "gamma (ADR-027)", "lag1": -0.4922, "q": null, "q_note": null, "alpha": null, "ewma_h1": null, "ewma_h4": null, "ewma_h16": null, "mean_h1": 0.8021, "best_fixed_ewma_h1": 0.7965, "share2x": 0.0775349914409425}, {"fam": "lambda", "label": "lambda (ADR-027)", "lag1": -0.4998, "q": null, "q_note": null, "alpha": null, "ewma_h1": null, "ewma_h4": null, "ewma_h16": null, "mean_h1": 0.8122, "best_fixed_ewma_h1": 0.7838, "share2x": 0.11880899095066653}], "panel": [{"target": "sx (1-kübit)", "exo": ["okuma", "T1", "T2"], "test_events": 5823, "level_vs_persist": 0.7567, "own_vs_level": 0.9992, "exo_vs_level": 0.9992}, {"target": "okuma (= measure)", "exo": ["sx", "T1", "T2"], "test_events": 26659, "level_vs_persist": 0.8165, "own_vs_level": 0.9937, "exo_vs_level": 0.9937}, {"target": "T1", "exo": ["sx", "okuma", "T2"], "test_events": 5750, "level_vs_persist": 0.7312, "own_vs_level": 1.0132, "exo_vs_level": 1.0144}, {"target": "T2", "exo": ["sx", "okuma", "T1"], "test_events": 5947, "level_vs_persist": 0.7343, "own_vs_level": 1.0501, "exo_vs_level": 1.0505}, {"target": "cz", "exo": ["sx (iki kübit)", "okuma (iki kübit)", "T1 (iki kübit)", "T2 (iki kübit)", "rzz"], "test_events": 6266, "level_vs_persist": 0.8431, "own_vs_level": 0.9969, "exo_vs_level": 0.9995}, {"target": "rzz", "exo": ["sx (iki kübit)", "okuma (iki kübit)", "T1 (iki kübit)", "T2 (iki kübit)", "cz"], "test_events": 5205, "level_vs_persist": 0.8449, "own_vs_level": 0.9952, "exo_vs_level": 1.0008}], "coherence": [{"gate": "sx", "q10": 0.175265, "med": 0.403704, "q90": 1.022975, "within_file": 0.1581, "between": 0.3196, "within_entity": 0.0934}, {"gate": "cz", "q10": 0.134955, "med": 0.330646, "q90": 0.710563, "within_file": 0.2385, "between": 0.3483, "within_entity": 0.0476}, {"gate": "rzz", "q10": 0.145647, "med": 0.348681, "q90": 0.718394, "within_file": 0.296, "between": 0.3412, "within_entity": 0.0611}], "faults": [{"fam": "sx (1-kübit)", "ever": 3, "entries": 1, "always": ["q72"]}, {"fam": "measure", "ever": 0, "entries": 0, "always": []}, {"fam": "measure_2", "ever": 156, "entries": 156, "always": []}, {"fam": "cz", "ever": 7, "entries": 2, "always": ["q32-33", "q27-28", "q71-72", "q72-73"]}, {"fam": "rzz", "ever": 13, "entries": 13, "always": ["q32-33", "q99-115", "q71-72", "q72-73", "q95-99"]}], "device": [{"label": "gamma (ADR-027)", "events": 134, "lag1": -0.3445, "mean": 1.2066, "e1": 1.1862, "e3": 0.9912, "e5": 0.9325}, {"label": "lambda (ADR-027)", "events": 134, "lag1": -0.4824, "mean": 0.979, "e1": 0.9233, "e3": 0.8694, "e5": 0.8562}, {"label": "sx (1-kübit)", "events": 134, "lag1": -0.4025, "mean": 1.3761, "e1": 1.1372, "e3": 0.9253, "e5": 0.8852}, {"label": "cz", "events": 133, "lag1": -0.4148, "mean": 0.9713, "e1": 0.924, "e3": 0.8904, "e5": 0.8745}, {"label": "rzz", "events": 116, "lag1": -0.1085, "mean": 1.8698, "e1": 1.4594, "e3": 1.1745, "e5": 1.0486}, {"label": "okuma (= measure)", "events": 601, "lag1": -0.4248, "mean": 2.2265, "e1": 0.85, "e3": 0.8484, "e5": 0.8695}], "shot": {"sd_single_med": 0.046569, "within2": 0.6422, "max_ratio": 48.467708, "p01_over_p10_med": 2.1, "decay_spearman": 0.0584}, "neighbours": {"rounds": 132, "common": 0.0158, "coupled_n": 176, "coupled_med": -0.00755, "far_n": 11364, "far_med": -0.0078}, "ages_med": {"T1": 12.801944, "T2": 12.335833, "readout_error": 2.466111, "sx": 12.393611, "measure_2": 11.876389, "cz": 12.792222, "rzz": 15.106389}, "sx_persist_h1": 0.11056, "sx_persist_h16": 0.11778};
+  const fmt = (v, d) => new Intl.NumberFormat("tr-TR", { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
+  const int = (v) => new Intl.NumberFormat("tr-TR").format(v);
+  const pct = (v, d) => "%" + fmt(100 * v, d);
+  const NA = "yok";
+
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  // ---- inline figures -------------------------------------------------------
+  const spans = {
+    alias: int(FP.checks.alias_compared),
+    edges: int(FP.checks.edge_direction_compared),
+    sxh1: fmt(FP.sx_persist_h1, 3),
+    sxh16: fmt(FP.sx_persist_h16, 3),
+    p01p10: fmt(FP.shot.p01_over_p10_med, 1),
+    decay: fmt(FP.shot.decay_spearman, 2),
+    nbrounds: int(FP.neighbours.rounds)
+  };
+  document.querySelectorAll("[data-fp]").forEach((s) => { s.textContent = spans[s.dataset.fp]; });
+
+  // ---- tables ---------------------------------------------------------------
+  function table(id, heads, rows) {
+    const t = document.createElement("table");
+    const thead = document.createElement("thead");
+    const hr = document.createElement("tr");
+    heads.forEach((h, i) => hr.appendChild(el("th", i ? "num" : null, h)));
+    thead.appendChild(hr);
+    const tb = document.createElement("tbody");
+    for (const row of rows) {
+      const tr = document.createElement("tr");
+      row.forEach((c, i) => tr.appendChild(el("td", i ? "num" : "lab", c)));
+      tb.appendChild(tr);
+    }
+    t.append(thead, tb);
+    document.getElementById(id).replaceChildren(t);
+  }
+  const ratio = (v) => (v == null ? NA : fmt(v, 2));
+
+  table("tbCad",
+    ["Aile", "Seri", "Tur", "Olaylar arası medyan aralık (sa)", "Seri başına olay (medyan)", "Toplam geçiş"],
+    FP.cadence.map((c) => [c.label, int(c.series), c.rounds == null ? "T1/T2 turları" : int(c.rounds),
+      fmt(c.gap_h, 1), int(Math.round(c.events)), int(c.transitions)]));
+
+  table("tbMem",
+    ["Aile", "Değişimlerin lag-1 korelasyonu", "q", "Kalman EWMA ağırlığı", "EWMA / persistence, h = 1", "h = 4", "h = 16",
+      "Tüm geçmişin ortalaması / persistence, h = 1", "2 kattan büyük değişim"],
+    FP.memory.map((m) => [m.label, fmt(m.lag1, 2),
+      m.q != null ? fmt(m.q, 3) : (m.q_note || NA),
+      m.alpha != null ? fmt(m.alpha, 2) : (m.q_note ? "0,2 kullanıldı" : NA),
+      ratio(m.ewma_h1), ratio(m.ewma_h4), ratio(m.ewma_h16), ratio(m.mean_h1), pct(m.share2x, 1)]));
+
+  table("tbPanel",
+    ["Hedef", "t anındaki diğer alanlar", "Test olayı", "EWMA seviyesi / persistence", "+ kendi sapması / EWMA seviyesi",
+      "+ diğer alanlar / EWMA seviyesi"],
+    FP.panel.map((p) => [p.target, p.exo.join(", "), int(p.test_events), fmt(p.level_vs_persist, 3),
+      fmt(p.own_vs_level, 3), fmt(p.exo_vs_level, 3)]));
+  document.querySelectorAll("#tbPanel td:nth-child(2)").forEach((td) => { td.className = ""; td.style.whiteSpace = "normal"; });
+
+  table("tbCoh",
+    ["Kapı", "Sınır / ölçülen hata (%10, medyan, %90)", "Bir dosyada varlıklar arası Spearman (medyan)",
+      "Varlıkların zaman ortalaması logları arası Pearson", "Varlık içinde Pearson (zaman ortalaması çıkarılmış)"],
+    FP.coherence.map((c) => [c.gate, fmt(c.q10, 2) + "; " + fmt(c.med, 2) + "; " + fmt(c.q90, 2),
+      fmt(c.within_file, 2), fmt(c.between, 2), fmt(c.within_entity, 2)]));
+
+  table("tbFault",
+    ["Aile", "gate_error = 1 olmuş varlık", "Beş ayda yer tutucuya giriş", "Her dosyada 1 olan varlıklar"],
+    FP.faults.map((f) => [f.fam, int(f.ever),
+      int(f.entries) + (f.fam === "measure_2" ? " (cihaz çapında tek aksaklık)" : ""),
+      f.always.length ? f.always.join(", ") : "yok"]));
+  document.querySelectorAll("#tbFault td:nth-child(4)").forEach((td) => { td.className = "mono"; td.style.whiteSpace = "normal"; });
+
+  table("tbDev",
+    ["Cihaz ortalaması (persistence'a oran)", "Olay", "Lag-1", "Tüm geçmişin ortalaması", "EWMA 0,1", "EWMA 0,3", "EWMA 0,5"],
+    FP.device.map((d) => [d.label, int(d.events), fmt(d.lag1, 2), fmt(d.mean, 2), fmt(d.e1, 2), fmt(d.e3, 2), fmt(d.e5, 2)]));
+
+  // ---- small tiles ----------------------------------------------------------
+  function tiles(id, items) {
+    const box = document.getElementById(id);
+    for (const [v, l] of items) {
+      const t = el("div", "mt");
+      t.append(el("div", "v", v), el("div", "l", l));
+      box.appendChild(t);
+    }
+  }
+  tiles("mtShot", [
+    ["4.096", "atış, p01 ve p10'un her biri için"],
+    [fmt(FP.shot.sd_single_med, 3) + " dekad", "tek okuma ölçümünün medyan standart sapması"],
+    [pct(FP.shot.within2, 0), "değişimlerin 2 standart sapma içinde kalanı (salt gürültüde %95)"],
+    [fmt(FP.shot.max_ratio, 0) + " kat", "en büyük değişimin gürültü standart sapmasına oranı"]
+  ]);
+  tiles("mtNb", [
+    [pct(FP.neighbours.common, 1), "turun ortak değişiminin açıkladığı varyans"],
+    [fmt(FP.neighbours.coupled_med, 3), int(FP.neighbours.coupled_n) + " komşu çift, medyan korelasyon"],
+    [fmt(FP.neighbours.far_med, 3), int(FP.neighbours.far_n) + " uzak çift (en az 4 adım), medyan korelasyon"]
+  ]);
+
+  // ---- sources --------------------------------------------------------------
+  const SRC = [
+    ["2407.21462", "Kurniawan et al. (2024), On the use of calibration data in error-aware compilation", "geçmiş kalibrasyon verisi, en son veriden daha iyi derleme"],
+    ["2403.14587", "Toner ve Darlow (2024), An Analysis of Linear Time Series Forecasting Models", "doğrusal varyantlar = sıradan en küçük kareler; kapalı form %72'de daha iyi"],
+    ["2105.06643", "Godahewa et al. (2021), Monash Time Series Forecasting Archive", "ilişkili seriler üzerinde global modeller"],
+    ["2501.02945", "Hoo et al. (2025), From Tables to Time: TabPFN-TS", "yalnızca dış referans"],
+    ["2502.12944", "Toner et al. (2025), Zero-Shot Time Series Foundation Models on Cloud Data", "temel modeller doğrusal referanslara yenildi"],
+    ["2607.04919", "Tan Jerome ve Simon (2026), When Do Foundation Models Pay Off?", "temel modeller 30 veri setinin 15'inde kazandı"],
+    ["2402.01139", "Angelopoulos, Barber ve Bates (2024), Online Conformal Prediction with Decaying Step Sizes", "bant adayı"],
+    ["2412.19318", "Podkopaev, Xu ve Lee (2024), Adaptive Conformal Inference by Betting", "adım boyu gerektirmeyen bant adayı"],
+    ["2410.13115", "Wang ve Hyndman (2024), Online Conformal Inference for Multi-Step Forecasting", "h > 1 için bantlar"],
+    ["1210.5799", "Ghosh, Fowler ve Geller (2012), Surface Code with Decoherence", "sönümleme kanalı ve süreç sadakati"],
+    ["quant-ph/0205035", "Nielsen (2002), A Simple Formula for the Average Gate Fidelity", "süreç sadakatinden ortalama sadakat"],
+    ["2110.15883", "Abad et al. (2022), Universal Fidelity Reduction from Weak Dissipation", "birinci dereceden çok-kübitli koherens sınırı"],
+    ["2210.04780", "Thorbeck et al. (2023), TLS Dynamics Due to Background Ionizing Radiation", "saatler mertebesinde TLS dinamikleri"],
+    ["2308.02321", "Klimov et al. (2024), Optimizing Quantum Gates towards the Scale of Logical Qubits", "az ağırlıklı fiziksel hata modeli (yalnızca yapı)"],
+    ["2211.07880", "Smith et al. (2022), Fast Fingerprinting of Cloud-based NISQ Quantum Computers", "kapı ve okuma hataları frekanstan daha gürültülü"],
+    ["2602.21253", "Hassan ve Kaabouch (2026), A Physics-Informed Neuro-Fuzzy Framework for Quantum Error Attribution", "ibm_fez üzerinde ANFIS; 1,0 yer tutucusu"]
+  ];
+  const list = document.getElementById("srcList");
+  for (const [id, title, use] of SRC) {
+    const li = document.createElement("li");
+    const a = el("a", null, title);
+    a.href = "https://arxiv.org/abs/" + id; a.target = "_blank"; a.rel = "noopener";
+    li.append(a, document.createTextNode(" "), el("span", "id", "arXiv:" + id), document.createTextNode(": " + use));
+    list.appendChild(li);
+  }
+  {
+    const li = document.createElement("li");
+    li.append(document.createTextNode("Baheri et al. (2022), Quantum Noise in the Flow of Time, IOLTS "),
+      el("span", "id", "doi:10.1109/IOLTS56730.2022.9897404"), document.createTextNode(": tahmin becerisine kanıt değil (tarama ajanının okuması)"));
+    list.appendChild(li);
+  }
+
+  // ---- charts ---------------------------------------------------------------
+  const NS = "http://www.w3.org/2000/svg";
+  function svgEl(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function tipFor(box) {
+    const t = el("div", "ftip"); t.hidden = true; box.appendChild(t); return t;
+  }
+  function showTip(tip, box, x, y, lines) {
+    tip.replaceChildren();
+    lines.forEach(([cls, txt]) => tip.appendChild(el("div", cls, txt)));
+    tip.hidden = false;
+    const w = tip.offsetWidth;
+    const left = Math.min(Math.max(0, x + 12), box.clientWidth - w);
+    tip.style.left = left + "px";
+    tip.style.top = Math.max(0, y - tip.offsetHeight - 8) + "px";
+  }
+
+  function bars(id) {
+    const box = document.getElementById(id);
+    const rows = FP.cadence;
+    const W = Math.max(280, box.clientWidth), ROW = 26, ML = 132, MR = 44, MT = 6;
+    const H = MT + rows.length * ROW + 24;
+    box.querySelectorAll("svg, .ftip").forEach((n) => n.remove());
+    const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H });
+    box.appendChild(svg);
+    const tip = tipFor(box);
+    const max = 600;
+    const x = (v) => ML + (v / max) * (W - ML - MR);
+    for (const t of [0, 200, 400, 600]) {
+      svgEl("line", { class: "gl", x1: x(t), x2: x(t), y1: MT, y2: H - 20 }, svg);
+      svgEl("text", { class: "tick", x: x(t), y: H - 6, "text-anchor": "middle" }, svg).textContent = int(t);
+    }
+    rows.forEach((r, i) => {
+      const y = MT + i * ROW + ROW / 2;
+      svgEl("text", { class: "lab", x: ML - 8, y: y + 4, "text-anchor": "end" }, svg).textContent = r.label;
+      const hi = r.fam === "readout_error";
+      svgEl("rect", { class: "bar" + (hi ? "" : " mute"), x: ML, y: y - 7, width: Math.max(2, x(r.events) - ML), height: 14, rx: 3 }, svg);
+      svgEl("text", { class: "val", x: x(r.events) + 6, y: y + 4 }, svg).textContent = int(Math.round(r.events));
+      const hit = svgEl("rect", { class: "hit", x: 0, y: y - ROW / 2, width: W, height: ROW }, svg);
+      hit.addEventListener("pointermove", (ev) => {
+        const b = box.getBoundingClientRect();
+        showTip(tip, box, ev.clientX - b.left, ev.clientY - b.top, [
+          ["tv", int(Math.round(r.events)) + " olay / seri"], [null, r.label],
+          ["tm", "olaylar arası medyan " + fmt(r.gap_h, 1) + " sa, toplam " + int(r.transitions) + " geçiş"]]);
+      });
+      hit.addEventListener("pointerleave", () => { tip.hidden = true; });
+    });
+  }
+
+  function dumbbell(id, rows, opt) {
+    const box = document.getElementById(id);
+    const W = Math.max(280, box.clientWidth), ROW = opt.row || 30, ML = opt.ml || 132, MR = 18, MT = 18;
+    const H = MT + rows.length * ROW + 26;
+    box.querySelectorAll("svg, .ftip").forEach((n) => n.remove());
+    const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H });
+    box.appendChild(svg);
+    const tip = tipFor(box);
+    const [d0, d1] = opt.domain;
+    const x = (v) => ML + ((v - d0) / (d1 - d0)) * (W - ML - MR);
+    for (const t of opt.ticks) {
+      svgEl("line", { class: "gl", x1: x(t), x2: x(t), y1: MT - 4, y2: H - 22 }, svg);
+      svgEl("text", { class: "tick", x: x(t), y: H - 8, "text-anchor": "middle" }, svg).textContent = fmt(t, opt.tickDigits);
+    }
+    svgEl("line", { class: "ref", x1: x(1), x2: x(1), y1: MT - 10, y2: H - 22 }, svg);
+    svgEl("text", { class: "reflab", x: x(1) + 5, y: MT - 6 }, svg).textContent = opt.refLabel;
+    rows.forEach((r, i) => {
+      const y = MT + i * ROW + ROW / 2;
+      const ya = opt.offset ? y - 5 : y, yb = opt.offset ? y + 5 : y;
+      svgEl("text", { class: "lab", x: ML - 10, y: y + 4, "text-anchor": "end" }, svg).textContent = r.label;
+      if (!opt.offset) svgEl("line", { class: "conn", x1: x(r.a), x2: x(r.b), y1: y, y2: y }, svg);
+      svgEl("circle", { class: "ma", cx: x(r.a), cy: ya, r: 5.5 }, svg);
+      const bx = x(r.b), s = 6.5;
+      svgEl("path", { class: "mb", d: `M${bx} ${yb - s}L${bx + s} ${yb}L${bx} ${yb + s}L${bx - s} ${yb}Z` }, svg);
+      const hit = svgEl("rect", { class: "hit", x: 0, y: y - ROW / 2, width: W, height: ROW }, svg);
+      hit.addEventListener("pointermove", (ev) => {
+        const b = box.getBoundingClientRect();
+        showTip(tip, box, ev.clientX - b.left, ev.clientY - b.top, [
+          [null, r.label], ["tv", opt.aName + ": " + fmt(r.a, 3)], ["tv", opt.bName + ": " + fmt(r.b, 3)]]);
+      });
+      hit.addEventListener("pointerleave", () => { tip.hidden = true; });
+    });
+  }
+
+  function drawAll() {
+    bars("chCad");
+    dumbbell("chMem",
+      FP.memory.filter((m) => m.ewma_h1 != null).map((m) => ({ label: m.label, a: m.ewma_h1, b: m.mean_h1 })),
+      { domain: [0.65, 1.25], ticks: [0.7, 0.8, 0.9, 1.0, 1.1, 1.2], tickDigits: 1, refLabel: "persistence",
+        aName: "EWMA", bName: "Tüm geçmişin ortalaması", offset: true });
+    dumbbell("chPanel",
+      FP.panel.map((p) => ({ label: p.target, a: p.own_vs_level, b: p.exo_vs_level })),
+      { domain: [0.96, 1.08], ticks: [0.96, 0.98, 1.0, 1.02, 1.04, 1.06, 1.08], tickDigits: 2, refLabel: "yalnız EWMA seviyesi",
+        aName: "+ kendi sapması", bName: "+ diğer alanlar", offset: true });
+  }
+  drawAll();
+  let raf = 0, lastW = 0;
+  new ResizeObserver(() => {
+    const w = document.getElementById("chMem").clientWidth;
+    if (w === lastW) return;
+    lastW = w;
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(drawAll);
+  }).observe(document.getElementById("chMem"));
+})();
+
+</script>
+</body></html>

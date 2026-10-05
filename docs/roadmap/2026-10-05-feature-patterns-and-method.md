@@ -375,3 +375,18 @@ Time (IOLTS 2022), doi:10.1109/IOLTS56730.2022.9897404. Everything else rests on
 2026-10-04 survey (`docs/roadmap/2026-10-04-deep-engine-architecture-research.md`, §8).
 Project sources: the plan of 2026-10-04 with its A9 section; ADR-027 and
 `src/superconducted/training/targets.py`; `scripts/feature_patterns.py`.
+
+## 9. As of 2026-10-05, later: where the rest of this work lives
+
+Appended 2026-10-05; the text above is unchanged.
+
+- **The full literature survey** that §3 summarizes, with all 50 arXiv identifiers and 4 DOIs
+  re-resolved: `docs/roadmap/2026-10-05-gate-error-literature-survey.md`.
+- **The measured report** every archive figure here is a field of:
+  `docs/evidence/feature-patterns/2026-10-05-09fcc45.json`, with a README mapping each section
+  of this document to its fields.
+- **The Turkish report page and its PDF**, shown to Dr. Akba on 2026-10-05:
+  `docs/advisor/2026-10-05-feature-patterns-report/`.
+- **The meeting record**: the plan's as-of section "the meeting with Dr. Akba". Its direction,
+  a deeper pass over this feature data before strategic decisions, comes after this document;
+  §6's steps are the pre-meeting proposal.
