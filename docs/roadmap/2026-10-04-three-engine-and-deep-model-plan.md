@@ -360,3 +360,23 @@ whether the paper should state that reinforcement learning has no role in the en
 `src/superconducted/integration/aer_factory.py`, `src/superconducted/training/targets.py`
 and `src/superconducted/calibration/features.py` at `110cfad`; PR #98 (Dr. Akba's
 approval and direction in the decisions register).
+
+## As of 2026-10-05: a second target, gate errors (decision A9)
+
+Appended 2026-10-05; the text above is unchanged.
+
+| # | Decision | Taken |
+| --- | --- | --- |
+| A9 | **Two forecasting targets, one shared analysis.** Besides ADR-027's `(gamma, lambda)` at `t + h` (A7), the lead adds the gate errors themselves (`sx`, `cz`, `rzz`, readout, `measure_2`) at a later calibration round as a second target. One feature-pattern analysis serves both; each target then gets its own model, and the performance comparison follows. | 2026-10-05 |
+
+**Assumption recorded with A9.** The lead expressed no preference on whether the week-of-10-05
+meeting with Dr. Akba (§9) changed decisions A1 to A8, so they stand as written above until he
+records otherwise.
+
+**What follows from A9 for this plan.** The feature-pattern analysis and the method
+recommendation for both targets are in
+`docs/roadmap/2026-10-05-feature-patterns-and-method.md`, measured with
+`scripts/feature_patterns.py` over all 1,753 `ibm_fez` snapshot files at `calibration-data`
+`09fcc45` (provisional until re-run on the verification desktop). That document is orientation
+data for tasks T1, T12 and T13; it does not register them, and no `docs/numerical-claims.md`
+row is added by it.
