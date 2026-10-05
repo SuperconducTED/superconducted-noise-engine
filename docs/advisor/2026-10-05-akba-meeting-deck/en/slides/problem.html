@@ -1,0 +1,46 @@
+<section id="problem" style="background:#F6F4EF;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">THE PROBLEM AND THE DATA</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">The Problem</h2>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:32px">
+<div style="display:flex;align-items:center;gap:16px">
+<div style="flex:1;align-self:stretch;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:24px;font-weight:700;color:#14213D">1 · IBM calibration</p>
+<p style="font-size:24px;color:#3A4558">T1, T2, errors; ibm_fez, 156 qubits</p>
+</div>
+<x-connector style="width:48px;color:#5B6B82;border-width:3px"></x-connector>
+<div style="flex:1;align-self:stretch;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:24px;font-weight:700;color:#14213D">2 · Engine infers (γ, λ)</p>
+<p style="font-size:24px;color:#3A4558">amplitude + phase damping, one qubit</p>
+</div>
+<x-connector style="width:48px;color:#5B6B82;border-width:3px"></x-connector>
+<div style="flex:1;align-self:stretch;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:24px;font-weight:700;color:#14213D">3 · Aer noise model</p>
+<p style="font-size:24px;color:#3A4558">Qiskit Aer, built from (γ, λ)</p>
+</div>
+<x-connector style="width:48px;color:#5B6B82;border-width:3px"></x-connector>
+<div style="flex:1;align-self:stretch;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:24px;font-weight:700;color:#14213D">4 · Simulated circuits</p>
+<p style="font-size:24px;color:#3A4558">compared with the device</p>
+</div>
+</div>
+<div style="background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;font-weight:600;line-height:1.25;color:#14213D">Goal: predict the noise at later times, with a band that still covers it after drift</p>
+<p style="font-size:24px;line-height:1.4;color:#5B6B82">The claim: from calibration at time t, the IT2 band covers the device's noise at later times better than a parameter-matched Type-1 engine and a deep-learning baseline.</p>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<p style="font-size:24px;font-weight:700;color:#FCFBF8;background:#2B6CB0;padding:12px 24px;border-radius:999px">E1 · Type-1 fuzzy</p>
+<p style="font-size:24px;color:#3A4558">Control arm, parameter-matched</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<p style="font-size:24px;font-weight:700;color:#FCFBF8;background:#A84E0C;padding:12px 24px;border-radius:999px">E2 · Interval Type-2 fuzzy</p>
+<p style="font-size:24px;color:#3A4558">The thesis: its uncertainty band</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<p style="font-size:24px;font-weight:700;color:#FCFBF8;background:#6B3FA0;padding:12px 24px;border-radius:999px">E3 · Deep model</p>
+<p style="font-size:24px;color:#3A4558">Deep-learning arm: two designs, A and B</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">2 · ibm_fez: 156 qubits. Claim: Issue #84, File 02, approved by Dr. Akba as presented.</p>
+</section>

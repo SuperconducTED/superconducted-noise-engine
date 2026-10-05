@@ -1,0 +1,56 @@
+<section id="optiona" style="background:#E8EDF2;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">ENGINE 3: TWO DESIGNS</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">Engine 3, Option A: The Decided Plan</h2>
+<p style="position:absolute;right:128px;top:128px;width:440px;padding:8px 24px;border-radius:999px;border:2px solid #6B3FA0;background:#6B3FA0;color:#FCFBF8;font-size:24px;font-weight:700;text-align:center">Decided (A1 to A8)</p>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between">
+<!-- host 1664x512. Nodes: IN 0,0,380,232  S0 428,0,380,232  S1 856,0,380,232  S2 1284,0,380,232  S3 1284,280,380,232  S4 856,280,380,232  S5 428,280,380,232  OUT 0,280,380,232. Row 1 left to right, row 2 right to left. -->
+<div style="position:relative;width:1664px;height:512px">
+<div style="position:absolute;left:0px;top:0px;width:380px;height:232px;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#14213D">Input</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">IBM calibration at time t (optionally a history window)</p>
+</div>
+<div style="position:absolute;left:428px;top:0px;width:380px;height:232px;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#6B3FA0">0 · Inventory + scenarios</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">3 levels per feature; count which of the 3^n combinations occur</p>
+</div>
+<div style="position:absolute;left:856px;top:0px;width:380px;height:232px;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#6B3FA0">1 · Screening MLP</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">trained on all candidate features; ranks them</p>
+</div>
+<div style="position:absolute;left:1284px;top:0px;width:380px;height:232px;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#6B3FA0">2 · Permutation importance</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">error rise at t + h; single and grouped</p>
+</div>
+<div style="position:absolute;left:1284px;top:280px;width:380px;height:232px;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#6B3FA0">3 · Feature engineering F*</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">candidates: log T1, log T2; rates 1/T1, 1/T2; ratio T2/T1</p>
+</div>
+<div style="position:absolute;left:856px;top:280px;width:380px;height:232px;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#6B3FA0">4 · Forecasting MLP on F*</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">(d + 3)h + 2 ≤ 243 parameters</p>
+</div>
+<div style="position:absolute;left:428px;top:280px;width:380px;height:232px;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#6B3FA0">5 · Split-conformal band</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">prediction ± a quantile of held-out residuals</p>
+</div>
+<div style="position:absolute;left:0px;top:280px;width:380px;height:232px;background:#6B3FA0;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#FCFBF8">E3 output</p>
+<p style="font-size:24px;line-height:1.3;color:#FCFBF8">(γ, λ) at t + h, with band</p>
+</div>
+<x-connector x1="380" y1="116" x2="428" y2="116" style="color:#5B6B82;border-width:3px"></x-connector>
+<x-connector x1="808" y1="116" x2="856" y2="116" style="color:#5B6B82;border-width:3px"></x-connector>
+<x-connector x1="1236" y1="116" x2="1284" y2="116" style="color:#5B6B82;border-width:3px"></x-connector>
+<x-connector x1="1474" y1="232" x2="1474" y2="280" style="color:#5B6B82;border-width:3px"></x-connector>
+<x-connector x1="1284" y1="396" x2="1236" y2="396" style="color:#5B6B82;border-width:3px"></x-connector>
+<x-connector x1="856" y1="396" x2="808" y2="396" style="color:#5B6B82;border-width:3px"></x-connector>
+<x-connector x1="428" y1="396" x2="380" y2="396" style="color:#5B6B82;border-width:3px"></x-connector>
+</div>
+<div style="display:flex;gap:16px;align-items:center">
+<p style="font-size:24px;font-weight:700;color:#5B6B82">Alongside:</p>
+<p style="font-size:24px;color:#14213D;background:#FCFBF8;border:2px solid #D5DAE1;border-radius:999px;padding:10px 24px;white-space:nowrap">A4 · NumPy by hand, no ML framework</p>
+<p style="font-size:24px;color:#14213D;background:#FCFBF8;border:2px solid #D5DAE1;border-radius:999px;padding:10px 24px;white-space:nowrap">A3 · per snapshot, then per qubit</p>
+<p style="font-size:24px;color:#14213D;background:#FCFBF8;border:2px solid #D5DAE1;border-radius:999px;padding:10px 24px;white-space:nowrap">A8 · SCL test</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">9 · Decisions A1 to A8 (2026-10-04) · 3 levels, 3^n: A2 · (d + 3)h + 2: plan · 243: fuzzy-arm parameters, NC-046</p>
+</section>

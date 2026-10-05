@@ -1,0 +1,46 @@
+<section id="problem" style="background:#F6F4EF;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">PROBLEM VE VERİ</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">Problem</h2>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:32px">
+<div style="display:flex;align-items:center;gap:16px">
+<div style="flex:1;align-self:stretch;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:24px;font-weight:700;color:#14213D">1 · IBM kalibrasyonu</p>
+<p style="font-size:24px;color:#3A4558">T1, T2, hatalar; ibm_fez, 156 kübit</p>
+</div>
+<x-connector style="width:48px;color:#5B6B82;border-width:3px"></x-connector>
+<div style="flex:1;align-self:stretch;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:24px;font-weight:700;color:#14213D">2 · Motor (γ, λ) çıkarır</p>
+<p style="font-size:24px;color:#3A4558">genlik + faz sönümü, tek kübit</p>
+</div>
+<x-connector style="width:48px;color:#5B6B82;border-width:3px"></x-connector>
+<div style="flex:1;align-self:stretch;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:24px;font-weight:700;color:#14213D">3 · Aer gürültü modeli</p>
+<p style="font-size:24px;color:#3A4558">Qiskit Aer, (γ, λ) ile kurulur</p>
+</div>
+<x-connector style="width:48px;color:#5B6B82;border-width:3px"></x-connector>
+<div style="flex:1;align-self:stretch;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:24px;font-weight:700;color:#14213D">4 · Simüle devreler</p>
+<p style="font-size:24px;color:#3A4558">cihazla karşılaştırılır</p>
+</div>
+</div>
+<div style="background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;font-weight:600;line-height:1.25;color:#14213D">Amaç: gürültüyü ileriki zamanlar için tahmin etmek, kaymadan sonra da onu kapsayan bir bantla</p>
+<p style="font-size:24px;line-height:1.4;color:#5B6B82">İddia: t anındaki kalibrasyondan, IT2 bandı cihazın ileriki zamanlardaki gürültüsünü, parametre sayısı eşitlenmiş bir Tip-1 motordan ve bir derin öğrenme referansından daha iyi kapsar.</p>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<p style="font-size:24px;font-weight:700;color:#FCFBF8;background:#2B6CB0;padding:12px 24px;border-radius:999px">M1 · Tip-1 bulanık</p>
+<p style="font-size:24px;color:#3A4558">Kontrol kolu, parametre sayısı eşitlenmiş</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<p style="font-size:24px;font-weight:700;color:#FCFBF8;background:#A84E0C;padding:12px 24px;border-radius:999px">M2 · Aralık Tip-2 bulanık</p>
+<p style="font-size:24px;color:#3A4558">Tez: belirsizlik bandı</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<p style="font-size:24px;font-weight:700;color:#FCFBF8;background:#6B3FA0;padding:12px 24px;border-radius:999px">M3 · Derin model</p>
+<p style="font-size:24px;color:#3A4558">Derin öğrenme kolu: iki tasarım, Seçenek A ve B</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">2 · ibm_fez: 156 kübit. İddia: Issue #84, File 02, Dr. Akba tarafından sunulduğu haliyle onaylandı.</p>
+</section>
