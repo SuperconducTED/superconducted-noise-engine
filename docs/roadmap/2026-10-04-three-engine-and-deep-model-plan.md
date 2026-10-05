@@ -380,3 +380,45 @@ recommendation for both targets are in
 `09fcc45` (provisional until re-run on the verification desktop). That document is orientation
 data for tasks T1, T12 and T13; it does not register them, and no `docs/numerical-claims.md`
 row is added by it.
+
+## As of 2026-10-05, later: the meeting with Dr. Akba
+
+Appended 2026-10-05; the text above, including the A9 section, is unchanged.
+
+**Held.** The meeting planned in §9 (task T0) took place on 2026-10-05, while this PR's
+feature-pattern analysis was being produced (the lead's account). That supersedes the A9
+section's sentence that the lead had expressed no preference on whether the meeting changed
+A1 to A8: the meeting has happened, and what follows is what the lead reported of it.
+
+**What was shown.** Dr. Akba saw the findings and the report page
+(`docs/advisor/2026-10-05-feature-patterns-report/`). This records that they were shown, not
+that anything in them was approved.
+
+**The direction, in the lead's words.** Original:
+
+> şimdi burada topladığımız feature dataları üstüne derinlemesine veri ile tekrar üstüne durup
+> stratejik kararlar alacağız. Akademik anlamda bu sayede data'nın kendisini anlayarak temele
+> inecğiz ki sorunun en kökünden başlayacağız makale çalışmasında
+
+In English: the team will now return to the feature data collected here, in depth and with
+data, and then take strategic decisions; academically, understanding the data itself takes the
+work down to the fundamentals, so that the paper starts from the very root of the problem.
+
+**Open, because the account does not cover them.** None of these is inferred:
+
+- Dr. Akba's answers to §9's seven questions and to the four in the research document's §7;
+- whether A1 to A9 stand, change or are confirmed;
+- whether any 2026-10-05 recommendation (`docs/roadmap/2026-10-05-feature-patterns-and-method.md`
+  §4: the local-level bar R2, the residual learner, online conformal bands, the per-entity unit)
+  is adopted.
+
+Until the lead records them, A1 to A9 stand as written above and the recommendations stay
+recommendations.
+
+**What follows from it.**
+
+- T0's entry in the decisions register still waits on PR #98, which is open on 2026-10-05.
+- The next phase is a deeper pass over the feature data before strategic decisions. It is to be
+  planned as gated tasks (the lead's rule of 2026-10-04), not run ahead of his say-so. The
+  feature-patterns document's steps M0 to M8 are the pre-meeting proposal and have not been
+  re-ordered.
