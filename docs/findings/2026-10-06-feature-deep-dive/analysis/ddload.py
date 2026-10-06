@@ -295,7 +295,8 @@ def result_header(scope: str, script: str) -> dict[str, Any]:
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=1, sort_keys=False) + "\n", encoding="utf-8")
+    text = json.dumps(payload, indent=1, sort_keys=False) + "\n"
+    path.write_text(text, encoding="utf-8", newline="\n")
 
 
 def log10(values: FloatArray) -> FloatArray:
