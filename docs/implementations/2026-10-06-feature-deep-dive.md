@@ -160,6 +160,13 @@ ruff check . && ruff format --check .
 The identity check's `cache_npy_sha256` must equal the digest in `01-data-layer.md`; the
 profile and identity JSON must match the committed files in every value except `measured_utc`.
 
+Checked on 2026-10-06 at `a776fb6` (laptop): the pinned ruff 0.15.12 passes `ruff check .` and
+`ruff format --check .` over the whole repository; `python scripts/check_ids.py` finds no
+colliding identifier (no document here defines an ADR or NC id); no test under `tests/` reads
+`docs/findings/`, and the four tests that read anything under `docs/` (`test_check_ids`,
+`test_feature_patterns`, `test_pipeline_health`, `test_parameterization`) pass, 211 cases, in the
+scratch Python 3.12 venv with `PYTHONPATH=src`. `mypy --strict` does not cover `docs/`.
+
 ## Related docs
 
 - `docs/findings/2026-10-06-feature-deep-dive/` (this deep dive)
