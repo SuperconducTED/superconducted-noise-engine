@@ -905,7 +905,8 @@ In the table's own measure, against the same
 script's default `qft_circuit(2)` now installs `['rx', 'sx']`, 4 errors (both
 gates on qubits 0 and 1), and `prepare()` no longer warns; the old order still
 installs `[]`, 0 errors, with the warning. `qft_circuit(3)` installs the same two
-gates, 6 errors. Measured on the PR #103 review-fix commit; see
+gates, 6 errors. Measured at `dd1ad56` (2026-10-03), the PR #103 review-fix
+commit, so after the heading's date; see
 `docs/implementations/2026-10-03-pr103-review-fixes.md`.
 
 ---

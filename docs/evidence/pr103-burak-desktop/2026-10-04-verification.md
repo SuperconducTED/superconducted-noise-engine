@@ -62,3 +62,26 @@ This evidence file is added after the measured code commit. It records the
 results for `9e180675311c354541873b6ee82b5142dedce8c2` and does not claim that
 the documentation-only commit containing this record was part of the measured
 test tree.
+
+## Reviewer correction, appended 2026-10-06
+
+Appended by @mertefesensoy during the review of PR #103. Everything above is
+Burak's record as committed in `1662ddb` and is left unchanged, including its
+verdict.
+
+The Mutation Verification paragraph says the runbook's third mutation "still
+names `member.prepare(...)`" and that "its literal command made no diff". The
+runbook does not say that. Its comment,
+`https://github.com/SuperconducTED/superconducted-noise-engine/pull/103#issuecomment-5969089080`,
+has never been edited (`created_at` and `updated_at` are both
+`2026-10-03T12:19:04Z`), and line 198 of its body reads:
+
+```bash
+sed -i 's/nm.prepare(transpiled_circuit.copy())/nm.prepare(circuit.copy())/' scripts/first_ensemble_run.py
+```
+
+Applied to `scripts/first_ensemble_run.py` at `9e18067`, that command changes
+exactly one line, line 171. The mutation recorded above as "equivalent" is
+therefore the runbook's own third mutation, run as written, and the result
+stands: the mutation was killed. The runbook's Step 11 and Step 12 Python
+snippets are where `member.prepare(...)` appears (body lines 238 and 285).

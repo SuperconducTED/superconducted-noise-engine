@@ -23,6 +23,8 @@ without another transpilation.
 | `docs/numerical-claims.md` | NC-021 re-measured per Rule 6. |
 | `docs/implementations/2026-09-22-issue-74-smoke-transpilation.md` | This document. |
 | `docs/implementations/2026-10-03-pr103-review-fixes.md` | Records the 2026-10-02 review round's fixes, landed on this branch. |
+| `docs/evidence/pr103-burak-desktop/2026-10-04-verification.md` | Burak's desktop verification of `9e18067`, with a reviewer correction appended on 2026-10-06. |
+| `docs/implementations/2026-10-06-pr103-final-review-fixes.md` | Records the 2026-10-06 final-review fixes, landed on this branch before approval. |
 
 ## Implementation approach
 
