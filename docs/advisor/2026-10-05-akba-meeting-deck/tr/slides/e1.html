@@ -1,0 +1,51 @@
+<section id="e1" style="background:#E8EDF2;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">MOTORLAR NASIL ÇALIŞIYOR</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">Motor 1: Tip-1 Bulanık</h2>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:24px">
+<div style="display:flex;width:1664px">
+<div style="flex:none;width:240px;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">1 · Öznitelikler</p>
+<p style="line-height:1.25">Tüm kübitlerin ortalama T1, T2, okuma hatası</p>
+<p style="color:#5B6B82;line-height:1.25">(ortak aşama 1)</p>
+</div>
+<x-shape kind="arrow-right" style="flex:none;align-self:center;width:48px;height:24px;background:#5B6B82"></x-shape>
+<div style="flex:none;width:360px;background:#FCFBF8;border:2px solid #2B6CB0;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">2a · Üyelik fonksiyonları</p>
+<p style="line-height:1.25">Girdi başına 3, tüm kurallarda ortak: toplam 9</p>
+<p style="line-height:1.25">Gauss (2 parametre) ya da Üçgen, TanhBell (3 parametre)</p>
+</div>
+<x-shape kind="arrow-right" style="flex:none;align-self:center;width:48px;height:24px;background:#5B6B82"></x-shape>
+<div style="flex:none;width:380px;background:#FCFBF8;border:2px solid #2B6CB0;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">2b · 27 kural</p>
+<p style="line-height:1.25">3 × 3 × 3 ızgara</p>
+<p style="line-height:1.25">Ateşleme gücü f_r: kuralın 3 üyelik derecesinin çarpımı</p>
+<p style="line-height:1.25">Çıktı, birinci dereceden doğrusal:</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;line-height:1.25">y_r = A_r [x; 1]</p>
+</div>
+<x-shape kind="arrow-right" style="flex:none;align-self:center;width:48px;height:24px;background:#5B6B82"></x-shape>
+<div style="flex:none;width:540px;background:#FCFBF8;border:2px solid #2B6CB0;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">3 · Durulaştırma</p>
+<p style="line-height:1.25">Ağırlıklı ortalama:</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;line-height:1.25">y = Σ f_r y_r / Σ f_r</p>
+<p style="line-height:1.25">Tek bir (γ, λ) çifti, ardından 4-7 arası ortak aşamalar (sıkıştırma, kanal, yerleştirme, kıyaslama)</p>
+</div>
+</div>
+<div style="display:flex;gap:32px;width:1664px">
+<div style="flex:13;background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px;font-size:24px;line-height:1.25">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:30px;font-weight:600;color:#14213D">Parametreler</p>
+<p style="line-height:1.25">27 öncül + 216 kural çıktısı (27 × 2 × 4) = 243, Üçgen ya da TanhBell ile: parametre sayısı eşitlenmiş kontrol kolu</p>
+<p style="line-height:1.25">Gauss: 18 + 216 = 234</p>
+</div>
+<div style="flex:14;background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px;font-size:24px;line-height:1.25">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:30px;font-weight:600;color:#14213D">Başlangıç ve eğitim</p>
+<p style="line-height:1.25">Kural çıktıları, her kuralın merkezinde fiziksel hedefe sabitlenerek başlar (#59, PR #68).</p>
+<p style="line-height:1.25">Eğitim planlandı (#60): hibrit ANFIS; kural çıktıları için en küçük kareler, üyelik fonksiyonları için gradyan adımları.</p>
+</div>
+<div style="flex:7;background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px;font-size:24px;line-height:1.25">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:30px;font-weight:600;color:#14213D">Belirsizlik bandı</p>
+<p style="line-height:1.25">Yerleşik bant yok: açık bir soru (plan §1.1).</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">7 · Kaynak: main @ 110cfad kodu (tsk.py, defuzzification.py); NC-045, NC-046; #59, PR #68, #60; plan §1.1</p>
+</section>

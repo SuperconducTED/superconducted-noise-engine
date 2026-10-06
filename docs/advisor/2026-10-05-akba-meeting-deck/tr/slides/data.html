@@ -1,0 +1,32 @@
+<section id="data" style="background:#F6F4EF;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">PROBLEM VE VERİ</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">Elimizdeki Veri</h2>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:24px">
+<div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:32px">
+<div style="background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:120px;font-weight:600;line-height:1;color:#14213D">1.697</p>
+<p style="font-size:24px;line-height:1.35;color:#5B6B82">anlık görüntü dosyası, 13 Mayıs ile 3 Ekim 2026 arası</p>
+</div>
+<div style="background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:120px;font-weight:600;line-height:1;color:#14213D">740</p>
+<p style="font-size:24px;line-height:1.35;color:#5B6B82">birbirinden farklı cihaz durumu</p>
+</div>
+<div style="background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:120px;font-weight:600;line-height:1;color:#14213D">132</p>
+<p style="font-size:24px;line-height:1.35;color:#5B6B82">farklı T1 / T2 vektörü, yaklaşık günlük</p>
+</div>
+<div style="background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:120px;font-weight:600;line-height:1;color:#14213D">156</p>
+<p style="font-size:24px;line-height:1.35;color:#5B6B82">ibm_fez'deki kübit sayısı (176 kuplör)</p>
+</div>
+</div>
+<table style="width:1664px;font-size:24px;color:#3A4558;border:1px solid #D5DAE1">
+<tr style="background:#E8EDF2"><th style="width:30%;text-align:left;padding:10px 16px;color:#14213D">Öznitelik grubu</th><th style="width:70%;text-align:left;color:#14213D">Alanlar</th></tr>
+<tr style="background:#FCFBF8"><td>6 temel, zamanla değişen, tüm dosyalarda var</td><td>T1, T2, okuma hatası, prob_meas0_prep1, prob_meas1_prep0, sx kapı hatası</td></tr>
+<tr style="background:#FCFBF8"><td>Tekrarlar</td><td>id, rx, x, xslow hataları = sx (her kübitte); ölçüm hatası = okuma hatası</td></tr>
+<tr style="background:#FCFBF8"><td>Yeni, eksik veri kuralı gerekli</td><td>init_error 4 Ağustos 2026'dan, measure_2 13 Ağustos 2026'dan, measure_reset 3 Eylül 2026'dan beri</td></tr>
+<tr style="background:#FCFBF8"><td>Motorun bugün kullandığı</td><td>3 öznitelik: T1, T2, okuma hatası, her biri kübitler üzerinden ortalama</td></tr>
+</table>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">3 · Geçici: calibration-data ref 43607a2 (740 = states_total), T1 ve T12 görevleriyle kayda geçecek · 156 kübit, 176 kuplör: ibm_fez</p>
+</section>

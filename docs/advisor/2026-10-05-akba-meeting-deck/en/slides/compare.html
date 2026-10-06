@@ -1,0 +1,17 @@
+<section id="compare" style="background:#F6F4EF;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">ENGINE 3: TWO DESIGNS</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">Option A and Option B Side by Side</h2>
+<table style="width:1664px;font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#3A4558">
+<tr style="background:#E8EDF2"><th style="width:26%;padding:10px 16px;text-align:left;color:#5B6B82">Aspect</th><th style="width:37%;text-align:left;color:#6B3FA0">Option A</th><th style="width:37%;text-align:left;color:#6B3FA0">Option B</th></tr>
+<tr><td style="color:#14213D">Row unit</td><td>Per snapshot first, then per qubit</td><td>T1/T2 re-measurement epochs</td></tr>
+<tr><td style="color:#14213D">Forecaster</td><td>Screening MLP, then MLP on F*</td><td>Grey-box residual on log decay rates z</td></tr>
+<tr><td style="color:#14213D">T2 ≤ 2·T1 guaranteed</td><td>Not among A1 to A8</td><td>Built in: 1/T2 = 1/(2·T1) + softplus(u)</td></tr>
+<tr><td style="color:#14213D">Band</td><td>Split conformal (A5)</td><td>ACI, asymmetric; split conformal as control</td></tr>
+<tr><td style="color:#14213D">Fit to about 131 transitions</td><td>MLP with up to 243 parameters</td><td>Linear first, about 26 parameters</td></tr>
+<tr><td style="color:#14213D">Zero-width band trap</td><td>Can show about 92% coverage at zero width</td><td>Coverage scored on change events</td></tr>
+<tr><td style="color:#14213D">Feature importance target</td><td>Error rise at t + h, single and grouped</td><td>Not specified in the recommendation</td></tr>
+<tr><td style="color:#14213D">Built in NumPy</td><td>Yes, by hand (A4)</td><td>Not specified in the recommendation</td></tr>
+<tr style="background:#FCFBF8"><td style="color:#14213D">Status</td><td style="color:#6B3FA0">Decided (A1 to A8)</td><td style="color:#6B3FA0">Recommended, not adopted</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">11 · A1 to A8 and research doc, 2026-10-04 · 131, about 92%: ref 43607a2, provisional · 243: NC-046 · 26: research doc</p>
+</section>
