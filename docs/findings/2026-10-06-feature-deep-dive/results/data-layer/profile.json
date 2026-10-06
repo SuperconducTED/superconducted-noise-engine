@@ -1,0 +1,4401 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "data-layer",
+ "script": "analysis/data_layer/profile_cache.py",
+ "measured_utc": "2026-10-06T06:54:01Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "files": {
+  "n_files": 1760,
+  "first": "20260513T121322000000Z.json",
+  "last": "20261006T025742000000Z.json",
+  "has_configuration": 1317,
+  "no_configuration": 443,
+  "timestamp_minus_last_update_h_live_q": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "timestamp_minus_last_update_h_historical_q": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "backend_versions": {
+   "1.3.37": 0
+  },
+  "schema_versions": {
+   "1.0.0": 1760
+  },
+  "top_level_keys": {
+   "backend": 1760,
+   "configuration": 1760,
+   "properties": 1760,
+   "schema_version": 1760,
+   "target": 1760,
+   "timestamp": 1760
+  },
+  "target_sets": [
+   {
+    "id": 0,
+    "n_ops": 1444,
+    "files": 702,
+    "missing_from_union": [
+     [
+      "measure_2",
+      [
+       0
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       1
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       2
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       3
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       4
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       5
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       6
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       7
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       8
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       9
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       10
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       11
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       12
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       13
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       14
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       15
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       16
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       17
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       18
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       19
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       20
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       21
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       22
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       23
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       24
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       25
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       26
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       27
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       28
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       29
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       30
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       31
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       32
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       33
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       34
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       35
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       36
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       37
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       38
+      ]
+     ],
+     [
+      "measure_2",
+      [
+       39
+      ]
+     ]
+    ],
+    "missing_count": 780
+   },
+   {
+    "id": 1,
+    "n_ops": 1600,
+    "files": 241,
+    "missing_from_union": [
+     [
+      "measure_reset",
+      [
+       0
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       1
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       2
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       3
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       4
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       5
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       6
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       7
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       8
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       9
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       10
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       11
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       12
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       13
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       14
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       15
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       16
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       17
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       18
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       19
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       20
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       21
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       22
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       23
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       24
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       25
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       26
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       27
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       28
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       29
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       30
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       31
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       32
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       33
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       34
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       35
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       36
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       37
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       38
+      ]
+     ],
+     [
+      "measure_reset",
+      [
+       39
+      ]
+     ]
+    ],
+    "missing_count": 624
+   },
+   {
+    "id": 2,
+    "n_ops": 2068,
+    "files": 53,
+    "missing_from_union": [
+     [
+      "xslow",
+      [
+       0
+      ]
+     ],
+     [
+      "xslow",
+      [
+       1
+      ]
+     ],
+     [
+      "xslow",
+      [
+       2
+      ]
+     ],
+     [
+      "xslow",
+      [
+       3
+      ]
+     ],
+     [
+      "xslow",
+      [
+       4
+      ]
+     ],
+     [
+      "xslow",
+      [
+       5
+      ]
+     ],
+     [
+      "xslow",
+      [
+       6
+      ]
+     ],
+     [
+      "xslow",
+      [
+       7
+      ]
+     ],
+     [
+      "xslow",
+      [
+       8
+      ]
+     ],
+     [
+      "xslow",
+      [
+       9
+      ]
+     ],
+     [
+      "xslow",
+      [
+       10
+      ]
+     ],
+     [
+      "xslow",
+      [
+       11
+      ]
+     ],
+     [
+      "xslow",
+      [
+       12
+      ]
+     ],
+     [
+      "xslow",
+      [
+       13
+      ]
+     ],
+     [
+      "xslow",
+      [
+       14
+      ]
+     ],
+     [
+      "xslow",
+      [
+       15
+      ]
+     ],
+     [
+      "xslow",
+      [
+       16
+      ]
+     ],
+     [
+      "xslow",
+      [
+       17
+      ]
+     ],
+     [
+      "xslow",
+      [
+       18
+      ]
+     ],
+     [
+      "xslow",
+      [
+       19
+      ]
+     ],
+     [
+      "xslow",
+      [
+       20
+      ]
+     ],
+     [
+      "xslow",
+      [
+       21
+      ]
+     ],
+     [
+      "xslow",
+      [
+       22
+      ]
+     ],
+     [
+      "xslow",
+      [
+       23
+      ]
+     ],
+     [
+      "xslow",
+      [
+       24
+      ]
+     ],
+     [
+      "xslow",
+      [
+       25
+      ]
+     ],
+     [
+      "xslow",
+      [
+       26
+      ]
+     ],
+     [
+      "xslow",
+      [
+       27
+      ]
+     ],
+     [
+      "xslow",
+      [
+       28
+      ]
+     ],
+     [
+      "xslow",
+      [
+       29
+      ]
+     ],
+     [
+      "xslow",
+      [
+       30
+      ]
+     ],
+     [
+      "xslow",
+      [
+       31
+      ]
+     ],
+     [
+      "xslow",
+      [
+       32
+      ]
+     ],
+     [
+      "xslow",
+      [
+       33
+      ]
+     ],
+     [
+      "xslow",
+      [
+       34
+      ]
+     ],
+     [
+      "xslow",
+      [
+       35
+      ]
+     ],
+     [
+      "xslow",
+      [
+       36
+      ]
+     ],
+     [
+      "xslow",
+      [
+       37
+      ]
+     ],
+     [
+      "xslow",
+      [
+       38
+      ]
+     ],
+     [
+      "xslow",
+      [
+       39
+      ]
+     ]
+    ],
+    "missing_count": 156
+   },
+   {
+    "id": 3,
+    "n_ops": 2224,
+    "files": 764,
+    "missing_from_union": [],
+    "missing_count": 0
+   }
+  ],
+  "target_union_size": 2224,
+  "distinct_states": 760,
+  "files_without_state_row": 1,
+  "files_per_state_q": [
+   1.0,
+   1.0,
+   1.0,
+   2.0,
+   5.0,
+   10.41,
+   14.0
+  ],
+  "state_index_rows": 1760,
+  "ledger_rows": 1981,
+  "ledger_decisions": {
+   "new": 844,
+   "collision": 10,
+   "duplicate": 490,
+   "duplicate-partial": 637
+  },
+  "collisions": [
+   "collisions/2026-09/ibm_fez/20260928T014620000000Z.30bd46705e67a215.json",
+   "collisions/2026-10/ibm_fez/20261003T213246000000Z.e1287940815be1b1.json"
+  ],
+  "lf_names": 97,
+  "lf_chain_lengths": {
+   "4": 37,
+   "5": 36,
+   "6": 38,
+   "7": 39,
+   "8": 34,
+   "9": 38,
+   "10": 36,
+   "11": 35,
+   "12": 38,
+   "13": 44,
+   "14": 53,
+   "15": 59,
+   "16": 57,
+   "17": 59,
+   "18": 62,
+   "19": 62,
+   "20": 65,
+   "21": 66,
+   "22": 61,
+   "23": 61,
+   "24": 63,
+   "25": 66,
+   "26": 63,
+   "27": 64,
+   "28": 69,
+   "29": 72,
+   "30": 71,
+   "31": 69,
+   "32": 67,
+   "33": 67,
+   "34": 68,
+   "35": 69,
+   "36": 71,
+   "37": 72,
+   "38": 71,
+   "39": 75,
+   "40": 73,
+   "41": 70,
+   "42": 71,
+   "43": 73,
+   "44": 72,
+   "45": 72,
+   "46": 71,
+   "47": 73,
+   "48": 74,
+   "49": 75,
+   "50": 73,
+   "51": 75,
+   "52": 75,
+   "53": 76,
+   "54": 74,
+   "55": 73,
+   "56": 71,
+   "57": 72,
+   "58": 71,
+   "59": 71,
+   "60": 73,
+   "61": 72,
+   "62": 76,
+   "63": 77,
+   "64": 75,
+   "65": 74,
+   "66": 75,
+   "67": 74,
+   "68": 76,
+   "69": 76,
+   "70": 74,
+   "71": 72,
+   "72": 75,
+   "73": 75,
+   "74": 76,
+   "75": 74,
+   "76": 74,
+   "77": 74,
+   "78": 78,
+   "79": 79,
+   "80": 76,
+   "81": 76,
+   "82": 77,
+   "83": 75,
+   "84": 75,
+   "85": 74,
+   "86": 75,
+   "87": 75,
+   "88": 77,
+   "89": 73,
+   "90": 73,
+   "91": 73,
+   "92": 68,
+   "93": 72,
+   "94": 65,
+   "95": 65,
+   "96": 66,
+   "97": 67,
+   "98": 66,
+   "99": 66,
+   "100": 59
+  },
+  "lf_distinct_chains": 6524,
+  "lf_chains_per_name_q": [
+   34.0,
+   34.96,
+   49.4,
+   72.0,
+   76.0,
+   78.04,
+   79.0
+  ],
+  "couplers": 176,
+  "directed_edges": 352,
+  "coupling_map_directed": 352,
+  "checks": {
+   "duplicate_record_in_file": 0,
+   "pair_name_ambiguous": 0,
+   "pair_name_unparsed": 0,
+   "pair_both_orientations": 0,
+   "qubit_record_unexpected_keys": 0,
+   "non_numeric_value": 0
+  },
+  "extract_seconds": 72.1
+ },
+ "config": {
+  "allow_q_object": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 4,
+     "value": true
+    }
+   ]
+  },
+  "backend_name": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 9,
+     "value": "ibm_fez"
+    }
+   ]
+  },
+  "backend_version": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 8,
+     "value": "1.3.37"
+    }
+   ]
+  },
+  "basis_gates": {
+   "distinct": 2,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20260910T155537000000Z.json",
+     "files": 967,
+     "chars": 29,
+     "value": [
+      "cz",
+      "id",
+      "rz",
+      "sx",
+      "x"
+     ]
+    },
+    {
+     "id": 1,
+     "first": "20260910T192051000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 350,
+     "chars": 38,
+     "value": [
+      "cz",
+      "id",
+      "rz",
+      "sx",
+      "x",
+      "xslow"
+     ]
+    }
+   ]
+  },
+  "clops": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 4,
+     "value": null
+    }
+   ]
+  },
+  "clops_h": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 6,
+     "value": 320000
+    }
+   ]
+  },
+  "clops_v": {
+   "distinct": 2,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20260624T151002000000Z.json",
+     "files": 333,
+     "chars": 6,
+     "value": "None"
+    },
+    {
+     "id": 1,
+     "first": "20260624T163639000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 984,
+     "chars": 4,
+     "value": null
+    }
+   ]
+  },
+  "conditional": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 5,
+     "value": false
+    }
+   ]
+  },
+  "coords": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 1378,
+     "value": "(long; see meta.json)"
+    }
+   ]
+  },
+  "coupling_map": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 3730,
+     "value": "(long; see meta.json)"
+    }
+   ]
+  },
+  "credits_required": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 4,
+     "value": true
+    }
+   ]
+  },
+  "default_rep_delay": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 5,
+     "value": 250.0
+    }
+   ]
+  },
+  "description": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 18,
+     "value": "156 qubit device"
+    }
+   ]
+  },
+  "discriminators": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 4,
+     "value": null
+    }
+   ]
+  },
+  "dt": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 3,
+     "value": 4.0
+    }
+   ]
+  },
+  "dtm": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 3,
+     "value": 4.0
+    }
+   ]
+  },
+  "dynamic_reprate_enabled": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 4,
+     "value": true
+    }
+   ]
+  },
+  "gates": {
+   "distinct": 4,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20260806T122947000000Z.json",
+     "files": 692,
+     "chars": 8276,
+     "value": "(long; see meta.json)"
+    },
+    {
+     "id": 1,
+     "first": "20260807T032159000000Z.json",
+     "last": "20260901T125138000000Z.json",
+     "files": 222,
+     "chars": 8335,
+     "value": "(long; see meta.json)"
+    },
+    {
+     "id": 2,
+     "first": "20260902T045624000000Z.json",
+     "last": "20260910T155537000000Z.json",
+     "files": 53,
+     "chars": 8520,
+     "value": "(long; see meta.json)"
+    },
+    {
+     "id": 3,
+     "first": "20260910T192051000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 350,
+     "chars": 9589,
+     "value": "(long; see meta.json)"
+    }
+   ]
+  },
+  "instruction_signatures": {
+   "distinct": 4,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20260806T122947000000Z.json",
+     "files": 692,
+     "chars": 2,
+     "value": []
+    },
+    {
+     "id": 1,
+     "first": "20260807T032159000000Z.json",
+     "last": "20260901T125138000000Z.json",
+     "files": 222,
+     "chars": 192,
+     "value": [
+      {
+       "description": "A shorter width measurement pulse, intended for use in mid-circuit readout.",
+       "name": "measure_2",
+       "num_clbits": 1,
+       "num_qubits": 1,
+       "parameters": [],
+       "return_type": "Bool"
+      }
+     ]
+    },
+    {
+     "id": 2,
+     "first": "20260902T045624000000Z.json",
+     "last": "20260903T160719000000Z.json",
+     "files": 10,
+     "chars": 727,
+     "value": "(long; see meta.json)"
+    },
+    {
+     "id": 3,
+     "first": "20260903T194106000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 393,
+     "chars": 797,
+     "value": "(long; see meta.json)"
+    }
+   ]
+  },
+  "local": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 5,
+     "value": false
+    }
+   ]
+  },
+  "max_experiments": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 3,
+     "value": 300
+    }
+   ]
+  },
+  "max_shots": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 6,
+     "value": 100000
+    }
+   ]
+  },
+  "meas_kernels": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 4,
+     "value": null
+    }
+   ]
+  },
+  "meas_levels": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 4,
+     "value": null
+    }
+   ]
+  },
+  "meas_map": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 672,
+     "value": "(long; see meta.json)"
+    }
+   ]
+  },
+  "measure_esp_enabled": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 5,
+     "value": false
+    }
+   ]
+  },
+  "memory": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 4,
+     "value": true
+    }
+   ]
+  },
+  "multi_meas_enabled": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 4,
+     "value": true
+    }
+   ]
+  },
+  "n_qubits": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 3,
+     "value": 156
+    }
+   ]
+  },
+  "n_registers": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 1,
+     "value": 1
+    }
+   ]
+  },
+  "online_date": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 27,
+     "value": "2024-05-14T04:00:00+00:00"
+    }
+   ]
+  },
+  "open_pulse": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 5,
+     "value": false
+    }
+   ]
+  },
+  "parallel_compilation": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 4,
+     "value": true
+    }
+   ]
+  },
+  "processor_type": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 36,
+     "value": {
+      "family": "Heron",
+      "revision": "2"
+     }
+    }
+   ]
+  },
+  "quantum_volume": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 4,
+     "value": null
+    }
+   ]
+  },
+  "rep_delay_range": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 13,
+     "value": [
+      0.0,
+      2000.0
+     ]
+    }
+   ]
+  },
+  "sample_name": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 28,
+     "value": "family: Heron, revision: 2"
+    }
+   ]
+  },
+  "simulator": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 5,
+     "value": false
+    }
+   ]
+  },
+  "supported_features": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 51,
+     "value": [
+      "qobj",
+      "qasm3",
+      "dynamic_circuits",
+      "parameters"
+     ]
+    }
+   ]
+  },
+  "supported_instructions": {
+   "distinct": 4,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20260806T122947000000Z.json",
+     "files": 692,
+     "chars": 78,
+     "value": [
+      "cz",
+      "id",
+      "delay",
+      "measure",
+      "reset",
+      "rz",
+      "sx",
+      "x",
+      "if_else",
+      "store"
+     ]
+    },
+    {
+     "id": 1,
+     "first": "20260807T032159000000Z.json",
+     "last": "20260901T125138000000Z.json",
+     "files": 222,
+     "chars": 91,
+     "value": [
+      "cz",
+      "id",
+      "delay",
+      "measure",
+      "reset",
+      "rz",
+      "sx",
+      "x",
+      "if_else",
+      "store",
+      "measure_2"
+     ]
+    },
+    {
+     "id": 2,
+     "first": "20260902T045624000000Z.json",
+     "last": "20260910T155537000000Z.json",
+     "files": 53,
+     "chars": 138,
+     "value": [
+      "cz",
+      "id",
+      "delay",
+      "measure",
+      "measure_reset",
+      "measure_2",
+      "measure_reset_2",
+      "reset",
+      "reset_2",
+      "rz",
+      "sx",
+      "x",
+      "if_else",
+      "store"
+     ]
+    },
+    {
+     "id": 3,
+     "first": "20260910T192051000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 350,
+     "chars": 147,
+     "value": [
+      "cz",
+      "id",
+      "delay",
+      "measure",
+      "measure_reset",
+      "measure_2",
+      "measure_reset_2",
+      "reset",
+      "reset_2",
+      "rz",
+      "sx",
+      "x",
+      "if_else",
+      "store",
+      "xslow"
+     ]
+    }
+   ]
+  },
+  "timing_constraints": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 81,
+     "value": {
+      "acquire_alignment": 1,
+      "granularity": 1,
+      "min_length": 2,
+      "pulse_alignment": 1
+     }
+    }
+   ]
+  },
+  "url": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 1317,
+     "chars": 6,
+     "value": "None"
+    }
+   ]
+  },
+  "mcps": {
+   "distinct": 1,
+   "values": [
+    {
+     "id": 0,
+     "first": "20260716T030013000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 821,
+     "chars": 4,
+     "value": 3864
+    }
+   ]
+  }
+ },
+ "fields": {
+  "g1.id.gate_error": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "": 274560
+   },
+   "distinct_values": 20208,
+   "quantiles_0_1_10_50_90_99_100": [
+    7.20525e-05,
+    0.000143188,
+    0.000197468,
+    0.000312238,
+    0.000662683,
+    0.0070489,
+    1.0
+   ],
+   "n_value_ge_1": 1975,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.005547,
+   "date_after_file_date": 1975,
+   "entity_age_h_median": 12.3,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    68.0,
+    100.68,
+    128.0,
+    132.0,
+    133.0,
+    133.0,
+    133.0
+   ],
+   "event_gap_h_q": [
+    6.31222,
+    7.115,
+    19.9508,
+    24.9261,
+    33.2133,
+    76.4533,
+    857.044
+   ],
+   "placeholder_records": 1975,
+   "entities_ever_placeholder": 3,
+   "entities_always_placeholder": [
+    72
+   ]
+  },
+  "g1.id.gate_length": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 274560
+   },
+   "distinct_values": 1,
+   "quantiles_0_1_10_50_90_99_100": [
+    24.0,
+    24.0,
+    24.0,
+    24.0,
+    24.0,
+    24.0,
+    24.0
+   ],
+   "n_value_ge_1": 274560,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.005547,
+   "date_after_file_date": 1975,
+   "entity_age_h_median": 12.3,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_gap_h_q": null
+  },
+  "g1.measure.gate_error": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "": 274560
+   },
+   "distinct_values": 2203,
+   "quantiles_0_1_10_50_90_99_100": [
+    0.000976562,
+    0.00292969,
+    0.00463867,
+    0.0100098,
+    0.0461426,
+    0.237671,
+    0.525879
+   ],
+   "n_value_ge_1": 0,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.003402,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 2.466,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    566.0,
+    567.0,
+    574.0,
+    580.0,
+    586.0,
+    588.45,
+    589.0
+   ],
+   "event_gap_h_q": [
+    0.140556,
+    1.00722,
+    2.55056,
+    4.46639,
+    10.5792,
+    33.6322,
+    121.208
+   ],
+   "placeholder_records": 0,
+   "entities_ever_placeholder": 0,
+   "entities_always_placeholder": []
+  },
+  "g1.measure.gate_length": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 274560
+   },
+   "distinct_values": 3,
+   "quantiles_0_1_10_50_90_99_100": [
+    1560.0,
+    1560.0,
+    1560.0,
+    1660.0,
+    1700.0,
+    1700.0,
+    1700.0
+   ],
+   "n_value_ge_1": 274560,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 1.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 0.0,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "assembly",
+   "events_per_entity_q": [
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    3.0
+   ],
+   "event_gap_h_q": [
+    630.718,
+    630.718,
+    630.718,
+    940.466,
+    1250.21,
+    1250.21,
+    1250.21
+   ],
+   "value_changes_per_entity_q": [
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0
+   ]
+  },
+  "g1.measure.threshold": {
+   "width": 156,
+   "records": 239148,
+   "files_with_any": 1533,
+   "first_file": "20260608T185628000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1533,
+   "entities_never_present": 0,
+   "units": {
+    "": 239148
+   },
+   "distinct_values": 50856,
+   "quantiles_0_1_10_50_90_99_100": [
+    -143155000.0,
+    -80532200.0,
+    -35031100.0,
+    -8896830.0,
+    2333600.0,
+    24807200.0,
+    89082200.0
+   ],
+   "n_value_ge_1": 36922,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 202226,
+   "date_equals_file_date_share": 1.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 0.0,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "assembly",
+   "events_per_entity_q": [
+    328.0,
+    328.0,
+    328.0,
+    328.0,
+    328.0,
+    328.0,
+    328.0
+   ],
+   "event_gap_h_q": [
+    0.649722,
+    1.15889,
+    2.45944,
+    4.795,
+    18.2942,
+    64.6086,
+    150.928
+   ],
+   "value_changes_per_entity_q": [
+    327.0,
+    327.0,
+    327.0,
+    327.0,
+    327.0,
+    327.0,
+    327.0
+   ]
+  },
+  "g1.measure_2.gate_error": {
+   "width": 156,
+   "records": 165048,
+   "files_with_any": 1058,
+   "first_file": "20260807T032159000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1058,
+   "entities_never_present": 0,
+   "units": {
+    "": 165048
+   },
+   "distinct_values": 746,
+   "quantiles_0_1_10_50_90_99_100": [
+    0.000976562,
+    0.00219727,
+    0.00439453,
+    0.013916,
+    0.083252,
+    0.410156,
+    1.0
+   ],
+   "n_value_ge_1": 312,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.003956,
+   "date_after_file_date": 312,
+   "entity_age_h_median": 11.93,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    45.0,
+    46.55,
+    49.0,
+    51.0,
+    52.0,
+    52.0,
+    52.0
+   ],
+   "event_gap_h_q": [
+    8.21306,
+    8.21306,
+    21.0572,
+    24.6775,
+    30.8244,
+    53.8869,
+    106.277
+   ],
+   "placeholder_records": 312,
+   "entities_ever_placeholder": 156,
+   "entities_always_placeholder": []
+  },
+  "g1.measure_2.gate_length": {
+   "width": 156,
+   "records": 165048,
+   "files_with_any": 1058,
+   "first_file": "20260807T032159000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1058,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 165048
+   },
+   "distinct_values": 1,
+   "quantiles_0_1_10_50_90_99_100": [
+    1340.0,
+    1340.0,
+    1340.0,
+    1340.0,
+    1340.0,
+    1340.0,
+    1340.0
+   ],
+   "n_value_ge_1": 165048,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 1.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 0.0,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "assembly",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_gap_h_q": null,
+   "value_changes_per_entity_q": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "g1.measure_2.threshold": {
+   "width": 156,
+   "records": 165048,
+   "files_with_any": 1058,
+   "first_file": "20260807T032159000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1058,
+   "entities_never_present": 0,
+   "units": {
+    "": 165048
+   },
+   "distinct_values": 18876,
+   "quantiles_0_1_10_50_90_99_100": [
+    -136233000.0,
+    -50213900.0,
+    -21153800.0,
+    -4027240.0,
+    2139730.0,
+    13942000.0,
+    73626500.0
+   ],
+   "n_value_ge_1": 31466,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 133582,
+   "date_equals_file_date_share": 1.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 0.0,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "assembly",
+   "events_per_entity_q": [
+    125.0,
+    125.0,
+    125.0,
+    125.0,
+    125.0,
+    125.0,
+    125.0
+   ],
+   "event_gap_h_q": [
+    0.5925,
+    0.643889,
+    1.2225,
+    4.93917,
+    16.1753,
+    57.2181,
+    570.568
+   ],
+   "value_changes_per_entity_q": [
+    124.0,
+    124.0,
+    124.0,
+    124.0,
+    124.0,
+    124.0,
+    124.0
+   ]
+  },
+  "g1.measure_reset.gate_length": {
+   "width": 156,
+   "records": 127452,
+   "files_with_any": 817,
+   "first_file": "20260902T045624000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 817,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 127452
+   },
+   "distinct_values": 1,
+   "quantiles_0_1_10_50_90_99_100": [
+    1684.0,
+    1684.0,
+    1684.0,
+    1684.0,
+    1684.0,
+    1684.0,
+    1684.0
+   ],
+   "n_value_ge_1": 127452,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 1.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 0.0,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "assembly",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_gap_h_q": null,
+   "value_changes_per_entity_q": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "g1.measure_reset.threshold": {
+   "width": 156,
+   "records": 127452,
+   "files_with_any": 817,
+   "first_file": "20260902T045624000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 817,
+   "entities_never_present": 0,
+   "units": {
+    "": 127452
+   },
+   "distinct_values": 16848,
+   "quantiles_0_1_10_50_90_99_100": [
+    -141606000.0,
+    -77070100.0,
+    -34852600.0,
+    -8828990.0,
+    2737910.0,
+    26774800.0,
+    89082200.0
+   ],
+   "n_value_ge_1": 20397,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 107055,
+   "date_equals_file_date_share": 1.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 0.0,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "assembly",
+   "events_per_entity_q": [
+    108.0,
+    108.0,
+    108.0,
+    108.0,
+    108.0,
+    108.0,
+    108.0
+   ],
+   "event_gap_h_q": [
+    0.649722,
+    0.879167,
+    2.0225,
+    4.98694,
+    18.2942,
+    27.9067,
+    57.2181
+   ],
+   "value_changes_per_entity_q": [
+    107.0,
+    107.0,
+    107.0,
+    107.0,
+    107.0,
+    107.0,
+    107.0
+   ]
+  },
+  "g1.measure_reset_2.gate_length": {
+   "width": 156,
+   "records": 127452,
+   "files_with_any": 817,
+   "first_file": "20260902T045624000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 817,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 127452
+   },
+   "distinct_values": 1,
+   "quantiles_0_1_10_50_90_99_100": [
+    1364.0,
+    1364.0,
+    1364.0,
+    1364.0,
+    1364.0,
+    1364.0,
+    1364.0
+   ],
+   "n_value_ge_1": 127452,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 1.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 0.0,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "assembly",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_gap_h_q": null,
+   "value_changes_per_entity_q": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "g1.measure_reset_2.threshold": {
+   "width": 156,
+   "records": 127452,
+   "files_with_any": 817,
+   "first_file": "20260902T045624000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 817,
+   "entities_never_present": 0,
+   "units": {
+    "": 127452
+   },
+   "distinct_values": 17628,
+   "quantiles_0_1_10_50_90_99_100": [
+    -136233000.0,
+    -52887300.0,
+    -21060700.0,
+    -4118230.0,
+    2331300.0,
+    15942900.0,
+    73626500.0
+   ],
+   "n_value_ge_1": 25158,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 102294,
+   "date_equals_file_date_share": 1.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 0.0,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "assembly",
+   "events_per_entity_q": [
+    117.0,
+    117.0,
+    117.0,
+    117.0,
+    117.0,
+    117.0,
+    117.0
+   ],
+   "event_gap_h_q": [
+    0.643889,
+    0.649722,
+    1.2225,
+    4.87625,
+    15.9897,
+    27.9067,
+    57.2181
+   ],
+   "value_changes_per_entity_q": [
+    116.0,
+    116.0,
+    116.0,
+    116.0,
+    116.0,
+    116.0,
+    116.0
+   ]
+  },
+  "g1.reset.gate_length": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 274560
+   },
+   "distinct_values": 3,
+   "quantiles_0_1_10_50_90_99_100": [
+    1584.0,
+    1584.0,
+    1584.0,
+    1684.0,
+    1724.0,
+    1724.0,
+    1724.0
+   ],
+   "n_value_ge_1": 274560,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 1.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 0.0,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "assembly",
+   "events_per_entity_q": [
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    3.0
+   ],
+   "event_gap_h_q": [
+    630.718,
+    630.718,
+    630.718,
+    940.466,
+    1250.21,
+    1250.21,
+    1250.21
+   ],
+   "value_changes_per_entity_q": [
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0
+   ]
+  },
+  "g1.reset_2.gate_length": {
+   "width": 156,
+   "records": 127452,
+   "files_with_any": 817,
+   "first_file": "20260902T045624000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 817,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 127452
+   },
+   "distinct_values": 1,
+   "quantiles_0_1_10_50_90_99_100": [
+    1364.0,
+    1364.0,
+    1364.0,
+    1364.0,
+    1364.0,
+    1364.0,
+    1364.0
+   ],
+   "n_value_ge_1": 127452,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 1.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 0.0,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "assembly",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_gap_h_q": null,
+   "value_changes_per_entity_q": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "g1.rx.gate_error": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "": 274560
+   },
+   "distinct_values": 20208,
+   "quantiles_0_1_10_50_90_99_100": [
+    7.20525e-05,
+    0.000143188,
+    0.000197468,
+    0.000312238,
+    0.000662683,
+    0.0070489,
+    1.0
+   ],
+   "n_value_ge_1": 1975,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.005547,
+   "date_after_file_date": 1975,
+   "entity_age_h_median": 12.3,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    68.0,
+    100.68,
+    128.0,
+    132.0,
+    133.0,
+    133.0,
+    133.0
+   ],
+   "event_gap_h_q": [
+    6.31222,
+    7.115,
+    19.9508,
+    24.9261,
+    33.2133,
+    76.4533,
+    857.044
+   ],
+   "placeholder_records": 1975,
+   "entities_ever_placeholder": 3,
+   "entities_always_placeholder": [
+    72
+   ]
+  },
+  "g1.rx.gate_length": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 274560
+   },
+   "distinct_values": 1,
+   "quantiles_0_1_10_50_90_99_100": [
+    24.0,
+    24.0,
+    24.0,
+    24.0,
+    24.0,
+    24.0,
+    24.0
+   ],
+   "n_value_ge_1": 274560,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.005547,
+   "date_after_file_date": 1975,
+   "entity_age_h_median": 12.3,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_gap_h_q": null
+  },
+  "g1.rz.gate_error": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "": 274560
+   },
+   "distinct_values": 1,
+   "quantiles_0_1_10_50_90_99_100": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "n_value_ge_1": 0,
+   "n_value_eq_0": 274560,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 1.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 0.0,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "assembly",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_gap_h_q": null,
+   "placeholder_records": 0,
+   "entities_ever_placeholder": 0,
+   "entities_always_placeholder": [],
+   "value_changes_per_entity_q": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "g1.rz.gate_length": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 274560
+   },
+   "distinct_values": 1,
+   "quantiles_0_1_10_50_90_99_100": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "n_value_ge_1": 0,
+   "n_value_eq_0": 274560,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 1.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 0.0,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "assembly",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_gap_h_q": null,
+   "value_changes_per_entity_q": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "g1.sx.gate_error": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "": 274560
+   },
+   "distinct_values": 20208,
+   "quantiles_0_1_10_50_90_99_100": [
+    7.20525e-05,
+    0.000143188,
+    0.000197468,
+    0.000312238,
+    0.000662683,
+    0.0070489,
+    1.0
+   ],
+   "n_value_ge_1": 1975,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.005547,
+   "date_after_file_date": 1975,
+   "entity_age_h_median": 12.3,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    68.0,
+    100.68,
+    128.0,
+    132.0,
+    133.0,
+    133.0,
+    133.0
+   ],
+   "event_gap_h_q": [
+    6.31222,
+    7.115,
+    19.9508,
+    24.9261,
+    33.2133,
+    76.4533,
+    857.044
+   ],
+   "placeholder_records": 1975,
+   "entities_ever_placeholder": 3,
+   "entities_always_placeholder": [
+    72
+   ]
+  },
+  "g1.sx.gate_length": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 274560
+   },
+   "distinct_values": 1,
+   "quantiles_0_1_10_50_90_99_100": [
+    24.0,
+    24.0,
+    24.0,
+    24.0,
+    24.0,
+    24.0,
+    24.0
+   ],
+   "n_value_ge_1": 274560,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.005547,
+   "date_after_file_date": 1975,
+   "entity_age_h_median": 12.3,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_gap_h_q": null
+  },
+  "g1.x.gate_error": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "": 274560
+   },
+   "distinct_values": 20208,
+   "quantiles_0_1_10_50_90_99_100": [
+    7.20525e-05,
+    0.000143188,
+    0.000197468,
+    0.000312238,
+    0.000662683,
+    0.0070489,
+    1.0
+   ],
+   "n_value_ge_1": 1975,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.005547,
+   "date_after_file_date": 1975,
+   "entity_age_h_median": 12.3,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    68.0,
+    100.68,
+    128.0,
+    132.0,
+    133.0,
+    133.0,
+    133.0
+   ],
+   "event_gap_h_q": [
+    6.31222,
+    7.115,
+    19.9508,
+    24.9261,
+    33.2133,
+    76.4533,
+    857.044
+   ],
+   "placeholder_records": 1975,
+   "entities_ever_placeholder": 3,
+   "entities_always_placeholder": [
+    72
+   ]
+  },
+  "g1.x.gate_length": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 274560
+   },
+   "distinct_values": 1,
+   "quantiles_0_1_10_50_90_99_100": [
+    24.0,
+    24.0,
+    24.0,
+    24.0,
+    24.0,
+    24.0,
+    24.0
+   ],
+   "n_value_ge_1": 274560,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.005547,
+   "date_after_file_date": 1975,
+   "entity_age_h_median": 12.3,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_gap_h_q": null
+  },
+  "g1.xslow.gate_error": {
+   "width": 156,
+   "records": 136032,
+   "files_with_any": 872,
+   "first_file": "20260514T123242000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 872,
+   "entities_never_present": 0,
+   "units": {
+    "": 136032
+   },
+   "distinct_values": 6533,
+   "quantiles_0_1_10_50_90_99_100": [
+    8.56212e-05,
+    0.000145023,
+    0.000201343,
+    0.000317641,
+    0.000671151,
+    0.0117557,
+    1.0
+   ],
+   "n_value_ge_1": 915,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.004095,
+   "date_after_file_date": 915,
+   "entity_age_h_median": 12.49,
+   "present_share_within_lifetime": 0.498286,
+   "entities_partially_present": 156,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    20.0,
+    33.56,
+    41.0,
+    43.0,
+    43.0,
+    43.0,
+    43.0
+   ],
+   "event_gap_h_q": [
+    6.31222,
+    6.31222,
+    19.1925,
+    25.0592,
+    29.67,
+    2477.79,
+    2746.96
+   ],
+   "placeholder_records": 915,
+   "entities_ever_placeholder": 2,
+   "entities_always_placeholder": []
+  },
+  "g1.xslow.gate_length": {
+   "width": 156,
+   "records": 136032,
+   "files_with_any": 872,
+   "first_file": "20260514T123242000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 872,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 136032
+   },
+   "distinct_values": 1,
+   "quantiles_0_1_10_50_90_99_100": [
+    1000.0,
+    1000.0,
+    1000.0,
+    1000.0,
+    1000.0,
+    1000.0,
+    1000.0
+   ],
+   "n_value_ge_1": 136032,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.004095,
+   "date_after_file_date": 915,
+   "entity_age_h_median": 12.49,
+   "present_share_within_lifetime": 0.498286,
+   "entities_partially_present": 156,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_gap_h_q": null
+  },
+  "g2.cz.gate_error": {
+   "width": 352,
+   "records": 619520,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "": 619520
+   },
+   "distinct_values": 22093,
+   "quantiles_0_1_10_50_90_99_100": [
+    0.0011525,
+    0.0015807,
+    0.00195932,
+    0.00278028,
+    0.0102572,
+    1.0,
+    1.0
+   ],
+   "n_value_ge_1": 17364,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.003758,
+   "date_after_file_date": 17364,
+   "entity_age_h_median": 12.37,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    6.0,
+    56.29,
+    128.0,
+    131.0,
+    131.0,
+    131.0,
+    131.0
+   ],
+   "event_gap_h_q": [
+    3.76639,
+    6.29639,
+    19.0342,
+    25.1364,
+    36.9092,
+    77.2833,
+    522.618
+   ],
+   "placeholder_records": 17364,
+   "entities_ever_placeholder": 14,
+   "entities_always_placeholder": [
+    [
+     72,
+     73
+    ],
+    [
+     73,
+     72
+    ],
+    [
+     71,
+     72
+    ],
+    [
+     72,
+     71
+    ],
+    [
+     27,
+     28
+    ],
+    [
+     28,
+     27
+    ],
+    [
+     32,
+     33
+    ],
+    [
+     33,
+     32
+    ]
+   ]
+  },
+  "g2.cz.gate_length": {
+   "width": 352,
+   "records": 619520,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 619520
+   },
+   "distinct_values": 3,
+   "quantiles_0_1_10_50_90_99_100": [
+    68.0,
+    68.0,
+    68.0,
+    68.0,
+    68.0,
+    88.0,
+    88.0
+   ],
+   "n_value_ge_1": 619520,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.003758,
+   "date_after_file_date": 17364,
+   "entity_age_h_median": 12.37,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.49,
+    2.0
+   ],
+   "event_gap_h_q": [
+    2765.8,
+    2765.8,
+    2765.8,
+    2765.8,
+    2765.8,
+    2765.8,
+    2765.8
+   ]
+  },
+  "g2.rzz.gate_error": {
+   "width": 352,
+   "records": 619520,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "": 619520
+   },
+   "distinct_values": 18211,
+   "quantiles_0_1_10_50_90_99_100": [
+    0.00108963,
+    0.00152548,
+    0.00188225,
+    0.00271052,
+    0.0113506,
+    1.0,
+    1.0
+   ],
+   "n_value_ge_1": 24790,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.002628,
+   "date_after_file_date": 24790,
+   "entity_age_h_median": 14.54,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    1.0,
+    19.56,
+    106.0,
+    110.0,
+    110.0,
+    110.0,
+    110.0
+   ],
+   "event_gap_h_q": [
+    3.09306,
+    6.27083,
+    19.5294,
+    25.3036,
+    51.2392,
+    260.171,
+    1840.04
+   ],
+   "placeholder_records": 24790,
+   "entities_ever_placeholder": 26,
+   "entities_always_placeholder": [
+    [
+     72,
+     73
+    ],
+    [
+     73,
+     72
+    ],
+    [
+     71,
+     72
+    ],
+    [
+     72,
+     71
+    ],
+    [
+     99,
+     115
+    ],
+    [
+     115,
+     99
+    ],
+    [
+     95,
+     99
+    ],
+    [
+     99,
+     95
+    ],
+    [
+     32,
+     33
+    ],
+    [
+     33,
+     32
+    ]
+   ]
+  },
+  "g2.rzz.gate_length": {
+   "width": 352,
+   "records": 619520,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 619520
+   },
+   "distinct_values": 4,
+   "quantiles_0_1_10_50_90_99_100": [
+    68.0,
+    68.0,
+    68.0,
+    68.0,
+    68.0,
+    116.0,
+    116.0
+   ],
+   "n_value_ge_1": 619520,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.002628,
+   "date_after_file_date": 24790,
+   "entity_age_h_median": 14.54,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.49,
+    2.0
+   ],
+   "event_gap_h_q": [
+    2765.8,
+    2765.8,
+    2765.8,
+    2765.8,
+    2765.8,
+    2765.8,
+    2765.8
+   ]
+  },
+  "gen.jq": {
+   "width": 176,
+   "records": 309760,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "GHz": 309760
+   },
+   "distinct_values": 1,
+   "quantiles_0_1_10_50_90_99_100": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "n_value_ge_1": 0,
+   "n_value_eq_0": 309760,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 1.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 0.0,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "assembly",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_gap_h_q": null,
+   "entities_ever_zero": 176,
+   "entities_always_zero": [
+    [
+     72,
+     73
+    ],
+    [
+     7,
+     17
+    ],
+    [
+     67,
+     68
+    ],
+    [
+     44,
+     45
+    ],
+    [
+     8,
+     9
+    ],
+    [
+     40,
+     41
+    ],
+    [
+     100,
+     101
+    ],
+    [
+     91,
+     98
+    ],
+    [
+     132,
+     133
+    ],
+    [
+     41,
+     42
+    ],
+    [
+     55,
+     59
+    ],
+    [
+     73,
+     74
+    ],
+    [
+     133,
+     134
+    ],
+    [
+     59,
+     75
+    ],
+    [
+     14,
+     15
+    ],
+    [
+     9,
+     10
+    ],
+    [
+     74,
+     75
+    ],
+    [
+     39,
+     53
+    ],
+    [
+     129,
+     130
+    ],
+    [
+     106,
+     107
+    ],
+    [
+     83,
+     96
+    ],
+    [
+     111,
+     112
+    ],
+    [
+     138,
+     151
+    ],
+    [
+     47,
+     48
+    ],
+    [
+     42,
+     43
+    ],
+    [
+     47,
+     57
+    ],
+    [
+     107,
+     108
+    ],
+    [
+     134,
+     135
+    ],
+    [
+     144,
+     145
+    ],
+    [
+     48,
+     49
+    ],
+    [
+     77,
+     85
+    ],
+    [
+     103,
+     104
+    ],
+    [
+     80,
+     81
+    ],
+    [
+     85,
+     86
+    ],
+    [
+     131,
+     138
+    ],
+    [
+     140,
+     141
+    ],
+    [
+     36,
+     41
+    ],
+    [
+     71,
+     72
+    ],
+    [
+     81,
+     82
+    ],
+    [
+     108,
+     109
+    ],
+    [
+     12,
+     13
+    ],
+    [
+     99,
+     115
+    ],
+    [
+     22,
+     23
+    ],
+    [
+     29,
+     38
+    ],
+    [
+     49,
+     50
+    ],
+    [
+     104,
+     105
+    ],
+    [
+     114,
+     115
+    ],
+    [
+     109,
+     110
+    ],
+    [
+     13,
+     14
+    ],
+    [
+     123,
+     136
+    ],
+    [
+     151,
+     152
+    ],
+    [
+     45,
+     46
+    ],
+    [
+     110,
+     111
+    ],
+    [
+     50,
+     51
+    ],
+    [
+     96,
+     103
+    ],
+    [
+     105,
+     106
+    ],
+    [
+     82,
+     83
+    ],
+    [
+     147,
+     148
+    ],
+    [
+     137,
+     147
+    ],
+    [
+     51,
+     52
+    ],
+    [
+     142,
+     143
+    ],
+    [
+     46,
+     47
+    ],
+    [
+     23,
+     24
+    ],
+    [
+     143,
+     144
+    ],
+    [
+     21,
+     36
+    ],
+    [
+     83,
+     84
+    ],
+    [
+     113,
+     119
+    ],
+    [
+     76,
+     81
+    ],
+    [
+     24,
+     25
+    ],
+    [
+     105,
+     117
+    ],
+    [
+     20,
+     21
+    ],
+    [
+     52,
+     53
+    ],
+    [
+     139,
+     155
+    ],
+    [
+     69,
+     78
+    ],
+    [
+     112,
+     113
+    ],
+    [
+     89,
+     90
+    ],
+    [
+     149,
+     150
+    ],
+    [
+     53,
+     54
+    ],
+    [
+     11,
+     18
+    ],
+    [
+     30,
+     31
+    ],
+    [
+     25,
+     26
+    ],
+    [
+     16,
+     23
+    ],
+    [
+     90,
+     91
+    ],
+    [
+     136,
+     143
+    ],
+    [
+     145,
+     146
+    ],
+    [
+     26,
+     27
+    ],
+    [
+     21,
+     22
+    ],
+    [
+     3,
+     16
+    ],
+    [
+     31,
+     32
+    ],
+    [
+     58,
+     71
+    ],
+    [
+     86,
+     87
+    ],
+    [
+     141,
+     142
+    ],
+    [
+     95,
+     99
+    ],
+    [
+     61,
+     76
+    ],
+    [
+     113,
+     114
+    ],
+    [
+     123,
+     124
+    ],
+    [
+     27,
+     28
+    ],
+    [
+     17,
+     27
+    ],
+    [
+     54,
+     55
+    ],
+    [
+     64,
+     65
+    ],
+    [
+     146,
+     147
+    ],
+    [
+     5,
+     6
+    ],
+    [
+     51,
+     58
+    ],
+    [
+     60,
+     61
+    ],
+    [
+     87,
+     88
+    ],
+    [
+     38,
+     49
+    ],
+    [
+     152,
+     153
+    ],
+    [
+     87,
+     97
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     28,
+     29
+    ],
+    [
+     93,
+     94
+    ],
+    [
+     148,
+     149
+    ],
+    [
+     19,
+     35
+    ],
+    [
+     88,
+     89
+    ],
+    [
+     117,
+     125
+    ],
+    [
+     120,
+     121
+    ],
+    [
+     56,
+     63
+    ],
+    [
+     29,
+     30
+    ],
+    [
+     84,
+     85
+    ],
+    [
+     61,
+     62
+    ],
+    [
+     43,
+     56
+    ],
+    [
+     98,
+     111
+    ],
+    [
+     126,
+     127
+    ],
+    [
+     121,
+     122
+    ],
+    [
+     135,
+     139
+    ],
+    [
+     101,
+     116
+    ],
+    [
+     153,
+     154
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     122,
+     123
+    ],
+    [
+     57,
+     67
+    ],
+    [
+     62,
+     63
+    ],
+    [
+     94,
+     95
+    ],
+    [
+     154,
+     155
+    ],
+    [
+     119,
+     133
+    ],
+    [
+     3,
+     4
+    ],
+    [
+     33,
+     39
+    ],
+    [
+     150,
+     151
+    ],
+    [
+     127,
+     128
+    ],
+    [
+     78,
+     89
+    ],
+    [
+     127,
+     137
+    ],
+    [
+     91,
+     92
+    ],
+    [
+     68,
+     69
+    ],
+    [
+     37,
+     45
+    ],
+    [
+     63,
+     64
+    ],
+    [
+     128,
+     129
+    ],
+    [
+     32,
+     33
+    ],
+    [
+     4,
+     5
+    ],
+    [
+     79,
+     93
+    ],
+    [
+     25,
+     37
+    ],
+    [
+     69,
+     70
+    ],
+    [
+     18,
+     31
+    ],
+    [
+     101,
+     102
+    ],
+    [
+     116,
+     121
+    ],
+    [
+     124,
+     125
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     10,
+     11
+    ],
+    [
+     65,
+     66
+    ],
+    [
+     92,
+     93
+    ],
+    [
+     97,
+     107
+    ],
+    [
+     102,
+     103
+    ],
+    [
+     109,
+     118
+    ],
+    [
+     6,
+     7
+    ],
+    [
+     15,
+     19
+    ],
+    [
+     33,
+     34
+    ],
+    [
+     43,
+     44
+    ],
+    [
+     73,
+     79
+    ],
+    [
+     70,
+     71
+    ],
+    [
+     125,
+     126
+    ],
+    [
+     118,
+     129
+    ],
+    [
+     130,
+     131
+    ],
+    [
+     34,
+     35
+    ],
+    [
+     11,
+     12
+    ],
+    [
+     66,
+     67
+    ],
+    [
+     65,
+     77
+    ],
+    [
+     131,
+     132
+    ],
+    [
+     7,
+     8
+    ]
+   ],
+   "value_changes_per_entity_q": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "gen.lf": {
+   "width": 97,
+   "records": 170720,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "": 170720
+   },
+   "distinct_values": 8051,
+   "quantiles_0_1_10_50_90_99_100": [
+    0.431943,
+    0.518121,
+    0.577653,
+    0.76027,
+    0.948307,
+    0.986213,
+    0.991606
+   ],
+   "n_value_ge_1": 0,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.0,
+   "date_after_file_date": 21049,
+   "entity_age_h_median": 13.01,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    83.0,
+    83.0,
+    83.0,
+    83.0,
+    83.0,
+    83.0,
+    83.0
+   ],
+   "event_gap_h_q": [
+    25.9156,
+    25.9156,
+    26.0647,
+    26.554,
+    31.8556,
+    1239.13,
+    1239.13
+   ]
+  },
+  "gen.zz": {
+   "width": 176,
+   "records": 309760,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "GHz": 309760
+   },
+   "distinct_values": 83444,
+   "quantiles_0_1_10_50_90_99_100": [
+    -0.000938214,
+    0.0,
+    3.04605e-06,
+    6.18015e-06,
+    1.38399e-05,
+    2.52224e-05,
+    0.000769919
+   ],
+   "n_value_ge_1": 0,
+   "n_value_eq_0": 3047,
+   "n_value_lt_0": 2421,
+   "date_equals_file_date_share": 1.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 0.0,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "assembly",
+   "events_per_entity_q": [
+    1.0,
+    2.0,
+    485.0,
+    486.0,
+    486.0,
+    486.0,
+    486.0
+   ],
+   "event_gap_h_q": [
+    0.535278,
+    1.44361,
+    2.73333,
+    5.15806,
+    13.1369,
+    40.9036,
+    1389.43
+   ],
+   "entities_ever_zero": 4,
+   "entities_always_zero": [
+    [
+     32,
+     33
+    ]
+   ],
+   "value_changes_per_entity_q": [
+    0.0,
+    1.0,
+    484.0,
+    485.0,
+    485.0,
+    485.0,
+    485.0
+   ]
+  },
+  "q.T1": {
+   "width": 156,
+   "records": 274524,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1724,
+   "entities_never_present": 0,
+   "units": {
+    "us": 274524
+   },
+   "distinct_values": 20063,
+   "quantiles_0_1_10_50_90_99_100": [
+    1.67534,
+    30.1359,
+    75.5722,
+    125.881,
+    188.985,
+    259.001,
+    409.021
+   ],
+   "n_value_ge_1": 274524,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.0,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 12.81,
+   "present_share_within_lifetime": 0.999869,
+   "entities_partially_present": 1,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    24.0,
+    61.55,
+    127.0,
+    130.0,
+    133.0,
+    134.0,
+    134.0
+   ],
+   "event_gap_h_q": [
+    3.86417,
+    6.17583,
+    19.1514,
+    24.7703,
+    43.7539,
+    98.7111,
+    2207.8
+   ]
+  },
+  "q.T2": {
+   "width": 156,
+   "records": 272800,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 0,
+   "entities_never_present": 1,
+   "units": {
+    "us": 272800
+   },
+   "distinct_values": 20626,
+   "quantiles_0_1_10_50_90_99_100": [
+    2.47886,
+    5.53115,
+    28.6011,
+    92.4354,
+    170.298,
+    236.603,
+    307.364
+   ],
+   "n_value_ge_1": 272800,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.004131,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 12.39,
+   "present_share_within_lifetime": 0.99359,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    68.0,
+    120.08,
+    133.0,
+    134.0,
+    134.0,
+    134.0,
+    134.0
+   ],
+   "event_gap_h_q": [
+    3.86417,
+    6.17611,
+    19.1511,
+    24.7281,
+    31.7556,
+    98.7111,
+    224.564
+   ]
+  },
+  "q.init_error": {
+   "width": 156,
+   "records": 126362,
+   "files_with_any": 1091,
+   "first_file": "20260804T005230000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 0,
+   "entities_never_present": 40,
+   "units": {
+    "": 126362
+   },
+   "distinct_values": 23550,
+   "quantiles_0_1_10_50_90_99_100": [
+    1.97458e-28,
+    0.0002,
+    0.000443682,
+    0.00185386,
+    0.0052588,
+    0.010584,
+    0.0464001
+   ],
+   "n_value_ge_1": 0,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.006727,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 3.108,
+   "present_share_within_lifetime": 0.74245,
+   "entities_partially_present": 1,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    1.0,
+    2.2,
+    81.0,
+    241.0,
+    244.5,
+    245.0,
+    245.0
+   ],
+   "event_gap_h_q": [
+    0.634444,
+    0.819167,
+    1.52361,
+    4.72639,
+    11.6331,
+    59.1319,
+    1072.75
+   ]
+  },
+  "q.prob_meas0_prep1": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "": 274560
+   },
+   "distinct_values": 1525,
+   "quantiles_0_1_10_50_90_99_100": [
+    0.000244141,
+    0.00439453,
+    0.00708008,
+    0.0136719,
+    0.0517578,
+    0.184814,
+    0.976562
+   ],
+   "n_value_ge_1": 0,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.002495,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 2.592,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    314.0,
+    317.1,
+    479.5,
+    574.0,
+    581.5,
+    587.35,
+    589.0
+   ],
+   "event_gap_h_q": [
+    0.155,
+    1.03306,
+    2.55806,
+    4.56278,
+    11.0272,
+    33.6322,
+    121.192
+   ]
+  },
+  "q.prob_meas1_prep0": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "": 274560
+   },
+   "distinct_values": 1355,
+   "quantiles_0_1_10_50_90_99_100": [
+    0.0,
+    0.000244141,
+    0.0012207,
+    0.00610352,
+    0.0385742,
+    0.166504,
+    0.99585
+   ],
+   "n_value_ge_1": 0,
+   "n_value_eq_0": 2468,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.002648,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 2.471,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    543.0,
+    546.55,
+    555.0,
+    572.0,
+    584.5,
+    588.45,
+    589.0
+   ],
+   "event_gap_h_q": [
+    0.148056,
+    1.04111,
+    2.54694,
+    4.515,
+    10.7581,
+    33.6322,
+    136.499
+   ]
+  },
+  "q.readout_error": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "": 274560
+   },
+   "distinct_values": 2203,
+   "quantiles_0_1_10_50_90_99_100": [
+    0.000976562,
+    0.00292969,
+    0.00463867,
+    0.0100098,
+    0.0461426,
+    0.237671,
+    0.525879
+   ],
+   "n_value_ge_1": 0,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.003402,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 2.466,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    566.0,
+    567.0,
+    574.0,
+    580.0,
+    586.0,
+    588.45,
+    589.0
+   ],
+   "event_gap_h_q": [
+    0.140556,
+    1.00722,
+    2.55056,
+    4.46639,
+    10.5792,
+    33.6322,
+    121.208
+   ]
+  },
+  "q.readout_length": {
+   "width": 156,
+   "records": 274560,
+   "files_with_any": 1760,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20261006T025742000000Z.json",
+   "files_full_width": 1760,
+   "entities_never_present": 0,
+   "units": {
+    "ns": 274560
+   },
+   "distinct_values": 3,
+   "quantiles_0_1_10_50_90_99_100": [
+    1560.0,
+    1560.0,
+    1560.0,
+    1660.0,
+    1700.0,
+    1700.0,
+    1700.0
+   ],
+   "n_value_ge_1": 274560,
+   "n_value_eq_0": 0,
+   "n_value_lt_0": 0,
+   "date_equals_file_date_share": 0.003402,
+   "date_after_file_date": 0,
+   "entity_age_h_median": 2.466,
+   "present_share_within_lifetime": 1.0,
+   "entities_partially_present": 0,
+   "event_rule": "measured",
+   "events_per_entity_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_gap_h_q": null
+  }
+ }
+}

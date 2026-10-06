@@ -1,0 +1,100 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "data-layer",
+ "script": "analysis/data_layer/identity_checks.py",
+ "measured_utc": "2026-10-06T06:54:37Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "checks": {
+  "sx_vs_id_error": {
+   "compared": 274560,
+   "value_mismatch": 0,
+   "date_mismatch": 979,
+   "only_left": 0,
+   "only_right": 0
+  },
+  "sx_vs_rx_error": {
+   "compared": 274560,
+   "value_mismatch": 0,
+   "date_mismatch": 645,
+   "only_left": 0,
+   "only_right": 0
+  },
+  "sx_vs_x_error": {
+   "compared": 274560,
+   "value_mismatch": 0,
+   "date_mismatch": 374,
+   "only_left": 0,
+   "only_right": 0
+  },
+  "sx_vs_xslow_error": {
+   "compared": 136032,
+   "value_mismatch": 0,
+   "date_mismatch": 310,
+   "only_left": 138528,
+   "only_right": 0
+  },
+  "readout_error_vs_measure_error": {
+   "compared": 274560,
+   "value_mismatch": 0,
+   "date_mismatch": 0,
+   "only_left": 0,
+   "only_right": 0
+  },
+  "readout_length_vs_measure_length_values": {
+   "compared": 274560,
+   "value_mismatch": 0,
+   "date_mismatch": 273626,
+   "only_left": 0,
+   "only_right": 0
+  },
+  "cz_gate_error_direction": {
+   "compared": 309760,
+   "value_mismatch": 0,
+   "date_mismatch": 8682,
+   "only_left": 0,
+   "only_right": 0
+  },
+  "cz_gate_length_direction": {
+   "compared": 309760,
+   "value_mismatch": 0,
+   "date_mismatch": 8682,
+   "only_left": 0,
+   "only_right": 0
+  },
+  "rzz_gate_error_direction": {
+   "compared": 309760,
+   "value_mismatch": 0,
+   "date_mismatch": 12395,
+   "only_left": 0,
+   "only_right": 0
+  },
+  "rzz_gate_length_direction": {
+   "compared": 309760,
+   "value_mismatch": 0,
+   "date_mismatch": 12395,
+   "only_left": 0,
+   "only_right": 0
+  },
+  "cz_vs_rzz_error_same_coupler": {
+   "compared": 619520,
+   "value_mismatch": 604244,
+   "date_mismatch": 619520,
+   "only_left": 0,
+   "only_right": 0
+  },
+  "readout_is_mean_of_p01_p10": {
+   "same_stamp_records": 188100,
+   "abs_residual_le_1e-12": 188100,
+   "records_total": 274560
+  },
+  "p01_p10_on_1_over_4096_grid": {
+   "values": 549120,
+   "off_grid": 0
+  }
+ },
+ "cache_npy_files": 131,
+ "cache_npy_sha256": "10df569c700977aa71c649a09f8beceb0bab0e2008a0dd5696d98acfcc91f5da"
+}
