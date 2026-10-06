@@ -90,8 +90,9 @@ record is not an acceptance of those pending architectural decisions.
 Everything above is left unedited. The sentence in "Implementation approach"
 that `feature_target_fn` expects `BasicCalibrationVectorizer` output "whose
 coherence values are currently in microseconds" stopped being true when issue
-#66 (PR #99) made `extract` emit SI seconds. `feature_target_fn` keeps the
-microsecond convention; from `eb30ca7` it raises `ValueError` on
-`mean_T1 < 1.0`, and its input should come from `ArchiveUnitFeatureExtractor`.
-NC-039's source is re-pointed accordingly and its value is unchanged. See
+#66 (PR #99) made `extract` emit SI seconds. From `4621b74`,
+`feature_target_fn` no longer assumes a unit: it takes a required
+`coherence_unit`, `"us"` for `ArchiveUnitFeatureExtractor` output and survey
+anchors, `"s"` for `extract` output. NC-039's source is re-pointed accordingly
+and its value is unchanged. See
 `docs/implementations/2026-10-03-feature-target-fn-units.md`.

@@ -1,5 +1,9 @@
 # 2026-10-03: feature-target-fn-units
 
+> NOTE (review round 1, 2026-10-06): the `mean_T1 < 1.0` guard described below was replaced
+> by a required `coherence_unit` keyword after review. The sections below are the round-0
+> record; the current contract is in "Review round 1" at the end.
+
 ## Problem / Motivation
 
 `training/targets.py::feature_target_fn` documented its input as
@@ -54,7 +58,8 @@ gave NC-039's registered values, bitwise.
 
 | File | One-sentence description |
 | --- | --- |
-| `src/superconducted/training/targets.py` | `feature_target_fn`'s docstring now says microseconds as in the survey TSV and `ArchiveUnitFeatureExtractor`, NOT `BasicCalibrationVectorizer.extract`; the function raises `ValueError` when `mean_T1 < 1.0`; the module docstring names this function as the one exception to its SI-seconds rule. |
+| `src/superconducted/training/targets.py` | Round 1 (current): `feature_target_fn` takes a required `coherence_unit` (`"us"` or `"s"`, no default) and the guard below is gone. Round 0: `feature_target_fn`'s docstring now says microseconds as in the survey TSV and `ArchiveUnitFeatureExtractor`, NOT `BasicCalibrationVectorizer.extract`; the function raises `ValueError` when `mean_T1 < 1.0`; the module docstring names this function as the one exception to its SI-seconds rule. |
+| `tests/test_parameterization.py` | Review round 1: the five `feature_target_fn` call sites state `coherence_unit="us"`, the unit of their survey anchors; nothing else changed. |
 | `tests/training/test_targets.py` | 5 new cases pin the contract (SI rejection on the real fixture, agreement of the microsecond path with the SI closed form, both sides of the `1.0` boundary), and the real-fixture test now goes through `ArchiveUnitFeatureExtractor` and pins NC-039 instead of asserting `not np.allclose`. |
 | `docs/numerical-claims.md` | NC-039's source is re-pointed to `ArchiveUnitFeatureExtractor`, with the value unchanged and the history in Notes; NC-021 gains the `706` at `eb30ca7` clause. |
 | `docs/decisions/drafts/ADR-027-calibration-training-target.md` | Appended an as-of note under the paragraph that describes the old input convention; the paragraph itself is unedited. |
@@ -273,3 +278,150 @@ These are its checks, each stated so that it cannot rot:
 - Issue #64 FR-3 (`per_qubit_spread` units, raised with its owner on the PR)
 - `docs/numerical-claims.md` NC-021, NC-035, NC-038, NC-039, NC-040, NC-041
 - `docs/team.md` (`training/` ownership)
+
+## Review round 1 (2026-10-06): an explicit unit replaces the guard
+
+Everything above records round 0 and is left as written, except the "What
+changed" manifest, which describes the PR as it now stands.
+
+### The finding
+
+Burak's review of `b92ac96` (`CHANGES_REQUESTED`, 2026-10-04) reported a clean
+desktop run: 706 passed, and Ruff, format and strict mypy all passed. His
+objection was to the contract itself. `mean_T1 < 1.0` does not mean "can only
+be SI seconds". The cutoff rests on the 975-row survey range, while
+`feature_target_fn` accepts any positive microsecond vector. A physically valid
+sub-microsecond device given in microseconds would be rejected as seconds, and
+a raw float array carries no unit provenance, so no cutoff can be a unit
+guarantee. He asked for either a lower-bound invariant documented with its
+data scope, or an explicit unit or source contract at the call boundary. Both
+were to keep the regression test and the NC-039 pin.
+
+**Reproduced on `b92ac96` before fixing.** The original `targets.py` was put
+on a copy of `src/` (the only `src` file that differs from the fix commit) and
+called with Burak's case:
+
+```
+0.5 -> ValueError: mean_T1 0.5 is below 1.0 microseconds, so it can only be SI seconds; ...
+0.9999999999999999 -> ValueError: mean_T1 0.9999999999999999 is below 1.0 microseconds, ...
+physical gamma at 0.5 us: 0.046866212922495265
+```
+
+The round-0 sentence "which can only be SI seconds" in the docstring, the
+error message and this record was an overclaim. The survey bounds what the
+archive has seen, not what the API may be given.
+
+### The decision
+
+Asked on 2026-10-06, the `training/` owner (Mert Efe Sensoy) chose the
+explicit unit over a scoped domain floor.
+
+- **A floor can be documented but not proven.** Restated as "the validated
+  domain", it would still reject a valid sub-microsecond device, by design
+  rather than by accident. It would also keep a magnitude heuristic standing
+  in for a fact the caller already knows.
+- **An explicit unit does not depend on magnitudes.** The caller always knows
+  which producer it called; the function never can.
+- **Cost:** one keyword at each of the five `tests/test_parameterization.py`
+  call sites, which evaluate the function at survey anchors in microseconds.
+
+### Contract after round 1
+
+`feature_target_fn(features, *, t_seconds, coherence_unit)`:
+
+- `coherence_unit: Literal["us", "s"]`, keyword-only, **no default**. Omitting
+  it raises `TypeError`, so the call that produced `(1.0, 1.0)` in round 0's
+  reproduction can no longer be written without a unit.
+- `"us"` scales by `UNIT_SCALE["us"]`, the loader's own table, so archive
+  microseconds convert here exactly as they do on the way into the vectorizer.
+  `"s"` scales by `1.0`.
+- Any other value, including a non-string, raises `ValueError`.
+- No magnitude check. `_MIN_MEAN_T1_MICROSECONDS` and its guard are gone.
+- **Residual risk, stated in the docstring:** a wrong label is not detected.
+  SI seconds declared as `"us"` still give a target that rounds to `(1.0, 1.0)`
+  at nanosecond gate durations. What changed is that the label is written at
+  every call site, where review can see it, instead of living only in a
+  docstring.
+
+**Why `"s"` is not added to `UNIT_SCALE`.** That table maps units an archive
+document declares to SI, and `validate_unit_scale` accepts exactly its keys.
+No archive field is published in seconds. Adding `"s"` there would widen what
+the loader accepts from a document in order to serve one function's API. The
+function keeps a two-entry table that reads `"us"` from the loader, so the
+microsecond factor cannot drift between the two.
+
+### Tests
+
+`tests/training/test_targets.py` stays at 19 collected: five round-0 cases
+are replaced by five round-1 cases, and the NC-039 test gains an assertion.
+
+| Round 0 | Round 1 | What it pins now |
+| --- | --- | --- |
+| `test_feature_target_fn_rejects_si_seconds_from_the_vectorizer` | `test_feature_target_fn_refuses_vectorizer_output_without_a_unit` | Same q72 `extract()` input; the unlabelled call raises `TypeError` naming `coherence_unit` |
+| `test_feature_target_fn_takes_archive_unit_features_for_the_same_snapshot` | `test_feature_target_fn_gives_one_target_for_both_units_of_the_same_snapshot` | `extract()` declared `"s"` and `ArchiveUnitFeatureExtractor` declared `"us"` both equal the closed form on the vectorizer's own seconds (`rel=1e-12`) |
+| `test_feature_target_fn_rejects_mean_t1_below_one_microsecond` (x2) | `test_feature_target_fn_rejects_an_unknown_coherence_unit` (x2: `"ns"`, `"S"`) | Only `"us"` and `"s"` are accepted; `"ns"` is in `UNIT_SCALE` and is still refused |
+| `test_feature_target_fn_accepts_mean_t1_of_exactly_one_microsecond` | `test_feature_target_fn_accepts_a_sub_microsecond_mean_t1` | Burak's counterexample: 0.5 microseconds gives `1 - exp(-0.048)` |
+| `test_real_fixture_derives_targets_from_all_sx_gate_lengths` | same test | The NC-039 pin is kept on the `"us"` path and added on the `"s"` path |
+
+The five `tests/test_parameterization.py` call sites now pass
+`coherence_unit="us"`, which is what their survey anchors are. Nothing else in
+that file changed.
+
+**Mutation checks** on `targets.py`. Each mutation was applied by exact-needle
+replacement, run against `tests/training/test_targets.py`, and restored; the
+file was confirmed byte-identical by SHA-256 afterwards.
+
+| Mutation | Caught by |
+| --- | --- |
+| M1: `coherence_unit` gets a default of `"us"` (the implicit contract again) | `refuses_vectorizer_output_without_a_unit` |
+| M2: the unit is ignored, always `1e-6` | `gives_one_target_for_both_units...` and the NC-039 pin's `"s"` path |
+| M3: an unknown unit falls back to microseconds instead of raising | both `rejects_an_unknown_coherence_unit` cases |
+| M4: the round-0 heuristic comes back for `"us"` | `accepts_a_sub_microsecond_mean_t1` |
+| M5: the `"us"` factor is off by `1e3` | 4 tests, including `agrees_with_one_qubit_target` and the NC-039 pin |
+
+### Mathematical details
+
+Burak's case, $T_1 = T_2 = 0.5\ \mu s$ at $t = 24$ ns:
+$\gamma = 1 - e^{-t/T_1} = 1 - e^{-0.048} = 0.046866$, and because $T_2 = T_1$,
+$2/T_2 - 1/T_1 = 1/T_1$ and $\lambda = \gamma$. That is a large but physical
+damping; the round-0 guard refused it.
+
+NC-039 at `4621b74`: both paths reproduce the registered gap **bitwise**,
+`ArchiveUnitFeatureExtractor` output with `"us"` and
+`BasicCalibrationVectorizer.extract` output with `"s"`. Bitwise equality of the
+`"s"` path is measured, not guaranteed: the #66 record shows that scaling
+before and after a mean can differ by about one ulp. The test pin's
+`rel=1e-9` is what is guaranteed.
+
+### Two merges of `main`
+
+`main` moved twice while the review was open.
+
+| Merge | `main` | What came in | Result |
+| --- | --- | --- | --- |
+| `e421e3c` | `e411911` (PR #98) | `docs/` only | Clean; 706 collected |
+| `5517881` | `7c2d4d1` (PR #103) | `scripts/first_ensemble_run.py`, its tests, docs | One text conflict, the NC-021 row; both narratives kept, `main`'s first |
+
+Neither merge brought a new `feature_target_fn` caller; the `+` lines of both
+diffs were grepped for it. `main` @ `e411911` collects 701, a direct collection. `main` @ `7c2d4d1` was
+not collected directly; PR #103 recorded 712 at its own merge `0ce3b42`.
+
+### Verification at `5517881`
+
+Provisional, on Mert's laptop, Python 3.12.10 venv on the pins, clean tree:
+
+| Gate | Result |
+| --- | --- |
+| `pytest tests/ --collect-only -q -o addopts="" -p no:cacheprovider` | `717 tests collected` |
+| `pytest tests/ -q -p no:cacheprovider` | `717 passed` |
+| `ruff check .` | `All checks passed!` |
+| `ruff format --check .` | `68 files already formatted` |
+| `mypy --strict` | `Success: no issues found in 38 source files` |
+| `python scripts/check_ids.py` | `No duplicate or colliding ADR / NC identifiers.` |
+
+The desktop runbook is re-pinned to the new head and posted as the last
+comment on the PR. Relative to round 0, it changes three steps:
+
+- the probe passes `coherence_unit="s"` on the PR tree;
+- step 9 mutates the unit table instead of the guard;
+- the scope step names `tests/test_parameterization.py` as a third file.
