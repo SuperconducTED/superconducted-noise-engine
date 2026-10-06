@@ -204,6 +204,58 @@ Downstream: ADR-011, ADR-015, and ADR-021 follow once this direction reaches Acc
 carries optional lower/upper bound arrays; `NieTanDefuzzifier` handles
 the IT2 closed form.
 
+### ADR-009 status, 2026-09-14: still Open, and why (Issue #56 FR-15)
+
+**ADR-009 is Open. Nothing in this PR decides it, and the `**Status**` line above is
+deliberately unchanged.**
+
+Issue #56 FR-15 lands ADR-009's ledger form at M3 (2026-09-23 to 25) one of two ways: the
+status flipped on Dr. Akba's recorded answer, or the ADR recorded as still Open with the
+date the request went out. This is the second. The recommendation is not this ticket's to
+make: it is the memo Issue #60 co-authors with @bengisucvd, sourced from Issue #62's
+ablation evidence, and the call is Dr. Akba's.
+
+> **NOTE · The fallback is not yet complete, and says so.** FR-15's second form names "the
+> date the request went out". **That date does not exist.** The batch has been ready since
+> 2026-09-09 and is unsent as of 2026-09-14; the slip is recorded in the decisions register's
+> `## Circulation, as-of 2026-09-14` section. The send date is appended there when the
+> message goes out, and this block is finished at that point, not before. Recording a
+> prepared-but-unsent request as though it were sent is the failure this whole requirement
+> exists to prevent.
+
+| | |
+| --- | --- |
+| **Circulated** | Not yet. Argued in `docs/advisor/2026-09-09-akba-brief/02-tip-sistemi.html`, ready 2026-09-09, unsent at 2026-09-14 |
+| **Recorded in** | `docs/advisor/2026-09-03-decisions-from-akba.md`, item 3 |
+| **Decision-by** | 2026-09-23, unchanged by the circulation slip because M3's gate is that date |
+| **Evidence still owed** | Issue #62's ADR-019 ablation table and Issue #60's memo. Neither exists on `main` at `004e14e` |
+| **Owner of the recommendation** | Issue #60 with @bengisucvd. The decision is Dr. Akba's |
+
+**One measured input the memo does not yet have.** The standard objection to Interval Type-2
+is that it doubles the parameter count. On this rule base it does not. NC-046 measures
+`IntervalGaussianMF` at 243 against `GaussianMF`'s 234: nine parameters, 3.8%, because IT2
+adds one parameter per unique membership-function object and `from_grid` shares only nine of
+them across 27 rules, while the 216-entry consequent term that dominates the total is
+type-independent. Whichever way ADR-009 goes, it should not go there on a parameter-count
+argument this configuration does not support.
+
+**What clears this block.** The answer appended to the decisions register, then one PR
+flipping the `**Status**` line with its own dated block. It is not cleared by the memo
+landing, by the ablation running, or by the passage of 2026-09-23.
+
+**As-of 2026-10-03.** The send this block waited on will not happen. On 2026-09-29 the
+lead replaced the batched e-mail with team decisions posted on Issue #84, and he now
+approves those decisions in the advisor role (decisions register, `## Advisor loop
+reshaped, as-of 2026-10-03`). Dr. Akba approved, in person between 2026-09-29 and
+2026-10-02, the decisions of File 02, which argues this ADR, as they were presented to
+him. That approval is recorded in the register; it flips nothing here. ADR-009 stays
+**Open** and still needs its evidence. The table above names Issue #62's table and Issue
+#60's memo; File 02's approved decisions make a time-split drift/coverage test the primary
+evidence, with #62's single-snapshot table supporting, and keep this ADR's own overturn
+clause (T1 wins unless IT2 beats both Gaussian T1 and a parameter-matched T1). The flip
+lands with that evidence and the lead's recorded approval, tracked in Issue #109.
+
+
 ---
 
 ## ADR-010 — Rule count and input variables
@@ -277,6 +329,47 @@ beats Karnik-Mendel iterative reduction in compute cost.
 whether the rule base is IT2.
 
 **Consequences**: No iterative numerical defuzzification at bootstrap.
+
+### ADR-011 status, 2026-09-14: blocked, and on what (Issue #56 FR-16)
+
+**ADR-011 is Open. This PR does not close it and does not choose a defuzzifier.**
+
+Issue #56 FR-16 lands ADR-011's closure at M3 in the same PR as FR-15, one of two ways: the
+closure text Issue #61 prepares landed as an appended block, or the ADR recorded as blocked
+with the missing measurement named. This is the second.
+
+**The missing measurement, named.** Issue #61 owes a Nie-Tan against Karnik-Mendel
+comparison on the certified harness: the type-reduction cost and the difference in the
+defuzzified output, measured rather than argued from the closed form's asymptotics. No such
+measurement exists on `main`. `docs/findings/` holds no ADR-011 file and #61 has no branch
+at `004e14e`.
+
+**It cannot close first, by its own text.** The Context above is conditional on the type
+system: T1's standard is weighted-average, while the Nie-Tan closed form is an IT2
+construction. Which half of that sentence is load-bearing depends on ADR-009, which is Open
+(see the status block under ADR-009). Closing ADR-011 first would ratify a defuzzifier for a
+rule base whose type nobody has decided.
+
+| | |
+| --- | --- |
+| **Blocked on** | Issue #61's Karnik-Mendel measurement, then ADR-009 |
+| **Circulated** | Not yet. Argued in `docs/advisor/2026-09-09-akba-brief/02-tip-sistemi.html` alongside ADR-009 |
+| **Recorded in** | `docs/advisor/2026-09-03-decisions-from-akba.md`, item 4 |
+| **Decision-by** | 2026-09-23 |
+| **Class** | Ratify. The measurement is ours; the confirmation is his |
+
+**What clears this block.** Issue #61's measurement, then Dr. Akba's ratification appended
+to the decisions register, then the closure text as its own dated block here. It is not
+cleared by a review, a merge, or the passage of 2026-09-23.
+
+**As-of 2026-10-03.** As under ADR-009's block: no e-mail will be sent. File 02 argues
+this ADR alongside ADR-009, and its decisions were approved by Dr. Akba in person between
+2026-09-29 and 2026-10-02, as presented. That approval is recorded in the decisions
+register and closes nothing here. ADR-011 stays **Open** and still needs its evidence:
+the table above names Issue #61's measurement, and File 02's approved decision (Q2) settles
+the point reducer by a pre-registered spike. The closure lands with that evidence, after
+ADR-009, on the lead's recorded approval, tracked in Issue #109.
+
 
 ---
 
@@ -891,6 +984,24 @@ left silent.
 | **Owner** | @mertefesensoy. `docs/team.md` names Dr. Akba primary on this file with Mert secondary, and Dr. Akba has no GitHub account, so this cannot be a review request. |
 | **Reversal cost** | One commit. The policy is injected and defaulted, so passing a permissive `GateEligibilityPolicy` restores the previous behaviour without touching any construction site, and the ledger text above is removed by appending the answer rather than by deletion. |
 
+### ADR-021 amendment as of 2026-10-02: smoke caller conforms
+
+`scripts/first_ensemble_run.py` now compiles once to the calibrated basis before
+calling `prepare()` and runs the returned circuit without another transpilation
+(Issue #74, PR #103). Its fixed-seed `sx`-only regression demonstrates that the
+installed error fires. `benchmarks/harness.py` remains non-conforming: it is
+Issue #58 / PR #79's scope and is unchanged here. This is a fact record only;
+the amendment remains Open and awaits the advisor sign-off recorded above.
+
+In the table's own measure, against the same
+`tests/fixtures/calibration/ibm_fez_20260513T121322Z_with_gates.json`: the
+script's default `qft_circuit(2)` now installs `['rx', 'sx']`, 4 errors (both
+gates on qubits 0 and 1), and `prepare()` no longer warns; the old order still
+installs `[]`, 0 errors, with the warning. `qft_circuit(3)` installs the same two
+gates, 6 errors. Measured at `dd1ad56` (2026-10-03), the PR #103 review-fix
+commit, so after the heading's date; see
+`docs/implementations/2026-10-03-pr103-review-fixes.md`.
+
 ---
 
 ## ADR-022 — Benchmark validation criteria
@@ -1459,6 +1570,61 @@ poll or the ledger row that makes scheduler degradation visible.
 | **Ledger semantics** | Unchanged. No existing row, column, unit or decision vocabulary is redefined; NC-025's definition and the meaning of a `health/state-index.tsv` row are untouched. What changes is *when* one generated file is committed. |
 | **Advisor sign-off** | `docs/team.md` requires Dr. Akba's out-of-band sign-off for changes that touch ADR ledger semantics. On the reading above this does not, so none was sought. **Recorded here as a question rather than assumed**, because the 2026-09-05 amendment is itself still Open on that exact test and a second silent judgement call on the same ADR is what this file exists to prevent. If the reviewer reads the `health/` commit contract as ledger semantics, this needs the same routing as that amendment and must not be merged before it. |
 | **Reversal cost** | One revert of the workflow step. No data loss, no rewrite, no dispatch: the extra commits are additive and any already made stay valid. |
+
+### ADR-025 amendment, 2026-09-29: the capture record
+
+**Context.** Issue #54 asked what share of the calibration documents IBM publishes the
+archive captures. The ledger this ADR defines cannot answer it: a row exists only for a
+document some poll fetched, so a document nobody fetched is absent from every ratio the
+ledger can form. NC-058 answered it once, by enumerating IBM's own history for
+2026-09-13..20 read-only and diffing the result against the archive: `<= 88.1%` with the
+daily sweep live, 27 documents missed, every one superseded within 45 minutes. A figure
+measured once and never again is the failure #48 exists to end, so it is now measured daily.
+
+**Amendment.** One file is added to the `health/` tree:
+
+    health/capture.tsv
+      day <TAB> last_update_date <TAB> served <TAB> held <TAB> retrieved <TAB> status <TAB> step_hours <TAB> run_id
+
+Append-only, one row per document proven to exist on an enumerated UTC day. What it
+measures is what the **unattended** pipeline retrieved, not what the archive holds: a
+document is `retrieved` when a ledger row from a *scheduled* run names it, with any
+decision, since a scheduled run that found a document already filed would otherwise have
+filed it. A row belongs to a dispatch when its `poll_time_utc` falls inside the execution
+interval of a job of a `workflow_dispatch` run of `calibration-poll.yml`, read from the
+Actions jobs API (every attempt). Job intervals, not run windows: a run queued behind
+another in the concurrency group keeps its creation time as its run-level start (observed
+in run 37199708102), so a run window would claim the scheduled run it waited behind (PR
+#105 review, round 2). The group serialises the runs, so their jobs never overlap: at
+`calibration-data` @ `0c798dc`, the 600 job intervals since 2026-09-02 do not overlap and
+596 of 596 ledger poll times fall inside exactly one of them. `status` is `captured`,
+`MISSED` (IBM serves it and the archive does not hold it) or `archived_not_served`, the
+vocabulary of the committed evidence TSVs, plus `backfilled` (held only because a dispatch
+filed it, counted as missed, so a manual backfill can never raise the figure) and
+`no_documents`, one sentinel row for a day on which nothing existed, so that an empty day
+is recorded instead of re-enumerated forever. Both `backfilled` and the "any decision"
+rule come from the PR #105 review, as does the next guarantee: a day measured before the
+job is stopped reaches the branch, because the enumeration step has its own timeout inside
+the job's, the commit step runs `always()`, and every write is an atomic file replace. Its writer is a new `capture` job in
+`calibration-health.yml`, which enumerates each *settled* day (`today - 3`, the newest day
+both of its daily sweeps have covered) at 15 minutes, finer than the sweep's 1 h so that it
+does not share the sweep's blind spots, and catches up at most three missed days per run.
+It is the only writer of this file, which keeps `scripts/push_with_retry.sh`'s
+one-tree-per-writer replay rule intact. `render` reads it and publishes `capture_7d` with
+the evidence it rests on (`capture_days_7d`, `capture_exist_7d`, `capture_missed_7d`,
+`capture_backfilled_7d`), and
+a failed capture never costs the render, because the render is the heartbeat NC-053 reads.
+
+The job records and never recovers: a `MISSED` row names a document still inside the 60-day
+retention (NC-026) and leaves the decision to backfill it to a person. A job that healed
+what it measured would make its own figure read 100% by construction, which is how NC-032
+became vacuous.
+
+| | |
+| --- | --- |
+| **Ledger semantics** | Unchanged. No existing file, row, column, unit or decision vocabulary is redefined; the ledger and `health/state-index.tsv`, which the job only reads, and NC-025's definition are untouched. What changes is that the branch gains a third writer and a file only it writes. |
+| **Advisor sign-off** | Not sought, on the same reading as the 2026-09-17 amendment above, and **recorded as a question rather than assumed** for the same reason: the 2026-09-05 amendment is still Open on this test. If the reviewer reads a new `health/` file as ledger semantics, this needs that amendment's routing and must not merge before it. |
+| **Reversal cost** | Remove the `capture` job and the `needs` entry. `health/capture.tsv` stays on the branch as history; the renderer reads a missing or stale file as "not yet measured", never as zero. |
 
 ---
 
