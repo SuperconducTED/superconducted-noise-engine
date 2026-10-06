@@ -11,6 +11,7 @@
 #
 # Replay rather than merge: each workflow commits to a tree only it writes
 # (`health/metrics.json` and `health/progress.svg` for the renderer;
+# `health/capture.tsv` for the health workflow's capture job;
 # `snapshots/`, `ledger/`, `collisions/` and `health/state-index.tsv` for the
 # poller), so a textual conflict means something unmodelled happened and the run
 # must fail loudly rather than guess.

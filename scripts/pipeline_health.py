@@ -31,6 +31,8 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+from scripts.capture_record import SPAN_DAYS, CaptureRow, read_capture, summarise
+
 STALENESS_BANDS: tuple[tuple[float, str], ...] = (
     (24.0, "under 24 h"),
     (72.0, "24 h to 3 days"),
@@ -246,6 +248,7 @@ def build_metrics(
     polls: Sequence[PollRow],
     floors: Sequence[tuple[str, int]],
     now: datetime,
+    capture: Sequence[CaptureRow] = (),
 ) -> dict[str, Any]:
     """Calculate published metrics relative to a supplied UTC instant.
 
@@ -352,6 +355,14 @@ def build_metrics(
                 "projected_date": projected_date,
             }
         )
+    # Capture (#54) is the one figure here that the ledger and the index cannot
+    # produce: a document the pipeline never fetched is in neither. It is read
+    # from `health/capture.tsv`, which the capture job fills by enumerating IBM's
+    # own history one settled day at a time. Like every rolling window above, the
+    # span is anchored on the render instant, so a capture job that stops shows
+    # as `capture_days_7d` draining to zero instead of a stale rate standing in
+    # for a current one, the failure PR #102's heartbeat exists to catch.
+    captured = summarise(capture, now.date())
     return {
         "generated_at": now.isoformat().replace("+00:00", "Z"),
         "index_head": index_head,
@@ -378,6 +389,20 @@ def build_metrics(
         "ledger_hour_coverage_72h": sum(hour_values) / 72,
         "poll_hours_72h": hour_values,
         "floors": floor_metrics,
+        # An upper bound, like NC-058: `None` until a settled day is recorded,
+        # never 0, because "not measured" and "captured nothing" must not share
+        # a value. `capture_days_7d` is published beside it for the same reason
+        # `states_added_7d` sits beside the projections: the evidence it rests on.
+        "capture_7d": captured.rate,
+        "capture_span_days": SPAN_DAYS,
+        "capture_days_7d": captured.days,
+        "capture_exist_7d": captured.exist,
+        "capture_held_7d": captured.held,
+        # Missed by the unattended pipeline, including documents a person later
+        # recovered by dispatch; those are also counted on their own, so a manual
+        # backfill can never raise the capture rate (PR #105 review).
+        "capture_missed_7d": captured.missed,
+        "capture_backfilled_7d": captured.backfilled,
     }
 
 
@@ -440,9 +465,25 @@ def render_svg(metrics: dict[str, Any]) -> str:
             f'height="{height:.2f}" fill="#2563eb"/>'
         )
     labels.append(f'<text x="55" y="370" class="metric">{rate_text:.2f} states/day</text>')
+    # Rendered exactly, not in bands: the graphic already changes bytes on every
+    # render (19 of 19 from 2026-09-10 to 09-28, the 72-hour strip alone moves
+    # hourly), so a daily-moving figure adds no churn and needs no threshold.
+    span = int(metrics["capture_span_days"])
+    days = int(metrics["capture_days_7d"])
+    if metrics["capture_7d"] is None:
+        capture_text = f"not yet measured ({days} of {span} days)"
+    else:
+        capture_text = (
+            f"{float(metrics['capture_7d']) * 100:.1f}% ({metrics['capture_missed_7d']} of "
+            f"{metrics['capture_exist_7d']} missed; {days} of {span} days measured)"
+        )
+    labels.append(
+        f'<text x="55" y="482" class="label">'
+        f"Capture, last {span} settled days: {html.escape(capture_text)}</text>"
+    )
     body = "".join(labels)
     return (
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} 480" role="img" '
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} 510" role="img" '
         'aria-label="Calibration pipeline health dashboard">\n'
         "<style>.title{font:700 24px sans-serif;fill:#0f172a}.value{font:700 22px sans-serif;"
         "fill:#166534}.metric{font:16px sans-serif;fill:#1e293b}.label{font:15px sans-serif;"
@@ -486,6 +527,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         read_ledger(root / "ledger"),
         _floor_values(args.floor),
         now,
+        read_capture(root / "health" / "capture.tsv"),
     )
     health = root / "health"
     health.mkdir(parents=True, exist_ok=True)
