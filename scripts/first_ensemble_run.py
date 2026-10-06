@@ -141,9 +141,10 @@ def run_ensemble(
     """Run each ensemble member and mean-aggregate counts per ADR-016.
 
     ``basis_gates`` must be the calibrated unitary basis from
-    :func:`_calibration_basis_gates`. The source circuit is transpiled once
-    with ``optimization_level=1`` and ``seed_transpiler=0`` before every member
-    receives a copy through :meth:`FuzzyNoiseModel.prepare`. The circuit that
+    :func:`_calibration_basis_gates`. The source circuit is transpiled once,
+    with the fixed controls ``_TRANSPILE_OPTIMIZATION_LEVEL`` and
+    ``_TRANSPILE_SEED``, before every member receives a copy through
+    :meth:`FuzzyNoiseModel.prepare`. The circuit that
     ``prepare`` returns is submitted directly: transpiling again would replace
     its physical instructions and make attached errors fail to fire. This is
     the ADR-021 amendment's compile-before-prepare contract.
