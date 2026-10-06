@@ -214,8 +214,11 @@ def main() -> int:
         f: [int(q) for q in np.flatnonzero(~np.isfinite(med[:, i]))][:60]
         for i, f in enumerate(fields)
     }
+    # Median over the qubits that HAVE the field (a qubit without events, e.g. the 40 qubits
+    # that never carry ``init_error``, would otherwise enter as a zero and pull it down).
     payload["events_per_qubit_median"] = {
-        f: xc.r6(float(np.nanmedian(lv["events"][f]))) for f in fields
+        f: xc.r6(float(np.nanmedian(np.where(lv["events"][f] > 0, lv["events"][f], np.nan))))
+        for f in fields
     }
     payload["level_quantiles_log10"] = {
         f: xc.q_list(med[:, i], (0.0, 0.1, 0.5, 0.9, 1.0)) for i, f in enumerate(fields)

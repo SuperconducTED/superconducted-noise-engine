@@ -1,0 +1,337 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "verify/cross",
+ "script": "analysis/verify/cross/v_comovement.py",
+ "measured_utc": "2026-10-06T13:56:52Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "definitions": "see module docstring",
+ "nearest_within_3h_W7d": {
+  "sx-p10": {
+   "sparser": "sx",
+   "n": 15986,
+   "r": 0.0574,
+   "shift_null": {
+    "null_mean": -0.0005,
+    "null_sd": 0.0087,
+    "p_two_sided": 0.009900990099009901
+   },
+   "r_before_0801": 0.0712,
+   "n_before_0801": 9617,
+   "r_from_0801": 0.0378
+  },
+  "sx-RO": {
+   "sparser": "sx",
+   "n": 16200,
+   "r": 0.0306,
+   "r_before_0801": 0.0397,
+   "n_before_0801": 9738,
+   "r_from_0801": 0.0175
+  },
+  "T2-RO": {
+   "sparser": "T2",
+   "n": 18887,
+   "r": -0.0255,
+   "shift_null": {
+    "null_mean": 0.0009,
+    "null_sd": 0.0069,
+    "p_two_sided": 0.009900990099009901
+   },
+   "r_before_0801": -0.0117,
+   "n_before_0801": 10528,
+   "r_from_0801": -0.0415
+  },
+  "T1-T2": {
+   "sparser": "T1",
+   "n": 19886,
+   "r": 0.6928,
+   "r_before_0801": 0.6901,
+   "n_before_0801": 11159,
+   "r_from_0801": 0.6961
+  },
+  "T1-init": {
+   "sparser": "T1",
+   "n": 3471,
+   "r": -0.0437,
+   "r_before_0801": null,
+   "n_before_0801": 0,
+   "r_from_0801": -0.0437
+  },
+  "T2-init": {
+   "sparser": "T2",
+   "n": 3567,
+   "r": -0.0414,
+   "r_before_0801": null,
+   "n_before_0801": 0,
+   "r_from_0801": -0.0414
+  }
+ },
+ "gap_bins_stress_sx_p10": {
+  "W2d": {
+   "sx-p10": [
+    {
+     "bin_h": [
+      0.0,
+      0.5
+     ],
+     "pairs": 1072,
+     "r": 0.0317
+    },
+    {
+     "bin_h": [
+      0.5,
+      2.0
+     ],
+     "pairs": 4906,
+     "r": 0.0582
+    },
+    {
+     "bin_h": [
+      2.0,
+      6.0
+     ],
+     "pairs": 12563,
+     "r": 0.0046
+    },
+    {
+     "bin_h": [
+      6.0,
+      18.0
+     ],
+     "pairs": 35244,
+     "r": 0.0021
+    },
+    {
+     "bin_h": [
+      18.0,
+      30.0
+     ],
+     "pairs": 35746,
+     "r": -0.0064
+    }
+   ]
+  },
+  "W7d": {
+   "sx-p10": [
+    {
+     "bin_h": [
+      0.0,
+      0.5
+     ],
+     "pairs": 1530,
+     "r": 0.1083
+    },
+    {
+     "bin_h": [
+      0.5,
+      2.0
+     ],
+     "pairs": 12148,
+     "r": 0.0692
+    },
+    {
+     "bin_h": [
+      2.0,
+      6.0
+     ],
+     "pairs": 28889,
+     "r": 0.0275
+    },
+    {
+     "bin_h": [
+      6.0,
+      18.0
+     ],
+     "pairs": 77994,
+     "r": 0.0093
+    },
+    {
+     "bin_h": [
+      18.0,
+      30.0
+     ],
+     "pairs": 80580,
+     "r": 0.0029
+    }
+   ]
+  },
+  "W14d": {
+   "sx-p10": [
+    {
+     "bin_h": [
+      0.0,
+      0.5
+     ],
+     "pairs": 1530,
+     "r": 0.1107
+    },
+    {
+     "bin_h": [
+      0.5,
+      2.0
+     ],
+     "pairs": 12151,
+     "r": 0.072
+    },
+    {
+     "bin_h": [
+      2.0,
+      6.0
+     ],
+     "pairs": 28901,
+     "r": 0.0307
+    },
+    {
+     "bin_h": [
+      6.0,
+      18.0
+     ],
+     "pairs": 78013,
+     "r": 0.0092
+    },
+    {
+     "bin_h": [
+      18.0,
+      30.0
+     ],
+     "pairs": 80600,
+     "r": 0.0116
+    }
+   ]
+  }
+ },
+ "gap_bins_W7d_T1_init": [
+  {
+   "bin_h": [
+    0.0,
+    0.5
+   ],
+   "pairs": 484,
+   "r": -0.1242
+  },
+  {
+   "bin_h": [
+    0.5,
+    2.0
+   ],
+   "pairs": 1615,
+   "r": -0.0426
+  },
+  {
+   "bin_h": [
+    2.0,
+    6.0
+   ],
+   "pairs": 7967,
+   "r": -0.0004
+  },
+  {
+   "bin_h": [
+    6.0,
+    18.0
+   ],
+   "pairs": 24759,
+   "r": -0.0107
+  },
+  {
+   "bin_h": [
+    18.0,
+    30.0
+   ],
+   "pairs": 18707,
+   "r": 0.0062
+  }
+ ],
+ "gap_bins_W7d_T2_init": [
+  {
+   "bin_h": [
+    0.0,
+    0.5
+   ],
+   "pairs": 495,
+   "r": -0.1155
+  },
+  {
+   "bin_h": [
+    0.5,
+    2.0
+   ],
+   "pairs": 1674,
+   "r": -0.0441
+  },
+  {
+   "bin_h": [
+    2.0,
+    6.0
+   ],
+   "pairs": 8204,
+   "r": -0.008
+  },
+  {
+   "bin_h": [
+    6.0,
+    18.0
+   ],
+   "pairs": 25469,
+   "r": -0.0205
+  },
+  {
+   "bin_h": [
+    18.0,
+    30.0
+   ],
+   "pairs": 19246,
+   "r": 0.0082
+  }
+ ],
+ "gap_bins_W7d_T2_RO": [
+  {
+   "bin_h": [
+    0.0,
+    0.5
+   ],
+   "pairs": 5559,
+   "r": 0.0181
+  },
+  {
+   "bin_h": [
+    0.5,
+    2.0
+   ],
+   "pairs": 15931,
+   "r": -0.0387
+  },
+  {
+   "bin_h": [
+    2.0,
+    6.0
+   ],
+   "pairs": 24206,
+   "r": 0.0056
+  },
+  {
+   "bin_h": [
+    6.0,
+    18.0
+   ],
+   "pairs": 83495,
+   "r": 0.0199
+  },
+  {
+   "bin_h": [
+    18.0,
+    30.0
+   ],
+   "pairs": 87503,
+   "r": 0.0195
+  }
+ ],
+ "zz_RO_nearest_12h": {
+  "n": 166849,
+  "r": -0.043,
+  "note": "attached to both qubits, as in the document; n counts event-qubit pairs"
+ },
+ "zz_events_total": 83443,
+ "zz_event_time_is_file_time_share": 1.0
+}

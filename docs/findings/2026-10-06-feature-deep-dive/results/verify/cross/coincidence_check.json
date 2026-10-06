@@ -1,0 +1,83 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "verify/cross",
+ "script": "analysis/verify/cross/v_coincidence.py",
+ "measured_utc": "2026-10-06T13:50:34Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_days": 175,
+ "n_days_before_0801": 110,
+ "pairs": {
+  "sx-p10@3.0sd": {
+   "qubit_days_both_observed": 19087,
+   "both_flagged": 89,
+   "qubit_null_mean": 57.95,
+   "qubit_null_lift": 1.536,
+   "qubit_null_p": 0.004975124378109453,
+   "time_null_mean": 44.85,
+   "time_null_lift": 1.984,
+   "time_null_p": 0.004975124378109453,
+   "qubit_null_lift_before_0801": 1.406,
+   "both_flagged_before_0801": 47,
+   "qubit_null_lift_from_0801": 1.72,
+   "both_flagged_from_0801": 42
+  },
+  "sx-p10@2.0sd": {
+   "qubit_days_both_observed": 19087,
+   "both_flagged": 512,
+   "qubit_null_mean": 476.85,
+   "qubit_null_lift": 1.074,
+   "qubit_null_p": 0.03980099502487562,
+   "time_null_mean": 356.05,
+   "time_null_lift": 1.438,
+   "time_null_p": 0.004975124378109453,
+   "qubit_null_lift_before_0801": 1.04,
+   "both_flagged_before_0801": 280,
+   "qubit_null_lift_from_0801": 1.111,
+   "both_flagged_from_0801": 232
+  },
+  "T2-RO@3.0sd": {
+   "qubit_days_both_observed": 19536,
+   "both_flagged": 108,
+   "qubit_null_mean": 87.42,
+   "qubit_null_lift": 1.235,
+   "qubit_null_p": 0.024875621890547265,
+   "time_null_mean": 63.13,
+   "time_null_lift": 1.711,
+   "time_null_p": 0.004975124378109453,
+   "qubit_null_lift_before_0801": 1.485,
+   "both_flagged_before_0801": 66,
+   "qubit_null_lift_from_0801": 1.012,
+   "both_flagged_from_0801": 42
+  },
+  "sx-RO@3.0sd": {
+   "qubit_days_both_observed": 19129,
+   "both_flagged": 80,
+   "qubit_null_mean": 57.02,
+   "qubit_null_lift": 1.403,
+   "qubit_null_p": 0.004975124378109453,
+   "time_null_mean": 43.05,
+   "time_null_lift": 1.859,
+   "time_null_p": 0.004975124378109453,
+   "qubit_null_lift_before_0801": 1.348,
+   "both_flagged_before_0801": 44,
+   "qubit_null_lift_from_0801": 1.5,
+   "both_flagged_from_0801": 36
+  },
+  "T1-T2@3.0sd": {
+   "qubit_days_both_observed": 19010,
+   "both_flagged": 158,
+   "qubit_null_mean": 16.96,
+   "qubit_null_lift": 9.316,
+   "qubit_null_p": 0.004975124378109453,
+   "time_null_mean": 9.8,
+   "time_null_lift": 16.122,
+   "time_null_p": 0.004975124378109453,
+   "qubit_null_lift_before_0801": 9.497,
+   "both_flagged_before_0801": 83,
+   "qubit_null_lift_from_0801": 8.772,
+   "both_flagged_from_0801": 75
+  }
+ }
+}
