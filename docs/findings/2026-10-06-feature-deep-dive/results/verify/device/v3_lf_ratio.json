@@ -1,0 +1,56 @@
+{
+ "header": {
+  "provisional": true,
+  "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+  "scope": "verify/device",
+  "script": "analysis/verify/device/v3_lf_ratio.py",
+  "measured_utc": "2026-10-06T14:27:59Z",
+  "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+  "machine": "lead's laptop (provisional until re-run on the verification desktop)"
+ },
+ "ratio_lf10": {
+  "n": 83,
+  "median": 1.370563018012638,
+  "q25_q75": [
+   1.2184487447142551,
+   1.515824695872944
+  ]
+ },
+ "ratio_lf50": {
+  "n": 80,
+  "median": 1.421114283224632,
+  "q25_q75": [
+   1.2626545650547278,
+   1.503883862844217
+  ]
+ },
+ "ratio_lf100": {
+  "n": 76,
+  "median": 1.4196998608246998,
+  "q25_q75": [
+   1.3118492610432442,
+   1.4987915150007152
+  ]
+ },
+ "skipped_event_name_pairs_placeholder_cz": 10,
+ "chain_len_mismatch_rows": 0,
+ "spearman_lnlf100_lnpred100": {
+  "rho": 0.2685049111813318,
+  "p": 0.019015855596264175,
+  "n": 76
+ },
+ "distinct_lf100_chains": 59,
+ "n_events": 83,
+ "consecutive_pairs_in_archive": {
+  "same": 16,
+  "diff": 65
+ },
+ "robust_sd_dln_same": 0.030308066365247875,
+ "robust_sd_dln_diff": 0.06098271780266229,
+ "rms_dln_same": 0.04475630806151983,
+ "rms_dln_diff": 0.08517867512296275,
+ "perm_p_sd_diff_ge_same": 0.015396920615876825,
+ "levene_p": 0.06977653078198455,
+ "median_gap_h_same": 26.785,
+ "median_gap_h_diff": 26.4925
+}

@@ -1,0 +1,67 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "verify/readout",
+ "script": "v_records.py",
+ "measured_utc": "2026-10-06T14:21:45Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "records": 274560,
+ "same3": 188100,
+ "same3_share": 0.6851,
+ "staggered": 72900,
+ "stale": 11515,
+ "mean_fail": 11263,
+ "mean_fail_and_stale": 11258,
+ "mean_ok_within_same3_or_staggered": 261000,
+ "mean_fail_within_same3_or_staggered": 0,
+ "stale_fail_lag_median_h": 11.6,
+ "groups_mod17": {
+  "9": {
+   "qubits": 9,
+   "stale_records": 2205,
+   "first_file": "20260725T120619000000Z.json",
+   "last_file": "20260825T101809000000Z.json"
+  },
+  "10": {
+   "qubits": 9,
+   "stale_records": 4005,
+   "first_file": "20260513T121322000000Z.json",
+   "last_file": "20260725T024548000000Z.json"
+  },
+  "16": {
+   "qubits": 9,
+   "stale_records": 5297,
+   "first_file": "20260825T194425000000Z.json",
+   "last_file": "20261006T025742000000Z.json"
+  }
+ },
+ "stale_records_on_other_residues": 8,
+ "stale_qubits": 35,
+ "recoverable_records": 11514,
+ "recovered_on_4096_grid_share": 1.0,
+ "ro_on_8192_grid_share_all_records": 1.0,
+ "p1g0_on_4096_grid_share_all_records": 1.0,
+ "recovered_in_unit_interval_share": 1.0,
+ "recovered_vs_published_stale_median_ratio": 1.0104,
+ "placebo_shuffled_p0g1_recovered_on_grid": 1.0,
+ "reset_minus_readout_unique": [
+  24.0
+ ],
+ "reset_records": 274560,
+ "readout_len_equals_measure_len_all": true,
+ "readout_length_values": {
+  "1560": 35412,
+  "1660": 177216,
+  "1700": 61932
+ },
+ "measure_error_equals_ro_all": true,
+ "measure_error_records": 274560,
+ "threshold_first_file": "20260608T185628000000Z.json",
+ "threshold_change_files": 327,
+ "threshold_change_qubits_per_file_unique": [
+  156
+ ],
+ "measure_vs_measure_reset_threshold_shared": 127452,
+ "measure_vs_measure_reset_threshold_equal_all": true
+}

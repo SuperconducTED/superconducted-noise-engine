@@ -1,0 +1,46 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "verify/gates_1q",
+ "script": "analysis/verify/gates_1q/verify_placebo.py",
+ "measured_utc": "2026-10-06T14:23:34Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "known": {
+  "2026-06-08T18:56:28Z": {
+   "shift": -0.014834276441793248,
+   "p": 6.521976569472536e-06,
+   "n": 154
+  },
+  "2026-07-30T21:09:17Z": {
+   "shift": -0.004462097208545401,
+   "p": 0.33024047084130304,
+   "n": 155
+  },
+  "2026-08-07T03:21:59Z": {
+   "shift": -0.0004624074402066469,
+   "p": 0.5166674783287029,
+   "n": 155
+  },
+  "2026-09-02T04:56:24Z": {
+   "shift": 0.0025945157180031764,
+   "p": 0.550718971036747,
+   "n": 155
+  },
+  "2026-09-10T16:56:21Z": {
+   "shift": 0.009339774284340407,
+   "p": 0.00732926858245173,
+   "n": 155
+  }
+ },
+ "placebo": {
+  "n_dates": 95,
+  "share_p_lt_0.01": 0.21052631578947367,
+  "share_p_lt_1e-3": 0.15789473684210525,
+  "share_p_lt_1e-5": 0.15789473684210525,
+  "min_p": 3.090627569162226e-18,
+  "share_p_le_6.5e-6": 0.15789473684210525,
+  "share_abs_shift_ge_0.0148": 0.15789473684210525,
+  "max_abs_shift": 0.04251277680684229
+ }
+}

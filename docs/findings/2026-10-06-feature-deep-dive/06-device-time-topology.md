@@ -66,7 +66,12 @@ decision is proposed here, and nothing here records an approval of A1 to A9.
   readout's device median drops 0.138 decades 2.6 h after the 2026-06-08 readout-length
   change. An unexplained episode lifts `init_error` (+0.225 decades) from 2026-08-21 to
   08-31, with readout points on the same dates. `sx`, `cz` and `measure_2` have no point at
-  that penalty. Basis: `changepoints.json`.
+  that penalty. Basis: `changepoints.json`. **[Verification 2026-10-06: "clear exception"
+  is too strong. The step reproduces (own device-median series: -0.105 to -0.116 decades,
+  windows of 5 to 20 rounds), and T1, T2 and sx show no step there, but readout's largest
+  10-round-window drop is -0.20 decades on 2026-05-17 with no known event, and 06-08/09 is
+  also one of the schedule's restart dates; the 2.6 h proximity is suggestive, n = 1 event,
+  and the second length change (07-30) shows no matching response.]**
 - **No time-of-day or day-of-week seasonality in device medians.** Hour-of-day Kruskal-Wallis
   p is at least 0.196 for all 9 families; day of week has one p = 0.021 (`cz`) among the 18
   tests. Basis: `schedule.json`.
@@ -74,7 +79,13 @@ decision is proposed here, and nothing here records an approval of A1 to A9.
   pairs (through `q72` and `q99`) against a null mean of 0.24 (p = 0.018); their 10-qubit
   footprint has a mean hop distance of 7.73 against a null median of 12.76, all at
   coordinate x of 8 or more. `measure_2`'s device-wide placeholder is its first two files,
-  not a later glitch. Basis: `layout_faults.json`.
+  not a later glitch. Basis: `layout_faults.json`. **[Verification 2026-10-06: the adjacency
+  result reproduces (exact null 0.238, p = 0.018), but the footprint null draws 10 random
+  qubits, whereas the faults are 6 couplers whose endpoints are adjacent by construction. Drawing 6 random
+  couplers gives a null median of 11.4 and p = 0.042 (one test, uncorrected); among draws
+  that already have 2 adjacent pairs, p = 0.16. "Spatially concentrated" is weakened to
+  suggestive; "the smallest of 2,000 draws" also did not reproduce with another seed (min
+  7.62).]**
 - **Layout: a heavy-hexagon graph.** 156 qubits, 176 couplers, degree 1/2/3 on 8/100/48
   qubits, bipartite (92 and 64, all 48 degree-3 qubits in one class), girth 12, cycle rank
   21, diameter 32, every coupler of coordinate length 1. Basis: `layout_faults.json`.
@@ -95,7 +106,9 @@ decision is proposed here, and nothing here records an approval of A1 to A9.
   N; the robust semivariance at about one day is 0.58 of the 744 to 1,488 h value for
   `lf_100` and 0.91 for `lf_10`; day-to-day changes of `ln(lf_100)` have a robust SD of 0.058
   when the chain changed and 0.030 when it did not. None of this attributes the component to
-  estimation noise or to real fluctuations (section 4).
+  estimation noise or to real fluctuations (section 4). **[Verification 2026-10-06: "part of
+  it is chain re-selection" rests on 16 same-chain pairs; own recomputation gives 0.061 vs
+  0.030, permutation p = 0.015 but Levene p = 0.070, so it is suggestive, not established.]**
 
 ## 1. The fields and how IBM produces them
 
@@ -466,7 +479,7 @@ to a few entities.
 
 ### 3.7 Layer fidelity over time
 
-EPLG(100) rises over the in-archive period: Spearman with time 0.456 (p = 1.5e-5, n = 83),
+EPLG(100) rises over the in-archive period: Spearman with time 0.456 (p = 1.5e-5, n = 83), **[Verification 2026-10-06: n = 83 includes the carried-in 2026-05-10 event; the in-archive 82 events give 0.463, p = 1.2e-5; the conclusion is unchanged]**
 first-half median 0.00481 and second-half median 0.00509 (average form). PELT at c = 8 places
 one step, +0.056 decades on 2026-07-11; at c = 2 and 4 it finds four points instead,
 2026-07-07 (+0.054), 08-06 (+0.080), 08-13 (-0.083) and 08-31 (+0.033). The cadence gaps above 48 h are the carried-in start
@@ -564,7 +577,7 @@ against a null mean of 0.24 adjacent pairs for 6 couplers drawn at random from t
 adjacent pairs against 1.91 (p = 0.0069). The footprint of the permanent faults (qubits 27,
 28, 32, 33, 71, 72, 73, 95, 99, 115) has a mean hop distance of 7.73, below the smallest of
 2,000 random 10-qubit draws (null median 12.76, minimum 7.8); its coordinates all have x of
-8 or more, in rows 3, 7 and 9 to 11. Reading (interpretation): faults are centred on qubits
+8 or more, in rows 3, 7 and 9 to 11. **[Verification 2026-10-06: wrong null for the footprint (random qubits instead of random couplers); coupler-based p = 0.042, and 0.16 given the adjacent pairs; see the Verification section.]** Reading (interpretation): faults are centred on qubits
 (`q72`: its `sx`, both couplers, `T2`; `q99`: both `rzz` couplers) and on one half of the
 chip. With 6 to 16 entities the tests have little power and the p-values are only
 indicative.
@@ -613,7 +626,7 @@ the placeholder state. Per-family consequences belong to documents 04 and 05.
    late files filed after the ledger began, the poll that filed the document (`new` row)
    precedes the `lf` stamp in 49, by up to 3.49 h (median -1.34 h). An archived live copy is
    never overwritten (ADR-025 in `docs/decisions.md`), so either the `lf` stamp is not a UTC
-   time at or before the measurement (for example an offset error in the source string), or
+   time at or before the measurement (for example an offset error in the source string; **[Verification 2026-10-06: a constant offset is not supported, since `lf` stamp minus `last_update_date` has median -13.0 h over all files and is positive only in 217, with lag from 0.01 h to 6.4 h; the example is speculation]**), or
    the archived copy is not the payload of that poll. This cannot be settled from the cache:
    the raw `date` strings are not stored. Until it is, an `lf` stamp should not be used to
    order `lf` against other fields at the hour scale.
@@ -823,3 +836,80 @@ full.
 | Project: August gap enumeration | `docs/implementations/2026-09-02-aug-gap-enumeration.md` | read 2026-10-06 | Attribution of the August file gaps |
 | Project: ADR-025 ledger and collisions | `docs/decisions.md` (ADR-025) | read 2026-10-06 | Ledger vocabulary; archived copies never overwritten |
 | Project: polling workflow | `.github/workflows/calibration-poll.yml` | read 2026-10-06 | Cron entries and the measured 6.13 runs per day |
+
+## Verification (2026-10-06)
+
+Verifier: an independent agent that did not write this document. Machine: the lead's laptop;
+all figures remain provisional.
+
+**Re-run.** All seven owner scripts (`batches`, `schedule`, `documents`, `states`,
+`changepoints`, `layout_faults`, `layer_fidelity`) were re-run from the cache; every results
+JSON reproduces field for field except `measured_utc` (the original files were restored
+afterwards). The results files are newer than their scripts (no stale file). Independent
+recomputation used new scripts written from `ddload` only: `analysis/verify/device/v1_basics.py`
+to `v7_lf_late.py`, results in `results/verify/device/` (`v1_basics.json`, `v2_schedule.json`,
+`v3_lf_ratio.json`, `v4_faults.json`, `v5_changepoint.json`, `v6_readout_cadence.json`,
+`v7_lf_late.json`).
+
+### Numbers checked
+
+| Claim | Document value | Recomputed | Match |
+| --- | --- | --- | --- |
+| Files; live; historical | 1,760; 1,317; 443 | 1,760; 1,317; 443 | yes |
+| Files per month (May to Oct) | 171, 194, 270, 304, 683, 138 | same | yes |
+| Gaps above 12 h, all live to live; longest | 14; 82.7 h | 14 (14 live-live); 82.68 h | yes |
+| Graph: degrees 1/2/3; diameter; girth; cycle rank; classes | 8/100/48; 32; 12; 21; 92 and 64 | same | yes |
+| `last_update_date` equals newest measured stamp | 0.195; median 0.98 h; 0 earlier | 0.1949; 0.980 h; 0 | yes |
+| `zz` stamps equal `last_update_date` | every file | every file | yes |
+| `T1` major rounds; median gap; daily shift; hour p; day p | 133; 24.71 h; 0.73 h; 0.0026; 0.866 | 133; 24.71; 0.726; 0.00255; 0.866 | yes |
+| `cz` rounds; gap; shift; hour p | 130; 25.13; 1.11; 0.019 | 130; 25.13; 1.111; 0.0193 | yes |
+| Readout rounds 588, gap 4.44 h, offset from `T1` | -0.74 h (-1.10, -0.41) | -0.741 h (-1.097, -0.414), n = 132 | yes |
+| Readout rounds per day, May and Sep | 5.62; 3.67 | 5.64; 3.67 (round gap 15 min); 5.59 and 3.64 at 60 min | yes (my day count differs slightly) |
+| `lf_100` median; range | 0.5449; 0.432 to 0.606 | 0.5449; 0.4319 to 0.6056 | yes |
+| EPLG(100) average-form median | 0.00489 | 0.004891 | yes |
+| EPLG(100) Spearman with time | 0.456, p = 1.5e-5, n = 83 | 0.456, p = 1.5e-5 (n = 83); 0.463 for the 82 in-archive events | yes (n note marked inline) |
+| `lf_N` monotone in N inside every event | 83 of 83 | 83 of 83 | yes |
+| Lag-1 ACF of dlog EPLG, `lf_100` | -0.56 | -0.565 | yes |
+| `lf` late files; live; historical | 217; 156; 61 | 217; 156; 61 | yes |
+| Live late files with poll before lf stamp; max; median | 49 of 60; 3.49 h; -1.34 h | 49 of 60; 3.49 h; -1.34 h | yes |
+| States; flag not on first file | 760; 79 (all first-file historical) | 760; 79 (79) | yes |
+| lf_100 / cz-prediction ratio, median (25%, 75%) | 1.42 (1.31, 1.50) | 1.420 (1.312, 1.499), n = 76 | yes |
+| Spearman `ln(lf_100)` vs `ln(pred_100)` | 0.269, p = 0.019, n = 76 | 0.2685, p = 0.019, n = 76 | yes |
+| Distinct `lf_100` chains | 59 | 59 | yes |
+| Robust SD of day-to-day `ln(lf_100)` change, chain same / changed | 0.030 (16) / 0.058 (66) | 0.030 (16) / 0.061 (65, in-archive pairs only) | yes, within counting difference |
+| Permanent faulty couplers | 27-28, 32-33, 71-72, 72-73, 95-99, 99-115 | same | yes |
+| Adjacent pairs null mean, 6 and 16 couplers | 0.24; 1.91 | exact 0.2377; 1.9013; MC p = 0.0176 | yes |
+| Footprint mean hop; null median (random qubits) | 7.73; 12.76 | 7.733; 12.67 | yes |
+| Footprint "below smallest of 2,000 draws" | min 7.8 | min 7.62, p = 0.001 | no (seed dependent, minor) |
+| Readout step after 2026-06-08 length change | -0.138 decades (PELT segment medians) | -0.105 to -0.116 (window medians) | yes in sign and size order |
+
+### Claims challenged
+
+| Claim | Verdict | Why |
+| --- | --- | --- |
+| Faults are spatially concentrated (footprint hop distance, "below the smallest of 2,000") | weakened | The null uses 10 random qubits; the faults are couplers, whose endpoints are adjacent by construction. Random-coupler null: p = 0.042 uncorrected; with 2 adjacent pairs already present, p = 0.16. The adjacency test itself (p = 0.018) holds. Marked inline. |
+| Readout drop at 2026-06-08 is "one clear exception" to chance alignment | weakened | Reproduces and controls (T1, T2, sx) show no step, but readout's biggest drop is 05-17 (-0.20 decades) with no known event, 06-08/09 is also a schedule restart date, and the second length change has no response. Marked inline. |
+| Part of the `lf` non-persistent component is chain re-selection | weakened | 16 same-chain pairs; permutation p = 0.015, Levene p = 0.070. Marked inline. The document's own stance (no attribution to noise or to fluctuations) is upheld. |
+| `lf` stamp lateness could be an offset error in the source string | weakened | A constant offset is not what the data show (median lf minus `last_update_date` is -13.0 h; only 217 files positive; lag 0.01 to 6.4 h). The measured facts (49 of 60) are upheld. Marked inline. |
+| Readout visible cadence fell for reasons beyond coverage | upheld | Same fall at round gaps of 15 and 60 min; the live-only May to July months (files per day 9.25, 6.47, 8.71) already show 5.64, 4.47, 4.23 rounds per day, and lost captures can only lower a count, so the true May rate was at least as high. At 180 min the fall persists (4.66 to 3.34). |
+| No time-of-day or day-of-week pattern in device medians | upheld, with a wording caveat | Not rejecting uniformity is not evidence of uniformity, and the test sees only device medians (the document says so). The non-uniform hour of round starts (own p = 0.0026 for T1) is reproduced; its restart explanation is labelled interpretation and was not tested. |
+| Change-point alignment with known events is near chance | upheld | Method reproduces; the match window covers 0.193 of the span, so 5 of 17 against 3.29 expected is not significant. |
+| `lf_100` is about 1.4 times the isolated-gate prediction, flat in N | upheld as measured | Recomputed independently for N = 10, 50, 100 (1.37, 1.42, 1.42). The cause is correctly left open; the 10.9 h age of the `cz` value is one unseparated factor. |
+| States are qubit-record states (0 of 998 same-state pairs differ) | upheld, but near-tautological | The digest is of qubit values, so equal ids implying equal values is expected; the informative part is the 314 gate-only changes inside states. |
+
+### Sources spot-checked (fetched 2026-10-06)
+
+| Source | Result |
+| --- | --- |
+| arXiv:2510.16915 (Lozano Palacio et al.) | Title matches; abstract states EPLG 40% to 70% lower than random chains for N = 100 and layer fidelity as a monitoring tool. Supported. |
+| arXiv:1204.6308 (Gambetta et al.) | Title matches; simultaneous randomized benchmarking and crosstalk. Supported; the document correctly says the batch reading is not confirmed by IBM. |
+| arXiv:1101.1438 (Killick, Fearnhead, Eckley) | Title matches; linear-cost optimal changepoint detection. The abstract does not use the name PELT; the document's use of the name is the usual one, but the page does not state it. |
+
+### Rule check
+
+- Em dashes (U+2014): none in the document or in `analysis/verify/device/` (count 0).
+- Provisional banner, ref, basis and machine: present in the header paragraph.
+- Traceability: every number checked above is in an owner results field or was recomputed.
+  The header's re-measurement event counts per family were not independently recounted.
+- `docs/numerical-claims.md`: not edited; the document states it registers nothing there.
+- Pinned ruff `check` and `format --check` pass on `analysis/verify/device/`.

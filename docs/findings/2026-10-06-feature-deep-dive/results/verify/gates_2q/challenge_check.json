@@ -1,0 +1,201 @@
+{
+ "header": {
+  "provisional": true,
+  "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+  "scope": "verify/gates_2q",
+  "script": "v_challenge.py",
+  "measured_utc": "2026-10-06T14:25:56Z",
+  "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+  "machine": "lead's laptop (provisional until re-run on the verification desktop)"
+ },
+ "a_shared_qubit_correlation": {
+  "cz": {
+   "by_hop": {
+    "1": {
+     "coupler_pairs": 230,
+     "n": 29513,
+     "spearman": 0.22
+    },
+    "2": {
+     "coupler_pairs": 280,
+     "n": 35646,
+     "spearman": -0.00844
+    },
+    "3": {
+     "coupler_pairs": 379,
+     "n": 48288,
+     "spearman": -0.00967
+    }
+   },
+   "cross_round": {
+    "round_lag_1": {
+     "n": 57547,
+     "spearman": -0.0353
+    },
+    "round_lag_2": {
+     "n": 57098,
+     "spearman": -0.05
+    }
+   },
+   "per_shared_qubit_rho": {
+    "n_qubits": 43,
+    "min": -0.0764,
+    "median": 0.186,
+    "max": 0.651,
+    "share_positive": 0.953
+   },
+   "by_sx_tercile_of_shared_qubit": {
+    "low_sx": {
+     "shared_qubits": 15,
+     "n": 5869,
+     "spearman": 0.186
+    },
+    "mid_sx": {
+     "shared_qubits": 14,
+     "n": 5481,
+     "spearman": 0.205
+    },
+    "high_sx": {
+     "shared_qubits": 14,
+     "n": 5332,
+     "spearman": 0.228
+    }
+   }
+  },
+  "rzz": {
+   "by_hop": {
+    "1": {
+     "coupler_pairs": 230,
+     "n": 24229,
+     "spearman": 0.225
+    },
+    "2": {
+     "coupler_pairs": 282,
+     "n": 29382,
+     "spearman": -0.0191
+    },
+    "3": {
+     "coupler_pairs": 383,
+     "n": 40051,
+     "spearman": -0.0198
+    }
+   },
+   "cross_round": {
+    "round_lag_1": {
+     "n": 47491,
+     "spearman": -0.0413
+    },
+    "round_lag_2": {
+     "n": 47036,
+     "spearman": -0.0424
+    }
+   },
+   "per_shared_qubit_rho": {
+    "n_qubits": 42,
+    "min": -0.0286,
+    "median": 0.2,
+    "max": 0.586,
+    "share_positive": 0.952
+   },
+   "by_sx_tercile_of_shared_qubit": {
+    "low_sx": {
+     "shared_qubits": 14,
+     "n": 4594,
+     "spearman": 0.15
+    },
+    "mid_sx": {
+     "shared_qubits": 14,
+     "n": 4612,
+     "spearman": 0.207
+    },
+    "high_sx": {
+     "shared_qubits": 14,
+     "n": 4495,
+     "spearman": 0.262
+    }
+   }
+  }
+ },
+ "b_short_gap_fraction_of_one_round_cz": {
+  "2-4h": {
+   "pairs": 163,
+   "frac": 0.334
+  },
+  "6-9h": {
+   "pairs": 500,
+   "frac": 0.637
+  },
+  "9-12h": {
+   "pairs": 503,
+   "frac": 0.734
+  },
+  "12-18h": {
+   "pairs": 669,
+   "frac": 0.885
+  },
+  "18-30h": {
+   "pairs": 16737,
+   "frac": 1.0
+  }
+ },
+ "b_occasion_level": {
+  "cz": {
+   "n_occasions": 11,
+   "input_note": "occasion means read from the owner's variograms.json (occasion-level units)",
+   "sign_test_short_below_preceding_p": 0.0654,
+   "wilcoxon_occasion_level_p": 0.102,
+   "spearman_short_semivar_vs_gap_h": 0.355,
+   "occasions_with_gap_below_8h": 3,
+   "mean_short_semivar_gap_below_8h": 0.007916,
+   "mean_short_semivar_gap_at_least_8h": 0.01041
+  },
+  "rzz": {
+   "n_occasions": 6,
+   "input_note": "occasion means read from the owner's variograms.json (occasion-level units)",
+   "sign_test_short_below_preceding_p": 0.688,
+   "wilcoxon_occasion_level_p": 0.562,
+   "spearman_short_semivar_vs_gap_h": 0.371,
+   "occasions_with_gap_below_8h": 3,
+   "mean_short_semivar_gap_below_8h": 0.007577,
+   "mean_short_semivar_gap_at_least_8h": 0.01295
+  }
+ },
+ "c_rzz_rate": {
+  "longest_pooled_gap_h": 279.8,
+  "pause_start_utc": "2026-08-19T23:02:22.000",
+  "post_split_days": 61.13,
+  "post_split_rate_per_coupler_day_all": 0.5902,
+  "post_split_rate_per_coupler_day_excluding_pause": 0.7292
+ },
+ "d_cz_rzz_offset_per_round": {
+  "round_pairs": 104,
+  "median_round_rho_offset_le_2h": 0.159,
+  "n_offset_le_2h": 65,
+  "median_round_rho_offset_gt_2h": 0.0553,
+  "n_offset_gt_2h": 39,
+  "spearman_round_rho_vs_offset": -0.393,
+  "p": 3.75e-05,
+  "median_round_rho_all": 0.116
+ },
+ "e_moran_cz": {
+  "n": 172,
+  "I_binary": 0.263,
+  "I_rowstd": 0.282,
+  "p_binary": 0.0004
+ },
+ "f_whole_second_share_nonplaceholder_cz": 1.0,
+ "g_non68_vs_abs_zz": {
+  "odd_medians_khz": [
+   2.853,
+   3.063,
+   4.332,
+   3.04,
+   1.466
+  ],
+  "rest_n": 168,
+  "rest_median_khz": 6.354,
+  "mw_p_five": 0.000109,
+  "mw_p_three_116ns_rzz_only": 0.00548,
+  "bonferroni_note": "found by inspection; the number of comparisons scanned is unknown"
+ }
+}

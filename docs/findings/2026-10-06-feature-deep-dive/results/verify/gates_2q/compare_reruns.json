@@ -1,0 +1,48 @@
+{
+ "header": {
+  "provisional": true,
+  "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+  "scope": "verify/gates_2q",
+  "script": "compare_reruns.py",
+  "measured_utc": "2026-10-06T14:25:32Z",
+  "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+  "machine": "lead's laptop (provisional until re-run on the verification desktop)"
+ },
+ "files": {
+  "cz_vs_rzz.json": {
+   "leaves_compared": 254,
+   "n_diffs": 0,
+   "first_diffs": []
+  },
+  "link.json": {
+   "leaves_compared": 335,
+   "n_diffs": 0,
+   "first_diffs": []
+  },
+  "profile.json": {
+   "leaves_compared": 1253,
+   "n_diffs": 0,
+   "first_diffs": []
+  },
+  "spatial.json": {
+   "leaves_compared": 297,
+   "n_diffs": 0,
+   "first_diffs": []
+  },
+  "temporal.json": {
+   "leaves_compared": 966,
+   "n_diffs": 0,
+   "first_diffs": []
+  },
+  "variograms.json": {
+   "leaves_compared": 1014,
+   "n_diffs": 0,
+   "first_diffs": []
+  },
+  "zz.json": {
+   "leaves_compared": 408,
+   "n_diffs": 0,
+   "first_diffs": []
+  }
+ }
+}

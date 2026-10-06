@@ -1,0 +1,65 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "verify/readout",
+ "script": "v_extra.py",
+ "measured_utc": "2026-10-06T14:27:20Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "degree_counts": {
+  "1": 8,
+  "2": 100,
+  "3": 48
+ },
+ "median_ro_by_degree": {
+  "1": 0.01196,
+  "2": 0.00757,
+  "3": 0.01428
+ },
+ "kruskal_ro_by_degree_p": 3.48e-07,
+ "moran_ro": {
+  "I": -0.1957,
+  "p": 0.0092
+ },
+ "moran_ro_after_removing_degree_class_median": {
+  "I": -0.0467,
+  "p": 0.5921
+ },
+ "moran_resid_without_10_worst": {
+  "I": 0.1677,
+  "p": 0.0346
+ },
+ "stale_qubits_events_in_even_sessions": {
+  "events": 4360,
+  "p0g1_fresh": 4312
+ },
+ "stale_qubits_events_in_mixed_sessions": {
+  "events": 16310,
+  "p0g1_fresh": 12125
+ },
+ "A_change_at_first_length_change_7d": 0.00146,
+ "A_placebo_7d": {
+  "days": 70,
+  "q05": -0.00146,
+  "q95": 0.00129,
+  "max": 0.00153
+ },
+ "predicted_dA_full_window_median": 0.00093,
+ "predicted_dA_half_window_median": 0.00047,
+ "observed_over_predicted_full": 1.574,
+ "observed_over_predicted_half": 3.132,
+ "p1g0_weekday_session_level": {
+  "sessions": 585,
+  "kruskal_p": 0.179,
+  "sessions_per_weekday": [
+   66,
+   80,
+   96,
+   82,
+   81,
+   91,
+   89
+  ]
+ },
+ "p1g0_weekday_vs_weekend_session_level_p": 0.132
+}

@@ -1,0 +1,61 @@
+{
+ "header": {
+  "provisional": true,
+  "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+  "scope": "verify/device",
+  "script": "analysis/verify/device/v4_faults.py",
+  "measured_utc": "2026-10-06T14:28:01Z",
+  "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+  "machine": "lead's laptop (provisional until re-run on the verification desktop)"
+ },
+ "permanent_couplers": [
+  [
+   27,
+   28
+  ],
+  [
+   32,
+   33
+  ],
+  [
+   71,
+   72
+  ],
+  [
+   72,
+   73
+  ],
+  [
+   95,
+   99
+  ],
+  [
+   99,
+   115
+  ]
+ ],
+ "ever_placeholder_couplers_count": 13,
+ "coupler_pairs_sharing_a_qubit": 244,
+ "exact_null_mean_adjacent_pairs_6": 0.23766233766233766,
+ "exact_null_mean_adjacent_pairs_16": 1.9012987012987013,
+ "observed_adjacent_pairs_perm": 2,
+ "mc_p_adjacent_ge_obs": 0.0176,
+ "footprint_mean_hop_couplers_only": 7.733333333333333,
+ "footprint_qubits_from_couplers": 10,
+ "null_a_random_qubits": {
+  "median": 12.666666666666666,
+  "min": 7.622222222222222,
+  "p_le_obs": 0.001
+ },
+ "null_b_random_couplers": {
+  "median": 11.418181818181818,
+  "q05": 7.909090909090909,
+  "min": 4.0606060606060606,
+  "p_le_obs": 0.0423978801059947
+ },
+ "null_c_random_couplers_with_ge2_adjacent": {
+  "n": 1066,
+  "median": 10.4,
+  "p_le_obs": 0.15557638238050608
+ }
+}

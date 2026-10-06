@@ -1,0 +1,95 @@
+{
+ "header": {
+  "provisional": true,
+  "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+  "scope": "verify/coherence",
+  "script": "analysis/verify/coherence/v_comove.py",
+  "measured_utc": "2026-10-06T14:28:57Z",
+  "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+  "machine": "lead's laptop (provisional until re-run on the verification desktop)"
+ },
+ "paired_events_used": 19747,
+ "level_pm7_days": {
+  "n": 18882,
+  "pearson": 0.7013547363959213,
+  "spearman": 0.6909935882311035,
+  "rho_sq": 0.49189846626499223,
+  "quiet_before_0528": {
+   "n": 2434,
+   "pearson": 0.6425301259001042
+  },
+  "0528_to_0805": {
+   "n": 9112,
+   "pearson": 0.7234674338562622
+  },
+  "after_0805": {
+   "n": 7336,
+   "pearson": 0.6885230826364254
+  },
+  "qubits_positive": "154 of 154",
+  "after_removing_round_median": {
+   "n": 18882,
+   "pearson": 0.6872049854673313
+  },
+  "placebo_T1_now_vs_T2_next_round": {
+   "n": 18727,
+   "pearson": -0.02696501013751264
+  },
+  "placebo_other_qubit_same_round_mean_pearson": 0.06576685241950514
+ },
+ "level_14_nearest_events": {
+  "n": 19437,
+  "pearson": 0.6980790599874699,
+  "spearman": 0.689115965827154,
+  "rho_sq": 0.4873143739929896,
+  "quiet_before_0528": {
+   "n": 2286,
+   "pearson": 0.5544171075886464
+  },
+  "0528_to_0805": {
+   "n": 9321,
+   "pearson": 0.7233112442101318
+  },
+  "after_0805": {
+   "n": 7830,
+   "pearson": 0.6898377550639296
+  },
+  "qubits_positive": "155 of 155",
+  "after_removing_round_median": {
+   "n": 19437,
+   "pearson": 0.6892733843276737
+  },
+  "placebo_T1_now_vs_T2_next_round": {
+   "n": 19282,
+   "pearson": -0.031001141540075366
+  },
+  "placebo_other_qubit_same_round_mean_pearson": 0.051234711923844094
+ },
+ "first_difference_18_30h_from_0628": {
+  "n": 9948,
+  "pearson": 0.7142893263396477,
+  "spearman": 0.7191438843676623
+ },
+ "dips_level_14_nearest_events": {
+  "events": 19595,
+  "dips": 630,
+  "qubits_with_dip": 151,
+  "rate": 0.03215105894360806,
+  "consecutive_pairs_observed": 28,
+  "consecutive_pairs_expected_exchangeable": 21.052828162070156,
+  "dips_from_0628": 533,
+  "pairs_from_0628_observed": 27,
+  "pairs_from_0628_expected": 23.26838245619467
+ },
+ "dips_level_pm7_days": {
+  "events": 19145,
+  "dips": 596,
+  "qubits_with_dip": 149,
+  "rate": 0.031130843562287805,
+  "consecutive_pairs_observed": 25,
+  "consecutive_pairs_expected_exchangeable": 19.50426912289332,
+  "dips_from_0628": 499,
+  "pairs_from_0628_observed": 23,
+  "pairs_from_0628_expected": 21.796481443354136
+ }
+}

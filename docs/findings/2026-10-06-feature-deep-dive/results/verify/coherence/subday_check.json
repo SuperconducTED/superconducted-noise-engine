@@ -1,0 +1,125 @@
+{
+ "header": {
+  "provisional": true,
+  "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+  "scope": "verify/coherence",
+  "script": "analysis/verify/coherence/v_subday.py",
+  "measured_utc": "2026-10-06T14:29:02Z",
+  "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+  "machine": "lead's laptop (provisional until re-run on the verification desktop)"
+ },
+ "occasions": [
+  {
+   "first_round": "2026-05-13T21:57:01.000",
+   "gap_h": 7.465277777777778,
+   "qubits": 149,
+   "robust_sv": 0.010858966341039243,
+   "classical_sv": 0.015315049941403916,
+   "neighbour_day_robust_sv": 0.005501861127592272,
+   "neighbour_day_classical_sv": 0.009569702117150684,
+   "ratio_robust": 1.9736896459601028,
+   "after_2026_05_30": false
+  },
+  {
+   "first_round": "2026-05-15T05:57:18.000",
+   "gap_h": 16.464444444444446,
+   "qubits": 153,
+   "robust_sv": 0.0006429759135292669,
+   "classical_sv": 0.0013784085081632075,
+   "neighbour_day_robust_sv": 0.005501861127592272,
+   "neighbour_day_classical_sv": 0.009569702117150684,
+   "ratio_robust": 0.11686516591716418,
+   "after_2026_05_30": false
+  },
+  {
+   "first_round": "2026-05-16T22:25:05.000",
+   "gap_h": 6.175833333333333,
+   "qubits": 153,
+   "robust_sv": 0.0004035888523080552,
+   "classical_sv": 0.00044650780441318717,
+   "neighbour_day_robust_sv": 0.0005218879340934809,
+   "neighbour_day_classical_sv": 0.0010219972907834012,
+   "ratio_robust": 0.7733247426175676,
+   "after_2026_05_30": false
+  },
+  {
+   "first_round": "2026-05-29T10:13:59.000",
+   "gap_h": 10.055,
+   "qubits": 148,
+   "robust_sv": 0.009299372280690398,
+   "classical_sv": 0.0096546082555202,
+   "neighbour_day_robust_sv": 0.008870877314409522,
+   "neighbour_day_classical_sv": 0.010618247526025072,
+   "ratio_robust": 1.0483035613157274,
+   "after_2026_05_30": false
+  },
+  {
+   "first_round": "2026-06-12T19:45:23.000",
+   "gap_h": 3.8643055555555557,
+   "qubits": 147,
+   "robust_sv": 0.01153431072463807,
+   "classical_sv": 0.013421417380574722,
+   "neighbour_day_robust_sv": 0.009693931472044249,
+   "neighbour_day_classical_sv": 0.010875529736945,
+   "ratio_robust": 1.1898485932050564,
+   "after_2026_05_30": true
+  },
+  {
+   "first_round": "2026-06-16T02:42:20.000",
+   "gap_h": 14.639444444444445,
+   "qubits": 144,
+   "robust_sv": 0.01050313971658466,
+   "classical_sv": 0.013371842878135297,
+   "neighbour_day_robust_sv": 0.010951429858137305,
+   "neighbour_day_classical_sv": 0.011965421096767789,
+   "ratio_robust": 0.9590656062852332,
+   "after_2026_05_30": true
+  },
+  {
+   "first_round": "2026-07-24T12:49:49.000",
+   "gap_h": 17.43861111111111,
+   "qubits": 143,
+   "robust_sv": 0.017045940011369977,
+   "classical_sv": 0.021276503489402455,
+   "neighbour_day_robust_sv": 0.013253434156686353,
+   "neighbour_day_classical_sv": 0.01543156764852069,
+   "ratio_robust": 1.2861526914343409,
+   "after_2026_05_30": true
+  },
+  {
+   "first_round": "2026-08-25T17:37:37.000",
+   "gap_h": 8.089166666666667,
+   "qubits": 145,
+   "robust_sv": 0.013140266374877235,
+   "classical_sv": 0.01417388690733738,
+   "neighbour_day_robust_sv": 0.014381065757204546,
+   "neighbour_day_classical_sv": 0.01608525191060709,
+   "ratio_robust": 0.91371992846179,
+   "after_2026_05_30": true
+  },
+  {
+   "first_round": "2026-09-22T10:38:33.000",
+   "gap_h": 10.120833333333334,
+   "qubits": 136,
+   "robust_sv": 0.018042705049435576,
+   "classical_sv": 0.02161459887729382,
+   "neighbour_day_robust_sv": 0.015150411046080458,
+   "neighbour_day_classical_sv": 0.018937818127102077,
+   "ratio_robust": 1.19090531567481,
+   "after_2026_05_30": true
+  }
+ ],
+ "n_occasions": 9,
+ "n_occasions_below_6h": 1,
+ "n_occasions_below_9h": 4,
+ "n_after_0530": 5,
+ "median_ratio_all": 1.0483035613157274,
+ "median_ratio_after_0530": 1.1898485932050564,
+ "ratios_after_0530": [
+  1.1898485932050564,
+  0.9590656062852332,
+  1.2861526914343409,
+  0.91371992846179,
+  1.19090531567481
+ ]
+}

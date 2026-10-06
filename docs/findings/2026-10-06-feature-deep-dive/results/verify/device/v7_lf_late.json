@@ -1,0 +1,35 @@
+{
+ "header": {
+  "provisional": true,
+  "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+  "scope": "verify/device",
+  "script": "analysis/verify/device/v7_lf_late.py",
+  "measured_utc": "2026-10-06T14:28:08Z",
+  "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+  "machine": "lead's laptop (provisional until re-run on the verification desktop)"
+ },
+ "late_files": 217,
+ "late_live": 156,
+ "late_hist": 61,
+ "lag_h_median": 1.958888888888889,
+ "lag_h_max": 6.4302777777777775,
+ "lag_h_min": 0.013055555555555556,
+ "all_files_lf_minus_last_update_h_quantiles": [
+  -1258.1888888888889,
+  -603.4861944444444,
+  -21.542708333333334,
+  -13.01125,
+  -4.525833333333333,
+  0.6911944444444453,
+  6.4302777777777775
+ ],
+ "live_late_with_ledger_new": 60,
+ "poll_before_lf_stamp": 49,
+ "poll_minus_lf_h_median": -1.3447222222222224,
+ "poll_minus_lf_h_min": -3.4922222222222223,
+ "states": 760,
+ "states_with_exactly_one_flag": 760,
+ "states_flag_not_on_first_file": 79,
+ "notfirst_first_is_hist": 79,
+ "files_without_state": 1
+}

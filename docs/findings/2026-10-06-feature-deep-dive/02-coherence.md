@@ -51,6 +51,7 @@ open; nothing here records or implies an approval.
   observed against a shuffled mean of 21.6 (5% to 95%: 15 to 29), p = 0.10; from 2026-06-28,
   24 against 22.1, p = 0.39. Thirteen qubits show a two-level shape, without day-scale dwell
   (9 low-low pairs against 12.7 expected).
+  **[Verification 2026-10-06: weakened. "Do not persist beyond chance" is absence of evidence from a test of 28 pairs: the observed excess is about 30% (28 against an analytic exchangeable expectation of 21.1, p = 0.10), and at 25 h sampling a dwell of a few hours could not produce consecutive dips anyway. Single-round dips are consistent with the data, not demonstrated.]**
 - **The size of the component is not a stable property of the device.** The round-to-round
   robust semivariance of log `T1` was between 0.000404 and 0.000686 in the 13 rounds of
   2026-05-15 to 2026-05-27, rose after a device-wide jump of +0.132 decades at the
@@ -84,6 +85,7 @@ open; nothing here records or implies an approval.
   `T1` and `T2` that attribution is contradicted for at least half of the non-persistent
   variance under the independence assumption above; the component is better described as
   real same-round changes of the qubit, plus an unquantified remainder.
+  **[Verification 2026-10-06: weakened. The 0.70 correlation is reproduced, but it shows a component SHARED by the `T1` and `T2` experiments of a round. A shared artefact of IBM's procedure is not excluded (section 4.2 says so); "contradicted" and "real" are stronger than that. Read: at least half of the variance is shared between the two fits.]**
 
 ## 1. The fields and how IBM produces them
 
@@ -386,6 +388,12 @@ short-lag audit confirms these are device-wide re-runs, not targeted ones: all 1
 under 6 h fall in rounds of at least 78 qubits, and the first event of such a pair is no more
 deviant than any event (median absolute deviation 0.0708 against 0.0686) (`short_lag_audit`).
 **So the component decorrelates faster than 3.86 h**, the shortest lag the archive offers.
+**[Verification 2026-10-06: weakened. Only one of the nine occasions (2026-06-12, 147 qubits,
+which are not independent of each other) is shorter than 6 h and only five fall after
+2026-05-30; the four May occasions are in the quiet or transition window and carry little
+information. The re-computation gives median ratios 1.05 (all) and 1.19 (after 05-30) instead of
+0.96. Supported: no rise of the semivariance from about 4 to 24 h. Not supported as stated: a
+claim about the lag at which the component decorrelates, resting on one round pair.]**
 
 **Log `Gamma_phi` by tertile of the qubit's median `s`** (`variograms.log10_gamma_phi_by_s_tertile`;
 edges 0.307 and 0.483): 18 to 30 h semivariance 0.0052 (lowest `s`, 52 qubits), 0.0138, 0.0337
@@ -522,7 +530,7 @@ documents 03 to 05 and are not analysed here.
 
 | Use | Field | What this document implies |
 | --- | --- | --- |
-| ADR-027 training target | gamma, lambda | The snapshot target is the mean of per-qubit values. Gamma's top 10% of qubits carry a median 20% of the sum (uniform would be 10%), mean over median 1.12; lambda's top 10% carry 48%, mean over median 2.30 (`adr027.json`). A snapshot lambda is mostly a statement about the 16 most dephasing-limited qubits. Rejections: `q72` always, `T2 > 2 T1` in 379 files; stale `T1` values enter the mean unflagged |
+| ADR-027 training target | gamma, lambda | The snapshot target is the mean of per-qubit values. Gamma's top 10% of qubits carry a median 20% of the sum (uniform would be 10%), mean over median 1.12; lambda's top 10% carry 48%, mean over median 2.30 (`adr027.json`). A snapshot lambda is mostly a statement about the 16 most dephasing-limited qubits. **[Verification 2026-10-06: overstated. The median share of the top 10% is 48%, below half; "mostly" holds in at most about half the files. Say "close to half".]** Rejections: `q72` always, `T2 > 2 T1` in 379 files; stale `T1` values enter the mean unflagged |
 | Forecasting (plan step M2 references) | `T1`, `T2` | After May, deviations have no memory: the qubit's level (median over its history) is the forecast and the scatter around it is a band, not a signal. For `T1` the level carries 39% of the variance and the rest is same-round change; for `T2` and `Gamma_phi`, over 80%. The quiet window and the 2026-06-26/29 step must be handled as regimes, not as part of a stationary noise |
 | Coherence limit of gates | `T1`, `T2` | Used by documents 04 and 05. Since a `T1` dip lasts one round and the gate errors are stamped in other rounds, a limit built from `T1`/`T2` of a different round inherits the full round-to-round scatter of section 4 |
 | Noise models and digital twins | `T1`, `T2` | Calibration-based digital twins map `T1`/`T2` into channels (Bautra et al. 2026, existing survey of 2026-10-05, section 2.5); the one-round dips mean a twin built from one snapshot carries that snapshot's dips |
@@ -612,3 +620,76 @@ the rest cited from the surveys by section.
 | Bautra, Dimitrijevs and Yakaryilmaz (2026) | arXiv:2603.14607 | existing survey of 2026-10-05, section 2.5 | Calibration-based digital twins |
 | Khalil et al. (2026) | arXiv:2608.21983 | existing survey of 2026-10-05, section 2.3 | TLS detection needs spectroscopy |
 | Project sources | `01-data-layer.md`; `docs/decisions.md` ADR-027; `src/superconducted/training/targets.py`; `docs/roadmap/2026-10-05-feature-patterns-and-method.md` | read 2026-10-06 | Field semantics, device dates, ADR-027 definitions, the P2 wording corrected here |
+
+## Verification (2026-10-06)
+
+Verifier: a second agent that did not write this document. Figures are provisional, measured on
+the lead's laptop at ref `7b84b506ef77beb6e6c1b25a7357c574cfaf5117`. The analyst stopped at a
+usage limit before a final self-check; this section is that check.
+
+**Re-run.** All seven owner scripts (`profile`, `temporal`, `nonpersistent`, `regime`, `dips`,
+`spatial`, `adr027`) were re-run from the same cache. Every results JSON reproduced exactly,
+field by field (tolerance 1e-9 relative), the only difference being `measured_utc`. So no
+number in the document is stale against its script. Whether a script's rule is right is a
+separate question, tested below with fresh code.
+
+**Independent recomputation** (new scripts written from `ddload` only, no import of the owner's
+code: `analysis/verify/coherence/v_core.py`, `v_comove.py`, `v_subday.py`; results in
+`results/verify/coherence/core_check.json`, `comove_check.json`, `subday_check.json`). The
+comovement and dip checks use a different running level (median of the qubit's other events
+within 7 days) as well as the document's (14 nearest events).
+
+| Claim | Document value | Recomputed | Match |
+| --- | --- | --- | --- |
+| `T1` / `T2` events, and paired events | 20,063 / 20,626; 19,899 | 20,063 / 20,626; 19,899 | yes |
+| `T2` stamp after `T1` stamp: range, share within 10 s | 1 to 112 s, 98.7% | 1 to 112 s, 98.67% | yes |
+| `T1` median, 1%, 99% (us) | 126, 39.5, 261 | 125.97, 39.49, 260.89 | yes |
+| Between-qubit variance share, `T1` / `T2` | 0.386 / 0.817 | 0.3865 / 0.8166 | yes |
+| `T1` variogram 18 to 30 h, 744 to 1,488 h, ratio, pairs | 0.0146, 0.0179, 0.817, 16,087 | 0.014634, 0.017913, 0.817, 16,087 | yes |
+| Lag-1 autocorrelation of `T1` log changes | -0.493 | -0.497 (no first events; document uses a demeaned within-qubit estimator) | yes, within 0.004 |
+| Largest device-wide median steps of `T1` | -0.162 (05-15), +0.132 (05-28) | -0.1625, +0.1317 at the same round pairs | yes |
+| Same-round deviation correlation `T1`/`T2` | Pearson 0.70, Spearman 0.69, 155 of 155 qubits | 0.701 / 0.691, 154 of 154 (7-day level); 0.698 / 0.689, 155 of 155 (document's level) | yes |
+| First-difference correlation, 18 to 30 h, from 06-28 (no level) | not in document | Pearson 0.714, Spearman 0.719 (n = 9,948) | new, supports |
+| `T1` dips (factor 2) | 630 of 19,595, 151 qubits | 630 of 19,595, 151 qubits (14-event level); 596 of 19,145, 149 qubits (7-day level) | yes |
+| Consecutive dip pairs | 28 observed, 21.6 shuffled | 28 observed, 21.1 analytic; 25 against 19.5 with the 7-day level | yes |
+| `T2 > 2 T1` among pairs | 20 events, 15 qubits | 20, 15 | yes |
+| Moran's I of median log `T1` | -0.017 (p = 0.86) | -0.015 (p = 0.81); ranks 0.003 | yes |
+| Shot-noise floor, total shots at which the floor equals the nugget | 74 to 167 | 74.0 to 167.4 (four designs) | yes |
+| Klimov budget (80,000 shots) floor as share of nugget | 0.14% | 0.14% (log design); 0.09% to 0.21% across designs | yes |
+| Matched sub-day test, median ratio | 0.96, 9 occasions | 1.05 (all), 1.19 (after 05-30), 9 occasions | partly (same occasions and gaps; ratio depends on the neighbour pairing, one neighbour value differs: 0.0055 against 0.0246 on 05-13) |
+
+**Claims challenged**
+
+| Claim | Verdict | Why |
+| --- | --- | --- |
+| At least half of the non-persistent variance is shared between `T1` and `T2` (rho^2 = 0.49) | Upheld, with the wording weakened to "shared" | Not an artefact of the level: 0.70 with two level definitions; 0.714 from first differences (no level, so it concerns the non-persistent part); 0.69 after removing each round's median deviation (so not a device-wide common mode); 0.64 / 0.72 / 0.69 by period; placebo `T1` against the next round's `T2` is -0.03 and against another qubit's `T2` in the same round 0.05 to 0.07. The Cauchy-Schwarz step is correct. It cannot separate a real qubit change from an artefact common to both of IBM's experiments, so "contradicted" and "real" in section 0 are marked weakened. |
+| The component decorrelates faster than 3.86 h | Weakened | Rests on one round pair at 3.86 h (147 qubits of one occasion) and five occasions after 05-30; see inline marker. |
+| Dips last one round and do not persist beyond chance | Weakened | 28 pairs, p = 0.10, a 30% excess; see inline marker. |
+| Shot noise cannot explain the component | Upheld | Reproduced independently. It is a Cramer-Rao lower bound for a correct exponential model with median readout and assumed designs; misspecification and in-experiment change are not covered, and the document says so. |
+| The size of the component is not a stable property (quiet window, 2026-05-15 to 05-27) | Upheld | Round-step medians reproduced; the document's own caveat (13 rounds; -0.33 autocorrelation is intermediate) is correct. The inference "TLS dynamics do not pause for twelve days" is interpretation, stated with an either/or. |
+| ADR-027 lambda "mostly" set by 16 qubits | Weakened (overstated) | Median share 48%; see inline marker. |
+| Low-`T1` dips are real drops that `T2` follows | Upheld as a shared change | Same limits as the first row. |
+| No neighbour structure | Upheld | Moran's I reproduced with a different weights and permutation implementation, on raw values and on ranks. The test has 156 units and detects only large effects; "no structure" means none detected. |
+
+Looked for and not found: placeholder leakage (neither field carries placeholders), alias or
+direction duplicates (not applicable to qubit fields), assembly-stamped dates (the measured rule
+applies), and period confounding of the headline correlation (the same in every period). Not
+tested by anyone here: whether a round's readout or initialisation change moves both `T1` and
+`T2`; this needs the cross-family document 06.
+
+**Sources spot-checked (3), fetched 2026-10-06.** IBM "View backend details": supports the
+`T1` and `T2` definitions, "`T2` is reported from a Hahn echo sequence", and the
+pairing with the timestamp of the last calibration. Dasgupta and Humble, arXiv:2008.09612,
+title "Characterizing the Stability of NISQ Devices": supports the stated framing (a distance
+between histograms over time and across qubits, on IBM's Yorktown device). Qiskit Experiments
+"T2 Hahn Characterization": supports 2,000 shots, 11 delays, `A exp(-t/T2) + B`, and
+(2.11 +/- 0.16)e-05 s; it does not explicitly compare the echo with Ramsey (it says echoes
+reduce frequency-inaccuracy effects), so the "echo against Ramsey" use of that row rests on
+Krantz et al., which was not re-fetched here.
+
+**Rule check.** No em dash (U+2014) in the document or the verification scripts. Provisional
+banner, ref, basis and machine are present. Every number in the body is a field of a results
+JSON that reproduces; the numbers added in this section come from the three verification
+results files. No row was added to `docs/numerical-claims.md`. The verification scripts pass the
+pinned `ruff check` and `ruff format --check`. Four inline markers were inserted (three weakened
+claims and one overstated claim).

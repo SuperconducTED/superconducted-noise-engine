@@ -1,0 +1,18 @@
+{
+ "header": {
+  "provisional": true,
+  "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+  "scope": "verify/gates_2q",
+  "script": "v_link.py",
+  "measured_utc": "2026-10-06T14:26:02Z",
+  "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+  "machine": "lead's laptop (provisional until re-run on the verification desktop)"
+ },
+ "n_couplers": 172,
+ "spearman_err_vs_limit": 0.318,
+ "spearman_err_vs_sx_sum": 0.577,
+ "spearman_err_vs_ro_sum": 0.171,
+ "partial_err_sx_given_limit": 0.542,
+ "partial_err_limit_given_sx": 0.217,
+ "partial_err_ro_given_limit_sx": -0.00413
+}

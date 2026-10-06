@@ -1,0 +1,84 @@
+{
+ "header": {
+  "provisional": true,
+  "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+  "scope": "verify/device",
+  "script": "analysis/verify/device/v1_basics.py",
+  "measured_utc": "2026-10-06T14:27:54Z",
+  "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+  "machine": "lead's laptop (provisional until re-run on the verification desktop)"
+ },
+ "n_files": 1760,
+ "n_live": 1317,
+ "n_hist": 443,
+ "per_month": {
+  "2026-05": {
+   "files": 171,
+   "hist": 0
+  },
+  "2026-06": {
+   "files": 194,
+   "hist": 0
+  },
+  "2026-07": {
+   "files": 270,
+   "hist": 0
+  },
+  "2026-08": {
+   "files": 304,
+   "hist": 29
+  },
+  "2026-09": {
+   "files": 683,
+   "hist": 349
+  },
+  "2026-10": {
+   "files": 138,
+   "hist": 65
+  }
+ },
+ "gap_median_h": 1.2591666666666668,
+ "gap_live_median_h": 1.906388888888889,
+ "n_gaps_gt_12h": 14,
+ "n_gaps_gt_12h_between_live": 14,
+ "max_gap_h": 82.67666666666666,
+ "n_q": 156,
+ "n_couplers": 176,
+ "degree_counts": {
+  "1": 8,
+  "2": 100,
+  "3": 48
+ },
+ "connected": true,
+ "bipartite": true,
+ "class_sizes": [
+  64,
+  92
+ ],
+ "diameter": 32,
+ "girth": 12,
+ "cycle_rank": 21,
+ "mean_hop": 12.63556658395368,
+ "lf_events_all": 83,
+ "lf_events_in_archive": 82,
+ "lf_stamp_first": "2026-05-10T09:02:41+00:00",
+ "lf100_median": 0.5449206872025318,
+ "lf100_min_max": [
+  0.4319425247245341,
+  0.6055628419918063
+ ],
+ "eplg100_avg_median": 0.004890967786892642,
+ "eplg_spearman_in_archive": {
+  "rho": 0.4625004081366115,
+  "p": 1.216743937315103e-05,
+  "n": 82
+ },
+ "eplg_spearman_all_events": {
+  "rho": 0.4562360942025943,
+  "p": 1.4592066398404851e-05,
+  "n": 83
+ },
+ "lf_monotone_events": 83,
+ "lf100_lag1_acf_dlogeplg": -0.5651899571309738,
+ "n_states": 760
+}

@@ -1,0 +1,103 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "verify/readout",
+ "script": "v_length_link.py",
+ "measured_utc": "2026-10-06T14:25:52Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "length_change_files": [
+  "20260608T185628000000Z.json",
+  "20260730T210917000000Z.json"
+ ],
+ "change1_7d": {
+  "median_log10": -0.1383,
+  "qubits": 156,
+  "share_up": 0.0192
+ },
+ "change2_7d": {
+  "median_log10": 0.0014,
+  "qubits": 156,
+  "share_up": 0.5
+ },
+ "change1_14d": {
+  "median_log10": -0.1448,
+  "qubits": 156,
+  "share_up": 0.0128
+ },
+ "change2_14d": {
+  "median_log10": 0.0059,
+  "qubits": 156,
+  "share_up": 0.5641
+ },
+ "placebo7": {
+  "days": 70,
+  "q05": -0.0375,
+  "q95": 0.0305,
+  "min": -0.084,
+  "share_at_least_as_negative": 0.0
+ },
+ "pre_change_same_statistic_centred_k_days_before": {
+  "8": {
+   "median_log10": -0.0211,
+   "qubits": 156
+  },
+  "10": {
+   "median_log10": -0.0391,
+   "qubits": 156
+  },
+  "12": {
+   "median_log10": -0.0381,
+   "qubits": 156
+  },
+  "14": {
+   "median_log10": -0.0327,
+   "qubits": 156
+  },
+  "16": {
+   "median_log10": -0.0307,
+   "qubits": 156
+  }
+ },
+ "asym_vs_dfull_across_qubits": {
+  "n": 156,
+  "spearman": 0.3937,
+  "p": 3.7e-07
+ },
+ "p0g1_vs_dfull_across_qubits": {
+  "spearman": 0.0337,
+  "p": 0.68
+ },
+ "p0g1_vs_p1g0_across_qubits": 0.9074,
+ "median_dfull_per_qubit": 0.01269,
+ "asym_vs_dfull_without_worst_10pct_ro_qubits": {
+  "n": 140,
+  "spearman": 0.3572,
+  "p": 1.5e-05
+ },
+ "asym_vs_median_ro_across_qubits": 0.2312,
+ "asym_vs_dfull_partial_on_ro_rank": 0.4071,
+ "moran_ro": {
+  "edges": 176,
+  "I": -0.1957,
+  "p": 0.0094
+ },
+ "moran_ro_two_hop_only": {
+  "edges": 244,
+  "I": 0.1952,
+  "p": 0.001
+ },
+ "init_never_present_qubits": 40,
+ "init_never_vs_others_median_ro": {
+  "never": 0.03137,
+  "others": 0.00757,
+  "p": 8.1e-21
+ },
+ "init_vs_p1g0_across_qubits": {
+  "n": 116,
+  "spearman": 0.8504
+ },
+ "init_first_file": "20260804T005230000000Z.json",
+ "never_present_among_top25pct_ro": 38,
+ "top25pct_ro_qubits": 40
+}

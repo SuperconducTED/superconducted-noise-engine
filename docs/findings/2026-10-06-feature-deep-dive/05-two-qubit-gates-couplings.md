@@ -60,6 +60,10 @@ approval, and nothing here is a modelling or strategic decision.
    estimation noise; most of it is unshared, and what the unshared part is stays open (§4).
 8. **Second calibrations within a day** (11 `cz` and 6 `rzz` device-wide occasions 3 to 16 h after
    a round) change by 0.727 (`cz`) and 0.783 (`rzz`) of the one-round semivariance (V).
+   **[Verification 2026-10-06: weakened. "Second calibrations" asserts a recalibration that 4.2
+   itself says the document cannot show; the 0.727 and 0.783 are averages over gaps of 3 to 16 h
+   and the fraction rises with the gap (0.33 of one round at 2 to 4 h, 0.73 at 9 to 12 h, 0.89 at
+   12 to 18 h; see Verification section).]**
 9. **Coherence limit.** At the device-median `T1` (125.9 us) and `T2` (92.44 us) a 68 ns gate has a
    coherence limit of 8.04e-4; the median `cz` error is 3.41 times that. Per event, the limit is a
    median 0.333 (`cz`) and 0.351 (`rzz`) of the reported error (L).
@@ -272,7 +276,9 @@ archive holds only documents the poller saw; a missed document can hide intermed
 pre-split event rates are lower bounds. The `cz` rate is the same in both periods, so the poller
 probably missed few `cz` rounds (an inference). The `rzz` rate is lower **after** the split, when coverage is better,
 so the drop reflects how often IBM refreshed `rzz`, not coverage (an inference: better coverage
-can only reveal more events under the measured rule). Device-wide gaps between round starts over
+can only reveal more events under the measured rule). **[Verification 2026-10-06: overstated as
+a cadence statement. The 279.8 h pause alone accounts for most of it: excluding it, the rate from
+the split is 0.729 per coupler per day (re-computed) against 0.607 with it and 0.809 before.]** Device-wide gaps between round starts over
 40 h occur 16 times for `rzz` and 9 times for `cz` (P `*.values.rounds.n_round_start_gaps_over_40h`,
 listed in `round_start_gaps_over_40h`); the longest `rzz` gap runs from 2026-08-19T23:02:17Z to
 2026-08-31T14:50:23Z (279.8 h), during which `cz` rounds continued (the longest `cz` round gap is
@@ -418,12 +424,22 @@ distinguishes a repeated benchmark of the same tuned gate from a fresh tune-up.
 | Occasions with the short change below the preceding | 9 of 11 | 4 of 6 |
 | Wilcoxon signed-rank p, short against preceding | 0.0011 | 2.9e-6 |
 
+**[Verification 2026-10-06: refuted as evidence. These p-values treat the 1,835 and 990 coupler
+pairs as independent, but couplers of one occasion share the device-wide round and there are only
+11 and 6 occasions. At occasion level the sign test gives p 0.065 (`cz`) and 0.69 (`rzz`), and the
+signed-rank test 0.10 and 0.56. "Short change below the preceding" is not established for `rzz`
+and is marginal for `cz`.]**
+
 A quarter of the preceding `cz` gaps exceed 51.7 h (V `cz.short_gap_occasions.preceding_gap_h_q`,
 75th percentile) and carry some level drift, so the comparison with the 18 to 30 h bin is the
 cleaner one. The single shortest occasion
 (2026-07-27, 163 couplers, 3.77 h) changed by 0.00447 against 0.0117 before it, but it is one
 occasion. **About three quarters of the one-round nugget is already present between two
 calibrations a few hours apart; about a quarter builds up between a few hours and a day.**
+**[Verification 2026-10-06: weakened. The pooled bins give 0.33 of the one-round value at 2 to 4 h,
+0.64 at 6 to 9 h, 0.73 at 9 to 12 h, 0.89 at 12 to 18 h; "three quarters" holds only for gaps near
+10 h. The occasions' gaps run 3 to 16 h, so the average hides a lag dependence, and the shortest
+(3.77 h) occasion is at 0.33 of the one-round value (0.00447 against 0.0134).]**
 
 ### 4.3 Variogram of `zz`
 
@@ -904,3 +920,80 @@ Project sources: `01-data-layer.md` (field semantics, readout cadence 4.47 h, id
 `docs/roadmap/2026-10-05-feature-patterns-and-method.md` (P2, P3, P4, P6, P7 at `09fcc45`);
 `docs/decisions.md` (ADR-028 Consequences); `scripts/feature_patterns.py` (event rule and
 `process_fidelity_1q`).
+
+## Verification (2026-10-06)
+
+Verifier note, appended under the append-only rule; the body above is unchanged except for the
+inline **[Verification 2026-10-06: ...]** markers. Same provisional basis (ref `7b84b50`, 1,760
+files, lead's laptop). Verifier scripts: `analysis/verify/gates_2q/` (`compare_reruns.py`,
+`v_core.py`, `v_challenge.py`, `v_link.py`, written from `ddload` without importing the owner's
+code); results: `results/verify/gates_2q/` (`compare_reruns.json`, `core_check.json`,
+`challenge_check.json`, `link_check.json`).
+
+### What was re-run
+
+1. All seven owner scripts (`profile_2q`, `cz_vs_rzz`, `temporal_2q`, `variograms_2q`, `zz_2q`,
+   `spatial_2q`, `link_qubits`) were re-run; every results JSON reproduces leaf for leaf
+   (4,527 numeric leaves compared, 0 differences apart from `measured_utc`; `compare_reruns.json`).
+   Every JSON the document cites exists and is current.
+2. Independent recomputation of the numbers below, from the cache through `ddload`.
+
+### Numbers checked
+
+| Claim | Document value | Recomputed | Match |
+| --- | --- | --- | --- |
+| Direction identity: value mismatches (`cz`, `rzz`) | 0, 0 of 309,760 | 0, 0 of 309,760 | yes |
+| Date mismatches, all in placeholders | 8,682, 12,395 | 8,682, 12,395 (all in placeholders) | yes |
+| Median stamp offset in mismatches (us) | 6.10, 7.08 | 6.10, 7.08 | yes |
+| Events, measured rule | 22,092; 18,210 | 22,092; 18,210 | yes |
+| Median event error | 2.75e-3; 2.66e-3 | 2.75e-3; 2.66e-3 | yes |
+| Lag-1 autocorrelation of log changes | -0.448; -0.425 | -0.448; -0.425 | yes |
+| One-round semivariance over long-lag level | 0.64; 0.54 | 0.638; 0.544 | yes |
+| Coupler-median Spearman `cz` vs `rzz`; median ratio | 0.896; 0.968 | 0.896; 0.968 | yes |
+| Shared-qubit deviation Spearman (`cz`, `rzz`) | 0.220; 0.226 | 0.220; 0.225 (own local-deviation code) | yes |
+| Four or more hops apart | -0.008 | -0.008 | yes |
+| Coherence limit of 68 ns at median `T1` 125.9, `T2` 92.44 | 8.04e-4 | 8.04e-4 | yes |
+| Between-coupler Spearman: error vs `sx` sum; vs readout sum | 0.577; 0.171 | 0.577; 0.171 | yes |
+| Error vs limit (per-qubit medians, own construction) | 0.334 | 0.318 | approximately (different qubit-level reduction; ordering unchanged) |
+| Partial: error vs `sx` given limit; limit given `sx`; readout given both | 0.539; 0.236; -0.012 | 0.542; 0.217; -0.004 | approximately |
+| Moran's I of `cz` levels | 0.263 | 0.263 (binary weights; 0.282 row-standardized; p 0.0004 vs 0.0006) | yes |
+| `zz`: files changing any coupler; bursts changing 170 or more | 486; 484 | 486; 484 | yes |
+| `zz`: median burst gap (h); median couplers changed | 5.16; 172 | 5.16; 172 | yes |
+| `abs(zz)` value events; lag-1 of changes | 83,440; -0.513 | 83,440; -0.513 | yes |
+| Median `abs(zz)` of records (kHz) | 6.18 | 6.23 (all nonzero records, my filter) | approximately |
+| Non-68 ns couplers vs `abs(zz)`, Mann-Whitney p | 1.1e-4 | 1.09e-4 | yes |
+| Events per coupler per day, `cz` before / from split | 0.880 / 0.869 | 0.871 / 0.849 | approximately (my denominator is calendar time over all couplers; same conclusion) |
+| Same for `rzz` | 0.809 / 0.607 | 0.798 / 0.590 | approximately |
+| Non-placeholder `cz` stamps that are whole seconds | 1.0 | 1.0 | yes |
+
+### Claims challenged
+
+| Claim | Verdict | Why |
+| --- | --- | --- |
+| A shared part of the non-persistent component exists (summary 7, 4.4, 4.5) | upheld | Hop 1: 0.220 (`cz`), 0.225 (`rzz`); hop 2: -0.008, -0.019; hop 3: -0.010, -0.020, so the effect is confined to couplers sharing a qubit. Cross-round correlations (lag 1, lag 2) of the same deviations are -0.035 and -0.050 (`cz`), so it is not a slow shared shift leaking through the detrending. Per shared qubit the median rho is 0.186 (`cz`) and 0.20 (`rzz`), positive for 95% of 43 and 42 qubits. Stronger for shared qubits with high `sx` (0.228 against 0.186 `cz`; 0.262 against 0.150 `rzz`), in line with the document's testable prediction of mechanism (ii), but it is a tercile split of 14 to 15 qubits. The text does not say what the unshared part is. |
+| `cz`-`rzz` shared deviation falls with offset (4.4 item 2) | upheld, with a changed test | The proposed stratification by round is not feasible as written (the offset is nearly constant within a round pair). Per cz round with at least 60 matched couplers (104 rounds), the across-coupler Spearman has median 0.159 at offset up to 2 h and 0.055 beyond, and correlates with offset at -0.393 (p 3.8e-5). The non-monotone 12 to 24 h bump remains unexplained. |
+| About three quarters of the one-round nugget is present within hours (4.2, summary 8) | weakened | The fraction depends on the gap: 0.33, 0.64, 0.73, 0.89 of the one-round value at 2 to 4, 6 to 9, 9 to 12, 12 to 18 h. Short-gap occasion semivariance rises with the gap (Spearman 0.36 `cz`, 0.37 `rzz`); mean 0.0079 for gaps under 8 h against 0.0104 for longer (`cz`), 0.0076 against 0.0130 (`rzz`). Marked inline. |
+| Short change below the preceding, Wilcoxon p 0.0011 and 2.9e-6 (4.2) | refuted as stated | Pseudo-replication over coupler pairs; 11 and 6 independent occasions give sign-test p 0.065 (`cz`) and 0.69 (`rzz`), signed-rank 0.10 and 0.56. Marked inline. |
+| `rzz` cadence fell after the coverage split (summary 4, 2.3) | weakened | Excluding the 279.8 h pause the post-split rate is 0.729 against 0.809 before; most of the fall is one pause. Marked inline. |
+| Gate error clusters on the graph (5.2) | upheld | Moran's I reproduced with an independent implementation; consistent with the qubit-sharing effect, so probably one phenomenon (interpretation). |
+| `sx` explains more than coherence (summary 10, 7.3) | weakened in wording | Rank correlations reproduce (0.577 against 0.318 to 0.334), but "explains" is causal. The limit is a proxy from `T1` and `T2` stamped hours apart, so its weaker correlation is partly proxy noise, and mechanism (i) (IBM's page, re-fetched, says the 2Q benchmark alternates single-qubit Clifford sequences with two-qubit gates) would give the same pattern with no physical coupling. The body hedges both mechanisms; only the summary verb is strong. |
+| Non-68 ns length goes with low `abs(zz)` (7.4) | upheld as exploratory | p reproduced; on the three `rzz` 116 ns couplers alone p is 0.0055. The number of comparisons scanned before finding it is unknown, as the document says. |
+| The component is not called estimation or measurement noise (4.5) | upheld | No unsupported attribution found. |
+
+### Sources spot-checked (fetched 2026-10-06)
+
+| Source | Result |
+| --- | --- |
+| arXiv:1810.04182, Mundada et al. | Title "Suppression of Qubit Crosstalk in a Tunable Coupling Superconducting Circuit" matches; the abstract says parasitic crosstalk is a leading limitation for quantum gates and that a coupler frequency can be set so ZZ interactions interfere destructively. Supported. |
+| arXiv:1204.6308, Gambetta et al. | Title "Characterization of addressability by simultaneous randomized benchmarking" matches; the abstract describes individual then simultaneous RB, addressability from the fidelity difference, and two samples with different cross-talk. Supported as a protocol-effect alternative. |
+| IBM "View backend details" | An error of 1 means benchmarking has not succeeded for several days ("stale", "undefined"); 2Q error from isolation batches with at least two qubits between edges, with single-qubit Cliffords alternating with two-qubit gates; RZZ error averaged over angles with an RB variant for arbitrary unitaries. Supported. |
+
+No new sources were added by the verifier.
+
+### Rule check
+
+- No em dashes (U+2014) in the document or the verifier scripts (0 found).
+- Provisional banner, ref, basis and machine present in the header; verifier JSONs carry `ddload.result_header`.
+- Every body number traces to a results field of the owner's JSONs, which reproduce. The 4.2 Wilcoxon p-values trace but are invalid (marked). Inconsistent label: the summary says "Second calibrations" while 4.2 says recalibration cannot be distinguished from re-measurement.
+- No rows added to `docs/numerical-claims.md` by this verification (not touched; no git command was run to confirm the whole tree).
+- Pinned ruff `check` and `format --check` pass on `analysis/verify/gates_2q/`.

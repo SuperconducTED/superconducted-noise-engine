@@ -39,7 +39,8 @@ Figures quoted from older documents name their path and their (older) ref.
   series of each alias are identical to `sx`'s [A aliases.*.series_identical_to_sx_after_masking].
   IBM's documentation says the benchmarking sequence includes SX, ID and X and their errors
   are assumed equal (§1).
-- **`xslow` is a 1,000 ns instruction whose error is copied from the 24 ns `sx`.** Its
+- **`xslow` is a 1,000 ns instruction whose error is copied from the 24 ns `sx`.**
+  **[Verification 2026-10-06: overstated. Equality in all 136,032 records was reproduced (0 mismatches), but "copied" names a mechanism; the data show only that the two fields are always equal. Read it as "reports the same value as".]** Its
   coherence limit alone exceeds the error it reports in 99.67% of 6,033 matched events
   (median 17.2 times; with `T2 = 2 T1`, no pure dephasing at all, still 99.27% and 8.9
   times) [C xslow_coherence_floor.events_inside_xslow_windows]. It is present in 135 files
@@ -69,7 +70,7 @@ Figures quoted from older documents name their path and their (older) ref.
   level, 0.28% more than a factor of two below; 94% of such upward episodes last one event
   [P changes.residual_from_running_level; T spikes]. Spikes do not cluster by round (variance
   3.20 against 2.90 for independence) or between coupled qubits (ratio 1.01) [T spikes.per_round;
-  S tests.same_round_spike_cooccurrence].
+  S tests.same_round_spike_cooccurrence]. **[Verification 2026-10-06: wording stronger than the power. With per-qubit spike rates as the expectation, the index of dispersion over 133 rounds is 1.16 (chi-square p = 0.10, standard error about 0.12): "no detectable clustering", not "do not cluster".]**
 - **Positive evidence that part of the component is a real fluctuation.** Within a qubit, the
   `sx` deviation from its level moves against the `T1` deviation measured in the same round
   (rank correlation -0.062; a null that pairs each event with a different round gives
@@ -408,7 +409,8 @@ deviation at -0.062 and with `T2` at -0.049, against a shifted null of 0.002 +- 
 hour (-0.096 for `T1`) and weak beyond (-0.024), in every month [C within_by_stamp_offset];
 and spikes coincide with `T1` dips beyond the shifted null [C coincidence]. Interpretation:
 **at least part of the non-persistent component is a real device fluctuation that `sx` shares
-with `T1` and `T2` and that changes on a timescale of hours.** It would be falsified by finding
+with `T1` and `T2` and that changes on a timescale of hours.**
+**[Verification 2026-10-06: partly overstated. The coupling itself was reproduced and survives controls (near pairs against the previous or next `T1` event of the same qubit give -0.021 and -0.003; trimming the top 1% of `sx` deviations leaves -0.058). But "timescale of hours" is one of two readings: the near-to-far drop equally fits "same calibration job versus a different job", which the paragraph below concedes. Treat the timescale as unestablished, and "real" as "shared between experiments", which would include a shared SPAM or state-preparation drift.]** It would be falsified by finding
 a shared input of the two analyses (for example an upstream calibration step feeding both
 experiments in the same job) that degrades both fits together; such a step would act on the
 whole job, so it would not obviously weaken with the stamp separation, but whether a larger
@@ -708,7 +710,7 @@ simulator noise (Bautra et al. 2026, §2.5); a neuro-fuzzy error-attribution fra
 documents, so
 every single-qubit channel built from them rests on one RB number per qubit and round, and on
 a convention that `x`, `id`, `rx` (and now `xslow`) share it. Its non-persistent component
-(a factor of about 1.3 per round) limits how well any single value describes the next one,
+(a factor of about 1.3 per round) **[Verification 2026-10-06: overstated for a typical event. 0.111 decades is the plain standard deviation, inflated by the upward tail; the robust size is 0.086 decades, a factor of 1.22 (recomputed).]** limits how well any single value describes the next one,
 and its one-sided tail makes a single snapshot a poor estimate of a qubit's typical error.
 
 ## 9. Open questions, and what measurement would settle each
@@ -784,3 +786,71 @@ structure); `docs/roadmap/2026-10-05-feature-patterns-and-method.md` (P2, P4, P6
 `scripts/feature_patterns.py` (the event rule and `coherence_limit_1q`, which equals the
 formula above); `src/superconducted/training/targets.py` and
 `src/superconducted/integration/aer_factory.py` (project use).
+
+## Verification (2026-10-06)
+
+Provisional, same ref and machine as above. Independent scripts: `analysis/verify/gates_1q/`
+(`verify_core.py`, `verify_challenges.py`, `verify_placebo.py`), written from `ddload` without
+importing the owner's code; results in `results/verify/gates_1q/` (`verify_core.json`,
+`verify_challenges.json`, `verify_placebo.json`). Nothing was added to `docs/numerical-claims.md`.
+
+**Re-run of the owner's scripts.** All six scripts (`aliases_and_schema`, `sx_profile`,
+`sx_temporal`, `sx_variogram`, `sx_coherence`, `sx_spatial`) were re-run; each results JSON is
+identical to the committed one apart from `measured_utc`. The results files are newer than the
+scripts, so none is stale, and every number checked below has a results field.
+
+**Numbers checked** (own recomputation):
+
+| Claim | Document value | Recomputed | Match |
+| --- | --- | --- | --- |
+| `sx` events, series | 20,207; 155 | 20,207; 155 | yes |
+| Event median, 1%, 99%, max | 3.10e-4, 1.42e-4, 2.54e-3, 1.71e-2 | 3.095e-4, 1.425e-4, 2.541e-3, 1.706e-2 | yes |
+| Share above 1e-3; events above 1e-2 | 4.88%; 7 | 4.879%; 7 | yes |
+| Between-qubit variance share; median range | 0.744; 34.5 | 0.744; 34.5 | yes |
+| Alias value mismatches (x, id, rx; xslow) | 0 in 274,560; 0 in 136,032 | 0; 0 (xslow absent-pattern differs only outside its files) | yes |
+| `rz` error and length | 0 and 0 | all 0 | yes |
+| Lag-1, lag-2 autocorrelation of log changes | -0.490, -0.003 | -0.486 to -0.490 (two normalisations), -0.003; Spearman lag-1 -0.466 | yes |
+| Daily over long-lag semivariance | 0.81 | 0.808 | yes |
+| 6 to 9 h pairs; minimum gap | 456; 6.31 h | 456; 6.31 h | yes |
+| Matched / skipped events | 18,301 / 1,906 | 18,301 / 1,906 | yes |
+| Coherence-limit ratio 10%, 50%, 90%; share above 1 | 0.178, 0.402, 0.992; 9.82% | 0.178, 0.402, 0.992; 9.82% | yes |
+| `xslow` limit above error; median ratio; T1-only | 99.67% of 6,033; 17.2; 99.27%, 8.9 | 99.67% of 6,033; 17.2; 99.27%, 8.9 | yes |
+| Upward spikes | 393 (1.95%) | 393 (1.94%) | yes |
+| Within-qubit Spearman `sx` with `T1`, `T2` | -0.062, -0.049 | -0.060, -0.048 | yes (the level of each series is taken over all events here, not the matched subset) |
+| Between-qubit Spearman `sx` with `T1` | -0.434 (n = 155) | -0.434 (n = 155) | yes |
+| Placeholder stamps after file date; median | 1,975 of 1,975; 287 s | 1,975; 287 s | yes |
+| Measured stamp age median; no stamp after file | 12.4 h; 0 | 12.43 h; 0 | yes |
+| `q17` frozen `T1` | 200.93 us, 482 files, all 209 placeholder files, stamp 2026-04-13T21:49:04Z | same | yes |
+| Degree Kruskal-Wallis for `sx` | p = 0.003; medians 3.28, 3.22, 2.69 e-4 | p = 0.0030; 3.31, 3.22, 2.69 e-4 (degree 1 differs in the third digit: median of qubit medians over n = 8) | yes |
+| Split-half rank correlation of qubit medians | 0.972 (split 2026-07-25) | 0.972 (split 2026-07-24T13:33Z) | yes |
+| Known-date placebo share with p < 0.01 | 21.1% of 95 dates | 21.05% of 95 dates | yes |
+
+**Claims challenged.**
+
+| Claim | Verdict | Why |
+| --- | --- | --- |
+| The same-round coupling to `T1`/`T2` is positive evidence of a real fluctuation, "on a timescale of hours" | weakened | Coupling reproduced and robust: near pairs paired with the previous or next `T1` event of the qubit give -0.021 and -0.003 against -0.091 for the current one (n = 9,849 each); trimming the top 1% of `sx` deviations gives -0.058. Not established: the timescale (job membership is not visible) and the premise that separate experiments have independent errors (a shared SPAM or state-preparation input would also couple them). Inline marker added. |
+| No device-wide `sx` change at the known dates (06-08 has p = 6.5e-6) | upheld | Own placebo scan over the 95 dates: 15.8% have p at most 6.5e-6 and a shift at least 0.0148 decades, and the smallest placebo p is 3e-18. The document did not report this tail; it supports its conclusion strongly. |
+| Variogram flat from 6 h; 6 to 9 h not below daily | upheld | The 456 short pairs come from May (302) and August (154) only, at most 3 per series. Within May alone the 6 to 9 h semivariance (0.0101, 302 pairs) is above the 18 to 30 h value (0.0079, 2,380 pairs). Note the May-only level is lower than the pooled 0.0124, so pooled bins mix periods; the conclusion is unaffected. |
+| Spikes do not cluster by round | weakened | Index of dispersion 1.16 over 133 rounds (p = 0.10, standard error 0.12): no detectable clustering, low power. Inline marker added. |
+| Component of 0.111 decades, "a factor of about 1.3 per round" | weakened | Plain standard deviation, inflated by the upward tail; the robust size is 0.086 decades (factor 1.22). The document's own §4 gives the robust per-qubit median 0.085. Inline marker added. |
+| `xslow` error "is copied from" `sx` | weakened | Equality is solid; the mechanism is not shown. Inline marker added. |
+| Degree-3 qubits have lower `sx` error, cause unknown | upheld, with an addition | Reproduced. `T1` shows the same degree pattern (Kruskal-Wallis p = 0.0037; medians 132, 125, 142 us for degrees 1, 2, 3), `T2` does not (p = 0.38). Since `sx` follows `T1` between qubits, the degree effect on `sx` may run through `T1`; this is a lead for `02-coherence.md`, not a finding. |
+| The coherence limit for `xslow` (1,000 ns) exceeds its reported error | upheld | Reproduced to the digit. The document's own caveat that the formula is a proxy where `T2` is low applies, but the T1-only variant (99.27%) is immune to it. |
+
+The refuted count is zero; no headline number was wrong.
+
+**Sources spot-checked (fetched 2026-10-06).** Epstein et al., arXiv:1308.2928: title and authors
+match; the abstract says RB gives a better than factor-of-two estimate of the average error rate
+and that few trials suffice when the standard error is small (supports §1). Proctor et al.,
+arXiv:1702.01853: title and authors match; the abstract says the RB decay rate does not correspond
+to the infidelity of a physically allowed representation (supports §1). Qiskit Experiments
+`rb_utils` module source: the one-qubit `coherence_limit` is
+`0.5 * (1 - 2/3 exp(-gatelen/T2) - 1/3 exp(-gatelen/T1))`, the docstring says "as measured, not
+Tphi" and assumes `T2 = 2 T1` when none is given (supports §7). All three support the cited claim.
+
+**Rule check.** No em dash (U+2014) in the document before or after this edit; the provisional
+banner, ref, basis and machine are in the header; every number in the body has a results field
+(spot-checked as above); no rows were added to `docs/numerical-claims.md`; the document states
+12 new sources of 15 allowed. Not re-verified: the 11 per-qubit change points, the spatial Moran
+tests other than the degree test, and the sources other than the three above.

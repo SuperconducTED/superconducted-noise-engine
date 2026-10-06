@@ -1,0 +1,116 @@
+{
+ "header": {
+  "provisional": true,
+  "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+  "scope": "verify/gates_2q",
+  "script": "v_core.py",
+  "measured_utc": "2026-10-06T14:25:50Z",
+  "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+  "machine": "lead's laptop (provisional until re-run on the verification desktop)"
+ },
+ "direction_identity": {
+  "cz": {
+   "records": 309760,
+   "value_mismatch": 0,
+   "date_mismatch": 8682,
+   "date_mismatch_in_placeholder": 8682,
+   "placeholder_records": 8682,
+   "median_offset_us_in_mismatch": 6.104
+  },
+  "rzz": {
+   "records": 309760,
+   "value_mismatch": 0,
+   "date_mismatch": 12395,
+   "date_mismatch_in_placeholder": 12395,
+   "placeholder_records": 12395,
+   "median_offset_us_in_mismatch": 7.08
+  }
+ },
+ "events": {
+  "cz": {
+   "n_events": 22092,
+   "median": 0.00275,
+   "lag1_autocorr": -0.448,
+   "lag1_pairs": 21748,
+   "variogram": {
+    "first_bin_ge1000_pairs": [
+     18.0,
+     30.0,
+     16737
+    ],
+    "one_round_semivariance": 0.013409,
+    "long_lag_mean_ge744h": 0.02101,
+    "ratio": 0.6383
+   },
+   "rate_per_coupler_day_before": 0.8712,
+   "rate_per_coupler_day_from": 0.8493
+  },
+  "rzz": {
+   "n_events": 18210,
+   "median": 0.00266,
+   "lag1_autocorr": -0.425,
+   "lag1_pairs": 17869,
+   "variogram": {
+    "first_bin_ge1000_pairs": [
+     18.0,
+     30.0,
+     12815
+    ],
+    "one_round_semivariance": 0.013073,
+    "long_lag_mean_ge744h": 0.02404,
+    "ratio": 0.5439
+   },
+   "rate_per_coupler_day_before": 0.7977,
+   "rate_per_coupler_day_from": 0.5902
+  }
+ },
+ "split_index": 687,
+ "cz_vs_rzz_coupler_medians": {
+  "n": 170,
+  "spearman": 0.896,
+  "median_ratio_rzz_over_cz": 0.968
+ },
+ "shared_qubit_deviation": {
+  "cz": {
+   "coupler_pairs_sharing_qubit_with_series": 230,
+   "n_matched": 29513,
+   "spearman": 0.22,
+   "far_4plus_hops": {
+    "far_pairs": 13646,
+    "n_matched": 1736149,
+    "spearman": -0.00779
+   }
+  },
+  "rzz": {
+   "coupler_pairs_sharing_qubit_with_series": 230,
+   "n_matched": 24229,
+   "spearman": 0.225,
+   "far_4plus_hops": {
+    "far_pairs": 13470,
+    "n_matched": 1403590,
+    "spearman": -0.00802
+   }
+  }
+ },
+ "coherence": {
+  "median_T1_raw_units": 125.9,
+  "median_T2_raw_units": 92.44,
+  "limit_68ns_if_us": 0.0008041
+ },
+ "zz": {
+  "files_with_any_change": 486,
+  "bursts_changing_ge170": 484,
+  "median_burst_gap_h": 5.158,
+  "median_changes_per_burst": 172.0,
+  "record_abs_zz_khz_median_nonzero": 6.232,
+  "abs_zz_value_events": 83440,
+  "lag1_autocorr_log10_abs_zz_changes": -0.513,
+  "lag1_pairs": 83096,
+  "couplers_all_zero": [
+   [
+    32,
+    33
+   ]
+  ]
+ }
+}

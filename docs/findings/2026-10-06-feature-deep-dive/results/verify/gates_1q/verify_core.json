@@ -1,0 +1,100 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "verify/gates_1q",
+ "script": "analysis/verify/gates_1q/verify_core.py",
+ "measured_utc": "2026-10-06T14:24:49Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "sx_events": {
+  "n_series": 155,
+  "n_events": 20207,
+  "median": 0.00030952233367417624,
+  "q01": 0.00014247976500917012,
+  "q99": 0.0025414058052036933,
+  "max": 0.017060418805944156,
+  "share_gt_1e-3": 0.04879497203939229,
+  "n_gt_1e-2": 7
+ },
+ "between_share": 0.7443173477959887,
+ "qubit_median_range_factor": 34.5374744461181,
+ "aliases": {
+  "x": {
+   "records_both": 274560,
+   "value_mismatch": 0,
+   "nan_pattern_differs": 0
+  },
+  "id": {
+   "records_both": 274560,
+   "value_mismatch": 0,
+   "nan_pattern_differs": 0
+  },
+  "rx": {
+   "records_both": 274560,
+   "value_mismatch": 0,
+   "nan_pattern_differs": 0
+  },
+  "xslow": {
+   "records_both": 136032,
+   "value_mismatch": 0,
+   "nan_pattern_differs": 138528,
+   "nan_pattern_differs_within_xslow_files": 0
+  }
+ },
+ "rz_all_zero": true,
+ "autocorr_log_changes": {
+  "lag1": -0.4858800971674291,
+  "lag2": -0.00302120478463433,
+  "n_changes": 20052,
+  "lag1_unnormalised_pairs_form": -0.4896651609992103,
+  "lag1_spearman": -0.46576919436988984
+ },
+ "variogram": {
+  "daily_18_30": 0.012387,
+  "long_744_3624": 0.015324522952983761,
+  "ratio": 0.8083122742550488,
+  "bin_6_9": 0.012024,
+  "pairs_6_9": 456,
+  "min_event_gap_h": 6.312222222222222
+ },
+ "coherence": {
+  "n_matched": 18301,
+  "n_skipped": 1906,
+  "ratio_q": [
+   0.17781559144785156,
+   0.4018375902478528,
+   0.9921293863294638
+  ],
+  "share_ratio_gt_1": 0.09819135566362494
+ },
+ "xslow_floor": {
+  "n": 6033,
+  "share_limit_above_reported": 0.9966848997182165,
+  "median_ratio": 17.22788896775733,
+  "t1only_share": 0.9927067793800762,
+  "t1only_median": 8.936942905814533,
+  "windows": [
+   [
+    1778761962000.0,
+    1780054715000.0
+   ],
+   [
+    1789059381000.0,
+    1791255462000.0
+   ]
+  ]
+ },
+ "spikes": {
+  "n_up_total": 393,
+  "n_up_total_rate": 0.01944870589399713,
+  "n_up_matched": 325,
+  "n_up_matched_with_T1_dip_1p5": 52
+ },
+ "within_pooled_spearman_sx_T1": -0.05972219866678888,
+ "within_pooled_spearman_sx_T2": -0.048086034308951295,
+ "between_qubit_spearman_sx_T1": {
+  "rho": -0.43397570171763716,
+  "p": 1.6881370847781853e-08,
+  "n": 155
+ }
+}

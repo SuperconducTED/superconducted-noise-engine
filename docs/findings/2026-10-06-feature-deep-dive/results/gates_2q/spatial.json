@@ -3,7 +3,7 @@
  "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
  "scope": "gates_2q",
  "script": "analysis/gates_2q/spatial_2q.py",
- "measured_utc": "2026-10-06T07:37:48Z",
+ "measured_utc": "2026-10-06T14:20:48Z",
  "basis": "all ibm_fez snapshot files at the ref (see n_files)",
  "machine": "lead's laptop (provisional until re-run on the verification desktop)",
  "n_files": 1760,

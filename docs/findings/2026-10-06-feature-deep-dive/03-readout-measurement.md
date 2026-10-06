@@ -39,7 +39,7 @@ document.
    sessions.** The group is always the 9 qubits with one index residue modulo 17: residue 10
    (q10, q27, ..., q146) from the archive's start to 2026-07-25, residue 9 to 2026-08-25,
    residue 16 since. RO is computed from a fresh P(0|1) that the document does not carry:
-   `2 RO - P(1|0)` lands on the 1/4096 grid in 100% of the 11,514 recoverable records. The
+   `2 RO - P(1|0)` lands on the 1/4096 grid in 100% of the 11,514 recoverable records. **[Verification 2026-10-06: overstated as evidence. RO sits on the 1/8192 grid and P(1|0) on the 1/4096 grid in 100% of all records, so 2 RO - P(1|0) is on the 1/4096 grid by arithmetic; a placebo with a shuffled P(0|1) also gives 100% (`results/verify/readout/records_check.json`). The grid test cannot fail. What the data show is that the implied value is consistent with the stale one (median ratio 1.01), not that RO was computed from a fresh P(0|1) that was withheld.]** The
    group's P(0|1) is fresh in 1,086 of 1,103 daily-session events and in 9 of 4,194 intraday
    ones (`sessions.json: stale_p0g1`). `meas_map` is one group of all 156 qubits, so it does
    not explain the grouping.
@@ -101,7 +101,7 @@ document.
 13. **Every reset and measure-reset duration is the readout duration plus 24 ns** (the `x`
     length) in all 274,560 and 127,452 records (`profiles.json: length_identities`), as a
     measurement followed by a conditional `x` (the documented reset on IBM systems) predicts.
-14. **The spatial pattern is a checkerboard, not a gradient.** Per-qubit medians are
+14. **The spatial pattern is a checkerboard, not a gradient.** **[Verification 2026-10-06: weakened. RO differs by lattice degree (median 0.00757 for degree 2 against 0.01196 for degree 1 and 0.01428 for degree 3; Kruskal-Wallis p = 3.5e-7), and after removing each degree class's median Moran's I is -0.047 (p = 0.59). On heavy-hex the degree-3 and degree-2 qubits alternate, so the 'checkerboard' is largely a degree-class effect; the frequency reading in section 5 is not supported. `extra_check.json`]** Per-qubit medians are
     negatively autocorrelated on the coupling graph (Moran's I -0.196 for RO, p = 0.007;
     -0.430 for `measure_2`, p = 0.0002), with no row or column trend, and the qubit ranking is
     stable (June against September, Spearman 0.926) (`spatial_temporal.json: spatial`).
@@ -119,7 +119,7 @@ probabilities of reading the wrong state after preparing |1> or |0>; RO as the a
 probability of a wrong reading, usually computed as the mean of the two; the readout length as
 the time from the start of the measurement pulse to the end of signal digitization; and
 `init_error` as the share of population in |1> after the default repetition delay and the
-qubit initialization procedure. The guide names `measure`, `measure_2` (for mid-circuit
+qubit initialization procedure. **[Verification 2026-10-06: incomplete. The fetched IBM text adds the condition 'when the prior experiment prepared the qubit in the |1> state'; the direct-addition-to-P(1|0) reading in section 7.1 is an inference.]** The guide names `measure`, `measure_2` (for mid-circuit
 measurement) and `reset` as supported non-unitary instructions without defining their
 calibration fields. It does not say how many shots the assignment experiment uses.
 
@@ -590,7 +590,7 @@ P(0|1) is 0.0142, so the expected decay is of the same order as the whole of P(0
 
 Reading: decay during the readout is visible where it should be, in the asymmetry and between
 qubits, with about half the full-length decay showing up in A, which matches an effective
-decay time of half the window (Krantz et al. eq. 173). The slope weakens in the lower-error
+decay time of half the window (Krantz et al. eq. 173). **[Verification 2026-10-06: overstated. The length change gives A +0.0015 against +0.00093 predicted for the full window (1.6 times) and +0.00047 for the half window (3.1 times), which favours full-window decay or more, not half; the two readings in this document conflict. Residual excited population also lowers A, so A/decay of 0.46 does not identify an effective time. `extra_check.json`]** The slope weakens in the lower-error
 half, so part of the cross-qubit link may come through qubits that are bad on both counts.
 Over time, the daily `T1` values do not predict the next readout session's P(0|1), even when
 `T1` halves. Two readings fit: the `T1` dips the daily round reports do not persist for the
@@ -622,7 +622,7 @@ At the first change the device median RO went from 0.0114 to 0.00806 (7 d), and 
 reached the observed change (share of placebo days at least as large: 0.0). Intraday-only
 windows give the same picture (RO -0.141, P(1|0) -0.269). Reading: a longer integration
 improves the separation of the two clouds, which lowers both errors, and the longer window adds
-decay, which raises A; both happened, and A rose by the predicted order. The same file is the
+decay, which raises A; both happened, and A rose by the predicted order. **[Verification 2026-10-06: weakened. The change in A of +0.00146 is not outside the placebo range of other days (5% to 95%: -0.00146 to +0.00129; placebo maximum +0.00153, 70 days), so the Wilcoxon p-value does not show a length effect on A; the drop in RO does stand out (observed -0.138 against placebo minimum -0.084). `extra_check.json`, `length_link_check.json`]** The same file is the
 first to carry `measure.threshold`, and the reset length moved with t_ro, so a broader change
 of IBM's readout procedure on that date is as consistent with the data as the length alone. At
 the second change the decay prediction (-0.0003 full, -0.00015 half) is smaller than the
@@ -747,3 +747,67 @@ Project sources: `01-data-layer.md` (field semantics, identities, coverage);
 `docs/implementations/2026-08-29-calibration-yield-and-poller-defects.md` (the `init_error`
 schema start and the ADR-017 skip treatment); `scripts/feature_patterns.py` (the measured event
 rule and P5's shot-noise code, re-run in `noise.py: old_method`).
+
+## Verification (2026-10-06)
+
+Verifier note, appended; the text above is unchanged except for inline markers. Provisional:
+same ref, same cache, lead's laptop. The analyst stopped before its own self-check.
+
+**Re-run.** All seven owner scripts were re-run from a scratch copy (so the committed results
+were not overwritten) and every results JSON reproduces field for field (0 differences
+besides `measured_utc`): `sessions`, `profiles`, `noise`, `length_changes`,
+`thresholds_m2_init`, `t1_link`, `spatial_temporal`. Fresh, independent scripts (ddload only)
+are in `analysis/verify/readout/` (`v_records.py`, `v_noise.py`, `v_length_link.py`,
+`v_extra.py`); results in `results/verify/readout/` (`records_check.json`,
+`noise_check.json`, `length_link_check.json`, `extra_check.json`). Pinned ruff check and
+format pass on that folder.
+
+| Claim | Document value | Recomputed | Match |
+| --- | --- | --- | --- |
+| Records with three identical stamps | 188,100 (68.51%) | 188,100 (0.6851) | yes |
+| Staggered records; stale P(0\|1) records | 72,900; 11,515 | 72,900; 11,515 | yes |
+| Mean-rule failures, of which stale | 11,263; 11,258 | 11,263; 11,258 | yes |
+| Rotating group residues and first/last files | 10, 9, 16 | 10 to 20260725, 9 to 20260825, 16 since | yes |
+| Sessions (all, >= 100 qubits, even, mixed, small) | 598, 589, 123, 466, 9 | same | yes |
+| Even / mixed sessions within 3 h of a T1 round | 87.0% / 15.7% | 0.8699 / 0.1567 | yes |
+| RO standardized semivariance, intraday, 2 to 4 h | 4.252 (24,477 pairs) | 4.253 (24,477 pairs) | yes |
+| Consecutive intraday share within 2 sd | 0.6445 | 0.6435 (n 72,525; different pairing) | approx |
+| Iid-binomial placebo through the same plug-in rule | not in document | ratio 1.005, 95.2% within 2 sd | new: no plug-in bias |
+| 2026-06-08 RO change, 7 d, median log10 | -0.137, 1.9% up | -0.138, 1.9% up | yes |
+| Placebo range 7 d (5%/95%) | -0.039 / +0.030 (104 days) | -0.0375 / +0.0305 (70 days; stricter exclusion) | approx |
+| 2026-07-30 change, 7 d | +0.003 | +0.0014 | yes (inside placebo) |
+| A against decay, across qubits | Spearman 0.423 | 0.394 (fresh-only records) | approx |
+| P(0\|1) against decay, across qubits | 0.016 | 0.034 | yes (null) |
+| Moran's I of RO | -0.196 (p 0.007) | -0.1957 (p 0.009) | yes |
+| 40 qubits without `init_error`; RO median | 0.0331 vs 0.0071 | 0.0314 vs 0.0076 | approx (median definition) |
+| init_error against P(1\|0), across qubits | 0.822 | 0.850 | approx (event versus median) |
+| Threshold change files, qubits moved each | 327, all 156 | 327, 156 | yes |
+| Reset minus readout length; measure error = RO | 24 ns; identical | 24 ns only; identical in all 274,560 | yes |
+
+**Claims challenged.**
+
+| Claim | Verdict | Why |
+| --- | --- | --- |
+| Summary 2: RO uses a fresh P(0\|1) the document does not carry, shown by the 1/4096 grid | weakened | The grid test is satisfied by arithmetic (placebo with shuffled P(0\|1): 100%). The rotating group and its dates are real; the mechanism is an inference. |
+| Summary 5 and 6, section 4.7: the excess over shot noise is not a plug-in or binomial artefact | upheld | Iid binomial counts at each qubit's own level give robust ratio 1.005; the data give 4.25. The attribution stays open, as the document says, and no "measurement noise" label is used. |
+| Summary 14: checkerboard, with a frequency interpretation | weakened | Explained by degree class (Moran's I after removing it: -0.047, p 0.59); RO also differs strongly by degree. The document lists degrees but never tests RO against them. |
+| Section 7.2: A matches an effective decay of half the window | weakened | The length experiment gives 1.6 times the full-window and 3.1 times the half-window prediction; the two tests disagree and excitation also enters A. |
+| Summary 7: the 06-08 change is a large natural experiment; A rose as predicted | RO part upheld, A part weakened | RO drop is 3.5 times the largest pre-change drift (-0.02 to -0.04) and beyond the placebo minimum (-0.084). The A rise (+0.00146) lies inside the placebo extremes (max +0.00153). |
+| Section 3.3: no seasonality of practical size; P(1\|0) weekday not excluded | upheld | At session level (585 sessions) the weekday test gives p = 0.18, so the record-level p of 4.5e-5 was clustering, as the document suspected. |
+| Summary 3: even sessions have probability 2^-312 by chance | weakened (minor) | Assumes 312 independent fair-parity counts; small counts and zeros are not fair. The 123 against 466 split itself reproduces. |
+| Section 7.2: T1 dips do not reach P(0\|1) | upheld as reported | Not re-run in detail; both readings given by the document are labelled and no attribution is claimed. |
+
+Not re-verified: the stale group's freshness by session kind (1,086 of 1,103 against 9 of 4,194);
+my probe used a different population and is not comparable.
+
+**Sources spot-checked (fetched 2026-10-06).** IBM qpu-information: P(0|1), P(1|0), RO and
+readout length definitions confirmed; `init_error` carries an extra condition (prior
+experiment prepared |1>), marked inline. Krantz et al., arXiv:1904.06560: title and author
+confirmed from the abstract page; eq. 173 and `tau_ro` were not visible in that page, so the
+equation citation rests on the analyst's full-text read and is unconfirmed here. Govia et al.,
+arXiv:2207.04836: title confirmed, spectator-qubit effects confirmed.
+
+**Rule check.** No U+2014 in the document or the owner's scripts; provisional banner, ref,
+basis and machine present; no `docs/numerical-claims.md` rows added by this scope. Numbers
+without a results field: none found in the sections read; the section 0 figures all trace to
+a named field. Section 11 says 14 new sources and lists 14, within the limit of 15.
