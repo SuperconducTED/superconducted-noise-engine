@@ -1109,7 +1109,7 @@ def test_the_target_magnitude_at_the_median_anchor_catches_a_unit_error() -> Non
     samples, _ = _committed_survey()
     median_anchor = np.array([partition_anchors(samples[name], 3)[1] for name in FEATURE_COLUMNS])
 
-    gamma, lam = feature_target_fn(median_anchor, t_seconds=SX_SECONDS)
+    gamma, lam = feature_target_fn(median_anchor, t_seconds=SX_SECONDS, coherence_unit="us")
 
     assert 1e-5 < gamma < 1e-3, f"gamma {gamma:.3e} is not of order 1e-4"
     assert 1e-5 < lam < 1e-3, f"lambda {lam:.3e} is not of order 1e-4"
@@ -1127,7 +1127,7 @@ def test_every_anchor_is_accepted_by_the_real_target() -> None:
 
     targets = np.array(
         [
-            feature_target_fn(np.array(combo), t_seconds=SX_SECONDS)
+            feature_target_fn(np.array(combo), t_seconds=SX_SECONDS, coherence_unit="us")
             for combo in itertools.product(*anchors)
         ]
     )
@@ -1157,7 +1157,7 @@ def test_anchored_base_is_never_degenerate_on_the_archive(shape: type, defuzzifi
     """
     samples, spreads = _committed_survey()
     mfs, anchors = _archive_partition(shape, samples, spreads)
-    target = functools.partial(feature_target_fn, t_seconds=SX_SECONDS)
+    target = functools.partial(feature_target_fn, t_seconds=SX_SECONDS, coherence_unit="us")
     rb = anchored_rule_base(mfs, target, anchors=anchors)
 
     lo, hi = _domain_box(samples)
@@ -1214,7 +1214,9 @@ def test_the_ensemble_evaluates_an_out_of_range_snapshot_through_the_clamp() -> 
     samples, spreads = _committed_survey()
     mfs, anchors = _archive_partition(GaussianMF, samples, spreads)
     rb = anchored_rule_base(
-        mfs, functools.partial(feature_target_fn, t_seconds=SX_SECONDS), anchors=anchors
+        mfs,
+        functools.partial(feature_target_fn, t_seconds=SX_SECONDS, coherence_unit="us"),
+        anchors=anchors,
     )
 
     lo, hi = _domain_box(samples)
@@ -1259,7 +1261,9 @@ def test_the_unwrapped_extractor_raises_where_the_clamp_saves_the_run(shape: typ
     samples, spreads = _committed_survey()
     mfs, anchors = _archive_partition(shape, samples, spreads)
     rule_base = anchored_rule_base(
-        mfs, functools.partial(feature_target_fn, t_seconds=SX_SECONDS), anchors=anchors
+        mfs,
+        functools.partial(feature_target_fn, t_seconds=SX_SECONDS, coherence_unit="us"),
+        anchors=anchors,
     )
     lo, hi = _domain_box(samples)
 

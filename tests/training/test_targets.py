@@ -165,7 +165,9 @@ def test_snapshot_target_uses_only_usable_rows() -> None:
 def test_feature_target_fn_agrees_with_one_qubit_target() -> None:
     duration = 60e-9
     expected = qubit_targets(_snapshot(_qubit(0, 100e-6, 150e-6)), {0: duration}).values[0]
-    actual = feature_target_fn(np.array([100.0, 150.0, 0.01]), t_seconds=duration)
+    actual = feature_target_fn(
+        np.array([100.0, 150.0, 0.01]), t_seconds=duration, coherence_unit="us"
+    )
     assert actual == pytest.approx(expected)
 
 
@@ -181,49 +183,68 @@ def test_feature_target_fn_agrees_with_one_qubit_target() -> None:
 )
 def test_feature_target_fn_rejects_invalid_inputs(features: np.ndarray, duration: float) -> None:
     with pytest.raises(ValueError):
-        feature_target_fn(features, t_seconds=duration)
+        feature_target_fn(features, t_seconds=duration, coherence_unit="us")
 
 
-def test_feature_target_fn_rejects_si_seconds_from_the_vectorizer() -> None:
-    """The trap the guard closes: ``extract`` emits SI seconds since issue #66.
+def test_feature_target_fn_refuses_vectorizer_output_without_a_unit() -> None:
+    """The trap the explicit unit closes: ``extract`` emits SI seconds since issue #66.
 
-    Without the guard these features are scaled by ``1e-6`` a second time, T1
-    becomes about ``1.6e-10`` s, and gamma and lambda both come back as exactly
-    ``1.0`` with no error raised.
+    When the function assumed microseconds, these features were scaled by
+    ``1e-6`` a second time, T1 became about ``1.6e-10`` s, and gamma and lambda
+    both came back as exactly ``1.0`` with no error raised. That call can no
+    longer be written without stating a unit.
     """
     features = BasicCalibrationVectorizer().extract(_calibration_snapshot(Q72_FIXTURE))
     assert 0.0 < features[0] < 1.0, "precondition: the vectorizer emits seconds"
-    with pytest.raises(ValueError, match="seconds"):
-        feature_target_fn(features, t_seconds=SX_SECONDS)
+    with pytest.raises(TypeError, match="coherence_unit"):
+        feature_target_fn(features, t_seconds=SX_SECONDS)  # type: ignore[call-arg]
 
 
-def test_feature_target_fn_takes_archive_unit_features_for_the_same_snapshot() -> None:
-    """The supported path: wrap the vectorizer to get microseconds back.
+def test_feature_target_fn_gives_one_target_for_both_units_of_the_same_snapshot() -> None:
+    """``extract`` declared as seconds and its archive-unit wrapper agree.
 
-    The result has to equal the closed form evaluated on the vectorizer's own
-    SI seconds, so the conversion out of SI and the ``1e-6`` back into it are
-    checked against each other rather than against a remembered magnitude.
+    Both have to equal the closed form evaluated on the vectorizer's own SI
+    seconds, so the ``"s"`` path, the conversion out of SI, and the ``1e-6``
+    back into it are checked against each other rather than against a
+    remembered magnitude.
     """
     snapshot = _calibration_snapshot(Q72_FIXTURE)
-    t1, t2, _ = BasicCalibrationVectorizer().extract(snapshot)
-    gamma, lam = feature_target_fn(
-        ArchiveUnitFeatureExtractor().extract(snapshot), t_seconds=SX_SECONDS
+    seconds = BasicCalibrationVectorizer().extract(snapshot)
+    t1, t2, _ = seconds
+    expected = [
+        1.0 - math.exp(-SX_SECONDS / t1),
+        1.0 - math.exp(-SX_SECONDS * (2.0 / t2 - 1.0 / t1)),
+    ]
+    from_seconds = feature_target_fn(seconds, t_seconds=SX_SECONDS, coherence_unit="s")
+    from_microseconds = feature_target_fn(
+        ArchiveUnitFeatureExtractor().extract(snapshot), t_seconds=SX_SECONDS, coherence_unit="us"
     )
-    assert gamma == pytest.approx(1.0 - math.exp(-SX_SECONDS / t1), rel=1e-12)
-    assert lam == pytest.approx(1.0 - math.exp(-SX_SECONDS * (2.0 / t2 - 1.0 / t1)), rel=1e-12)
-    assert 1e-5 < gamma < 1e-3, f"gamma {gamma:.3e} is not of order 1e-4"
+    assert from_seconds == pytest.approx(expected, rel=1e-12)
+    assert from_microseconds == pytest.approx(expected, rel=1e-12)
+    assert 1e-5 < from_seconds[0] < 1e-3, f"gamma {from_seconds[0]:.3e} is not of order 1e-4"
 
 
-@pytest.mark.parametrize("mean_t1", [np.nextafter(1.0, 0.0), 100e-6])
-def test_feature_target_fn_rejects_mean_t1_below_one_microsecond(mean_t1: float) -> None:
-    with pytest.raises(ValueError, match="seconds"):
-        feature_target_fn(np.array([mean_t1, mean_t1, 0.01]), t_seconds=SX_SECONDS)
+@pytest.mark.parametrize("unit", ["ns", "S"])
+def test_feature_target_fn_rejects_an_unknown_coherence_unit(unit: str) -> None:
+    with pytest.raises(ValueError, match="coherence_unit"):
+        feature_target_fn(
+            np.array([100.0, 150.0, 0.01]),
+            t_seconds=SX_SECONDS,
+            coherence_unit=unit,  # type: ignore[arg-type]
+        )
 
 
-def test_feature_target_fn_accepts_mean_t1_of_exactly_one_microsecond() -> None:
-    gamma, lam = feature_target_fn(np.array([1.0, 1.0, 0.01]), t_seconds=SX_SECONDS)
-    assert gamma == pytest.approx(1.0 - math.exp(-SX_SECONDS / 1e-6))
-    assert lam == pytest.approx(gamma)
+def test_feature_target_fn_accepts_a_sub_microsecond_mean_t1() -> None:
+    """A physically valid device below one microsecond is not mistaken for seconds.
+
+    The first version of this contract guessed the unit from ``mean_T1 < 1.0``
+    and rejected this input as SI seconds (PR #107 review).
+    """
+    gamma, lam = feature_target_fn(
+        np.array([0.5, 0.5, 0.01]), t_seconds=SX_SECONDS, coherence_unit="us"
+    )
+    assert gamma == pytest.approx(1.0 - math.exp(-SX_SECONDS / 0.5e-6), rel=1e-12)
+    assert lam == pytest.approx(gamma, rel=1e-12)
 
 
 def test_real_fixture_derives_targets_from_all_sx_gate_lengths() -> None:
@@ -244,11 +265,20 @@ def test_real_fixture_derives_targets_from_all_sx_gate_lengths() -> None:
     assert summary is not None
     assert summary.n_usable == 155
 
+    snapshot = _calibration_snapshot(GATE_FIXTURE)
     target_at_mean_features = feature_target_fn(
-        ArchiveUnitFeatureExtractor().extract(_calibration_snapshot(GATE_FIXTURE)),
+        ArchiveUnitFeatureExtractor().extract(snapshot),
         t_seconds=SX_SECONDS,
+        coherence_unit="us",
     )
     # Pinned to NC-039 rather than asserted unequal: once issue #66 made the
     # bare vectorizer emit seconds, the gap here became about 1 instead of
     # about 4e-4, and `not np.allclose(...)` kept passing on the wrong value.
     assert target_at_mean_features - summary.mean == pytest.approx(NC_039_GAP, rel=1e-9)
+    # The SI path reaches the same registered gap when it says it is seconds.
+    target_from_seconds = feature_target_fn(
+        BasicCalibrationVectorizer().extract(snapshot),
+        t_seconds=SX_SECONDS,
+        coherence_unit="s",
+    )
+    assert target_from_seconds - summary.mean == pytest.approx(NC_039_GAP, rel=1e-9)
