@@ -30,15 +30,15 @@
   },
   "counts": {
     "blocked": 4,
-    "done": 8,
-    "in_review": 3,
+    "done": 10,
+    "in_review": 1,
     "ready": 6
   },
   "date": "2026-10-06",
   "gates_done": 12,
   "gates_total": 28,
-  "generated": "2026-10-06 06:19 UTC",
-  "main_sha": "110cfad8",
+  "generated": "2026-10-06 21:04 UTC",
+  "main_sha": "e39af506",
   "milestones": {
     "M0": {
       "done": 7,
@@ -71,7 +71,7 @@
     "48": "done",
     "49": "done",
     "53": "done",
-    "54": "in_review",
+    "54": "done",
     "56": "done",
     "57": "ready",
     "58": "in_review",
@@ -84,7 +84,7 @@
     "65": "blocked",
     "66": "done",
     "73": "done",
-    "74": "in_review",
+    "74": "done",
     "75": "ready",
     "76": "blocked",
     "84": "ready"

@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-10-06 06:19 UTC · main at `110cfad8` (2026-09-27) · 25 days to 2026-10-31_
+_Generated 2026-10-06 21:04 UTC · main at `e39af506` (2026-10-06) · 25 days to 2026-10-31_
 
 
 ## Milestones
@@ -82,8 +82,6 @@ _Generated 2026-10-06 06:19 UTC · main at `110cfad8` (2026-09-27) · 25 days to
 
 1. Start #60: ADR-014 hybrid ANFIS trainer
    - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.
-1. Unstick PR #103 for #74: first_ensemble_run must transpile before prepare
-   - CHANGES_REQUESTED standing from @mertefesensoy (2026-09-28). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **Mert Efe Şensoy** (@mertefesensoy)
 
@@ -91,10 +89,6 @@ _Generated 2026-10-06 06:19 UTC · main at `110cfad8` (2026-09-27) · 25 days to
    - FR-15 routes all advisor contact through the lead, so no one else can send it. The decision-by date was 2026-09-08 and has passed. ADR-027 stays Open, ADR-014 stays Deferred, and the M3 ADR-009 memo has no answer to build on until this goes out.
 1. Finish #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
    - The contract merged; only the advisor half of its definition of done is outstanding.
-1. Unstick PR #105 for #54: Capture rate ~70% during normal operation
-   - Awaiting merge.
-1. Re-review PR #103 (#74: first_ensemble_run must transpile before prepare)
-   - Your CHANGES_REQUESTED from 2026-09-28 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 
 **Yiğit Arda Kaderoğlu** (@yigit-arda)
 
@@ -121,10 +115,6 @@ _Generated 2026-10-06 06:19 UTC · main at `110cfad8` (2026-09-27) · 25 days to
 
 - [low] FR-4's consequent convention and the raw-space vs logit-space choice both depend on #57's decision.
 
-**#74: first_ensemble_run must transpile before prepare** (@BurakOztekin)
-
-- [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-09-28). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
-
 **#75: Decide the LOCKED Kraus projector boundary** (@bengisucvd)
 
 - [medium] Touches LOCKED src/superconducted/channels/kraus.py: needs a decision, not just a patch.
@@ -145,7 +135,7 @@ _Generated 2026-10-06 06:19 UTC · main at `110cfad8` (2026-09-27) · 25 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
-| 2026-10-06 | 12/28 | 6 | 3 | 4 | nothing moved |
+| 2026-10-06 | 12/28 | 6 | 1 | 4 | #54 Capture rate ~70% during normal operation: in review to closed; #74 first_ensemble_run must transpile before prepare: in review to closed; main moved to e39af506 |
 | 2026-10-05 | 12/28 | 6 | 3 | 4 | nothing moved |
 | 2026-10-04 | 12/28 | 6 | 3 | 4 | nothing moved |
 | 2026-10-03 | 12/28 | 6 | 3 | 4 | #56 Clear the queue, keep the records honest: in review to closed |

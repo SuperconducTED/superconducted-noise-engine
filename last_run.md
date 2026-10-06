@@ -1,9 +1,9 @@
-run-token: 2026-10-06T06:19:11Z-961
+run-token: 2026-10-06T21:04:16Z-259765
 outcome: ok: chore: phase-3 dashboard: state moved (2026-10-06)
 
 **12/28 milestone gates met** · 25 days to 2026-10-31 · calendar 58% burned against 43% of gates, 15 points behind.
 
-**Since 2026-10-05:** nothing moved.
+**Since 2026-10-05:** #54 Capture rate ~70% during normal operation: in review to closed; #74 first_ensemble_run must transpile before prepare: in review to closed; main moved to e39af506.
 
 **Needs attention**
 - M0 (Queue clear) is 31 days past its 2026-09-05 target at 7/8
