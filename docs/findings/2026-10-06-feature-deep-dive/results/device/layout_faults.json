@@ -1,0 +1,914 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "device",
+ "script": "analysis/device/layout_faults.py",
+ "measured_utc": "2026-10-06T07:43:50Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "layout": {
+  "qubits": 156,
+  "couplers": 176,
+  "directed_edges": 352,
+  "coords_distinct_values": 1,
+  "coupling_map_distinct_values": 1,
+  "degree_counts": {
+   "1": 8,
+   "2": 100,
+   "3": 48
+  },
+  "degree_by_qubit": [
+   1,
+   2,
+   2,
+   3,
+   2,
+   2,
+   2,
+   3,
+   2,
+   2,
+   2,
+   3,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   1,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   1,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   1,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   1,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   1,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   1,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   3,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   1,
+   2,
+   2,
+   3,
+   2,
+   2,
+   2,
+   3,
+   2,
+   2,
+   2,
+   3,
+   2,
+   2,
+   2,
+   2
+  ],
+  "connected": true,
+  "diameter": 32,
+  "mean_distance": 12.6356,
+  "distance_q": [
+   1.0,
+   5.0,
+   8.0,
+   12.0,
+   17.0,
+   22.0,
+   32.0
+  ],
+  "bipartite": true,
+  "bipartition_sizes": [
+   92,
+   64
+  ],
+  "degree3_in_class": [
+   0,
+   48
+  ],
+  "girth": 12,
+  "cycle_rank": 21,
+  "coupler_coordinate_length_q": [
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0
+  ],
+  "coord_x_range": [
+   1.0,
+   16.0
+  ],
+  "coord_rows": [
+   1.0,
+   2.0,
+   3.0,
+   4.0,
+   5.0,
+   6.0,
+   7.0,
+   8.0,
+   9.0,
+   10.0,
+   11.0,
+   12.0,
+   13.0,
+   14.0,
+   15.0
+  ],
+  "qubits_per_row": [
+   16,
+   4,
+   16,
+   4,
+   16,
+   4,
+   16,
+   4,
+   16,
+   4,
+   16,
+   4,
+   16,
+   4,
+   16
+  ],
+  "degree3_per_row": [
+   3,
+   0,
+   7,
+   0,
+   7,
+   0,
+   7,
+   0,
+   7,
+   0,
+   7,
+   0,
+   7,
+   0,
+   3
+  ]
+ },
+ "faults": {
+  "sx": {
+   "entities_listed": 3,
+   "lifetime_files": 1760,
+   "entities_ever": 3,
+   "entities_always": [
+    72
+   ],
+   "entries_total": 1,
+   "entities": [
+    {
+     "entity": 17,
+     "share_of_present_files": 0.11875,
+     "entries": 1,
+     "entry_files": [
+      "20260622T014623000000Z.json"
+     ],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20260713T135208000000Z.json",
+     "always": false
+    },
+    {
+     "entity": 72,
+     "share_of_present_files": 1.0,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20261006T025742000000Z.json",
+     "always": true
+    },
+    {
+     "entity": 149,
+     "share_of_present_files": 0.00340909,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20260513T215706000000Z.json",
+     "always": false
+    }
+   ],
+   "per_file_count_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    2.0,
+    3.0
+   ],
+   "largest_episodes": [
+    {
+     "file": "20260513T152118000000Z.json",
+     "entities": 3
+    },
+    {
+     "file": "20260513T202707000000Z.json",
+     "entities": 3
+    },
+    {
+     "file": "20260513T184440000000Z.json",
+     "entities": 3
+    }
+   ]
+  },
+  "measure_2": {
+   "entities_listed": 3,
+   "lifetime_files": 1058,
+   "entities_ever": 156,
+   "entities_always": [],
+   "entries_total": 0,
+   "entities": [
+    {
+     "entity": 0,
+     "share_of_present_files": 0.00189036,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260807T032159000000Z.json",
+     "last_bad_file": "20260810T140235000000Z.json",
+     "always": false
+    },
+    {
+     "entity": 1,
+     "share_of_present_files": 0.00189036,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260807T032159000000Z.json",
+     "last_bad_file": "20260810T140235000000Z.json",
+     "always": false
+    },
+    {
+     "entity": 2,
+     "share_of_present_files": 0.00189036,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260807T032159000000Z.json",
+     "last_bad_file": "20260810T140235000000Z.json",
+     "always": false
+    }
+   ],
+   "per_file_count_q": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    156.0
+   ],
+   "largest_episodes": [
+    {
+     "file": "20260810T140235000000Z.json",
+     "entities": 156
+    },
+    {
+     "file": "20260807T032159000000Z.json",
+     "entities": 156
+    },
+    {
+     "file": "20260812T185740000000Z.json",
+     "entities": 0
+    }
+   ]
+  },
+  "xslow": {
+   "entities_listed": 2,
+   "lifetime_files": 1750,
+   "entities_ever": 2,
+   "entities_always": [
+    72
+   ],
+   "entries_total": 0,
+   "entities": [
+    {
+     "entity": 17,
+     "share_of_present_files": 0.0493119,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260514T123242000000Z.json",
+     "last_bad_file": "20260518T050826000000Z.json",
+     "always": false
+    },
+    {
+     "entity": 72,
+     "share_of_present_files": 1.0,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260514T123242000000Z.json",
+     "last_bad_file": "20261006T025742000000Z.json",
+     "always": true
+    }
+   ],
+   "per_file_count_q": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    1.0,
+    2.0
+   ],
+   "largest_episodes": [
+    {
+     "file": "20260514T223551000000Z.json",
+     "entities": 2
+    },
+    {
+     "file": "20260514T195201000000Z.json",
+     "entities": 2
+    },
+    {
+     "file": "20260516T054344000000Z.json",
+     "entities": 2
+    }
+   ]
+  },
+  "cz": {
+   "entities_listed": 7,
+   "lifetime_files": 1760,
+   "entities_ever": 7,
+   "entities_always": [
+    "72-73",
+    "71-72",
+    "27-28",
+    "32-33"
+   ],
+   "entries_total": 2,
+   "entities": [
+    {
+     "entity": "72-73",
+     "share_of_present_files": 1.0,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20261006T025742000000Z.json",
+     "always": true
+    },
+    {
+     "entity": "71-72",
+     "share_of_present_files": 1.0,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20261006T025742000000Z.json",
+     "always": true
+    },
+    {
+     "entity": "149-150",
+     "share_of_present_files": 0.0403409,
+     "entries": 1,
+     "entry_files": [
+      "20260519T153114000000Z.json"
+     ],
+     "first_bad_file": "20260519T153114000000Z.json",
+     "last_bad_file": "20260527T053937000000Z.json",
+     "always": false
+    },
+    {
+     "entity": "27-28",
+     "share_of_present_files": 1.0,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20261006T025742000000Z.json",
+     "always": true
+    },
+    {
+     "entity": "148-149",
+     "share_of_present_files": 0.00454545,
+     "entries": 1,
+     "entry_files": [
+      "20260528T033226000000Z.json"
+     ],
+     "first_bad_file": "20260528T033226000000Z.json",
+     "last_bad_file": "20260529T082836000000Z.json",
+     "always": false
+    },
+    {
+     "entity": "32-33",
+     "share_of_present_files": 1.0,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20261006T025742000000Z.json",
+     "always": true
+    },
+    {
+     "entity": "102-103",
+     "share_of_present_files": 0.888068,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20260929T022626000000Z.json",
+     "always": false
+    }
+   ],
+   "per_file_count_q": [
+    4.0,
+    4.0,
+    5.0,
+    5.0,
+    5.0,
+    5.0,
+    6.0
+   ],
+   "largest_episodes": [
+    {
+     "file": "20260523T231606000000Z.json",
+     "entities": 6
+    },
+    {
+     "file": "20260523T213941000000Z.json",
+     "entities": 6
+    },
+    {
+     "file": "20260523T204328000000Z.json",
+     "entities": 6
+    }
+   ]
+  },
+  "rzz": {
+   "entities_listed": 13,
+   "lifetime_files": 1760,
+   "entities_ever": 13,
+   "entities_always": [
+    "72-73",
+    "71-72",
+    "99-115",
+    "95-99",
+    "32-33"
+   ],
+   "entries_total": 13,
+   "entities": [
+    {
+     "entity": "72-73",
+     "share_of_present_files": 1.0,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20261006T025742000000Z.json",
+     "always": true
+    },
+    {
+     "entity": "7-17",
+     "share_of_present_files": 0.236364,
+     "entries": 1,
+     "entry_files": [
+      "20260605T043513000000Z.json"
+     ],
+     "first_bad_file": "20260605T043513000000Z.json",
+     "last_bad_file": "20260729T191446000000Z.json",
+     "always": false
+    },
+    {
+     "entity": "71-72",
+     "share_of_present_files": 1.0,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20261006T025742000000Z.json",
+     "always": true
+    },
+    {
+     "entity": "99-115",
+     "share_of_present_files": 1.0,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20261006T025742000000Z.json",
+     "always": true
+    },
+    {
+     "entity": "49-50",
+     "share_of_present_files": 0.00454545,
+     "entries": 1,
+     "entry_files": [
+      "20260903T004128000000Z.json"
+     ],
+     "first_bad_file": "20260903T004128000000Z.json",
+     "last_bad_file": "20260904T051420000000Z.json",
+     "always": false
+    },
+    {
+     "entity": "149-150",
+     "share_of_present_files": 0.119886,
+     "entries": 2,
+     "entry_files": [
+      "20260803T033328000000Z.json",
+      "20260903T004128000000Z.json"
+     ],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20260904T051420000000Z.json",
+     "always": false
+    },
+    {
+     "entity": "95-99",
+     "share_of_present_files": 1.0,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20261006T025742000000Z.json",
+     "always": true
+    },
+    {
+     "entity": "27-28",
+     "share_of_present_files": 0.95625,
+     "entries": 1,
+     "entry_files": [
+      "20260701T120353000000Z.json"
+     ],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20261006T025742000000Z.json",
+     "always": false
+    },
+    {
+     "entity": "17-27",
+     "share_of_present_files": 0.275568,
+     "entries": 1,
+     "entry_files": [
+      "20260514T165538000000Z.json"
+     ],
+     "first_bad_file": "20260514T165538000000Z.json",
+     "last_bad_file": "20260716T030013000000Z.json",
+     "always": false
+    },
+    {
+     "entity": "38-49",
+     "share_of_present_files": 0.00454545,
+     "entries": 1,
+     "entry_files": [
+      "20260903T004128000000Z.json"
+     ],
+     "first_bad_file": "20260903T004128000000Z.json",
+     "last_bad_file": "20260904T051420000000Z.json",
+     "always": false
+    },
+    {
+     "entity": "148-149",
+     "share_of_present_files": 0.106818,
+     "entries": 3,
+     "entry_files": [
+      "20260805T073818000000Z.json",
+      "20260903T004128000000Z.json",
+      "20260918T062633000000Z.json"
+     ],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20260918T104615000000Z.json",
+     "always": false
+    },
+    {
+     "entity": "32-33",
+     "share_of_present_files": 1.0,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20261006T025742000000Z.json",
+     "always": true
+    },
+    {
+     "entity": "102-103",
+     "share_of_present_files": 0.338636,
+     "entries": 3,
+     "entry_files": [
+      "20260727T194245000000Z.json",
+      "20260817T065740000000Z.json",
+      "20260903T004128000000Z.json"
+     ],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20260907T094653000000Z.json",
+     "always": false
+    }
+   ],
+   "per_file_count_q": [
+    6.0,
+    6.0,
+    6.0,
+    6.0,
+    8.0,
+    9.0,
+    11.0
+   ],
+   "largest_episodes": [
+    {
+     "file": "20260904T051420000000Z.json",
+     "entities": 11
+    },
+    {
+     "file": "20260904T010031000000Z.json",
+     "entities": 11
+    },
+    {
+     "file": "20260903T213444000000Z.json",
+     "entities": 11
+    }
+   ]
+  },
+  "zz_zero": {
+   "entities_listed": 4,
+   "lifetime_files": 1760,
+   "entities_ever": 4,
+   "entities_always": [
+    "32-33"
+   ],
+   "entries_total": 0,
+   "entities": [
+    {
+     "entity": "39-53",
+     "share_of_present_files": 0.24375,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20260710T051721000000Z.json",
+     "always": false
+    },
+    {
+     "entity": "13-14",
+     "share_of_present_files": 0.24375,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20260710T051721000000Z.json",
+     "always": false
+    },
+    {
+     "entity": "32-33",
+     "share_of_present_files": 1.0,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20261006T025742000000Z.json",
+     "always": true
+    },
+    {
+     "entity": "109-118",
+     "share_of_present_files": 0.24375,
+     "entries": 0,
+     "entry_files": [],
+     "first_bad_file": "20260513T121322000000Z.json",
+     "last_bad_file": "20260710T051721000000Z.json",
+     "always": false
+    }
+   ],
+   "per_file_count_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    4.0,
+    4.0
+   ],
+   "largest_episodes": [
+    {
+     "file": "20260514T223551000000Z.json",
+     "entities": 4
+    },
+    {
+     "file": "20260514T195201000000Z.json",
+     "entities": 4
+    },
+    {
+     "file": "20260514T191202000000Z.json",
+     "entities": 4
+    }
+   ]
+  }
+ },
+ "absent_coherence_records": {
+  "q.T1": {
+   "qubits_with_absent_records": {
+    "72": 36
+   },
+   "absent_records_total": 36
+  },
+  "q.T2": {
+   "qubits_with_absent_records": {
+    "72": 1760
+   },
+   "absent_records_total": 1760
+  }
+ },
+ "clustering": [
+  {
+   "set": "permanently faulty cz or rzz",
+   "couplers": [
+    "27-28",
+    "32-33",
+    "71-72",
+    "72-73",
+    "95-99",
+    "99-115"
+   ],
+   "adjacent_pairs_observed": 2,
+   "adjacent_pairs_null_mean": 0.2372,
+   "p_value_at_least_observed": 0.0182991,
+   "draws": 20000
+  },
+  {
+   "set": "ever placeholder cz, rzz or zz = 0",
+   "couplers": [
+    "7-17",
+    "13-14",
+    "17-27",
+    "27-28",
+    "32-33",
+    "38-49",
+    "39-53",
+    "49-50",
+    "71-72",
+    "72-73",
+    "95-99",
+    "99-115",
+    "102-103",
+    "109-118",
+    "148-149",
+    "149-150"
+   ],
+   "adjacent_pairs_observed": 6,
+   "adjacent_pairs_null_mean": 1.91145,
+   "p_value_at_least_observed": 0.00694965,
+   "draws": 20000
+  }
+ ],
+ "permanent_fault_qubit_footprint": [
+  27,
+  28,
+  32,
+  33,
+  71,
+  72,
+  73,
+  95,
+  99,
+  115
+ ],
+ "footprint_coords": [
+  [
+   8,
+   3
+  ],
+  [
+   9,
+   3
+  ],
+  [
+   13,
+   3
+  ],
+  [
+   14,
+   3
+  ],
+  [
+   12,
+   7
+  ],
+  [
+   13,
+   7
+  ],
+  [
+   14,
+   7
+  ],
+  [
+   16,
+   9
+  ],
+  [
+   16,
+   10
+  ],
+  [
+   16,
+   11
+  ]
+ ],
+ "footprint_mean_distance": 7.73333,
+ "footprint_mean_distance_null_q": [
+  7.8,
+  10.5978,
+  11.6167,
+  12.7556,
+  13.7333,
+  14.6222,
+  17.4889
+ ],
+ "footprint_null_draws": 2000
+}

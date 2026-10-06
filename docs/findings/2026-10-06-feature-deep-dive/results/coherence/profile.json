@@ -1,0 +1,1135 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "coherence",
+ "script": "analysis/coherence/profile.py",
+ "measured_utc": "2026-10-06T07:44:28Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "constants": {
+  "sx_length_s": 2.4e-08,
+  "sync_window_h": 1.0,
+  "round_gap_min": 15.0,
+  "level_window_events": 15,
+  "level_min_events": 8,
+  "period_split_utc": "2026-08-05T23:45:31Z"
+ },
+ "n_files": 1760,
+ "records": {
+  "T1": {
+   "records": 274524,
+   "cells": 274560,
+   "missing_by_qubit": {
+    "72": 36
+   },
+   "min_value": 1.67534,
+   "max_value": 409.021,
+   "q72_missing_runs": [
+    {
+     "first": "20260513T121322000000Z.json",
+     "last": "20260516T210531000000Z.json",
+     "files": 36
+    }
+   ]
+  },
+  "T2": {
+   "records": 272800,
+   "cells": 274560,
+   "missing_by_qubit": {
+    "72": 1760
+   },
+   "min_value": 2.47886,
+   "max_value": 307.364
+  },
+  "stamp_offset_T2_minus_T1_records": {
+   "records_with_both": 272800,
+   "identical_stamp": 0,
+   "t2_before_t1": 1528,
+   "within_10s": 0.94562,
+   "within_60s": 0.95158,
+   "within_1h": 0.959194,
+   "within_24h": 0.963853,
+   "offset_s_quantiles": [
+    -716047.0,
+    1.0,
+    2.0,
+    3.0,
+    4.0,
+    4.0,
+    5.0,
+    98527.0,
+    7833780.0
+   ]
+  },
+  "staleness": {
+   "stale_h": 72.0,
+   "T1": {
+    "qubits_ever_stale": 156,
+    "stale_records": 3478,
+    "age_h_quantiles_all_records": [
+     0.000833333,
+     0.00138889,
+     1.84167,
+     5.845,
+     12.8139,
+     19.5558,
+     24.0256,
+     124.452,
+     2205.96
+    ],
+    "worst": [
+     {
+      "qubit": 72,
+      "stale_files": 1126,
+      "present_files": 1724,
+      "max_age_h": 695.611,
+      "last_stale_file": "20261006T025742000000Z.json"
+     },
+     {
+      "qubit": 11,
+      "stale_files": 876,
+      "present_files": 1760,
+      "max_age_h": 503.216,
+      "last_stale_file": "20261006T025742000000Z.json"
+     },
+     {
+      "qubit": 17,
+      "stale_files": 482,
+      "present_files": 1760,
+      "max_age_h": 2205.96,
+      "last_stale_file": "20260714T194636000000Z.json"
+     },
+     {
+      "qubit": 103,
+      "stale_files": 76,
+      "present_files": 1760,
+      "max_age_h": 132.681,
+      "last_stale_file": "20260915T214955000000Z.json"
+     },
+     {
+      "qubit": 20,
+      "stale_files": 21,
+      "present_files": 1760,
+      "max_age_h": 132.681,
+      "last_stale_file": "20260806T084740000000Z.json"
+     },
+     {
+      "qubit": 133,
+      "stale_files": 19,
+      "present_files": 1760,
+      "max_age_h": 132.681,
+      "last_stale_file": "20260709T071319000000Z.json"
+     }
+    ]
+   },
+   "T2": {
+    "qubits_ever_stale": 155,
+    "stale_records": 1130,
+    "age_h_quantiles_all_records": [
+     0.0,
+     0.000277778,
+     1.74778,
+     5.65417,
+     12.3942,
+     18.87,
+     23.1061,
+     47.1978,
+     219.514
+    ],
+    "worst": [
+     {
+      "qubit": 149,
+      "stale_files": 351,
+      "present_files": 1760,
+      "max_age_h": 219.514,
+      "last_stale_file": "20261006T025742000000Z.json"
+     },
+     {
+      "qubit": 11,
+      "stale_files": 13,
+      "present_files": 1760,
+      "max_age_h": 132.681,
+      "last_stale_file": "20260604T213521000000Z.json"
+     },
+     {
+      "qubit": 6,
+      "stale_files": 6,
+      "present_files": 1760,
+      "max_age_h": 132.68,
+      "last_stale_file": "20260708T070800000000Z.json"
+     },
+     {
+      "qubit": 0,
+      "stale_files": 5,
+      "present_files": 1760,
+      "max_age_h": 132.68,
+      "last_stale_file": "20260513T202707000000Z.json"
+     },
+     {
+      "qubit": 1,
+      "stale_files": 5,
+      "present_files": 1760,
+      "max_age_h": 132.681,
+      "last_stale_file": "20260513T202707000000Z.json"
+     },
+     {
+      "qubit": 2,
+      "stale_files": 5,
+      "present_files": 1760,
+      "max_age_h": 132.68,
+      "last_stale_file": "20260513T202707000000Z.json"
+     }
+    ]
+   }
+  },
+  "T2_gt_2T1_records": {
+   "count": 424,
+   "share": 0.00155425,
+   "qubits": 18
+  }
+ },
+ "events": {
+  "T1": {
+   "series": 156,
+   "events": 20063,
+   "events_per_qubit_quantiles": [
+    24.0,
+    61.55,
+    127.0,
+    129.0,
+    130.0,
+    132.0,
+    133.0,
+    134.0,
+    134.0
+   ],
+   "distribution": {
+    "n": 20063,
+    "quantiles_linear": [
+     1.67534,
+     11.241,
+     39.4873,
+     62.8589,
+     78.2482,
+     99.3437,
+     125.971,
+     158.746,
+     189.235,
+     209.662,
+     260.889,
+     329.055,
+     409.021
+    ],
+    "quantile_levels": [
+     0.0,
+     0.001,
+     0.01,
+     0.05,
+     0.1,
+     0.25,
+     0.5,
+     0.75,
+     0.9,
+     0.95,
+     0.99,
+     0.999,
+     1.0
+    ],
+    "log10_mean": 2.08781,
+    "log10_median": 2.10027,
+    "log10_std": 0.167317,
+    "log10_mad_scaled": 0.150726,
+    "log10_skew": -1.12881,
+    "log10_excess_kurtosis": 4.80522,
+    "log10_bowley_skew": -0.0132532,
+    "median_over_p1": 3.19016,
+    "p99_over_median": 2.07102
+   },
+   "variance_split": {
+    "series": 156,
+    "values": 20063,
+    "total_var_log10": 0.0279936,
+    "between_qubit_var_log10": 0.0108184,
+    "between_share": 0.386459
+   },
+   "cadence": {
+    "gap_h_quantiles": [
+     3.86417,
+     6.17583,
+     19.1514,
+     24.2958,
+     24.7703,
+     25.6614,
+     43.7539,
+     98.7111,
+     2207.8
+    ],
+    "gap_h_quantiles_before_split": [
+     3.86417,
+     3.86444,
+     18.5902,
+     24.2303,
+     24.7019,
+     25.655,
+     44.1628,
+     134.179,
+     2207.8
+    ],
+    "gap_h_quantiles_after_split": [
+     8.08778,
+     8.08917,
+     21.5475,
+     24.3206,
+     24.9447,
+     25.9039,
+     40.9578,
+     98.7111,
+     401.874
+    ],
+    "gaps_before_split": 11837,
+    "gaps_after_split": 8070,
+    "quantile_levels": [
+     0.0,
+     0.01,
+     0.1,
+     0.25,
+     0.5,
+     0.75,
+     0.9,
+     0.99,
+     1.0
+    ],
+    "events_per_qubit_by_month_median": {
+     "2026-05": 21.0,
+     "2026-06": 27.0,
+     "2026-07": 24.0,
+     "2026-08": 24.0,
+     "2026-09": 29.0,
+     "2026-10": 4.0
+    }
+   },
+   "rounds": {
+    "events_used": 19907,
+    "rounds": 138,
+    "rounds_half_device_or_more": 133,
+    "events_in_half_device_rounds_share": 0.998543,
+    "round_size_quantiles": [
+     2.0,
+     4.37,
+     146.0,
+     147.0,
+     150.0,
+     151.0,
+     153.0,
+     154.0,
+     154.0
+    ],
+    "round_duration_min_quantiles_big": [
+     0.05,
+     0.05,
+     0.05,
+     0.05,
+     0.05,
+     0.0666667,
+     0.0666667,
+     0.178667,
+     1.83333
+    ],
+    "big_round_start_hour_utc_counts": [
+     5,
+     4,
+     9,
+     3,
+     2,
+     5,
+     4,
+     5,
+     5,
+     6,
+     7,
+     4,
+     3,
+     1,
+     2,
+     3,
+     2,
+     5,
+     5,
+     7,
+     12,
+     14,
+     9,
+     11
+    ],
+    "big_round_weekday_counts_mon_first": [
+     18,
+     23,
+     18,
+     16,
+     23,
+     18,
+     17
+    ],
+    "gap_between_big_rounds_h_quantiles": [
+     3.86444,
+     6.57556,
+     19.2111,
+     24.2926,
+     24.7142,
+     25.5009,
+     30.5187,
+     64.3343,
+     98.7111
+    ],
+    "gap_between_big_rounds_h_quantiles_before_split": [
+     3.86444,
+     5.64421,
+     18.7926,
+     24.2365,
+     24.69,
+     25.226,
+     28.9051,
+     62.1314,
+     65.8189
+    ],
+    "gap_between_big_rounds_h_quantiles_after_split": [
+     8.08778,
+     9.16544,
+     21.9051,
+     24.3233,
+     24.8807,
+     25.5444,
+     30.4514,
+     74.0589,
+     98.7111
+    ],
+    "event_stamp_hour_utc_counts": [
+     748,
+     603,
+     1349,
+     448,
+     304,
+     746,
+     589,
+     744,
+     741,
+     906,
+     1053,
+     596,
+     446,
+     166,
+     297,
+     446,
+     299,
+     752,
+     742,
+     1049,
+     1782,
+     2097,
+     1358,
+     1646
+    ],
+    "first_big_round_utc": "2026-05-13T21:57:00Z",
+    "last_big_round_utc": "2026-10-05T02:53:37Z"
+   }
+  },
+  "T2": {
+   "series": 155,
+   "events": 20626,
+   "events_per_qubit_quantiles": [
+    68.0,
+    120.08,
+    133.0,
+    134.0,
+    134.0,
+    134.0,
+    134.0,
+    134.0,
+    134.0
+   ],
+   "distribution": {
+    "n": 20626,
+    "quantiles_linear": [
+     2.47886,
+     4.08525,
+     6.46272,
+     19.5799,
+     29.3137,
+     51.1518,
+     92.9247,
+     132.953,
+     169.818,
+     191.736,
+     233.544,
+     271.71,
+     307.364
+    ],
+    "quantile_levels": [
+     0.0,
+     0.001,
+     0.01,
+     0.05,
+     0.1,
+     0.25,
+     0.5,
+     0.75,
+     0.9,
+     0.95,
+     0.99,
+     0.999,
+     1.0
+    ],
+    "log10_mean": 1.89408,
+    "log10_median": 1.96813,
+    "log10_std": 0.313644,
+    "log10_mad_scaled": 0.283958,
+    "log10_skew": -1.07314,
+    "log10_excess_kurtosis": 1.32709,
+    "log10_bowley_skew": -0.24998,
+    "median_over_p1": 14.3786,
+    "p99_over_median": 2.51326
+   },
+   "variance_split": {
+    "series": 155,
+    "values": 20626,
+    "total_var_log10": 0.0983675,
+    "between_qubit_var_log10": 0.080325,
+    "between_share": 0.816581
+   },
+   "cadence": {
+    "gap_h_quantiles": [
+     3.86417,
+     6.17611,
+     19.1511,
+     24.2956,
+     24.7281,
+     25.5533,
+     31.7556,
+     98.7111,
+     224.564
+    ],
+    "gap_h_quantiles_before_split": [
+     3.86417,
+     3.86444,
+     18.5903,
+     24.2306,
+     24.6989,
+     25.2681,
+     31.7558,
+     134.179,
+     224.564
+    ],
+    "gap_h_quantiles_after_split": [
+     8.08889,
+     8.08917,
+     21.5475,
+     24.3206,
+     24.9444,
+     25.5533,
+     30.8164,
+     98.7111,
+     178.638
+    ],
+    "gaps_before_split": 12166,
+    "gaps_after_split": 8305,
+    "quantile_levels": [
+     0.0,
+     0.01,
+     0.1,
+     0.25,
+     0.5,
+     0.75,
+     0.9,
+     0.99,
+     1.0
+    ],
+    "events_per_qubit_by_month_median": {
+     "2026-05": 21.0,
+     "2026-06": 28.0,
+     "2026-07": 25.0,
+     "2026-08": 25.0,
+     "2026-09": 30.0,
+     "2026-10": 4.0
+    }
+   },
+   "rounds": {
+    "events_used": 20471,
+    "rounds": 135,
+    "rounds_half_device_or_more": 133,
+    "events_in_half_device_rounds_share": 0.999902,
+    "round_size_quantiles": [
+     1.0,
+     51.32,
+     153.0,
+     153.0,
+     154.0,
+     155.0,
+     155.0,
+     155.0,
+     155.0
+    ],
+    "round_duration_min_quantiles_big": [
+     0.05,
+     0.05,
+     0.05,
+     0.05,
+     0.05,
+     0.0666667,
+     0.0666667,
+     0.244667,
+     1.11667
+    ],
+    "big_round_start_hour_utc_counts": [
+     5,
+     4,
+     9,
+     3,
+     2,
+     5,
+     4,
+     5,
+     5,
+     6,
+     7,
+     4,
+     3,
+     1,
+     2,
+     3,
+     2,
+     5,
+     5,
+     7,
+     12,
+     14,
+     9,
+     11
+    ],
+    "big_round_weekday_counts_mon_first": [
+     18,
+     23,
+     18,
+     16,
+     23,
+     18,
+     17
+    ],
+    "gap_between_big_rounds_h_quantiles": [
+     3.86417,
+     6.57556,
+     19.2111,
+     24.2926,
+     24.7144,
+     25.5009,
+     30.519,
+     64.3344,
+     98.7111
+    ],
+    "gap_between_big_rounds_h_quantiles_before_split": [
+     3.86417,
+     5.64415,
+     18.7926,
+     24.2365,
+     24.6899,
+     25.2258,
+     28.9053,
+     62.1313,
+     65.8192
+    ],
+    "gap_between_big_rounds_h_quantiles_after_split": [
+     8.08917,
+     9.1661,
+     21.9052,
+     24.3235,
+     24.8949,
+     25.5447,
+     30.4515,
+     74.0587,
+     98.7111
+    ],
+    "event_stamp_hour_utc_counts": [
+     768,
+     615,
+     1386,
+     463,
+     310,
+     773,
+     615,
+     767,
+     771,
+     924,
+     1076,
+     610,
+     461,
+     154,
+     308,
+     462,
+     309,
+     770,
+     772,
+     1077,
+     1841,
+     2156,
+     1390,
+     1693
+    ],
+    "first_big_round_utc": "2026-05-13T21:57:03Z",
+    "last_big_round_utc": "2026-10-05T02:53:41Z"
+   }
+  },
+  "co_measurement": {
+   "t1_events_excl_first": 19907,
+   "t1_events_without_t2_event_in_window": 160,
+   "t2_events_excl_first": 20471,
+   "t2_events_without_t1_event_in_window": 724
+  }
+ },
+ "derived": {
+  "pairing_counts": {
+   "t2_events": 20626,
+   "paired": 19899,
+   "no_t1_record": 0,
+   "outside_window": 727
+  },
+  "unpaired_by_qubit_top": [
+   {
+    "qubit": 11,
+    "unpaired": 71
+   },
+   {
+    "qubit": 17,
+    "unpaired": 62
+   },
+   {
+    "qubit": 24,
+    "unpaired": 9
+   },
+   {
+    "qubit": 126,
+    "unpaired": 9
+   },
+   {
+    "qubit": 10,
+    "unpaired": 8
+   },
+   {
+    "qubit": 33,
+    "unpaired": 8
+   },
+   {
+    "qubit": 61,
+    "unpaired": 8
+   },
+   {
+    "qubit": 82,
+    "unpaired": 8
+   }
+  ],
+  "unpaired_qubits": 149,
+  "paired_qubits": 155,
+  "pair_offset_s_quantiles": [
+   1.0,
+   1.0,
+   2.0,
+   3.0,
+   4.0,
+   4.0,
+   5.0,
+   12.0,
+   112.0
+  ],
+  "pair_offset_within_10s_share": 0.986733,
+  "pair_t2_before_t1": 0,
+  "rate_1_over_T1_per_ms": {
+   "n": 20063,
+   "quantiles_linear": [
+    2.44486,
+    3.039,
+    3.83305,
+    4.76959,
+    5.28444,
+    6.29937,
+    7.93834,
+    10.0661,
+    12.7798,
+    15.9087,
+    25.3246,
+    88.9609,
+    596.895
+   ],
+   "quantile_levels": [
+    0.0,
+    0.001,
+    0.01,
+    0.05,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    0.95,
+    0.99,
+    0.999,
+    1.0
+   ],
+   "log10_mean": 0.912191,
+   "log10_median": 0.899729,
+   "log10_std": 0.167317,
+   "log10_mad_scaled": 0.150726,
+   "log10_skew": 1.12881,
+   "log10_excess_kurtosis": 4.80522,
+   "log10_bowley_skew": 0.0132532,
+   "median_over_p1": 2.07102,
+   "p99_over_median": 3.19017
+  },
+  "T2_over_T1_quantiles": [
+   0.0288272,
+   0.0372765,
+   0.0862114,
+   0.164121,
+   0.254232,
+   0.463133,
+   0.810632,
+   1.04886,
+   1.24099,
+   1.36439,
+   1.63453,
+   1.99331,
+   3.52758
+  ],
+  "s_T2_over_2T1_quantiles": [
+   0.0144136,
+   0.0186383,
+   0.0431057,
+   0.0820605,
+   0.127116,
+   0.231566,
+   0.405316,
+   0.52443,
+   0.620497,
+   0.682193,
+   0.817264,
+   0.996654,
+   1.76379
+  ],
+  "quantile_levels": [
+   0.0,
+   0.001,
+   0.01,
+   0.05,
+   0.1,
+   0.25,
+   0.5,
+   0.75,
+   0.9,
+   0.95,
+   0.99,
+   0.999,
+   1.0
+  ],
+  "s_bins": [
+   0.0,
+   0.25,
+   0.5,
+   0.75,
+   0.9,
+   1.0,
+   1000000000.0
+  ],
+  "s_bin_counts": [
+   5421,
+   8525,
+   5520,
+   374,
+   39,
+   20
+  ],
+  "gamma_phi_nonpositive": 20,
+  "gamma_phi_exactly_zero": 0,
+  "gamma_phi_per_ms": {
+   "n": 19879,
+   "quantiles_linear": [
+    0.0189109,
+    0.311478,
+    1.17887,
+    1.94867,
+    2.46811,
+    3.59626,
+    5.93745,
+    13.9878,
+    27.3779,
+    43.8347,
+    108.029,
+    200.834,
+    256.55
+   ],
+   "quantile_levels": [
+    0.0,
+    0.001,
+    0.01,
+    0.05,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    0.95,
+    0.99,
+    0.999,
+    1.0
+   ],
+   "log10_mean": 0.856788,
+   "log10_median": 0.7736,
+   "log10_std": 0.423352,
+   "log10_mad_scaled": 0.393773,
+   "log10_skew": 0.566905,
+   "log10_excess_kurtosis": 0.539829,
+   "log10_bowley_skew": 0.261741,
+   "median_over_p1": 5.03658,
+   "p99_over_median": 18.1946
+  },
+  "T_phi_us_quantiles": [
+   3.89787,
+   4.97923,
+   9.26052,
+   22.813,
+   36.5258,
+   71.491,
+   168.422,
+   278.066,
+   405.169,
+   513.169,
+   848.273,
+   3210.5,
+   52879.5
+  ],
+  "gamma_adr027_T1_events": {
+   "n": 20063,
+   "quantiles_linear": [
+    5.8675e-05,
+    7.29334e-05,
+    9.19889e-05,
+    0.000114464,
+    0.000126818,
+    0.000151174,
+    0.000190502,
+    0.000241556,
+    0.000306669,
+    0.000381735,
+    0.000607606,
+    0.00213278,
+    0.0142234
+   ],
+   "quantile_levels": [
+    0.0,
+    0.001,
+    0.01,
+    0.05,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    0.95,
+    0.99,
+    0.999,
+    1.0
+   ],
+   "log10_mean": -3.70764,
+   "log10_median": -3.7201,
+   "log10_std": 0.167291,
+   "log10_mad_scaled": 0.150713,
+   "log10_skew": 1.12788,
+   "log10_excess_kurtosis": 4.79592,
+   "log10_bowley_skew": 0.0132419,
+   "median_over_p1": 2.07092,
+   "p99_over_median": 3.1895
+  },
+  "lambda_adr027_paired": {
+   "n": 19879,
+   "quantiles_linear": [
+    9.07723e-07,
+    1.49509e-05,
+    5.65839e-05,
+    9.3532e-05,
+    0.000118462,
+    0.000172606,
+    0.000284957,
+    0.000671188,
+    0.00131328,
+    0.00210185,
+    0.00517198,
+    0.00959374,
+    0.0122389
+   ],
+   "quantile_levels": [
+    0.0,
+    0.001,
+    0.01,
+    0.05,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    0.95,
+    0.99,
+    0.999,
+    1.0
+   ],
+   "log10_mean": -3.4621,
+   "log10_median": -3.54522,
+   "log10_std": 0.423187,
+   "log10_mad_scaled": 0.393702,
+   "log10_skew": 0.565666,
+   "log10_excess_kurtosis": 0.536669,
+   "log10_bowley_skew": 0.261688,
+   "median_over_p1": 5.03601,
+   "p99_over_median": 18.15
+  },
+  "lambda_rejected_T2_gt_2T1": 20,
+  "variance_split_gamma_phi": {
+   "series": 155,
+   "values": 19879,
+   "total_var_log10": 0.179218,
+   "between_qubit_var_log10": 0.158029,
+   "between_share": 0.881772
+  },
+  "variance_split_s": {
+   "series": 155,
+   "values": 19899,
+   "total_var_log10": 0.0835285,
+   "between_qubit_var_log10": 0.0749455,
+   "between_share": 0.897245
+  },
+  "T2_gt_2T1_events": {
+   "events": 20,
+   "share_of_paired": 0.00100508,
+   "qubits_with_any": 15,
+   "top_qubits": [
+    {
+     "qubit": 140,
+     "count": 4,
+     "paired_events": 131
+    },
+    {
+     "qubit": 117,
+     "count": 3,
+     "paired_events": 130
+    },
+    {
+     "qubit": 40,
+     "count": 1,
+     "paired_events": 127
+    },
+    {
+     "qubit": 2,
+     "count": 1,
+     "paired_events": 129
+    },
+    {
+     "qubit": 56,
+     "count": 1,
+     "paired_events": 131
+    },
+    {
+     "qubit": 87,
+     "count": 1,
+     "paired_events": 131
+    },
+    {
+     "qubit": 92,
+     "count": 1,
+     "paired_events": 132
+    },
+    {
+     "qubit": 10,
+     "count": 1,
+     "paired_events": 126
+    }
+   ],
+   "share_in_top_10pct_qubits": 1.0,
+   "top_10pct_qubit_count": 16,
+   "s_quantiles_when_flagged": [
+    1.00009,
+    1.0004,
+    1.00985,
+    1.0293,
+    1.08313,
+    1.18948,
+    1.34454,
+    1.69706,
+    1.76379
+   ],
+   "t1_dev_median_when_flagged": -0.31288,
+   "t2_dev_median_when_flagged": -0.0157466,
+   "t1_dev_median_otherwise": 0.000941083,
+   "t2_dev_median_otherwise": 0.000648707,
+   "flagged_with_t1_dev_below_0": 1.0,
+   "flagged_with_t2_dev_above_0": 0.4,
+   "flagged_with_finite_devs": 20,
+   "deviation_note": "log10 deviations from each field's centred running median over the paired series"
+  }
+ },
+ "q72": {
+  "t1_events": 24,
+  "t1_event_stamps_utc": [
+   "2026-05-16T22:25:05Z",
+   "2026-06-15T00:40:59Z",
+   "2026-06-16T02:42:19Z",
+   "2026-06-16T17:20:42Z",
+   "2026-06-17T17:36:56Z",
+   "2026-06-20T21:20:24Z",
+   "2026-06-21T22:12:31Z",
+   "2026-06-29T14:55:52Z",
+   "2026-06-30T15:39:50Z",
+   "2026-07-01T19:13:56Z",
+   "2026-07-03T01:51:12Z",
+   "2026-07-12T11:31:36Z",
+   "2026-07-24T12:49:49Z",
+   "2026-07-27T07:51:04Z",
+   "2026-07-28T08:08:06Z",
+   "2026-07-31T09:31:22Z",
+   "2026-08-01T09:57:03Z",
+   "2026-08-02T10:52:33Z",
+   "2026-08-12T05:09:44Z",
+   "2026-08-28T23:02:11Z",
+   "2026-09-04T10:11:23Z",
+   "2026-09-08T14:06:39Z",
+   "2026-09-12T01:37:23Z",
+   "2026-09-13T02:14:18Z"
+  ],
+  "t1_values_us": [
+   7.1587,
+   8.6368,
+   12.781,
+   8.56,
+   8.5555,
+   13.38,
+   12.497,
+   9.4103,
+   7.7304,
+   9.7957,
+   7.9203,
+   24.04,
+   7.2768,
+   19.146,
+   6.8288,
+   7.043,
+   6.8705,
+   6.2112,
+   24.705,
+   23.404,
+   26.281,
+   17.762,
+   17.986,
+   21.449
+  ],
+  "max_gap_h": 698.265,
+  "max_gap_from_utc": "2026-05-16T22:25:05Z",
+  "max_gap_to_utc": "2026-06-15T00:40:59Z",
+  "median_t1_us": 9.603,
+  "median_of_other_qubit_medians_us": 129.451,
+  "t2_records": 0
+ }
+}

@@ -1,0 +1,894 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "readout",
+ "script": "analysis/readout/profiles.py",
+ "measured_utc": "2026-10-06T07:51:32Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "error_fields": {
+  "q.readout_error": {
+   "first_file": "20260513T121322",
+   "last_file": "20261006T025742",
+   "files_in_lifetime": 1760,
+   "entities_never_present_in_lifetime": [],
+   "present_share_in_lifetime": 1.0,
+   "present_share_in_lifetime_excluding_never_present": 1.0,
+   "placeholder_records_ge_1": 0,
+   "records": 274560,
+   "value_q_0_1_10_50_90_99_100": [
+    0.000976562,
+    0.00292969,
+    0.00463867,
+    0.0100098,
+    0.0461426,
+    0.237671,
+    0.525879
+   ],
+   "exact_zero_records": 0,
+   "below_1e-6_records": 0,
+   "log10_value_over_entity_median_q": [
+    -1.26445,
+    -0.339659,
+    -0.153815,
+    0.0,
+    0.238239,
+    0.7564,
+    1.90562
+   ],
+   "share_records_gt_3x_entity_median": 0.02933,
+   "share_records_lt_third_entity_median": 0.00351,
+   "entity_median_q": [
+    0.0045166,
+    0.00463867,
+    0.00524902,
+    0.00891113,
+    0.0408936,
+    0.109052,
+    0.332092
+   ],
+   "date_equals_file_date_share": 0.0034,
+   "grid_share": {
+    "on_1_over_2048": 0.31759,
+    "on_1_over_4096": 0.63181,
+    "on_1_over_8192": 1.0
+   },
+   "events_measured_rule": {
+    "series": 156,
+    "events_total": 90408,
+    "events_per_entity_q": [
+     566.0,
+     567.0,
+     574.0,
+     580.0,
+     586.0,
+     588.45,
+     589.0
+    ],
+    "gap_h_q": [
+     0.140556,
+     1.00722,
+     2.55056,
+     4.46639,
+     10.5792,
+     33.6322,
+     121.208
+    ]
+   },
+   "events_stamp_rule": {
+    "series": 156,
+    "events_total": 92153,
+    "events_per_entity_q": [
+     590.0,
+     590.0,
+     590.0,
+     591.0,
+     591.0,
+     597.0,
+     597.0
+    ],
+    "gap_h_q": [
+     0.110833,
+     0.818611,
+     2.51556,
+     4.41833,
+     10.1944,
+     33.6322,
+     82.1083
+    ]
+   },
+   "stamp_events_with_value_unchanged": 1745,
+   "memory_measured_rule": {
+    "transitions": 90252,
+    "events_dropped_nonpositive": 0,
+    "lag1_autocorr_of_log10_change": -0.4493,
+    "abs_log10_change_q": [
+     0.000120287,
+     0.00366891,
+     0.0170333,
+     0.087739,
+     0.288065,
+     0.758868,
+     2.17978
+    ],
+    "share_change_gt_2x": 0.0926,
+    "share_change_exact_zero": 0.0
+   },
+   "memory_stamp_rule": {
+    "transitions": 91997,
+    "events_dropped_nonpositive": 0,
+    "lag1_autocorr_of_log10_change": -0.4434,
+    "abs_log10_change_q": [
+     0.0,
+     0.0,
+     0.0142404,
+     0.0856035,
+     0.28561,
+     0.753237,
+     2.17978
+    ],
+    "share_change_gt_2x": 0.0909,
+    "share_change_exact_zero": 0.019
+   }
+  },
+  "q.prob_meas0_prep1": {
+   "first_file": "20260513T121322",
+   "last_file": "20261006T025742",
+   "files_in_lifetime": 1760,
+   "entities_never_present_in_lifetime": [],
+   "present_share_in_lifetime": 1.0,
+   "present_share_in_lifetime_excluding_never_present": 1.0,
+   "placeholder_records_ge_1": 0,
+   "records": 274560,
+   "value_q_0_1_10_50_90_99_100": [
+    0.000244141,
+    0.00439453,
+    0.00708008,
+    0.0136719,
+    0.0517578,
+    0.184814,
+    0.976562
+   ],
+   "exact_zero_records": 0,
+   "below_1e-6_records": 0,
+   "log10_value_over_entity_median_q": [
+    -2.55871,
+    -0.332438,
+    -0.146736,
+    0.0,
+    0.2156,
+    0.683779,
+    1.93247
+   ],
+   "share_records_gt_3x_entity_median": 0.02384,
+   "share_records_lt_third_entity_median": 0.00404,
+   "entity_median_q": [
+    0.00683594,
+    0.00683594,
+    0.00817871,
+    0.012207,
+    0.0432129,
+    0.13302,
+    0.432495
+   ],
+   "date_equals_file_date_share": 0.0025,
+   "grid_share": {
+    "on_1_over_2048": 0.6581,
+    "on_1_over_4096": 1.0,
+    "on_1_over_8192": 1.0
+   },
+   "events_measured_rule": {
+    "series": 156,
+    "events_total": 85849,
+    "events_per_entity_q": [
+     314.0,
+     317.1,
+     479.5,
+     574.0,
+     581.5,
+     587.35,
+     589.0
+    ],
+    "gap_h_q": [
+     0.155,
+     1.03306,
+     2.55806,
+     4.56278,
+     11.0272,
+     33.6322,
+     121.192
+    ]
+   },
+   "events_stamp_rule": {
+    "series": 156,
+    "events_total": 87991,
+    "events_per_entity_q": [
+     327.0,
+     328.0,
+     485.0,
+     590.0,
+     590.0,
+     596.0,
+     596.0
+    ],
+    "gap_h_q": [
+     0.0888889,
+     0.852594,
+     2.52444,
+     4.45028,
+     10.8419,
+     33.6322,
+     97.5694
+    ]
+   },
+   "stamp_events_with_value_unchanged": 2142,
+   "memory_measured_rule": {
+    "transitions": 85693,
+    "events_dropped_nonpositive": 0,
+    "lag1_autocorr_of_log10_change": -0.4736,
+    "abs_log10_change_q": [
+     0.0004669,
+     0.00469512,
+     0.0177288,
+     0.0894004,
+     0.289448,
+     0.759978,
+     3.31218
+    ],
+    "share_change_gt_2x": 0.0933,
+    "share_change_exact_zero": 0.0
+   },
+   "memory_stamp_rule": {
+    "transitions": 87835,
+    "events_dropped_nonpositive": 0,
+    "lag1_autocorr_of_log10_change": -0.4686,
+    "abs_log10_change_q": [
+     0.0,
+     0.0,
+     0.0142404,
+     0.0866371,
+     0.286307,
+     0.752613,
+     3.31218
+    ],
+    "share_change_gt_2x": 0.091,
+    "share_change_exact_zero": 0.0244
+   }
+  },
+  "q.prob_meas1_prep0": {
+   "first_file": "20260513T121322",
+   "last_file": "20261006T025742",
+   "files_in_lifetime": 1760,
+   "entities_never_present_in_lifetime": [],
+   "present_share_in_lifetime": 1.0,
+   "present_share_in_lifetime_excluding_never_present": 1.0,
+   "placeholder_records_ge_1": 0,
+   "records": 274560,
+   "value_q_0_1_10_50_90_99_100": [
+    0.0,
+    0.000244141,
+    0.0012207,
+    0.00610352,
+    0.0385742,
+    0.166504,
+    0.99585
+   ],
+   "exact_zero_records": 2468,
+   "below_1e-6_records": 2468,
+   "log10_value_over_entity_median_q": [
+    -2.96142,
+    -0.90309,
+    -0.39794,
+    0.0,
+    0.372386,
+    0.965855,
+    2.56914
+   ],
+   "share_records_gt_3x_entity_median": 0.05907,
+   "share_records_lt_third_entity_median": 0.06872,
+   "entity_median_q": [
+    0.00146484,
+    0.00170898,
+    0.00219727,
+    0.00537109,
+    0.0333252,
+    0.100977,
+    0.223389
+   ],
+   "date_equals_file_date_share": 0.0026,
+   "grid_share": {
+    "on_1_over_2048": 0.63565,
+    "on_1_over_4096": 1.0,
+    "on_1_over_8192": 1.0
+   },
+   "events_measured_rule": {
+    "series": 156,
+    "events_total": 88975,
+    "events_per_entity_q": [
+     543.0,
+     546.55,
+     555.0,
+     572.0,
+     584.5,
+     588.45,
+     589.0
+    ],
+    "gap_h_q": [
+     0.148056,
+     1.04111,
+     2.54694,
+     4.515,
+     10.7581,
+     33.6322,
+     136.499
+    ]
+   },
+   "events_stamp_rule": {
+    "series": 156,
+    "events_total": 92155,
+    "events_per_entity_q": [
+     590.0,
+     590.0,
+     590.0,
+     591.0,
+     591.0,
+     597.0,
+     597.0
+    ],
+    "gap_h_q": [
+     0.0997222,
+     0.830556,
+     2.51028,
+     4.41833,
+     10.2081,
+     33.6322,
+     82.1083
+    ]
+   },
+   "stamp_events_with_value_unchanged": 3180,
+   "memory_measured_rule": {
+    "transitions": 88214,
+    "events_dropped_nonpositive": 605,
+    "lag1_autocorr_of_log10_change": -0.4477,
+    "abs_log10_change_q": [
+     0.0,
+     0.00789648,
+     0.0377886,
+     0.176899,
+     0.60206,
+     1.25527,
+     3.56914
+    ],
+    "share_change_gt_2x": 0.3178,
+    "share_change_exact_zero": 0.0005
+   },
+   "memory_stamp_rule": {
+    "transitions": 91345,
+    "events_dropped_nonpositive": 654,
+    "lag1_autocorr_of_log10_change": -0.4344,
+    "abs_log10_change_q": [
+     0.0,
+     0.0,
+     0.0280287,
+     0.176091,
+     0.588272,
+     1.25527,
+     3.56914
+    ],
+    "share_change_gt_2x": 0.3069,
+    "share_change_exact_zero": 0.0348
+   },
+   "memory_stamp_rule_values_ge_1e-6": {
+    "transitions": 91345,
+    "events_dropped_nonpositive": 0,
+    "lag1_autocorr_of_log10_change": -0.4344,
+    "abs_log10_change_q": [
+     0.0,
+     0.0,
+     0.0280287,
+     0.176091,
+     0.588272,
+     1.25527,
+     3.56914
+    ],
+    "share_change_gt_2x": 0.3069,
+    "share_change_exact_zero": 0.0348
+   }
+  },
+  "q.init_error": {
+   "first_file": "20260804T005230",
+   "last_file": "20261006T025742",
+   "files_in_lifetime": 1091,
+   "entities_never_present_in_lifetime": [
+    1,
+    3,
+    11,
+    12,
+    15,
+    32,
+    33,
+    35,
+    41,
+    43,
+    45,
+    47,
+    51,
+    53,
+    55,
+    60,
+    61,
+    62,
+    63,
+    65,
+    67,
+    72,
+    76,
+    81,
+    83,
+    87,
+    91,
+    93,
+    99,
+    101,
+    102,
+    113,
+    116,
+    126,
+    128,
+    131,
+    135,
+    145,
+    149,
+    155
+   ],
+   "present_share_in_lifetime": 0.7424,
+   "present_share_in_lifetime_excluding_never_present": 0.9985,
+   "placeholder_records_ge_1": 0,
+   "records": 126362,
+   "value_q_0_1_10_50_90_99_100": [
+    1.97458e-28,
+    0.0002,
+    0.000443682,
+    0.00185386,
+    0.0052588,
+    0.010584,
+    0.0464001
+   ],
+   "exact_zero_records": 0,
+   "below_1e-6_records": 540,
+   "log10_value_over_entity_median_q": [
+    -24.7045,
+    -0.932908,
+    -0.444617,
+    0.0,
+    0.352321,
+    0.830638,
+    1.88349
+   ],
+   "share_records_gt_3x_entity_median": 0.02503,
+   "share_records_lt_third_entity_median": 0.04121,
+   "entity_median_q": [
+    0.0002,
+    0.000619622,
+    0.000846278,
+    0.00170872,
+    0.00404385,
+    0.00711029,
+    0.0103818
+   ],
+   "date_equals_file_date_share": 0.0067,
+   "grid_share": {
+    "on_1_over_2048": 0.00305,
+    "on_1_over_4096": 0.00375,
+    "on_1_over_8192": 0.00292
+   },
+   "events_measured_rule": {
+    "series": 116,
+    "events_total": 23952,
+    "events_per_entity_q": [
+     1.0,
+     2.2,
+     81.0,
+     241.0,
+     244.5,
+     245.0,
+     245.0
+    ],
+    "gap_h_q": [
+     0.634444,
+     0.819167,
+     1.52361,
+     4.72639,
+     11.6331,
+     59.1319,
+     1072.75
+    ]
+   },
+   "events_stamp_rule": {
+    "series": 116,
+    "events_total": 25158,
+    "events_per_entity_q": [
+     1.0,
+     2.2,
+     83.0,
+     252.0,
+     260.0,
+     261.85,
+     262.0
+    ],
+    "gap_h_q": [
+     0.2825,
+     0.329167,
+     1.145,
+     4.39111,
+     11.4574,
+     59.1319,
+     1072.75
+    ]
+   },
+   "stamp_events_with_value_unchanged": 1206,
+   "memory_measured_rule": {
+    "transitions": 23836,
+    "events_dropped_nonpositive": 0,
+    "lag1_autocorr_of_log10_change": -0.5012,
+    "abs_log10_change_q": [
+     3.7372e-09,
+     0.00040075,
+     0.040519,
+     0.24936,
+     0.733654,
+     4.70374,
+     24.9373
+    ],
+    "share_change_gt_2x": 0.4243,
+    "share_change_exact_zero": 0.0
+   },
+   "memory_stamp_rule": {
+    "transitions": 25042,
+    "events_dropped_nonpositive": 0,
+    "lag1_autocorr_of_log10_change": -0.4965,
+    "abs_log10_change_q": [
+     0.0,
+     0.0,
+     0.0158627,
+     0.233126,
+     0.712322,
+     4.54284,
+     24.9373
+    ],
+    "share_change_gt_2x": 0.4038,
+    "share_change_exact_zero": 0.0482
+   },
+   "memory_stamp_rule_values_ge_1e-6": {
+    "transitions": 24887,
+    "events_dropped_nonpositive": 0,
+    "lag1_autocorr_of_log10_change": -0.4364,
+    "abs_log10_change_q": [
+     0.0,
+     0.0,
+     0.0151992,
+     0.228982,
+     0.695444,
+     1.20316,
+     3.39128
+    ],
+    "share_change_gt_2x": 0.3975,
+    "share_change_exact_zero": 0.0485
+   }
+  },
+  "g1.measure_2.gate_error": {
+   "first_file": "20260807T032159",
+   "last_file": "20261006T025742",
+   "files_in_lifetime": 1058,
+   "entities_never_present_in_lifetime": [],
+   "present_share_in_lifetime": 1.0,
+   "present_share_in_lifetime_excluding_never_present": 1.0,
+   "placeholder_records_ge_1": 312,
+   "placeholder_files": [
+    {
+     "file": "20260807T032159",
+     "entities": 156
+    },
+    {
+     "file": "20260810T140235",
+     "entities": 156
+    }
+   ],
+   "records": 164736,
+   "value_q_0_1_10_50_90_99_100": [
+    0.000976562,
+    0.00219727,
+    0.00439453,
+    0.013916,
+    0.0822754,
+    0.298828,
+    0.570312
+   ],
+   "exact_zero_records": 0,
+   "below_1e-6_records": 0,
+   "log10_value_over_entity_median_q": [
+    -0.778151,
+    -0.367977,
+    -0.140179,
+    0.0,
+    0.180838,
+    0.66728,
+    1.92826
+   ],
+   "share_records_gt_3x_entity_median": 0.01249,
+   "share_records_lt_third_entity_median": 0.00206,
+   "entity_median_q": [
+    0.00341797,
+    0.00390625,
+    0.00463867,
+    0.0133667,
+    0.0720215,
+    0.162854,
+    0.445801
+   ],
+   "date_equals_file_date_share": 0.004,
+   "grid_share": {
+    "on_1_over_2048": 0.49254,
+    "on_1_over_4096": 1.0,
+    "on_1_over_8192": 1.0
+   },
+   "events_measured_rule": {
+    "series": 156,
+    "events_total": 7925,
+    "events_per_entity_q": [
+     45.0,
+     46.55,
+     49.0,
+     51.0,
+     52.0,
+     52.0,
+     52.0
+    ],
+    "gap_h_q": [
+     8.21306,
+     8.21306,
+     21.0572,
+     24.6775,
+     30.8244,
+     53.8869,
+     106.277
+    ]
+   },
+   "events_stamp_rule": {
+    "series": 156,
+    "events_total": 8112,
+    "events_per_entity_q": [
+     52.0,
+     52.0,
+     52.0,
+     52.0,
+     52.0,
+     52.0,
+     52.0
+    ],
+    "gap_h_q": [
+     8.21306,
+     8.21306,
+     21.0572,
+     24.6617,
+     28.1506,
+     53.8869,
+     53.8869
+    ]
+   },
+   "stamp_events_with_value_unchanged": 187,
+   "memory_measured_rule": {
+    "transitions": 7769,
+    "events_dropped_nonpositive": 0,
+    "lag1_autocorr_of_log10_change": -0.504,
+    "abs_log10_change_q": [
+     0.000617334,
+     0.00368947,
+     0.019135,
+     0.09691,
+     0.342423,
+     0.8208,
+     2.31644
+    ],
+    "share_change_gt_2x": 0.1318,
+    "share_change_exact_zero": 0.0
+   },
+   "memory_stamp_rule": {
+    "transitions": 7956,
+    "events_dropped_nonpositive": 0,
+    "lag1_autocorr_of_log10_change": -0.4962,
+    "abs_log10_change_q": [
+     0.0,
+     0.0,
+     0.0157943,
+     0.0927541,
+     0.338347,
+     0.816956,
+     2.31644
+    ],
+    "share_change_gt_2x": 0.1287,
+    "share_change_exact_zero": 0.0235
+   }
+  }
+ },
+ "length_fields": {
+  "q.readout_length": {
+   "first_file": "20260513T121322",
+   "present_share_in_lifetime": 1.0,
+   "distinct_values": {
+    "1560.0": 35412,
+    "1660.0": 177216,
+    "1700.0": 61932
+   },
+   "value_changes": [
+    {
+     "file": "20260608T185628",
+     "entities_changed": 156,
+     "from": [
+      1560.0
+     ],
+     "to": [
+      1700.0
+     ]
+    },
+    {
+     "file": "20260730T210917",
+     "entities_changed": 156,
+     "from": [
+      1700.0
+     ],
+     "to": [
+      1660.0
+     ]
+    }
+   ]
+  },
+  "g1.measure.gate_length": {
+   "first_file": "20260513T121322",
+   "present_share_in_lifetime": 1.0,
+   "distinct_values": {
+    "1560.0": 35412,
+    "1660.0": 177216,
+    "1700.0": 61932
+   },
+   "value_changes": [
+    {
+     "file": "20260608T185628",
+     "entities_changed": 156,
+     "from": [
+      1560.0
+     ],
+     "to": [
+      1700.0
+     ]
+    },
+    {
+     "file": "20260730T210917",
+     "entities_changed": 156,
+     "from": [
+      1700.0
+     ],
+     "to": [
+      1660.0
+     ]
+    }
+   ]
+  },
+  "g1.measure_2.gate_length": {
+   "first_file": "20260807T032159",
+   "present_share_in_lifetime": 1.0,
+   "distinct_values": {
+    "1340.0": 165048
+   },
+   "value_changes": []
+  },
+  "g1.measure_reset.gate_length": {
+   "first_file": "20260902T045624",
+   "present_share_in_lifetime": 1.0,
+   "distinct_values": {
+    "1684.0": 127452
+   },
+   "value_changes": []
+  },
+  "g1.measure_reset_2.gate_length": {
+   "first_file": "20260902T045624",
+   "present_share_in_lifetime": 1.0,
+   "distinct_values": {
+    "1364.0": 127452
+   },
+   "value_changes": []
+  },
+  "g1.reset.gate_length": {
+   "first_file": "20260513T121322",
+   "present_share_in_lifetime": 1.0,
+   "distinct_values": {
+    "1584.0": 35412,
+    "1684.0": 177216,
+    "1724.0": 61932
+   },
+   "value_changes": [
+    {
+     "file": "20260608T185628",
+     "entities_changed": 156,
+     "from": [
+      1584.0
+     ],
+     "to": [
+      1724.0
+     ]
+    },
+    {
+     "file": "20260730T210917",
+     "entities_changed": 156,
+     "from": [
+      1724.0
+     ],
+     "to": [
+      1684.0
+     ]
+    }
+   ]
+  },
+  "g1.reset_2.gate_length": {
+   "first_file": "20260902T045624",
+   "present_share_in_lifetime": 1.0,
+   "distinct_values": {
+    "1364.0": 127452
+   },
+   "value_changes": []
+  }
+ },
+ "length_identities": {
+  "reset_eq_readout_length_plus_24": {
+   "compared": 274560,
+   "mismatch": 0
+  },
+  "measure_reset_eq_reset": {
+   "compared": 127452,
+   "mismatch": 0
+  },
+  "reset_2_eq_measure_2_plus_24": {
+   "compared": 127452,
+   "mismatch": 0
+  },
+  "measure_reset_2_eq_reset_2": {
+   "compared": 127452,
+   "mismatch": 0
+  },
+  "x_length_ns_distinct": [
+   24.0
+  ]
+ },
+ "count_parity": {
+  "q.prob_meas0_prep1": {
+   "stamp_events": 87991,
+   "odd_share": 0.3888,
+   "count_mod_4": [
+    26905,
+    17082,
+    26872,
+    17132
+   ]
+  },
+  "q.prob_meas1_prep0": {
+   "stamp_events": 92155,
+   "odd_share": 0.3946,
+   "count_mod_4": [
+    27888,
+    18387,
+    27905,
+    17975
+   ]
+  },
+  "g1.measure_2.gate_error": {
+   "records": 164736,
+   "odd_share_of_4096_count": 0.5075
+  }
+ },
+ "p1g0_exact_zero": {
+  "records": 2468,
+  "qubits_with_any": 78,
+  "max_per_qubit": 141
+ }
+}

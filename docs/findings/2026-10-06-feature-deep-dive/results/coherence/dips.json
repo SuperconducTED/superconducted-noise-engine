@@ -1,0 +1,449 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "coherence",
+ "script": "analysis/coherence/dips.py",
+ "measured_utc": "2026-10-06T07:45:31Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "constants": {
+  "sx_length_s": 2.4e-08,
+  "sync_window_h": 1.0,
+  "round_gap_min": 15.0,
+  "level_window_events": 15,
+  "level_min_events": 8,
+  "period_split_utc": "2026-08-05T23:45:31Z"
+ },
+ "n_files": 1760,
+ "thresholds": {
+  "dip_decades": 0.3010299956639812,
+  "mild_decades": 0.17609125905568124,
+  "recovered_within_decades": 0.09691001300805642,
+  "shuffles": 500,
+  "codip_simulations": 2000,
+  "big_round_min_qubits": 78,
+  "gmm_min_weight": 0.05,
+  "gmm_delta_bic": 10.0,
+  "gmm_ashman_d": 2.0,
+  "seed": 20261006,
+  "regime3_start_utc": "2026-06-28T00:00:00Z"
+ },
+ "dips": {
+  "factor_2": {
+   "qubits": 156,
+   "dip_events": 630,
+   "events": 19595,
+   "dip_share": 0.0321511,
+   "qubits_with_any": 151,
+   "per_qubit_rate_quantiles": [
+    0.0,
+    0.0,
+    0.011482,
+    0.015748,
+    0.0310078,
+    0.0400806,
+    0.0542636,
+    0.086242,
+    0.0869565
+   ],
+   "share_of_dips_in_top_10pct_qubits": 0.204762,
+   "top_10pct_count": 16,
+   "episodes": 602,
+   "episode_length_events_counts_1_2_3_4plus": [
+    574,
+    28,
+    0,
+    0
+   ],
+   "episode_depth_decades_quantiles": [
+    -1.854,
+    -0.94203,
+    -0.611412,
+    -0.460895,
+    -0.379885,
+    -0.334419,
+    -0.31305,
+    -0.302489,
+    -0.301218
+   ],
+   "episode_duration_to_recovery_h_quantiles": [
+    3.86417,
+    3.86444,
+    22.7394,
+    24.4511,
+    24.9578,
+    26.0956,
+    48.6858,
+    88.3329,
+    259.211
+   ],
+   "episodes_censored_at_end": 0,
+   "first_post_episode_dev_quantiles": [
+    -0.294732,
+    -0.246946,
+    -0.169976,
+    -0.0707988,
+    0.0129416,
+    0.0833986,
+    0.140288,
+    0.231532,
+    0.298545
+   ],
+   "first_post_episode_recovered_share": 0.58804
+  },
+  "factor_1.5": {
+   "qubits": 156,
+   "dip_events": 1864,
+   "events": 19595,
+   "dip_share": 0.0951263,
+   "qubits_with_any": 156,
+   "per_qubit_rate_quantiles": [
+    0.0153846,
+    0.0241642,
+    0.0610687,
+    0.0761913,
+    0.0933866,
+    0.111742,
+    0.129734,
+    0.168187,
+    0.22449
+   ],
+   "share_of_dips_in_top_10pct_qubits": 0.15397,
+   "top_10pct_count": 16,
+   "episodes": 1658,
+   "episode_length_events_counts_1_2_3_4plus": [
+    1475,
+    163,
+    18,
+    2
+   ],
+   "episode_depth_decades_quantiles": [
+    -1.854,
+    -0.806112,
+    -0.451817,
+    -0.344494,
+    -0.260505,
+    -0.210237,
+    -0.188876,
+    -0.177655,
+    -0.176195
+   ],
+   "episode_duration_to_recovery_h_quantiles": [
+    3.86417,
+    6.27174,
+    22.7394,
+    24.4697,
+    25.0206,
+    29.5999,
+    51.3164,
+    98.7111,
+    283.639
+   ],
+   "episodes_censored_at_end": 0,
+   "first_post_episode_dev_quantiles": [
+    -0.175981,
+    -0.168668,
+    -0.106321,
+    -0.0468406,
+    0.0271557,
+    0.0880365,
+    0.137124,
+    0.23506,
+    0.493263
+   ],
+   "first_post_episode_recovered_share": 0.662244
+  },
+  "most_dip_prone_qubits_factor_2": [
+   {
+    "qubit": 6,
+    "dips": 11
+   },
+   {
+    "qubit": 103,
+    "dips": 11
+   },
+   {
+    "qubit": 3,
+    "dips": 10
+   },
+   {
+    "qubit": 49,
+    "dips": 9
+   },
+   {
+    "qubit": 20,
+    "dips": 8
+   },
+   {
+    "qubit": 89,
+    "dips": 8
+   },
+   {
+    "qubit": 102,
+    "dips": 8
+   },
+   {
+    "qubit": 126,
+    "dips": 8
+   },
+   {
+    "qubit": 4,
+    "dips": 7
+   },
+   {
+    "qubit": 14,
+    "dips": 7
+   }
+  ]
+ },
+ "persistence": {
+  "all": {
+   "dip_events": 630,
+   "observed_consecutive_dip_pairs": 28,
+   "shuffled_mean": 21.57,
+   "shuffled_quantiles_5_50_95": [
+    15.0,
+    22.0,
+    29.0
+   ],
+   "p_shuffled_ge_observed": 0.0998004
+  },
+  "from_2026-06-28": {
+   "dip_events": 520,
+   "observed_consecutive_dip_pairs": 24,
+   "shuffled_mean": 22.142,
+   "shuffled_quantiles_5_50_95": [
+    15.0,
+    22.0,
+    30.0
+   ],
+   "p_shuffled_ge_observed": 0.38523
+  }
+ },
+ "two_level": {
+  "qubits_fitted": 155,
+  "delta_bic_gt_10": 73,
+  "two_level_qubits": 13,
+  "two_level_list": [
+   {
+    "qubit": 14,
+    "delta_bic": 22.51,
+    "ashman_d": 3.948,
+    "low_weight": 0.08352,
+    "low_mean_dev": -0.3088,
+    "low_low_consecutive": 1,
+    "low_low_expected_if_independent": 0.623
+   },
+   {
+    "qubit": 15,
+    "delta_bic": 21.98,
+    "ashman_d": 3.473,
+    "low_weight": 0.09601,
+    "low_mean_dev": -0.2916,
+    "low_low_consecutive": 1,
+    "low_low_expected_if_independent": 0.9379
+   },
+   {
+    "qubit": 20,
+    "delta_bic": 11.79,
+    "ashman_d": 4.151,
+    "low_weight": 0.07272,
+    "low_mean_dev": -0.373,
+    "low_low_consecutive": 0,
+    "low_low_expected_if_independent": 0.6428
+   },
+   {
+    "qubit": 26,
+    "delta_bic": 24.8,
+    "ashman_d": 3.136,
+    "low_weight": 0.1159,
+    "low_mean_dev": -0.303,
+    "low_low_consecutive": 0,
+    "low_low_expected_if_independent": 1.152
+   },
+   {
+    "qubit": 63,
+    "delta_bic": 29.88,
+    "ashman_d": 4.564,
+    "low_weight": 0.05076,
+    "low_mean_dev": -0.4581,
+    "low_low_consecutive": 0,
+    "low_low_expected_if_independent": 0.2791
+   },
+   {
+    "qubit": 94,
+    "delta_bic": 13.33,
+    "ashman_d": 4.927,
+    "low_weight": 0.05475,
+    "low_mean_dev": -0.3245,
+    "low_low_consecutive": 1,
+    "low_low_expected_if_independent": 0.3828
+   },
+   {
+    "qubit": 96,
+    "delta_bic": 15.73,
+    "ashman_d": 2.499,
+    "low_weight": 0.1598,
+    "low_mean_dev": -0.2628,
+    "low_low_consecutive": 2,
+    "low_low_expected_if_independent": 2.258
+   },
+   {
+    "qubit": 102,
+    "delta_bic": 15.89,
+    "ashman_d": 3.256,
+    "low_weight": 0.128,
+    "low_mean_dev": -0.28,
+    "low_low_consecutive": 0,
+    "low_low_expected_if_independent": 1.496
+   },
+   {
+    "qubit": 103,
+    "delta_bic": 10.18,
+    "ashman_d": 2.236,
+    "low_weight": 0.1122,
+    "low_mean_dev": -0.3685,
+    "low_low_consecutive": 0,
+    "low_low_expected_if_independent": 1.143
+   },
+   {
+    "qubit": 118,
+    "delta_bic": 22.05,
+    "ashman_d": 2.36,
+    "low_weight": 0.123,
+    "low_mean_dev": -0.2324,
+    "low_low_consecutive": 0,
+    "low_low_expected_if_independent": 1.3
+   },
+   {
+    "qubit": 122,
+    "delta_bic": 16.52,
+    "ashman_d": 2.632,
+    "low_weight": 0.1075,
+    "low_mean_dev": -0.2383,
+    "low_low_consecutive": 4,
+    "low_low_expected_if_independent": 0.9603
+   },
+   {
+    "qubit": 134,
+    "delta_bic": 12.32,
+    "ashman_d": 4.051,
+    "low_weight": 0.09196,
+    "low_mean_dev": -0.3156,
+    "low_low_consecutive": 0,
+    "low_low_expected_if_independent": 1.108
+   },
+   {
+    "qubit": 140,
+    "delta_bic": 20.33,
+    "ashman_d": 2.652,
+    "low_weight": 0.06288,
+    "low_mean_dev": -0.3628,
+    "low_low_consecutive": 0,
+    "low_low_expected_if_independent": 0.3798
+   }
+  ],
+  "two_level_low_low_observed_total": 9,
+  "two_level_low_low_expected_total": 12.6617
+ },
+ "t2_during_t1_dips": {
+  "t1_dip_events_paired": 621,
+  "t2_dev_median_observed": -0.234083,
+  "t2_dev_median_predicted_pure_t1": -0.193684,
+  "spearman_observed_vs_predicted": 0.809534,
+  "share_t2_dev_negative": 0.979066,
+  "share_observed_below_predicted": 0.73752,
+  "t2_dev_median_when_t1_not_dipping": 0.00817517,
+  "t2_dip_events": 425,
+  "t2_dips_with_t1_not_dipping_mild": 127,
+  "note": "predicted: 1/T2 = 1/(2 T1_observed) + Gamma_phi at the running levels (floored at 0)"
+ },
+ "codipping": {
+  "all": {
+   "rounds": 131,
+   "observed_count_quantiles": [
+    0.0,
+    0.0,
+    0.0,
+    2.0,
+    4.0,
+    7.0,
+    9.0,
+    14.0,
+    17.0
+   ],
+   "observed_variance": 12.9815,
+   "independent_sim_variance_quantiles_5_50_95": [
+    3.66818,
+    4.57444,
+    5.55831
+   ],
+   "observed_max": 17,
+   "independent_sim_max_quantiles_5_50_95": [
+    9.0,
+    11.0,
+    13.0
+   ],
+   "observed_rounds_with_5plus": 62,
+   "independent_sim_rounds_with_5plus_quantiles_5_50_95": [
+    59.0,
+    69.0,
+    78.0
+   ],
+   "observed_rounds_with_0": 15,
+   "independent_sim_rounds_with_0_median": 1.0,
+   "codip_pairs": 2033,
+   "codip_pairs_coupled": 32,
+   "codip_pairs_coupled_shuffled_mean": 29.85,
+   "codip_pairs_coupled_shuffled_quantiles_5_50_95": [
+    20.95,
+    30.0,
+    38.0
+   ],
+   "codip_coupled_shuffles": 200
+  },
+  "from_2026-06-28": {
+   "rounds": 85,
+   "observed_count_quantiles": [
+    1.0,
+    1.0,
+    2.0,
+    4.0,
+    6.0,
+    8.0,
+    10.0,
+    14.48,
+    17.0
+   ],
+   "observed_variance": 11.5618,
+   "independent_sim_variance_quantiles_5_50_95": [
+    4.37529,
+    5.78228,
+    7.48945
+   ],
+   "observed_max": 17,
+   "independent_sim_max_quantiles_5_50_95": [
+    11.0,
+    13.0,
+    15.0
+   ],
+   "observed_rounds_with_5plus": 56,
+   "independent_sim_rounds_with_5plus_quantiles_5_50_95": [
+    58.0,
+    64.0,
+    70.0
+   ],
+   "observed_rounds_with_0": 0,
+   "independent_sim_rounds_with_0_median": 0.0,
+   "codip_pairs": 1873,
+   "codip_pairs_coupled": 28,
+   "codip_pairs_coupled_shuffled_mean": 27.23,
+   "codip_pairs_coupled_shuffled_quantiles_5_50_95": [
+    18.95,
+    27.5,
+    36.0
+   ],
+   "codip_coupled_shuffles": 200
+  }
+ }
+}

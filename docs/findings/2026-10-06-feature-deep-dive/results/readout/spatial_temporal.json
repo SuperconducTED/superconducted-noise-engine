@@ -1,0 +1,1165 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "readout",
+ "script": "analysis/readout/spatial_temporal.py",
+ "measured_utc": "2026-10-06T07:58:01Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "spatial": {
+  "coords_distinct_sets": 1,
+  "rows_y_values": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15
+  ],
+  "bridge_qubits": 28,
+  "degree_counts": {
+   "1": 8,
+   "2": 100,
+   "3": 48
+  },
+  "ro": {
+   "qubits": 156,
+   "median_of_medians": 0.0090332,
+   "q10_q90_of_medians": [
+    0.0056152,
+    0.041198
+   ],
+   "moran_coupling_graph": {
+    "qubits": 156,
+    "edges": 176,
+    "morans_i": -0.1959,
+    "expected_under_null": -0.0065,
+    "permutation_p_two_sided": 0.007
+   },
+   "moran_coupling_graph_ranks": {
+    "qubits": 156,
+    "edges": 176,
+    "morans_i": -0.1824,
+    "expected_under_null": -0.0065,
+    "permutation_p_two_sided": 0.018
+   },
+   "moran_coupling_graph_excluding_q72": {
+    "qubits": 155,
+    "edges": 174,
+    "morans_i": -0.2067,
+    "expected_under_null": -0.0065,
+    "permutation_p_two_sided": 0.0048
+   },
+   "spearman_vs_x": {
+    "n": 156,
+    "rho": -0.0093,
+    "p": 0.909
+   },
+   "spearman_vs_y": {
+    "n": 156,
+    "rho": -0.0744,
+    "p": 0.356
+   },
+   "kruskal_by_row_p": 0.87,
+   "bridge_vs_row_median": [
+    0.0092812,
+    0.0090332,
+    0.673
+   ],
+   "worst_10": [
+    {
+     "qubit": 72,
+     "median": 0.3502,
+     "xy": [
+      13,
+      7
+     ]
+    },
+    {
+     "qubit": 83,
+     "median": 0.1261,
+     "xy": [
+      4,
+      9
+     ]
+    },
+    {
+     "qubit": 43,
+     "median": 0.08905,
+     "xy": [
+      4,
+      5
+     ]
+    },
+    {
+     "qubit": 131,
+     "median": 0.07733,
+     "xy": [
+      12,
+      13
+     ]
+    },
+    {
+     "qubit": 113,
+     "median": 0.0741,
+     "xy": [
+      14,
+      11
+     ]
+    },
+    {
+     "qubit": 41,
+     "median": 0.07129,
+     "xy": [
+      2,
+      5
+     ]
+    },
+    {
+     "qubit": 11,
+     "median": 0.0658,
+     "xy": [
+      12,
+      1
+     ]
+    },
+    {
+     "qubit": 65,
+     "median": 0.06458,
+     "xy": [
+      6,
+      7
+     ]
+    },
+    {
+     "qubit": 126,
+     "median": 0.05688,
+     "xy": [
+      7,
+      13
+     ]
+    },
+    {
+     "qubit": 55,
+     "median": 0.05304,
+     "xy": [
+      16,
+      5
+     ]
+    }
+   ]
+  },
+  "p0g1_fresh": {
+   "qubits": 156,
+   "median_of_medians": 0.012695,
+   "q10_q90_of_medians": [
+    0.0083008,
+    0.0454
+   ],
+   "moran_coupling_graph": {
+    "qubits": 156,
+    "edges": 176,
+    "morans_i": -0.1866,
+    "expected_under_null": -0.0065,
+    "permutation_p_two_sided": 0.011
+   },
+   "moran_coupling_graph_ranks": {
+    "qubits": 156,
+    "edges": 176,
+    "morans_i": -0.1974,
+    "expected_under_null": -0.0065,
+    "permutation_p_two_sided": 0.008
+   },
+   "moran_coupling_graph_excluding_q72": {
+    "qubits": 155,
+    "edges": 174,
+    "morans_i": -0.2038,
+    "expected_under_null": -0.0065,
+    "permutation_p_two_sided": 0.0056
+   },
+   "spearman_vs_x": {
+    "n": 156,
+    "rho": -0.0328,
+    "p": 0.685
+   },
+   "spearman_vs_y": {
+    "n": 156,
+    "rho": -0.0555,
+    "p": 0.491
+   },
+   "kruskal_by_row_p": 0.95,
+   "bridge_vs_row_median": [
+    0.012544,
+    0.012695,
+    0.757
+   ],
+   "worst_10": [
+    {
+     "qubit": 72,
+     "median": 0.4803,
+     "xy": [
+      13,
+      7
+     ]
+    },
+    {
+     "qubit": 83,
+     "median": 0.127,
+     "xy": [
+      4,
+      9
+     ]
+    },
+    {
+     "qubit": 43,
+     "median": 0.09399,
+     "xy": [
+      4,
+      5
+     ]
+    },
+    {
+     "qubit": 11,
+     "median": 0.09033,
+     "xy": [
+      12,
+      1
+     ]
+    },
+    {
+     "qubit": 126,
+     "median": 0.08484,
+     "xy": [
+      7,
+      13
+     ]
+    },
+    {
+     "qubit": 131,
+     "median": 0.07861,
+     "xy": [
+      12,
+      13
+     ]
+    },
+    {
+     "qubit": 41,
+     "median": 0.07666,
+     "xy": [
+      2,
+      5
+     ]
+    },
+    {
+     "qubit": 113,
+     "median": 0.07446,
+     "xy": [
+      14,
+      11
+     ]
+    },
+    {
+     "qubit": 65,
+     "median": 0.06787,
+     "xy": [
+      6,
+      7
+     ]
+    },
+    {
+     "qubit": 149,
+     "median": 0.06348,
+     "xy": [
+      10,
+      15
+     ]
+    }
+   ]
+  },
+  "p1g0": {
+   "qubits": 156,
+   "median_of_medians": 0.0052476,
+   "q10_q90_of_medians": [
+    0.0024414,
+    0.033873
+   ],
+   "moran_coupling_graph": {
+    "qubits": 156,
+    "edges": 176,
+    "morans_i": -0.195,
+    "expected_under_null": -0.0065,
+    "permutation_p_two_sided": 0.01
+   },
+   "moran_coupling_graph_ranks": {
+    "qubits": 156,
+    "edges": 176,
+    "morans_i": -0.1445,
+    "expected_under_null": -0.0065,
+    "permutation_p_two_sided": 0.05259
+   },
+   "moran_coupling_graph_excluding_q72": {
+    "qubits": 155,
+    "edges": 174,
+    "morans_i": -0.1959,
+    "expected_under_null": -0.0065,
+    "permutation_p_two_sided": 0.006
+   },
+   "spearman_vs_x": {
+    "n": 156,
+    "rho": 0.0106,
+    "p": 0.895
+   },
+   "spearman_vs_y": {
+    "n": 156,
+    "rho": -0.0826,
+    "p": 0.305
+   },
+   "kruskal_by_row_p": 0.397,
+   "bridge_vs_row_median": [
+    0.0045764,
+    0.0053711,
+    0.412
+   ],
+   "worst_10": [
+    {
+     "qubit": 72,
+     "median": 0.2048,
+     "xy": [
+      13,
+      7
+     ]
+    },
+    {
+     "qubit": 83,
+     "median": 0.1261,
+     "xy": [
+      4,
+      9
+     ]
+    },
+    {
+     "qubit": 43,
+     "median": 0.08643,
+     "xy": [
+      4,
+      5
+     ]
+    },
+    {
+     "qubit": 131,
+     "median": 0.07715,
+     "xy": [
+      12,
+      13
+     ]
+    },
+    {
+     "qubit": 113,
+     "median": 0.07434,
+     "xy": [
+      14,
+      11
+     ]
+    },
+    {
+     "qubit": 41,
+     "median": 0.06543,
+     "xy": [
+      2,
+      5
+     ]
+    },
+    {
+     "qubit": 65,
+     "median": 0.06323,
+     "xy": [
+      6,
+      7
+     ]
+    },
+    {
+     "qubit": 55,
+     "median": 0.04834,
+     "xy": [
+      16,
+      5
+     ]
+    },
+    {
+     "qubit": 135,
+     "median": 0.04395,
+     "xy": [
+      16,
+      13
+     ]
+    },
+    {
+     "qubit": 53,
+     "median": 0.04248,
+     "xy": [
+      14,
+      5
+     ]
+    }
+   ]
+  },
+  "init_error": {
+   "qubits": 116,
+   "median_of_medians": 0.0017087,
+   "q10_q90_of_medians": [
+    0.00091639,
+    0.0040431
+   ],
+   "moran_coupling_graph": {
+    "qubits": 116,
+    "edges": 85,
+    "morans_i": -0.0545,
+    "expected_under_null": -0.0087,
+    "permutation_p_two_sided": 0.60548
+   },
+   "moran_coupling_graph_ranks": {
+    "qubits": 116,
+    "edges": 85,
+    "morans_i": -0.0145,
+    "expected_under_null": -0.0087,
+    "permutation_p_two_sided": 0.89762
+   },
+   "moran_coupling_graph_excluding_q72": {
+    "qubits": 116,
+    "edges": 85,
+    "morans_i": -0.0545,
+    "expected_under_null": -0.0087,
+    "permutation_p_two_sided": 0.61808
+   },
+   "spearman_vs_x": {
+    "n": 116,
+    "rho": 0.1705,
+    "p": 0.0673
+   },
+   "spearman_vs_y": {
+    "n": 116,
+    "rho": -0.0314,
+    "p": 0.738
+   },
+   "kruskal_by_row_p": 0.786,
+   "bridge_vs_row_median": [
+    0.0020041,
+    0.0016079,
+    0.0832
+   ],
+   "worst_10": [
+    {
+     "qubit": 125,
+     "median": 0.01038,
+     "xy": [
+      6,
+      13
+     ]
+    },
+    {
+     "qubit": 52,
+     "median": 0.00723,
+     "xy": [
+      13,
+      5
+     ]
+    },
+    {
+     "qubit": 39,
+     "median": 0.00643,
+     "xy": [
+      14,
+      4
+     ]
+    },
+    {
+     "qubit": 96,
+     "median": 0.00556,
+     "xy": [
+      4,
+      10
+     ]
+    },
+    {
+     "qubit": 78,
+     "median": 0.005487,
+     "xy": [
+      10,
+      8
+     ]
+    },
+    {
+     "qubit": 153,
+     "median": 0.00518,
+     "xy": [
+      14,
+      15
+     ]
+    },
+    {
+     "qubit": 112,
+     "median": 0.0051,
+     "xy": [
+      13,
+      11
+     ]
+    },
+    {
+     "qubit": 49,
+     "median": 0.005072,
+     "xy": [
+      10,
+      5
+     ]
+    },
+    {
+     "qubit": 133,
+     "median": 0.004992,
+     "xy": [
+      14,
+      13
+     ]
+    },
+    {
+     "qubit": 92,
+     "median": 0.004628,
+     "xy": [
+      13,
+      9
+     ]
+    }
+   ]
+  },
+  "measure_2": {
+   "qubits": 156,
+   "median_of_medians": 0.013365,
+   "q10_q90_of_medians": [
+    0.0046387,
+    0.072007
+   ],
+   "moran_coupling_graph": {
+    "qubits": 156,
+    "edges": 176,
+    "morans_i": -0.4298,
+    "expected_under_null": -0.0065,
+    "permutation_p_two_sided": 0.0002
+   },
+   "moran_coupling_graph_ranks": {
+    "qubits": 156,
+    "edges": 176,
+    "morans_i": -0.4423,
+    "expected_under_null": -0.0065,
+    "permutation_p_two_sided": 0.0002
+   },
+   "moran_coupling_graph_excluding_q72": {
+    "qubits": 155,
+    "edges": 174,
+    "morans_i": -0.4559,
+    "expected_under_null": -0.0065,
+    "permutation_p_two_sided": 0.0002
+   },
+   "spearman_vs_x": {
+    "n": 156,
+    "rho": 0.0515,
+    "p": 0.523
+   },
+   "spearman_vs_y": {
+    "n": 156,
+    "rho": -0.0217,
+    "p": 0.788
+   },
+   "kruskal_by_row_p": 0.171,
+   "bridge_vs_row_median": [
+    0.0075526,
+    0.016111,
+    0.0057
+   ],
+   "worst_10": [
+    {
+     "qubit": 72,
+     "median": 0.4458,
+     "xy": [
+      13,
+      7
+     ]
+    },
+    {
+     "qubit": 83,
+     "median": 0.1748,
+     "xy": [
+      4,
+      9
+     ]
+    },
+    {
+     "qubit": 113,
+     "median": 0.1531,
+     "xy": [
+      14,
+      11
+     ]
+    },
+    {
+     "qubit": 43,
+     "median": 0.146,
+     "xy": [
+      4,
+      5
+     ]
+    },
+    {
+     "qubit": 135,
+     "median": 0.1255,
+     "xy": [
+      16,
+      13
+     ]
+    },
+    {
+     "qubit": 55,
+     "median": 0.1206,
+     "xy": [
+      16,
+      5
+     ]
+    },
+    {
+     "qubit": 65,
+     "median": 0.1047,
+     "xy": [
+      6,
+      7
+     ]
+    },
+    {
+     "qubit": 131,
+     "median": 0.09717,
+     "xy": [
+      12,
+      13
+     ]
+    },
+    {
+     "qubit": 87,
+     "median": 0.09229,
+     "xy": [
+      8,
+      9
+     ]
+    },
+    {
+     "qubit": 67,
+     "median": 0.08838,
+     "xy": [
+      8,
+      7
+     ]
+    }
+   ]
+  },
+  "ro_rank_stability_june_vs_september": {
+   "n": 156,
+   "rho": 0.9258,
+   "p": 5.75e-67
+  },
+  "cross_field_spearman_of_medians": {
+   "ro_vs_measure_2": {
+    "n": 156,
+    "rho": 0.8641,
+    "p": 9e-48
+   },
+   "p0g1_fresh_vs_p1g0": {
+    "n": 156,
+    "rho": 0.9067,
+    "p": 1.3e-59
+   },
+   "ro_vs_init_error": {
+    "n": 116,
+    "rho": 0.7387,
+    "p": 2.96e-21
+   }
+  }
+ },
+ "temporal": {
+  "ro_device_median_per_session": {
+   "sessions": 589,
+   "change_point_cap": 8,
+   "q": [
+    0.0077512,
+    0.0084229,
+    0.0094603,
+    0.013806,
+    0.023682
+   ],
+   "change_points": [
+    {
+     "session_start": "2026-05-17T13:53:44Z",
+     "level_before": 0.021637,
+     "level_after": 0.014038
+    },
+    {
+     "session_start": "2026-05-27T15:37:21Z",
+     "level_before": 0.014038,
+     "level_after": 0.012024
+    },
+    {
+     "session_start": "2026-06-08T21:31:37Z",
+     "level_before": 0.012024,
+     "level_after": 0.0087567
+    },
+    {
+     "session_start": "2026-08-21T06:06:24Z",
+     "level_before": 0.0087567,
+     "level_after": 0.0099485
+    },
+    {
+     "session_start": "2026-08-31T16:35:39Z",
+     "level_before": 0.0099485,
+     "level_after": 0.0094603
+    },
+    {
+     "session_start": "2026-09-12T21:17:23Z",
+     "level_before": 0.0094603,
+     "level_after": 0.0098877
+    }
+   ]
+  },
+  "p0g1_fresh_device_median_per_session": {
+   "sessions": 589,
+   "change_point_cap": 8,
+   "q": [
+    0.010742,
+    0.011963,
+    0.013175,
+    0.018212,
+    0.027466
+   ],
+   "change_points": [
+    {
+     "session_start": "2026-05-17T13:53:44Z",
+     "level_before": 0.025876,
+     "level_after": 0.018493
+    },
+    {
+     "session_start": "2026-05-27T15:37:21Z",
+     "level_before": 0.018493,
+     "level_after": 0.01477
+    },
+    {
+     "session_start": "2026-06-08T21:31:37Z",
+     "level_before": 0.01477,
+     "level_after": 0.012207
+    },
+    {
+     "session_start": "2026-06-29T16:17:05Z",
+     "level_before": 0.012207,
+     "level_after": 0.012689
+    },
+    {
+     "session_start": "2026-08-27T20:48:14Z",
+     "level_before": 0.012689,
+     "level_after": 0.013428
+    }
+   ]
+  },
+  "p1g0_device_median_per_session": {
+   "sessions": 589,
+   "change_point_cap": 8,
+   "q": [
+    0.0039062,
+    0.0046387,
+    0.0053711,
+    0.0098869,
+    0.019286
+   ],
+   "change_points": [
+    {
+     "session_start": "2026-05-17T13:53:44Z",
+     "level_before": 0.017761,
+     "level_after": 0.0097641
+    },
+    {
+     "session_start": "2026-05-27T15:37:21Z",
+     "level_before": 0.0097641,
+     "level_after": 0.0090299
+    },
+    {
+     "session_start": "2026-06-08T21:31:37Z",
+     "level_before": 0.0090299,
+     "level_after": 0.0048828
+    },
+    {
+     "session_start": "2026-08-21T06:06:24Z",
+     "level_before": 0.0048828,
+     "level_after": 0.0073242
+    },
+    {
+     "session_start": "2026-08-31T16:35:39Z",
+     "level_before": 0.0073242,
+     "level_after": 0.005736
+    }
+   ]
+  },
+  "monthly_device_median_of_qubit_medians": {
+   "ro": {
+    "2026-05": 0.01416,
+    "2026-06": 0.0085449,
+    "2026-07": 0.0081177,
+    "2026-08": 0.0083618,
+    "2026-09": 0.0085449,
+    "2026-10": 0.0092773
+   },
+   "p0g1_fresh": {
+    "2026-05": 0.018921,
+    "2026-06": 0.011719,
+    "2026-07": 0.011353,
+    "2026-08": 0.010986,
+    "2026-09": 0.011963,
+    "2026-10": 0.013306
+   },
+   "p1g0": {
+    "2026-05": 0.01001,
+    "2026-06": 0.0050049,
+    "2026-07": 0.0041504,
+    "2026-08": 0.0048828,
+    "2026-09": 0.0048218,
+    "2026-10": 0.0048828
+   }
+  },
+  "per_qubit_ro_change_points": {
+   "rule": "binary segmentation, min segment 30 events, penalty 3 sigma^2 ln n",
+   "change_points_per_qubit_q": [
+    1.0,
+    1.0,
+    2.0,
+    3.0,
+    6.0,
+    8.0,
+    8.0
+   ],
+   "qubits_with_none": 0,
+   "cap_per_series": 8,
+   "qubits_at_cap": 5,
+   "total": 555,
+   "within_1_day_of_change_1": 94,
+   "within_1_day_of_change_2": 4,
+   "top_weeks": [
+    {
+     "week": "2026-W24",
+     "change_points": 123
+    },
+    {
+     "week": "2026-W20",
+     "change_points": 89
+    },
+    {
+     "week": "2026-W22",
+     "change_points": 71
+    },
+    {
+     "week": "2026-W23",
+     "change_points": 37
+    },
+    {
+     "week": "2026-W34",
+     "change_points": 31
+    },
+    {
+     "week": "2026-W36",
+     "change_points": 24
+    }
+   ]
+  },
+  "ro_weekly_level_range_decades_q": [
+   0.070452,
+   0.101233,
+   0.138353,
+   0.230697,
+   0.483248,
+   0.990421,
+   1.69482
+  ],
+  "seasonality": {
+   "ro_all": {
+    "residuals": 89861,
+    "utc_hour_bin_4h": {
+     "median_residual_by_bin": [
+      -0.001,
+      0.001,
+      0.0,
+      0.0012,
+      -0.001,
+      0.0
+     ],
+     "n_by_bin": [
+      12477,
+      14817,
+      14505,
+      14034,
+      17136,
+      16892
+     ],
+     "kruskal_p": 0.0885,
+     "epsilon_squared": 0.00011
+    },
+    "weekday_mon0": {
+     "median_residual_by_bin": [
+      0.0,
+      0.0002,
+      0.0001,
+      -0.0,
+      0.0001,
+      0.0,
+      0.0002
+     ],
+     "n_by_bin": [
+      10296,
+      12165,
+      14681,
+      12159,
+      12480,
+      14196,
+      13884
+     ],
+     "kruskal_p": 0.501,
+     "epsilon_squared": 6e-05
+    }
+   },
+   "ro_mixed_only": {
+    "residuals": 70809,
+    "utc_hour_bin_4h": {
+     "median_residual_by_bin": [
+      0.0,
+      0.0005,
+      -0.0018,
+      0.0009,
+      -0.0019,
+      0.0001
+     ],
+     "n_by_bin": [
+      10917,
+      11856,
+      11853,
+      12783,
+      12636,
+      10764
+     ],
+     "kruskal_p": 0.0694,
+     "epsilon_squared": 0.00014
+    },
+    "weekday_mon0": {
+     "median_residual_by_bin": [
+      0.0002,
+      0.0,
+      0.0001,
+      -0.0014,
+      0.0,
+      0.0,
+      0.0001
+     ],
+     "n_by_bin": [
+      8268,
+      9045,
+      12009,
+      9195,
+      9516,
+      11388,
+      11388
+     ],
+     "kruskal_p": 0.48,
+     "epsilon_squared": 8e-05
+    }
+   },
+   "p0g1_fresh_all": {
+    "residuals": 89861,
+    "utc_hour_bin_4h": {
+     "median_residual_by_bin": [
+      0.0,
+      0.0001,
+      0.0,
+      0.0002,
+      0.0,
+      0.0
+     ],
+     "n_by_bin": [
+      12477,
+      14817,
+      14505,
+      14034,
+      17136,
+      16892
+     ],
+     "kruskal_p": 0.387,
+     "epsilon_squared": 6e-05
+    },
+    "weekday_mon0": {
+     "median_residual_by_bin": [
+      0.0,
+      0.0002,
+      0.0,
+      0.0,
+      0.0002,
+      0.0,
+      0.0
+     ],
+     "n_by_bin": [
+      10296,
+      12165,
+      14681,
+      12159,
+      12480,
+      14196,
+      13884
+     ],
+     "kruskal_p": 0.682,
+     "epsilon_squared": 4e-05
+    }
+   },
+   "p0g1_fresh_mixed_only": {
+    "residuals": 70809,
+    "utc_hour_bin_4h": {
+     "median_residual_by_bin": [
+      0.0,
+      0.0002,
+      0.0,
+      0.0002,
+      0.0,
+      0.0
+     ],
+     "n_by_bin": [
+      10917,
+      11856,
+      11853,
+      12783,
+      12636,
+      10764
+     ],
+     "kruskal_p": 0.716,
+     "epsilon_squared": 4e-05
+    },
+    "weekday_mon0": {
+     "median_residual_by_bin": [
+      0.0,
+      0.0,
+      0.0,
+      0.0001,
+      0.0002,
+      0.0,
+      0.0
+     ],
+     "n_by_bin": [
+      8268,
+      9045,
+      12009,
+      9195,
+      9516,
+      11388,
+      11388
+     ],
+     "kruskal_p": 0.628,
+     "epsilon_squared": 6e-05
+    }
+   },
+   "p1g0_all": {
+    "residuals": 89217,
+    "utc_hour_bin_4h": {
+     "median_residual_by_bin": [
+      0.0,
+      0.0002,
+      0.0,
+      0.0011,
+      0.0,
+      0.0
+     ],
+     "n_by_bin": [
+      12391,
+      14716,
+      14401,
+      13958,
+      16976,
+      16775
+     ],
+     "kruskal_p": 0.693,
+     "epsilon_squared": 3e-05
+    },
+    "weekday_mon0": {
+     "median_residual_by_bin": [
+      0.0,
+      0.0,
+      0.0,
+      -0.0034,
+      0.0,
+      0.0,
+      0.0033
+     ],
+     "n_by_bin": [
+      10231,
+      12059,
+      14555,
+      12076,
+      12370,
+      14108,
+      13818
+     ],
+     "kruskal_p": 0.00158,
+     "epsilon_squared": 0.00024
+    }
+   },
+   "p1g0_mixed_only": {
+    "residuals": 70510,
+    "utc_hour_bin_4h": {
+     "median_residual_by_bin": [
+      -0.0029,
+      0.0006,
+      0.0,
+      0.0034,
+      0.0,
+      0.0001
+     ],
+     "n_by_bin": [
+      10859,
+      11812,
+      11801,
+      12733,
+      12572,
+      10733
+     ],
+     "kruskal_p": 0.257,
+     "epsilon_squared": 9e-05
+    },
+    "weekday_mon0": {
+     "median_residual_by_bin": [
+      0.0011,
+      -0.007,
+      0.0006,
+      -0.0031,
+      0.0,
+      0.0022,
+      0.0043
+     ],
+     "n_by_bin": [
+      8238,
+      8998,
+      11946,
+      9158,
+      9470,
+      11350,
+      11350
+     ],
+     "kruskal_p": 4.51e-05,
+     "epsilon_squared": 0.00042
+    }
+   }
+  }
+ }
+}

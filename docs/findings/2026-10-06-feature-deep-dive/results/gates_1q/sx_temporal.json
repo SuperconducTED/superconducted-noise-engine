@@ -1,0 +1,432 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "gates_1q",
+ "script": "analysis/gates_1q/sx_temporal.py",
+ "measured_utc": "2026-10-06T07:52:16Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "field": "g1.sx.gate_error",
+ "device": {
+  "rounds": 132,
+  "first": "2026-05-13T22:55:15Z",
+  "last": "2026-10-05T03:56:23Z",
+  "device_round_median_q": [
+   -0.0451,
+   -0.0346,
+   -0.0204,
+   -0.0041,
+   0.0253,
+   0.0445,
+   0.0667
+  ],
+  "theil_sen_slope_log10_per_30_days": {
+   "slope": 0.0008,
+   "lo95": -0.0016,
+   "hi95": 0.0029,
+   "n": 132
+  },
+  "spearman_vs_time": {
+   "rho": 0.0255,
+   "p": 0.772,
+   "n": 132
+  },
+  "binary_segmentation": {
+   "rule": "rank CUSUM, block permutations of 7 rounds (2000), recurse while p < 0.01, min 20 rounds, depth <= 3",
+   "tests": [
+    {
+     "segment": [
+      "2026-05-13T22:55:15Z",
+      "2026-10-05T03:56:23Z"
+     ],
+     "rounds": 132,
+     "K": 675.5,
+     "p_block7": 0.2389,
+     "split_round_start": "2026-05-30T21:29:40Z",
+     "median_before_log10": 0.0278,
+     "median_after_log10": -0.0055
+    }
+   ],
+   "n_tests": 1
+  }
+ },
+ "known_dates": {
+  "window_days_each_side": 14.0,
+  "min_events_each_side": 3,
+  "bonferroni_alpha_for_5_dates": 0.01,
+  "dates": {
+   "readout length 1560 to 1700 ns, measure.threshold appears": {
+    "date": "2026-06-08T18:56:28Z",
+    "n": 154,
+    "median_shift_log10": -0.0148,
+    "share_up": 0.344,
+    "p": 6.52e-06
+   },
+   "readout length 1700 to 1660 ns": {
+    "date": "2026-07-30T21:09:17Z",
+    "n": 155,
+    "median_shift_log10": -0.0045,
+    "share_up": 0.452,
+    "p": 0.33
+   },
+   "measure_2 appears (target 1,600 ops)": {
+    "date": "2026-08-07T03:21:59Z",
+    "n": 155,
+    "median_shift_log10": -0.0005,
+    "share_up": 0.497,
+    "p": 0.517
+   },
+   "measure_reset, reset_2 appear (target 2,068 ops)": {
+    "date": "2026-09-02T04:56:24Z",
+    "n": 155,
+    "median_shift_log10": 0.0026,
+    "share_up": 0.529,
+    "p": 0.551
+   },
+   "xslow records return": {
+    "date": "2026-09-10T16:56:21Z",
+    "n": 155,
+    "median_shift_log10": 0.0093,
+    "share_up": 0.581,
+    "p": 0.00733
+   }
+  },
+  "placebo": {
+   "far_14d": {
+    "rule": "daily grid, more than 14 days from every known date (windows overlap, so the dates are not independent)",
+    "dates_tested": 31,
+    "share_p_below_0.01": 0.226,
+    "share_p_below_0.05": 0.323,
+    "abs_median_shift_log10_q": [
+     0.0001,
+     0.0001,
+     0.0012,
+     0.0057,
+     0.0188,
+     0.0317,
+     0.0339
+    ]
+   },
+   "near_3d": {
+    "rule": "daily grid, more than 3 days from every known date (windows overlap, so the dates are not independent)",
+    "dates_tested": 95,
+    "share_p_below_0.01": 0.211,
+    "share_p_below_0.05": 0.326,
+    "abs_median_shift_log10_q": [
+     0.0,
+     0.0001,
+     0.0011,
+     0.0053,
+     0.0285,
+     0.042,
+     0.0425
+    ]
+   }
+  }
+ },
+ "entity_changepoints": {
+  "entities": 155,
+  "permutations": 999,
+  "min_attainable_p": 0.001,
+  "bh_fdr": 0.05,
+  "significant_iid": 19,
+  "significant_block5": 11,
+  "abs_shift_log10_significant_block5_q": [
+   0.04,
+   0.0427,
+   0.0665,
+   0.0907,
+   0.4463,
+   0.6211,
+   0.6405
+  ],
+  "share_up_among_significant_block5": 0.636,
+  "abs_shift_log10_all_q": [
+   0.0053,
+   0.0117,
+   0.0215,
+   0.0423,
+   0.0886,
+   0.3747,
+   0.6405
+  ],
+  "split_month_of_significant_block5": {
+   "2026-05": 0,
+   "2026-06": 4,
+   "2026-07": 4,
+   "2026-08": 2,
+   "2026-09": 1
+  },
+  "significant_block5_within_3_days_of_known_date": {
+   "readout length 1560 to 1700 ns, measure.threshold appears": 3,
+   "readout length 1700 to 1660 ns": 2,
+   "measure_2 appears (target 1,600 ops)": 1,
+   "measure_reset, reset_2 appear (target 2,068 ops)": 1,
+   "xslow records return": 0
+  },
+  "expected_within_any_one_6_day_window_if_uniform": 0.432,
+  "record_span_days": 152.6,
+  "largest_shifts_significant_block5": [
+   {
+    "qubit": 102,
+    "date": "2026-07-19T22:06:27Z",
+    "shift_log10": 0.64,
+    "p_block5": 0.001
+   },
+   {
+    "qubit": 126,
+    "date": "2026-06-07T23:18:41Z",
+    "shift_log10": 0.446,
+    "p_block5": 0.001
+   },
+   {
+    "qubit": 43,
+    "date": "2026-06-06T22:30:27Z",
+    "shift_log10": -0.314,
+    "p_block5": 0.001
+   },
+   {
+    "qubit": 127,
+    "date": "2026-09-01T03:03:20Z",
+    "shift_log10": 0.252,
+    "p_block5": 0.001
+   },
+   {
+    "qubit": 0,
+    "date": "2026-08-05T10:26:28Z",
+    "shift_log10": -0.104,
+    "p_block5": 0.001
+   },
+   {
+    "qubit": 108,
+    "date": "2026-06-06T22:30:30Z",
+    "shift_log10": 0.091,
+    "p_block5": 0.001
+   },
+   {
+    "qubit": 98,
+    "date": "2026-08-12T05:59:18Z",
+    "shift_log10": 0.09,
+    "p_block5": 0.003
+   },
+   {
+    "qubit": 31,
+    "date": "2026-07-31T12:42:57Z",
+    "shift_log10": -0.082,
+    "p_block5": 0.001
+   },
+   {
+    "qubit": 19,
+    "date": "2026-07-09T09:29:13Z",
+    "shift_log10": 0.076,
+    "p_block5": 0.002
+   },
+   {
+    "qubit": 87,
+    "date": "2026-07-29T09:55:18Z",
+    "shift_log10": 0.067,
+    "p_block5": 0.001
+   }
+  ]
+ },
+ "spikes": {
+  "definition": "residual from running level (median of up to 5 events each side, self excluded) above log10(2); downward spike below -log10(2)",
+  "events_with_level": 20207,
+  "spikes_up": 393,
+  "spikes_down": 56,
+  "spike_up_rate": 0.01945,
+  "entities_with_any_spike": 129,
+  "spikes_per_entity_q": [
+   0.0,
+   0.0,
+   0.0,
+   2.0,
+   5.6,
+   13.0,
+   13.0
+  ],
+  "share_of_spikes_in_top_10pct_entities": 0.354,
+  "top_entities": [
+   {
+    "qubit": 15,
+    "spikes": 13,
+    "events": 128
+   },
+   {
+    "qubit": 49,
+    "spikes": 13,
+    "events": 129
+   },
+   {
+    "qubit": 96,
+    "spikes": 13,
+    "events": 131
+   },
+   {
+    "qubit": 57,
+    "spikes": 11,
+    "events": 129
+   },
+   {
+    "qubit": 5,
+    "spikes": 11,
+    "events": 130
+   },
+   {
+    "qubit": 149,
+    "spikes": 11,
+    "events": 68
+   },
+   {
+    "qubit": 90,
+    "spikes": 8,
+    "events": 132
+   },
+   {
+    "qubit": 13,
+    "spikes": 7,
+    "events": 130
+   }
+  ],
+  "episode_length_events_counts": {
+   "1": 343,
+   "2": 21,
+   "4": 2
+  },
+  "episodes": 366,
+  "share_of_episodes_single_event": 0.9372,
+  "rate_by_month": {
+   "2026-05": {
+    "events": 3333,
+    "spike_rate": 0.0102
+   },
+   "2026-06": {
+    "events": 3937,
+    "spike_rate": 0.02235
+   },
+   "2026-07": {
+    "events": 4101,
+    "spike_rate": 0.02097
+   },
+   "2026-08": {
+    "events": 3819,
+    "spike_rate": 0.0199
+   },
+   "2026-09": {
+    "events": 4411,
+    "spike_rate": 0.02086
+   },
+   "2026-10": {
+    "events": 606,
+    "spike_rate": 0.02805
+   }
+  },
+  "per_round": {
+   "rounds_with_ge_half_device": 133,
+   "spikes_per_round_q": [
+    0.0,
+    0.0,
+    1.0,
+    3.0,
+    5.0,
+    7.0,
+    7.0
+   ],
+   "mean": 2.94,
+   "variance": 3.199,
+   "binomial_variance_if_independent": 2.896,
+   "max": 7,
+   "rounds_with_ge_5_spikes": 26
+  }
+ },
+ "seasonality": {
+  "residual": "log10 value minus running level (5 each side, self excluded)",
+  "by_utc_hour_bin_3h": {
+   "kruskal": {
+    "H": 4.425,
+    "p": 0.73,
+    "epsilon_sq": 0.00022,
+    "n": 20207,
+    "groups": 8
+   },
+   "median_residual": [
+    -0.0028,
+    -0.0013,
+    0.0001,
+    0.0016,
+    -0.0028,
+    0.0015,
+    -0.0038,
+    0.0003
+   ],
+   "n": [
+    2423,
+    2127,
+    1982,
+    2583,
+    1981,
+    1366,
+    2434,
+    5311
+   ],
+   "spike_rate": [
+    0.0194,
+    0.0197,
+    0.0151,
+    0.0205,
+    0.0177,
+    0.0212,
+    0.0205,
+    0.0201
+   ]
+  },
+  "by_weekday": {
+   "kruskal": {
+    "H": 5.317,
+    "p": 0.504,
+    "epsilon_sq": 0.00026,
+    "n": 20207,
+    "groups": 7
+   },
+   "median_residual": {
+    "Mon": -0.0022,
+    "Tue": 0.002,
+    "Wed": -0.0028,
+    "Thu": -0.0024,
+    "Fri": 0.0021,
+    "Sat": -0.0012,
+    "Sun": -0.0016
+   },
+   "n": {
+    "Mon": 2593,
+    "Tue": 3329,
+    "Wed": 3031,
+    "Thu": 2437,
+    "Fri": 3483,
+    "Sat": 2443,
+    "Sun": 2891
+   },
+   "spike_rate": {
+    "Mon": 0.0208,
+    "Tue": 0.0192,
+    "Wed": 0.0172,
+    "Thu": 0.0201,
+    "Fri": 0.0212,
+    "Sat": 0.0213,
+    "Sun": 0.0166
+   }
+  },
+  "spike_rate_by_hour_bin_chi2": {
+   "chi2": 2.94,
+   "dof": 7,
+   "p": 0.89
+  },
+  "spike_rate_by_weekday_chi2": {
+   "chi2": 3.41,
+   "dof": 6,
+   "p": 0.756
+  }
+ },
+ "tests_in_this_file": "device binary segmentation (n_tests listed), 5 known dates (Bonferroni 0.01) plus the placebo scan, 155 per-entity CUSUM tests x 2 null types (BH 0.05 each), 2 Kruskal-Wallis and 2 chi-square seasonality tests"
+}

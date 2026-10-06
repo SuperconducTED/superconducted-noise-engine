@@ -1,0 +1,1059 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "device",
+ "script": "analysis/device/documents.py",
+ "measured_utc": "2026-10-06T07:55:37Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "cadence": {
+  "by_month": {
+   "2026-05": {
+    "files": 171,
+    "live": 171,
+    "historical": 0,
+    "days_covered": 18.4907,
+    "files_per_day": 9.24788,
+    "gap_h_q": [
+     0.259167,
+     1.12872,
+     1.39375,
+     2.25167,
+     3.30208,
+     4.91803,
+     8.30889
+    ]
+   },
+   "2026-06": {
+    "files": 194,
+    "live": 194,
+    "historical": 0,
+    "days_covered": 30.0,
+    "files_per_day": 6.46667,
+    "gap_h_q": [
+     0.0,
+     1.33342,
+     1.95299,
+     2.88292,
+     4.35819,
+     5.56725,
+     61.7839
+    ]
+   },
+   "2026-07": {
+    "files": 270,
+    "live": 270,
+    "historical": 0,
+    "days_covered": 31.0,
+    "files_per_day": 8.70968,
+    "gap_h_q": [
+     0.103889,
+     0.950111,
+     1.47729,
+     2.1725,
+     2.99875,
+     4.36936,
+     39.5539
+    ]
+   },
+   "2026-08": {
+    "files": 304,
+    "live": 275,
+    "historical": 29,
+    "days_covered": 31.0,
+    "files_per_day": 9.80645,
+    "gap_h_q": [
+     0.0341667,
+     0.48275,
+     0.907361,
+     1.40931,
+     2.23681,
+     3.69033,
+     82.6767
+    ]
+   },
+   "2026-09": {
+    "files": 683,
+    "live": 334,
+    "historical": 349,
+    "days_covered": 30.0,
+    "files_per_day": 22.7667,
+    "gap_h_q": [
+     0.0363889,
+     0.291111,
+     0.497639,
+     0.768611,
+     1.11097,
+     1.61861,
+     26.7394
+    ]
+   },
+   "2026-10": {
+    "files": 138,
+    "live": 73,
+    "historical": 65,
+    "days_covered": 5.1234,
+    "files_per_day": 26.9352,
+    "gap_h_q": [
+     0.0144444,
+     0.340889,
+     0.57625,
+     0.842083,
+     1.09417,
+     1.46931,
+     3.86611
+    ]
+   }
+  },
+  "gap_h_q_all": [
+   0.0,
+   0.420333,
+   0.686111,
+   1.25917,
+   2.35931,
+   4.05872,
+   82.6767
+  ],
+  "gap_h_q_live_to_live": [
+   0.0,
+   0.630167,
+   1.13583,
+   1.81472,
+   3.02194,
+   4.80061,
+   82.6767
+  ],
+  "gaps_above_12h_count": 14,
+  "gaps_above_12h": [
+   {
+    "after": "20260618T183429000000Z.json",
+    "before": "20260619T114946000000Z.json",
+    "hours": 17.2547,
+    "live_live": true
+   },
+   {
+    "after": "20260620T104125000000Z.json",
+    "before": "20260621T180901000000Z.json",
+    "hours": 31.46,
+    "live_live": true
+   },
+   {
+    "after": "20260627T015612000000Z.json",
+    "before": "20260629T154314000000Z.json",
+    "hours": 61.7839,
+    "live_live": true
+   },
+   {
+    "after": "20260630T215320000000Z.json",
+    "before": "20260701T120353000000Z.json",
+    "hours": 14.1758,
+    "live_live": true
+   },
+   {
+    "after": "20260701T200427000000Z.json",
+    "before": "20260702T082755000000Z.json",
+    "hours": 12.3911,
+    "live_live": true
+   },
+   {
+    "after": "20260705T185951000000Z.json",
+    "before": "20260707T025734000000Z.json",
+    "hours": 31.9619,
+    "live_live": true
+   },
+   {
+    "after": "20260716T030013000000Z.json",
+    "before": "20260717T183327000000Z.json",
+    "hours": 39.5539,
+    "live_live": true
+   },
+   {
+    "after": "20260806T122947000000Z.json",
+    "before": "20260807T032159000000Z.json",
+    "hours": 14.87,
+    "live_live": true
+   },
+   {
+    "after": "20260807T032159000000Z.json",
+    "before": "20260810T140235000000Z.json",
+    "hours": 82.6767,
+    "live_live": true
+   },
+   {
+    "after": "20260810T140235000000Z.json",
+    "before": "20260812T055918000000Z.json",
+    "hours": 39.9453,
+    "live_live": true
+   },
+   {
+    "after": "20260814T201859000000Z.json",
+    "before": "20260817T065740000000Z.json",
+    "hours": 58.6447,
+    "live_live": true
+   },
+   {
+    "after": "20260828T031723000000Z.json",
+    "before": "20260828T182857000000Z.json",
+    "hours": 15.1928,
+    "live_live": true
+   },
+   {
+    "after": "20260901T125138000000Z.json",
+    "before": "20260902T045624000000Z.json",
+    "hours": 16.0794,
+    "live_live": true
+   },
+   {
+    "after": "20260922T140030000000Z.json",
+    "before": "20260923T164452000000Z.json",
+    "hours": 26.7394,
+    "live_live": true
+   }
+  ],
+  "first_historical_file": "20260805T234531000000Z.json",
+  "timestamp_equals_last_update_all_files": true
+ },
+ "ledger": {
+  "rows": 1981,
+  "first_poll": "2026-09-02T16:49:30Z",
+  "last_poll": "2026-10-06T03:21:45Z",
+  "distinct_poll_times": 629,
+  "decisions_by_month": {
+   "2026-09 collision": 9,
+   "2026-09 duplicate": 425,
+   "2026-09 duplicate-partial": 535,
+   "2026-09 new": 685,
+   "2026-10 collision": 1,
+   "2026-10 duplicate": 65,
+   "2026-10 duplicate-partial": 102,
+   "2026-10 new": 159
+  },
+  "polls_per_day_q": [
+   5.0,
+   6.0,
+   17.0,
+   21.0,
+   24.0,
+   26.0,
+   31.0
+  ],
+  "poll_interval_h_q": [
+   0.0408333,
+   0.138917,
+   0.233889,
+   0.572083,
+   1.92264,
+   3.51683,
+   7.95083
+  ],
+  "new_rows_matched_to_files": 844,
+  "first_poll_minus_last_update_h_q_live": [
+   0.113889,
+   0.348611,
+   0.428611,
+   0.614167,
+   0.831111,
+   1.12556,
+   1.88972
+  ],
+  "first_poll_minus_last_update_h_q_historical": [
+   1.29361,
+   5.1405,
+   9.585,
+   20.6067,
+   38.4,
+   312.246,
+   765.146
+  ],
+  "files_after_first_poll": 814,
+  "files_after_first_poll_without_new_row": 0,
+  "examples_without_new_row": []
+ },
+ "visible_rounds": {
+  "readout": {
+   "2026-05": {
+    "major_rounds": 104,
+    "per_day": 5.62444,
+    "gap_h_q": [
+     0.804444,
+     2.07261,
+     3.19833,
+     3.30417,
+     4.91694,
+     7.4245,
+     13.6069
+    ],
+    "share_gaps_above_6p5h": 0.15534
+   },
+   "2026-06": {
+    "major_rounds": 133,
+    "per_day": 4.43333,
+    "gap_h_q": [
+     0.278056,
+     2.54772,
+     3.22375,
+     3.91931,
+     5.74944,
+     7.56983,
+     64.0669
+    ],
+    "share_gaps_above_6p5h": 0.212121
+   },
+   "2026-07": {
+    "major_rounds": 129,
+    "per_day": 4.16129,
+    "gap_h_q": [
+     0.288333,
+     2.61469,
+     3.43576,
+     4.32708,
+     5.87104,
+     10.285,
+     43.9847
+    ],
+    "share_gaps_above_6p5h": 0.210938
+   },
+   "2026-08": {
+    "major_rounds": 95,
+    "per_day": 3.06452,
+    "gap_h_q": [
+     1.36528,
+     2.57267,
+     3.45951,
+     4.93625,
+     7.68576,
+     13.1223,
+     82.1083
+    ],
+    "share_gaps_above_6p5h": 0.340426
+   },
+   "2026-09": {
+    "major_rounds": 110,
+    "per_day": 3.66667,
+    "gap_h_q": [
+     0.8275,
+     3.25072,
+     4.36833,
+     5.77667,
+     7.17056,
+     10.4167,
+     26.6186
+    ],
+    "share_gaps_above_6p5h": 0.376147
+   },
+   "2026-10": {
+    "major_rounds": 17,
+    "per_day": 3.31811,
+    "gap_h_q": [
+     1.39944,
+     2.26236,
+     4.93167,
+     6.14056,
+     8.9416,
+     10.9496,
+     14.5917
+    ],
+    "share_gaps_above_6p5h": 0.5
+   }
+  },
+  "init_error": {
+   "2026-08": {
+    "major_rounds": 85,
+    "per_day": 2.74194,
+    "gap_h_q": [
+     0.634444,
+     1.61386,
+     3.33826,
+     4.62972,
+     8.79597,
+     14.1138,
+     82.1083
+    ],
+    "share_gaps_above_6p5h": 0.357143
+   },
+   "2026-09": {
+    "major_rounds": 129,
+    "per_day": 4.3,
+    "gap_h_q": [
+     0.8325,
+     1.56689,
+     3.05049,
+     4.60528,
+     6.99424,
+     9.81081,
+     26.6356
+    ],
+    "share_gaps_above_6p5h": 0.3125
+   },
+   "2026-10": {
+    "major_rounds": 22,
+    "per_day": 4.29402,
+    "gap_h_q": [
+     0.946389,
+     1.86056,
+     3.07528,
+     4.91722,
+     7.07472,
+     9.77361,
+     10.6253
+    ],
+    "share_gaps_above_6p5h": 0.333333
+   }
+  },
+  "measure_2": {
+   "2026-08": {
+    "major_rounds": 19,
+    "per_day": 0.612903
+   },
+   "2026-09": {
+    "major_rounds": 29,
+    "per_day": 0.966667
+   },
+   "2026-10": {
+    "major_rounds": 4,
+    "per_day": 0.780731
+   }
+  },
+  "T1": {
+   "2026-05": {
+    "major_rounds": 21,
+    "per_day": 1.1357
+   },
+   "2026-06": {
+    "major_rounds": 28,
+    "per_day": 0.933333
+   },
+   "2026-07": {
+    "major_rounds": 25,
+    "per_day": 0.806452
+   },
+   "2026-08": {
+    "major_rounds": 25,
+    "per_day": 0.806452
+   },
+   "2026-09": {
+    "major_rounds": 30,
+    "per_day": 1.0
+   },
+   "2026-10": {
+    "major_rounds": 4,
+    "per_day": 0.780731
+   }
+  },
+  "T2": {
+   "2026-05": {
+    "major_rounds": 21,
+    "per_day": 1.1357
+   },
+   "2026-06": {
+    "major_rounds": 28,
+    "per_day": 0.933333
+   },
+   "2026-07": {
+    "major_rounds": 25,
+    "per_day": 0.806452
+   },
+   "2026-08": {
+    "major_rounds": 25,
+    "per_day": 0.806452
+   },
+   "2026-09": {
+    "major_rounds": 30,
+    "per_day": 1.0
+   },
+   "2026-10": {
+    "major_rounds": 4,
+    "per_day": 0.780731
+   }
+  },
+  "sx": {
+   "2026-05": {
+    "major_rounds": 21,
+    "per_day": 1.1357
+   },
+   "2026-06": {
+    "major_rounds": 26,
+    "per_day": 0.866667
+   },
+   "2026-07": {
+    "major_rounds": 27,
+    "per_day": 0.870968
+   },
+   "2026-08": {
+    "major_rounds": 25,
+    "per_day": 0.806452
+   },
+   "2026-09": {
+    "major_rounds": 29,
+    "per_day": 0.966667
+   },
+   "2026-10": {
+    "major_rounds": 4,
+    "per_day": 0.780731
+   }
+  },
+  "cz": {
+   "2026-05": {
+    "major_rounds": 19,
+    "per_day": 1.02754
+   },
+   "2026-06": {
+    "major_rounds": 26,
+    "per_day": 0.866667
+   },
+   "2026-07": {
+    "major_rounds": 26,
+    "per_day": 0.83871
+   },
+   "2026-08": {
+    "major_rounds": 25,
+    "per_day": 0.806452
+   },
+   "2026-09": {
+    "major_rounds": 29,
+    "per_day": 0.966667
+   },
+   "2026-10": {
+    "major_rounds": 5,
+    "per_day": 0.975914
+   }
+  },
+  "rzz": {
+   "2026-05": {
+    "major_rounds": 20,
+    "per_day": 1.08162
+   },
+   "2026-06": {
+    "major_rounds": 24,
+    "per_day": 0.8
+   },
+   "2026-07": {
+    "major_rounds": 23,
+    "per_day": 0.741935
+   },
+   "2026-08": {
+    "major_rounds": 15,
+    "per_day": 0.483871
+   },
+   "2026-09": {
+    "major_rounds": 23,
+    "per_day": 0.766667
+   },
+   "2026-10": {
+    "major_rounds": 4,
+    "per_day": 0.780731
+   }
+  }
+ },
+ "configuration": {
+  "keys": 43,
+  "keys_changing": {
+   "basis_gates": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20260910T155537000000Z.json",
+     "files": 967,
+     "chars": 29
+    },
+    {
+     "id": 1,
+     "first": "20260910T192051000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 350,
+     "chars": 38
+    }
+   ],
+   "clops_v": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20260624T151002000000Z.json",
+     "files": 333,
+     "chars": 6
+    },
+    {
+     "id": 1,
+     "first": "20260624T163639000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 984,
+     "chars": 4
+    }
+   ],
+   "gates": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20260806T122947000000Z.json",
+     "files": 692,
+     "chars": 8276
+    },
+    {
+     "id": 1,
+     "first": "20260807T032159000000Z.json",
+     "last": "20260901T125138000000Z.json",
+     "files": 222,
+     "chars": 8335
+    },
+    {
+     "id": 2,
+     "first": "20260902T045624000000Z.json",
+     "last": "20260910T155537000000Z.json",
+     "files": 53,
+     "chars": 8520
+    },
+    {
+     "id": 3,
+     "first": "20260910T192051000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 350,
+     "chars": 9589
+    }
+   ],
+   "instruction_signatures": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20260806T122947000000Z.json",
+     "files": 692,
+     "chars": 2
+    },
+    {
+     "id": 1,
+     "first": "20260807T032159000000Z.json",
+     "last": "20260901T125138000000Z.json",
+     "files": 222,
+     "chars": 192
+    },
+    {
+     "id": 2,
+     "first": "20260902T045624000000Z.json",
+     "last": "20260903T160719000000Z.json",
+     "files": 10,
+     "chars": 727
+    },
+    {
+     "id": 3,
+     "first": "20260903T194106000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 393,
+     "chars": 797
+    }
+   ],
+   "supported_instructions": [
+    {
+     "id": 0,
+     "first": "20260513T121322000000Z.json",
+     "last": "20260806T122947000000Z.json",
+     "files": 692,
+     "chars": 78
+    },
+    {
+     "id": 1,
+     "first": "20260807T032159000000Z.json",
+     "last": "20260901T125138000000Z.json",
+     "files": 222,
+     "chars": 91
+    },
+    {
+     "id": 2,
+     "first": "20260902T045624000000Z.json",
+     "last": "20260910T155537000000Z.json",
+     "files": 53,
+     "chars": 138
+    },
+    {
+     "id": 3,
+     "first": "20260910T192051000000Z.json",
+     "last": "20261006T025742000000Z.json",
+     "files": 350,
+     "chars": 147
+    }
+   ]
+  },
+  "keys_absent_from_some_live_files": {
+   "mcps": {
+    "live_files_without_key": 496,
+    "first_live_file_with_key": "20260716T030013000000Z.json",
+    "value": 3864
+   }
+  },
+  "clops_v": [
+   {
+    "first": "20260513T121322000000Z.json",
+    "files": 333,
+    "json": "string"
+   },
+   {
+    "first": "20260624T163639000000Z.json",
+    "files": 984,
+    "json": "null"
+   }
+  ],
+  "basis_gates": [
+   {
+    "first": "20260513T121322000000Z.json",
+    "last": "20260910T155537000000Z.json",
+    "value": [
+     "cz",
+     "id",
+     "rz",
+     "sx",
+     "x"
+    ]
+   },
+   {
+    "first": "20260910T192051000000Z.json",
+    "last": "20261006T025742000000Z.json",
+    "value": [
+     "cz",
+     "id",
+     "rz",
+     "sx",
+     "x",
+     "xslow"
+    ]
+   }
+  ],
+  "instruction_signature_names": [
+   {
+    "first": "20260513T121322000000Z.json",
+    "names": []
+   },
+   {
+    "first": "20260807T032159000000Z.json",
+    "names": [
+     "measure_2"
+    ]
+   },
+   {
+    "first": "20260902T045624000000Z.json",
+    "names": [
+     "measure_2",
+     "measure_reset",
+     "measure_reset_2",
+     "reset_2"
+    ]
+   },
+   {
+    "first": "20260903T194106000000Z.json",
+    "names": [
+     "measure_2",
+     "measure_reset",
+     "measure_reset_2",
+     "reset_2"
+    ]
+   }
+  ],
+  "target_sets_by_provenance": [
+   {
+    "id": 0,
+    "n_ops": 1444,
+    "live": {
+     "files": 692,
+     "first": "20260513T121322000000Z.json",
+     "last": "20260806T122947000000Z.json"
+    },
+    "historical": {
+     "files": 10,
+     "first": "20260805T234531000000Z.json",
+     "last": "20260806T114821000000Z.json"
+    }
+   },
+   {
+    "id": 1,
+    "n_ops": 1600,
+    "live": {
+     "files": 222,
+     "first": "20260807T032159000000Z.json",
+     "last": "20260901T125138000000Z.json"
+    },
+    "historical": {
+     "files": 19,
+     "first": "20260812T063125000000Z.json",
+     "last": "20260817T233707000000Z.json"
+    }
+   },
+   {
+    "id": 2,
+    "n_ops": 2068,
+    "live": {
+     "files": 53,
+     "first": "20260902T045624000000Z.json",
+     "last": "20260910T155537000000Z.json"
+    },
+    "historical": {
+     "files": 0
+    }
+   },
+   {
+    "id": 3,
+    "n_ops": 2224,
+    "live": {
+     "files": 350,
+     "first": "20260910T192051000000Z.json",
+     "last": "20261006T025742000000Z.json"
+    },
+    "historical": {
+     "files": 414,
+     "first": "20260909T084345000000Z.json",
+     "last": "20261005T100831000000Z.json"
+    }
+   }
+  ],
+  "historical_files_with_2224_ops_before_first_live_2224": 31,
+  "those_files_range": [
+   "20260909T084345000000Z.json",
+   "20260910T183347000000Z.json"
+  ],
+  "those_files_with_any_xslow_record": 4,
+  "those_files_without_any_xslow_record": 27,
+  "record_counts": {
+   "n_qubit_records": [
+    {
+     "value": 934,
+     "files": 36,
+     "first": "20260513T121322000000Z.json",
+     "last": "20260516T210531000000Z.json"
+    },
+    {
+     "value": 935,
+     "files": 633,
+     "first": "20260516T222522000000Z.json",
+     "last": "20260803T231001000000Z.json"
+    },
+    {
+     "value": 1050,
+     "files": 194,
+     "first": "20260804T005230000000Z.json",
+     "last": "20260822T215527000000Z.json"
+    },
+    {
+     "value": 1051,
+     "files": 897,
+     "first": "20260822T225607000000Z.json",
+     "last": "20261006T025742000000Z.json"
+    }
+   ],
+   "n_gate_records": [
+    {
+     "value": 1796,
+     "files": 567,
+     "first": "20260513T121322000000Z.json",
+     "last": "20260806T122947000000Z.json"
+    },
+    {
+     "value": 1952,
+     "files": 376,
+     "first": "20260514T123242000000Z.json",
+     "last": "20260901T125138000000Z.json"
+    },
+    {
+     "value": 2420,
+     "files": 80,
+     "first": "20260902T045624000000Z.json",
+     "last": "20260910T155537000000Z.json"
+    },
+    {
+     "value": 2576,
+     "files": 737,
+     "first": "20260910T165621000000Z.json",
+     "last": "20261006T025742000000Z.json"
+    }
+   ],
+   "n_general_records": [
+    {
+     "value": 449,
+     "files": 1760,
+     "first": "20260513T121322000000Z.json",
+     "last": "20261006T025742000000Z.json"
+    }
+   ],
+   "n_target_ops": [
+    {
+     "value": 1444,
+     "files": 702,
+     "first": "20260513T121322000000Z.json",
+     "last": "20260806T122947000000Z.json"
+    },
+    {
+     "value": 1600,
+     "files": 241,
+     "first": "20260807T032159000000Z.json",
+     "last": "20260901T125138000000Z.json"
+    },
+    {
+     "value": 2068,
+     "files": 53,
+     "first": "20260902T045624000000Z.json",
+     "last": "20260910T155537000000Z.json"
+    },
+    {
+     "value": 2224,
+     "files": 764,
+     "first": "20260909T084345000000Z.json",
+     "last": "20261006T025742000000Z.json"
+    }
+   ]
+  },
+  "backend_versions": {
+   "1.3.37": 0
+  },
+  "backend_version_id_distinct": 1,
+  "schema_versions": {
+   "1.0.0": 1760
+  }
+ },
+ "length_events": {
+  "q.readout_length": [
+   {
+    "file": "20260608T185628000000Z.json",
+    "entities_changed": 156,
+    "from_to": [
+     [
+      1560.0,
+      1700.0
+     ]
+    ],
+    "examples": [
+     0,
+     1,
+     2,
+     3
+    ]
+   },
+   {
+    "file": "20260730T210917000000Z.json",
+    "entities_changed": 156,
+    "from_to": [
+     [
+      1700.0,
+      1660.0
+     ]
+    ],
+    "examples": [
+     0,
+     1,
+     2,
+     3
+    ]
+   }
+  ],
+  "g1.reset.gate_length": [
+   {
+    "file": "20260608T185628000000Z.json",
+    "entities_changed": 156,
+    "from_to": [
+     [
+      1584.0,
+      1724.0
+     ]
+    ],
+    "examples": [
+     0,
+     1,
+     2,
+     3
+    ]
+   },
+   {
+    "file": "20260730T210917000000Z.json",
+    "entities_changed": 156,
+    "from_to": [
+     [
+      1724.0,
+      1684.0
+     ]
+    ],
+    "examples": [
+     0,
+     1,
+     2,
+     3
+    ]
+   }
+  ],
+  "g2.cz.gate_length": [
+   {
+    "file": "20260905T175136000000Z.json",
+    "entities_changed": 4,
+    "from_to": [
+     [
+      68.0,
+      84.0
+     ]
+    ],
+    "examples": [
+     [
+      72,
+      73
+     ],
+     [
+      73,
+      72
+     ],
+     [
+      71,
+      72
+     ],
+     [
+      72,
+      71
+     ]
+    ]
+   }
+  ]
+ },
+ "stamp_semantics": {
+  "measured_fields_used": [
+   "q.T1",
+   "q.T2",
+   "q.readout_error",
+   "q.prob_meas0_prep1",
+   "q.prob_meas1_prep0",
+   "q.init_error",
+   "g1.sx.gate_error",
+   "g1.x.gate_error",
+   "g1.id.gate_error",
+   "g1.rx.gate_error",
+   "g1.xslow.gate_error",
+   "g1.measure_2.gate_error",
+   "g2.cz.gate_error",
+   "g2.rzz.gate_error"
+  ],
+  "share_last_update_equals_newest_measured_stamp": 0.194886,
+  "files_last_update_before_newest_measured_stamp": 0,
+  "last_update_minus_newest_measured_h_q": [
+   0.0,
+   0.0,
+   0.222847,
+   0.979583,
+   2.34507,
+   3.75203,
+   19.3117
+  ],
+  "share_placeholder_stamp_after_last_update": 1.0,
+  "placeholder_minus_last_update_h_q_live": [
+   0.00194444,
+   0.0180556,
+   0.0422222,
+   0.0827778,
+   0.121944,
+   0.187889,
+   12.4261
+  ],
+  "placeholder_minus_last_update_h_q_historical": [
+   0.00222222,
+   0.0202778,
+   0.0258333,
+   0.0633333,
+   0.107639,
+   0.156889,
+   0.422778
+  ],
+  "share_files_all_zz_stamps_equal_last_update": 1.0,
+  "share_threshold_files_all_stamps_equal_last_update": 1.0,
+  "threshold_files": 1533
+ }
+}

@@ -1,0 +1,490 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "gates_2q",
+ "script": "analysis/gates_2q/link_qubits.py",
+ "measured_utc": "2026-10-06T07:41:34Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "reference_limits": {
+  "median_T1_us_all_records": 125.9,
+  "median_T2_us_all_records": 92.44,
+  "p10_T1_us": 75.57,
+  "p10_T2_us": 28.6,
+  "limit_at_median_T1_T2": {
+   "68": 0.0008041,
+   "84": 0.0009932,
+   "88": 0.00104,
+   "116": 0.001371
+  },
+  "limit_at_p10_T1_T2_both_qubits": {
+   "68": 0.002258,
+   "116": 0.003847
+  },
+  "first_order_check_68ns_at_median": 0.0008046,
+  "first_order_note": "Abad et al. eq. 12: (2/5) t sum_k (1/T1_k + Gamma_phi_k), Gamma_phi = 1/T2 - 1/(2 T1)"
+ },
+ "cz": {
+  "events": 22092,
+  "events_with_T2_gt_2T1_on_either_qubit": 43,
+  "limit_q": [
+   0.000322608,
+   0.000427593,
+   0.000563505,
+   0.000718768,
+   0.000985707,
+   0.00138195,
+   0.00207806,
+   0.00558786,
+   0.0126009
+  ],
+  "limit_over_error_q": [
+   0.00701851,
+   0.0248359,
+   0.137897,
+   0.235084,
+   0.332844,
+   0.479,
+   0.711476,
+   1.22351,
+   3.71982
+  ],
+  "share_events_limit_above_error": 0.02594,
+  "error_over_limit_median": 3.004,
+  "event_median_error": 0.002745,
+  "event_median_error_over_68ns_limit_at_median_T1_T2": 3.41,
+  "abs_hours_gate_stamp_to_T1_T2_stamps_q": [
+   0.426667,
+   0.4475,
+   1.71333,
+   2.79528,
+   3.52361,
+   6.0675,
+   15.9364,
+   40.9714,
+   2179.51
+  ],
+  "within_file_spearman_log_err_vs_log_limit_q": [
+   0.06692,
+   0.100013,
+   0.158,
+   0.196775,
+   0.2374,
+   0.273975,
+   0.3163,
+   0.3547,
+   0.3749
+  ],
+  "within_file_files_sampled_every_5th": 352,
+  "between_coupler": {
+   "couplers": 172,
+   "spearman_err_vs_limit": {
+    "rho": 0.3338,
+    "p": 7.64e-06,
+    "n": 172
+   },
+   "spearman_err_vs_sx_sum": {
+    "rho": 0.5768,
+    "p": 1.23e-16,
+    "n": 172
+   },
+   "spearman_err_vs_readout_sum": {
+    "rho": 0.1714,
+    "p": 0.0245,
+    "n": 172
+   },
+   "spearman_err_vs_readout_max": {
+    "rho": 0.1642,
+    "p": 0.0314,
+    "n": 172
+   },
+   "spearman_limit_vs_sx_sum": {
+    "rho": 0.2561,
+    "p": 0.000697,
+    "n": 172
+   },
+   "partial_err_sx_given_limit": {
+    "rho": 0.5392,
+    "n": 172
+   },
+   "partial_err_limit_given_sx": {
+    "rho": 0.2357,
+    "n": 172
+   },
+   "partial_err_readout_given_limit_sx": {
+    "rho": -0.01185,
+    "n": 172
+   }
+  },
+  "within_coupler_changes": {
+   "spearman_dlog_err_vs_dlog_limit": {
+    "rho": 0.02463,
+    "p": 0.000266,
+    "n": 21920
+   },
+   "spearman_dlog_err_vs_dlog_sx_sum": {
+    "rho": 0.04828,
+    "p": 8.92e-13,
+    "n": 21886
+   },
+   "spearman_dlog_err_vs_dlog_readout_sum": {
+    "rho": 0.007312,
+    "p": 0.279,
+    "n": 21920
+   }
+  },
+  "within_coupler_demeaned_levels": {
+   "spearman_err_vs_limit": {
+    "rho": 0.078,
+    "p": 3.66e-31,
+    "n": 22092
+   },
+   "spearman_err_vs_sx_sum": {
+    "rho": 0.1581,
+    "p": 1.97e-123,
+    "n": 22060
+   },
+   "spearman_err_vs_readout_sum": {
+    "rho": 0.04143,
+    "p": 7.29e-10,
+    "n": 22092
+   },
+   "spearman_err_vs_T1_product": {
+    "rho": -0.07885,
+    "p": 8.15e-32,
+    "n": 22092
+   }
+  },
+  "shared_qubit_pairs": {
+   "rows": 29513,
+   "spearman_dev_i_vs_dev_j": {
+    "rho": 0.2196,
+    "p": 0.0,
+    "n": 29513
+   },
+   "spearman_dev_i_vs_shared_qubit_sx_dev": {
+    "rho": 0.03179,
+    "p": 4.73e-08,
+    "n": 29498
+   },
+   "spearman_dev_i_vs_shared_qubit_T1_dev": {
+    "rho": -0.002285,
+    "p": 0.695,
+    "n": 29513
+   },
+   "partial_dev_i_dev_j_given_sx_T1": {
+    "rho": 0.2188,
+    "n": 29498
+   },
+   "spearman_dev_i_vs_shared_qubit_readout_dev": {
+    "rho": -0.007019,
+    "p": 0.228,
+    "n": 29513
+   },
+   "partial_dev_i_dev_j_given_sx_T1_readout": {
+    "rho": 0.2187,
+    "n": 29498
+   }
+  }
+ },
+ "rzz": {
+  "events": 18210,
+  "events_with_T2_gt_2T1_on_either_qubit": 34,
+  "limit_q": [
+   0.000322608,
+   0.000426127,
+   0.000564318,
+   0.000717868,
+   0.000983791,
+   0.00140059,
+   0.00215701,
+   0.00554641,
+   0.0121042
+  ],
+  "limit_over_error_q": [
+   0.00454846,
+   0.0230746,
+   0.149733,
+   0.247043,
+   0.351435,
+   0.499988,
+   0.72735,
+   1.27504,
+   3.2914
+  ],
+  "share_events_limit_above_error": 0.0335,
+  "error_over_limit_median": 2.845,
+  "event_median_error": 0.002657,
+  "event_median_error_over_68ns_limit_at_median_T1_T2": 3.3,
+  "abs_hours_gate_stamp_to_T1_T2_stamps_q": [
+   1.33361,
+   1.51583,
+   2.73611,
+   3.94694,
+   5.04222,
+   7.37861,
+   15.8528,
+   39.2344,
+   915.958
+  ],
+  "within_file_spearman_log_err_vs_log_limit_q": [
+   0.1043,
+   0.1197,
+   0.2165,
+   0.24825,
+   0.29645,
+   0.3393,
+   0.3677,
+   0.420733,
+   0.4602
+  ],
+  "within_file_files_sampled_every_5th": 352,
+  "between_coupler": {
+   "couplers": 171,
+   "spearman_err_vs_limit": {
+    "rho": 0.3905,
+    "p": 1.29e-07,
+    "n": 171
+   },
+   "spearman_err_vs_sx_sum": {
+    "rho": 0.5786,
+    "p": 1.15e-16,
+    "n": 171
+   },
+   "spearman_err_vs_readout_sum": {
+    "rho": 0.1923,
+    "p": 0.0117,
+    "n": 171
+   },
+   "spearman_err_vs_readout_max": {
+    "rho": 0.1868,
+    "p": 0.0144,
+    "n": 171
+   },
+   "spearman_limit_vs_sx_sum": {
+    "rho": 0.2489,
+    "p": 0.00103,
+    "n": 171
+   },
+   "partial_err_sx_given_limit": {
+    "rho": 0.5399,
+    "n": 171
+   },
+   "partial_err_limit_given_sx": {
+    "rho": 0.3121,
+    "n": 171
+   },
+   "partial_err_readout_given_limit_sx": {
+    "rho": 0.02102,
+    "n": 171
+   }
+  },
+  "within_coupler_changes": {
+   "spearman_dlog_err_vs_dlog_limit": {
+    "rho": 0.008102,
+    "p": 0.277,
+    "n": 18039
+   },
+   "spearman_dlog_err_vs_dlog_sx_sum": {
+    "rho": 0.0246,
+    "p": 0.000956,
+    "n": 18034
+   },
+   "spearman_dlog_err_vs_dlog_readout_sum": {
+    "rho": 0.01621,
+    "p": 0.0294,
+    "n": 18039
+   }
+  },
+  "within_coupler_demeaned_levels": {
+   "spearman_err_vs_limit": {
+    "rho": 0.08199,
+    "p": 1.54e-28,
+    "n": 18210
+   },
+   "spearman_err_vs_sx_sum": {
+    "rho": 0.1372,
+    "p": 3.27e-77,
+    "n": 18205
+   },
+   "spearman_err_vs_readout_sum": {
+    "rho": 0.03492,
+    "p": 2.44e-06,
+    "n": 18210
+   },
+   "spearman_err_vs_T1_product": {
+    "rho": -0.08633,
+    "p": 1.79e-31,
+    "n": 18210
+   }
+  },
+  "shared_qubit_pairs": {
+   "rows": 24229,
+   "spearman_dev_i_vs_dev_j": {
+    "rho": 0.2255,
+    "p": 6.37e-277,
+    "n": 24229
+   },
+   "spearman_dev_i_vs_shared_qubit_sx_dev": {
+    "rho": 0.02382,
+    "p": 0.000209,
+    "n": 24229
+   },
+   "spearman_dev_i_vs_shared_qubit_T1_dev": {
+    "rho": -0.005281,
+    "p": 0.411,
+    "n": 24229
+   },
+   "partial_dev_i_dev_j_given_sx_T1": {
+    "rho": 0.2253,
+    "n": 24229
+   },
+   "spearman_dev_i_vs_shared_qubit_readout_dev": {
+    "rho": 0.001081,
+    "p": 0.866,
+    "n": 24229
+   },
+   "partial_dev_i_dev_j_given_sx_T1_readout": {
+    "rho": 0.2253,
+    "n": 24229
+   }
+  }
+ },
+ "faulty_coupler_qubits": {
+  "27": {
+   "sx_placeholder_share": 0.0,
+   "sx_median": 0.00543,
+   "sx_percentile": 1.0,
+   "T1_median_us": 103.3,
+   "T1_percentile": 0.141,
+   "T2_median_us": 105.8,
+   "T2_percentile": 0.497,
+   "readout_median": 0.01086,
+   "readout_percentile": 0.583
+  },
+  "28": {
+   "sx_placeholder_share": 0.0,
+   "sx_median": 0.0002475,
+   "sx_percentile": 0.265,
+   "T1_median_us": 156.7,
+   "T1_percentile": 0.865,
+   "T2_median_us": 148.8,
+   "T2_percentile": 0.845,
+   "readout_median": 0.006592,
+   "readout_percentile": 0.295
+  },
+  "32": {
+   "sx_placeholder_share": 0.0,
+   "sx_median": 0.0002815,
+   "sx_percentile": 0.419,
+   "T1_median_us": 115.5,
+   "T1_percentile": 0.244,
+   "T2_median_us": 125.8,
+   "T2_percentile": 0.684,
+   "readout_median": 0.02844,
+   "readout_percentile": 0.865
+  },
+  "33": {
+   "sx_placeholder_share": 0.0,
+   "sx_median": 0.0002416,
+   "sx_percentile": 0.232,
+   "T1_median_us": 122.5,
+   "T1_percentile": 0.359,
+   "T2_median_us": 124.5,
+   "T2_percentile": 0.677,
+   "readout_median": 0.01831,
+   "readout_percentile": 0.795
+  },
+  "71": {
+   "sx_placeholder_share": 0.0,
+   "sx_median": 0.0003542,
+   "sx_percentile": 0.671,
+   "T1_median_us": 154.0,
+   "T1_percentile": 0.853,
+   "T2_median_us": 111.5,
+   "T2_percentile": 0.542,
+   "readout_median": 0.00647,
+   "readout_percentile": 0.282
+  },
+  "72": {
+   "sx_placeholder_share": 1.0,
+   "sx_median": null,
+   "sx_percentile": null,
+   "T1_median_us": 21.45,
+   "T1_percentile": 0.00641,
+   "T2_median_us": null,
+   "T2_percentile": null,
+   "readout_median": 0.3321,
+   "readout_percentile": 1.0
+  },
+  "73": {
+   "sx_placeholder_share": 0.0,
+   "sx_median": 0.0002803,
+   "sx_percentile": 0.406,
+   "T1_median_us": 152.2,
+   "T1_percentile": 0.833,
+   "T2_median_us": 81.26,
+   "T2_percentile": 0.348,
+   "readout_median": 0.01367,
+   "readout_percentile": 0.712
+  },
+  "95": {
+   "sx_placeholder_share": 0.0,
+   "sx_median": 0.0003136,
+   "sx_percentile": 0.535,
+   "T1_median_us": 140.0,
+   "T1_percentile": 0.673,
+   "T2_median_us": 145.2,
+   "T2_percentile": 0.813,
+   "readout_median": 0.008911,
+   "readout_percentile": 0.513
+  },
+  "99": {
+   "sx_placeholder_share": 0.0,
+   "sx_median": 0.0002698,
+   "sx_percentile": 0.342,
+   "T1_median_us": 110.8,
+   "T1_percentile": 0.192,
+   "T2_median_us": 35.68,
+   "T2_percentile": 0.135,
+   "readout_median": 0.0249,
+   "readout_percentile": 0.84
+  },
+  "102": {
+   "sx_placeholder_share": 0.0,
+   "sx_median": 0.001796,
+   "sx_percentile": 0.981,
+   "T1_median_us": 123.6,
+   "T1_percentile": 0.372,
+   "T2_median_us": 82.19,
+   "T2_percentile": 0.361,
+   "readout_median": 0.09351,
+   "readout_percentile": 0.987
+  },
+  "103": {
+   "sx_placeholder_share": 0.0,
+   "sx_median": 0.0002645,
+   "sx_percentile": 0.303,
+   "T1_median_us": 98.48,
+   "T1_percentile": 0.0962,
+   "T2_median_us": 103.9,
+   "T2_percentile": 0.484,
+   "readout_median": 0.01147,
+   "readout_percentile": 0.609
+  },
+  "115": {
+   "sx_placeholder_share": 0.0,
+   "sx_median": 0.0002187,
+   "sx_percentile": 0.148,
+   "T1_median_us": 124.3,
+   "T1_percentile": 0.397,
+   "T2_median_us": 147.4,
+   "T2_percentile": 0.832,
+   "readout_median": 0.00708,
+   "readout_percentile": 0.353
+  }
+ },
+ "percentile_note": "share of the 156 qubits whose median is at or below this one",
+ "labels_note": "176 canonical couplers"
+}

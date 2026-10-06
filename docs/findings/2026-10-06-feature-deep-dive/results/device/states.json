@@ -1,0 +1,83 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "device",
+ "script": "analysis/device/states.py",
+ "measured_utc": "2026-10-06T07:43:45Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "state_index_rows": 1760,
+ "files_with_state": 1759,
+ "files_without_state_row": [
+  {
+   "file": "20260630T214008000000Z.json",
+   "qubit_values_equal_previous_file": true,
+   "qubit_values_equal_next_file": true,
+   "previous_state": 251,
+   "next_state": 251,
+   "next_file_is_new_state": 0
+  }
+ ],
+ "distinct_states": 760,
+ "files_per_state_q": [
+  1.0,
+  1.0,
+  1.0,
+  2.0,
+  3.0,
+  5.0,
+  14.0
+ ],
+ "states_with_one_file": 366,
+ "max_files_per_state": 14,
+ "runs": 760,
+ "states_recurring_after_another_state": 0,
+ "is_new_state_ones": 760,
+ "is_new_equals_first_seen": 1601,
+ "is_new_equals_differs_from_previous": 1601,
+ "files_compared": 1759,
+ "flag_mismatch": {
+  "states_where_flag_is_not_on_first_file_in_time": 79,
+  "of_those_first_file_in_time_is_historical": 79,
+  "of_those_flagged_file_is_later": 79,
+  "of_those_flagged_file_is_live": 73,
+  "flagged_minus_first_file_h_q": [
+   0.0897222,
+   0.212222,
+   0.502222,
+   0.690278,
+   1.43778,
+   2.09589,
+   4.63222
+  ],
+  "states_without_a_flag": 0,
+  "states_with_more_than_one_flag": 0,
+  "state_ids_in_time_order_are_increasing": false,
+  "state_id_order_inversions": 38
+ },
+ "consecutive_pairs_same_state": 998,
+ "same_state_pairs_with_any_qubit_value_change": 0,
+ "consecutive_pairs_different_state": 759,
+ "different_state_pairs_without_qubit_value_change": 0,
+ "same_state_pairs_with_change_by_field": {
+  "g1.sx.gate_error": 63,
+  "g1.measure_2.gate_error": 17,
+  "g1.xslow.gate_error": 28,
+  "g2.cz.gate_error": 78,
+  "g2.rzz.gate_error": 55,
+  "gen.lf": 34,
+  "gen.zz": 59,
+  "g1.measure.threshold": 60
+ },
+ "same_state_pairs_with_any_listed_change": 314,
+ "qubit_fields_compared": [
+  "q.T1",
+  "q.T2",
+  "q.readout_error",
+  "q.prob_meas0_prep1",
+  "q.prob_meas1_prep0",
+  "q.readout_length",
+  "q.init_error"
+ ]
+}

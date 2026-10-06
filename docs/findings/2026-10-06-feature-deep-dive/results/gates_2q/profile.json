@@ -1,0 +1,1803 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "gates_2q",
+ "script": "analysis/gates_2q/profile_2q.py",
+ "measured_utc": "2026-10-06T07:50:50Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "n_couplers": 176,
+ "canonical_direction": "column [a, b] with a < b",
+ "coverage_split": {
+  "rule": "first file with configuration null (first historical fetch)",
+  "split_utc": "2026-08-05T23:45:31Z",
+  "split_file": "20260805T234531000000Z.json",
+  "files_before": 687,
+  "files_from": 1073
+ },
+ "cz": {
+  "direction_identity": {
+   "records_compared": 309760,
+   "value_mismatch": 0,
+   "placeholder_flag_mismatch": 0,
+   "date_mismatch": 8682,
+   "date_mismatch_in_placeholder_records": 8682,
+   "date_mismatch_outside_placeholders": 0,
+   "placeholder_records_per_direction": 8682,
+   "mismatch_offset_microseconds_q": [
+    4.63867,
+    4.88281,
+    5.85938,
+    5.85938,
+    6.10352,
+    6.10352,
+    6.34766,
+    10.7886,
+    31.0059
+   ],
+   "nonplaceholder_stamps": 301078,
+   "nonplaceholder_stamps_whole_second_share": 1.0,
+   "placeholder_stamps_whole_millisecond_share": 0.00103663,
+   "placeholder_stamp_minus_file_date_h_q": [
+    0.00219018,
+    0.0104434,
+    0.019851,
+    0.0407377,
+    0.0783273,
+    0.11908,
+    0.182355,
+    0.590917,
+    12.4267
+   ],
+   "nonplaceholder_stamp_minus_file_date_h_q": [
+    -334.231,
+    -63.3561,
+    -23.4717,
+    -19.45,
+    -12.7967,
+    -6.25028,
+    -2.10056,
+    -0.000277778,
+    0.0
+   ]
+  },
+  "values": {
+   "records_nonplaceholder": 301078,
+   "records_placeholder": 8682,
+   "record_weighted_q": [
+    0.0011525,
+    0.0015767,
+    0.0019516,
+    0.00226982,
+    0.00274967,
+    0.00383769,
+    0.00804258,
+    0.0492623,
+    0.117497
+   ],
+   "event_weighted_q": [
+    0.0011525,
+    0.00158514,
+    0.00196156,
+    0.00228089,
+    0.00274547,
+    0.00371891,
+    0.0075379,
+    0.0453953,
+    0.117497
+   ],
+   "event_weighted_mean": 0.004791,
+   "record_log10_skew": 2.112,
+   "couplers_with_events": 172,
+   "couplers_without_events_permanently_faulty": [
+    "27-28",
+    "32-33",
+    "71-72",
+    "72-73"
+   ],
+   "per_coupler_median_log10_q": [
+    -2.80338,
+    -2.73194,
+    -2.69046,
+    -2.63726,
+    -2.56468,
+    -2.47951,
+    -2.15187,
+    -1.35681,
+    -1.17471
+   ],
+   "per_coupler_median_q": [
+    0.00157259,
+    0.0018538,
+    0.0020396,
+    0.0023054,
+    0.00272474,
+    0.00331507,
+    0.00704951,
+    0.0444429,
+    0.0668787
+   ],
+   "best_to_worst_coupler_median_ratio": 42.53,
+   "p90_to_p10_coupler_median_ratio": 3.456,
+   "deviation_from_coupler_median_log10_q": [
+    -0.91827,
+    -0.360118,
+    -0.0801959,
+    -0.0409137,
+    0.0,
+    0.0509829,
+    0.133653,
+    0.656098,
+    1.72246
+   ],
+   "deviation_share_above_factor2": 0.03354,
+   "deviation_share_below_half": 0.01276,
+   "deviation_share_above_10x": 0.002218,
+   "events_total": 22092,
+   "events_per_coupler_q": [
+    6.0,
+    57.13,
+    128.1,
+    131.0,
+    131.0,
+    131.0,
+    131.0,
+    131.0,
+    131.0
+   ],
+   "event_gap_h_q": [
+    3.76639,
+    6.29639,
+    19.0342,
+    24.7025,
+    25.1364,
+    27.0906,
+    36.9092,
+    77.2833,
+    522.618
+   ],
+   "event_gap_h_q_before_split": [
+    3.76639,
+    3.76667,
+    18.9372,
+    24.6647,
+    25.0044,
+    26.6169,
+    40.5036,
+    152.071,
+    522.618
+   ],
+   "event_gap_h_q_after_split": [
+    8.66556,
+    8.66556,
+    20.1758,
+    24.8814,
+    25.5039,
+    27.4203,
+    32.0083,
+    75.5183,
+    362.953
+   ],
+   "gaps_over_168h": 17,
+   "gaps_over_48h": 1643,
+   "gaps_over_48h_before_split": 1086,
+   "gaps_over_48h_after_split": 557,
+   "long_gaps_over_168h": [
+    {
+     "coupler": "7-17",
+     "from": "2026-05-05T13:21:19Z",
+     "to": "2026-05-13T23:54:18Z",
+     "hours": 202.5
+    },
+    {
+     "coupler": "7-17",
+     "from": "2026-06-15T00:14:09Z",
+     "to": "2026-06-23T21:10:43Z",
+     "hours": 212.9
+    },
+    {
+     "coupler": "149-150",
+     "from": "2026-05-05T13:21:20Z",
+     "to": "2026-05-27T07:58:24Z",
+     "hours": 522.6
+    },
+    {
+     "coupler": "149-150",
+     "from": "2026-07-05T08:24:58Z",
+     "to": "2026-07-12T14:42:35Z",
+     "hours": 174.3
+    },
+    {
+     "coupler": "149-150",
+     "from": "2026-07-27T17:58:33Z",
+     "to": "2026-08-11T20:55:43Z",
+     "hours": 363.0
+    },
+    {
+     "coupler": "149-150",
+     "from": "2026-09-21T12:14:09Z",
+     "to": "2026-09-29T23:28:43Z",
+     "hours": 203.2
+    },
+    {
+     "coupler": "31-32",
+     "from": "2026-07-13T17:19:37Z",
+     "to": "2026-07-22T02:37:16Z",
+     "hours": 201.3
+    },
+    {
+     "coupler": "17-27",
+     "from": "2026-05-05T13:21:20Z",
+     "to": "2026-05-13T23:54:19Z",
+     "hours": 202.5
+    },
+    {
+     "coupler": "17-27",
+     "from": "2026-06-15T00:14:10Z",
+     "to": "2026-06-23T21:10:43Z",
+     "hours": 212.9
+    },
+    {
+     "coupler": "38-49",
+     "from": "2026-05-31T00:04:43Z",
+     "to": "2026-06-09T01:09:23Z",
+     "hours": 217.1
+    },
+    {
+     "coupler": "148-149",
+     "from": "2026-05-05T13:21:16Z",
+     "to": "2026-05-13T23:54:16Z",
+     "hours": 202.6
+    },
+    {
+     "coupler": "148-149",
+     "from": "2026-05-13T23:54:16Z",
+     "to": "2026-05-29T11:38:31Z",
+     "hours": 371.7
+    },
+    {
+     "coupler": "148-149",
+     "from": "2026-07-05T08:24:55Z",
+     "to": "2026-07-15T01:09:12Z",
+     "hours": 232.7
+    },
+    {
+     "coupler": "148-149",
+     "from": "2026-08-03T06:11:49Z",
+     "to": "2026-08-11T20:55:40Z",
+     "hours": 206.7
+    },
+    {
+     "coupler": "148-149",
+     "from": "2026-09-17T03:32:45Z",
+     "to": "2026-09-29T23:28:41Z",
+     "hours": 307.9
+    },
+    {
+     "coupler": "57-67",
+     "from": "2026-05-07T15:50:04Z",
+     "to": "2026-05-16T00:05:22Z",
+     "hours": 200.3
+    },
+    {
+     "coupler": "43-44",
+     "from": "2026-05-06T15:04:54Z",
+     "to": "2026-05-13T23:54:16Z",
+     "hours": 176.8
+    }
+   ],
+   "long_gaps_listed_cap": 60,
+   "events_after_first_before_split": 12783,
+   "events_after_first_after_split": 9137,
+   "events_per_coupler_per_day_before_split": 0.8797,
+   "events_per_coupler_per_day_after_split": 0.869,
+   "rounds": {
+    "n_rounds": 132,
+    "couplers_per_round_q": [
+     1.0,
+     51.91,
+     166.0,
+     167.0,
+     169.0,
+     170.0,
+     171.0,
+     171.69,
+     172.0
+    ],
+    "rounds_with_ge_half_of_couplers": 130,
+    "rounds_with_lt_10_couplers": 2,
+    "gap_between_round_starts_h_q": [
+     3.76667,
+     6.54367,
+     19.0342,
+     24.7006,
+     25.1258,
+     26.4465,
+     31.8272,
+     70.8377,
+     77.2833
+    ],
+    "round_span_minutes_q": [
+     0.0,
+     0.05,
+     0.0666667,
+     0.0666667,
+     0.0666667,
+     0.0833333,
+     0.0833333,
+     0.233333,
+     0.366667
+    ],
+    "distinct_stamps_per_round_q": [
+     1.0,
+     2.62,
+     5.0,
+     5.0,
+     5.0,
+     6.0,
+     6.0,
+     11.0,
+     15.0
+    ],
+    "round_start_utc_hour_counts": [
+     9,
+     12,
+     5,
+     7,
+     3,
+     6,
+     5,
+     7,
+     6,
+     6,
+     2,
+     5,
+     6,
+     5,
+     7,
+     3,
+     2,
+     2,
+     3,
+     1,
+     6,
+     4,
+     7,
+     13
+    ],
+    "round_start_gaps_over_40h": [
+     {
+      "from": "2026-05-27T07:58:21Z",
+      "to": "2026-05-29T11:38:31Z",
+      "hours": 51.67
+     },
+     {
+      "from": "2026-06-02T01:37:31Z",
+      "to": "2026-06-04T00:04:15Z",
+      "hours": 46.45
+     },
+     {
+      "from": "2026-06-27T00:55:39Z",
+      "to": "2026-06-30T06:12:39Z",
+      "hours": 77.28
+     },
+     {
+      "from": "2026-07-05T08:24:55Z",
+      "to": "2026-07-07T09:43:25Z",
+      "hours": 49.31
+     },
+     {
+      "from": "2026-07-16T06:20:23Z",
+      "to": "2026-07-17T22:50:36Z",
+      "hours": 40.5
+     },
+     {
+      "from": "2026-07-22T02:37:12Z",
+      "to": "2026-07-24T14:32:11Z",
+      "hours": 59.92
+     },
+     {
+      "from": "2026-08-06T14:59:54Z",
+      "to": "2026-08-09T18:31:00Z",
+      "hours": 75.52
+     },
+     {
+      "from": "2026-08-14T15:25:13Z",
+      "to": "2026-08-16T18:50:32Z",
+      "hours": 51.42
+     },
+     {
+      "from": "2026-08-24T11:39:28Z",
+      "to": "2026-08-26T08:37:36Z",
+      "hours": 44.97
+     }
+    ],
+    "n_round_start_gaps_over_40h": 9,
+    "rounds_before_split": 77,
+    "rounds_from_split": 55,
+    "split_days_before": 84.48,
+    "split_days_from": 61.13
+   },
+   "event_utc_hour_counts": [
+    1507,
+    2013,
+    846,
+    1184,
+    508,
+    1017,
+    841,
+    1182,
+    1013,
+    1014,
+    335,
+    840,
+    1012,
+    680,
+    1181,
+    511,
+    337,
+    337,
+    509,
+    2,
+    1007,
+    677,
+    1174,
+    2193
+   ],
+   "event_weekday_counts_mon_first": [
+    3197,
+    3870,
+    3034,
+    2361,
+    3706,
+    2873,
+    2879
+   ]
+  },
+  "placeholders": {
+   "couplers_ever_placeholder": 7,
+   "couplers_always_placeholder": [
+    "27-28",
+    "32-33",
+    "71-72",
+    "72-73"
+   ],
+   "entries_into_placeholder": 2,
+   "exits_from_placeholder": 3,
+   "placeholder_couplers_per_file_q": [
+    4.0,
+    4.0,
+    4.0,
+    5.0,
+    5.0,
+    5.0,
+    5.0,
+    6.0,
+    6.0
+   ],
+   "couplers": [
+    {
+     "coupler": "27-28",
+     "share_of_files": 1.0,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260513T121322000000Z.json",
+       "last_file": "20261006T025742000000Z.json",
+       "files": 1760,
+       "hours": 3495.0,
+       "open_at_start": true,
+       "open_at_end": true
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "32-33",
+     "share_of_files": 1.0,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260513T121322000000Z.json",
+       "last_file": "20261006T025742000000Z.json",
+       "files": 1760,
+       "hours": 3495.0,
+       "open_at_start": true,
+       "open_at_end": true
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "71-72",
+     "share_of_files": 1.0,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260513T121322000000Z.json",
+       "last_file": "20261006T025742000000Z.json",
+       "files": 1760,
+       "hours": 3495.0,
+       "open_at_start": true,
+       "open_at_end": true
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "72-73",
+     "share_of_files": 1.0,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260513T121322000000Z.json",
+       "last_file": "20261006T025742000000Z.json",
+       "files": 1760,
+       "hours": 3495.0,
+       "open_at_start": true,
+       "open_at_end": true
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "102-103",
+     "share_of_files": 0.8881,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260513T121322000000Z.json",
+       "last_file": "20260929T022626000000Z.json",
+       "files": 1563,
+       "hours": 3327.0,
+       "open_at_start": true,
+       "open_at_end": false
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "149-150",
+     "share_of_files": 0.04034,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260519T153114000000Z.json",
+       "last_file": "20260527T053937000000Z.json",
+       "files": 71,
+       "hours": 186.1,
+       "open_at_start": false,
+       "open_at_end": false
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "148-149",
+     "share_of_files": 0.004545,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260528T033226000000Z.json",
+       "last_file": "20260529T082836000000Z.json",
+       "files": 8,
+       "hours": 32.1,
+       "open_at_start": false,
+       "open_at_end": false
+      }
+     ],
+     "runs_listed_cap": 12
+    }
+   ]
+  },
+  "lengths": {
+   "record_counts_by_length_ns": {
+    "68.0": 304652,
+    "84.0": 1588,
+    "88.0": 3520
+   },
+   "non_68ns_couplers": [
+    {
+     "coupler": "71-72",
+     "values_ns": [
+      68.0,
+      84.0
+     ],
+     "changes": [
+      {
+       "file": "20260905T175136000000Z.json",
+       "from": 68.0,
+       "to": 84.0
+      }
+     ],
+     "placeholder_share": 1.0,
+     "record_median_error": null
+    },
+    {
+     "coupler": "72-73",
+     "values_ns": [
+      68.0,
+      84.0
+     ],
+     "changes": [
+      {
+       "file": "20260905T175136000000Z.json",
+       "from": 68.0,
+       "to": 84.0
+      }
+     ],
+     "placeholder_share": 1.0,
+     "record_median_error": null
+    },
+    {
+     "coupler": "102-103",
+     "values_ns": [
+      88.0
+     ],
+     "changes": [],
+     "placeholder_share": 0.8881,
+     "record_median_error": 0.07414
+    },
+    {
+     "coupler": "146-147",
+     "values_ns": [
+      88.0
+     ],
+     "changes": [],
+     "placeholder_share": 0.0,
+     "record_median_error": 0.002713
+    }
+   ],
+   "record_median_error_at_68ns": 0.002749
+  }
+ },
+ "rzz": {
+  "direction_identity": {
+   "records_compared": 309760,
+   "value_mismatch": 0,
+   "placeholder_flag_mismatch": 0,
+   "date_mismatch": 12395,
+   "date_mismatch_in_placeholder_records": 12395,
+   "date_mismatch_outside_placeholders": 0,
+   "placeholder_records_per_direction": 12395,
+   "mismatch_offset_microseconds_q": [
+    5.85938,
+    5.85938,
+    6.83594,
+    6.83594,
+    7.08008,
+    7.08008,
+    8.05664,
+    11.2305,
+    27.3438
+   ],
+   "nonplaceholder_stamps": 297365,
+   "nonplaceholder_stamps_whole_second_share": 1.0,
+   "placeholder_stamps_whole_millisecond_share": 0.00104881,
+   "placeholder_stamp_minus_file_date_h_q": [
+    0.00219151,
+    0.0102741,
+    0.0197332,
+    0.0413968,
+    0.0802602,
+    0.121114,
+    0.184804,
+    0.616796,
+    12.4267
+   ],
+   "nonplaceholder_stamp_minus_file_date_h_q": [
+    -335.61,
+    -211.444,
+    -45.0883,
+    -22.9839,
+    -15.1022,
+    -7.53583,
+    -2.83167,
+    -0.000555556,
+    0.0
+   ]
+  },
+  "values": {
+   "records_nonplaceholder": 297365,
+   "records_placeholder": 12395,
+   "record_weighted_q": [
+    0.00108963,
+    0.0015227,
+    0.00187086,
+    0.00218207,
+    0.00266302,
+    0.00364168,
+    0.00794393,
+    0.0674555,
+    0.25979
+   ],
+   "event_weighted_q": [
+    0.00108963,
+    0.0015271,
+    0.00188539,
+    0.00219005,
+    0.00265719,
+    0.00355871,
+    0.00701849,
+    0.0461329,
+    0.25979
+   ],
+   "event_weighted_mean": 0.004706,
+   "record_log10_skew": 2.429,
+   "couplers_with_events": 171,
+   "couplers_without_events_permanently_faulty": [
+    "32-33",
+    "71-72",
+    "72-73",
+    "95-99",
+    "99-115"
+   ],
+   "per_coupler_median_log10_q": [
+    -2.79035,
+    -2.7544,
+    -2.70093,
+    -2.65526,
+    -2.58318,
+    -2.47107,
+    -2.17825,
+    -1.06909,
+    -0.792162
+   ],
+   "per_coupler_median_q": [
+    0.00162051,
+    0.00176081,
+    0.00199099,
+    0.00221176,
+    0.00261106,
+    0.00338021,
+    0.00663362,
+    0.0868161,
+    0.161376
+   ],
+   "best_to_worst_coupler_median_ratio": 99.58,
+   "p90_to_p10_coupler_median_ratio": 3.332,
+   "deviation_from_coupler_median_log10_q": [
+    -1.04596,
+    -0.305533,
+    -0.0881127,
+    -0.0445515,
+    0.0,
+    0.0536462,
+    0.148467,
+    0.727971,
+    1.43654
+   ],
+   "deviation_share_above_factor2": 0.04152,
+   "deviation_share_below_half": 0.01027,
+   "deviation_share_above_10x": 0.002691,
+   "events_total": 18210,
+   "events_per_coupler_q": [
+    1.0,
+    24.2,
+    106.0,
+    110.0,
+    110.0,
+    110.0,
+    110.0,
+    110.0,
+    110.0
+   ],
+   "event_gap_h_q": [
+    3.09306,
+    6.27083,
+    19.5294,
+    24.8783,
+    25.3036,
+    30.0056,
+    51.2392,
+    260.171,
+    1840.04
+   ],
+   "event_gap_h_q_before_split": [
+    3.09306,
+    3.09306,
+    19.0042,
+    24.7986,
+    25.1656,
+    29.1953,
+    49.4942,
+    146.669,
+    1840.04
+   ],
+   "event_gap_h_q_after_split": [
+    14.9322,
+    14.9322,
+    22.92,
+    24.9206,
+    26.0008,
+    30.595,
+    51.7264,
+    279.802,
+    528.962
+   ],
+   "gaps_over_168h": 193,
+   "gaps_over_48h": 2743,
+   "gaps_over_48h_before_split": 1544,
+   "gaps_over_48h_after_split": 1199,
+   "long_gaps_over_168h": [
+    {
+     "coupler": "7-17",
+     "from": "2026-05-04T20:18:15Z",
+     "to": "2026-05-14T00:42:55Z",
+     "hours": 220.4
+    },
+    {
+     "coupler": "7-17",
+     "from": "2026-05-22T01:46:32Z",
+     "to": "2026-07-29T20:08:54Z",
+     "hours": 1650.0
+    },
+    {
+     "coupler": "7-17",
+     "from": "2026-07-29T20:08:54Z",
+     "to": "2026-08-06T17:40:19Z",
+     "hours": 189.5
+    },
+    {
+     "coupler": "7-17",
+     "from": "2026-08-19T23:02:20Z",
+     "to": "2026-08-31T14:50:26Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "67-68",
+     "from": "2026-08-19T23:02:21Z",
+     "to": "2026-08-31T14:50:27Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "44-45",
+     "from": "2026-08-19T23:02:21Z",
+     "to": "2026-08-31T14:50:26Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "8-9",
+     "from": "2026-08-19T23:02:17Z",
+     "to": "2026-08-31T14:50:23Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "40-41",
+     "from": "2026-08-19T23:02:20Z",
+     "to": "2026-08-31T14:50:26Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "100-101",
+     "from": "2026-08-19T23:02:18Z",
+     "to": "2026-08-31T14:50:24Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "91-98",
+     "from": "2026-08-19T23:02:19Z",
+     "to": "2026-08-31T14:50:25Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "132-133",
+     "from": "2026-08-19T23:02:20Z",
+     "to": "2026-08-31T14:50:26Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "41-42",
+     "from": "2026-08-19T23:02:21Z",
+     "to": "2026-08-31T14:50:27Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "55-59",
+     "from": "2026-08-19T23:02:19Z",
+     "to": "2026-08-31T14:50:24Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "73-74",
+     "from": "2026-08-19T23:02:19Z",
+     "to": "2026-08-31T14:50:25Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "133-134",
+     "from": "2026-08-19T23:02:22Z",
+     "to": "2026-08-31T14:50:28Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "59-75",
+     "from": "2026-08-19T23:02:21Z",
+     "to": "2026-08-31T14:50:27Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "14-15",
+     "from": "2026-08-19T23:02:19Z",
+     "to": "2026-08-31T14:50:25Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "9-10",
+     "from": "2026-08-19T23:02:18Z",
+     "to": "2026-08-31T14:50:24Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "74-75",
+     "from": "2026-08-19T23:02:20Z",
+     "to": "2026-08-31T14:50:26Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "39-53",
+     "from": "2026-08-19T23:02:20Z",
+     "to": "2026-08-31T14:50:26Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "129-130",
+     "from": "2026-08-19T23:02:21Z",
+     "to": "2026-08-31T14:50:27Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "106-107",
+     "from": "2026-08-19T23:02:22Z",
+     "to": "2026-08-31T14:50:28Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "83-96",
+     "from": "2026-08-19T23:02:22Z",
+     "to": "2026-08-31T14:50:28Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "111-112",
+     "from": "2026-08-19T23:02:21Z",
+     "to": "2026-08-31T14:50:27Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "138-151",
+     "from": "2026-08-19T23:02:22Z",
+     "to": "2026-08-31T14:50:28Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "47-48",
+     "from": "2026-08-19T23:02:18Z",
+     "to": "2026-08-31T14:50:24Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "42-43",
+     "from": "2026-08-19T23:02:18Z",
+     "to": "2026-08-31T14:50:23Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "47-57",
+     "from": "2026-08-19T23:02:19Z",
+     "to": "2026-08-31T14:50:25Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "107-108",
+     "from": "2026-08-19T23:02:21Z",
+     "to": "2026-08-31T14:50:27Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "134-135",
+     "from": "2026-05-06T21:32:14Z",
+     "to": "2026-05-14T00:42:53Z",
+     "hours": 171.2
+    },
+    {
+     "coupler": "134-135",
+     "from": "2026-08-19T23:02:18Z",
+     "to": "2026-08-31T14:50:24Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "144-145",
+     "from": "2026-08-19T23:02:18Z",
+     "to": "2026-08-31T14:50:24Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "48-49",
+     "from": "2026-08-19T23:02:21Z",
+     "to": "2026-08-31T14:50:26Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "77-85",
+     "from": "2026-08-19T23:02:20Z",
+     "to": "2026-08-31T14:50:26Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "103-104",
+     "from": "2026-08-19T23:02:21Z",
+     "to": "2026-08-31T14:50:27Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "80-81",
+     "from": "2026-08-19T23:02:21Z",
+     "to": "2026-08-31T14:50:27Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "85-86",
+     "from": "2026-08-19T23:02:21Z",
+     "to": "2026-08-31T14:50:27Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "131-138",
+     "from": "2026-08-19T23:02:19Z",
+     "to": "2026-08-31T14:50:25Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "140-141",
+     "from": "2026-08-19T23:02:18Z",
+     "to": "2026-08-31T14:50:24Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "36-41",
+     "from": "2026-08-19T23:02:20Z",
+     "to": "2026-08-31T14:50:26Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "81-82",
+     "from": "2026-08-19T23:02:21Z",
+     "to": "2026-08-31T14:50:27Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "108-109",
+     "from": "2026-08-19T23:02:18Z",
+     "to": "2026-08-31T14:50:24Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "12-13",
+     "from": "2026-08-19T23:02:17Z",
+     "to": "2026-08-31T14:50:23Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "22-23",
+     "from": "2026-08-19T23:02:22Z",
+     "to": "2026-08-31T14:50:28Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "29-38",
+     "from": "2026-08-19T23:02:19Z",
+     "to": "2026-08-31T14:50:25Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "49-50",
+     "from": "2026-08-19T23:02:21Z",
+     "to": "2026-09-04T06:25:42Z",
+     "hours": 367.4
+    },
+    {
+     "coupler": "104-105",
+     "from": "2026-08-19T23:02:18Z",
+     "to": "2026-08-31T14:50:24Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "114-115",
+     "from": "2026-08-19T23:02:20Z",
+     "to": "2026-08-31T14:50:26Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "109-110",
+     "from": "2026-08-19T23:02:19Z",
+     "to": "2026-08-31T14:50:25Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "13-14",
+     "from": "2026-08-19T23:02:18Z",
+     "to": "2026-08-31T14:50:24Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "123-136",
+     "from": "2026-08-19T23:02:22Z",
+     "to": "2026-08-31T14:50:28Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "151-152",
+     "from": "2026-08-19T23:02:20Z",
+     "to": "2026-08-31T14:50:26Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "45-46",
+     "from": "2026-08-19T23:02:21Z",
+     "to": "2026-08-31T14:50:27Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "110-111",
+     "from": "2026-08-19T23:02:20Z",
+     "to": "2026-08-31T14:50:26Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "50-51",
+     "from": "2026-08-19T23:02:18Z",
+     "to": "2026-08-31T14:50:24Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "96-103",
+     "from": "2026-08-19T23:02:19Z",
+     "to": "2026-08-31T14:50:25Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "105-106",
+     "from": "2026-08-19T23:02:19Z",
+     "to": "2026-08-31T14:50:25Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "82-83",
+     "from": "2026-08-19T23:02:18Z",
+     "to": "2026-08-31T14:50:24Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "147-148",
+     "from": "2026-08-19T23:02:20Z",
+     "to": "2026-08-31T14:50:26Z",
+     "hours": 279.8
+    },
+    {
+     "coupler": "137-147",
+     "from": "2026-08-19T23:02:22Z",
+     "to": "2026-08-31T14:50:28Z",
+     "hours": 279.8
+    }
+   ],
+   "long_gaps_listed_cap": 60,
+   "events_after_first_before_split": 11689,
+   "events_after_first_after_split": 6350,
+   "events_per_coupler_per_day_before_split": 0.8091,
+   "events_per_coupler_per_day_after_split": 0.6074,
+   "rounds": {
+    "n_rounds": 110,
+    "couplers_per_round_q": [
+     1.0,
+     160.0,
+     163.0,
+     164.25,
+     165.0,
+     167.0,
+     168.0,
+     169.0,
+     170.0
+    ],
+    "rounds_with_ge_half_of_couplers": 109,
+    "rounds_with_lt_10_couplers": 1,
+    "gap_between_round_starts_h_q": [
+     3.09306,
+     6.34249,
+     20.7934,
+     24.8486,
+     25.2869,
+     28.4025,
+     49.7083,
+     91.4042,
+     279.802
+    ],
+    "round_span_minutes_q": [
+     0.0,
+     0.05,
+     0.0666667,
+     0.0666667,
+     0.0666667,
+     0.0833333,
+     0.0833333,
+     0.421333,
+     1.18333
+    ],
+    "distinct_stamps_per_round_q": [
+     1.0,
+     4.0,
+     5.0,
+     5.0,
+     5.0,
+     6.0,
+     6.0,
+     11.82,
+     17.0
+    ],
+    "round_start_utc_hour_counts": [
+     10,
+     11,
+     9,
+     5,
+     4,
+     2,
+     6,
+     9,
+     5,
+     4,
+     6,
+     3,
+     6,
+     3,
+     6,
+     4,
+     2,
+     1,
+     2,
+     1,
+     1,
+     3,
+     3,
+     4
+    ],
+    "round_start_gaps_over_40h": [
+     {
+      "from": "2026-06-02T04:18:35Z",
+      "to": "2026-06-05T01:42:07Z",
+      "hours": 69.39
+     },
+     {
+      "from": "2026-06-27T01:55:54Z",
+      "to": "2026-06-30T21:40:04Z",
+      "hours": 91.74
+     },
+     {
+      "from": "2026-07-05T10:20:26Z",
+      "to": "2026-07-07T10:52:23Z",
+      "hours": 48.53
+     },
+     {
+      "from": "2026-07-11T14:52:11Z",
+      "to": "2026-07-13T18:28:32Z",
+      "hours": 51.61
+     },
+     {
+      "from": "2026-07-16T07:25:52Z",
+      "to": "2026-07-18T00:08:55Z",
+      "hours": 40.72
+     },
+     {
+      "from": "2026-07-20T02:10:54Z",
+      "to": "2026-07-22T03:55:43Z",
+      "hours": 49.75
+     },
+     {
+      "from": "2026-07-22T03:55:43Z",
+      "to": "2026-07-24T15:30:35Z",
+      "hours": 59.58
+     },
+     {
+      "from": "2026-08-01T01:22:31Z",
+      "to": "2026-08-03T02:52:10Z",
+      "hours": 49.49
+     },
+     {
+      "from": "2026-08-06T17:40:16Z",
+      "to": "2026-08-09T22:44:28Z",
+      "hours": 77.07
+     },
+     {
+      "from": "2026-08-14T16:35:57Z",
+      "to": "2026-08-16T19:50:18Z",
+      "hours": 51.24
+     },
+     {
+      "from": "2026-08-19T23:02:17Z",
+      "to": "2026-08-31T14:50:23Z",
+      "hours": 279.8
+     },
+     {
+      "from": "2026-08-31T14:50:23Z",
+      "to": "2026-09-04T06:25:39Z",
+      "hours": 87.59
+     },
+     {
+      "from": "2026-09-05T07:20:53Z",
+      "to": "2026-09-07T10:52:20Z",
+      "hours": 51.52
+     },
+     {
+      "from": "2026-09-09T14:02:15Z",
+      "to": "2026-09-11T06:52:40Z",
+      "hours": 40.84
+     },
+     {
+      "from": "2026-09-26T02:01:42Z",
+      "to": "2026-09-28T05:45:18Z",
+      "hours": 51.73
+     },
+     {
+      "from": "2026-09-30T01:27:53Z",
+      "to": "2026-10-02T03:09:48Z",
+      "hours": 49.7
+     }
+    ],
+    "n_round_start_gaps_over_40h": 16,
+    "rounds_before_split": 72,
+    "rounds_from_split": 38,
+    "split_days_before": 84.48,
+    "split_days_from": 61.13
+   },
+   "event_utc_hour_counts": [
+    1646,
+    1816,
+    1481,
+    828,
+    664,
+    331,
+    997,
+    1490,
+    830,
+    664,
+    998,
+    501,
+    991,
+    492,
+    830,
+    660,
+    334,
+    164,
+    333,
+    169,
+    167,
+    488,
+    502,
+    663
+   ],
+   "event_weekday_counts_mon_first": [
+    2818,
+    2643,
+    2652,
+    1979,
+    2819,
+    2477,
+    2651
+   ]
+  },
+  "placeholders": {
+   "couplers_ever_placeholder": 13,
+   "couplers_always_placeholder": [
+    "32-33",
+    "71-72",
+    "72-73",
+    "95-99",
+    "99-115"
+   ],
+   "entries_into_placeholder": 13,
+   "exits_from_placeholder": 16,
+   "placeholder_couplers_per_file_q": [
+    6.0,
+    6.0,
+    6.0,
+    6.0,
+    6.0,
+    8.0,
+    9.0,
+    10.0,
+    11.0
+   ],
+   "couplers": [
+    {
+     "coupler": "32-33",
+     "share_of_files": 1.0,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260513T121322000000Z.json",
+       "last_file": "20261006T025742000000Z.json",
+       "files": 1760,
+       "hours": 3495.0,
+       "open_at_start": true,
+       "open_at_end": true
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "71-72",
+     "share_of_files": 1.0,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260513T121322000000Z.json",
+       "last_file": "20261006T025742000000Z.json",
+       "files": 1760,
+       "hours": 3495.0,
+       "open_at_start": true,
+       "open_at_end": true
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "72-73",
+     "share_of_files": 1.0,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260513T121322000000Z.json",
+       "last_file": "20261006T025742000000Z.json",
+       "files": 1760,
+       "hours": 3495.0,
+       "open_at_start": true,
+       "open_at_end": true
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "95-99",
+     "share_of_files": 1.0,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260513T121322000000Z.json",
+       "last_file": "20261006T025742000000Z.json",
+       "files": 1760,
+       "hours": 3495.0,
+       "open_at_start": true,
+       "open_at_end": true
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "99-115",
+     "share_of_files": 1.0,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260513T121322000000Z.json",
+       "last_file": "20261006T025742000000Z.json",
+       "files": 1760,
+       "hours": 3495.0,
+       "open_at_start": true,
+       "open_at_end": true
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "27-28",
+     "share_of_files": 0.9563,
+     "runs": 2,
+     "run_list": [
+      {
+       "first_file": "20260513T121322000000Z.json",
+       "last_file": "20260616T230742000000Z.json",
+       "files": 288,
+       "hours": 832.2,
+       "open_at_start": true,
+       "open_at_end": false
+      },
+      {
+       "first_file": "20260701T120353000000Z.json",
+       "last_file": "20261006T025742000000Z.json",
+       "files": 1395,
+       "hours": 2319.0,
+       "open_at_start": false,
+       "open_at_end": true
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "102-103",
+     "share_of_files": 0.3386,
+     "runs": 4,
+     "run_list": [
+      {
+       "first_file": "20260513T121322000000Z.json",
+       "last_file": "20260713T171937000000Z.json",
+       "files": 470,
+       "hours": 1470.0,
+       "open_at_start": true,
+       "open_at_end": false
+      },
+      {
+       "first_file": "20260727T194245000000Z.json",
+       "last_file": "20260801T001902000000Z.json",
+       "files": 44,
+       "hours": 103.1,
+       "open_at_start": false,
+       "open_at_end": false
+      },
+      {
+       "first_file": "20260817T065740000000Z.json",
+       "last_file": "20260819T220546000000Z.json",
+       "files": 53,
+       "hours": 64.31,
+       "open_at_start": false,
+       "open_at_end": false
+      },
+      {
+       "first_file": "20260903T004128000000Z.json",
+       "last_file": "20260907T094653000000Z.json",
+       "files": 29,
+       "hours": 111.7,
+       "open_at_start": false,
+       "open_at_end": false
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "17-27",
+     "share_of_files": 0.2756,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260514T165538000000Z.json",
+       "last_file": "20260716T030013000000Z.json",
+       "files": 485,
+       "hours": 1538.0,
+       "open_at_start": false,
+       "open_at_end": false
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "7-17",
+     "share_of_files": 0.2364,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260605T043513000000Z.json",
+       "last_file": "20260729T191446000000Z.json",
+       "files": 416,
+       "hours": 1312.0,
+       "open_at_start": false,
+       "open_at_end": false
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "149-150",
+     "share_of_files": 0.1199,
+     "runs": 3,
+     "run_list": [
+      {
+       "first_file": "20260513T121322000000Z.json",
+       "last_file": "20260530T231739000000Z.json",
+       "files": 160,
+       "hours": 424.5,
+       "open_at_start": true,
+       "open_at_end": false
+      },
+      {
+       "first_file": "20260803T033328000000Z.json",
+       "last_file": "20260810T140235000000Z.json",
+       "files": 43,
+       "hours": 218.4,
+       "open_at_start": false,
+       "open_at_end": false
+      },
+      {
+       "first_file": "20260903T004128000000Z.json",
+       "last_file": "20260904T051420000000Z.json",
+       "files": 8,
+       "hours": 34.26,
+       "open_at_start": false,
+       "open_at_end": false
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "148-149",
+     "share_of_files": 0.1068,
+     "runs": 4,
+     "run_list": [
+      {
+       "first_file": "20260513T121322000000Z.json",
+       "last_file": "20260529T221611000000Z.json",
+       "files": 148,
+       "hours": 396.9,
+       "open_at_start": true,
+       "open_at_end": false
+      },
+      {
+       "first_file": "20260805T073818000000Z.json",
+       "last_file": "20260810T140235000000Z.json",
+       "files": 25,
+       "hours": 166.3,
+       "open_at_start": false,
+       "open_at_end": false
+      },
+      {
+       "first_file": "20260903T004128000000Z.json",
+       "last_file": "20260904T051420000000Z.json",
+       "files": 8,
+       "hours": 34.26,
+       "open_at_start": false,
+       "open_at_end": false
+      },
+      {
+       "first_file": "20260918T062633000000Z.json",
+       "last_file": "20260918T104615000000Z.json",
+       "files": 7,
+       "hours": 4.651,
+       "open_at_start": false,
+       "open_at_end": false
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "38-49",
+     "share_of_files": 0.004545,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260903T004128000000Z.json",
+       "last_file": "20260904T051420000000Z.json",
+       "files": 8,
+       "hours": 34.26,
+       "open_at_start": false,
+       "open_at_end": false
+      }
+     ],
+     "runs_listed_cap": 12
+    },
+    {
+     "coupler": "49-50",
+     "share_of_files": 0.004545,
+     "runs": 1,
+     "run_list": [
+      {
+       "first_file": "20260903T004128000000Z.json",
+       "last_file": "20260904T051420000000Z.json",
+       "files": 8,
+       "hours": 34.26,
+       "open_at_start": false,
+       "open_at_end": false
+      }
+     ],
+     "runs_listed_cap": 12
+    }
+   ]
+  },
+  "lengths": {
+   "record_counts_by_length_ns": {
+    "68.0": 299372,
+    "84.0": 1588,
+    "88.0": 3520,
+    "116.0": 5280
+   },
+   "non_68ns_couplers": [
+    {
+     "coupler": "68-69",
+     "values_ns": [
+      116.0
+     ],
+     "changes": [],
+     "placeholder_share": 0.0,
+     "record_median_error": 0.003811
+    },
+    {
+     "coupler": "71-72",
+     "values_ns": [
+      68.0,
+      84.0
+     ],
+     "changes": [
+      {
+       "file": "20260905T175136000000Z.json",
+       "from": 68.0,
+       "to": 84.0
+      }
+     ],
+     "placeholder_share": 1.0,
+     "record_median_error": null
+    },
+    {
+     "coupler": "72-73",
+     "values_ns": [
+      68.0,
+      84.0
+     ],
+     "changes": [
+      {
+       "file": "20260905T175136000000Z.json",
+       "from": 68.0,
+       "to": 84.0
+      }
+     ],
+     "placeholder_share": 1.0,
+     "record_median_error": null
+    },
+    {
+     "coupler": "80-81",
+     "values_ns": [
+      116.0
+     ],
+     "changes": [],
+     "placeholder_share": 0.0,
+     "record_median_error": 0.002937
+    },
+    {
+     "coupler": "102-103",
+     "values_ns": [
+      88.0
+     ],
+     "changes": [],
+     "placeholder_share": 0.3386,
+     "record_median_error": 0.09193
+    },
+    {
+     "coupler": "106-107",
+     "values_ns": [
+      116.0
+     ],
+     "changes": [],
+     "placeholder_share": 0.0,
+     "record_median_error": 0.00365
+    },
+    {
+     "coupler": "146-147",
+     "values_ns": [
+      88.0
+     ],
+     "changes": [],
+     "placeholder_share": 0.0,
+     "record_median_error": 0.002577
+    }
+   ],
+   "record_median_error_at_68ns": 0.002644
+  }
+ },
+ "jq": {
+  "records": 309760,
+  "zero_records": 309760,
+  "distinct_values": 1
+ },
+ "target_operations_union_counts": {
+  "cz": 352,
+  "delay": 156,
+  "id": 156,
+  "measure": 156,
+  "measure_2": 156,
+  "measure_reset": 156,
+  "measure_reset_2": 156,
+  "reset": 156,
+  "reset_2": 156,
+  "rz": 156,
+  "sx": 156,
+  "x": 156,
+  "xslow": 156
+ },
+ "rzz_in_target_union": 0
+}

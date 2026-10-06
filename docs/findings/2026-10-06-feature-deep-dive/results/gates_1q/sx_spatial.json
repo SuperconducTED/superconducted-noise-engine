@@ -1,0 +1,220 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "gates_1q",
+ "script": "analysis/gates_1q/sx_spatial.py",
+ "measured_utc": "2026-10-06T07:53:11Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "field": "g1.sx.gate_error",
+ "qubits_with_level": 155,
+ "qubits_without_level": [
+  72
+ ],
+ "degree_counts": {
+  "1": 8,
+  "2": 100,
+  "3": 48
+ },
+ "coords_columns_rows": {
+  "columns": [
+   1.0,
+   16.0
+  ],
+  "rows": [
+   1.0,
+   15.0
+  ],
+  "long_row_qubits": 128,
+  "connector_row_qubits": 28,
+  "degree_counts_connector_rows": {
+   "1": 0,
+   "2": 28,
+   "3": 0
+  },
+  "degree_counts_long_rows": {
+   "1": 8,
+   "2": 72,
+   "3": 48
+  }
+ },
+ "tests": {
+  "level_vs_column_spearman": {
+   "rho": 0.0716,
+   "p": 0.376,
+   "n": 155
+  },
+  "level_vs_row_spearman": {
+   "rho": -0.206,
+   "p": 0.0101,
+   "n": 155
+  },
+  "level_by_degree_kruskal": {
+   "H": 11.604,
+   "p": 0.00302,
+   "epsilon_sq": 0.07535,
+   "n": 155,
+   "groups": 3
+  },
+  "level_by_degree_median": {
+   "1": {
+    "n": 8,
+    "median": 0.0003284
+   },
+   "2": {
+    "n": 99,
+    "median": 0.000322
+   },
+   "3": {
+    "n": 48,
+    "median": 0.0002687
+   }
+  },
+  "level_long_rows_vs_connector_rows_mannwhitney": {
+   "n_long_rows": 127,
+   "n_connector_rows": 28,
+   "median_long_rows": 0.0002857,
+   "median_connector_rows": 0.0003388,
+   "p": 0.00877
+  },
+  "level_degree3_vs_degree2_within_long_rows_mannwhitney": {
+   "n_degree3": 48,
+   "n_degree2": 71,
+   "median_degree3": 0.0002687,
+   "median_degree2": 0.0003153,
+   "p": 0.0126
+  },
+  "morans_i_level": {
+   "I": -0.0488,
+   "expected_under_null": -0.0065,
+   "null_mean": -0.0071,
+   "null_sd": 0.0736,
+   "p_two_sided_perm": 0.561,
+   "n_nodes": 155,
+   "n_edges": 174
+  },
+  "morans_i_robust_change_size": {
+   "I": -0.0737,
+   "expected_under_null": -0.0065,
+   "null_mean": -0.0071,
+   "null_sd": 0.0751,
+   "p_two_sided_perm": 0.377,
+   "n_nodes": 155,
+   "n_edges": 174
+  },
+  "morans_i_spike_rate": {
+   "I": 0.0145,
+   "expected_under_null": -0.0065,
+   "null_mean": -0.0059,
+   "null_sd": 0.0724,
+   "p_two_sided_perm": 0.7792,
+   "n_nodes": 155,
+   "n_edges": 174
+  },
+  "same_round_spike_cooccurrence": {
+   "coupled": {
+    "pairs": 174,
+    "observed_joint_spike_rounds": 9,
+    "expected_if_independent": 8.92,
+    "ratio": 1.009,
+    "poisson_p_upper": 0.534
+   },
+   "ge_4_hops": {
+    "pairs": 11219,
+    "observed_joint_spike_rounds": 559,
+    "expected_if_independent": 529.03,
+    "ratio": 1.057,
+    "poisson_p_upper": 0.101
+   }
+  }
+ },
+ "tests_run": 10,
+ "bonferroni_alpha": 0.005,
+ "worst_qubits": [
+  {
+   "qubit": 27,
+   "median": 0.005306,
+   "coords": [
+    8.0,
+    3.0
+   ],
+   "degree": 3
+  },
+  {
+   "qubit": 11,
+   "median": 0.001991,
+   "coords": [
+    12.0,
+    1.0
+   ],
+   "degree": 3
+  },
+  {
+   "qubit": 0,
+   "median": 0.001931,
+   "coords": [
+    1.0,
+    1.0
+   ],
+   "degree": 1
+  },
+  {
+   "qubit": 149,
+   "median": 0.001382,
+   "coords": [
+    10.0,
+    15.0
+   ],
+   "degree": 2
+  },
+  {
+   "qubit": 24,
+   "median": 0.001296,
+   "coords": [
+    5.0,
+    3.0
+   ],
+   "degree": 2
+  },
+  {
+   "qubit": 100,
+   "median": 0.001252,
+   "coords": [
+    1.0,
+    11.0
+   ],
+   "degree": 1
+  },
+  {
+   "qubit": 126,
+   "median": 0.001088,
+   "coords": [
+    7.0,
+    13.0
+   ],
+   "degree": 2
+  },
+  {
+   "qubit": 102,
+   "median": 0.000979,
+   "coords": [
+    3.0,
+    11.0
+   ],
+   "degree": 2
+  }
+ ],
+ "q72_neighbours": [
+  {
+   "qubit": 71,
+   "median": 0.0003577,
+   "rank_of_155_low_is_best": 110.0
+  },
+  {
+   "qubit": 73,
+   "median": 0.0002837,
+   "rank_of_155_low_is_best": 71.0
+  }
+ ]
+}

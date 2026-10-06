@@ -1,0 +1,482 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "gates_1q",
+ "script": "analysis/gates_1q/sx_profile.py",
+ "measured_utc": "2026-10-06T07:52:07Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "field": "g1.sx.gate_error",
+ "rule": "measured, placeholders masked before events",
+ "distribution": {
+  "events": 20207,
+  "entities": 155,
+  "value_q": {
+   "0.0": 7.205e-05,
+   "0.001": 0.00010801,
+   "0.01": 0.00014248,
+   "0.05": 0.00017572,
+   "0.1": 0.00019696,
+   "0.25": 0.00024056,
+   "0.5": 0.00030952,
+   "0.75": 0.00041765,
+   "0.9": 0.0006154,
+   "0.95": 0.00098,
+   "0.99": 0.00254141,
+   "0.999": 0.00688328,
+   "1.0": 0.01706042
+  },
+  "log10_q": {
+   "0.0": -4.1424,
+   "0.001": -3.9665,
+   "0.01": -3.8462,
+   "0.05": -3.7552,
+   "0.1": -3.7056,
+   "0.25": -3.6188,
+   "0.5": -3.5093,
+   "0.75": -3.3792,
+   "0.9": -3.2108,
+   "0.95": -3.0088,
+   "0.99": -2.5949,
+   "0.999": -2.1622,
+   "1.0": -1.768
+  },
+  "share_above": {
+   "0.001": 0.04879,
+   "0.002": 0.01727,
+   "0.005": 0.0048,
+   "0.01": 0.00035,
+   "0.1": 0.0
+  },
+  "count_above": {
+   "0.001": 986,
+   "0.01": 7,
+   "0.1": 0
+  },
+  "max_event_value": 0.017060418805944156,
+  "max_event_entity": 149,
+  "log10_variance_total": 0.05808,
+  "log10_variance_between_entity_means": 0.04323,
+  "log10_variance_within_entities": 0.01485,
+  "between_share": 0.7443,
+  "residual_from_entity_median_log10_q": {
+   "0.0": -0.6255,
+   "0.001": -0.4529,
+   "0.01": -0.2368,
+   "0.05": -0.1424,
+   "0.1": -0.1082,
+   "0.25": -0.0569,
+   "0.5": 0.0,
+   "0.75": 0.0628,
+   "0.9": 0.1372,
+   "0.95": 0.2037,
+   "0.99": 0.4203,
+   "0.999": 0.883,
+   "1.0": 1.5019
+  },
+  "residual_share_above_plus_log2": 0.02192,
+  "residual_share_below_minus_log2": 0.00574,
+  "residual_share_above_plus_1_decade": 0.00074,
+  "residual_share_below_minus_1_decade": 0.0,
+  "entity_median_value_q": [
+   0.00015364,
+   0.00018593,
+   0.00020742,
+   0.00030026,
+   0.00056549,
+   0.00195836,
+   0.00530623
+  ],
+  "entity_median_log10_mad": 0.0928,
+  "entity_median_max_over_min": 34.54,
+  "best5_entities_median": [
+   {
+    "qubit": 131,
+    "median": 0.0001536
+   },
+   {
+    "qubit": 135,
+    "median": 0.0001808
+   },
+   {
+    "qubit": 132,
+    "median": 0.0001903
+   },
+   {
+    "qubit": 81,
+    "median": 0.0001935
+   },
+   {
+    "qubit": 155,
+    "median": 0.0001937
+   }
+  ],
+  "worst5_entities_median": [
+   {
+    "qubit": 27,
+    "median": 0.005306
+   },
+   {
+    "qubit": 11,
+    "median": 0.001991
+   },
+   {
+    "qubit": 0,
+    "median": 0.001931
+   },
+   {
+    "qubit": 149,
+    "median": 0.001382
+   },
+   {
+    "qubit": 24,
+    "median": 0.001296
+   }
+  ],
+  "entity_iqr_log10_q": [
+   0.0651,
+   0.0743,
+   0.09,
+   0.1177,
+   0.1634,
+   0.247,
+   0.6424
+  ]
+ },
+ "stability": {
+  "split": "2026-07-25T00:00:00Z",
+  "halves_spearman_of_entity_medians": {
+   "rho": 0.9717,
+   "p": 8.84e-98,
+   "n": 155
+  },
+  "halves_same_tercile_share": 0.8581,
+  "halves_median_abs_shift_log10": 0.0173,
+  "monthly_min_events_for_median": 5,
+  "monthly_consecutive_spearman": {
+   "2026-05_vs_2026-06": {
+    "rho": 0.9553,
+    "p": 2.48e-82,
+    "n": 154
+   },
+   "2026-06_vs_2026-07": {
+    "rho": 0.9671,
+    "p": 3.01e-92,
+    "n": 154
+   },
+   "2026-07_vs_2026-08": {
+    "rho": 0.9622,
+    "p": 2.76e-88,
+    "n": 155
+   },
+   "2026-08_vs_2026-09": {
+    "rho": 0.9563,
+    "p": 1.31e-83,
+    "n": 155
+   },
+   "2026-09_vs_2026-10": {
+    "rho": null,
+    "p": null,
+    "n": 0
+   }
+  },
+  "may_vs_september_spearman": {
+   "rho": 0.9304,
+   "p": 3.84e-68,
+   "n": 154
+  },
+  "device_median_of_entity_monthly_medians": {
+   "2026-05": 0.0003139,
+   "2026-06": 0.00028339,
+   "2026-07": 0.00028715,
+   "2026-08": 0.00029581,
+   "2026-09": 0.00030651,
+   "2026-10": null
+  },
+  "events_per_entity_by_month_median": {
+   "2026-05": 22.0,
+   "2026-06": 26.0,
+   "2026-07": 27.0,
+   "2026-08": 25.0,
+   "2026-09": 29.0,
+   "2026-10": 4.0
+  }
+ },
+ "cadence": {
+  "events_per_series_q": [
+   68.0,
+   100.7,
+   128.0,
+   132.0,
+   133.0,
+   133.0,
+   133.0
+  ],
+  "fewest_events": [
+   {
+    "qubit": 149,
+    "events": 68,
+    "max_gap_h": 252.6,
+    "max_gap_from": "2026-07-07T07:26:12Z"
+   },
+   {
+    "qubit": 17,
+    "events": 78,
+    "max_gap_h": 857.0,
+    "max_gap_from": "2026-06-07T23:18:21Z"
+   },
+   {
+    "qubit": 54,
+    "events": 120,
+    "max_gap_h": 202.4,
+    "max_gap_from": "2026-05-05T12:32:55Z"
+   },
+   {
+    "qubit": 11,
+    "events": 122,
+    "max_gap_h": 152.5,
+    "max_gap_from": "2026-05-07T14:25:48Z"
+   },
+   {
+    "qubit": 111,
+    "events": 126,
+    "max_gap_h": 152.5,
+    "max_gap_from": "2026-05-07T14:25:49Z"
+   },
+   {
+    "qubit": 25,
+    "events": 127,
+    "max_gap_h": 152.5,
+    "max_gap_from": "2026-05-07T14:25:48Z"
+   }
+  ],
+  "longest_gaps": [
+   {
+    "qubit": 17,
+    "max_gap_h": 857.0,
+    "from": "2026-06-07T23:18:21Z"
+   },
+   {
+    "qubit": 149,
+    "max_gap_h": 252.6,
+    "from": "2026-07-07T07:26:12Z"
+   },
+   {
+    "qubit": 54,
+    "max_gap_h": 202.4,
+    "from": "2026-05-05T12:32:55Z"
+   },
+   {
+    "qubit": 97,
+    "max_gap_h": 177.2,
+    "from": "2026-05-06T13:40:33Z"
+   },
+   {
+    "qubit": 92,
+    "max_gap_h": 177.2,
+    "from": "2026-05-06T13:40:33Z"
+   },
+   {
+    "qubit": 98,
+    "max_gap_h": 159.6,
+    "from": "2026-05-07T14:25:50Z"
+   }
+  ],
+  "gap_h_q": [
+   6.312,
+   7.115,
+   19.951,
+   24.926,
+   33.213,
+   76.453,
+   857.044
+  ],
+  "gap_h_by_month_of_later_event": {
+   "2026-05": {
+    "gaps": 3178,
+    "gap_h_q_10_50_90": [
+     10.02,
+     24.51,
+     29.67
+    ]
+   },
+   "2026-06": {
+    "gaps": 3937,
+    "gap_h_q_10_50_90": [
+     21.65,
+     24.84,
+     38.83
+    ]
+   },
+   "2026-07": {
+    "gaps": 4101,
+    "gap_h_q_10_50_90": [
+     24.42,
+     24.99,
+     31.25
+    ]
+   },
+   "2026-08": {
+    "gaps": 3819,
+    "gap_h_q_10_50_90": [
+     19.72,
+     24.76,
+     52.89
+    ]
+   },
+   "2026-09": {
+    "gaps": 4411,
+    "gap_h_q_10_50_90": [
+     19.95,
+     25.31,
+     30.84
+    ]
+   },
+   "2026-10": {
+    "gaps": 606,
+    "gap_h_q_10_50_90": [
+     24.64,
+     25.91,
+     26.06
+    ]
+   }
+  },
+  "rounds": {
+   "definition": "event stamps (first event of each series excluded) split where consecutive stamps are more than 15 minutes apart",
+   "n_rounds": 135,
+   "entities_per_round_q": [
+    2.0,
+    2.7,
+    149.4,
+    152.0,
+    154.0,
+    155.0,
+    155.0
+   ],
+   "rounds_with_ge_half_device": 132,
+   "events_in_rounds_with_ge_half_device_share": 0.9996,
+   "gap_between_round_starts_h_q": [
+    6.31,
+    7.35,
+    19.79,
+    24.89,
+    30.11,
+    58.24,
+    65.84
+   ],
+   "round_starts_by_utc_hour": [
+    6,
+    5,
+    5,
+    8,
+    2,
+    4,
+    3,
+    6,
+    4,
+    8,
+    5,
+    4,
+    5,
+    6,
+    3,
+    3,
+    4,
+    2,
+    3,
+    6,
+    8,
+    11,
+    15,
+    9
+   ],
+   "round_starts_by_weekday": {
+    "Mon": 17,
+    "Tue": 23,
+    "Wed": 20,
+    "Thu": 15,
+    "Fri": 23,
+    "Sat": 18,
+    "Sun": 19
+   }
+  },
+  "event_stamps_by_utc_hour": [
+   905,
+   759,
+   759,
+   1210,
+   302,
+   614,
+   454,
+   918,
+   610,
+   1222,
+   755,
+   606,
+   612,
+   763,
+   453,
+   456,
+   603,
+   307,
+   458,
+   908,
+   1068,
+   1664,
+   2272,
+   1374
+  ],
+  "event_stamps_by_weekday": {
+   "Mon": 2592,
+   "Tue": 3328,
+   "Wed": 3028,
+   "Thu": 2287,
+   "Fri": 3483,
+   "Sat": 2443,
+   "Sun": 2891
+  }
+ },
+ "changes": {
+  "transitions": 20052,
+  "abs_change_log10_q": [
+   0.0,
+   0.0013,
+   0.0144,
+   0.0816,
+   0.2321,
+   0.5505,
+   1.5799
+  ],
+  "share_changes_gt_factor2": 0.0505,
+  "lag1_autocorr_of_change_pearson": -0.4895,
+  "lag1_autocorr_of_change_spearman": {
+   "rho": -0.4658,
+   "p": 0.0,
+   "n": 19897
+  },
+  "lag2_autocorr_of_change_pearson": -0.0031,
+  "local_level_q_from_lag1": 0.0428,
+  "residual_from_running_level": {
+   "definition": "log10 value minus the median of up to 5 events each side (self excluded, at least 4 neighbours)",
+   "n": 20207,
+   "q": [
+    -0.3718,
+    -0.227,
+    -0.1471,
+    -0.0586,
+    -0.0008,
+    0.0627,
+    0.1968,
+    0.4083,
+    0.8704
+   ],
+   "share_above_plus_log2": 0.01945,
+   "share_below_minus_log2": 0.00277,
+   "share_above_plus_half_decade": 0.00564,
+   "share_below_minus_half_decade": 0.0,
+   "bowley_skew": 0.0469,
+   "octile_skew": 0.0897
+  }
+ }
+}

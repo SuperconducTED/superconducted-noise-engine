@@ -1,0 +1,452 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "gates_1q",
+ "script": "analysis/gates_1q/aliases_and_schema.py",
+ "measured_utc": "2026-10-06T07:52:03Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "aliases": {
+  "id": {
+   "compared": 274560,
+   "value_mismatch": 0,
+   "date_mismatch": 979,
+   "date_mismatch_in_placeholder_records": 979,
+   "date_mismatch_outside_placeholder_records": 0,
+   "placeholder_records_compared": 1975,
+   "date_mismatch_share_of_placeholder_records": 0.4957,
+   "offset_alias_minus_sx_ms_counts": {
+    "-1000": 979
+   },
+   "qubits_with_date_mismatch": [
+    17,
+    72,
+    149
+   ],
+   "series_after_masking": 155,
+   "series_identical_to_sx_after_masking": 155
+  },
+  "rx": {
+   "compared": 274560,
+   "value_mismatch": 0,
+   "date_mismatch": 645,
+   "date_mismatch_in_placeholder_records": 645,
+   "date_mismatch_outside_placeholder_records": 0,
+   "placeholder_records_compared": 1975,
+   "date_mismatch_share_of_placeholder_records": 0.3266,
+   "offset_alias_minus_sx_ms_counts": {
+    "-1000": 645
+   },
+   "qubits_with_date_mismatch": [
+    17,
+    72,
+    149
+   ],
+   "series_after_masking": 155,
+   "series_identical_to_sx_after_masking": 155
+  },
+  "x": {
+   "compared": 274560,
+   "value_mismatch": 0,
+   "date_mismatch": 374,
+   "date_mismatch_in_placeholder_records": 374,
+   "date_mismatch_outside_placeholder_records": 0,
+   "placeholder_records_compared": 1975,
+   "date_mismatch_share_of_placeholder_records": 0.1894,
+   "offset_alias_minus_sx_ms_counts": {
+    "1000": 374
+   },
+   "qubits_with_date_mismatch": [
+    17,
+    72,
+    149
+   ],
+   "series_after_masking": 155,
+   "series_identical_to_sx_after_masking": 155
+  },
+  "xslow": {
+   "compared": 136032,
+   "value_mismatch": 0,
+   "date_mismatch": 310,
+   "date_mismatch_in_placeholder_records": 310,
+   "date_mismatch_outside_placeholder_records": 0,
+   "placeholder_records_compared": 915,
+   "date_mismatch_share_of_placeholder_records": 0.3388,
+   "offset_alias_minus_sx_ms_counts": {
+    "1000": 310
+   },
+   "qubits_with_date_mismatch": [
+    17,
+    72
+   ],
+   "series_after_masking": 155,
+   "series_identical_to_sx_after_masking": 155
+  },
+  "sx_series_after_masking": 155,
+  "sx_events_after_masking": 20207
+ },
+ "stamps": {
+  "placeholder_records": 1975,
+  "placeholder_stamp_whole_second_share": 1.0,
+  "measured_records": 272585,
+  "measured_stamp_whole_second_share": 1.0,
+  "placeholder_stamp_after_file_date_s_q_0_1_10_50_90_99_100": [
+   7.0,
+   36.0,
+   69.0,
+   287.0,
+   668.2,
+   5705.6,
+   44734.0
+  ],
+  "placeholder_stamp_after_file_date_count": 1975,
+  "measured_stamp_after_file_date_count": 0,
+  "measured_stamp_age_at_file_h_q_0_1_10_50_90_99_100": [
+   0.0,
+   0.0,
+   1.896,
+   12.435,
+   23.532,
+   50.362,
+   334.904
+  ]
+ },
+ "placeholders": {
+  "sx": {
+   "q17": {
+    "placeholder_records": 209,
+    "present_records": 1760,
+    "always_placeholder_in_lifetime": false,
+    "first_file": "20260513T121322000000Z.json",
+    "last_file": "20260713T135208000000Z.json",
+    "episodes": 2,
+    "episodes_detail": [
+     {
+      "first": "20260513T121322000000Z.json",
+      "last": "20260518T050826000000Z.json",
+      "files": 53
+     },
+     {
+      "first": "20260622T014623000000Z.json",
+      "last": "20260713T135208000000Z.json",
+      "files": 156
+     }
+    ]
+   },
+   "q72": {
+    "placeholder_records": 1760,
+    "present_records": 1760,
+    "always_placeholder_in_lifetime": true,
+    "first_file": "20260513T121322000000Z.json",
+    "last_file": "20261006T025742000000Z.json",
+    "episodes": 1,
+    "episodes_detail": [
+     {
+      "first": "20260513T121322000000Z.json",
+      "last": "20261006T025742000000Z.json",
+      "files": 1760
+     }
+    ]
+   },
+   "q149": {
+    "placeholder_records": 6,
+    "present_records": 1760,
+    "always_placeholder_in_lifetime": false,
+    "first_file": "20260513T121322000000Z.json",
+    "last_file": "20260513T215706000000Z.json",
+    "episodes": 1,
+    "episodes_detail": [
+     {
+      "first": "20260513T121322000000Z.json",
+      "last": "20260513T215706000000Z.json",
+      "files": 6
+     }
+    ]
+   }
+  },
+  "xslow": {
+   "q17": {
+    "placeholder_records": 43,
+    "present_records": 872,
+    "always_placeholder_in_lifetime": false,
+    "first_file": "20260514T123242000000Z.json",
+    "last_file": "20260518T050826000000Z.json",
+    "episodes": 1,
+    "episodes_detail": [
+     {
+      "first": "20260514T123242000000Z.json",
+      "last": "20260518T050826000000Z.json",
+      "files": 43
+     }
+    ]
+   },
+   "q72": {
+    "placeholder_records": 872,
+    "present_records": 872,
+    "always_placeholder_in_lifetime": true,
+    "first_file": "20260514T123242000000Z.json",
+    "last_file": "20261006T025742000000Z.json",
+    "episodes": 2,
+    "episodes_detail": [
+     {
+      "first": "20260514T123242000000Z.json",
+      "last": "20260529T113835000000Z.json",
+      "files": 135
+     },
+     {
+      "first": "20260910T165621000000Z.json",
+      "last": "20261006T025742000000Z.json",
+      "files": 737
+     }
+    ]
+   }
+  }
+ },
+ "constants": {
+  "g1.sx.gate_length": {
+   "records": 274560,
+   "unique_values": [
+    24.0
+   ]
+  },
+  "g1.x.gate_length": {
+   "records": 274560,
+   "unique_values": [
+    24.0
+   ]
+  },
+  "g1.id.gate_length": {
+   "records": 274560,
+   "unique_values": [
+    24.0
+   ]
+  },
+  "g1.rx.gate_length": {
+   "records": 274560,
+   "unique_values": [
+    24.0
+   ]
+  },
+  "g1.xslow.gate_length": {
+   "records": 136032,
+   "unique_values": [
+    1000.0
+   ]
+  },
+  "g1.rz.gate_length": {
+   "records": 274560,
+   "unique_values": [
+    0.0
+   ]
+  },
+  "g1.rz.gate_error": {
+   "records": 274560,
+   "unique_values": [
+    0.0
+   ]
+  }
+ },
+ "xslow": {
+  "present_for_all_or_none": true,
+  "files_present": 872,
+  "presence_runs": [
+   {
+    "first": "20260514T123242000000Z.json",
+    "last": "20260529T113835000000Z.json",
+    "files": 135
+   },
+   {
+    "first": "20260910T165621000000Z.json",
+    "last": "20261006T025742000000Z.json",
+    "files": 737
+   }
+  ],
+  "file_after_first_run": "20260529T164642000000Z.json",
+  "files_by_present_targetHasXslow_hasConfiguration_basisId": [
+   {
+    "xslow_records_present": false,
+    "target_has_xslow": false,
+    "has_configuration": false,
+    "basis_gates_id": -1,
+    "files": 29
+   },
+   {
+    "xslow_records_present": false,
+    "target_has_xslow": false,
+    "has_configuration": true,
+    "basis_gates_id": 0,
+    "files": 832
+   },
+   {
+    "xslow_records_present": false,
+    "target_has_xslow": true,
+    "has_configuration": false,
+    "basis_gates_id": -1,
+    "files": 27
+   },
+   {
+    "xslow_records_present": true,
+    "target_has_xslow": false,
+    "has_configuration": true,
+    "basis_gates_id": 0,
+    "files": 135
+   },
+   {
+    "xslow_records_present": true,
+    "target_has_xslow": true,
+    "has_configuration": false,
+    "basis_gates_id": -1,
+    "files": 387
+   },
+   {
+    "xslow_records_present": true,
+    "target_has_xslow": true,
+    "has_configuration": true,
+    "basis_gates_id": 1,
+    "files": 350
+   }
+  ],
+  "target_has_xslow_but_no_records": {
+   "files": 27,
+   "historical_fetches_among_them": 27,
+   "first": "20260909T084345000000Z.json",
+   "last": "20260910T151016000000Z.json"
+  },
+  "first_live_file_with_xslow_records": "20260514T123242000000Z.json",
+  "first_live_file_with_xslow_records_in_second_run": "20260910T192051000000Z.json",
+  "second_run_first_file_is_historical": true,
+  "first_file_with_basis_gates_containing_xslow": "20260910T192051000000Z.json",
+  "basis_gates_versions": {
+   "0": {
+    "first": "20260513T121322000000Z.json",
+    "last": "20260910T155537000000Z.json",
+    "files": 967,
+    "value": [
+     "cz",
+     "id",
+     "rz",
+     "sx",
+     "x"
+    ]
+   },
+   "1": {
+    "first": "20260910T192051000000Z.json",
+    "last": "20261006T025742000000Z.json",
+    "files": 350,
+    "value": [
+     "cz",
+     "id",
+     "rz",
+     "sx",
+     "x",
+     "xslow"
+    ]
+   }
+  },
+  "configuration_gate_versions": [
+   {
+    "id": 0,
+    "first": "20260513T121322000000Z.json",
+    "last": "20260806T122947000000Z.json",
+    "files": 692,
+    "names": [
+     "id",
+     "rz",
+     "sx",
+     "x",
+     "cz",
+     "reset",
+     "measure"
+    ],
+    "xslow_qasm_def": null
+   },
+   {
+    "id": 1,
+    "first": "20260807T032159000000Z.json",
+    "last": "20260901T125138000000Z.json",
+    "files": 222,
+    "names": [
+     "id",
+     "rz",
+     "sx",
+     "x",
+     "cz",
+     "reset",
+     "measure",
+     "measure_2"
+    ],
+    "xslow_qasm_def": null
+   },
+   {
+    "id": 2,
+    "first": "20260902T045624000000Z.json",
+    "last": "20260910T155537000000Z.json",
+    "files": 53,
+    "names": [
+     "id",
+     "rz",
+     "sx",
+     "x",
+     "cz",
+     "reset",
+     "reset_2",
+     "measure",
+     "measure_2",
+     "measure_reset",
+     "measure_reset_2"
+    ],
+    "xslow_qasm_def": null
+   },
+   {
+    "id": 3,
+    "first": "20260910T192051000000Z.json",
+    "last": "20261006T025742000000Z.json",
+    "files": 350,
+    "names": [
+     "id",
+     "rz",
+     "sx",
+     "x",
+     "xslow",
+     "cz",
+     "reset",
+     "reset_2",
+     "measure",
+     "measure_2",
+     "measure_reset",
+     "measure_reset_2"
+    ],
+    "xslow_qasm_def": "gate xslow q0 {}"
+   }
+  ],
+  "target_set_has_xslow": {
+   "0": false,
+   "1": false,
+   "2": false,
+   "3": true
+  }
+ },
+ "rx": {
+  "target_union_ops_by_name": {
+   "cz": 352,
+   "delay": 156,
+   "id": 156,
+   "measure": 156,
+   "measure_2": 156,
+   "measure_reset": 156,
+   "measure_reset_2": 156,
+   "reset": 156,
+   "reset_2": 156,
+   "rz": 156,
+   "sx": 156,
+   "x": 156,
+   "xslow": 156
+  },
+  "rx_in_target_union": false,
+  "rx_in_any_basis_gates": false,
+  "rx_in_any_configuration_gates": false,
+  "rx_in_any_supported_instructions": false,
+  "rx_records_in_properties": 274560
+ }
+}

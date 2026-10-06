@@ -1,0 +1,1657 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "device",
+ "script": "analysis/device/changepoints.py",
+ "measured_utc": "2026-10-06T07:47:09Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "method": "PELT, squared-error cost, min segment 3, beta = c sigma^2 ln n; BinSeg check",
+ "penalty_factors": [
+  2.0,
+  4.0,
+  8.0
+ ],
+ "match_window_h": 36.0,
+ "known_events": [
+  {
+   "at": "2026-05-29T16:46:42Z",
+   "what": "xslow records disappear (01-data-layer)"
+  },
+  {
+   "at": "2026-06-08T18:56:28Z",
+   "what": "readout length 1560 to 1700 ns; measure.threshold appears"
+  },
+  {
+   "at": "2026-06-24T16:36:39Z",
+   "what": "clops_v serialisation changes (configuration only)"
+  },
+  {
+   "at": "2026-07-16T03:00:13Z",
+   "what": "configuration key mcps appears"
+  },
+  {
+   "at": "2026-07-30T21:09:17Z",
+   "what": "readout length 1700 to 1660 ns"
+  },
+  {
+   "at": "2026-08-05T23:45:31Z",
+   "what": "first historical file (coverage change)"
+  },
+  {
+   "at": "2026-08-07T03:21:59Z",
+   "what": "measure_2 enters target and properties; 82.7 h file gap follows"
+  },
+  {
+   "at": "2026-09-02T04:56:24Z",
+   "what": "measure_reset, measure_reset_2, reset_2 enter; ledger starts"
+  },
+  {
+   "at": "2026-09-05T17:51:36Z",
+   "what": "q72 couplers 68 to 84 ns"
+  },
+  {
+   "at": "2026-09-10T16:56:21Z",
+   "what": "xslow records return; basis_gates gains xslow"
+  }
+ ],
+ "share_of_span_within_window_of_a_known_event": 0.19329,
+ "span_days": 145.614,
+ "first_utc_day": "2026-05-13",
+ "series": {
+  "readout": {
+   "n": 588,
+   "noise_sigma": 0.020284,
+   "c2": {
+    "beta": 0.0052473,
+    "pelt_points": [
+     {
+      "at": "2026-05-17T13:53:44Z",
+      "shift_log10": -0.186895,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 290.883,
+      "matched": false
+     },
+     {
+      "at": "2026-05-27T15:37:21Z",
+      "shift_log10": -0.0679049,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 49.1558,
+      "matched": false
+     },
+     {
+      "at": "2026-06-08T21:31:37Z",
+      "shift_log10": -0.114799,
+      "nearest_known": "readout length 1560 to 1700 ns; measure.threshold appears",
+      "hours_to_nearest_known": 2.58583,
+      "matched": true
+     },
+     {
+      "at": "2026-06-09T09:13:25Z",
+      "shift_log10": -0.0311169,
+      "nearest_known": "readout length 1560 to 1700 ns; measure.threshold appears",
+      "hours_to_nearest_known": 14.2825,
+      "matched": true
+     },
+     {
+      "at": "2026-06-30T15:06:38Z",
+      "shift_log10": 0.0106309,
+      "nearest_known": "clops_v serialisation changes (configuration only)",
+      "hours_to_nearest_known": 142.5,
+      "matched": false
+     },
+     {
+      "at": "2026-08-21T06:06:24Z",
+      "shift_log10": 0.0454433,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 286.833,
+      "matched": false
+     },
+     {
+      "at": "2026-08-27T20:48:14Z",
+      "shift_log10": 0.0484716,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 128.136,
+      "matched": false
+     },
+     {
+      "at": "2026-08-31T16:35:39Z",
+      "shift_log10": -0.0621479,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 36.3458,
+      "matched": false
+     },
+     {
+      "at": "2026-09-12T21:17:23Z",
+      "shift_log10": 0.0177226,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 52.3506,
+      "matched": false
+     }
+    ],
+    "pelt_count": 9,
+    "matched": 2,
+    "expected_by_chance": 1.73961,
+    "binseg_count": 9,
+    "binseg_points_shared_with_pelt_within_1": 9,
+    "segment_medians_log10": [
+     -1.66298,
+     -1.84987,
+     -1.91778,
+     -2.03258,
+     -2.06369,
+     -2.05306,
+     -2.00762,
+     -1.95915,
+     -2.0213,
+     -2.00357
+    ]
+   },
+   "c4": {
+    "beta": 0.0104946,
+    "pelt_points": [
+     {
+      "at": "2026-05-17T13:53:44Z",
+      "shift_log10": -0.186895,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 290.883,
+      "matched": false
+     },
+     {
+      "at": "2026-05-27T15:37:21Z",
+      "shift_log10": -0.0679049,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 49.1558,
+      "matched": false
+     },
+     {
+      "at": "2026-06-08T21:31:37Z",
+      "shift_log10": -0.138281,
+      "nearest_known": "readout length 1560 to 1700 ns; measure.threshold appears",
+      "hours_to_nearest_known": 2.58583,
+      "matched": true
+     },
+     {
+      "at": "2026-08-21T06:06:24Z",
+      "shift_log10": 0.0484385,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 286.833,
+      "matched": false
+     },
+     {
+      "at": "2026-08-27T20:48:14Z",
+      "shift_log10": 0.0484716,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 128.136,
+      "matched": false
+     },
+     {
+      "at": "2026-08-31T06:50:59Z",
+      "shift_log10": -0.0501394,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 46.0903,
+      "matched": false
+     }
+    ],
+    "pelt_count": 6,
+    "matched": 1,
+    "expected_by_chance": 1.15974,
+    "binseg_count": 4,
+    "binseg_points_shared_with_pelt_within_1": 4,
+    "segment_medians_log10": [
+     -1.66298,
+     -1.84987,
+     -1.91778,
+     -2.05606,
+     -2.00762,
+     -1.95915,
+     -2.00929
+    ]
+   },
+   "c8": {
+    "beta": 0.0209892,
+    "pelt_points": [
+     {
+      "at": "2026-05-17T13:53:44Z",
+      "shift_log10": -0.186895,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 290.883,
+      "matched": false
+     },
+     {
+      "at": "2026-05-27T15:37:21Z",
+      "shift_log10": -0.0679049,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 49.1558,
+      "matched": false
+     },
+     {
+      "at": "2026-06-08T21:31:37Z",
+      "shift_log10": -0.138281,
+      "nearest_known": "readout length 1560 to 1700 ns; measure.threshold appears",
+      "hours_to_nearest_known": 2.58583,
+      "matched": true
+     },
+     {
+      "at": "2026-08-21T06:06:24Z",
+      "shift_log10": 0.0511194,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 286.833,
+      "matched": false
+     }
+    ],
+    "pelt_count": 4,
+    "matched": 1,
+    "expected_by_chance": 0.773161,
+    "binseg_count": 4,
+    "binseg_points_shared_with_pelt_within_1": 4,
+    "segment_medians_log10": [
+     -1.66298,
+     -1.84987,
+     -1.91778,
+     -2.05606,
+     -2.00494
+    ]
+   }
+  },
+  "init_error": {
+   "n": 236,
+   "noise_sigma": 0.0476198,
+   "c2": {
+    "beta": 0.0247801,
+    "pelt_points": [
+     {
+      "at": "2026-08-21T06:06:24Z",
+      "shift_log10": 0.290939,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 286.833,
+      "matched": false
+     },
+     {
+      "at": "2026-08-21T16:01:48Z",
+      "shift_log10": -0.317655,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 276.91,
+      "matched": false
+     },
+     {
+      "at": "2026-08-22T09:41:32Z",
+      "shift_log10": 0.268932,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 259.248,
+      "matched": false
+     },
+     {
+      "at": "2026-08-25T15:34:29Z",
+      "shift_log10": -0.237859,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 181.365,
+      "matched": false
+     },
+     {
+      "at": "2026-08-26T18:37:39Z",
+      "shift_log10": 0.298074,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 154.312,
+      "matched": false
+     },
+     {
+      "at": "2026-08-31T16:56:01Z",
+      "shift_log10": -0.300398,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 36.0064,
+      "matched": false
+     }
+    ],
+    "pelt_count": 6,
+    "matched": 0,
+    "expected_by_chance": 1.15974,
+    "binseg_count": 4,
+    "binseg_points_shared_with_pelt_within_1": 4,
+    "segment_medians_log10": [
+     -2.79333,
+     -2.5024,
+     -2.82005,
+     -2.55112,
+     -2.78898,
+     -2.4909,
+     -2.7913
+    ]
+   },
+   "c4": {
+    "beta": 0.0495601,
+    "pelt_points": [
+     {
+      "at": "2026-08-21T06:06:24Z",
+      "shift_log10": 0.224783,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 286.833,
+      "matched": false
+     },
+     {
+      "at": "2026-08-26T18:37:39Z",
+      "shift_log10": 0.0776482,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 154.312,
+      "matched": false
+     },
+     {
+      "at": "2026-08-31T16:56:01Z",
+      "shift_log10": -0.300398,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 36.0064,
+      "matched": false
+     }
+    ],
+    "pelt_count": 3,
+    "matched": 0,
+    "expected_by_chance": 0.579871,
+    "binseg_count": 3,
+    "binseg_points_shared_with_pelt_within_1": 3,
+    "segment_medians_log10": [
+     -2.79333,
+     -2.56855,
+     -2.4909,
+     -2.7913
+    ]
+   },
+   "c8": {
+    "beta": 0.0991202,
+    "pelt_points": [
+     {
+      "at": "2026-08-21T06:06:24Z",
+      "shift_log10": 0.224783,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 286.833,
+      "matched": false
+     },
+     {
+      "at": "2026-08-26T18:37:39Z",
+      "shift_log10": 0.0776482,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 154.312,
+      "matched": false
+     },
+     {
+      "at": "2026-08-31T16:56:01Z",
+      "shift_log10": -0.300398,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 36.0064,
+      "matched": false
+     }
+    ],
+    "pelt_count": 3,
+    "matched": 0,
+    "expected_by_chance": 0.579871,
+    "binseg_count": 3,
+    "binseg_points_shared_with_pelt_within_1": 3,
+    "segment_medians_log10": [
+     -2.79333,
+     -2.56855,
+     -2.4909,
+     -2.7913
+    ]
+   }
+  },
+  "measure_2": {
+   "n": 52,
+   "noise_sigma": 0.0262624,
+   "c2": {
+    "beta": 0.00545046,
+    "pelt_points": [
+     {
+      "at": "2026-09-16T23:37:01Z",
+      "shift_log10": 0.0637359,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 150.678,
+      "matched": false
+     },
+     {
+      "at": "2026-09-20T08:42:14Z",
+      "shift_log10": -0.0561159,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 231.765,
+      "matched": false
+     }
+    ],
+    "pelt_count": 2,
+    "matched": 0,
+    "expected_by_chance": 0.386581,
+    "binseg_count": 1,
+    "binseg_points_shared_with_pelt_within_1": 0,
+    "segment_medians_log10": [
+     -1.85655,
+     -1.79282,
+     -1.84893
+    ]
+   },
+   "c4": {
+    "beta": 0.0109009,
+    "pelt_points": [],
+    "pelt_count": 0,
+    "matched": 0,
+    "expected_by_chance": 0.0,
+    "binseg_count": 0,
+    "binseg_points_shared_with_pelt_within_1": 0,
+    "segment_medians_log10": [
+     -1.85649
+    ]
+   },
+   "c8": {
+    "beta": 0.0218018,
+    "pelt_points": [],
+    "pelt_count": 0,
+    "matched": 0,
+    "expected_by_chance": 0.0,
+    "binseg_count": 0,
+    "binseg_points_shared_with_pelt_within_1": 0,
+    "segment_medians_log10": [
+     -1.85649
+    ]
+   }
+  },
+  "T1": {
+   "n": 133,
+   "noise_sigma": 0.0234911,
+   "c2": {
+    "beta": 0.00539731,
+    "pelt_points": [
+     {
+      "at": "2026-05-15T22:25:08Z",
+      "shift_log10": -0.164061,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 330.359,
+      "matched": false
+     },
+     {
+      "at": "2026-05-28T06:03:46Z",
+      "shift_log10": 0.144949,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 34.7156,
+      "matched": true
+     },
+     {
+      "at": "2026-06-29T14:55:50Z",
+      "shift_log10": -0.0427143,
+      "nearest_known": "clops_v serialisation changes (configuration only)",
+      "hours_to_nearest_known": 118.32,
+      "matched": false
+     },
+     {
+      "at": "2026-08-10T12:12:15Z",
+      "shift_log10": -0.0472338,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 80.8378,
+      "matched": false
+     },
+     {
+      "at": "2026-08-18T20:36:42Z",
+      "shift_log10": 0.0518503,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 281.245,
+      "matched": false
+     }
+    ],
+    "pelt_count": 5,
+    "matched": 1,
+    "expected_by_chance": 0.966452,
+    "binseg_count": 3,
+    "binseg_points_shared_with_pelt_within_1": 3,
+    "segment_medians_log10": [
+     2.16851,
+     2.00445,
+     2.14939,
+     2.10668,
+     2.05945,
+     2.1113
+    ]
+   },
+   "c4": {
+    "beta": 0.0107946,
+    "pelt_points": [
+     {
+      "at": "2026-05-15T22:25:08Z",
+      "shift_log10": -0.164061,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 330.359,
+      "matched": false
+     },
+     {
+      "at": "2026-05-28T06:03:46Z",
+      "shift_log10": 0.144949,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 34.7156,
+      "matched": true
+     },
+     {
+      "at": "2026-06-29T14:55:50Z",
+      "shift_log10": -0.0427805,
+      "nearest_known": "clops_v serialisation changes (configuration only)",
+      "hours_to_nearest_known": 118.32,
+      "matched": false
+     }
+    ],
+    "pelt_count": 3,
+    "matched": 1,
+    "expected_by_chance": 0.579871,
+    "binseg_count": 3,
+    "binseg_points_shared_with_pelt_within_1": 3,
+    "segment_medians_log10": [
+     2.16851,
+     2.00445,
+     2.14939,
+     2.10661
+    ]
+   },
+   "c8": {
+    "beta": 0.0215892,
+    "pelt_points": [
+     {
+      "at": "2026-05-15T22:25:08Z",
+      "shift_log10": -0.164061,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 330.359,
+      "matched": false
+     },
+     {
+      "at": "2026-05-28T06:03:46Z",
+      "shift_log10": 0.144949,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 34.7156,
+      "matched": true
+     },
+     {
+      "at": "2026-06-29T14:55:50Z",
+      "shift_log10": -0.0427805,
+      "nearest_known": "clops_v serialisation changes (configuration only)",
+      "hours_to_nearest_known": 118.32,
+      "matched": false
+     }
+    ],
+    "pelt_count": 3,
+    "matched": 1,
+    "expected_by_chance": 0.579871,
+    "binseg_count": 3,
+    "binseg_points_shared_with_pelt_within_1": 3,
+    "segment_medians_log10": [
+     2.16851,
+     2.00445,
+     2.14939,
+     2.10661
+    ]
+   }
+  },
+  "T2": {
+   "n": 133,
+   "noise_sigma": 0.0213063,
+   "c2": {
+    "beta": 0.00444004,
+    "pelt_points": [
+     {
+      "at": "2026-05-15T22:25:11Z",
+      "shift_log10": -0.0845656,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 330.359,
+      "matched": false
+     },
+     {
+      "at": "2026-05-19T02:22:26Z",
+      "shift_log10": -0.101851,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 254.404,
+      "matched": false
+     },
+     {
+      "at": "2026-05-23T23:59:41Z",
+      "shift_log10": 0.0995282,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 136.784,
+      "matched": false
+     },
+     {
+      "at": "2026-05-28T06:03:49Z",
+      "shift_log10": 0.0632073,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 34.7147,
+      "matched": true
+     },
+     {
+      "at": "2026-06-29T14:55:54Z",
+      "shift_log10": -0.0579149,
+      "nearest_known": "clops_v serialisation changes (configuration only)",
+      "hours_to_nearest_known": 118.321,
+      "matched": false
+     },
+     {
+      "at": "2026-07-05T05:10:13Z",
+      "shift_log10": 0.0598563,
+      "nearest_known": "clops_v serialisation changes (configuration only)",
+      "hours_to_nearest_known": 252.559,
+      "matched": false
+     },
+     {
+      "at": "2026-07-17T18:33:24Z",
+      "shift_log10": -0.0399546,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 39.5531,
+      "matched": false
+     }
+    ],
+    "pelt_count": 7,
+    "matched": 1,
+    "expected_by_chance": 1.35303,
+    "binseg_count": 5,
+    "binseg_points_shared_with_pelt_within_1": 5,
+    "segment_medians_log10": [
+     2.0327,
+     1.94814,
+     1.84629,
+     1.94581,
+     2.00902,
+     1.95111,
+     2.01096,
+     1.97101
+    ]
+   },
+   "c4": {
+    "beta": 0.00888008,
+    "pelt_points": [
+     {
+      "at": "2026-05-19T02:22:26Z",
+      "shift_log10": -0.107369,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 254.404,
+      "matched": false
+     },
+     {
+      "at": "2026-05-23T23:59:41Z",
+      "shift_log10": 0.0995282,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 136.784,
+      "matched": false
+     },
+     {
+      "at": "2026-05-28T06:03:49Z",
+      "shift_log10": 0.0596555,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 34.7147,
+      "matched": true
+     },
+     {
+      "at": "2026-07-17T18:33:24Z",
+      "shift_log10": -0.0344614,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 39.5531,
+      "matched": false
+     }
+    ],
+    "pelt_count": 4,
+    "matched": 1,
+    "expected_by_chance": 0.773161,
+    "binseg_count": 4,
+    "binseg_points_shared_with_pelt_within_1": 4,
+    "segment_medians_log10": [
+     1.95366,
+     1.84629,
+     1.94581,
+     2.00547,
+     1.97101
+    ]
+   },
+   "c8": {
+    "beta": 0.0177602,
+    "pelt_points": [
+     {
+      "at": "2026-05-19T02:22:26Z",
+      "shift_log10": -0.107369,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 254.404,
+      "matched": false
+     },
+     {
+      "at": "2026-05-23T23:59:41Z",
+      "shift_log10": 0.153167,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 136.784,
+      "matched": false
+     },
+     {
+      "at": "2026-07-17T18:33:24Z",
+      "shift_log10": -0.0284447,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 39.5531,
+      "matched": false
+     }
+    ],
+    "pelt_count": 3,
+    "matched": 0,
+    "expected_by_chance": 0.579871,
+    "binseg_count": 4,
+    "binseg_points_shared_with_pelt_within_1": 3,
+    "segment_medians_log10": [
+     1.95366,
+     1.84629,
+     1.99945,
+     1.97101
+    ]
+   }
+  },
+  "sx": {
+   "n": 132,
+   "noise_sigma": 0.017536,
+   "c2": {
+    "beta": 0.00300303,
+    "pelt_points": [
+     {
+      "at": "2026-05-15T23:03:33Z",
+      "shift_log10": 0.0545509,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 329.719,
+      "matched": false
+     },
+     {
+      "at": "2026-05-26T02:43:24Z",
+      "shift_log10": -0.0418751,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 86.055,
+      "matched": false
+     },
+     {
+      "at": "2026-07-27T08:40:20Z",
+      "shift_log10": 0.010556,
+      "nearest_known": "readout length 1700 to 1660 ns",
+      "hours_to_nearest_known": 84.4825,
+      "matched": false
+     }
+    ],
+    "pelt_count": 3,
+    "matched": 0,
+    "expected_by_chance": 0.579871,
+    "binseg_count": 3,
+    "binseg_points_shared_with_pelt_within_1": 3,
+    "segment_medians_log10": [
+     -3.53174,
+     -3.47719,
+     -3.51906,
+     -3.5085
+    ]
+   },
+   "c4": {
+    "beta": 0.00600605,
+    "pelt_points": [
+     {
+      "at": "2026-05-26T02:43:24Z",
+      "shift_log10": -0.0360351,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 86.055,
+      "matched": false
+     }
+    ],
+    "pelt_count": 1,
+    "matched": 0,
+    "expected_by_chance": 0.19329,
+    "binseg_count": 1,
+    "binseg_points_shared_with_pelt_within_1": 1,
+    "segment_medians_log10": [
+     -3.47959,
+     -3.51563
+    ]
+   },
+   "c8": {
+    "beta": 0.0120121,
+    "pelt_points": [],
+    "pelt_count": 0,
+    "matched": 0,
+    "expected_by_chance": 0.0,
+    "binseg_count": 0,
+    "binseg_points_shared_with_pelt_within_1": 0,
+    "segment_medians_log10": [
+     -3.51411
+    ]
+   }
+  },
+  "cz": {
+   "n": 130,
+   "noise_sigma": 0.0105253,
+   "c2": {
+    "beta": 0.00107847,
+    "pelt_points": [
+     {
+      "at": "2026-05-16T00:05:20Z",
+      "shift_log10": 0.0507372,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 328.689,
+      "matched": false
+     },
+     {
+      "at": "2026-05-29T23:07:20Z",
+      "shift_log10": -0.034426,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 6.34389,
+      "matched": true
+     },
+     {
+      "at": "2026-06-11T21:36:16Z",
+      "shift_log10": 0.0146712,
+      "nearest_known": "readout length 1560 to 1700 ns; measure.threshold appears",
+      "hours_to_nearest_known": 74.6633,
+      "matched": false
+     },
+     {
+      "at": "2026-08-06T14:59:54Z",
+      "shift_log10": 0.0319664,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 12.3681,
+      "matched": true
+     },
+     {
+      "at": "2026-08-12T08:31:47Z",
+      "shift_log10": -0.030522,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 125.163,
+      "matched": false
+     },
+     {
+      "at": "2026-09-28T01:46:16Z",
+      "shift_log10": -0.0144983,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 416.832,
+      "matched": false
+     }
+    ],
+    "pelt_count": 6,
+    "matched": 2,
+    "expected_by_chance": 1.15974,
+    "binseg_count": 4,
+    "binseg_points_shared_with_pelt_within_1": 4,
+    "segment_medians_log10": [
+     -2.59245,
+     -2.54171,
+     -2.57614,
+     -2.56147,
+     -2.5295,
+     -2.56002,
+     -2.57452
+    ]
+   },
+   "c4": {
+    "beta": 0.00215695,
+    "pelt_points": [
+     {
+      "at": "2026-05-16T00:05:20Z",
+      "shift_log10": 0.0507372,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 328.689,
+      "matched": false
+     },
+     {
+      "at": "2026-05-29T23:07:20Z",
+      "shift_log10": -0.0207959,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 6.34389,
+      "matched": true
+     }
+    ],
+    "pelt_count": 2,
+    "matched": 1,
+    "expected_by_chance": 0.386581,
+    "binseg_count": 2,
+    "binseg_points_shared_with_pelt_within_1": 2,
+    "segment_medians_log10": [
+     -2.59245,
+     -2.54171,
+     -2.56251
+    ]
+   },
+   "c8": {
+    "beta": 0.0043139,
+    "pelt_points": [],
+    "pelt_count": 0,
+    "matched": 0,
+    "expected_by_chance": 0.0,
+    "binseg_count": 0,
+    "binseg_points_shared_with_pelt_within_1": 0,
+    "segment_medians_log10": [
+     -2.561
+    ]
+   }
+  },
+  "rzz": {
+   "n": 109,
+   "noise_sigma": 0.0112863,
+   "c2": {
+    "beta": 0.00119517,
+    "pelt_points": [
+     {
+      "at": "2026-05-30T01:09:31Z",
+      "shift_log10": -0.0343051,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 8.38028,
+      "matched": true
+     },
+     {
+      "at": "2026-06-13T02:21:27Z",
+      "shift_log10": 0.0104994,
+      "nearest_known": "readout length 1560 to 1700 ns; measure.threshold appears",
+      "hours_to_nearest_known": 103.416,
+      "matched": false
+     },
+     {
+      "at": "2026-07-15T02:14:08Z",
+      "shift_log10": 0.0332979,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 24.7681,
+      "matched": true
+     },
+     {
+      "at": "2026-08-01T01:22:31Z",
+      "shift_log10": -0.0252013,
+      "nearest_known": "readout length 1700 to 1660 ns",
+      "hours_to_nearest_known": 28.2206,
+      "matched": true
+     }
+    ],
+    "pelt_count": 4,
+    "matched": 3,
+    "expected_by_chance": 0.773161,
+    "binseg_count": 4,
+    "binseg_points_shared_with_pelt_within_1": 4,
+    "segment_medians_log10": [
+     -2.5614,
+     -2.59571,
+     -2.58521,
+     -2.55191,
+     -2.57711
+    ]
+   },
+   "c4": {
+    "beta": 0.00239034,
+    "pelt_points": [
+     {
+      "at": "2026-05-30T01:09:31Z",
+      "shift_log10": -0.0271212,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 8.38028,
+      "matched": true
+     },
+     {
+      "at": "2026-07-15T02:14:08Z",
+      "shift_log10": 0.0366134,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 24.7681,
+      "matched": true
+     },
+     {
+      "at": "2026-08-01T01:22:31Z",
+      "shift_log10": -0.0252013,
+      "nearest_known": "readout length 1700 to 1660 ns",
+      "hours_to_nearest_known": 28.2206,
+      "matched": true
+     }
+    ],
+    "pelt_count": 3,
+    "matched": 3,
+    "expected_by_chance": 0.579871,
+    "binseg_count": 3,
+    "binseg_points_shared_with_pelt_within_1": 3,
+    "segment_medians_log10": [
+     -2.5614,
+     -2.58853,
+     -2.55191,
+     -2.57711
+    ]
+   },
+   "c8": {
+    "beta": 0.00478068,
+    "pelt_points": [
+     {
+      "at": "2026-05-30T01:09:31Z",
+      "shift_log10": -0.0271212,
+      "nearest_known": "xslow records disappear (01-data-layer)",
+      "hours_to_nearest_known": 8.38028,
+      "matched": true
+     },
+     {
+      "at": "2026-07-15T02:14:08Z",
+      "shift_log10": 0.0366134,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 24.7681,
+      "matched": true
+     },
+     {
+      "at": "2026-08-01T01:22:31Z",
+      "shift_log10": -0.0252013,
+      "nearest_known": "readout length 1700 to 1660 ns",
+      "hours_to_nearest_known": 28.2206,
+      "matched": true
+     }
+    ],
+    "pelt_count": 3,
+    "matched": 3,
+    "expected_by_chance": 0.579871,
+    "binseg_count": 0,
+    "binseg_points_shared_with_pelt_within_1": 0,
+    "segment_medians_log10": [
+     -2.5614,
+     -2.58853,
+     -2.55191,
+     -2.57711
+    ]
+   }
+  },
+  "lf_eplg100": {
+   "n": 82,
+   "noise_sigma": 0.0253742,
+   "c2": {
+    "beta": 0.00567454,
+    "pelt_points": [
+     {
+      "at": "2026-07-07T07:45:27Z",
+      "shift_log10": 0.0535377,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 211.246,
+      "matched": false
+     },
+     {
+      "at": "2026-08-06T16:46:10Z",
+      "shift_log10": 0.0796337,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 10.5969,
+      "matched": true
+     },
+     {
+      "at": "2026-08-13T14:33:40Z",
+      "shift_log10": -0.0828276,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 155.195,
+      "matched": false
+     },
+     {
+      "at": "2026-08-31T22:31:05Z",
+      "shift_log10": 0.0330419,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 30.4219,
+      "matched": true
+     }
+    ],
+    "pelt_count": 4,
+    "matched": 2,
+    "expected_by_chance": 0.773161,
+    "binseg_count": 2,
+    "binseg_points_shared_with_pelt_within_1": 0,
+    "segment_medians_log10": [
+     -2.27643,
+     -2.22289,
+     -2.14325,
+     -2.22608,
+     -2.19304
+    ]
+   },
+   "c4": {
+    "beta": 0.0113491,
+    "pelt_points": [
+     {
+      "at": "2026-07-07T07:45:27Z",
+      "shift_log10": 0.0535377,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 211.246,
+      "matched": false
+     },
+     {
+      "at": "2026-08-06T16:46:10Z",
+      "shift_log10": 0.0796337,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 10.5969,
+      "matched": true
+     },
+     {
+      "at": "2026-08-13T14:33:40Z",
+      "shift_log10": -0.0828276,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 155.195,
+      "matched": false
+     },
+     {
+      "at": "2026-08-31T22:31:05Z",
+      "shift_log10": 0.0330419,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 30.4219,
+      "matched": true
+     }
+    ],
+    "pelt_count": 4,
+    "matched": 2,
+    "expected_by_chance": 0.773161,
+    "binseg_count": 2,
+    "binseg_points_shared_with_pelt_within_1": 0,
+    "segment_medians_log10": [
+     -2.27643,
+     -2.22289,
+     -2.14325,
+     -2.22608,
+     -2.19304
+    ]
+   },
+   "c8": {
+    "beta": 0.0226982,
+    "pelt_points": [
+     {
+      "at": "2026-07-11T18:19:57Z",
+      "shift_log10": 0.0557999,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 104.671,
+      "matched": false
+     }
+    ],
+    "pelt_count": 1,
+    "matched": 0,
+    "expected_by_chance": 0.19329,
+    "binseg_count": 1,
+    "binseg_points_shared_with_pelt_within_1": 1,
+    "segment_medians_log10": [
+     -2.26249,
+     -2.20669
+    ]
+   }
+  },
+  "coverage_files_per_day": {
+   "n": 147,
+   "noise_sigma": 2.09671,
+   "c2": {
+    "beta": 43.8779,
+    "pelt_points": [
+     {
+      "at": "2026-06-15T00:00:00Z",
+      "shift_log10": -2.0,
+      "nearest_known": "readout length 1560 to 1700 ns; measure.threshold appears",
+      "hours_to_nearest_known": 149.059,
+      "matched": false
+     },
+     {
+      "at": "2026-07-08T00:00:00Z",
+      "shift_log10": 4.0,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 195.004,
+      "matched": false
+     },
+     {
+      "at": "2026-08-07T00:00:00Z",
+      "shift_log10": -10.0,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 3.36639,
+      "matched": true
+     },
+     {
+      "at": "2026-08-12T00:00:00Z",
+      "shift_log10": 17.0,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 116.634,
+      "matched": false
+     },
+     {
+      "at": "2026-08-15T00:00:00Z",
+      "shift_log10": -17.0,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 188.634,
+      "matched": false
+     },
+     {
+      "at": "2026-08-18T00:00:00Z",
+      "shift_log10": 19.0,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 260.634,
+      "matched": false
+     },
+     {
+      "at": "2026-08-24T00:00:00Z",
+      "shift_log10": -7.0,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 220.94,
+      "matched": false
+     },
+     {
+      "at": "2026-08-27T00:00:00Z",
+      "shift_log10": -6.0,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 148.94,
+      "matched": false
+     },
+     {
+      "at": "2026-09-09T00:00:00Z",
+      "shift_log10": 22.0,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 40.9392,
+      "matched": false
+     },
+     {
+      "at": "2026-09-12T00:00:00Z",
+      "shift_log10": 8.0,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 31.0608,
+      "matched": true
+     },
+     {
+      "at": "2026-09-16T00:00:00Z",
+      "shift_log10": -10.0,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 127.061,
+      "matched": false
+     },
+     {
+      "at": "2026-09-19T00:00:00Z",
+      "shift_log10": 4.0,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 199.061,
+      "matched": false
+     },
+     {
+      "at": "2026-09-22T00:00:00Z",
+      "shift_log10": -16.0,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 271.061,
+      "matched": false
+     },
+     {
+      "at": "2026-09-25T00:00:00Z",
+      "shift_log10": 17.0,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 343.061,
+      "matched": false
+     },
+     {
+      "at": "2026-10-04T00:00:00Z",
+      "shift_log10": -13.0,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 559.061,
+      "matched": false
+     }
+    ],
+    "pelt_count": 15,
+    "matched": 2,
+    "expected_by_chance": 2.89936,
+    "binseg_count": 15,
+    "binseg_points_shared_with_pelt_within_1": 14,
+    "segment_medians_log10": [
+     8.0,
+     6.0,
+     10.0,
+     0.0,
+     17.0,
+     0.0,
+     19.0,
+     12.0,
+     6.0,
+     28.0,
+     36.0,
+     26.0,
+     30.0,
+     14.0,
+     31.0,
+     18.0
+    ]
+   },
+   "c4": {
+    "beta": 87.7559,
+    "pelt_points": [
+     {
+      "at": "2026-06-15T00:00:00Z",
+      "shift_log10": -2.0,
+      "nearest_known": "readout length 1560 to 1700 ns; measure.threshold appears",
+      "hours_to_nearest_known": 149.059,
+      "matched": false
+     },
+     {
+      "at": "2026-07-08T00:00:00Z",
+      "shift_log10": 4.0,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 195.004,
+      "matched": false
+     },
+     {
+      "at": "2026-08-07T00:00:00Z",
+      "shift_log10": -10.0,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 3.36639,
+      "matched": true
+     },
+     {
+      "at": "2026-08-12T00:00:00Z",
+      "shift_log10": 17.0,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 116.634,
+      "matched": false
+     },
+     {
+      "at": "2026-08-15T00:00:00Z",
+      "shift_log10": -17.0,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 188.634,
+      "matched": false
+     },
+     {
+      "at": "2026-08-18T00:00:00Z",
+      "shift_log10": 17.0,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 260.634,
+      "matched": false
+     },
+     {
+      "at": "2026-08-27T00:00:00Z",
+      "shift_log10": -11.0,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 148.94,
+      "matched": false
+     },
+     {
+      "at": "2026-09-09T00:00:00Z",
+      "shift_log10": 22.0,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 40.9392,
+      "matched": false
+     },
+     {
+      "at": "2026-09-12T00:00:00Z",
+      "shift_log10": 8.0,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 31.0608,
+      "matched": true
+     },
+     {
+      "at": "2026-09-16T00:00:00Z",
+      "shift_log10": -8.5,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 127.061,
+      "matched": false
+     },
+     {
+      "at": "2026-09-22T00:00:00Z",
+      "shift_log10": -13.5,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 271.061,
+      "matched": false
+     },
+     {
+      "at": "2026-09-25T00:00:00Z",
+      "shift_log10": 17.0,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 343.061,
+      "matched": false
+     },
+     {
+      "at": "2026-10-04T00:00:00Z",
+      "shift_log10": -13.0,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 559.061,
+      "matched": false
+     }
+    ],
+    "pelt_count": 13,
+    "matched": 2,
+    "expected_by_chance": 2.51277,
+    "binseg_count": 11,
+    "binseg_points_shared_with_pelt_within_1": 11,
+    "segment_medians_log10": [
+     8.0,
+     6.0,
+     10.0,
+     0.0,
+     17.0,
+     0.0,
+     17.0,
+     6.0,
+     28.0,
+     36.0,
+     27.5,
+     14.0,
+     31.0,
+     18.0
+    ]
+   },
+   "c8": {
+    "beta": 175.512,
+    "pelt_points": [
+     {
+      "at": "2026-08-07T00:00:00Z",
+      "shift_log10": -8.5,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 3.36639,
+      "matched": true
+     },
+     {
+      "at": "2026-08-12T00:00:00Z",
+      "shift_log10": 17.0,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 116.634,
+      "matched": false
+     },
+     {
+      "at": "2026-08-27T00:00:00Z",
+      "shift_log10": -11.0,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 148.94,
+      "matched": false
+     },
+     {
+      "at": "2026-09-10T00:00:00Z",
+      "shift_log10": 23.5,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 16.9392,
+      "matched": true
+     },
+     {
+      "at": "2026-09-22T00:00:00Z",
+      "shift_log10": -15.5,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 271.061,
+      "matched": false
+     },
+     {
+      "at": "2026-09-25T00:00:00Z",
+      "shift_log10": 17.0,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 343.061,
+      "matched": false
+     },
+     {
+      "at": "2026-10-04T00:00:00Z",
+      "shift_log10": -13.0,
+      "nearest_known": "xslow records return; basis_gates gains xslow",
+      "hours_to_nearest_known": 559.061,
+      "matched": false
+     }
+    ],
+    "pelt_count": 7,
+    "matched": 2,
+    "expected_by_chance": 1.35303,
+    "binseg_count": 2,
+    "binseg_points_shared_with_pelt_within_1": 2,
+    "segment_medians_log10": [
+     8.5,
+     0.0,
+     17.0,
+     6.0,
+     29.5,
+     14.0,
+     31.0,
+     18.0
+    ]
+   }
+  },
+  "coverage_readout_rounds_per_day": {
+   "n": 147,
+   "noise_sigma": 1.04836,
+   "c2": {
+    "beta": 10.9695,
+    "pelt_points": [
+     {
+      "at": "2026-06-15T00:00:00Z",
+      "shift_log10": -2.0,
+      "nearest_known": "readout length 1560 to 1700 ns; measure.threshold appears",
+      "hours_to_nearest_known": 149.059,
+      "matched": false
+     },
+     {
+      "at": "2026-06-27T00:00:00Z",
+      "shift_log10": -2.0,
+      "nearest_known": "clops_v serialisation changes (configuration only)",
+      "hours_to_nearest_known": 55.3892,
+      "matched": false
+     },
+     {
+      "at": "2026-07-08T00:00:00Z",
+      "shift_log10": 4.0,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 195.004,
+      "matched": false
+     },
+     {
+      "at": "2026-07-15T00:00:00Z",
+      "shift_log10": -4.0,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 27.0036,
+      "matched": true
+     },
+     {
+      "at": "2026-07-18T00:00:00Z",
+      "shift_log10": 3.0,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 44.9964,
+      "matched": false
+     },
+     {
+      "at": "2026-08-07T00:00:00Z",
+      "shift_log10": -4.0,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 3.36639,
+      "matched": true
+     },
+     {
+      "at": "2026-08-18T00:00:00Z",
+      "shift_log10": 4.0,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 260.634,
+      "matched": false
+     },
+     {
+      "at": "2026-08-23T00:00:00Z",
+      "shift_log10": -1.0,
+      "nearest_known": "measure_reset, measure_reset_2, reset_2 enter; ledger starts",
+      "hours_to_nearest_known": 244.94,
+      "matched": false
+     }
+    ],
+    "pelt_count": 8,
+    "matched": 2,
+    "expected_by_chance": 1.54632,
+    "binseg_count": 5,
+    "binseg_points_shared_with_pelt_within_1": 5,
+    "segment_medians_log10": [
+     6.0,
+     4.0,
+     2.0,
+     6.0,
+     2.0,
+     5.0,
+     1.0,
+     5.0,
+     4.0
+    ]
+   },
+   "c4": {
+    "beta": 21.939,
+    "pelt_points": [
+     {
+      "at": "2026-06-15T00:00:00Z",
+      "shift_log10": -2.0,
+      "nearest_known": "readout length 1560 to 1700 ns; measure.threshold appears",
+      "hours_to_nearest_known": 149.059,
+      "matched": false
+     },
+     {
+      "at": "2026-06-27T00:00:00Z",
+      "shift_log10": -2.0,
+      "nearest_known": "clops_v serialisation changes (configuration only)",
+      "hours_to_nearest_known": 55.3892,
+      "matched": false
+     },
+     {
+      "at": "2026-07-08T00:00:00Z",
+      "shift_log10": 3.0,
+      "nearest_known": "configuration key mcps appears",
+      "hours_to_nearest_known": 195.004,
+      "matched": false
+     },
+     {
+      "at": "2026-08-07T00:00:00Z",
+      "shift_log10": -4.5,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 3.36639,
+      "matched": true
+     },
+     {
+      "at": "2026-08-17T00:00:00Z",
+      "shift_log10": 3.5,
+      "nearest_known": "measure_2 enters target and properties; 82.7 h file gap follows",
+      "hours_to_nearest_known": 236.634,
+      "matched": false
+     }
+    ],
+    "pelt_count": 5,
+    "matched": 1,
+    "expected_by_chance": 0.966452,
+    "binseg_count": 1,
+    "binseg_points_shared_with_pelt_within_1": 1,
+    "segment_medians_log10": [
+     6.0,
+     4.0,
+     2.0,
+     5.0,
+     0.5,
+     4.0
+    ]
+   },
+   "c8": {
+    "beta": 43.8779,
+    "pelt_points": [
+     {
+      "at": "2026-06-15T00:00:00Z",
+      "shift_log10": -2.0,
+      "nearest_known": "readout length 1560 to 1700 ns; measure.threshold appears",
+      "hours_to_nearest_known": 149.059,
+      "matched": false
+     }
+    ],
+    "pelt_count": 1,
+    "matched": 0,
+    "expected_by_chance": 0.19329,
+    "binseg_count": 1,
+    "binseg_points_shared_with_pelt_within_1": 1,
+    "segment_medians_log10": [
+     6.0,
+     4.0
+    ]
+   }
+  }
+ },
+ "summary_value_series": {
+  "c2": {
+   "series": 9,
+   "detected": 46,
+   "matched": 11,
+   "expected_by_chance": 8.89135
+  },
+  "c4": {
+   "series": 9,
+   "detected": 26,
+   "matched": 9,
+   "expected_by_chance": 5.02555
+  },
+  "c8": {
+   "series": 9,
+   "detected": 17,
+   "matched": 5,
+   "expected_by_chance": 3.28594
+  }
+ }
+}

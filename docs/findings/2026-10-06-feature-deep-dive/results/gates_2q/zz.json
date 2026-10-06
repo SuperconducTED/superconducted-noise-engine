@@ -1,0 +1,577 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "gates_2q",
+ "script": "analysis/gates_2q/zz_2q.py",
+ "measured_utc": "2026-10-06T07:50:44Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "couplers": 176,
+ "unit_note": "IBM reports GHz; values here are multiplied by 1e6 (kHz)",
+ "record_khz_q": [
+  -938.214,
+  0.0,
+  3.04605,
+  4.06531,
+  6.18015,
+  9.41877,
+  13.8399,
+  25.2224,
+  769.919
+ ],
+ "per_coupler_median_khz_q": [
+  -4.33196,
+  0.685368,
+  3.19241,
+  4.15731,
+  6.23066,
+  9.44163,
+  13.7015,
+  25.0081,
+  25.8902
+ ],
+ "per_coupler_abs_median_khz_q": [
+  0.0,
+  1.32862,
+  3.21104,
+  4.18113,
+  6.23066,
+  9.44163,
+  13.7015,
+  25.0081,
+  25.8902
+ ],
+ "per_coupler_iqr_over_median_q": [
+  0.0,
+  0.0,
+  0.0523762,
+  0.0706652,
+  0.107873,
+  0.157997,
+  0.212645,
+  0.73519,
+  1.21849
+ ],
+ "negative_records": 2421,
+ "zero_records": 3047,
+ "couplers_ever_negative": 13,
+ "couplers_median_negative": 1,
+ "negative_couplers": [
+  {
+   "coupler": "68-69",
+   "negative_files": 1760,
+   "median_khz": -4.332,
+   "min_khz": -5.431,
+   "max_khz": -3.109,
+   "sign_changes": 0
+  },
+  {
+   "coupler": "72-73",
+   "negative_files": 387,
+   "median_khz": 7.198,
+   "min_khz": -729.3,
+   "max_khz": 615.3,
+   "sign_changes": 104
+  },
+  {
+   "coupler": "71-72",
+   "negative_files": 172,
+   "median_khz": 0.9138,
+   "min_khz": -1.207,
+   "max_khz": 2.682,
+   "sign_changes": 92
+  },
+  {
+   "coupler": "10-11",
+   "negative_files": 26,
+   "median_khz": 7.709,
+   "min_khz": -7.122,
+   "max_khz": 12.77,
+   "sign_changes": 30
+  },
+  {
+   "coupler": "154-155",
+   "negative_files": 16,
+   "median_khz": 4.177,
+   "min_khz": -0.3424,
+   "max_khz": 5.559,
+   "sign_changes": 4
+  },
+  {
+   "coupler": "149-150",
+   "negative_files": 14,
+   "median_khz": 2.577,
+   "min_khz": -3.112,
+   "max_khz": 5.813,
+   "sign_changes": 8
+  },
+  {
+   "coupler": "103-104",
+   "negative_files": 9,
+   "median_khz": 5.152,
+   "min_khz": -12.55,
+   "max_khz": 16.83,
+   "sign_changes": 2
+  },
+  {
+   "coupler": "11-12",
+   "negative_files": 9,
+   "median_khz": 5.285,
+   "min_khz": -735.2,
+   "max_khz": 769.9,
+   "sign_changes": 10
+  },
+  {
+   "coupler": "11-18",
+   "negative_files": 9,
+   "median_khz": 17.18,
+   "min_khz": -938.2,
+   "max_khz": 75.32,
+   "sign_changes": 12
+  },
+  {
+   "coupler": "61-62",
+   "negative_files": 6,
+   "median_khz": 2.766,
+   "min_khz": -4.491,
+   "max_khz": 4.405,
+   "sign_changes": 2
+  },
+  {
+   "coupler": "132-133",
+   "negative_files": 5,
+   "median_khz": 5.458,
+   "min_khz": -2.147,
+   "max_khz": 6.844,
+   "sign_changes": 4
+  },
+  {
+   "coupler": "119-133",
+   "negative_files": 5,
+   "median_khz": 3.591,
+   "min_khz": -0.8699,
+   "max_khz": 5.192,
+   "sign_changes": 4
+  },
+  {
+   "coupler": "139-155",
+   "negative_files": 3,
+   "median_khz": 25.89,
+   "min_khz": -3.4,
+   "max_khz": 27.48,
+   "sign_changes": 4
+  }
+ ],
+ "zero_couplers": [
+  {
+   "coupler": "13-14",
+   "zero_files": 429,
+   "first": "20260513T121322000000Z.json",
+   "last": "20260710T051721000000Z.json",
+   "cz_placeholder_share_while_zero": 0.0,
+   "rzz_placeholder_share_while_zero": 0.0,
+   "cz_placeholder_share_otherwise": 0.0
+  },
+  {
+   "coupler": "32-33",
+   "zero_files": 1760,
+   "first": "20260513T121322000000Z.json",
+   "last": "20261006T025742000000Z.json",
+   "cz_placeholder_share_while_zero": 1.0,
+   "rzz_placeholder_share_while_zero": 1.0,
+   "cz_placeholder_share_otherwise": null
+  },
+  {
+   "coupler": "39-53",
+   "zero_files": 429,
+   "first": "20260513T121322000000Z.json",
+   "last": "20260710T051721000000Z.json",
+   "cz_placeholder_share_while_zero": 0.0,
+   "rzz_placeholder_share_while_zero": 0.0,
+   "cz_placeholder_share_otherwise": 0.0
+  },
+  {
+   "coupler": "109-118",
+   "zero_files": 429,
+   "first": "20260513T121322000000Z.json",
+   "last": "20260710T051721000000Z.json",
+   "cz_placeholder_share_while_zero": 0.0,
+   "rzz_placeholder_share_while_zero": 0.0,
+   "cz_placeholder_share_otherwise": 0.0
+  }
+ ],
+ "couplers_with_at_most_one_value_change": [
+  {
+   "coupler": "13-14",
+   "value_changes": 1,
+   "distinct_values_khz": [
+    0.0,
+    7.447
+   ],
+   "change_file": "20260710T093926000000Z.json"
+  },
+  {
+   "coupler": "32-33",
+   "value_changes": 0,
+   "distinct_values_khz": [
+    0.0
+   ],
+   "change_file": null
+  },
+  {
+   "coupler": "39-53",
+   "value_changes": 1,
+   "distinct_values_khz": [
+    0.0,
+    2.892
+   ],
+   "change_file": "20260710T093926000000Z.json"
+  },
+  {
+   "coupler": "109-118",
+   "value_changes": 1,
+   "distinct_values_khz": [
+    0.0,
+    6.345
+   ],
+   "change_file": "20260710T093926000000Z.json"
+  }
+ ],
+ "distinct_values": 83444,
+ "smallest_nonzero_abs_khz": 0.0006581,
+ "smallest_gap_between_distinct_abs_values_khz": 4.202e-09,
+ "significant_digits_of_distinct_values_q": [
+  12.0,
+  15.0,
+  16.0,
+  16.0,
+  16.0,
+  17.0,
+  17.0,
+  17.0,
+  17.0
+ ],
+ "burst_rate_and_file_kind": {
+  "bursts_per_day_before_split": 4.001,
+  "bursts_per_day_from_split": 2.421,
+  "bursts_from_split_in_live_files": 101,
+  "bursts_from_split_in_historical_files": 47,
+  "share_with_change_before_split_all_pairs": 0.4927,
+  "by_file_kind_after_split": {
+   "live_to_live": {
+    "file_pairs_after_split": 427,
+    "share_with_change": 0.2131
+   },
+   "live_to_hist": {
+    "file_pairs_after_split": 203,
+    "share_with_change": 0.1429
+   },
+   "hist_to_live": {
+    "file_pairs_after_split": 203,
+    "share_with_change": 0.04926
+   },
+   "hist_to_hist": {
+    "file_pairs_after_split": 240,
+    "share_with_change": 0.075
+   }
+  },
+  "bursts_by_month": {
+   "2026-05": 89,
+   "2026-06": 121,
+   "2026-07": 106,
+   "2026-08": 73,
+   "2026-09": 83,
+   "2026-10": 14
+  }
+ },
+ "bursts": {
+  "files_with_any_change": 486,
+  "couplers_changing_per_burst_q": [
+   40.0,
+   170.0,
+   171.0,
+   171.0,
+   172.0,
+   172.0,
+   172.0,
+   172.0,
+   172.0
+  ],
+  "bursts_with_ge_170_couplers": 484,
+  "gap_between_bursts_h_q": [
+   0.535278,
+   1.45108,
+   2.73389,
+   3.66222,
+   5.15806,
+   8.14139,
+   13.0244,
+   40.0986,
+   82.6767
+  ],
+  "gap_between_bursts_h_q_before_split": [
+   1.17639,
+   1.44681,
+   2.46511,
+   3.28,
+   4.40028,
+   6.71806,
+   10.1454,
+   28.907,
+   63.3558
+  ],
+  "gap_between_bursts_h_q_after_split": [
+   0.535278,
+   2.11411,
+   3.77969,
+   4.64993,
+   7.19819,
+   11.4785,
+   15.3584,
+   53.2175,
+   82.6767
+  ],
+  "bursts_before_split": 338,
+  "bursts_from_split": 148,
+  "file_gap_before_burst_h_q": [
+   0.309167,
+   0.560167,
+   1.04861,
+   1.46208,
+   2.72139,
+   4.07778,
+   5.33569,
+   27.4475,
+   82.6767
+  ],
+  "file_gap_before_nonburst_h_q": [
+   0.0,
+   0.0888556,
+   0.338333,
+   0.583333,
+   0.961111,
+   1.56556,
+   2.66217,
+   7.41168,
+   61.7839
+  ],
+  "burst_utc_hour_counts": [
+   15,
+   10,
+   8,
+   22,
+   27,
+   19,
+   19,
+   29,
+   18,
+   16,
+   25,
+   27,
+   13,
+   19,
+   25,
+   18,
+   25,
+   22,
+   25,
+   26,
+   26,
+   17,
+   19,
+   16
+  ],
+  "value_changes_per_coupler_q": [
+   0.0,
+   1.0,
+   484.0,
+   485.0,
+   485.0,
+   485.0,
+   485.0,
+   485.0,
+   485.0
+  ]
+ },
+ "alignment_with_gate_rounds": {
+  "cz": {
+   "files_with_events": 130,
+   "bursts_in_event_files": 50,
+   "event_files_that_are_bursts": 0.3846,
+   "share_of_all_files_that_are_bursts": 0.2763
+  },
+  "rzz": {
+   "files_with_events": 109,
+   "bursts_in_event_files": 43,
+   "event_files_that_are_bursts": 0.3945,
+   "share_of_all_files_that_are_bursts": 0.2763
+  }
+ },
+ "burst_change_log10_abs_ratio_q": [
+  -2.71468,
+  -0.21114,
+  -0.0719647,
+  -0.0314303,
+  -1.44144e-05,
+  0.031194,
+  0.0720632,
+  0.212148,
+  2.97662
+ ],
+ "burst_change_share_above_factor_1p5": 0.03159,
+ "lag1_autocorr_dlog_abs_zz": -0.5132,
+ "lag2_autocorr_dlog_abs_zz": 0.01624,
+ "lag_pairs": 83096,
+ "couplers_excluded_from_log_statistics_for_zeros": [
+  "39-53",
+  "13-14",
+  "32-33",
+  "109-118"
+ ],
+ "value_seasonality_log_abs": {
+  "events": 83440,
+  "by_utc_4h_block": {
+   "groups": 6,
+   "groups_dropped_lt_min_n": 0,
+   "n": 83440,
+   "H": 4.833,
+   "p": 0.437,
+   "epsilon2": -2.01e-06,
+   "median_by_group": {
+    "0": 2.907e-05,
+    "1": 0.0002058,
+    "2": 0.0004063,
+    "3": -0.0004318,
+    "4": -0.0002871,
+    "5": 0.0006586
+   },
+   "n_by_group": {
+    "0": 9272,
+    "1": 16139,
+    "2": 14767,
+    "3": 13051,
+    "4": 16823,
+    "5": 13388
+   }
+  },
+  "by_weekday_mon0": {
+   "groups": 7,
+   "groups_dropped_lt_min_n": 0,
+   "n": 83440,
+   "H": 2.327,
+   "p": 0.887,
+   "epsilon2": -4.4e-05,
+   "median_by_group": {
+    "0": 0.0003541,
+    "1": -0.0001491,
+    "2": 0.0003757,
+    "3": -0.0001491,
+    "4": -0.000174,
+    "5": 0.0001736,
+    "6": 0.0002548
+   },
+   "n_by_group": {
+    "0": 11171,
+    "1": 10302,
+    "2": 13392,
+    "3": 11497,
+    "4": 10639,
+    "5": 13214,
+    "6": 13225
+   }
+  }
+ },
+ "relations": {
+  "cz": {
+   "between_coupler_spearman_median_log_err_vs_median_abs_zz": {
+    "rho": 0.01042,
+    "p": 0.892,
+    "n": 172
+   },
+   "within_coupler_spearman_demeaned": {
+    "rho": -0.02007,
+    "p": 0.00311,
+    "n": 21700
+   }
+  },
+  "rzz": {
+   "between_coupler_spearman_median_log_err_vs_median_abs_zz": {
+    "rho": -0.02722,
+    "p": 0.724,
+    "n": 171
+   },
+   "within_coupler_spearman_demeaned": {
+    "rho": -0.01368,
+    "p": 0.0673,
+    "n": 17880
+   }
+  }
+ },
+ "special_couplers": {
+  "102-103": {
+   "median_khz": 2.853,
+   "abs_rank": 0.04571
+  },
+  "146-147": {
+   "median_khz": 3.063,
+   "abs_rank": 0.07429
+  },
+  "68-69": {
+   "median_khz": -4.332,
+   "abs_rank": 0.2857
+  },
+  "80-81": {
+   "median_khz": 3.04,
+   "abs_rank": 0.06286
+  },
+  "106-107": {
+   "median_khz": 1.466,
+   "abs_rank": 0.01143
+  },
+  "71-72": {
+   "median_khz": 0.9138,
+   "abs_rank": 0.005714
+  },
+  "72-73": {
+   "median_khz": 7.198,
+   "abs_rank": 0.6914
+  },
+  "27-28": {
+   "median_khz": 13.33,
+   "abs_rank": 0.8914
+  },
+  "32-33": {
+   "median_khz": 0.0,
+   "abs_rank": 0.0
+  },
+  "95-99": {
+   "median_khz": 6.79,
+   "abs_rank": 0.5543
+  },
+  "99-115": {
+   "median_khz": 8.043,
+   "abs_rank": 0.68
+  }
+ },
+ "non_68ns_length_vs_abs_zz": {
+  "couplers": [
+   "102-103",
+   "146-147",
+   "68-69",
+   "80-81",
+   "106-107"
+  ],
+  "abs_median_khz": [
+   2.853,
+   3.063,
+   4.332,
+   3.04,
+   1.466
+  ],
+  "rest_n": 168,
+  "rest_abs_median_khz_median": 6.354,
+  "mannwhitney_less_p": 0.000109,
+  "auc_share_of_rest_below": 0.0762
+ }
+}

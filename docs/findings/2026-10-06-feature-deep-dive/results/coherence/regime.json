@@ -1,0 +1,1066 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "coherence",
+ "script": "analysis/coherence/regime.py",
+ "measured_utc": "2026-10-06T07:45:13Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "constants": {
+  "sx_length_s": 2.4e-08,
+  "sync_window_h": 1.0,
+  "round_gap_min": 15.0,
+  "level_window_events": 15,
+  "level_min_events": 8,
+  "period_split_utc": "2026-08-05T23:45:31Z"
+ },
+ "n_files": 1760,
+ "thresholds": {
+  "big_round_min_qubits": 78,
+  "window_rounds": 10,
+  "boundary_utc": "2026-05-29T16:46:42Z",
+  "regimes": {
+   "quiet_2026-05-15T12_to_2026-05-28T00": [
+    "2026-05-15T12:00:00Z",
+    "2026-05-28T00:00:00Z"
+   ],
+   "2026-05-28T12_to_2026-06-28T00": [
+    "2026-05-28T12:00:00Z",
+    "2026-06-28T00:00:00Z"
+   ],
+   "from_2026-06-28T00": [
+    "2026-06-28T00:00:00Z",
+    ""
+   ]
+  }
+ },
+ "t1_t2_change_comovement_by_regime": {
+  "matched_rounds": 133,
+  "quiet_2026-05-15T12_to_2026-05-28T00": {
+   "changes": 1825,
+   "spearman": 0.384804
+  },
+  "2026-05-28T12_to_2026-06-28T00": {
+   "changes": 4158,
+   "spearman": 0.723735
+  },
+  "from_2026-06-28T00": {
+   "changes": 12082,
+   "spearman": 0.720477
+  }
+ },
+ "T1": {
+  "big_rounds": 133,
+  "change_level": {
+   "round_pairs": 132,
+   "robust_sv_quantiles": [
+    0.000403589,
+    0.000516614,
+    0.00686654,
+    0.0100265,
+    0.0127984,
+    0.0154939,
+    0.017395,
+    0.0206691,
+    0.0245915
+   ],
+   "classical_sv_quantiles": [
+    0.000446508,
+    0.000664159,
+    0.00839302,
+    0.0119944,
+    0.0153912,
+    0.0198166,
+    0.0224697,
+    0.0277927,
+    0.0314021
+   ],
+   "robust_sv_median_by_month": {
+    "2026-05": 0.000609384,
+    "2026-06": 0.0105749,
+    "2026-07": 0.014567,
+    "2026-08": 0.0151262,
+    "2026-09": 0.0133635,
+    "2026-10": 0.0149315
+   },
+   "round_pairs_by_month": {
+    "2026-05": 20,
+    "2026-06": 28,
+    "2026-07": 25,
+    "2026-08": 25,
+    "2026-09": 30,
+    "2026-10": 4
+   },
+   "spearman_robust_sv_vs_gap": 0.301608,
+   "spearman_robust_sv_vs_gap_p": 0.000440646,
+   "pettitt_between_utc": [
+    "2026-06-26T21:06:42Z",
+    "2026-06-29T14:55:50Z"
+   ],
+   "pettitt_p": 5.54053e-12,
+   "robust_sv_median_before_pettitt": 0.00921843,
+   "robust_sv_median_after_pettitt": 0.014579,
+   "device_median_change_quantiles": [
+    -0.162453,
+    -0.0848069,
+    -0.0411582,
+    -0.0166746,
+    0.00134373,
+    0.018294,
+    0.0407761,
+    0.0713162,
+    0.131723
+   ],
+   "lowest_robust_sv_round_pairs": [
+    {
+     "second_round_utc": "2026-05-17T04:35:36Z",
+     "gap_h": 6.176,
+     "qubits": 153,
+     "robust_sv": 0.000403589,
+     "classical_sv": 0.000446508
+    },
+    {
+     "second_round_utc": "2026-05-16T22:25:03Z",
+     "gap_h": 24.0,
+     "qubits": 153,
+     "robust_sv": 0.000514958,
+     "classical_sv": 0.00135796
+    },
+    {
+     "second_round_utc": "2026-05-20T21:50:03Z",
+     "gap_h": 24.31,
+     "qubits": 153,
+     "robust_sv": 0.0005203,
+     "classical_sv": 0.000926898
+    },
+    {
+     "second_round_utc": "2026-05-22T23:38:32Z",
+     "gap_h": 25.16,
+     "qubits": 152,
+     "robust_sv": 0.000523784,
+     "classical_sv": 0.000847188
+    },
+    {
+     "second_round_utc": "2026-05-18T05:08:20Z",
+     "gap_h": 24.55,
+     "qubits": 153,
+     "robust_sv": 0.000525195,
+     "classical_sv": 0.000686033
+    },
+    {
+     "second_round_utc": "2026-05-27T02:28:28Z",
+     "gap_h": 24.43,
+     "qubits": 152,
+     "robust_sv": 0.000535118,
+     "classical_sv": 0.000788801
+    },
+    {
+     "second_round_utc": "2026-05-19T21:31:28Z",
+     "gap_h": 19.15,
+     "qubits": 154,
+     "robust_sv": 0.000552298,
+     "classical_sv": 0.000672344
+    },
+    {
+     "second_round_utc": "2026-05-26T02:02:27Z",
+     "gap_h": 25.86,
+     "qubits": 153,
+     "robust_sv": 0.000565578,
+     "classical_sv": 0.00074276
+    }
+   ],
+   "first_10_round_pairs": [
+    {
+     "second_round_utc": "2026-05-14T05:24:55Z",
+     "robust_sv": 0.010859,
+     "median_change": -0.0339441
+    },
+    {
+     "second_round_utc": "2026-05-15T05:57:17Z",
+     "robust_sv": 0.0245915,
+     "median_change": -0.162453
+    },
+    {
+     "second_round_utc": "2026-05-15T22:25:08Z",
+     "robust_sv": 0.000642976,
+     "median_change": 0.00547687
+    },
+    {
+     "second_round_utc": "2026-05-16T22:25:03Z",
+     "robust_sv": 0.000514958,
+     "median_change": -0.00243543
+    },
+    {
+     "second_round_utc": "2026-05-17T04:35:36Z",
+     "robust_sv": 0.000403589,
+     "median_change": 0.00138199
+    },
+    {
+     "second_round_utc": "2026-05-18T05:08:20Z",
+     "robust_sv": 0.000525195,
+     "median_change": 0.00179777
+    },
+    {
+     "second_round_utc": "2026-05-19T02:22:23Z",
+     "robust_sv": 0.000686207,
+     "median_change": -0.00791083
+    },
+    {
+     "second_round_utc": "2026-05-19T21:31:28Z",
+     "robust_sv": 0.000552298,
+     "median_change": 0.00130546
+    },
+    {
+     "second_round_utc": "2026-05-20T21:50:03Z",
+     "robust_sv": 0.0005203,
+     "median_change": -0.00399046
+    },
+    {
+     "second_round_utc": "2026-05-21T22:28:39Z",
+     "robust_sv": 0.000593135,
+     "median_change": -0.000345463
+    },
+    {
+     "second_round_utc": "2026-05-22T23:38:32Z",
+     "robust_sv": 0.000523784,
+     "median_change": 0.000502328
+    },
+    {
+     "second_round_utc": "2026-05-23T23:59:38Z",
+     "robust_sv": 0.000603738,
+     "median_change": 0.0143381
+    },
+    {
+     "second_round_utc": "2026-05-25T00:10:53Z",
+     "robust_sv": 0.00061503,
+     "median_change": 0.00198966
+    },
+    {
+     "second_round_utc": "2026-05-26T02:02:27Z",
+     "robust_sv": 0.000565578,
+     "median_change": -0.00449393
+    },
+    {
+     "second_round_utc": "2026-05-27T02:28:28Z",
+     "robust_sv": 0.000535118,
+     "median_change": 0.00248104
+    },
+    {
+     "second_round_utc": "2026-05-28T06:03:46Z",
+     "robust_sv": 0.0169326,
+     "median_change": 0.131723
+    },
+    {
+     "second_round_utc": "2026-05-29T10:13:57Z",
+     "robust_sv": 0.00835792,
+     "median_change": 0.0113161
+    },
+    {
+     "second_round_utc": "2026-05-29T20:17:15Z",
+     "robust_sv": 0.00929937,
+     "median_change": 0.0216407
+    },
+    {
+     "second_round_utc": "2026-05-30T20:27:22Z",
+     "robust_sv": 0.0093191,
+     "median_change": 0.0294094
+    },
+    {
+     "second_round_utc": "2026-05-31T20:39:23Z",
+     "robust_sv": 0.0067776,
+     "median_change": 0.00802812
+    },
+    {
+     "second_round_utc": "2026-06-01T21:15:03Z",
+     "robust_sv": 0.00805924,
+     "median_change": -0.00855775
+    },
+    {
+     "second_round_utc": "2026-06-02T15:50:27Z",
+     "robust_sv": 0.00766696,
+     "median_change": 0.00449756
+    },
+    {
+     "second_round_utc": "2026-06-04T23:08:28Z",
+     "robust_sv": 0.0107365,
+     "median_change": -0.048862
+    },
+    {
+     "second_round_utc": "2026-06-05T20:47:23Z",
+     "robust_sv": 0.011658,
+     "median_change": 0.015979
+    },
+    {
+     "second_round_utc": "2026-06-06T21:08:44Z",
+     "robust_sv": 0.0126506,
+     "median_change": 0.0249964
+    }
+   ]
+  },
+  "change_acf_by_regime": {
+   "quiet_2026-05-15T12_to_2026-05-28T00": {
+    "lag1": -0.330282,
+    "lag2": -0.124525,
+    "rounds": 13,
+    "qubits": 153
+   },
+   "2026-05-28T12_to_2026-06-28T00": {
+    "lag1": -0.485702,
+    "lag2": 0.00785976,
+    "rounds": 30,
+    "qubits": 155
+   },
+   "from_2026-06-28T00": {
+    "lag1": -0.501111,
+    "lag2": 0.0140971,
+    "rounds": 86,
+    "qubits": 156
+   }
+  },
+  "boundary": {
+   "boundary_utc": "2026-05-29T16:46:42Z",
+   "rounds_each_side": 10,
+   "last_round_before_utc": "2026-05-29T10:13:57Z",
+   "first_round_after_utc": "2026-05-29T20:17:15Z",
+   "reference_boundaries": 96,
+   "at_boundary": {
+    "qubits": 153.0,
+    "median_shift": 0.166889,
+    "share_up": 0.993464,
+    "spearman_levels": 0.833766,
+    "median_scale_before": 0.0279775,
+    "median_scale_after": 0.0868406,
+    "median_log10_scale_ratio": 0.474544,
+    "spearman_shift_vs_level_before": 0.25317
+   },
+   "reference_quantiles_5_50_95": {
+    "qubits": [
+     150.0,
+     152.0,
+     153.25
+    ],
+    "median_shift": [
+     -0.0309653,
+     -0.00491322,
+     0.0266339
+    ],
+    "share_up": [
+     0.273795,
+     0.460526,
+     0.65784
+    ],
+    "spearman_levels": [
+     0.700982,
+     0.747953,
+     0.807838
+    ],
+    "median_scale_before": [
+     0.0873382,
+     0.101518,
+     0.11559
+    ],
+    "median_scale_after": [
+     0.0879246,
+     0.103774,
+     0.115734
+    ],
+    "median_log10_scale_ratio": [
+     -0.0467949,
+     0.00207365,
+     0.0532101
+    ],
+    "spearman_shift_vs_level_before": [
+     -0.414718,
+     -0.295586,
+     -0.185041
+    ]
+   },
+   "boundary_percentile_in_reference": {
+    "qubits": 0.947917,
+    "median_shift": 1.0,
+    "share_up": 1.0,
+    "spearman_levels": 0.989583,
+    "median_scale_before": 0.0,
+    "median_scale_after": 0.0208333,
+    "median_log10_scale_ratio": 1.0,
+    "spearman_shift_vs_level_before": 1.0
+   }
+  }
+ },
+ "T2": {
+  "big_rounds": 133,
+  "change_level": {
+   "round_pairs": 132,
+   "robust_sv_quantiles": [
+    0.00111586,
+    0.00117657,
+    0.00518426,
+    0.00691801,
+    0.00893459,
+    0.0104955,
+    0.0120522,
+    0.0148253,
+    0.0156393
+   ],
+   "classical_sv_quantiles": [
+    0.00131432,
+    0.00143719,
+    0.00794735,
+    0.0116639,
+    0.015661,
+    0.0194517,
+    0.0229242,
+    0.0279361,
+    0.0290254
+   ],
+   "robust_sv_median_by_month": {
+    "2026-05": 0.00180733,
+    "2026-06": 0.00774173,
+    "2026-07": 0.00993472,
+    "2026-08": 0.00998882,
+    "2026-09": 0.00961858,
+    "2026-10": 0.0109506
+   },
+   "round_pairs_by_month": {
+    "2026-05": 20,
+    "2026-06": 28,
+    "2026-07": 25,
+    "2026-08": 25,
+    "2026-09": 30,
+    "2026-10": 4
+   },
+   "spearman_robust_sv_vs_gap": 0.338221,
+   "spearman_robust_sv_vs_gap_p": 7.29529e-05,
+   "pettitt_between_utc": [
+    "2026-06-26T21:06:45Z",
+    "2026-06-29T14:55:54Z"
+   ],
+   "pettitt_p": 4.44457e-10,
+   "robust_sv_median_before_pettitt": 0.00659089,
+   "robust_sv_median_after_pettitt": 0.00998771,
+   "device_median_change_quantiles": [
+    -0.0890175,
+    -0.0653026,
+    -0.0241064,
+    -0.0102377,
+    0.00178985,
+    0.0111376,
+    0.0236138,
+    0.0549654,
+    0.0698861
+   ],
+   "lowest_robust_sv_round_pairs": [
+    {
+     "second_round_utc": "2026-05-25T00:10:57Z",
+     "gap_h": 24.19,
+     "qubits": 153,
+     "robust_sv": 0.00111586,
+     "classical_sv": 0.00131432
+    },
+    {
+     "second_round_utc": "2026-05-17T04:35:40Z",
+     "gap_h": 6.176,
+     "qubits": 155,
+     "robust_sv": 0.00117472,
+     "classical_sv": 0.0058001
+    },
+    {
+     "second_round_utc": "2026-05-18T05:08:23Z",
+     "gap_h": 24.55,
+     "qubits": 155,
+     "robust_sv": 0.00118069,
+     "classical_sv": 0.00168026
+    },
+    {
+     "second_round_utc": "2026-05-21T22:28:43Z",
+     "gap_h": 24.64,
+     "qubits": 153,
+     "robust_sv": 0.00124241,
+     "classical_sv": 0.00139268
+    },
+    {
+     "second_round_utc": "2026-05-20T21:50:07Z",
+     "gap_h": 24.31,
+     "qubits": 153,
+     "robust_sv": 0.00132798,
+     "classical_sv": 0.00153625
+    },
+    {
+     "second_round_utc": "2026-05-15T22:25:11Z",
+     "gap_h": 16.46,
+     "qubits": 155,
+     "robust_sv": 0.00138315,
+     "classical_sv": 0.00192239
+    },
+    {
+     "second_round_utc": "2026-05-27T02:28:31Z",
+     "gap_h": 24.43,
+     "qubits": 154,
+     "robust_sv": 0.00141851,
+     "classical_sv": 0.00388809
+    },
+    {
+     "second_round_utc": "2026-05-22T23:38:35Z",
+     "gap_h": 25.16,
+     "qubits": 154,
+     "robust_sv": 0.0015171,
+     "classical_sv": 0.00266324
+    }
+   ],
+   "first_10_round_pairs": [
+    {
+     "second_round_utc": "2026-05-14T05:24:58Z",
+     "robust_sv": 0.0063104,
+     "median_change": -0.0170946
+    },
+    {
+     "second_round_utc": "2026-05-15T05:57:20Z",
+     "robust_sv": 0.0121242,
+     "median_change": -0.0890175
+    },
+    {
+     "second_round_utc": "2026-05-15T22:25:11Z",
+     "robust_sv": 0.00138315,
+     "median_change": -0.00109607
+    },
+    {
+     "second_round_utc": "2026-05-16T22:25:07Z",
+     "robust_sv": 0.00198733,
+     "median_change": -0.00195084
+    },
+    {
+     "second_round_utc": "2026-05-17T04:35:40Z",
+     "robust_sv": 0.00117472,
+     "median_change": 0.00409767
+    },
+    {
+     "second_round_utc": "2026-05-18T05:08:23Z",
+     "robust_sv": 0.00118069,
+     "median_change": -0.000986712
+    },
+    {
+     "second_round_utc": "2026-05-19T02:22:26Z",
+     "robust_sv": 0.00592329,
+     "median_change": -0.0659632
+    },
+    {
+     "second_round_utc": "2026-05-19T21:31:31Z",
+     "robust_sv": 0.00162733,
+     "median_change": -0.00443951
+    },
+    {
+     "second_round_utc": "2026-05-20T21:50:07Z",
+     "robust_sv": 0.00132798,
+     "median_change": 0.00300382
+    },
+    {
+     "second_round_utc": "2026-05-21T22:28:43Z",
+     "robust_sv": 0.00124241,
+     "median_change": -0.00294708
+    },
+    {
+     "second_round_utc": "2026-05-22T23:38:35Z",
+     "robust_sv": 0.0015171,
+     "median_change": 0.010274
+    },
+    {
+     "second_round_utc": "2026-05-23T23:59:41Z",
+     "robust_sv": 0.00520497,
+     "median_change": 0.0615424
+    },
+    {
+     "second_round_utc": "2026-05-25T00:10:57Z",
+     "robust_sv": 0.00111586,
+     "median_change": 0.00174722
+    },
+    {
+     "second_round_utc": "2026-05-26T02:02:30Z",
+     "robust_sv": 0.0016094,
+     "median_change": -0.00256328
+    },
+    {
+     "second_round_utc": "2026-05-27T02:28:31Z",
+     "robust_sv": 0.00141851,
+     "median_change": 0.001689
+    },
+    {
+     "second_round_utc": "2026-05-28T06:03:49Z",
+     "robust_sv": 0.00928166,
+     "median_change": 0.0698861
+    },
+    {
+     "second_round_utc": "2026-05-29T10:14:01Z",
+     "robust_sv": 0.00827657,
+     "median_change": 0.00689647
+    },
+    {
+     "second_round_utc": "2026-05-29T20:17:18Z",
+     "robust_sv": 0.00667968,
+     "median_change": 0.0150714
+    },
+    {
+     "second_round_utc": "2026-05-30T20:27:25Z",
+     "robust_sv": 0.00549006,
+     "median_change": -9.96864e-05
+    },
+    {
+     "second_round_utc": "2026-05-31T20:39:26Z",
+     "robust_sv": 0.0062835,
+     "median_change": 0.0160055
+    },
+    {
+     "second_round_utc": "2026-06-01T21:15:06Z",
+     "robust_sv": 0.00773711,
+     "median_change": 0.0112151
+    },
+    {
+     "second_round_utc": "2026-06-02T15:50:30Z",
+     "robust_sv": 0.00628216,
+     "median_change": 0.000769267
+    },
+    {
+     "second_round_utc": "2026-06-04T23:08:31Z",
+     "robust_sv": 0.00829478,
+     "median_change": -0.0218137
+    },
+    {
+     "second_round_utc": "2026-06-05T20:47:27Z",
+     "robust_sv": 0.00951306,
+     "median_change": -0.000160632
+    },
+    {
+     "second_round_utc": "2026-06-06T21:08:47Z",
+     "robust_sv": 0.00775657,
+     "median_change": 0.00581231
+    }
+   ]
+  },
+  "change_acf_by_regime": {
+   "quiet_2026-05-15T12_to_2026-05-28T00": {
+    "lag1": -0.340643,
+    "lag2": -0.0822137,
+    "rounds": 13,
+    "qubits": 155
+   },
+   "2026-05-28T12_to_2026-06-28T00": {
+    "lag1": -0.489903,
+    "lag2": 0.0126865,
+    "rounds": 30,
+    "qubits": 155
+   },
+   "from_2026-06-28T00": {
+    "lag1": -0.496613,
+    "lag2": 0.0208505,
+    "rounds": 86,
+    "qubits": 155
+   }
+  },
+  "boundary": {
+   "boundary_utc": "2026-05-29T16:46:42Z",
+   "rounds_each_side": 10,
+   "last_round_before_utc": "2026-05-29T10:14:01Z",
+   "first_round_after_utc": "2026-05-29T20:17:18Z",
+   "reference_boundaries": 96,
+   "at_boundary": {
+    "qubits": 153.0,
+    "median_shift": 0.1216,
+    "share_up": 0.980392,
+    "spearman_levels": 0.959829,
+    "median_scale_before": 0.0398701,
+    "median_scale_after": 0.0683538,
+    "median_log10_scale_ratio": 0.228394,
+    "spearman_shift_vs_level_before": 0.649646
+   },
+   "reference_quantiles_5_50_95": {
+    "qubits": [
+     153.0,
+     154.0,
+     154.0
+    ],
+    "median_shift": [
+     -0.015362,
+     -0.00135175,
+     0.0154746
+    ],
+    "share_up": [
+     0.362597,
+     0.487013,
+     0.654157
+    ],
+    "spearman_levels": [
+     0.939291,
+     0.954205,
+     0.965548
+    ],
+    "median_scale_before": [
+     0.0672392,
+     0.0768889,
+     0.0894404
+    ],
+    "median_scale_after": [
+     0.0684517,
+     0.078208,
+     0.0894404
+    ],
+    "median_log10_scale_ratio": [
+     -0.062175,
+     0.00506295,
+     0.0897595
+    ],
+    "spearman_shift_vs_level_before": [
+     -0.279585,
+     -0.140838,
+     -0.0137329
+    ]
+   },
+   "boundary_percentile_in_reference": {
+    "qubits": 0.427083,
+    "median_shift": 1.0,
+    "share_up": 1.0,
+    "spearman_levels": 0.78125,
+    "median_scale_before": 0.0,
+    "median_scale_after": 0.0416667,
+    "median_log10_scale_ratio": 1.0,
+    "spearman_shift_vs_level_before": 1.0
+   }
+  }
+ },
+ "gamma_phi": {
+  "big_rounds": 133,
+  "change_level": {
+   "round_pairs": 132,
+   "robust_sv_quantiles": [
+    0.00250319,
+    0.00267015,
+    0.00647522,
+    0.00782139,
+    0.0097158,
+    0.0112547,
+    0.0128179,
+    0.0159226,
+    0.0171876
+   ],
+   "classical_sv_quantiles": [
+    0.00305855,
+    0.00329794,
+    0.00942962,
+    0.0131595,
+    0.0175827,
+    0.0217346,
+    0.0264837,
+    0.0381456,
+    0.0392618
+   ],
+   "robust_sv_median_by_month": {
+    "2026-05": 0.00394494,
+    "2026-06": 0.00806619,
+    "2026-07": 0.00956319,
+    "2026-08": 0.010979,
+    "2026-09": 0.0111905,
+    "2026-10": 0.012179
+   },
+   "round_pairs_by_month": {
+    "2026-05": 20,
+    "2026-06": 28,
+    "2026-07": 25,
+    "2026-08": 25,
+    "2026-09": 30,
+    "2026-10": 4
+   },
+   "spearman_robust_sv_vs_gap": 0.211935,
+   "spearman_robust_sv_vs_gap_p": 0.0147048,
+   "pettitt_between_utc": [
+    "2026-07-15T22:23:38Z",
+    "2026-07-17T18:33:24Z"
+   ],
+   "pettitt_p": 6.55145e-14,
+   "robust_sv_median_before_pettitt": 0.00774617,
+   "robust_sv_median_after_pettitt": 0.010979,
+   "device_median_change_quantiles": [
+    -0.0926004,
+    -0.0517753,
+    -0.0213606,
+    -0.009899,
+    -0.000145407,
+    0.00720712,
+    0.0169322,
+    0.0575463,
+    0.107384
+   ],
+   "lowest_robust_sv_round_pairs": [
+    {
+     "second_round_utc": "2026-05-21T22:28:43Z",
+     "gap_h": 24.64,
+     "qubits": 151,
+     "robust_sv": 0.00250319,
+     "classical_sv": 0.00305855
+    },
+    {
+     "second_round_utc": "2026-05-25T00:10:57Z",
+     "gap_h": 24.19,
+     "qubits": 151,
+     "robust_sv": 0.00261777,
+     "classical_sv": 0.00349647
+    },
+    {
+     "second_round_utc": "2026-05-20T21:50:07Z",
+     "gap_h": 24.31,
+     "qubits": 152,
+     "robust_sv": 0.00278672,
+     "classical_sv": 0.00320874
+    },
+    {
+     "second_round_utc": "2026-05-22T23:38:35Z",
+     "gap_h": 25.16,
+     "qubits": 151,
+     "robust_sv": 0.00284921,
+     "classical_sv": 0.00380381
+    },
+    {
+     "second_round_utc": "2026-05-18T05:08:23Z",
+     "gap_h": 24.55,
+     "qubits": 153,
+     "robust_sv": 0.00288128,
+     "classical_sv": 0.00412379
+    },
+    {
+     "second_round_utc": "2026-05-15T22:25:11Z",
+     "gap_h": 16.46,
+     "qubits": 153,
+     "robust_sv": 0.00288509,
+     "classical_sv": 0.00387729
+    },
+    {
+     "second_round_utc": "2026-05-17T04:35:40Z",
+     "gap_h": 6.176,
+     "qubits": 153,
+     "robust_sv": 0.00305594,
+     "classical_sv": 0.00379576
+    },
+    {
+     "second_round_utc": "2026-05-26T02:02:30Z",
+     "gap_h": 25.86,
+     "qubits": 152,
+     "robust_sv": 0.00322383,
+     "classical_sv": 0.00463601
+    }
+   ],
+   "first_10_round_pairs": [
+    {
+     "second_round_utc": "2026-05-14T05:24:58Z",
+     "robust_sv": 0.00682808,
+     "median_change": 0.0169552
+    },
+    {
+     "second_round_utc": "2026-05-15T05:57:20Z",
+     "robust_sv": 0.00916126,
+     "median_change": 0.0658207
+    },
+    {
+     "second_round_utc": "2026-05-15T22:25:11Z",
+     "robust_sv": 0.00288509,
+     "median_change": 0.00344491
+    },
+    {
+     "second_round_utc": "2026-05-16T22:25:07Z",
+     "robust_sv": 0.00427847,
+     "median_change": 0.00792455
+    },
+    {
+     "second_round_utc": "2026-05-17T04:35:40Z",
+     "robust_sv": 0.00305594,
+     "median_change": -0.0060355
+    },
+    {
+     "second_round_utc": "2026-05-18T05:08:23Z",
+     "robust_sv": 0.00288128,
+     "median_change": 0.00271671
+    },
+    {
+     "second_round_utc": "2026-05-19T02:22:26Z",
+     "robust_sv": 0.0129898,
+     "median_change": 0.107384
+    },
+    {
+     "second_round_utc": "2026-05-19T21:31:31Z",
+     "robust_sv": 0.00361141,
+     "median_change": 0.0043092
+    },
+    {
+     "second_round_utc": "2026-05-20T21:50:07Z",
+     "robust_sv": 0.00278672,
+     "median_change": -0.0113181
+    },
+    {
+     "second_round_utc": "2026-05-21T22:28:43Z",
+     "robust_sv": 0.00250319,
+     "median_change": 0.000986649
+    },
+    {
+     "second_round_utc": "2026-05-22T23:38:35Z",
+     "robust_sv": 0.00284921,
+     "median_change": -0.00897207
+    },
+    {
+     "second_round_utc": "2026-05-23T23:59:41Z",
+     "robust_sv": 0.0121883,
+     "median_change": -0.0926004
+    },
+    {
+     "second_round_utc": "2026-05-25T00:10:57Z",
+     "robust_sv": 0.00261777,
+     "median_change": -0.000164417
+    },
+    {
+     "second_round_utc": "2026-05-26T02:02:30Z",
+     "robust_sv": 0.00322383,
+     "median_change": 0.00287266
+    },
+    {
+     "second_round_utc": "2026-05-27T02:28:31Z",
+     "robust_sv": 0.00353888,
+     "median_change": -0.0092617
+    },
+    {
+     "second_round_utc": "2026-05-28T06:03:49Z",
+     "robust_sv": 0.00913525,
+     "median_change": -0.0590796
+    },
+    {
+     "second_round_utc": "2026-05-29T10:14:01Z",
+     "robust_sv": 0.00939789,
+     "median_change": 0.00567625
+    },
+    {
+     "second_round_utc": "2026-05-29T20:17:18Z",
+     "robust_sv": 0.00790975,
+     "median_change": -0.0319887
+    },
+    {
+     "second_round_utc": "2026-05-30T20:27:25Z",
+     "robust_sv": 0.0070931,
+     "median_change": 0.00325427
+    },
+    {
+     "second_round_utc": "2026-05-31T20:39:26Z",
+     "robust_sv": 0.00741666,
+     "median_change": 0.00117382
+    },
+    {
+     "second_round_utc": "2026-06-01T21:15:06Z",
+     "robust_sv": 0.00863099,
+     "median_change": -0.0098852
+    },
+    {
+     "second_round_utc": "2026-06-02T15:50:30Z",
+     "robust_sv": 0.00896871,
+     "median_change": 0.00445798
+    },
+    {
+     "second_round_utc": "2026-06-04T23:08:31Z",
+     "robust_sv": 0.00965358,
+     "median_change": 0.00476275
+    },
+    {
+     "second_round_utc": "2026-06-05T20:47:27Z",
+     "robust_sv": 0.00997013,
+     "median_change": -0.00366577
+    },
+    {
+     "second_round_utc": "2026-06-06T21:08:47Z",
+     "robust_sv": 0.00774617,
+     "median_change": 0.00983004
+    }
+   ]
+  },
+  "change_acf_by_regime": {
+   "quiet_2026-05-15T12_to_2026-05-28T00": {
+    "lag1": -0.292361,
+    "lag2": -0.0112989,
+    "rounds": 13,
+    "qubits": 153
+   },
+   "2026-05-28T12_to_2026-06-28T00": {
+    "lag1": -0.473053,
+    "lag2": 0.0157151,
+    "rounds": 30,
+    "qubits": 154
+   },
+   "from_2026-06-28T00": {
+    "lag1": -0.500674,
+    "lag2": 0.0225953,
+    "rounds": 86,
+    "qubits": 155
+   }
+  },
+  "boundary": {
+   "boundary_utc": "2026-05-29T16:46:42Z",
+   "rounds_each_side": 10,
+   "last_round_before_utc": "2026-05-29T10:14:01Z",
+   "first_round_after_utc": "2026-05-29T20:17:18Z",
+   "reference_boundaries": 96,
+   "at_boundary": {
+    "qubits": 152.0,
+    "median_shift": -0.117505,
+    "share_up": 0.0460526,
+    "spearman_levels": 0.97163,
+    "median_scale_before": 0.051699,
+    "median_scale_after": 0.0758229,
+    "median_log10_scale_ratio": 0.150398,
+    "spearman_shift_vs_level_before": 0.653254
+   },
+   "reference_quantiles_5_50_95": {
+    "qubits": [
+     148.0,
+     150.0,
+     152.0
+    ],
+    "median_shift": [
+     -0.0165735,
+     -0.000187252,
+     0.00958838
+    ],
+    "share_up": [
+     0.352093,
+     0.496689,
+     0.590979
+    ],
+    "spearman_levels": [
+     0.9701,
+     0.977331,
+     0.983343
+    ],
+    "median_scale_before": [
+     0.067272,
+     0.0799206,
+     0.09056
+    ],
+    "median_scale_after": [
+     0.0694283,
+     0.0807469,
+     0.0900053
+    ],
+    "median_log10_scale_ratio": [
+     -0.0345003,
+     -0.00175751,
+     0.0494203
+    ],
+    "spearman_shift_vs_level_before": [
+     -0.268818,
+     -0.0923789,
+     0.0930121
+    ]
+   },
+   "boundary_percentile_in_reference": {
+    "qubits": 0.958333,
+    "median_shift": 0.0,
+    "share_up": 0.0,
+    "spearman_levels": 0.09375,
+    "median_scale_before": 0.0,
+    "median_scale_after": 0.291667,
+    "median_log10_scale_ratio": 1.0,
+    "spearman_shift_vs_level_before": 1.0
+   }
+  }
+ }
+}

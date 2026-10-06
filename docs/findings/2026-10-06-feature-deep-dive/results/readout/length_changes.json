@@ -1,0 +1,766 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "readout",
+ "script": "analysis/readout/length_changes.py",
+ "measured_utc": "2026-10-06T07:53:13Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "guard_h": 6.0,
+ "changes": [
+  {
+   "change": "2026-06-08T18:56:28Z",
+   "file": "20260608T185628",
+   "length_ns": [
+    1560.0,
+    1700.0
+   ],
+   "windows": {
+    "7d": {
+     "ro_all_sessions": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.1374,
+      "share_qubits_up": 0.0192,
+      "device_median_before": 0.011414,
+      "device_median_after": 0.0080566,
+      "per_qubit_log10_change_q": [
+       -0.616639,
+       -0.404478,
+       -0.265249,
+       -0.137443,
+       -0.0559274,
+       0.0653288,
+       1.0452
+      ],
+      "wilcoxon_p": 9.36e-26,
+      "placebo_days": 104,
+      "placebo_q05_q50_q95": [
+       -0.0386,
+       -0.0014,
+       0.0298
+      ],
+      "placebo_share_abs_ge_observed": 0.0
+     },
+     "ro_mixed_only": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.1408,
+      "share_qubits_up": 0.0192,
+      "device_median_before": 0.011353,
+      "device_median_after": 0.0080566,
+      "per_qubit_log10_change_q": [
+       -0.502696,
+       -0.3934,
+       -0.266172,
+       -0.140831,
+       -0.059187,
+       0.0486226,
+       1.05105
+      ],
+      "wilcoxon_p": 1.01e-25,
+      "placebo_days": 104,
+      "placebo_q05_q50_q95": [
+       -0.0405,
+       0.0,
+       0.0283
+      ],
+      "placebo_share_abs_ge_observed": 0.0
+     },
+     "p0g1_fresh_all_sessions": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.0792,
+      "share_qubits_up": 0.0897,
+      "device_median_before": 0.013977,
+      "device_median_after": 0.010986,
+      "per_qubit_log10_change_q": [
+       -0.505369,
+       -0.337852,
+       -0.196404,
+       -0.079193,
+       0.0,
+       0.0737068,
+       1.00467
+      ],
+      "wilcoxon_p": 9.15e-23,
+      "placebo_days": 104,
+      "placebo_q05_q50_q95": [
+       -0.0573,
+       0.0,
+       0.0094
+      ],
+      "placebo_share_abs_ge_observed": 0.0
+     },
+     "p0g1_fresh_mixed_only": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.078,
+      "share_qubits_up": 0.1154,
+      "device_median_before": 0.014038,
+      "device_median_after": 0.010864,
+      "per_qubit_log10_change_q": [
+       -0.431879,
+       -0.324428,
+       -0.191375,
+       -0.0779937,
+       0.00670719,
+       0.0738707,
+       1.00292
+      ],
+      "wilcoxon_p": 2.9e-22,
+      "placebo_days": 104,
+      "placebo_q05_q50_q95": [
+       -0.0568,
+       0.0,
+       0.0109
+      ],
+      "placebo_share_abs_ge_observed": 0.0
+     },
+     "p1g0_all_sessions": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.2693,
+      "share_qubits_up": 0.0321,
+      "device_median_before": 0.0084229,
+      "device_median_after": 0.0043945,
+      "per_qubit_log10_change_q": [
+       -0.936033,
+       -0.686756,
+       -0.507994,
+       -0.269309,
+       -0.138076,
+       0.0573317,
+       1.08261
+      ],
+      "wilcoxon_p": 6.18e-26,
+      "placebo_days": 104,
+      "placebo_q05_q50_q95": [
+       -0.0809,
+       0.0,
+       0.1028
+      ],
+      "placebo_share_abs_ge_observed": 0.0
+     },
+     "p1g0_mixed_only": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.2693,
+      "share_qubits_up": 0.0256,
+      "device_median_before": 0.0084229,
+      "device_median_after": 0.0043335,
+      "per_qubit_log10_change_q": [
+       -0.803606,
+       -0.705378,
+       -0.493737,
+       -0.269273,
+       -0.135095,
+       0.0603583,
+       1.06582
+      ],
+      "wilcoxon_p": 5.96e-26,
+      "placebo_days": 104,
+      "placebo_q05_q50_q95": [
+       -0.0873,
+       0.0,
+       0.0952
+      ],
+      "placebo_share_abs_ge_observed": 0.0
+     },
+     "asymmetry_p0g1_minus_p1g0": {
+      "qubits": 156,
+      "median_change": 0.0015869,
+      "median_before": 0.0048828,
+      "median_after": 0.0062256,
+      "wilcoxon_p": 7.53e-16
+     },
+     "t1_control": {
+      "qubits": 153,
+      "median_log10_after_over_before": -0.017,
+      "device_median_before_us": 147.21,
+      "placebo_q05_q50_q95": [
+       -0.0513,
+       0.0047,
+       0.1084
+      ]
+     },
+     "decay_prediction_t1_held_at_before": {
+      "full_length": {
+       "median_decay_before": 0.010541,
+       "median_predicted_change": 0.00094058
+      },
+      "half_length": {
+       "median_decay_before": 0.0052847,
+       "median_predicted_change": 0.0004729
+      },
+      "observed_median_change_p0g1": -0.0024414,
+      "observed_median_change_asymmetry": 0.0015869
+     },
+     "sessions_before": {
+      "even": 6,
+      "mixed": 34
+     },
+     "sessions_after": {
+      "even": 5,
+      "mixed": 34
+     }
+    },
+    "14d": {
+     "ro_all_sessions": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.1443,
+      "share_qubits_up": 0.0192,
+      "device_median_before": 0.011536,
+      "device_median_after": 0.0078125,
+      "per_qubit_log10_change_q": [
+       -0.965737,
+       -0.439596,
+       -0.268978,
+       -0.144318,
+       -0.0746906,
+       0.0269276,
+       1.05381
+      ],
+      "wilcoxon_p": 5.64e-26,
+      "placebo_days": 63,
+      "placebo_q05_q50_q95": [
+       -0.0218,
+       0.0,
+       0.0362
+      ],
+      "placebo_share_abs_ge_observed": 0.0
+     },
+     "ro_mixed_only": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.1448,
+      "share_qubits_up": 0.0128,
+      "device_median_before": 0.011658,
+      "device_median_after": 0.0077515,
+      "per_qubit_log10_change_q": [
+       -0.867452,
+       -0.430314,
+       -0.261182,
+       -0.144785,
+       -0.0791812,
+       0.0159543,
+       1.05463
+      ],
+      "wilcoxon_p": 5.43e-26,
+      "placebo_days": 63,
+      "placebo_q05_q50_q95": [
+       -0.0225,
+       0.0002,
+       0.0331
+      ],
+      "placebo_share_abs_ge_observed": 0.0
+     },
+     "p0g1_fresh_all_sessions": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.0931,
+      "share_qubits_up": 0.0513,
+      "device_median_before": 0.014282,
+      "device_median_after": 0.010864,
+      "per_qubit_log10_change_q": [
+       -0.86114,
+       -0.375891,
+       -0.21596,
+       -0.0931094,
+       -0.0148882,
+       0.0430597,
+       1.00342
+      ],
+      "wilcoxon_p": 5.37e-25,
+      "placebo_days": 63,
+      "placebo_q05_q50_q95": [
+       -0.0048,
+       0.0007,
+       0.0115
+      ],
+      "placebo_share_abs_ge_observed": 0.0
+     },
+     "p0g1_fresh_mixed_only": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.0969,
+      "share_qubits_up": 0.0449,
+      "device_median_before": 0.014282,
+      "device_median_after": 0.010864,
+      "per_qubit_log10_change_q": [
+       -0.796414,
+       -0.368088,
+       -0.206296,
+       -0.09691,
+       -0.0144464,
+       0.0437101,
+       0.997738
+      ],
+      "wilcoxon_p": 2.75e-24,
+      "placebo_days": 63,
+      "placebo_q05_q50_q95": [
+       -0.0044,
+       0.0006,
+       0.0117
+      ],
+      "placebo_share_abs_ge_observed": 0.0
+     },
+     "p1g0_all_sessions": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.2775,
+      "share_qubits_up": 0.0192,
+      "device_median_before": 0.0085449,
+      "device_median_after": 0.0042725,
+      "per_qubit_log10_change_q": [
+       -1.12453,
+       -0.660449,
+       -0.477121,
+       -0.277541,
+       -0.133531,
+       0.0313356,
+       1.10721
+      ],
+      "wilcoxon_p": 5.12e-26,
+      "placebo_days": 63,
+      "placebo_q05_q50_q95": [
+       -0.0763,
+       0.0,
+       0.1138
+      ],
+      "placebo_share_abs_ge_observed": 0.0
+     },
+     "p1g0_mixed_only": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.2791,
+      "share_qubits_up": 0.0192,
+      "device_median_before": 0.0085449,
+      "device_median_after": 0.0041504,
+      "per_qubit_log10_change_q": [
+       -1.07122,
+       -0.660449,
+       -0.468865,
+       -0.279122,
+       -0.129819,
+       0.0641423,
+       1.10783
+      ],
+      "wilcoxon_p": 5.52e-26,
+      "placebo_days": 63,
+      "placebo_q05_q50_q95": [
+       -0.071,
+       0.0,
+       0.1082
+      ],
+      "placebo_share_abs_ge_observed": 0.0
+     },
+     "asymmetry_p0g1_minus_p1g0": {
+      "qubits": 156,
+      "median_change": 0.0012207,
+      "median_before": 0.005249,
+      "median_after": 0.0061035,
+      "wilcoxon_p": 7.65e-14
+     },
+     "t1_control": {
+      "qubits": 154,
+      "median_log10_after_over_before": 0.0065,
+      "device_median_before_us": 136.15,
+      "placebo_q05_q50_q95": [
+       -0.0339,
+       -0.0017,
+       0.0411
+      ]
+     },
+     "decay_prediction_t1_held_at_before": {
+      "full_length": {
+       "median_decay_before": 0.011393,
+       "median_predicted_change": 0.0010161
+      },
+      "half_length": {
+       "median_decay_before": 0.0057128,
+       "median_predicted_change": 0.00051109
+      },
+      "observed_median_change_p0g1": -0.0026855,
+      "observed_median_change_asymmetry": 0.0012207
+     },
+     "sessions_before": {
+      "even": 12,
+      "mixed": 62
+     },
+     "sessions_after": {
+      "even": 10,
+      "mixed": 51
+     }
+    }
+   }
+  },
+  {
+   "change": "2026-07-30T21:09:17Z",
+   "file": "20260730T210917",
+   "length_ns": [
+    1700.0,
+    1660.0
+   ],
+   "windows": {
+    "7d": {
+     "ro_all_sessions": {
+      "qubits": 156,
+      "median_log10_after_over_before": 0.0026,
+      "share_qubits_up": 0.5385,
+      "device_median_before": 0.0080566,
+      "device_median_after": 0.0082092,
+      "per_qubit_log10_change_q": [
+       -0.2156,
+       -0.0835732,
+       -0.0416786,
+       0.00262424,
+       0.052178,
+       0.083904,
+       0.105804
+      ],
+      "wilcoxon_p": 0.136,
+      "placebo_days": 104,
+      "placebo_q05_q50_q95": [
+       -0.0386,
+       -0.0014,
+       0.0298
+      ],
+      "placebo_share_abs_ge_observed": 0.7885
+     },
+     "ro_mixed_only": {
+      "qubits": 156,
+      "median_log10_after_over_before": 0.0,
+      "share_qubits_up": 0.4872,
+      "device_median_before": 0.0079956,
+      "device_median_after": 0.0082397,
+      "per_qubit_log10_change_q": [
+       -0.207913,
+       -0.0815689,
+       -0.0479435,
+       0.0,
+       0.0514936,
+       0.0989778,
+       0.108728
+      ],
+      "wilcoxon_p": 0.334,
+      "placebo_days": 104,
+      "placebo_q05_q50_q95": [
+       -0.0405,
+       0.0,
+       0.0283
+      ],
+      "placebo_share_abs_ge_observed": 1.0
+     },
+     "p0g1_fresh_all_sessions": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.004,
+      "share_qubits_up": 0.4359,
+      "device_median_before": 0.011108,
+      "device_median_after": 0.011169,
+      "per_qubit_log10_change_q": [
+       -0.143091,
+       -0.0811313,
+       -0.0449384,
+       -0.00399955,
+       0.0413927,
+       0.0789235,
+       0.0898097
+      ],
+      "wilcoxon_p": 0.467,
+      "placebo_days": 104,
+      "placebo_q05_q50_q95": [
+       -0.0573,
+       0.0,
+       0.0094
+      ],
+      "placebo_share_abs_ge_observed": 0.5
+     },
+     "p0g1_fresh_mixed_only": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.0007,
+      "share_qubits_up": 0.4167,
+      "device_median_before": 0.010986,
+      "device_median_after": 0.011292,
+      "per_qubit_log10_change_q": [
+       -0.158068,
+       -0.0836812,
+       -0.0451698,
+       -0.000720224,
+       0.0483726,
+       0.09691,
+       0.101622
+      ],
+      "wilcoxon_p": 0.741,
+      "placebo_days": 104,
+      "placebo_q05_q50_q95": [
+       -0.0568,
+       0.0,
+       0.0109
+      ],
+      "placebo_share_abs_ge_observed": 0.6923
+     },
+     "p1g0_all_sessions": {
+      "qubits": 156,
+      "median_log10_after_over_before": 0.0078,
+      "share_qubits_up": 0.5128,
+      "device_median_before": 0.0039062,
+      "device_median_after": 0.0040894,
+      "per_qubit_log10_change_q": [
+       -0.430125,
+       -0.237039,
+       -0.085217,
+       0.00780783,
+       0.108389,
+       0.210303,
+       0.259637
+      ],
+      "wilcoxon_p": 0.157,
+      "placebo_days": 104,
+      "placebo_q05_q50_q95": [
+       -0.0809,
+       0.0,
+       0.1028
+      ],
+      "placebo_share_abs_ge_observed": 0.5385
+     },
+     "p1g0_mixed_only": {
+      "qubits": 156,
+      "median_log10_after_over_before": 0.0,
+      "share_qubits_up": 0.4679,
+      "device_median_before": 0.0039062,
+      "device_median_after": 0.0040283,
+      "per_qubit_log10_change_q": [
+       -0.430125,
+       -0.20132,
+       -0.0902466,
+       0.0,
+       0.106833,
+       0.225336,
+       0.268845
+      ],
+      "wilcoxon_p": 0.341,
+      "placebo_days": 104,
+      "placebo_q05_q50_q95": [
+       -0.0873,
+       0.0,
+       0.0952
+      ],
+      "placebo_share_abs_ge_observed": 1.0
+     },
+     "asymmetry_p0g1_minus_p1g0": {
+      "qubits": 156,
+      "median_change": -0.00012207,
+      "median_before": 0.0063477,
+      "median_after": 0.0062256,
+      "wilcoxon_p": 0.271
+     },
+     "t1_control": {
+      "qubits": 155,
+      "median_log10_after_over_before": -0.0062,
+      "device_median_before_us": 132.44,
+      "placebo_q05_q50_q95": [
+       -0.0513,
+       0.0047,
+       0.1084
+      ]
+     },
+     "decay_prediction_t1_held_at_before": {
+      "full_length": {
+       "median_decay_before": 0.012754,
+       "median_predicted_change": -0.00029823
+      },
+      "half_length": {
+       "median_decay_before": 0.0063977,
+       "median_predicted_change": -0.00015006
+      },
+      "observed_median_change_p0g1": -0.00012207,
+      "observed_median_change_asymmetry": -0.00012207
+     },
+     "sessions_before": {
+      "even": 8,
+      "mixed": 27
+     },
+     "sessions_after": {
+      "even": 6,
+      "mixed": 28
+     }
+    },
+    "14d": {
+     "ro_all_sessions": {
+      "qubits": 156,
+      "median_log10_after_over_before": 0.0062,
+      "share_qubits_up": 0.5577,
+      "device_median_before": 0.0081177,
+      "device_median_after": 0.0082092,
+      "per_qubit_log10_change_q": [
+       -0.214093,
+       -0.0814455,
+       -0.0366822,
+       0.00624895,
+       0.0481324,
+       0.0913058,
+       0.124348
+      ],
+      "wilcoxon_p": 0.0529,
+      "placebo_days": 63,
+      "placebo_q05_q50_q95": [
+       -0.0218,
+       0.0,
+       0.0362
+      ],
+      "placebo_share_abs_ge_observed": 0.5714
+     },
+     "ro_mixed_only": {
+      "qubits": 156,
+      "median_log10_after_over_before": 0.0013,
+      "share_qubits_up": 0.5,
+      "device_median_before": 0.0080872,
+      "device_median_after": 0.0082397,
+      "per_qubit_log10_change_q": [
+       -0.207384,
+       -0.0877089,
+       -0.0385488,
+       0.00127359,
+       0.0545947,
+       0.0910467,
+       0.15585
+      ],
+      "wilcoxon_p": 0.106,
+      "placebo_days": 63,
+      "placebo_q05_q50_q95": [
+       -0.0225,
+       0.0002,
+       0.0331
+      ],
+      "placebo_share_abs_ge_observed": 0.8571
+     },
+     "p0g1_fresh_all_sessions": {
+      "qubits": 156,
+      "median_log10_after_over_before": 0.0042,
+      "share_qubits_up": 0.5192,
+      "device_median_before": 0.011292,
+      "device_median_after": 0.01123,
+      "per_qubit_log10_change_q": [
+       -0.158068,
+       -0.0549098,
+       -0.0358658,
+       0.00420569,
+       0.0454179,
+       0.0831418,
+       0.0917019
+      ],
+      "wilcoxon_p": 0.0781,
+      "placebo_days": 63,
+      "placebo_q05_q50_q95": [
+       -0.0048,
+       0.0007,
+       0.0115
+      ],
+      "placebo_share_abs_ge_observed": 0.5079
+     },
+     "p0g1_fresh_mixed_only": {
+      "qubits": 156,
+      "median_log10_after_over_before": 0.0053,
+      "share_qubits_up": 0.5385,
+      "device_median_before": 0.011292,
+      "device_median_after": 0.01123,
+      "per_qubit_log10_change_q": [
+       -0.158068,
+       -0.0500418,
+       -0.0352953,
+       0.00530127,
+       0.0490755,
+       0.0893465,
+       0.126775
+      ],
+      "wilcoxon_p": 0.046,
+      "placebo_days": 63,
+      "placebo_q05_q50_q95": [
+       -0.0044,
+       0.0006,
+       0.0117
+      ],
+      "placebo_share_abs_ge_observed": 0.381
+     },
+     "p1g0_all_sessions": {
+      "qubits": 156,
+      "median_log10_after_over_before": 0.0,
+      "share_qubits_up": 0.4744,
+      "device_median_before": 0.0040894,
+      "device_median_after": 0.0040283,
+      "per_qubit_log10_change_q": [
+       -0.391691,
+       -0.196682,
+       -0.0791812,
+       0.0,
+       0.0934265,
+       0.186658,
+       0.210853
+      ],
+      "wilcoxon_p": 0.97,
+      "placebo_days": 63,
+      "placebo_q05_q50_q95": [
+       -0.0763,
+       0.0,
+       0.1138
+      ],
+      "placebo_share_abs_ge_observed": 1.0
+     },
+     "p1g0_mixed_only": {
+      "qubits": 156,
+      "median_log10_after_over_before": 0.0,
+      "share_qubits_up": 0.4359,
+      "device_median_before": 0.0040894,
+      "device_median_after": 0.0040283,
+      "per_qubit_log10_change_q": [
+       -0.391691,
+       -0.164437,
+       -0.0852732,
+       0.0,
+       0.0914653,
+       0.176091,
+       0.227244
+      ],
+      "wilcoxon_p": 0.777,
+      "placebo_days": 63,
+      "placebo_q05_q50_q95": [
+       -0.071,
+       0.0,
+       0.1082
+      ],
+      "placebo_share_abs_ge_observed": 1.0
+     },
+     "asymmetry_p0g1_minus_p1g0": {
+      "qubits": 156,
+      "median_change": 0.00012207,
+      "median_before": 0.0062256,
+      "median_after": 0.0062256,
+      "wilcoxon_p": 0.583
+     },
+     "t1_control": {
+      "qubits": 156,
+      "median_log10_after_over_before": -0.0088,
+      "device_median_before_us": 129.32,
+      "placebo_q05_q50_q95": [
+       -0.0339,
+       -0.0017,
+       0.0411
+      ]
+     },
+     "decay_prediction_t1_held_at_before": {
+      "full_length": {
+       "median_decay_before": 0.01306,
+       "median_predicted_change": -0.00030532
+      },
+      "half_length": {
+       "median_decay_before": 0.0065514,
+       "median_predicted_change": -0.00015366
+      },
+      "observed_median_change_p0g1": 0.00012207,
+      "observed_median_change_asymmetry": 0.00012207
+     },
+     "sessions_before": {
+      "even": 14,
+      "mixed": 52
+     },
+     "sessions_after": {
+      "even": 8,
+      "mixed": 34
+     }
+    }
+   }
+  }
+ ],
+ "measure_threshold_first_file": "20260608T185628"
+}

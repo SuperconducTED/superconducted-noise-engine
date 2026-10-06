@@ -1,0 +1,546 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "readout",
+ "script": "analysis/readout/thresholds_m2_init.py",
+ "measured_utc": "2026-10-06T07:53:17Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "thresholds": {
+  "g1.measure.threshold": {
+   "first_file": "20260608T185628",
+   "records": 239148,
+   "value_q": [
+    -143155000.0,
+    -80532200.0,
+    -35031100.0,
+    -8896830.0,
+    2333600.0,
+    24807200.0,
+    89082200.0
+   ],
+   "share_negative": 0.8456,
+   "qubits_always_negative": 9,
+   "qubits_always_positive": 0,
+   "qubits_changing_sign": 147,
+   "per_qubit_median_abs_q": [
+    832123.0,
+    1279060.0,
+    3110910.0,
+    11073800.0,
+    33408600.0,
+    65313000.0,
+    91709400.0
+   ],
+   "per_qubit_sd_over_median_abs_q": [
+    0.135559,
+    0.20592,
+    0.352709,
+    0.715072,
+    1.59168,
+    2.57583,
+    2.98355
+   ],
+   "change_files": 327,
+   "qubits_changed_in_a_change_file_q": [
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0
+   ],
+   "change_files_all_156": 327,
+   "value_changes_per_qubit_q": [
+    327.0,
+    327.0,
+    327.0,
+    327.0,
+    327.0,
+    327.0,
+    327.0
+   ]
+  },
+  "g1.measure_reset.threshold": {
+   "first_file": "20260902T045624",
+   "records": 127452,
+   "value_q": [
+    -141606000.0,
+    -77070100.0,
+    -34852600.0,
+    -8828990.0,
+    2737910.0,
+    26774800.0,
+    89082200.0
+   ],
+   "share_negative": 0.84,
+   "qubits_always_negative": 20,
+   "qubits_always_positive": 0,
+   "qubits_changing_sign": 136,
+   "per_qubit_median_abs_q": [
+    832123.0,
+    1109950.0,
+    3129540.0,
+    10837800.0,
+    32920000.0,
+    67034000.0,
+    90993800.0
+   ],
+   "per_qubit_sd_over_median_abs_q": [
+    0.129075,
+    0.173287,
+    0.320347,
+    0.6434,
+    1.69211,
+    3.0348,
+    3.55058
+   ],
+   "change_files": 107,
+   "qubits_changed_in_a_change_file_q": [
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0
+   ],
+   "change_files_all_156": 107,
+   "value_changes_per_qubit_q": [
+    107.0,
+    107.0,
+    107.0,
+    107.0,
+    107.0,
+    107.0,
+    107.0
+   ]
+  },
+  "g1.measure_2.threshold": {
+   "first_file": "20260807T032159",
+   "records": 165048,
+   "value_q": [
+    -136233000.0,
+    -50213900.0,
+    -21153800.0,
+    -4027240.0,
+    2139730.0,
+    13942000.0,
+    73626500.0
+   ],
+   "share_negative": 0.8094,
+   "qubits_always_negative": 14,
+   "qubits_always_positive": 1,
+   "qubits_changing_sign": 141,
+   "per_qubit_median_abs_q": [
+    430239.0,
+    584538.0,
+    1454100.0,
+    4636720.0,
+    19440100.0,
+    43163600.0,
+    87139900.0
+   ],
+   "per_qubit_sd_over_median_abs_q": [
+    0.183647,
+    0.203938,
+    0.337555,
+    0.756468,
+    1.61078,
+    2.92164,
+    3.53278
+   ],
+   "change_files": 124,
+   "qubits_changed_in_a_change_file_q": [
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0
+   ],
+   "change_files_all_156": 124,
+   "value_changes_per_qubit_q": [
+    124.0,
+    124.0,
+    124.0,
+    124.0,
+    124.0,
+    124.0,
+    124.0
+   ]
+  },
+  "g1.measure_reset_2.threshold": {
+   "first_file": "20260902T045624",
+   "records": 127452,
+   "value_q": [
+    -136233000.0,
+    -52887300.0,
+    -21060700.0,
+    -4118230.0,
+    2331300.0,
+    15942900.0,
+    73626500.0
+   ],
+   "share_negative": 0.8026,
+   "qubits_always_negative": 14,
+   "qubits_always_positive": 1,
+   "qubits_changing_sign": 141,
+   "per_qubit_median_abs_q": [
+    569114.0,
+    776708.0,
+    1572200.0,
+    4790200.0,
+    18287100.0,
+    39848300.0,
+    90964300.0
+   ],
+   "per_qubit_sd_over_median_abs_q": [
+    0.179842,
+    0.189255,
+    0.394881,
+    0.756123,
+    1.50965,
+    2.63361,
+    2.66942
+   ],
+   "change_files": 116,
+   "qubits_changed_in_a_change_file_q": [
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0
+   ],
+   "change_files_all_156": 116,
+   "value_changes_per_qubit_q": [
+    116.0,
+    116.0,
+    116.0,
+    116.0,
+    116.0,
+    116.0,
+    116.0
+   ]
+  },
+  "g1.measure.threshold_eq_g1.measure_reset.threshold": {
+   "compared": 127452,
+   "mismatch": 0
+  },
+  "g1.measure_2.threshold_eq_g1.measure_reset_2.threshold": {
+   "compared": 127452,
+   "mismatch": 0
+  },
+  "measure_vs_measure_2": {
+   "files_in_measure_2_lifetime": 1057,
+   "measure_changes_there": 142,
+   "measure_2_changes_there": 124,
+   "both_change_same_file": 109,
+   "per_qubit_median_ratio_m2_over_m_q": [
+    -3.29615,
+    -2.11295,
+    0.101524,
+    0.445482,
+    1.43188,
+    11.9164,
+    33.1459
+   ],
+   "spearman_per_qubit_medians": {
+    "n": 156,
+    "rho": 0.7351,
+    "p": 8.89e-28
+   },
+   "same_sign_share_records": 0.8309
+  },
+  "threshold_change_vs_readout_session": {
+   "all_files": {
+    "files": 1532,
+    "change_and_session": 228,
+    "change_no_session": 99,
+    "session_no_change": 211,
+    "neither": 994,
+    "change_with_even_session": 20,
+    "change_with_mixed_only": 208,
+    "even_session_no_change": 77,
+    "mixed_only_session_no_change": 134
+   },
+   "live_files": {
+    "files": 1089,
+    "change_and_session": 223,
+    "change_no_session": 62,
+    "session_no_change": 148,
+    "neither": 656,
+    "change_with_even_session": 19,
+    "change_with_mixed_only": 204,
+    "even_session_no_change": 61,
+    "mixed_only_session_no_change": 87
+   },
+   "historical_files": {
+    "files": 443,
+    "change_and_session": 5,
+    "change_no_session": 37,
+    "session_no_change": 63,
+    "neither": 338,
+    "change_with_even_session": 1,
+    "change_with_mixed_only": 4,
+    "even_session_no_change": 16,
+    "mixed_only_session_no_change": 47
+   }
+  },
+  "sessions_whose_interval_file_changes_threshold": {
+   "even": {
+    "with_change": 20,
+    "sessions": 97
+   },
+   "mixed": {
+    "with_change": 208,
+    "sessions": 343
+   }
+  }
+ },
+ "measure_2": {
+  "rounds": 52,
+  "round_gap_h_q": [
+   8.21306,
+   8.83486,
+   21.0572,
+   24.6617,
+   28.1506,
+   52.5382,
+   53.8869
+  ],
+  "hours_from_round_to_nearest_even_session_q": [
+   0.226389,
+   0.231631,
+   0.312444,
+   0.431806,
+   0.763806,
+   25.0824,
+   25.3089
+  ],
+  "share_rounds_within_1h_of_even_session": 0.9038,
+  "share_rounds_within_1h_of_any_session": 0.9038,
+  "placeholder_files": [
+   "20260807T032159",
+   "20260810T140235"
+  ],
+  "per_qubit_median_ratio_m2_over_ro_q": [
+   0.535211,
+   0.609236,
+   0.791304,
+   1.2461,
+   2.87432,
+   5.71649,
+   6.56818
+  ],
+  "share_qubits_m2_above_ro": 0.6026,
+  "spearman_per_qubit_medians_m2_vs_ro": {
+   "n": 156,
+   "rho": 0.8523,
+   "p": 3.43e-45
+  },
+  "within_qubit_spearman_demeaned_logs": {
+   "n": 8112,
+   "rho": 0.3815,
+   "p": 2.27e-279
+  },
+  "device_median_m2": 0.013916,
+  "device_median_ro_same_files": 0.0097656
+ },
+ "init_error": {
+  "first_file": "20260804T005230",
+  "qubits_never_present": [
+   1,
+   3,
+   11,
+   12,
+   15,
+   32,
+   33,
+   35,
+   41,
+   43,
+   45,
+   47,
+   51,
+   53,
+   55,
+   60,
+   61,
+   62,
+   63,
+   65,
+   67,
+   72,
+   76,
+   81,
+   83,
+   87,
+   91,
+   93,
+   99,
+   101,
+   102,
+   113,
+   116,
+   126,
+   128,
+   131,
+   135,
+   145,
+   149,
+   155
+  ],
+  "qubits_never_present_count": 40,
+  "qubits_partially_present": [
+   {
+    "qubit": 40,
+    "present_share": 0.8222
+   }
+  ],
+  "never_present_by_degree": {
+   "1": [
+    1,
+    8
+   ],
+   "2": [
+    18,
+    100
+   ],
+   "3": [
+    21,
+    48
+   ]
+  },
+  "never_present_mod_17_counts": [
+   2,
+   2,
+   3,
+   1,
+   2,
+   0,
+   1,
+   2,
+   2,
+   4,
+   1,
+   4,
+   3,
+   3,
+   3,
+   3,
+   4
+  ],
+  "stamp_events": 25158,
+  "qubits_with_lt_50_stamp_events": [
+   {
+    "qubit": 40,
+    "events": 1
+   },
+   {
+    "qubit": 73,
+    "events": 22
+   },
+   {
+    "qubit": 78,
+    "events": 10
+   },
+   {
+    "qubit": 96,
+    "events": 9
+   },
+   {
+    "qubit": 117,
+    "events": 1
+   },
+   {
+    "qubit": 125,
+    "events": 22
+   },
+   {
+    "qubit": 129,
+    "events": 16
+   },
+   {
+    "qubit": 153,
+    "events": 10
+   }
+  ],
+  "stamp_events_inside_a_readout_session": 6028,
+  "minutes_to_nearest_readout_session_q": [
+   0.0,
+   0.0,
+   0.0,
+   20.95,
+   159.133,
+   383.033,
+   1901.55
+  ],
+  "ro_stamp_minus_init_stamp_h_q": [
+   -21.4111,
+   -9.77806,
+   -3.65194,
+   -0.296667,
+   64.4217,
+   909.497,
+   1507.45
+  ],
+  "records_below_1e-6": 540,
+  "qubits_with_values_below_1e-6": 59,
+  "between_qubit_spearman_medians": {
+   "init_vs_p1g0": {
+    "n": 116,
+    "rho": 0.8224,
+    "p": 1.08e-29
+   },
+   "init_vs_p0g1": {
+    "n": 116,
+    "rho": 0.6015,
+    "p": 9.35e-13
+   },
+   "init_vs_ro": {
+    "n": 116,
+    "rho": 0.7171,
+    "p": 1.37e-19
+   }
+  },
+  "within_qubit_spearman_demeaned_logs_same_session": {
+   "init_vs_p1g0": {
+    "n": 4938,
+    "rho": 0.7216,
+    "p": 0.0
+   },
+   "init_vs_ro": {
+    "n": 4938,
+    "rho": 0.4939,
+    "p": 4.06e-302
+   },
+   "qubits": 109
+  },
+  "share_records_p1g0_below_init": 0.148,
+  "per_qubit_median_p1g0_over_init_q": [
+   1.26988,
+   1.37731,
+   1.65974,
+   1.94964,
+   2.60623,
+   12.8124,
+   35.4004
+  ],
+  "never_present_vs_others_median_ro": [
+   0.033142,
+   0.0071411,
+   1.28e-20
+  ],
+  "never_present_vs_others_median_p1g0": [
+   0.027222,
+   0.0036621,
+   6.07e-21
+  ]
+ }
+}

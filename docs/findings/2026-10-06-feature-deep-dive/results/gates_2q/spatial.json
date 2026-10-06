@@ -1,0 +1,478 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "gates_2q",
+ "script": "analysis/gates_2q/spatial_2q.py",
+ "measured_utc": "2026-10-06T07:37:48Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "couplers": 176,
+ "horizontal_couplers": 120,
+ "bridge_couplers": 56,
+ "qubit_degree_counts": {
+  "1": 8,
+  "2": 100,
+  "3": 48
+ },
+ "line_graph_edges": 244,
+ "cz": {
+  "couplers": 172,
+  "horizontal_median": 0.002739,
+  "bridge_median": 0.00271,
+  "bridge_over_horizontal": 0.9894,
+  "mannwhitney_p": 0.679,
+  "spearman_vs_distance_from_centre": {
+   "rho": -0.166,
+   "p": 0.0295,
+   "n": 172
+  },
+  "spearman_vs_row_y": {
+   "rho": -0.118,
+   "p": 0.123,
+   "n": 172
+  },
+  "spearman_vs_column_x": {
+   "rho": -0.007042,
+   "p": 0.927,
+   "n": 172
+  },
+  "spearman_vs_degree_sum": {
+   "rho": 0.1598,
+   "p": 0.0362,
+   "n": 172
+  },
+  "morans_i_log": {
+   "n": 172,
+   "I": 0.2634,
+   "expected_under_null": -0.005848,
+   "null_q_2p5_50_97p5": [
+    -0.117602,
+    -0.0111398,
+    0.13183
+   ],
+   "p_one_sided": 0.0006
+  },
+  "morans_i_rank": {
+   "n": 172,
+   "I": 0.2095,
+   "expected_under_null": -0.005848,
+   "null_q_2p5_50_97p5": [
+    -0.131989,
+    -0.00775283,
+    0.121474
+   ],
+   "p_one_sided": 0.0004
+  }
+ },
+ "rzz": {
+  "couplers": 171,
+  "horizontal_median": 0.002627,
+  "bridge_median": 0.002536,
+  "bridge_over_horizontal": 0.9653,
+  "mannwhitney_p": 0.36,
+  "spearman_vs_distance_from_centre": {
+   "rho": -0.1203,
+   "p": 0.117,
+   "n": 171
+  },
+  "spearman_vs_row_y": {
+   "rho": -0.153,
+   "p": 0.0458,
+   "n": 171
+  },
+  "spearman_vs_column_x": {
+   "rho": -0.02126,
+   "p": 0.783,
+   "n": 171
+  },
+  "spearman_vs_degree_sum": {
+   "rho": 0.1049,
+   "p": 0.172,
+   "n": 171
+  },
+  "morans_i_log": {
+   "n": 171,
+   "I": 0.3831,
+   "expected_under_null": -0.005882,
+   "null_q_2p5_50_97p5": [
+    -0.106904,
+    -0.012741,
+    0.135786
+   ],
+   "p_one_sided": 0.0001
+  },
+  "morans_i_rank": {
+   "n": 171,
+   "I": 0.1919,
+   "expected_under_null": -0.005882,
+   "null_q_2p5_50_97p5": [
+    -0.13026,
+    -0.00710885,
+    0.123536
+   ],
+   "p_one_sided": 0.0016
+  }
+ },
+ "abs_zz": {
+  "couplers": 175,
+  "horizontal_median": 5.639e-06,
+  "bridge_median": 7.986e-06,
+  "bridge_over_horizontal": 1.416,
+  "mannwhitney_p": 0.00127,
+  "spearman_vs_distance_from_centre": {
+   "rho": -0.01982,
+   "p": 0.795,
+   "n": 175
+  },
+  "spearman_vs_row_y": {
+   "rho": 0.04978,
+   "p": 0.513,
+   "n": 175
+  },
+  "spearman_vs_column_x": {
+   "rho": 0.2395,
+   "p": 0.00141,
+   "n": 175
+  },
+  "spearman_vs_degree_sum": {
+   "rho": -0.04483,
+   "p": 0.556,
+   "n": 175
+  },
+  "morans_i_log": {
+   "n": 175,
+   "I": -0.002103,
+   "expected_under_null": -0.005747,
+   "null_q_2p5_50_97p5": [
+    -0.126831,
+    -0.00658353,
+    0.123854
+   ],
+   "p_one_sided": 0.472
+  },
+  "morans_i_rank": {
+   "n": 175,
+   "I": 0.03252,
+   "expected_under_null": -0.005747,
+   "null_q_2p5_50_97p5": [
+    -0.128269,
+    -0.00670046,
+    0.120787
+   ],
+   "p_one_sided": 0.272
+  }
+ },
+ "faulty_positions": {
+  "cz": [
+   {
+    "coupler": "27-28",
+    "placeholder_share": 1.0,
+    "midpoint": [
+     8.5,
+     3.0
+    ],
+    "orientation": "horizontal"
+   },
+   {
+    "coupler": "32-33",
+    "placeholder_share": 1.0,
+    "midpoint": [
+     13.5,
+     3.0
+    ],
+    "orientation": "horizontal"
+   },
+   {
+    "coupler": "71-72",
+    "placeholder_share": 1.0,
+    "midpoint": [
+     12.5,
+     7.0
+    ],
+    "orientation": "horizontal"
+   },
+   {
+    "coupler": "72-73",
+    "placeholder_share": 1.0,
+    "midpoint": [
+     13.5,
+     7.0
+    ],
+    "orientation": "horizontal"
+   },
+   {
+    "coupler": "102-103",
+    "placeholder_share": 0.8881,
+    "midpoint": [
+     3.5,
+     11.0
+    ],
+    "orientation": "horizontal"
+   },
+   {
+    "coupler": "148-149",
+    "placeholder_share": 0.004545,
+    "midpoint": [
+     9.5,
+     15.0
+    ],
+    "orientation": "horizontal"
+   },
+   {
+    "coupler": "149-150",
+    "placeholder_share": 0.04034,
+    "midpoint": [
+     10.5,
+     15.0
+    ],
+    "orientation": "horizontal"
+   }
+  ],
+  "rzz": [
+   {
+    "coupler": "7-17",
+    "placeholder_share": 0.2364,
+    "midpoint": [
+     8.0,
+     1.5
+    ],
+    "orientation": "bridge"
+   },
+   {
+    "coupler": "17-27",
+    "placeholder_share": 0.2756,
+    "midpoint": [
+     8.0,
+     2.5
+    ],
+    "orientation": "bridge"
+   },
+   {
+    "coupler": "27-28",
+    "placeholder_share": 0.9563,
+    "midpoint": [
+     8.5,
+     3.0
+    ],
+    "orientation": "horizontal"
+   },
+   {
+    "coupler": "32-33",
+    "placeholder_share": 1.0,
+    "midpoint": [
+     13.5,
+     3.0
+    ],
+    "orientation": "horizontal"
+   },
+   {
+    "coupler": "38-49",
+    "placeholder_share": 0.004545,
+    "midpoint": [
+     10.0,
+     4.5
+    ],
+    "orientation": "bridge"
+   },
+   {
+    "coupler": "49-50",
+    "placeholder_share": 0.004545,
+    "midpoint": [
+     10.5,
+     5.0
+    ],
+    "orientation": "horizontal"
+   },
+   {
+    "coupler": "71-72",
+    "placeholder_share": 1.0,
+    "midpoint": [
+     12.5,
+     7.0
+    ],
+    "orientation": "horizontal"
+   },
+   {
+    "coupler": "72-73",
+    "placeholder_share": 1.0,
+    "midpoint": [
+     13.5,
+     7.0
+    ],
+    "orientation": "horizontal"
+   },
+   {
+    "coupler": "95-99",
+    "placeholder_share": 1.0,
+    "midpoint": [
+     16.0,
+     9.5
+    ],
+    "orientation": "bridge"
+   },
+   {
+    "coupler": "99-115",
+    "placeholder_share": 1.0,
+    "midpoint": [
+     16.0,
+     10.5
+    ],
+    "orientation": "bridge"
+   },
+   {
+    "coupler": "102-103",
+    "placeholder_share": 0.3386,
+    "midpoint": [
+     3.5,
+     11.0
+    ],
+    "orientation": "horizontal"
+   },
+   {
+    "coupler": "148-149",
+    "placeholder_share": 0.1068,
+    "midpoint": [
+     9.5,
+     15.0
+    ],
+    "orientation": "horizontal"
+   },
+   {
+    "coupler": "149-150",
+    "placeholder_share": 0.1199,
+    "midpoint": [
+     10.5,
+     15.0
+    ],
+    "orientation": "horizontal"
+   }
+  ]
+ },
+ "cz_deviation_correlation_in_space": {
+  "share_a_qubit": {
+   "pairs_of_couplers": 244,
+   "rho": 0.2196,
+   "p": 0.0,
+   "n": 29513
+  },
+  "four_or_more_hops": {
+   "pairs_of_couplers": 13886,
+   "rho": -0.007889,
+   "p": 2.16e-24,
+   "n": 1668789
+  },
+  "share_a_qubit_per_pair": {
+   "pairs": 230,
+   "rho_q": [
+    -0.1533,
+    -0.106847,
+    0.015775,
+    0.107625,
+    0.2089,
+    0.3157,
+    0.44088,
+    0.664891,
+    0.7372
+   ],
+   "share_positive": 0.9087
+  },
+  "share_a_qubit_without_top_decile_couplers": {
+   "pairs_of_couplers": 195,
+   "rho": 0.2301,
+   "p": 3.28e-301,
+   "n": 25300
+  }
+ },
+ "rzz_deviation_correlation_in_space": {
+  "share_a_qubit": {
+   "pairs_of_couplers": 244,
+   "rho": 0.2255,
+   "p": 6.37e-277,
+   "n": 24229
+  },
+  "four_or_more_hops": {
+   "pairs_of_couplers": 13886,
+   "rho": -0.008305,
+   "p": 5.01e-22,
+   "n": 1349430
+  },
+  "share_a_qubit_per_pair": {
+   "pairs": 225,
+   "rho_q": [
+    -0.3684,
+    -0.106428,
+    0.003624,
+    0.1083,
+    0.2277,
+    0.3269,
+    0.4211,
+    0.626048,
+    0.8458
+   ],
+   "share_positive": 0.9067
+  },
+  "share_a_qubit_without_top_decile_couplers": {
+   "pairs_of_couplers": 197,
+   "rho": 0.2248,
+   "p": 1e-242,
+   "n": 21351
+  }
+ },
+ "cz_batches": {
+  "stamps_with_ge_2_couplers": 709,
+  "couplers_per_stamp_q": [
+   2.0,
+   3.0,
+   11.0,
+   23.0,
+   36.0,
+   39.0,
+   41.0,
+   46.0,
+   48.0
+  ],
+  "min_qubit_distance_within_stamp_q": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   3.0,
+   4.0,
+   7.0
+  ],
+  "share_stamps_min_distance_ge_2": 0.2186,
+  "share_stamps_min_distance_eq_0": 0.7814,
+  "distance_note": "0 = the two couplers share a qubit; 1 = adjacent qubits"
+ },
+ "rzz_batches": {
+  "stamps_with_ge_2_couplers": 601,
+  "couplers_per_stamp_q": [
+   2.0,
+   3.0,
+   11.0,
+   23.0,
+   35.0,
+   37.0,
+   40.0,
+   44.0,
+   48.0
+  ],
+  "min_qubit_distance_within_stamp_q": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   3.0,
+   7.0,
+   7.0
+  ],
+  "share_stamps_min_distance_ge_2": 0.2313,
+  "share_stamps_min_distance_eq_0": 0.7687,
+  "distance_note": "0 = the two couplers share a qubit; 1 = adjacent qubits"
+ }
+}

@@ -1,0 +1,1065 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "device",
+ "script": "analysis/device/batches.py",
+ "measured_utc": "2026-10-06T07:45:34Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "round_gap_min": 15.0,
+ "seed": 20261006,
+ "families": {
+  "readout": {
+   "field": "q.readout_error",
+   "entities": 156,
+   "events": 90252,
+   "events_dropped_carried_in": 156,
+   "rounds": 597,
+   "batches_per_round_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    32.4,
+    58.0
+   ],
+   "entities_per_batch_q": [
+    1.0,
+    3.0,
+    4.0,
+    4.0,
+    6.0,
+    151.0,
+    156.0
+   ],
+   "round_spread_s_q": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    32.0,
+    946.0
+   ],
+   "batch_spacing_s_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    896.0
+   ],
+   "entities_per_round_q": [
+    2.0,
+    151.0,
+    153.0,
+    154.0,
+    155.0,
+    155.0,
+    156.0
+   ],
+   "rounds_covering_at_least_half": 588,
+   "spatial_test": {
+    "rounds_tested": 122,
+    "rule": "rounds with >= 20 distinct entities, >= 2 batches, one event per entity",
+    "distance": "hop distance; couplers by the nearest pair of endpoints (0 = share a qubit)",
+    "within_batch_pairs_at_distance_le_k": {
+     "0": 0,
+     "1": 12427,
+     "2": 22598,
+     "3": 30569
+    },
+    "null_mean_within_batch_pairs_le_k": {
+     "0": 0.0,
+     "1": 1436.12,
+     "2": 3423.99,
+     "3": 5925.77
+    },
+    "p_value_fewer_close_pairs_than_null": {
+     "0": 1.0,
+     "1": 1.0,
+     "2": 1.0,
+     "3": 1.0
+    },
+    "permutations": 200,
+    "within_batch_min_distance_counts": {
+     "1": 3255,
+     "2": 44,
+     "3": 16,
+     "4": 18,
+     "5": 21,
+     "6": 272,
+     "7": 2,
+     "10": 6,
+     "13": 1,
+     "14": 1,
+     "15": 1
+    },
+    "within_batch_pairs": 98600,
+    "within_batch_pairs_at_odd_distance": 50192,
+    "rounds_whose_batches_follow_index_order": 120,
+    "batch_bipartition_purity_q": [
+     0.5,
+     0.5,
+     0.5,
+     0.6,
+     0.666667,
+     0.833333,
+     1.0
+    ],
+    "purity_note": "share of a batch's qubits in its majority class of the graph's 2-colouring"
+   },
+   "partition_repeat": {
+    "consecutive_round_pairs": 578,
+    "rand_index_q": [
+     0.0116289,
+     0.0192187,
+     0.0285361,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "share_identical_partition": 0.589965
+   }
+  },
+  "init_error": {
+   "field": "q.init_error",
+   "entities": 156,
+   "events": 23952,
+   "events_dropped_carried_in": 0,
+   "rounds": 302,
+   "batches_per_round_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    5.0,
+    9.6,
+    40.0
+   ],
+   "entities_per_batch_q": [
+    1.0,
+    1.0,
+    4.0,
+    6.0,
+    21.0,
+    92.0,
+    108.0
+   ],
+   "round_spread_s_q": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    4.0,
+    11.7,
+    245.0
+   ],
+   "batch_spacing_s_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    146.0
+   ],
+   "entities_per_round_q": [
+    1.0,
+    3.1,
+    89.25,
+    95.0,
+    100.0,
+    104.0,
+    108.0
+   ],
+   "rounds_covering_at_least_half": 236,
+   "spatial_test": {
+    "rounds_tested": 97,
+    "rule": "rounds with >= 20 distinct entities, >= 2 batches, one event per entity",
+    "distance": "hop distance; couplers by the nearest pair of endpoints (0 = share a qubit)",
+    "within_batch_pairs_at_distance_le_k": {
+     "0": 0,
+     "1": 4514,
+     "2": 11444,
+     "3": 16790
+    },
+    "null_mean_within_batch_pairs_le_k": {
+     "0": 0.0,
+     "1": 873.17,
+     "2": 2546.59,
+     "3": 4050.54
+    },
+    "p_value_fewer_close_pairs_than_null": {
+     "0": 1.0,
+     "1": 1.0,
+     "2": 1.0,
+     "3": 1.0
+    },
+    "permutations": 200,
+    "within_batch_min_distance_counts": {
+     "1": 720,
+     "2": 102,
+     "3": 12,
+     "4": 29,
+     "5": 4,
+     "6": 28,
+     "8": 2,
+     "12": 2
+    },
+    "within_batch_pairs": 67233,
+    "within_batch_pairs_at_odd_distance": 27847,
+    "rounds_whose_batches_follow_index_order": 97,
+    "batch_bipartition_purity_q": [
+     0.5,
+     0.571429,
+     0.666667,
+     0.722222,
+     0.8,
+     1.0,
+     1.0
+    ],
+    "purity_note": "share of a batch's qubits in its majority class of the graph's 2-colouring"
+   },
+   "partition_repeat": {
+    "consecutive_round_pairs": 211,
+    "rand_index_q": [
+     0.0245924,
+     0.0438871,
+     0.184694,
+     0.220219,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "share_identical_partition": 0.379147
+   }
+  },
+  "measure_2": {
+   "field": "g1.measure_2.gate_error",
+   "entities": 156,
+   "events": 7925,
+   "events_dropped_carried_in": 0,
+   "rounds": 52,
+   "batches_per_round_q": [
+    4.0,
+    4.0,
+    4.0,
+    4.0,
+    5.0,
+    5.0,
+    8.0
+   ],
+   "entities_per_batch_q": [
+    1.0,
+    10.0,
+    23.0,
+    40.0,
+    45.0,
+    46.8,
+    55.0
+   ],
+   "round_spread_s_q": [
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    4.0,
+    4.0,
+    7.0
+   ],
+   "batch_spacing_s_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "entities_per_round_q": [
+    147.0,
+    150.0,
+    151.0,
+    152.5,
+    154.0,
+    155.0,
+    156.0
+   ],
+   "rounds_covering_at_least_half": 52,
+   "spatial_test": {
+    "rounds_tested": 52,
+    "rule": "rounds with >= 20 distinct entities, >= 2 batches, one event per entity",
+    "distance": "hop distance; couplers by the nearest pair of endpoints (0 = share a qubit)",
+    "within_batch_pairs_at_distance_le_k": {
+     "0": 0,
+     "1": 8003,
+     "2": 18048,
+     "3": 29516
+    },
+    "null_mean_within_batch_pairs_le_k": {
+     "0": 0.0,
+     "1": 2246.66,
+     "2": 5348.44,
+     "3": 9257.5
+    },
+    "p_value_fewer_close_pairs_than_null": {
+     "0": 1.0,
+     "1": 1.0,
+     "2": 1.0,
+     "3": 1.0
+    },
+    "permutations": 200,
+    "within_batch_min_distance_counts": {
+     "1": 231
+    },
+    "within_batch_pairs": 154042,
+    "within_batch_pairs_at_odd_distance": 76368,
+    "rounds_whose_batches_follow_index_order": 52,
+    "batch_bipartition_purity_q": [
+     0.5,
+     0.533333,
+     0.564427,
+     0.581395,
+     0.6,
+     0.619048,
+     0.714286
+    ],
+    "purity_note": "share of a batch's qubits in its majority class of the graph's 2-colouring"
+   },
+   "partition_repeat": {
+    "consecutive_round_pairs": 51,
+    "rand_index_q": [
+     0.739187,
+     0.767083,
+     0.789047,
+     0.840624,
+     0.891494,
+     0.952567,
+     0.968257
+    ],
+    "share_identical_partition": 0.0
+   }
+  },
+  "T1": {
+   "field": "q.T1",
+   "entities": 156,
+   "events": 19908,
+   "events_dropped_carried_in": 155,
+   "rounds": 138,
+   "batches_per_round_q": [
+    2.0,
+    4.0,
+    4.0,
+    4.0,
+    5.0,
+    5.0,
+    24.0
+   ],
+   "entities_per_batch_q": [
+    1.0,
+    6.0,
+    21.0,
+    38.0,
+    44.0,
+    46.0,
+    53.0
+   ],
+   "round_spread_s_q": [
+    1.0,
+    3.0,
+    3.0,
+    3.0,
+    4.0,
+    4.0,
+    110.0
+   ],
+   "batch_spacing_s_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    14.0
+   ],
+   "entities_per_round_q": [
+    2.0,
+    146.0,
+    147.0,
+    150.0,
+    151.0,
+    153.0,
+    155.0
+   ],
+   "rounds_covering_at_least_half": 133,
+   "spatial_test": {
+    "rounds_tested": 133,
+    "rule": "rounds with >= 20 distinct entities, >= 2 batches, one event per entity",
+    "distance": "hop distance; couplers by the nearest pair of endpoints (0 = share a qubit)",
+    "within_batch_pairs_at_distance_le_k": {
+     "0": 0,
+     "1": 19602,
+     "2": 44307,
+     "3": 72467
+    },
+    "null_mean_within_batch_pairs_le_k": {
+     "0": 0.0,
+     "1": 5493.54,
+     "2": 13069.2,
+     "3": 22617.9
+    },
+    "p_value_fewer_close_pairs_than_null": {
+     "0": 1.0,
+     "1": 1.0,
+     "2": 1.0,
+     "3": 1.0
+    },
+    "permutations": 200,
+    "within_batch_min_distance_counts": {
+     "1": 585,
+     "16": 1
+    },
+    "within_batch_pairs": 377436,
+    "within_batch_pairs_at_odd_distance": 186684,
+    "rounds_whose_batches_follow_index_order": 133,
+    "batch_bipartition_purity_q": [
+     0.5,
+     0.538462,
+     0.5625,
+     0.585366,
+     0.604651,
+     0.625,
+     1.0
+    ],
+    "purity_note": "share of a batch's qubits in its majority class of the graph's 2-colouring"
+   },
+   "partition_repeat": {
+    "consecutive_round_pairs": 128,
+    "rand_index_q": [
+     0.735481,
+     0.755902,
+     0.769173,
+     0.821173,
+     0.887533,
+     0.926901,
+     0.99205
+    ],
+    "share_identical_partition": 0.0
+   }
+  },
+  "T2": {
+   "field": "q.T2",
+   "entities": 156,
+   "events": 20471,
+   "events_dropped_carried_in": 155,
+   "rounds": 135,
+   "batches_per_round_q": [
+    1.0,
+    4.0,
+    4.0,
+    4.0,
+    5.0,
+    5.0,
+    10.0
+   ],
+   "entities_per_batch_q": [
+    1.0,
+    8.0,
+    21.0,
+    41.0,
+    45.0,
+    47.0,
+    54.0
+   ],
+   "round_spread_s_q": [
+    0.0,
+    3.0,
+    3.0,
+    3.0,
+    4.0,
+    4.0,
+    67.0
+   ],
+   "batch_spacing_s_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    64.0
+   ],
+   "entities_per_round_q": [
+    1.0,
+    153.0,
+    153.0,
+    154.0,
+    155.0,
+    155.0,
+    155.0
+   ],
+   "rounds_covering_at_least_half": 133,
+   "spatial_test": {
+    "rounds_tested": 133,
+    "rule": "rounds with >= 20 distinct entities, >= 2 batches, one event per entity",
+    "distance": "hop distance; couplers by the nearest pair of endpoints (0 = share a qubit)",
+    "within_batch_pairs_at_distance_le_k": {
+     "0": 0,
+     "1": 0,
+     "2": 28761,
+     "3": 28761
+    },
+    "null_mean_within_batch_pairs_le_k": {
+     "0": 0.0,
+     "1": 5851.62,
+     "2": 13963.2,
+     "3": 24116.1
+    },
+    "p_value_fewer_close_pairs_than_null": {
+     "0": 1.0,
+     "1": 0.00497512,
+     "2": 1.0,
+     "3": 1.0
+    },
+    "permutations": 200,
+    "within_batch_min_distance_counts": {
+     "2": 602,
+     "6": 3,
+     "14": 1
+    },
+    "within_batch_pairs": 401506,
+    "within_batch_pairs_at_odd_distance": 38186,
+    "rounds_whose_batches_follow_index_order": 0,
+    "batch_bipartition_purity_q": [
+     0.5,
+     0.787234,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "purity_note": "share of a batch's qubits in its majority class of the graph's 2-colouring"
+   },
+   "partition_repeat": {
+    "consecutive_round_pairs": 130,
+    "rand_index_q": [
+     0.73975,
+     0.757222,
+     0.781325,
+     0.82467,
+     0.885132,
+     0.933118,
+     0.987181
+    ],
+    "share_identical_partition": 0.0
+   }
+  },
+  "sx": {
+   "field": "g1.sx.gate_error",
+   "entities": 156,
+   "events": 20054,
+   "events_dropped_carried_in": 153,
+   "rounds": 135,
+   "batches_per_round_q": [
+    2.0,
+    4.0,
+    4.0,
+    5.0,
+    5.0,
+    5.0,
+    15.0
+   ],
+   "entities_per_batch_q": [
+    1.0,
+    5.0,
+    17.0,
+    40.5,
+    44.0,
+    46.0,
+    55.0
+   ],
+   "round_spread_s_q": [
+    1.0,
+    3.0,
+    3.0,
+    4.0,
+    4.0,
+    4.0,
+    80.0
+   ],
+   "batch_spacing_s_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    64.0
+   ],
+   "entities_per_round_q": [
+    2.0,
+    149.4,
+    150.5,
+    152.0,
+    153.0,
+    154.0,
+    155.0
+   ],
+   "rounds_covering_at_least_half": 132,
+   "spatial_test": {
+    "rounds_tested": 132,
+    "rule": "rounds with >= 20 distinct entities, >= 2 batches, one event per entity",
+    "distance": "hop distance; couplers by the nearest pair of endpoints (0 = share a qubit)",
+    "within_batch_pairs_at_distance_le_k": {
+     "0": 0,
+     "1": 0,
+     "2": 27705,
+     "3": 27705
+    },
+    "null_mean_within_batch_pairs_le_k": {
+     "0": 0.0,
+     "1": 5656.56,
+     "2": 13461.8,
+     "3": 23262.7
+    },
+    "p_value_fewer_close_pairs_than_null": {
+     "0": 1.0,
+     "1": 0.00497512,
+     "2": 1.0,
+     "3": 1.0
+    },
+    "permutations": 200,
+    "within_batch_min_distance_counts": {
+     "2": 606
+    },
+    "within_batch_pairs": 387708,
+    "within_batch_pairs_at_odd_distance": 40781,
+    "rounds_whose_batches_follow_index_order": 0,
+    "batch_bipartition_purity_q": [
+     0.5,
+     0.724202,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "purity_note": "share of a batch's qubits in its majority class of the graph's 2-colouring"
+   },
+   "partition_repeat": {
+    "consecutive_round_pairs": 128,
+    "rand_index_q": [
+     0.741896,
+     0.752852,
+     0.766765,
+     0.810726,
+     0.890304,
+     0.927073,
+     0.985324
+    ],
+    "share_identical_partition": 0.0
+   }
+  },
+  "xslow": {
+   "field": "g1.xslow.gate_error",
+   "entities": 156,
+   "events": 6532,
+   "events_dropped_carried_in": 0,
+   "rounds": 45,
+   "batches_per_round_q": [
+    1.0,
+    4.0,
+    4.0,
+    4.0,
+    5.0,
+    5.0,
+    8.0
+   ],
+   "entities_per_batch_q": [
+    1.0,
+    6.0,
+    21.0,
+    41.0,
+    45.0,
+    47.0,
+    55.0
+   ],
+   "round_spread_s_q": [
+    0.0,
+    3.0,
+    3.0,
+    3.0,
+    4.0,
+    4.0,
+    80.0
+   ],
+   "batch_spacing_s_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    64.0
+   ],
+   "entities_per_round_q": [
+    1.0,
+    150.0,
+    151.0,
+    152.0,
+    153.0,
+    154.0,
+    155.0
+   ],
+   "rounds_covering_at_least_half": 43,
+   "spatial_test": {
+    "rounds_tested": 43,
+    "rule": "rounds with >= 20 distinct entities, >= 2 batches, one event per entity",
+    "distance": "hop distance; couplers by the nearest pair of endpoints (0 = share a qubit)",
+    "within_batch_pairs_at_distance_le_k": {
+     "0": 0,
+     "1": 0,
+     "2": 9027,
+     "3": 9027
+    },
+    "null_mean_within_batch_pairs_le_k": {
+     "0": 0.0,
+     "1": 1864.58,
+     "2": 4442.56,
+     "3": 7665.84
+    },
+    "p_value_fewer_close_pairs_than_null": {
+     "0": 1.0,
+     "1": 0.00497512,
+     "2": 1.0,
+     "3": 1.0
+    },
+    "permutations": 200,
+    "within_batch_min_distance_counts": {
+     "2": 193
+    },
+    "within_batch_pairs": 127727,
+    "within_batch_pairs_at_odd_distance": 14583,
+    "rounds_whose_batches_follow_index_order": 0,
+    "batch_bipartition_purity_q": [
+     0.5,
+     0.692806,
+     1.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "purity_note": "share of a batch's qubits in its majority class of the graph's 2-colouring"
+   },
+   "partition_repeat": {
+    "consecutive_round_pairs": 41,
+    "rand_index_q": [
+     0.741896,
+     0.758146,
+     0.771903,
+     0.809248,
+     0.877586,
+     0.894944,
+     0.979239
+    ],
+    "share_identical_partition": 0.0
+   }
+  },
+  "cz": {
+   "field": "g2.cz.gate_error",
+   "entities": 176,
+   "events": 21921,
+   "events_dropped_carried_in": 171,
+   "rounds": 132,
+   "batches_per_round_q": [
+    1.0,
+    5.0,
+    5.0,
+    5.0,
+    6.0,
+    6.0,
+    15.0
+   ],
+   "entities_per_batch_q": [
+    1.0,
+    9.0,
+    21.0,
+    36.0,
+    39.0,
+    41.0,
+    48.0
+   ],
+   "round_spread_s_q": [
+    0.0,
+    4.0,
+    4.0,
+    4.0,
+    5.0,
+    5.0,
+    22.0
+   ],
+   "batch_spacing_s_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    13.0
+   ],
+   "entities_per_round_q": [
+    1.0,
+    166.0,
+    167.0,
+    169.0,
+    170.0,
+    171.0,
+    172.0
+   ],
+   "rounds_covering_at_least_half": 130,
+   "spatial_test": {
+    "rounds_tested": 130,
+    "rule": "rounds with >= 20 distinct entities, >= 2 batches, one event per entity",
+    "distance": "hop distance; couplers by the nearest pair of endpoints (0 = share a qubit)",
+    "within_batch_pairs_at_distance_le_k": {
+     "0": 4847,
+     "1": 6088,
+     "2": 10703,
+     "3": 38851
+    },
+    "null_mean_within_batch_pairs_le_k": {
+     "0": 5987.98,
+     "1": 13382.3,
+     "2": 23760.2,
+     "3": 36710.7
+    },
+    "p_value_fewer_close_pairs_than_null": {
+     "0": 0.00497512,
+     "1": 0.00497512,
+     "2": 0.00497512,
+     "3": 1.0
+    },
+    "permutations": 200,
+    "within_batch_min_distance_counts": {
+     "0": 554,
+     "2": 1,
+     "3": 127,
+     "4": 20,
+     "7": 7
+    },
+    "within_batch_pairs": 375605,
+    "within_batch_pairs_at_odd_distance": 203318,
+    "rounds_whose_batches_follow_index_order": 0,
+    "batch_bipartition_purity_q": null,
+    "purity_note": "share of a batch's qubits in its majority class of the graph's 2-colouring"
+   },
+   "partition_repeat": {
+    "consecutive_round_pairs": 127,
+    "rand_index_q": [
+     0.783953,
+     0.804834,
+     0.815992,
+     0.849939,
+     0.892031,
+     0.933492,
+     0.994524
+    ],
+    "share_identical_partition": 0.0
+   }
+  },
+  "rzz": {
+   "field": "g2.rzz.gate_error",
+   "entities": 176,
+   "events": 18043,
+   "events_dropped_carried_in": 167,
+   "rounds": 110,
+   "batches_per_round_q": [
+    1.0,
+    5.0,
+    5.0,
+    5.0,
+    6.0,
+    6.0,
+    17.0
+   ],
+   "entities_per_batch_q": [
+    1.0,
+    9.0,
+    21.0,
+    35.0,
+    37.0,
+    39.0,
+    48.0
+   ],
+   "round_spread_s_q": [
+    0.0,
+    4.0,
+    4.0,
+    4.0,
+    5.0,
+    5.0,
+    71.0
+   ],
+   "batch_spacing_s_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    63.0
+   ],
+   "entities_per_round_q": [
+    1.0,
+    163.0,
+    165.0,
+    165.0,
+    167.0,
+    168.0,
+    170.0
+   ],
+   "rounds_covering_at_least_half": 109,
+   "spatial_test": {
+    "rounds_tested": 109,
+    "rule": "rounds with >= 20 distinct entities, >= 2 batches, one event per entity",
+    "distance": "hop distance; couplers by the nearest pair of endpoints (0 = share a qubit)",
+    "within_batch_pairs_at_distance_le_k": {
+     "0": 3810,
+     "1": 4788,
+     "2": 8518,
+     "3": 31464
+    },
+    "null_mean_within_batch_pairs_le_k": {
+     "0": 4825.84,
+     "1": 10750.6,
+     "2": 19070.0,
+     "3": 29451.3
+    },
+    "p_value_fewer_close_pairs_than_null": {
+     "0": 0.00497512,
+     "1": 0.00497512,
+     "2": 0.00497512,
+     "3": 1.0
+    },
+    "permutations": 200,
+    "within_batch_min_distance_counts": {
+     "0": 462,
+     "2": 1,
+     "3": 119,
+     "4": 12,
+     "7": 7
+    },
+    "within_batch_pairs": 298204,
+    "within_batch_pairs_at_odd_distance": 162150,
+    "rounds_whose_batches_follow_index_order": 0,
+    "batch_bipartition_purity_q": null,
+    "purity_note": "share of a batch's qubits in its majority class of the graph's 2-colouring"
+   },
+   "partition_repeat": {
+    "consecutive_round_pairs": 107,
+    "rand_index_q": [
+     0.793422,
+     0.806767,
+     0.825065,
+     0.860976,
+     0.898157,
+     0.939817,
+     0.978357
+    ],
+    "share_identical_partition": 0.0
+   }
+  },
+  "lf": {
+   "field": "gen.lf",
+   "entities": 97,
+   "events": 7954,
+   "events_dropped_carried_in": 97,
+   "rounds": 82,
+   "batches_per_round_q": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "entities_per_batch_q": [
+    97.0,
+    97.0,
+    97.0,
+    97.0,
+    97.0,
+    97.0,
+    97.0
+   ],
+   "round_spread_s_q": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "batch_spacing_s_q": null,
+   "entities_per_round_q": [
+    97.0,
+    97.0,
+    97.0,
+    97.0,
+    97.0,
+    97.0,
+    97.0
+   ],
+   "rounds_covering_at_least_half": 82
+  }
+ },
+ "t1_t2": {
+  "t1_events": 19908,
+  "t2_events": 20471,
+  "pairs_same_round_same_qubit": 19747,
+  "t2_minus_t1_s_q": [
+   1.0,
+   2.0,
+   3.0,
+   4.0,
+   4.0,
+   5.0,
+   112.0
+  ],
+  "share_equal_stamp": 0.0,
+  "share_t2_later": 1.0,
+  "share_t2_earlier": 0.0,
+  "distinct_t1_stamps": 626,
+  "distinct_t2_stamps": 614,
+  "stamps_shared_by_t1_and_t2": 132
+ },
+ "direction_check": {
+  "g2.cz.gate_error": {
+   "undirected_couplers": 176,
+   "records_both_real": 301078,
+   "real_value_mismatch": 0,
+   "real_date_mismatch": 0,
+   "records_both_placeholder": 8682,
+   "placeholder_date_mismatch": 8682,
+   "records_one_real_one_placeholder": 0
+  },
+  "g2.rzz.gate_error": {
+   "undirected_couplers": 176,
+   "records_both_real": 297365,
+   "real_value_mismatch": 0,
+   "real_date_mismatch": 0,
+   "records_both_placeholder": 12395,
+   "placeholder_date_mismatch": 12395,
+   "records_one_real_one_placeholder": 0
+  }
+ }
+}

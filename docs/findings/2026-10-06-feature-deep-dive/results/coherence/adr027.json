@@ -1,0 +1,263 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "coherence",
+ "script": "analysis/coherence/adr027.py",
+ "measured_utc": "2026-10-06T07:46:15Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "constants": {
+  "sx_length_s": 2.4e-08,
+  "sync_window_h": 1.0,
+  "round_gap_min": 15.0,
+  "level_window_events": 15,
+  "level_min_events": 8,
+  "period_split_utc": "2026-08-05T23:45:31Z"
+ },
+ "n_files": 1760,
+ "rejections_per_file": {
+  "t1_missing": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "t2_missing": [
+   0.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0
+  ],
+  "nonpositive": 0,
+  "t2_gt_2t1": [
+   0.0,
+   0.0,
+   0.0,
+   1.0,
+   2.0
+  ],
+  "files_with_any_t2_gt_2t1": 379,
+  "usable": [
+   153.0,
+   154.0,
+   155.0,
+   155.0,
+   155.0
+  ],
+  "quantile_levels": [
+   0.0,
+   0.1,
+   0.5,
+   0.9,
+   1.0
+  ],
+  "distinct_coherence_states": 134
+ },
+ "gamma": {
+  "all_files": {
+   "rows": 1760,
+   "snapshot_mean_quantiles": [
+    0.000169018,
+    0.000190813,
+    0.000212781,
+    0.000239842,
+    0.000255029
+   ],
+   "snapshot_median_quantiles": [
+    0.000153339,
+    0.000169817,
+    0.000186797,
+    0.000207694,
+    0.000247008
+   ],
+   "mean_over_median_quantiles": [
+    1.02204,
+    1.07911,
+    1.12219,
+    1.18259,
+    1.4235
+   ],
+   "share_of_sum_top_1_qubit_quantiles": [
+    0.0140896,
+    0.0170304,
+    0.0210779,
+    0.045216,
+    0.134268
+   ],
+   "share_of_sum_top_5pct_quantiles": [
+    0.0862387,
+    0.106437,
+    0.121168,
+    0.154287,
+    0.301071
+   ],
+   "share_of_sum_top_10pct_quantiles": [
+    0.150994,
+    0.183687,
+    0.202921,
+    0.239022,
+    0.366119
+   ],
+   "uniform_share_top_10pct": 0.1,
+   "sd_log10_snapshot_mean_across_rows": 0.0376032,
+   "sd_log10_snapshot_median_across_rows": 0.040567,
+   "spearman_mean_vs_max_qubit": 0.496802
+  },
+  "distinct_states": {
+   "rows": 134,
+   "snapshot_mean_quantiles": [
+    0.000169018,
+    0.00018676,
+    0.000208682,
+    0.00024545,
+    0.000255029
+   ],
+   "snapshot_median_quantiles": [
+    0.000153339,
+    0.000163522,
+    0.00018276,
+    0.000230497,
+    0.000247008
+   ],
+   "mean_over_median_quantiles": [
+    1.02204,
+    1.06113,
+    1.12015,
+    1.18701,
+    1.4235
+   ],
+   "share_of_sum_top_1_qubit_quantiles": [
+    0.0140896,
+    0.0169074,
+    0.0209228,
+    0.0463103,
+    0.134268
+   ],
+   "share_of_sum_top_5pct_quantiles": [
+    0.0862387,
+    0.101908,
+    0.120357,
+    0.15477,
+    0.301071
+   ],
+   "share_of_sum_top_10pct_quantiles": [
+    0.150994,
+    0.170553,
+    0.203021,
+    0.239065,
+    0.366119
+   ],
+   "uniform_share_top_10pct": 0.1,
+   "sd_log10_snapshot_mean_across_rows": 0.0441109,
+   "sd_log10_snapshot_median_across_rows": 0.0484289,
+   "spearman_mean_vs_max_qubit": 0.423693
+  }
+ },
+ "lambda": {
+  "all_files": {
+   "rows": 1760,
+   "snapshot_mean_quantiles": [
+    0.000595455,
+    0.000621609,
+    0.000666309,
+    0.000744334,
+    0.000828043
+   ],
+   "snapshot_median_quantiles": [
+    0.000241768,
+    0.000263511,
+    0.000296444,
+    0.000315764,
+    0.00045319
+   ],
+   "mean_over_median_quantiles": [
+    1.76745,
+    2.08496,
+    2.29529,
+    2.50891,
+    2.78359
+   ],
+   "share_of_sum_top_1_qubit_quantiles": [
+    0.0617467,
+    0.0791564,
+    0.0905413,
+    0.112577,
+    0.147999
+   ],
+   "share_of_sum_top_5pct_quantiles": [
+    0.266131,
+    0.319646,
+    0.34992,
+    0.383703,
+    0.452019
+   ],
+   "share_of_sum_top_10pct_quantiles": [
+    0.399181,
+    0.45517,
+    0.484772,
+    0.522415,
+    0.570119
+   ],
+   "uniform_share_top_10pct": 0.1,
+   "sd_log10_snapshot_mean_across_rows": 0.0302456,
+   "sd_log10_snapshot_median_across_rows": 0.0417917,
+   "spearman_mean_vs_max_qubit": 0.460084
+  },
+  "distinct_states": {
+   "rows": 134,
+   "snapshot_mean_quantiles": [
+    0.000595455,
+    0.000621035,
+    0.000669421,
+    0.000746701,
+    0.000828043
+   ],
+   "snapshot_median_quantiles": [
+    0.000241768,
+    0.00026666,
+    0.000295217,
+    0.000317121,
+    0.00045319
+   ],
+   "mean_over_median_quantiles": [
+    1.76745,
+    2.08692,
+    2.30622,
+    2.53265,
+    2.78359
+   ],
+   "share_of_sum_top_1_qubit_quantiles": [
+    0.0617467,
+    0.0759109,
+    0.0894679,
+    0.110575,
+    0.147999
+   ],
+   "share_of_sum_top_5pct_quantiles": [
+    0.266131,
+    0.320717,
+    0.348633,
+    0.390445,
+    0.452019
+   ],
+   "share_of_sum_top_10pct_quantiles": [
+    0.399181,
+    0.455311,
+    0.486279,
+    0.524203,
+    0.570119
+   ],
+   "uniform_share_top_10pct": 0.1,
+   "sd_log10_snapshot_mean_across_rows": 0.0325522,
+   "sd_log10_snapshot_median_across_rows": 0.0462432,
+   "spearman_mean_vs_max_qubit": 0.458363
+  }
+ },
+ "lambda_boundary": {
+  "usable_records": 272376,
+  "share_s_above_0.9": 0.00230931,
+  "share_s_above_0.75": 0.0222193
+ }
+}

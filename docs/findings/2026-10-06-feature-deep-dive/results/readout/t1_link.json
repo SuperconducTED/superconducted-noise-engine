@@ -1,0 +1,278 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "readout",
+ "script": "analysis/readout/t1_link.py",
+ "measured_utc": "2026-10-06T07:53:26Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "events": 91710,
+ "events_dropped_no_t1": 23,
+ "pooled": {
+  "share_p0g1_gt_p1g0": 0.8763,
+  "share_p0g1_eq_p1g0": 0.0071,
+  "ratio_p0g1_over_p1g0_q": [
+   0.000245158,
+   0.584615,
+   0.953125,
+   2.0,
+   7.2,
+   31.0,
+   3056.0
+  ],
+  "asymmetry_q": [
+   -0.995605,
+   -0.0354004,
+   -0.000976562,
+   0.00634766,
+   0.0170898,
+   0.0976562,
+   0.961426
+  ],
+  "decay_full_q": [
+   0.00380673,
+   0.00628211,
+   0.00868118,
+   0.0130326,
+   0.0210164,
+   0.0508304,
+   0.628738
+  ],
+  "decay_half_q": [
+   0.00190518,
+   0.003146,
+   0.00435005,
+   0.00653768,
+   0.010564,
+   0.0257467,
+   0.390687
+  ],
+  "p0g1_q": [
+   0.000244141,
+   0.00463867,
+   0.00732422,
+   0.0141602,
+   0.0541992,
+   0.193337,
+   0.976562
+  ],
+  "spearman_p0g1_vs_decay_full_pooled": {
+   "n": 91710,
+   "rho": 0.0589,
+   "p": 3.38e-71
+  },
+  "spearman_asymmetry_vs_decay_full_pooled": {
+   "n": 91710,
+   "rho": 0.1584,
+   "p": 0.0
+  },
+  "t1_age_h_at_event_q": [
+   -3.44361,
+   -1.2575,
+   -0.367222,
+   12.7758,
+   24.0681,
+   127.306,
+   2205.41
+  ]
+ },
+ "between_qubits": {
+  "qubits": 156,
+  "spearman_p0g1_vs_decay": {
+   "n": 156,
+   "rho": 0.0161,
+   "p": 0.842
+  },
+  "spearman_asymmetry_vs_decay": {
+   "n": 156,
+   "rho": 0.4226,
+   "p": 3.89e-08
+  },
+  "spearman_p1g0_vs_decay_control": {
+   "n": 156,
+   "rho": -0.0865,
+   "p": 0.283
+  },
+  "spearman_p0g1_vs_p1g0": {
+   "n": 156,
+   "rho": 0.9079,
+   "p": 5.01e-60
+  },
+  "theil_sen_asymmetry_on_decay_full": {
+   "slope": 0.3103,
+   "slope_95ci": [
+    0.2089,
+    0.437
+   ],
+   "intercept": 0.002136
+  },
+  "per_qubit_asymmetry_over_decay_full_q": [
+   -0.0237025,
+   0.0939477,
+   0.343813,
+   0.46385,
+   0.686708,
+   1.97817,
+   2.90708
+  ],
+  "per_qubit_p0g1_over_decay_full_q": [
+   0.472896,
+   0.513798,
+   0.638343,
+   0.990258,
+   3.26052,
+   8.02467,
+   11.1733
+  ],
+  "share_qubits_asymmetry_lt_decay_half": 0.5897,
+  "share_qubits_asymmetry_lt_decay_full": 0.9615,
+  "share_qubits_asymmetry_negative": 0.0064
+ },
+ "between_qubits_low_error_half": {
+  "qubits": 80,
+  "spearman_asymmetry_vs_decay": {
+   "n": 80,
+   "rho": 0.1589,
+   "p": 0.159
+  },
+  "theil_sen_slope": 0.0995,
+  "theil_sen_95ci": [
+   0.0,
+   0.2191
+  ],
+  "per_qubit_asymmetry_over_decay_full_q": [
+   0.0512,
+   0.197713,
+   0.366888,
+   0.439625,
+   0.588335,
+   0.771496,
+   0.780226
+  ]
+ },
+ "within_qubits_even_sessions": {
+  "consecutive_changes_with_new_t1": 14909,
+  "spearman_dlog_p0g1_vs_dlog_t1": {
+   "n": 14909,
+   "rho": -0.0136,
+   "p": 0.097
+  },
+  "spearman_dlog_p1g0_vs_dlog_t1_control": {
+   "n": 14909,
+   "rho": 0.0123,
+   "p": 0.134
+  },
+  "levels_spearman_log_p0g1_vs_log_t1_demeaned": {
+   "n": 18703,
+   "rho": -0.0909,
+   "p": 1.25e-35
+  },
+  "levels_spearman_log_p1g0_vs_log_t1_demeaned_control": {
+   "n": 18703,
+   "rho": -0.0572,
+   "p": 4.7e-15
+  },
+  "t1_within_3h_spearman_dlog_p0g1_vs_dlog_t1": {
+   "n": 8247,
+   "rho": -0.0488,
+   "p": 9.4e-06
+  }
+ },
+ "t1_dip_event_study_even_sessions": {
+  "dip_records_t1_lt_half_median": 592,
+  "dip_qubits": 143,
+  "normal_records": 10979,
+  "median_rel_p0g1_dip": 0.9974,
+  "median_rel_p0g1_normal": 1.0,
+  "median_rel_p1g0_dip_control": 0.9333,
+  "median_rel_p1g0_normal_control": 1.0,
+  "mannwhitney_p_rel_p0g1": 0.281,
+  "median_excess_decay_full_in_dip": 0.01823,
+  "median_abs_p0g1_change_in_dip": -0.0004883
+ },
+ "t1_dip_event_study_t1_within_3h": {
+  "dip_records": 223,
+  "dip_qubits": 111,
+  "normal_records": 4636,
+  "median_rel_p0g1_dip": 1.0,
+  "median_rel_p0g1_normal": 1.0,
+  "median_rel_p1g0_dip_control": 1.0,
+  "mannwhitney_p_rel_p0g1": 0.722,
+  "share_even_records_with_t1_within_3h": 0.4411
+ },
+ "monthly": {
+  "2026-05": {
+   "events": 16345,
+   "median_asymmetry": 0.006836,
+   "median_decay_full": 0.01463,
+   "median_p0g1": 0.01978,
+   "median_p1g0": 0.01172,
+   "between_qubit_spearman_asym_vs_decay": {
+    "n": 156,
+    "rho": 0.3932,
+    "p": 3.83e-07
+   }
+  },
+  "2026-06": {
+   "events": 20748,
+   "median_asymmetry": 0.005859,
+   "median_decay_full": 0.01163,
+   "median_p0g1": 0.01294,
+   "median_p1g0": 0.006104,
+   "between_qubit_spearman_asym_vs_decay": {
+    "n": 156,
+    "rho": 0.4297,
+    "p": 2.17e-08
+   }
+  },
+  "2026-07": {
+   "events": 20121,
+   "median_asymmetry": 0.006348,
+   "median_decay_full": 0.0132,
+   "median_p0g1": 0.01245,
+   "median_p1g0": 0.004883,
+   "between_qubit_spearman_asym_vs_decay": {
+    "n": 156,
+    "rho": 0.4294,
+    "p": 2.22e-08
+   }
+  },
+  "2026-08": {
+   "events": 14820,
+   "median_asymmetry": 0.005859,
+   "median_decay_full": 0.01302,
+   "median_p0g1": 0.0127,
+   "median_p1g0": 0.005859,
+   "between_qubit_spearman_asym_vs_decay": {
+    "n": 156,
+    "rho": 0.3296,
+    "p": 2.65e-05
+   }
+  },
+  "2026-09": {
+   "events": 17024,
+   "median_asymmetry": 0.006348,
+   "median_decay_full": 0.0129,
+   "median_p0g1": 0.01343,
+   "median_p1g0": 0.005615,
+   "between_qubit_spearman_asym_vs_decay": {
+    "n": 156,
+    "rho": 0.4144,
+    "p": 7.53e-08
+   }
+  },
+  "2026-10": {
+   "events": 2652,
+   "median_asymmetry": 0.006592,
+   "median_decay_full": 0.01298,
+   "median_p0g1": 0.01367,
+   "median_p1g0": 0.005371,
+   "between_qubit_spearman_asym_vs_decay": {
+    "n": 156,
+    "rho": 0.3301,
+    "p": 2.57e-05
+   }
+  }
+ }
+}

@@ -1,0 +1,596 @@
+{
+ "provisional": true,
+ "ref": "7b84b506ef77beb6e6c1b25a7357c574cfaf5117",
+ "scope": "readout",
+ "script": "analysis/readout/sessions.py",
+ "measured_utc": "2026-10-06T07:51:29Z",
+ "basis": "all ibm_fez snapshot files at the ref (see n_files)",
+ "machine": "lead's laptop (provisional until re-run on the verification desktop)",
+ "n_files": 1760,
+ "records": 274560,
+ "record_classes": {
+  "same3": {
+   "records": 188100,
+   "share": 0.6851,
+   "mean_rule_holds": 188100
+  },
+  "staggered": {
+   "records": 72900,
+   "share": 0.2655,
+   "mean_rule_holds": 72900
+  },
+  "stale_p0g1": {
+   "records": 11515,
+   "share": 0.0419,
+   "mean_rule_holds": 257
+  },
+  "other": {
+   "records": 2045,
+   "share": 0.0074,
+   "mean_rule_holds": 2040
+  }
+ },
+ "stagger": {
+  "ro_minus_p0g1_s_q": [
+   -524.0,
+   7.0,
+   50.0,
+   81.0,
+   116.0,
+   299.0,
+   410.0
+  ],
+  "ro_minus_p1g0_s_q": [
+   0.0,
+   4.0,
+   25.0,
+   41.0,
+   58.0,
+   109.0,
+   220.0
+  ],
+  "not_same3_records_by_max_gap": {
+   "le_60_s": 16627,
+   "le_120_s": 67978,
+   "le_300_s": 72236,
+   "le_600_s": 72900,
+   "le_1800_s": 74967,
+   "le_3600_s": 75096
+  },
+  "files_with_no_same3_record": 473,
+  "per_file_same3_share_q": [
+   0.0,
+   0.0,
+   0.0,
+   0.942308,
+   0.942308,
+   0.942308,
+   0.942308
+  ],
+  "files_with_no_same3_record_historical": 149
+ },
+ "stale_p0g1": {
+  "records": 11515,
+  "share_of_mean_rule_failures": 0.99956,
+  "mean_rule_failures_total": 11263,
+  "mean_rule_failures_not_stale": 5,
+  "lag_h_q": [
+   0.285556,
+   0.678889,
+   2.57778,
+   11.5728,
+   19.4603,
+   23.1667,
+   47.7736
+  ],
+  "qubits_ever_stale": 35,
+  "qubits_stale_ge_100_records": 27,
+  "groups_by_qubit_mod_17": {
+   "9": {
+    "qubits": [
+     9,
+     26,
+     43,
+     60,
+     77,
+     94,
+     111,
+     128,
+     145
+    ],
+    "first_file": "20260725T120619",
+    "last_file": "20260825T101809"
+   },
+   "10": {
+    "qubits": [
+     10,
+     27,
+     44,
+     61,
+     78,
+     95,
+     112,
+     129,
+     146
+    ],
+    "first_file": "20260513T121322",
+    "last_file": "20260725T024548"
+   },
+   "16": {
+    "qubits": [
+     16,
+     33,
+     50,
+     67,
+     84,
+     101,
+     118,
+     135,
+     152
+    ],
+    "first_file": "20260825T194425",
+    "last_file": "20261006T025742"
+   }
+  },
+  "minor_qubits": [
+   {
+    "qubit": 8,
+    "qubit_mod_17": 8,
+    "stale_records": 1,
+    "first_file": "20260806T084023",
+    "last_file": "20260806T084023"
+   },
+   {
+    "qubit": 25,
+    "qubit_mod_17": 8,
+    "stale_records": 1,
+    "first_file": "20260806T084023",
+    "last_file": "20260806T084023"
+   },
+   {
+    "qubit": 42,
+    "qubit_mod_17": 8,
+    "stale_records": 1,
+    "first_file": "20260806T084023",
+    "last_file": "20260806T084023"
+   },
+   {
+    "qubit": 59,
+    "qubit_mod_17": 8,
+    "stale_records": 1,
+    "first_file": "20260806T084023",
+    "last_file": "20260806T084023"
+   },
+   {
+    "qubit": 76,
+    "qubit_mod_17": 8,
+    "stale_records": 1,
+    "first_file": "20260806T084023",
+    "last_file": "20260806T084023"
+   },
+   {
+    "qubit": 110,
+    "qubit_mod_17": 8,
+    "stale_records": 1,
+    "first_file": "20260909T143551",
+    "last_file": "20260909T143551"
+   },
+   {
+    "qubit": 127,
+    "qubit_mod_17": 8,
+    "stale_records": 1,
+    "first_file": "20260909T143551",
+    "last_file": "20260909T143551"
+   },
+   {
+    "qubit": 144,
+    "qubit_mod_17": 8,
+    "stale_records": 1,
+    "first_file": "20260909T143551",
+    "last_file": "20260909T143551"
+   }
+  ],
+  "implied_p0g1_records": 11514,
+  "implied_p0g1_on_1_over_4096_grid": 1.0,
+  "implied_p0g1_q": [
+   0.00317383,
+   0.00488281,
+   0.00708008,
+   0.015625,
+   0.046875,
+   0.0964355,
+   0.303955
+  ],
+  "implied_minus_published_p0g1_q": [
+   -0.218506,
+   -0.0427246,
+   -0.0078125,
+   0.000244141,
+   0.00732422,
+   0.0317383,
+   0.296143
+  ],
+  "meas_map_groups": [
+   156
+  ],
+  "group_qubit_p0g1_fresh_by_session_kind": {
+   "even": {
+    "fresh": 1086,
+    "events": 1103
+   },
+   "mixed": {
+    "fresh": 9,
+    "events": 4194
+   }
+  },
+  "other_qubit_p0g1_fresh_by_session_kind": {
+   "even": {
+    "fresh": 15959,
+    "events": 16079
+   },
+   "mixed": {
+    "fresh": 60102,
+    "events": 60102
+   }
+  }
+ },
+ "sessions": {
+  "rule": "readout_error stamp events of all qubits, sorted, split at gaps > 15 min",
+  "n_sessions": 598,
+  "kinds": {
+   "even": 123,
+   "mixed": 466,
+   "small": 9
+  },
+  "even_share_histogram_big": {
+   "edges": [
+    0,
+    0.4,
+    0.45,
+    0.55,
+    0.6,
+    0.9,
+    0.99,
+    1.0,
+    1.01
+   ],
+   "counts": [
+    0,
+    19,
+    429,
+    17,
+    0,
+    0,
+    1,
+    123
+   ]
+  },
+  "mixed_even_share_q": [
+   0.419142,
+   0.435644,
+   0.462046,
+   0.49835,
+   0.537954,
+   0.567657,
+   0.990566
+  ],
+  "counts_per_session_q": {
+   "even": [
+    40.0,
+    304.98,
+    312.0,
+    312.0,
+    312.0,
+    455.38,
+    621.0
+   ],
+   "mixed": [
+    297.0,
+    300.9,
+    303.0,
+    303.0,
+    303.0,
+    303.0,
+    318.0
+   ]
+  },
+  "qubits_per_session_q": {
+   "even": [
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0
+   ],
+   "mixed": [
+    153.0,
+    154.95,
+    156.0,
+    156.0,
+    156.0,
+    156.0,
+    156.0
+   ],
+   "small": [
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    3.0
+   ]
+  },
+  "duration_min_q": {
+   "even": [
+    0.0,
+    0.05,
+    0.0666667,
+    0.533333,
+    0.766667,
+    12.8833,
+    15.7667
+   ],
+   "mixed": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    8.45
+   ]
+  },
+  "small_sessions": [
+   {
+    "start": "2026-05-13T17:10:51Z",
+    "qubits": 3
+   },
+   {
+    "start": "2026-05-14T12:04:12Z",
+    "qubits": 3
+   },
+   {
+    "start": "2026-05-21T15:49:10Z",
+    "qubits": 3
+   },
+   {
+    "start": "2026-05-26T14:37:19Z",
+    "qubits": 3
+   },
+   {
+    "start": "2026-05-28T14:42:05Z",
+    "qubits": 3
+   },
+   {
+    "start": "2026-05-29T20:59:54Z",
+    "qubits": 3
+   },
+   {
+    "start": "2026-06-09T18:31:24Z",
+    "qubits": 3
+   },
+   {
+    "start": "2026-07-02T14:32:34Z",
+    "qubits": 3
+   },
+   {
+    "start": "2026-07-08T03:44:44Z",
+    "qubits": 3
+   }
+  ],
+  "first_even": "2026-05-13T21:32:53Z",
+  "last_even": "2026-10-04T22:41:40Z",
+  "start_hour_utc_counts": {
+   "even": [
+    3,
+    3,
+    3,
+    1,
+    4,
+    6,
+    3,
+    6,
+    9,
+    4,
+    3,
+    0,
+    0,
+    1,
+    3,
+    4,
+    4,
+    5,
+    8,
+    11,
+    17,
+    9,
+    9,
+    7
+   ],
+   "mixed": [
+    12,
+    19,
+    25,
+    16,
+    18,
+    14,
+    25,
+    20,
+    17,
+    16,
+    23,
+    22,
+    18,
+    24,
+    26,
+    18,
+    26,
+    16,
+    24,
+    18,
+    17,
+    18,
+    19,
+    15
+   ]
+  },
+  "start_weekday_counts_mon0": {
+   "even": [
+    13,
+    20,
+    19,
+    18,
+    19,
+    17,
+    17
+   ],
+   "mixed": [
+    55,
+    58,
+    81,
+    61,
+    61,
+    74,
+    76
+   ]
+  },
+  "by_month": {
+   "2026-05": {
+    "sessions": 105,
+    "even": 20,
+    "days_covered": 18.49,
+    "sessions_per_day": 5.679,
+    "even_per_day": 1.082,
+    "gap_between_sessions_h_q": [
+     0.804444,
+     1.0123,
+     2.10975,
+     3.31375,
+     7.42092,
+     12.9695,
+     13.6069
+    ],
+    "files": 171,
+    "historical_files": 0
+   },
+   "2026-06": {
+    "sessions": 133,
+    "even": 24,
+    "days_covered": 30.0,
+    "sessions_per_day": 4.433,
+    "even_per_day": 0.8,
+    "gap_between_sessions_h_q": [
+     0.278056,
+     0.899333,
+     2.54772,
+     3.91931,
+     7.56983,
+     29.7379,
+     64.0669
+    ],
+    "files": 194,
+    "historical_files": 0
+   },
+   "2026-07": {
+    "sessions": 129,
+    "even": 26,
+    "days_covered": 31.0,
+    "sessions_per_day": 4.161,
+    "even_per_day": 0.839,
+    "gap_between_sessions_h_q": [
+     0.288333,
+     1.09223,
+     2.61469,
+     4.32708,
+     10.285,
+     30.0771,
+     43.9847
+    ],
+    "files": 270,
+    "historical_files": 0
+   },
+   "2026-08": {
+    "sessions": 95,
+    "even": 22,
+    "days_covered": 31.0,
+    "sessions_per_day": 3.065,
+    "even_per_day": 0.71,
+    "gap_between_sessions_h_q": [
+     1.36528,
+     1.60424,
+     2.57267,
+     4.93625,
+     13.1223,
+     60.7403,
+     82.1083
+    ],
+    "files": 304,
+    "historical_files": 29
+   },
+   "2026-09": {
+    "sessions": 110,
+    "even": 27,
+    "days_covered": 30.0,
+    "sessions_per_day": 3.667,
+    "even_per_day": 0.9,
+    "gap_between_sessions_h_q": [
+     0.8275,
+     1.45829,
+     3.25072,
+     5.77667,
+     10.4167,
+     20.9618,
+     26.6186
+    ],
+    "files": 683,
+    "historical_files": 349
+   },
+   "2026-10": {
+    "sessions": 17,
+    "even": 4,
+    "days_covered": 5.12,
+    "sessions_per_day": 3.318,
+    "even_per_day": 0.781,
+    "gap_between_sessions_h_q": [
+     1.39944,
+     1.49386,
+     2.26236,
+     6.14056,
+     10.9496,
+     14.0993,
+     14.5917
+    ],
+    "files": 138,
+    "historical_files": 65
+   }
+  },
+  "t1_rounds": 133,
+  "hours_to_nearest_t1_round_q": {
+   "even": [
+    0.288611,
+    0.352078,
+    0.404833,
+    0.853333,
+    3.7145,
+    19.3057,
+    23.8656
+   ],
+   "mixed": [
+    0.280556,
+    0.690597,
+    2.28542,
+    7.0725,
+    11.8314,
+    20.0758,
+    24.3853
+   ]
+  },
+  "share_within_3h_of_t1_round": {
+   "even": 0.8699,
+   "mixed": 0.1567
+  }
+ }
+}
