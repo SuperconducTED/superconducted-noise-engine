@@ -353,3 +353,21 @@ detail.
   #109.
 - The deep-learning model's design is outstanding until the planning session in the week
   of 2026-10-05.
+
+## Outstanding items, as of 2026-10-02
+
+Not a decision entry and not a new item: a fact update on item 15 (the
+2026-09-18 section above), appended here in the same form as the 2026-09-10
+and 2026-09-18 additions, because the 2026-09-18 section stands as written.
+It follows the 2026-10-03 sections because those reached `main` first, with
+PR #98; as the 2026-09-29 reconciliation above records, this file's order is
+merge order, not date order.
+
+**Item 15, ask 3.** Issue #74 / PR #103 satisfies the ADR-021 amendment's
+compile-before-prepare ordering for the smoke caller: it compiles once to the
+calibrated basis before `prepare()` and runs the returned circuit without
+another transpilation. The premise remains true for `benchmarks/harness.py`,
+which is Issue #58 / PR #79's scope. This narrows the recorded gap; it does not
+answer the ratification question or alter the item's Outstanding status, which
+under the 2026-10-03 entry above closes only through the lead's approval
+session (Issue #109).
