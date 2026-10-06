@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-05 05:37 UTC",
+  "generated": "2026-10-06 06:19 UTC",
   "main": {
     "sha": "110cfad8",
     "date": "2026-09-27",
@@ -1384,13 +1384,19 @@
           "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "Transpile smoke circuits before preparing noise (#74)",
-          "updatedAt": "2026-10-04T17:02:04Z",
+          "updatedAt": "2026-10-05T14:08:04Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/103",
           "headRefOid": "1662ddb71c89ee0539884f9156b00ad4a8bdaea0",
           "additions": 680,
           "deletions": 30,
           "file_count": 8,
           "latest_reviews": [
+            {
+              "who": "BahaJarad",
+              "state": "APPROVED",
+              "at": "2026-10-05",
+              "last_activity": "2026-10-05"
+            },
             {
               "who": "mertefesensoy",
               "state": "CHANGES_REQUESTED",
@@ -1675,7 +1681,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -30
+      "days_left": -31
     },
     {
       "id": "M1",
@@ -1717,7 +1723,7 @@
       "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -24
+      "days_left": -25
     },
     {
       "id": "M2",
@@ -1760,7 +1766,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -17
+      "days_left": -18
     },
     {
       "id": "M3",
@@ -1808,7 +1814,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": -10
+      "days_left": -11
     },
     {
       "id": "M4",
@@ -1846,7 +1852,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": -5
+      "days_left": -6
     }
   ]
 }
