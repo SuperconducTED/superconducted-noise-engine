@@ -633,3 +633,16 @@ open against a correct measurement of what the fallback costs.
 **NC-021.** The 485 and 590 figures above describe earlier trees. The suite is
 611 at the head of this branch; NC-021 carries the value and the commit it was
 measured at.
+
+## As of 2026-10-06
+
+The section "The unit sanity check" above names the target callable as
+`training.targets.feature_target_fn(features, *, t_seconds)`. Everything above
+is left as written. PR #107 (review round 1, `4621b74`) added a required
+keyword, so the signature is now
+`feature_target_fn(features, *, t_seconds, coherence_unit)`, with
+`coherence_unit` either `"us"` or `"s"` and no default. The five call sites in
+`tests/test_parameterization.py` pass `coherence_unit="us"`, the unit of the
+survey anchors; the anchors, the magnitudes quoted above, and every check in
+that file are unchanged. See
+`docs/implementations/2026-10-03-feature-target-fn-units.md`.

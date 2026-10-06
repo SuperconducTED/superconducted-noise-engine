@@ -64,6 +64,7 @@ gave NC-039's registered values, bitwise.
 | `docs/numerical-claims.md` | NC-039's source is re-pointed to `ArchiveUnitFeatureExtractor`, with the value unchanged and the history in Notes; NC-021 gains the `706` at `eb30ca7` clause. |
 | `docs/decisions/drafts/ADR-027-calibration-training-target.md` | Appended an as-of note under the paragraph that describes the old input convention; the paragraph itself is unedited. |
 | `docs/implementations/2026-09-05-issue-57-training-target-contract.md` | Appended a `Units, as-of 2026-10-03` section; everything above it is unedited. |
+| `docs/implementations/2026-09-08-mf-parameterization.md` | Review round 1: appended an `As of 2026-10-06` section recording the new `coherence_unit` keyword; everything above it is unedited. |
 | `docs/implementations/2026-10-03-feature-target-fn-units.md` | This record. |
 
 ## Implementation approach
@@ -393,18 +394,20 @@ NC-039 at `4621b74`: both paths reproduce the registered gap **bitwise**,
 before and after a mean can differ by about one ulp. The test pin's
 `rel=1e-9` is what is guaranteed.
 
-### Two merges of `main`
+### Three merges of `main`
 
-`main` moved twice while the review was open.
+`main` moved three times while the review was open.
 
 | Merge | `main` | What came in | Result |
 | --- | --- | --- | --- |
 | `e421e3c` | `e411911` (PR #98) | `docs/` only | Clean; 706 collected |
 | `5517881` | `7c2d4d1` (PR #103) | `scripts/first_ensemble_run.py`, its tests, docs | One text conflict, the NC-021 row; both narratives kept, `main`'s first |
+| `1a5839b` | `e39af50` (PR #105) | The capture-rate scripts, the health workflow, their tests, docs | The same one-row NC-021 conflict; both narratives kept, `main`'s first |
 
-Neither merge brought a new `feature_target_fn` caller; the `+` lines of both
+No merge brought a new `feature_target_fn` caller; the `+` lines of all three
 diffs were grepped for it. `main` @ `e411911` collects 701, a direct collection. `main` @ `7c2d4d1` was
-not collected directly; PR #103 recorded 712 at its own merge `0ce3b42`.
+not collected directly here; PR #105 later collected it directly at 712. `main` @ `e39af50`
+collects 766, a direct collection.
 
 ### Verification at `5517881`
 
@@ -419,9 +422,25 @@ Provisional, on Mert's laptop, Python 3.12.10 venv on the pins, clean tree:
 | `mypy --strict` | `Success: no issues found in 38 source files` |
 | `python scripts/check_ids.py` | `No duplicate or colliding ADR / NC identifiers.` |
 
+### Verification at `1a5839b`
+
+Re-run after the PR #105 merge, which supersedes the table above as the tree
+that will merge. Same machine and venv, clean tree:
+
+| Gate | Result |
+| --- | --- |
+| `pytest tests/ --collect-only -q -o addopts="" -p no:cacheprovider` | `771 tests collected` |
+| `pytest tests/ -q -p no:cacheprovider` | `771 passed` |
+| `ruff check .` | `All checks passed!` |
+| `ruff format --check .` | `72 files already formatted` |
+| `mypy --strict` | `Success: no issues found in 40 source files` |
+| `python scripts/check_ids.py` | `No duplicate or colliding ADR / NC identifiers.` |
+
+The file and source counts grow with PR #105's new scripts, not with this PR.
+
 The desktop runbook is re-pinned to the new head and posted as the last
 comment on the PR. Relative to round 0, it changes three steps:
 
-- the probe passes `coherence_unit="s"` on the PR tree;
-- step 9 mutates the unit table instead of the guard;
+- the probe makes each call with and without a unit, so one script runs on both trees;
+- step 9 makes the function ignore its unit instead of disabling the guard;
 - the scope step names `tests/test_parameterization.py` as a third file.
