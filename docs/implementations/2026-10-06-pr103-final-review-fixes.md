@@ -110,3 +110,50 @@ Run from a checkout of `feature/issue-74-smoke-transpilation`:
 - ADR-021 amendment (2026-09-18) and ADR-028 in `docs/decisions.md`
 - `docs/numerical-claims.md`, NC-021 and Rule 6
 - Issue #74, PR #103 and its review thread; Issue #58 and PR #79
+
+---
+
+## Merge with `main` after PR #98, as-of 2026-10-06
+
+Everything above this heading is left unedited. PR #98 merged into `main` as
+`e411911` after this PR was approved at `82dfe3e`, and GitHub reported the PR
+as conflicting. `main` was merged into this branch as `0ce3b42` (a merge, not a
+rebase: NC-021, the evidence record and the runbook pin this branch's SHAs).
+
+**What conflicted, and how it was resolved.** One textual conflict:
+`docs/advisor/2026-09-03-decisions-from-akba.md`, where #98 and this branch
+each appended after the same line (171). The file is append-only, and #98's
+own "Merge reconciliation, as-of 2026-09-29" section sets the rule for this
+case: order is merge order, not date order, so text already on `main` is never
+displaced. Main's 184 appended lines are therefore kept byte for byte, and this
+branch's "Outstanding items, as of 2026-10-02" section follows them. That
+section, which had never reached `main`, gained two things: one sentence saying
+why a 2026-10-02 entry follows 2026-10-03 ones, and a clause pointing its
+"Outstanding" at the lead's approval session (Issue #109), which is how #98's
+2026-10-03 decision entry says every tabled item now closes. A script asserted
+that the resolved file starts with `main`'s file exactly; `git diff -U0
+origin/main` shows one hunk at its tail and no removed line.
+
+`docs/decisions.md` and `docs/numerical-claims.md` merged without conflict. #98
+touched ADR sections far from ADR-021 and only the NC-045 row, so the ADR-021
+as-of note and the NC-021 row arrive as this branch wrote them. Checked after
+the merge: one "ADR-021 amendment as of 2026-10-02" heading, one NC-021 row
+with 7 pipes, no `NC-` row missing its closing pipe, and `scripts/check_ids.py`
+clean.
+
+**Nothing executable moved.** PR #98 changes only `docs/`, so no test of this
+branch can be un-skipped or broken by the merge, and no runbook step changes.
+
+**NC-021, per Rule 6.** Re-measured at the merge `0ce3b42` and recorded by the
+following docs-only commit. `main`'s own tip was collected first, because a
+merged count that disagrees with `main`'s row plus the branch delta usually
+means `main`'s row is stale: it collects `701` at `e411911`, matching its row.
+
+**Verification at `0ce3b42`** (Mert's laptop, Windows 11, Python 3.12.10, the
+six key packages at the pinned versions; provisional, as before): `ruff check
+.`, `ruff format --check .` (68 files), `mypy --strict` (38 source files),
+`mypy --strict src/superconducted` (26) and `scripts/check_ids.py` clean; the
+suite count is NC-021's, every collected test passing. The desktop run at
+`9e18067` (`docs/evidence/pr103-burak-desktop/2026-10-04-verification.md`) is
+not repeated, because the merge brings in no code; CI on the pushed head is the
+check that it did not.
