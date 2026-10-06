@@ -142,6 +142,18 @@ table.st th { font-weight: 600; color: var(--ink-2); font-size: 12.5px; }
 table.st td.num { font-variant-numeric: tabular-nums; }
 .foot { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; max-width: 92ch; }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+/* Print (and PDF): keep colours, keep each card on one page, drop interactive chrome. */
+@media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  :root:not([data-theme="dark"]) { --bg: #ffffff; }
+  .plot svg { max-height: 500px; width: auto; max-width: 100%; margin-inline: auto; }
+  .wrap { max-width: none; padding-inline: 0; padding-block: 0; gap: 24px; }
+  nav.toc, details.tbl, .tip { display: none !important; }
+  .card, .tile, .block, .banner { break-inside: avoid; }
+  .band-head, h2, h3 { break-after: avoid; }
+  section.band { break-before: page; }
+  section.band:first-of-type { break-before: auto; }
+}
 </style>
 
 <div class="wrap">

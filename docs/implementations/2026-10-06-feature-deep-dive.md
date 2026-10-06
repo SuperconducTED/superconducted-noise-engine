@@ -191,6 +191,15 @@ The section scripts carry a file-level `# ruff: noqa: RUF001` for Turkish text, 
 `E501`; the page itself is not committed (it is rebuilt with
 `python analysis/report/build_page.py --out <file.html>`).
 
+Then, on the lead's word, the page was committed as a dated record in
+`docs/advisor/2026-10-06-feature-deep-dive-report/` (the HTML wrapped in its own skeleton, built
+with the new `--standalone` option, plus a README on its sources and how to rebuild it), and
+printed to a 98-page A4 PDF for the lead's desktop (not committed). For the PDF the template
+gained a print stylesheet (colours kept, white ground, one chart card per page break, each
+section on a new page, chart height capped at 500 px so no card spills a line onto the next
+page) and `build_page.py` a `--theme light` option that pins the light theme. The artifact was
+republished with the same template, so the published version 2 and the committed HTML match.
+
 ## Related docs
 
 - `docs/findings/2026-10-06-feature-deep-dive/` (this deep dive)

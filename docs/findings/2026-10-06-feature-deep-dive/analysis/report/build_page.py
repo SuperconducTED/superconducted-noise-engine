@@ -72,6 +72,17 @@ def layout() -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument(
+        "--standalone",
+        action="store_true",
+        help="wrap the page in its own html/head/body so it opens directly in a browser",
+    )
+    ap.add_argument(
+        "--theme",
+        choices=("auto", "light", "dark"),
+        default="auto",
+        help="with --standalone: pin a theme (light for print and PDF)",
+    )
     args = ap.parse_args(argv)
     text = json.loads((HERE / "page_tr.json").read_text(encoding="utf-8"))
     sections: list[dict[str, Any]] = []
@@ -90,6 +101,15 @@ def main(argv: list[str] | None = None) -> int:
     html = (HERE / "template.html").read_text(encoding="utf-8").replace("__REPORT_DATA__", blob)
     if "—" in html:
         raise SystemExit("em dash in the assembled page")
+    if args.standalone:
+        theme = "" if args.theme == "auto" else f' data-theme="{args.theme}"'
+        html = (
+            f'<!doctype html><html lang="tr"{theme}><head><meta charset="utf-8">'
+            '<meta name="viewport" '
+            'content="width=device-width, initial-scale=1, viewport-fit=cover">'
+            "<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}"
+            "[hidden]{display:none!important}</style></head><body>" + html + "</body></html>\n"
+        )
     args.out.write_text(html, encoding="utf-8", newline="\n")
     n_charts = sum(len(s.get("charts", [])) for s in sections)
     print(f"wrote {args.out}: {len(sections)} sections, {n_charts} charts, {len(html):,} bytes")
