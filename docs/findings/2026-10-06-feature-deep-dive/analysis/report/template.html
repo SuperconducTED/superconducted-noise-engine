@@ -1,0 +1,835 @@
+<title>ibm_fez özellik incelemesi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one centred column; header with stat tiles and a section index, then one band per
+   section (intro, findings, a responsive grid of chart cards; maps and timelines span the row),
+   closing with root questions, verification status, data rules and provenance.
+   Same identity as the 2026-10-05 report shown to Dr. Akba. */
+:root {
+  --bg: #f3f5f7;
+  --surface: #fbfcfd;
+  --ink: #0e1620;
+  --ink-2: #4a5563;
+  --muted: #6f7987;
+  --grid: #e3e7ec;
+  --axis: #c3cad3;
+  --line: rgba(14, 22, 32, 0.10);
+  --wash: rgba(14, 22, 32, 0.05);
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --s3: #1baf7a;
+  --s4: #eda100;
+  --crit: #d03b3b;
+  --good: #0ca30c;
+  --warn: #c98500;
+  --seq-lo: #e8f1fc;
+  --seq-hi: #0d366b;
+  --div-lo: #2a78d6;
+  --div-mid: #eceae6;
+  --div-hi: #d03b3b;
+  --note: #fff6e5;
+  --note-line: #e9c46a;
+  --f-display: "Bricolage Grotesque", "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-data: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b0f13; --surface: #141a20; --ink: #eef2f6; --ink-2: #bcc5cf; --muted: #8a94a1;
+    --grid: #222a32; --axis: #36404a; --line: rgba(255, 255, 255, 0.10); --wash: rgba(255, 255, 255, 0.06);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --crit: #e66767; --good: #0ca30c; --warn: #fab219;
+    --seq-lo: #22395a; --seq-hi: #cde2fb; --div-lo: #3987e5; --div-mid: #383835; --div-hi: #e66767;
+    --note: #2a2414; --note-line: #8a6d1f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b0f13; --surface: #141a20; --ink: #eef2f6; --ink-2: #bcc5cf; --muted: #8a94a1;
+  --grid: #222a32; --axis: #36404a; --line: rgba(255, 255, 255, 0.10); --wash: rgba(255, 255, 255, 0.06);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --crit: #e66767; --good: #0ca30c; --warn: #fab219;
+  --seq-lo: #22395a; --seq-hi: #cde2fb; --div-lo: #3987e5; --div-mid: #383835; --div-hi: #e66767;
+  --note: #2a2414; --note-line: #8a6d1f;
+  color-scheme: dark;
+}
+
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 56px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; }
+.wrap > *, #sections > * { min-width: 0; }
+@media (max-width: 520px) { .wrap { padding-inline: 16px; padding-block: 24px 40px; gap: 32px; } }
+code, .mono { font-family: var(--f-data); font-size: 0.86em; overflow-wrap: anywhere; }
+a { color: var(--s1); }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; }
+
+/* header */
+.head { display: grid; gap: 10px; }
+.eyebrow { margin: 0; font-family: var(--f-data); font-size: 12px; letter-spacing: 0.02em; color: var(--muted); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: clamp(30px, 4.4vw, 48px); line-height: 1.06; letter-spacing: -0.015em; text-wrap: balance; }
+.lede { margin: 0; max-width: 72ch; color: var(--ink-2); font-size: 16.5px; }
+.banner { display: flex; gap: 10px; align-items: flex-start; max-width: 92ch; background: var(--note); border: 1px solid var(--note-line); border-radius: 10px; padding: 10px 14px; font-size: 13.5px; color: var(--ink); }
+.banner b { font-weight: 600; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 176px), 1fr)); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 2px; align-content: start; min-width: 0; }
+.t-label { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+.t-val { font-size: 27px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; margin-top: 4px; }
+.t-sub { font-size: 12.5px; color: var(--muted); }
+nav.toc { display: flex; flex-wrap: wrap; gap: 8px; }
+nav.toc a { font-size: 13px; text-decoration: none; color: var(--ink-2); border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; }
+nav.toc a:hover { color: var(--ink); border-color: var(--axis); }
+
+/* sections */
+section.band { display: grid; gap: 18px; scroll-margin-top: 16px; }
+.band-head { display: grid; gap: 8px; max-width: 80ch; }
+.band-num { margin: 0; font-family: var(--f-data); font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
+h2 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.15; letter-spacing: -0.01em; text-wrap: balance; }
+.intro p { margin: 0 0 10px; color: var(--ink-2); max-width: 78ch; }
+.findings { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 8px 22px; }
+.findings li { position: relative; padding-left: 16px; font-size: 14.5px; max-width: 70ch; }
+.findings li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 6px; height: 6px; border-radius: 50%; background: var(--s1); }
+.blocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 14px; }
+.block { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+.block h3 { margin: 0 0 8px; font-size: 15px; font-weight: 600; }
+.block ol, .block ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; color: var(--ink-2); }
+
+/* chart cards */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 540px), 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding-block: 16px 12px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.card.wide { grid-column: 1 / -1; }
+.card > .pad { padding-inline: 18px; }
+.card h3 { margin: 0; font-size: 15.5px; font-weight: 600; line-height: 1.3; text-wrap: balance; }
+.card .sub { margin: 4px 0 0; color: var(--ink-2); font-size: 13px; }
+.legend { list-style: none; margin: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--ink-2); }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.legend .k-line { width: 16px; height: 0; border-top: 2px solid; }
+.legend .k-dot { width: 9px; height: 9px; border-radius: 50%; }
+.legend .k-box { width: 10px; height: 10px; border-radius: 2px; }
+.legend .k-ring { width: 11px; height: 11px; border-radius: 50%; border: 2.5px solid; box-sizing: border-box; }
+.ramp { display: flex; align-items: center; gap: 8px; font-family: var(--f-data); font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+.ramp .bar { width: 160px; max-width: 40vw; height: 8px; border-radius: 4px; }
+.plot { position: relative; width: 100%; }
+.plot svg { display: block; width: 100%; height: auto; overflow: visible; }
+.plot text { font-family: var(--f-body); fill: var(--ink-2); }
+.plot .tick text, .plot .tl { font-family: var(--f-data); font-size: 10.5px; fill: var(--muted); }
+.plot .gl line { stroke: var(--grid); }
+.plot .domain { stroke: var(--axis); }
+.plot .tick line { stroke: var(--axis); }
+.plot .alab { font-size: 11.5px; fill: var(--ink-2); }
+.plot .mk line { stroke: var(--ink-2); stroke-opacity: 0.55; }
+.plot .mk text { font-size: 10.5px; fill: var(--ink-2); }
+.plot .mk text, .plot .tl, .plot .dlab { paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
+.read { margin: 0; font-size: 13.5px; background: var(--wash); border-radius: 8px; padding: 9px 12px; }
+.read b { font-weight: 600; }
+.caveat { margin: 0; font-size: 13px; border-left: 3px solid var(--note-line); background: var(--note); border-radius: 0 8px 8px 0; padding: 7px 11px; }
+.meta-row { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; justify-content: space-between; }
+.src { font-family: var(--f-data); font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+details.tbl summary { cursor: pointer; font-size: 12.5px; color: var(--ink-2); }
+details.tbl .tw { max-height: 280px; overflow: auto; margin-top: 8px; border: 1px solid var(--line); border-radius: 8px; }
+details.tbl table { border-collapse: collapse; font-size: 12px; width: 100%; font-variant-numeric: tabular-nums; }
+details.tbl th, details.tbl td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+details.tbl th { position: sticky; top: 0; background: var(--surface); font-weight: 600; }
+.tip { position: fixed; pointer-events: none; z-index: 20; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 22px rgba(0, 0, 0, 0.14); padding: 8px 10px; font-size: 12.5px; max-width: 300px; }
+.tip .tv { font-weight: 600; font-variant-numeric: tabular-nums; }
+.tip .tr { display: flex; align-items: center; gap: 6px; }
+.tip .tk { width: 12px; height: 0; border-top: 2px solid; flex: none; }
+.tip .th { color: var(--muted); font-size: 11.5px; margin-bottom: 3px; }
+
+/* static tables */
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table.st { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+table.st th, table.st td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.st th { font-weight: 600; color: var(--ink-2); font-size: 12.5px; }
+table.st td.num { font-variant-numeric: tabular-nums; }
+.foot { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; max-width: 92ch; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <p class="eyebrow">SuperconducTED · ibm_fez (Heron r2, 156 kübit) · 6 Ekim 2026 · calibration-data 7b84b50</p>
+    <h1>ibm_fez kalibrasyon özellikleri: verinin kendisi</h1>
+    <p class="lede" id="lede"></p>
+    <div class="banner" role="note"><span id="banner"></span></div>
+    <div class="tiles" id="tiles"></div>
+    <nav class="toc" id="toc" aria-label="Bölümler"></nav>
+  </header>
+  <main id="sections" style="display:grid;grid-template-columns:minmax(0,1fr);gap:48px"></main>
+  <footer class="foot" id="foot"></footer>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script id="report-data" type="application/json">__REPORT_DATA__</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+(function () {
+  "use strict";
+  const DATA = JSON.parse(document.getElementById("report-data").textContent);
+  d3.formatDefaultLocale({ decimal: ",", thousands: ".", grouping: [3], currency: ["", " ₺"] });
+  d3.timeFormatDefaultLocale({
+    dateTime: "%A, %e %B %Y %X", date: "%d.%m.%Y", time: "%H:%M:%S", periods: ["", ""],
+    days: ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"],
+    shortDays: ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"],
+    months: ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"],
+    shortMonths: ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"],
+  });
+  const fmtG = d3.format(".3~g");
+  const fmtDate = d3.timeFormat("%d %b %Y");
+  const fmtDateTime = d3.timeFormat("%d %b %Y %H:%M");
+
+  // ---------- small helpers
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function md(s) {
+    return esc(s == null ? "" : s)
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  }
+  function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+  function tok(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function cat(i) { return tok(["--s1", "--s2", "--s3", "--s4"][i % 4]); }
+  function num(v) {
+    if (v == null || Number.isNaN(v)) return "yok";
+    if (typeof v !== "number") return String(v);
+    const a = Math.abs(v);
+    if (a !== 0 && (a < 1e-4)) return d3.format(".2~e")(v).replace(".", ",");
+    if (a >= 1000) return d3.format(",.0f")(v);
+    return fmtG(v);
+  }
+  function isTime(axis) { return axis && axis.scale === "time"; }
+  function toX(v, axis) { return isTime(axis) ? new Date(v) : v; }
+  function fmtX(v, axis) { return isTime(axis) ? fmtDateTime(v instanceof Date ? v : new Date(v)) : num(v); }
+
+  function plain(s) { return String(s == null ? "" : s).replace(/`/g, "").replace(/\*\*/g, ""); }
+  const SYMS = [d3.symbolCircle, d3.symbolSquare, d3.symbolTriangle, d3.symbolDiamond];
+  const tip = document.getElementById("tip");
+  function showTip(evt, head, rows) {
+    tip.replaceChildren();
+    if (head) { const h = el("div", "th"); h.textContent = plain(head); tip.appendChild(h); }
+    rows.forEach(r => {
+      const row = el("div", "tr");
+      if (r.color) { const k = el("span", "tk"); k.style.borderTopColor = r.color; row.appendChild(k); }
+      const v = el("span", "tv"); v.textContent = plain(r.value); row.appendChild(v);
+      if (r.label) { const l = el("span"); l.textContent = " " + plain(r.label); l.style.color = "var(--ink-2)"; row.appendChild(l); }
+      tip.appendChild(row);
+    });
+    tip.hidden = false;
+    const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = evt.clientX + pad, y = evt.clientY + pad;
+    if (x + w > window.innerWidth - 8) x = evt.clientX - w - pad;
+    if (y + h > window.innerHeight - 8) y = evt.clientY - h - pad;
+    tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px";
+  }
+  function hideTip() { tip.hidden = true; }
+
+  // Log ticks: denser mantissas when the domain spans few decades, so an axis never shows a single label.
+  const MANT = [[1.3, [1, 2, 3, 5, 7]], [2.6, [1, 2, 5]], [4.2, [1, 3]], [Infinity, [1]]];
+  function logTicks(scale) {
+    const d = scale.domain(), a = Math.min(d[0], d[1]), b = Math.max(d[0], d[1]);
+    const mant = MANT.find(m => Math.log10(b / a) <= m[0])[1], t = [];
+    for (let k = Math.floor(Math.log10(a)); k <= Math.ceil(Math.log10(b)); k++) mant.forEach(mm => { const v = mm * Math.pow(10, k); if (v >= a * 0.999 && v <= b * 1.001) t.push(v); });
+    return t.length >= 2 ? t : scale.ticks(4);
+  }
+  // Log axes are padded by 5% of their span instead of being rounded out to whole decades.
+  function makeScale(axis, values, range, opts) {
+    opts = opts || {};
+    const sc = axis && axis.scale;
+    let ext = d3.extent(values.filter(v => v != null && (sc !== "log" || v > 0)));
+    if (ext[0] == null) ext = sc === "log" ? [1, 10] : [0, 1];
+    const fixedLo = axis && axis.min != null, fixedHi = axis && axis.max != null;
+    if (sc === "log") {
+      if (ext[0] === ext[1]) ext = [ext[0] / 2, ext[1] * 2];
+      const pad = Math.pow(ext[1] / ext[0], 0.05);
+      ext = [ext[0] / pad, ext[1] * pad];
+    }
+    if (fixedLo) ext[0] = isTime(axis) ? new Date(axis.min) : axis.min;
+    if (fixedHi) ext[1] = isTime(axis) ? new Date(axis.max) : axis.max;
+    let s;
+    if (sc === "time") s = d3.scaleUtc().domain(ext).range(range);
+    else if (sc === "log") s = d3.scaleLog().domain(ext).range(range);
+    else {
+      if (ext[0] === ext[1]) ext = [ext[0] - 1, ext[1] + 1];
+      if (opts.zero && ext[0] > 0 && !fixedLo) ext[0] = 0;
+      if (opts.headroom && !fixedHi && ext[1] > 0) ext[1] = ext[1] * (1 + opts.headroom);
+      s = d3.scaleLinear().domain(ext).range(range);
+      if (!fixedLo && !fixedHi) s.nice();
+    }
+    return s;
+  }
+  function axisFor(scale, axis, orient, n) {
+    const ax = orient === "bottom" ? d3.axisBottom(scale) : d3.axisLeft(scale);
+    if (axis && axis.scale === "log") { ax.tickValues(logTicks(scale)).tickFormat(v => num(v)); }
+    else if (axis && axis.scale === "time") { ax.ticks(n || 5).tickFormat(d3.timeFormat("%d %b")); }
+    else if (axis && axis.scale === "band") { ax.tickFormat(v => plain(v)); }
+    else { ax.ticks(n || 5).tickFormat(v => num(v)); }
+    return ax.tickSizeOuter(0);
+  }
+  function axisLabel(axis) { if (!axis) return ""; return plain((axis.label || "") + (axis.unit ? " (" + axis.unit + ")" : "")); }
+
+  // Top margin: the y-axis title row, plus one row per staggered x-marker label (at most three).
+  function markerRows(spec) { return Math.min(3, (spec.markers || []).filter(k => k.axis === "x").length); }
+  function topMargin(spec, base) { return base + markerRows(spec) * 12; }
+  function frame(host, width, height, m) {
+    const svg = d3.select(host).append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("role", "img");
+    const g = svg.append("g").attr("transform", `translate(${m.l},${m.t})`);
+    return { svg, g, w: width - m.l - m.r, h: height - m.t - m.b, m };
+  }
+  function drawAxes(f, xs, ys, spec, opts) {
+    opts = opts || {};
+    const xa = axisFor(xs, spec.x, "bottom", f.w < 380 ? 3 : 5), ya = axisFor(ys, spec.y, "left", 5);
+    if (!opts.noGrid && spec.y && spec.y.scale !== "band") {
+      f.g.append("g").attr("class", "gl").call(d3.axisLeft(ys).tickValues(spec.y.scale === "log" ? logTicks(ys) : ys.ticks(5)).tickSize(-f.w).tickFormat("")).call(g => g.select(".domain").remove());
+    }
+    const gx = f.g.append("g").attr("transform", `translate(0,${f.h})`).call(xa);
+    if (opts.rotateX) gx.selectAll("text").attr("transform", "rotate(-35)").style("text-anchor", "end").attr("dx", "-0.4em").attr("dy", "0.5em");
+    f.g.append("g").call(ya);
+    if (spec.x && spec.x.label) f.g.append("text").attr("class", "alab").attr("x", f.w).attr("y", f.h + (opts.xLabelDy || 34)).attr("text-anchor", "end").text(axisLabel(spec.x));
+    if (spec.y && spec.y.label) f.g.append("text").attr("class", "alab").attr("x", 0).attr("y", -f.m.t + 12).attr("text-anchor", "start").text(axisLabel(spec.y));
+  }
+  // x-marker labels sit above the plot, greedily staggered so they never overlap; y-marker labels sit at the left end.
+  function drawMarkers(f, xs, ys, spec) {
+    const mk = spec.markers || [];
+    const g = f.g.append("g").attr("class", "mk");
+    const placed = [[], [], []];
+    const xm = mk.filter(m => m.axis === "x").map(m => xs(toX(m.value, spec.x)));
+    mk.forEach(m => {
+      const label = plain(m.label || "");
+      if (m.axis === "x") {
+        const x = xs(toX(m.value, spec.x));
+        if (!(x >= 0 && x <= f.w)) return;
+        g.append("line").attr("x1", x).attr("x2", x).attr("y1", 0).attr("y2", f.h);
+        const wpx = label.length * 5.8 + 6;
+        const others = xm.filter(o => Math.abs(o - x) > 0.5);
+        const freeR = !others.some(o => o > x && o < x + wpx + 4) && x + wpx <= f.w + 12;
+        const freeL = !others.some(o => o < x && o > x - wpx - 4) && x - wpx >= -f.m.l + 4;
+        const anchor = freeR && (!freeL || x <= f.w * 0.6) ? "start" : freeL ? "end" : (x > f.w * 0.6 ? "end" : "start");
+        const x0 = anchor === "start" ? x : x - wpx, x1 = anchor === "start" ? x + wpx : x;
+        let lvl = placed.findIndex(row => row.every(([a, b]) => x1 < a - 4 || x0 > b + 4));
+        if (lvl < 0) lvl = placed.length - 1;
+        placed[lvl].push([x0, x1]);
+        const ty = -6 - lvl * 12;
+        g.append("line").attr("x1", x).attr("x2", x).attr("y1", ty + 3).attr("y2", 0);
+        g.append("text").attr("x", x + (anchor === "start" ? 3 : -3)).attr("y", ty).attr("text-anchor", anchor).text(label);
+      } else {
+        const y = ys(m.value);
+        if (!(y >= 0 && y <= f.h)) return;
+        g.append("line").attr("x1", 0).attr("x2", f.w).attr("y1", y).attr("y2", y);
+        g.append("text").attr("x", 4).attr("y", y - 4).attr("text-anchor", "start").text(label);
+      }
+    });
+  }
+  function legendFor(card, items) {
+    const ul = card.querySelector(".legend"); ul.replaceChildren();
+    if (!items || items.length < 2) { ul.hidden = true; return; }
+    ul.hidden = false;
+    items.forEach(it => {
+      const li = el("li");
+      let k;
+      if (it.kind === "sym") {
+        k = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        k.setAttribute("width", "12"); k.setAttribute("height", "12"); k.setAttribute("viewBox", "-6 -6 12 12");
+        const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        p.setAttribute("d", d3.symbol().type(SYMS[(it.sym || 0) % 4]).size(40)()); p.setAttribute("fill", it.color); k.appendChild(p);
+      } else {
+        k = el("span", "k-" + (it.kind || "line"));
+        if (it.kind === "box" || it.kind === "dot") k.style.background = it.color;
+        else if (it.kind === "ring") { k.style.borderColor = it.color; if (it.dash) k.style.borderStyle = "dashed"; }
+        else { k.style.borderTopColor = it.color; if (it.dash) k.style.borderTopStyle = "dashed"; }
+      }
+      li.appendChild(k); const t = el("span"); t.textContent = plain(it.name); li.appendChild(t); ul.appendChild(li);
+    });
+  }
+  function rampFor(card, colorAt, labels) {
+    const r = card.querySelector(".ramp"); r.replaceChildren(); r.hidden = false;
+    const lo = el("span"); lo.textContent = plain(labels[0]);
+    const bar = el("span", "bar");
+    const stops = d3.range(0, 1.0001, 0.1).map(t => colorAt(t) + " " + Math.round(t * 100) + "%");
+    bar.style.background = "linear-gradient(90deg," + stops.join(",") + ")";
+    const hi = el("span"); hi.textContent = plain(labels[1]);
+    r.append(lo, bar, hi);
+    if (labels[2]) { const n = el("span"); n.textContent = plain(labels[2]); r.appendChild(n); }
+  }
+
+  // ---------- chart types
+  const R = {};
+
+  R.line = function (host, card, spec, W) {
+    const H = Math.max(240, Math.min(340, W * 0.52)), m = { t: topMargin(spec, 26), r: 16, b: 44, l: 56 };
+    const f = frame(host, W, H, m);
+    const pts = spec.series.flatMap(s => s.points.map(p => [toX(p[0], spec.x), p[1]]));
+    const bands = spec.series.flatMap(s => (s.band || []).flatMap(b => [b[1], b[2]]));
+    const xs = makeScale(spec.x, pts.map(p => p[0]), [0, f.w]);
+    const ys = makeScale(spec.y, pts.map(p => p[1]).concat(bands), [f.h, 0]);
+    drawAxes(f, xs, ys, spec);
+    const ok = v => v != null && (spec.y.scale !== "log" || v > 0);
+    const multiDots = spec.series.filter(s => (s.style || "line") === "dots").length > 1;
+    spec.series.forEach((s, i) => {
+      const c = cat(i), raw = s.points.map(p => [toX(p[0], spec.x), p[1]]);
+      // Break a time series at gaps far longer than its usual spacing, so a line never implies data across a pause.
+      const gapAt = new Set();
+      if (isTime(spec.x) && raw.length > 3) {
+        const xv = raw.map(p => +p[0]), dif = xv.slice(1).map((v, k) => v - xv[k]);
+        const thr = Math.max(3 * 864e5, (d3.median(dif) || 0) * 8);
+        dif.forEach((d, k) => { if (d > thr) gapAt.add(k + 1); });
+      }
+      const data = raw.map(p => [xs(p[0]), ok(p[1]) ? ys(p[1]) : null]);
+      const path = [];
+      data.forEach((d, k) => { if (gapAt.has(k)) path.push([d[0], null]); path.push(d); });
+      if (s.band && s.band.length) {
+        const area = d3.area().defined(b => ok(b[1]) && ok(b[2])).x(b => xs(toX(b[0], spec.x))).y0(b => ys(b[1])).y1(b => ys(b[2]));
+        f.g.append("path").attr("d", area(s.band)).attr("fill", c).attr("fill-opacity", 0.12);
+      }
+      const style = s.style || "line";
+      if (style.includes("line")) f.g.append("path").attr("d", d3.line().defined(d => d[1] != null).x(d => d[0]).y(d => d[1])(path)).attr("fill", "none").attr("stroke", c).attr("stroke-width", 2).attr("stroke-linejoin", "round").attr("stroke-linecap", "round");
+      const dots = data.filter(d => d[1] != null);
+      if (style === "dots" && multiDots) f.g.append("g").selectAll("path").data(dots).join("path").attr("transform", d => `translate(${d[0]},${d[1]})`).attr("d", d3.symbol().type(SYMS[i % 4]).size(30)).attr("fill", c).attr("fill-opacity", 0.85);
+      else if (style.includes("dots")) f.g.append("g").selectAll("circle").data(dots).join("circle").attr("cx", d => d[0]).attr("cy", d => d[1]).attr("r", style === "dots" ? 3 : 3.5).attr("fill", c).attr("stroke", tok("--surface")).attr("stroke-width", style === "dots" ? 0.8 : 1.5).attr("fill-opacity", style === "dots" ? 0.8 : 1);
+    });
+    drawMarkers(f, xs, ys, spec);
+    legendFor(card, spec.series.map((s, i) => ((s.style || "line") === "dots" && multiDots) ? { name: s.name, color: cat(i), kind: "sym", sym: i } : { name: s.name, color: cat(i), kind: (s.style === "dots" ? "dot" : "line") }));
+    // crosshair
+    const cross = f.g.append("line").attr("y1", 0).attr("y2", f.h).attr("stroke", tok("--axis")).attr("visibility", "hidden");
+    const hl = f.g.append("g");
+    const series = spec.series.map(s => s.points.map(p => ({ x: xs(toX(p[0], spec.x)), raw: p })).filter(d => ok(d.raw[1])).sort((a, b) => a.x - b.x));
+    f.g.append("rect").attr("width", f.w).attr("height", f.h).attr("fill", "transparent")
+      .on("pointermove", function (evt) {
+        const [mx] = d3.pointer(evt, this);
+        let best = null;
+        const rows = [];
+        hl.selectAll("*").remove();
+        series.forEach((arr, i) => {
+          if (!arr.length) return;
+          const k = d3.bisector(d => d.x).center(arr, mx), d = arr[k];
+          if (Math.abs(d.x - mx) > 40) return;
+          if (!best || Math.abs(d.x - mx) < Math.abs(best.x - mx)) best = d;
+          hl.append("circle").attr("cx", d.x).attr("cy", ys(d.raw[1])).attr("r", 4.5).attr("fill", cat(i)).attr("stroke", tok("--surface")).attr("stroke-width", 2);
+          rows.push({ color: cat(i), value: num(d.raw[1]), label: spec.series[i].name + (series.length > 1 ? " · " + fmtX(toX(d.raw[0], spec.x), spec.x) : "") });
+        });
+        if (!best) { hideTip(); cross.attr("visibility", "hidden"); return; }
+        cross.attr("x1", best.x).attr("x2", best.x).attr("visibility", "visible");
+        showTip(evt, axisLabel(spec.x) + ": " + fmtX(toX(best.raw[0], spec.x), spec.x), rows);
+      })
+      .on("pointerleave", () => { hideTip(); cross.attr("visibility", "hidden"); hl.selectAll("*").remove(); });
+  };
+
+  R.scatter = function (host, card, spec, W) {
+    const H = Math.max(260, Math.min(380, W * 0.62)), m = { t: topMargin(spec, 24), r: 16, b: 44, l: 56 };
+    const f = frame(host, W, H, m);
+    const all = spec.series.flatMap(s => s.points);
+    const okx = v => spec.x.scale !== "log" || v > 0, oky = v => spec.y.scale !== "log" || v > 0;
+    let xv = all.map(p => p[0]).filter(okx), yv = all.map(p => p[1]).filter(oky);
+    // With a y = x reference both axes share one domain, so the diagonal is a true 45 degree line.
+    if (spec.diag && spec.x.scale === spec.y.scale) { const u = xv.concat(yv); xv = u; yv = u; }
+    const xs = makeScale(spec.x, xv, [0, f.w]);
+    const ys = makeScale(spec.y, yv, [f.h, 0]);
+    drawAxes(f, xs, ys, spec);
+    if (spec.diag) {
+      const d = xs.domain(), e = ys.domain(), lo = Math.max(d[0], e[0]), hi = Math.min(d[1], e[1]);
+      if (hi > lo) {
+        const end = spec.x.scale === "log" ? lo * Math.pow(hi / lo, 0.86) : lo + 0.86 * (hi - lo);
+        f.g.append("line").attr("x1", xs(lo)).attr("y1", ys(lo)).attr("x2", xs(end)).attr("y2", ys(end)).attr("stroke", tok("--ink-2")).attr("stroke-opacity", 0.5);
+        f.g.append("text").attr("class", "tl dlab").attr("x", xs(hi) - 2).attr("y", ys(hi) + 10).attr("text-anchor", "end").text("y = x");
+      }
+    }
+    const flat = [], multi = spec.series.length > 1;
+    spec.series.forEach((s, i) => {
+      const dense = s.points.length > 400;
+      const g = f.g.append("g");
+      s.points.forEach(p => {
+        if (!okx(p[0]) || !oky(p[1])) return;
+        const cx = xs(p[0]), cy = ys(p[1]);
+        flat.push({ cx, cy, p, i });
+        if (multi) g.append("path").attr("transform", `translate(${cx},${cy})`).attr("d", d3.symbol().type(SYMS[i % 4]).size(dense ? 18 : 34)()).attr("fill", cat(i)).attr("fill-opacity", s.points.length > 100 ? 0.55 : 0.85);
+        else g.append("circle").attr("cx", cx).attr("cy", cy).attr("r", dense ? 2.4 : 4).attr("fill", cat(i)).attr("fill-opacity", dense ? 0.45 : 0.85).attr("stroke", dense ? "none" : tok("--surface")).attr("stroke-width", 1.5);
+      });
+    });
+    if (spec.fit) f.g.append("line").attr("x1", xs(spec.fit[0][0])).attr("y1", ys(spec.fit[0][1])).attr("x2", xs(spec.fit[1][0])).attr("y2", ys(spec.fit[1][1])).attr("stroke", tok("--ink")).attr("stroke-width", 1.5).attr("stroke-opacity", 0.7);
+    drawMarkers(f, xs, ys, spec);
+    legendFor(card, spec.series.map((s, i) => (multi ? { name: s.name, color: cat(i), kind: "sym", sym: i } : { name: s.name, color: cat(i), kind: "dot" })));
+    if (!flat.length) return;
+    const dl = d3.Delaunay.from(flat, d => d.cx, d => d.cy);
+    const ring = f.g.append("circle").attr("r", 6).attr("fill", "none").attr("stroke", tok("--ink")).attr("stroke-width", 1.5).attr("visibility", "hidden");
+    f.g.append("rect").attr("width", f.w).attr("height", f.h).attr("fill", "transparent")
+      .on("pointermove", function (evt) {
+        const [mx, my] = d3.pointer(evt, this), k = dl.find(mx, my), d = flat[k];
+        if (!d || Math.hypot(d.cx - mx, d.cy - my) > 24) { hideTip(); ring.attr("visibility", "hidden"); return; }
+        ring.attr("cx", d.cx).attr("cy", d.cy).attr("visibility", "visible");
+        showTip(evt, (d.p[2] != null ? String(d.p[2]) + " · " : "") + spec.series[d.i].name, [
+          { value: num(d.p[0]), label: axisLabel(spec.x) }, { value: num(d.p[1]), label: axisLabel(spec.y) }]);
+      })
+      .on("pointerleave", () => { hideTip(); ring.attr("visibility", "hidden"); });
+  };
+
+  function barLike(host, card, spec, W, stacked) {
+    const horiz = spec.orient === "h" && !stacked;
+    const cats = spec.categories, ns = spec.series.length;
+    const longest = d3.max(cats, c => String(c).length) || 4;
+    const yAxis = spec.y || {}, xAxis = spec.x || {};
+    if (horiz) {
+      const lw = Math.min(200, 12 + longest * 6.6), rowH = Math.max(18, Math.min(30, 22 * ns));
+      const H = topMargin(spec, 14) + 26 + cats.length * rowH + 30, m = { t: topMargin(spec, 14), r: 36, b: 40, l: lw };
+      const f = frame(host, W, H, m);
+      const vals = spec.series.flatMap(s => s.values.concat(s.lo || [], s.hi || [])).filter(v => v != null);
+      const vAxis = { scale: xAxis.scale === "log" ? "log" : "linear", min: xAxis.min, max: xAxis.max, label: xAxis.label, unit: xAxis.unit };
+      const xs = makeScale(vAxis, vals, [0, f.w], { zero: vAxis.scale !== "log", headroom: 0.12 });
+      const yb = d3.scaleBand().domain(cats).range([0, f.h]).padding(0.25), inner = d3.scaleBand().domain(d3.range(ns)).range([0, yb.bandwidth()]).padding(0.1);
+      f.g.append("g").attr("class", "gl").call(d3.axisBottom(xs).tickValues(vAxis.scale === "log" ? logTicks(xs) : xs.ticks(5)).tickSize(f.h).tickFormat("")).call(g => g.select(".domain").remove());
+      f.g.append("g").attr("transform", `translate(0,${f.h})`).call(axisFor(xs, vAxis, "bottom", f.w < 320 ? 3 : 5));
+      f.g.append("g").call(d3.axisLeft(yb).tickFormat(v => plain(v)).tickSizeOuter(0));
+      if (vAxis.label) f.g.append("text").attr("class", "alab").attr("x", f.w).attr("y", f.h + 34).attr("text-anchor", "end").text(axisLabel(vAxis));
+      const base = vAxis.scale === "log" ? xs.domain()[0] : Math.max(0, xs.domain()[0]);
+      spec.series.forEach((s, i) => {
+        s.values.forEach((v, j) => {
+          if (v == null) return;
+          const y = yb(cats[j]) + inner(i), bh = Math.min(22, inner.bandwidth());
+          if (v === 0) { f.g.append("text").attr("class", "tl").attr("x", xs(Math.max(base, xs.domain()[0])) + 4).attr("y", y + inner.bandwidth() / 2 + 3.5).text("0"); return; }
+          const x0 = xs(Math.min(base, v) < xs.domain()[0] ? xs.domain()[0] : Math.min(base, v)), x1 = xs(Math.max(base, v));
+          f.g.append("rect").attr("x", Math.min(x0, x1)).attr("y", y + (inner.bandwidth() - bh) / 2).attr("width", Math.max(1, Math.abs(x1 - x0))).attr("height", bh).attr("rx", 3).attr("fill", cat(i))
+            .on("pointermove", evt => showTip(evt, cats[j], [{ color: cat(i), value: num(v), label: ns > 1 ? s.name : "" }])).on("pointerleave", hideTip);
+          if (s.lo && s.hi && s.lo[j] != null && s.hi[j] != null) f.g.append("line").attr("x1", xs(s.lo[j])).attr("x2", xs(s.hi[j])).attr("y1", y + inner.bandwidth() / 2).attr("y2", y + inner.bandwidth() / 2).attr("stroke", tok("--ink")).attr("stroke-width", 1.4);
+          if (ns === 1 && cats.length <= 16) f.g.append("text").attr("class", "tl").attr("x", Math.max(x0, x1) + 4).attr("y", y + inner.bandwidth() / 2 + 3.5).text(num(v));
+        });
+      });
+      drawMarkers(f, xs, null, { markers: (spec.markers || []).filter(k => k.axis === "x"), x: vAxis });
+      legendFor(card, spec.series.map((s, i) => ({ name: s.name, color: cat(i), kind: "box" })));
+      return;
+    }
+    const rot = longest > 8 || cats.length > 10;
+    const rb = rot ? 52 + Math.min(120, longest * 4.4) : 46;
+    const H = Math.max(240, Math.min(340, W * 0.5)) + (rot ? rb - 46 : 0), m = { t: 24, r: 16, b: rb, l: 56 };
+    const f = frame(host, W, H, m);
+    const xb = d3.scaleBand().domain(cats).range([0, f.w]).padding(0.22);
+    let vals;
+    if (stacked) { vals = cats.map((_, j) => d3.sum(spec.series, s => s.values[j] || 0)).concat([0]); }
+    else vals = spec.series.flatMap(s => s.values.concat(s.lo || [], s.hi || [])).filter(v => v != null);
+    const vAxis = { scale: yAxis.scale === "log" ? "log" : "linear", min: yAxis.min, max: yAxis.max, label: yAxis.label, unit: yAxis.unit };
+    const ys = makeScale(vAxis, vals, [f.h, 0], { zero: vAxis.scale !== "log", headroom: 0.1 });
+    drawAxes(f, xb, ys, { x: { scale: "band", label: xAxis.label }, y: vAxis }, { rotateX: rot, xLabelDy: rot ? rb - 6 : 38 });
+    const base = vAxis.scale === "log" ? ys.domain()[0] : 0;
+    if (stacked) {
+      cats.forEach((c, j) => {
+        let acc = 0;
+        spec.series.forEach((s, i) => {
+          const v = s.values[j] || 0; if (v <= 0) return;
+          const y0 = ys(acc), y1 = ys(acc + v); acc += v;
+          const bw = Math.min(28, xb.bandwidth());
+          f.g.append("rect").attr("x", xb(c) + (xb.bandwidth() - bw) / 2).attr("y", y1 + 1).attr("width", bw).attr("height", Math.max(0.5, y0 - y1 - 2)).attr("fill", cat(i)).attr("rx", 2)
+            .on("pointermove", evt => showTip(evt, c, spec.series.map((t, k) => ({ color: cat(k), value: num(t.values[j]), label: t.name })))).on("pointerleave", hideTip);
+        });
+      });
+    } else {
+      const inner = d3.scaleBand().domain(d3.range(ns)).range([0, xb.bandwidth()]).padding(0.08);
+      spec.series.forEach((s, i) => {
+        s.values.forEach((v, j) => {
+          if (v == null) return;
+          const bw = Math.min(24, inner.bandwidth()), x = xb(cats[j]) + inner(i) + (inner.bandwidth() - bw) / 2;
+          if (v === 0) { f.g.append("text").attr("class", "tl").attr("x", x + bw / 2).attr("y", ys(base) - 4).attr("text-anchor", "middle").text("0"); return; }
+          const y0 = ys(base), y1 = ys(v);
+          f.g.append("rect").attr("x", x).attr("y", Math.min(y0, y1)).attr("width", bw).attr("height", Math.max(1, Math.abs(y0 - y1))).attr("rx", 3).attr("fill", cat(i))
+            .on("pointermove", evt => showTip(evt, cats[j], spec.series.map((t, k) => ({ color: cat(k), value: num(t.values[j]), label: t.name })))).on("pointerleave", hideTip);
+          if (s.lo && s.hi && s.lo[j] != null && s.hi[j] != null) f.g.append("line").attr("x1", x + bw / 2).attr("x2", x + bw / 2).attr("y1", ys(s.lo[j])).attr("y2", ys(s.hi[j])).attr("stroke", tok("--ink")).attr("stroke-width", 1.4);
+          if (ns === 1 && cats.length <= 14) f.g.append("text").attr("class", "tl").attr("x", x + bw / 2).attr("y", Math.min(y0, y1) - 4).attr("text-anchor", "middle").text(num(v));
+        });
+      });
+    }
+    drawMarkers(f, xb, ys, { markers: (spec.markers || []).filter(k => k.axis === "y"), y: vAxis });
+    legendFor(card, spec.series.map((s, i) => ({ name: s.name, color: cat(i), kind: "box" })));
+  }
+  R.bar = (h, c, s, W) => barLike(h, c, s, W, false);
+  R.stack = (h, c, s, W) => barLike(h, c, s, W, true);
+
+  R.hist = function (host, card, spec, W) {
+    const H = Math.max(230, Math.min(320, W * 0.48)), m = { t: topMargin(spec, 26), r: 16, b: 44, l: 56 };
+    const f = frame(host, W, H, m);
+    const edges = spec.series.flatMap(s => s.edges), counts = spec.series.flatMap(s => s.counts);
+    const xs = makeScale(spec.x, edges, [0, f.w]);
+    const yAx = Object.assign({ scale: "linear" }, spec.y);
+    const ys = makeScale(yAx, counts.concat([0]), [f.h, 0], { zero: true, headroom: 0.08 });
+    drawAxes(f, xs, ys, { x: spec.x, y: yAx });
+    const one = spec.series.length === 1;
+    spec.series.forEach((s, i) => {
+      const c = cat(i);
+      if (one) {
+        s.counts.forEach((v, j) => {
+          const x0 = xs(s.edges[j]), x1 = xs(s.edges[j + 1]);
+          f.g.append("rect").attr("x", Math.min(x0, x1) + 1).attr("y", ys(v)).attr("width", Math.max(0.5, Math.abs(x1 - x0) - 2)).attr("height", Math.max(0, ys(0) - ys(v))).attr("fill", c).attr("rx", 2)
+            .on("pointermove", evt => showTip(evt, num(s.edges[j]) + " ile " + num(s.edges[j + 1]) + " arası", [{ color: c, value: num(v), label: "" }])).on("pointerleave", hideTip);
+        });
+      } else {
+        const pts = [];
+        s.counts.forEach((v, j) => { pts.push([xs(s.edges[j]), ys(v)], [xs(s.edges[j + 1]), ys(v)]); });
+        f.g.append("path").attr("d", d3.area().x(d => d[0]).y0(ys(0)).y1(d => d[1])(pts)).attr("fill", c).attr("fill-opacity", 0.1);
+        f.g.append("path").attr("d", d3.line().x(d => d[0]).y(d => d[1])(pts)).attr("fill", "none").attr("stroke", c).attr("stroke-width", 2);
+      }
+    });
+    drawMarkers(f, xs, ys, spec);
+    legendFor(card, spec.series.map((s, i) => ({ name: s.name, color: cat(i), kind: one ? "box" : "line" })));
+  };
+
+  function seqColor(t) { return d3.interpolateLab(tok("--seq-lo"), tok("--seq-hi"))(Math.max(0, Math.min(1, t))); }
+  function divColor(t) { // t in [-1, 1]
+    const lo = tok("--div-lo"), mid = tok("--div-mid"), hi = tok("--div-hi");
+    return t < 0 ? d3.interpolateLab(mid, lo)(Math.min(1, -t)) : d3.interpolateLab(mid, hi)(Math.min(1, t));
+  }
+  function textOn(bg) { const c = d3.lab(bg); return c.l > 60 ? "#0e1620" : "#ffffff"; }
+
+  R.heatmap = function (host, card, spec, W) {
+    const rows = spec.rows, cols = spec.cols;
+    const lw = Math.min(170, 12 + (d3.max(rows, r => String(r).length) || 4) * 6.4);
+    const top = Math.min(150, 14 + (d3.max(cols, c => String(c).length) || 4) * 6.0);
+    const cell = Math.max(12, Math.min(46, (W - lw - 16) / cols.length));
+    const H = top + rows.length * cell + 12, m = { t: top, r: 16, b: 12, l: lw };
+    const f = frame(host, Math.max(W, lw + cols.length * cell + 16), H, m);
+    const vals = spec.values.flat().filter(v => v != null);
+    const fmt = spec.fmt ? d3.format(spec.fmt) : num;
+    let colorOf, labels;
+    if (spec.scale === "div") {
+      const mx = spec.domain ? Math.max(Math.abs(spec.domain[0]), Math.abs(spec.domain[1])) : (d3.max(vals, v => Math.abs(v)) || 1);
+      colorOf = v => divColor(v / mx); labels = [fmt(-mx), fmt(mx), "orta = 0"];
+      rampFor(card, t => divColor(t * 2 - 1), labels);
+    } else {
+      const d = spec.domain || d3.extent(vals);
+      colorOf = v => seqColor((v - d[0]) / ((d[1] - d[0]) || 1)); labels = [fmt(d[0]), fmt(d[1])];
+      rampFor(card, seqColor, labels);
+    }
+    cols.forEach((c, j) => f.g.append("text").attr("class", "tl").attr("transform", `translate(${j * cell + cell / 2},-6) rotate(-45)`).attr("text-anchor", "start").text(plain(c)));
+    rows.forEach((r, i) => f.g.append("text").attr("class", "tl").attr("x", -6).attr("y", i * cell + cell / 2 + 3.5).attr("text-anchor", "end").text(plain(r)));
+    spec.values.forEach((row, i) => row.forEach((v, j) => {
+      const bg = v == null ? tok("--wash") : colorOf(v);
+      f.g.append("rect").attr("x", j * cell + 1).attr("y", i * cell + 1).attr("width", cell - 2).attr("height", cell - 2).attr("rx", 3).attr("fill", bg)
+        .on("pointermove", evt => showTip(evt, rows[i] + " · " + cols[j], [{ value: v == null ? "yok" : fmt(v), label: "" }])).on("pointerleave", hideTip);
+      if (v != null && cell >= 30 && cols.length <= 14) f.g.append("text").attr("x", j * cell + cell / 2).attr("y", i * cell + cell / 2 + 3.5).attr("text-anchor", "middle").attr("font-size", 10).style("fill", textOn(bg)).style("pointer-events", "none").text(fmt(v));
+    }));
+  };
+
+  R.forest = function (host, card, spec, W) {
+    const rows = spec.rows;
+    const lw = Math.min(230, 12 + (d3.max(rows, r => String(r.label).length) || 4) * 6.4), rowH = 24;
+    const H = 30 + rows.length * rowH + 36, m = { t: 12, r: 20, b: 42, l: lw };
+    const f = frame(host, W, H, m);
+    const vals = rows.flatMap(r => [r.est, r.lo, r.hi]).filter(v => v != null).concat(spec.ref != null ? [spec.ref] : []);
+    const xAx = Object.assign({ scale: "linear" }, spec.x);
+    const xs = makeScale(xAx, vals, [0, f.w]);
+    const yb = d3.scaleBand().domain(rows.map((r, i) => i)).range([0, f.h]).padding(0.3);
+    f.g.append("g").attr("class", "gl").call(d3.axisBottom(xs).tickValues(xAx.scale === "log" ? logTicks(xs) : xs.ticks(5)).tickSize(f.h).tickFormat("")).call(g => g.select(".domain").remove());
+    f.g.append("g").attr("transform", `translate(0,${f.h})`).call(axisFor(xs, xAx, "bottom", f.w < 320 ? 3 : 5));
+    f.g.append("g").call(d3.axisLeft(yb).tickFormat(i => plain(rows[i].label)).tickSizeOuter(0));
+    if (xAx.label) f.g.append("text").attr("class", "alab").attr("x", f.w).attr("y", f.h + 34).attr("text-anchor", "end").text(axisLabel(xAx));
+    if (spec.ref != null) f.g.append("line").attr("x1", xs(spec.ref)).attr("x2", xs(spec.ref)).attr("y1", 0).attr("y2", f.h).attr("stroke", tok("--ink-2")).attr("stroke-opacity", 0.6);
+    const groups = [...new Set(rows.map(r => r.group || ""))];
+    rows.forEach((r, i) => {
+      const y = yb(i) + yb.bandwidth() / 2, c = cat(groups.indexOf(r.group || ""));
+      if (r.lo != null && r.hi != null) f.g.append("line").attr("x1", xs(r.lo)).attr("x2", xs(r.hi)).attr("y1", y).attr("y2", y).attr("stroke", c).attr("stroke-width", 2).attr("stroke-linecap", "round");
+      f.g.append("circle").attr("cx", xs(r.est)).attr("cy", y).attr("r", 4.5).attr("fill", c).attr("stroke", tok("--surface")).attr("stroke-width", 2);
+      f.g.append("rect").attr("x", 0).attr("y", yb(i)).attr("width", f.w).attr("height", yb.bandwidth()).attr("fill", "transparent")
+        .on("pointermove", evt => showTip(evt, r.label + (r.group ? " · " + r.group : ""), [{ color: c, value: num(r.est), label: (r.lo != null ? "[" + num(r.lo) + ", " + num(r.hi) + "]" : "") }])).on("pointerleave", hideTip);
+    });
+    legendFor(card, groups.filter(g => g).length > 1 ? groups.map((g, i) => ({ name: g, color: cat(i), kind: "dot" })) : []);
+  };
+
+  R.gantt = function (host, card, spec, W) {
+    const rows = spec.rows;
+    const lw = Math.min(210, 12 + (d3.max(rows, r => String(r.label).length) || 4) * 6.4), rowH = 22;
+    const H = topMargin(spec, 14) + rows.length * rowH + 40, m = { t: topMargin(spec, 14), r: 18, b: 40, l: lw };
+    const f = frame(host, W, H, m);
+    const times = rows.flatMap(r => r.spans.flat()).map(t => new Date(t));
+    const xs = makeScale({ scale: "time", min: spec.x && spec.x.min, max: spec.x && spec.x.max }, times, [0, f.w]);
+    const yb = d3.scaleBand().domain(rows.map((r, i) => i)).range([0, f.h]).padding(0.28);
+    f.g.append("g").attr("class", "gl").call(d3.axisBottom(xs).ticks(6).tickSize(f.h).tickFormat("")).call(g => g.select(".domain").remove());
+    f.g.append("g").attr("transform", `translate(0,${f.h})`).call(d3.axisBottom(xs).ticks(W < 500 ? 4 : 7).tickFormat(d3.timeFormat("%d %b")).tickSizeOuter(0));
+    f.g.append("g").call(d3.axisLeft(yb).tickFormat(i => plain(rows[i].label)).tickSizeOuter(0));
+    const groups = [...new Set(rows.map(r => r.group || ""))];
+    rows.forEach((r, i) => {
+      const c = cat(groups.indexOf(r.group || ""));
+      r.spans.forEach(([a, b]) => {
+        const x0 = xs(new Date(a)), x1 = xs(new Date(b));
+        f.g.append("rect").attr("x", x0).attr("y", yb(i)).attr("width", Math.max(2, x1 - x0)).attr("height", yb.bandwidth()).attr("rx", 3).attr("fill", c)
+          .on("pointermove", evt => showTip(evt, r.label, [{ color: c, value: fmtDate(new Date(a)) + " ile " + fmtDate(new Date(b)), label: "" }])).on("pointerleave", hideTip);
+      });
+    });
+    drawMarkers(f, xs, null, { markers: (spec.markers || []).filter(k => k.axis === "x"), x: { scale: "time" } });
+    legendFor(card, groups.filter(g => g).length > 1 ? groups.map((g, i) => ({ name: g, color: cat(i), kind: "box" })) : []);
+  };
+
+  // Flag styles: each flag key gets its own colour and dash, the same on the map and in the legend.
+  function flagStyles(spec) {
+    const STY = [["--crit", null], ["--warn", null], ["--crit", "5 3"], ["--ink-2", "3 3"], ["--warn", "5 3"]];
+    const out = {};
+    Object.keys(spec.flags || {}).forEach((k, i) => { const st = STY[i % STY.length]; out[k] = { color: tok(st[0]), dash: st[1] }; });
+    return out;
+  }
+  R.map = function (host, card, spec, W) {
+    const L = DATA.layout, coords = L.coords;
+    const cols = d3.max(coords, c => c[0]), rws = d3.max(coords, c => c[1]);
+    const cw = Math.min(56, (W - 24) / (cols + 0.6));
+    const H = cw * (rws + 0.8), m = { t: cw * 0.5, r: cw * 0.3, b: cw * 0.4, l: cw * 0.3 + (W - 24 - cw * (cols + 0.6)) / 2 };
+    const f = frame(host, W, H, m);
+    const X = q => (coords[q][0] - 1) * cw + cw * 0.3, Y = q => (coords[q][1] - 1) * cw + cw * 0.2;
+    const nv = spec.node_values || {}, ev = spec.edge_values || {};
+    const nVals = Object.values(nv).filter(v => v != null), eVals = Object.values(ev).filter(v => v != null);
+    const allVals = nVals.length ? nVals : eVals;
+    let colorOf;
+    if (spec.scale === "div") {
+      const mx = spec.domain ? Math.max(Math.abs(spec.domain[0]), Math.abs(spec.domain[1])) : (d3.quantile(allVals.map(Math.abs).sort(d3.ascending), 0.98) || 1);
+      colorOf = v => divColor(v / mx);
+      rampFor(card, t => divColor(t * 2 - 1), [num(-mx), num(mx), "orta = 0"]);
+    } else {
+      // Rank colouring: a value's colour is its percentile among the map's values, so outliers cannot flatten the rest.
+      const sorted = allVals.slice().sort(d3.ascending), n = sorted.length;
+      const rank = v => n > 1 ? (d3.bisectLeft(sorted, v) + d3.bisectRight(sorted, v) - 1) / 2 / (n - 1) : 0.5;
+      colorOf = v => seqColor(0.08 + 0.92 * rank(v));
+      rampFor(card, t => seqColor(0.08 + 0.92 * t), [num(sorted[0]), num(sorted[n - 1]), "renk sıraya göre; ortanca " + num(d3.quantile(sorted, 0.5))]);
+    }
+    const eFlags = spec.edge_flags || {}, nFlags = spec.node_flags || {}, FS = flagStyles(spec);
+    const hasEdges = eVals.length > 0, labels = [];
+    L.couplers.forEach(([a, b]) => {
+      const key = Math.min(a, b) + "-" + Math.max(a, b), v = ev[key], fk = eFlags[key];
+      const col = hasEdges ? (v == null ? tok("--wash") : colorOf(v)) : tok("--axis");
+      const line = f.g.append("line").attr("x1", X(a)).attr("y1", Y(a)).attr("x2", X(b)).attr("y2", Y(b)).attr("stroke", col).attr("stroke-width", hasEdges ? cw * 0.26 : 1.5).attr("stroke-linecap", hasEdges ? "round" : "butt");
+      if (fk) {
+        const st = FS[fk] || { color: tok("--crit"), dash: null };
+        line.attr("stroke", st.color).attr("stroke-width", hasEdges ? cw * 0.26 : 3.4).attr("stroke-linecap", "butt");
+        if (st.dash) line.attr("stroke-dasharray", st.dash);
+        labels.push({ x: (X(a) + X(b)) / 2, y: (Y(a) + Y(b)) / 2 - cw * 0.22, t: a + "-" + b });
+      }
+      line.on("pointermove", evt => showTip(evt, "kuplör " + a + "-" + b, [{ value: v == null ? "yok" : num(v), label: spec.edge_label || "" }].concat(fk ? [{ value: (spec.flags || {})[fk] || fk, label: "" }] : []))).on("pointerleave", hideTip);
+    });
+    coords.forEach((_, q) => {
+      const v = nv[String(q)], fk = nFlags[String(q)];
+      const fill = nVals.length ? (v == null ? tok("--surface") : colorOf(v)) : tok("--surface");
+      const r = cw * (hasEdges ? 0.2 : 0.3);
+      const c = f.g.append("circle").attr("cx", X(q)).attr("cy", Y(q)).attr("r", r).attr("fill", fill).attr("stroke", tok("--axis")).attr("stroke-width", 1);
+      if (fk) {
+        const st = FS[fk] || { color: tok("--crit"), dash: null };
+        c.attr("stroke", st.color).attr("stroke-width", 3);
+        if (st.dash) c.attr("stroke-dasharray", st.dash);
+        labels.push({ x: X(q), y: Y(q) - r - 4, t: "q" + q });
+      }
+      if (cw >= 30 && !hasEdges) f.g.append("text").attr("x", X(q)).attr("y", Y(q) + 3).attr("text-anchor", "middle").attr("font-size", Math.min(10, cw * 0.24)).style("fill", textOn(fill)).style("pointer-events", "none").text(q);
+      c.on("pointermove", evt => showTip(evt, "q" + q + " · derece " + L.degree[q], [{ value: v == null ? "yok" : num(v), label: spec.node_label || "" }].concat(fk ? [{ value: (spec.flags || {})[fk] || fk, label: "" }] : []))).on("pointerleave", hideTip);
+    });
+    const lg = f.g.append("g").attr("class", "mk"), boxes = [];
+    labels.forEach(l => {
+      const w = l.t.length * 6.4 + 4, h = 11, d = cw * 0.42;
+      const cands = [[l.x, l.y], [l.x, l.y + 2 * d], [l.x - w / 2 - d * 0.6, l.y + d], [l.x + w / 2 + d * 0.6, l.y + d], [l.x, l.y - d * 0.8]];
+      let pos = cands.find(([x, y]) => x - w / 2 >= -m.l + 2 && x + w / 2 <= f.w + m.r - 2 && boxes.every(b => x + w / 2 < b[0] || x - w / 2 > b[2] || y < b[1] || y - h > b[3]));
+      if (!pos) pos = cands[0];
+      boxes.push([pos[0] - w / 2, pos[1] - h, pos[0] + w / 2, pos[1]]);
+      lg.append("text").attr("x", pos[0]).attr("y", pos[1]).attr("text-anchor", "middle").attr("font-weight", 600).text(l.t);
+    });
+    const fl = spec.flags || {};
+    const nodeKeys = new Set(Object.values(nFlags)), legendItems = [];
+    if (Object.keys(fl).length) {
+      legendItems.push({ name: "renk: " + (nVals.length ? (spec.node_label || "değer") : (spec.edge_label || "değer")), color: seqColor(0.7), kind: "dot" });
+      Object.keys(fl).forEach(k => legendItems.push({ name: fl[k], color: FS[k].color, dash: FS[k].dash, kind: nodeKeys.has(k) ? "ring" : "line" }));
+    }
+    legendFor(card, legendItems);
+  };
+
+  // ---------- table view
+  function tableRows(spec) {
+    const t = spec.type;
+    if (t === "line" || t === "scatter") return { head: ["seri", axisLabel(spec.x) || "x", axisLabel(spec.y) || "y"], rows: spec.series.flatMap(s => s.points.map(p => [s.name, isTime(spec.x) ? fmtDateTime(new Date(p[0])) : num(p[0]), num(p[1]) + (p[2] != null ? " (" + p[2] + ")" : "")])) };
+    if (t === "bar" || t === "stack") return { head: ["kategori"].concat(spec.series.map(s => s.name)), rows: spec.categories.map((c, j) => [c].concat(spec.series.map(s => num(s.values[j]) + (s.lo && s.lo[j] != null ? " [" + num(s.lo[j]) + ", " + num(s.hi[j]) + "]" : "")))) };
+    if (t === "hist") return { head: ["seri", "alt sınır", "üst sınır", "sayı"], rows: spec.series.flatMap(s => s.counts.map((c, j) => [s.name, num(s.edges[j]), num(s.edges[j + 1]), num(c)])) };
+    if (t === "heatmap") return { head: [""].concat(spec.cols), rows: spec.rows.map((r, i) => [r].concat(spec.values[i].map(v => num(v)))) };
+    if (t === "forest") return { head: ["satır", "grup", "tahmin", "alt", "üst"], rows: spec.rows.map(r => [r.label, r.group || "", num(r.est), num(r.lo), num(r.hi)]) };
+    if (t === "gantt") return { head: ["satır", "başlangıç", "bitiş"], rows: spec.rows.flatMap(r => r.spans.map(([a, b]) => [r.label, fmtDateTime(new Date(a)), fmtDateTime(new Date(b))])) };
+    if (t === "map") {
+      const out = [];
+      Object.entries(spec.node_values || {}).forEach(([q, v]) => out.push(["q" + q, num(v), (spec.flags || {})[(spec.node_flags || {})[q]] || ""]));
+      Object.entries(spec.edge_values || {}).forEach(([k, v]) => out.push([k, num(v), (spec.flags || {})[(spec.edge_flags || {})[k]] || ""]));
+      Object.entries(spec.node_flags || {}).forEach(([q, fg]) => { if (!(spec.node_values || {})[q] && !(q in (spec.node_values || {}))) out.push(["q" + q, "", (spec.flags || {})[fg] || fg]); });
+      Object.entries(spec.edge_flags || {}).forEach(([k, fg]) => { if (!(k in (spec.edge_values || {}))) out.push([k, "", (spec.flags || {})[fg] || fg]); });
+      return { head: ["varlık", "değer", "işaret"], rows: out };
+    }
+    return { head: [], rows: [] };
+  }
+  function fillTable(details, spec) {
+    if (details.dataset.done) return;
+    const { head, rows } = tableRows(spec);
+    const tw = details.querySelector(".tw"), table = document.createElement("table");
+    const thead = document.createElement("thead"), tr = document.createElement("tr");
+    head.forEach(h => { const th = document.createElement("th"); th.textContent = plain(h); tr.appendChild(th); });
+    thead.appendChild(tr); table.appendChild(thead);
+    const tb = document.createElement("tbody");
+    rows.slice(0, 2500).forEach(r => { const row = document.createElement("tr"); r.forEach(c => { const td = document.createElement("td"); td.textContent = plain(c); row.appendChild(td); }); tb.appendChild(row); });
+    table.appendChild(tb); tw.appendChild(table);
+    if (rows.length > 2500) { const p = el("p", "src"); p.textContent = "İlk 2.500 satır gösteriliyor (toplam " + rows.length + ")."; tw.appendChild(p); }
+    details.dataset.done = "1";
+  }
+
+  // ---------- page assembly
+  const charts = [];
+  function buildCard(spec) {
+    const wide = spec.type === "map" || spec.type === "gantt" || spec.type === "heatmap" || spec.wide;
+    const card = el("article", "card" + (wide ? " wide" : ""));
+    card.id = "c-" + spec.id;
+    const head = el("div", "pad");
+    const h3 = el("h3", null, md(spec.title)); head.appendChild(h3);
+    head.appendChild(el("p", "sub", md(spec.subtitle)));
+    card.appendChild(head);
+    const leg = el("div", "pad"); const ul = el("ul", "legend"); ul.hidden = true; leg.appendChild(ul);
+    const ramp = el("div", "ramp"); ramp.hidden = true; leg.appendChild(ramp); card.appendChild(leg);
+    const plotWrap = el("div", "pad"); const plot = el("div", "plot"); plot.setAttribute("aria-label", spec.title); plotWrap.appendChild(plot); card.appendChild(plotWrap);
+    const foot = el("div", "pad"); foot.style.display = "grid"; foot.style.gap = "8px";
+    foot.appendChild(el("p", "read", "<b>Nasıl okunur.</b> " + md(spec.read)));
+    if (spec.caveat) foot.appendChild(el("p", "caveat", "<b>Dikkat.</b> " + md(spec.caveat)));
+    const row = el("div", "meta-row");
+    const det = el("details", "tbl"); det.appendChild(el("summary", null, "Veriyi tablo olarak göster")); det.appendChild(el("div", "tw"));
+    det.addEventListener("toggle", () => { if (det.open) fillTable(det, spec); });
+    row.appendChild(det);
+    const src = el("span", "src"); src.textContent = "Kaynak: " + spec.source; row.appendChild(src);
+    foot.appendChild(row); card.appendChild(foot);
+    charts.push({ spec, card, plot });
+    return card;
+  }
+  function render(c) {
+    c.plot.replaceChildren();
+    const W = Math.max(280, Math.round(c.plot.getBoundingClientRect().width || 600));
+    try { (R[c.spec.type] || (() => { }))(c.plot, c.card, c.spec, W); }
+    catch (e) { c.plot.textContent = "Grafik çizilemedi: " + e.message; console.error(c.spec.id, e); }
+  }
+  function renderAll() { charts.forEach(render); }
+
+  document.getElementById("lede").innerHTML = md(DATA.page.lede);
+  document.getElementById("banner").innerHTML = md(DATA.page.banner);
+  const tiles = document.getElementById("tiles");
+  DATA.page.tiles.forEach(t => {
+    const d = el("div", "tile");
+    d.append(el("div", "t-label", md(t.label)), el("div", "t-val", md(t.value)), el("div", "t-sub", md(t.sub)));
+    tiles.appendChild(d);
+  });
+  const toc = document.getElementById("toc"), main = document.getElementById("sections");
+  DATA.sections.forEach((s, i) => {
+    const a = el("a"); a.href = "#" + s.section; a.textContent = (i + 1) + ". " + plain(s.toc_tr || s.title_tr); toc.appendChild(a);
+    const band = el("section", "band"); band.id = s.section;
+    const head = el("div", "band-head");
+    head.appendChild(el("p", "band-num", "Bölüm " + (i + 1)));
+    head.appendChild(el("h2", null, md(s.title_tr)));
+    const intro = el("div", "intro"); (s.intro_tr || []).forEach(p => intro.appendChild(el("p", null, md(p)))); head.appendChild(intro);
+    band.appendChild(head);
+    if (s.bullets_tr && s.bullets_tr.length) { const ul = el("ul", "findings"); s.bullets_tr.forEach(b => ul.appendChild(el("li", null, md(b)))); band.appendChild(ul); }
+    if (s.blocks_tr && s.blocks_tr.length) {
+      const bl = el("div", "blocks");
+      s.blocks_tr.forEach(b => { const d = el("div", "block"); d.appendChild(el("h3", null, md(b.h))); const list = el(b.ordered ? "ol" : "ul"); b.items.forEach(it => list.appendChild(el("li", null, md(it)))); d.appendChild(list); bl.appendChild(d); });
+      band.appendChild(bl);
+    }
+    if (s.table_tr) {
+      const wrap = el("div", "tablewrap"); const t = el("table", "st");
+      const tr = el("tr"); s.table_tr.head.forEach(h => tr.appendChild(el("th", null, md(h)))); const th = el("thead"); th.appendChild(tr); t.appendChild(th);
+      const tb = el("tbody"); s.table_tr.rows.forEach(r => { const row = el("tr"); r.forEach((c, k) => row.appendChild(el("td", k > 0 && /^[\d.,\s/]+$/.test(String(c)) ? "num" : null, md(c)))); tb.appendChild(row); }); t.appendChild(tb);
+      wrap.appendChild(t); band.appendChild(wrap);
+    }
+    if (s.charts && s.charts.length) { const grid = el("div", "grid"); s.charts.forEach(c => grid.appendChild(buildCard(c))); band.appendChild(grid); }
+    main.appendChild(band);
+  });
+  const foot = document.getElementById("foot");
+  DATA.page.footer.forEach(p => foot.appendChild(el("p", null, md(p))));
+
+  renderAll();
+  let rt = null;
+  const ro = new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(renderAll, 150); });
+  ro.observe(main);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+  new MutationObserver(renderAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+})();
+</script>

@@ -1,0 +1,2718 @@
+{
+ "section": "tek-kubit",
+ "toc_tr": "Tek-kübit kapıları",
+ "title_tr": "Tek-kübit kapıları: `sx`, takma adları, `xslow` ve `rz`",
+ "intro_tr": [
+  "`sx` hatası, belgelerde tek kübitli bir üniter kapının ölçülen tek hatası: IBM onu tüm kübitlerde eşzamanlı randomized benchmarking (RB) ile türetiyor. `x`, `id`, `rx` ve `xslow` her kayıtta aynı değeri bildiriyor, dolayısıyla kübit başına tek bir tek-kübit hata serisi var. `rz` sabit (hata 0, süre 0): McKay ve diğerlerinin (2017) sanal Z kapısı.",
+  "Kübit seviyeleri 34,5 kat aralığa yayılıyor ve aylar boyunca yerinde duruyor. Seviyenin etrafında olaydan olaya hafızasız bir bileşen var: değişimlerin lag-1 otokorelasyonu -0,49, lag-2 -0,003. Bu bileşenin robust büyüklüğü 0,086 dekad, yaklaşık 1,22 kat (04 Doğrulama); gövdesi simetrik, kuyruğu yukarı yönde tek taraflı.",
+  "Kübitler arasında `sx`, `T1`'i koherans sınırından daha iyi izliyor. Aynı turda `sx` sapması `T1` sapmasıyla zayıf ama kaydırılmış eşleştirmelerin aralığı dışında kalan bir korelasyon gösteriyor (-0,062; damgalar 1 saat içindeyse -0,096). Bu, iki deney arasında paylaşılan bir parça; doğrulayıcıya göre zaman ölçeği ve fiziksel mi yoksa ortak bir SPAM ya da hazırlık kayması mı olduğu belirlenmedi. Bileşenin büyük kısmının ne olduğu bilinmiyor; ona tahmin gürültüsü denmiyor."
+ ],
+ "bullets_tr": [
+  "**Bir ölçüm, beş ad.** `x`, `id`, `rx` 274.560 kaydın, `xslow` 136.032 kaydın hiçbirinde `sx`'ten farklı değer taşımıyor. 979, 645, 374 ve 310 tarih uyuşmazlığının hepsi `q17`, `q72` ve `q149`'un yer tutucu kayıtlarında ve fark tam 1 saniye.",
+  "**`xslow`'un çelişkisi.** 1.000 ns'lik bir talimat 24 ns'lik `sx` ile aynı hatayı bildiriyor. 1.000 ns'nin koherans sınırı bildirilen hatayı 6.033 eşli olayın %99,67'sinde aşıyor (medyan 17,2 kat; saf faz kaybı olmadan da %99,27, 8,9 kat). Eşitlik kesin; bir kopyalama mekanizması gösterilmedi.",
+  "**Dağılım ve kuyruk.** Olay başına medyan 3,10e-4 (yüzde 1: 1,42e-4; yüzde 99: 2,54e-3; 20.207 olay); %4,88'i 1e-3'ün üstünde. Kayan seviyenin 2 katından fazla üstünde %1,95, altında %0,28: kuyruk tek taraflı.",
+  "**Kararlı seviyeler.** Kayıt ikiye bölündüğünde kübit medyanlarının sıra korelasyonu 0,972 (155 kübit); kübitlerin %85,8'i aynı üçte birlik dilimde kalıyor. Cihaz geneli kayma (30 günde 0,0008 dekad) ve saat ya da gün etkisi (Kruskal-Wallis p 0,73 ve 0,50) yok.",
+  "**Koherans sınırı bir vekil.** 24 ns'lik sınır bildirilen hatanın medyanda 0,40'ı (yüzde 10: 0,18; yüzde 90: 0,99; 18.301 eşli olay); %9,8'inde 1'in üstünde ve bunlar düşük `T2`'li kübitlerde toplanıyor.",
+  "**Kübitler arasında `sx` `T1`'i izliyor.** Kübit medyanlarında log `sx` ile log `T1` arasında Spearman -0,434 (%95 güven aralığı -0,558 ile -0,291); koherans sınırıyla 0,199, `T2` ile -0,161.",
+  "**Derece etkisi.** 3. dereceli kübitlerde medyan `sx` 2,69e-4, 2. derecede 3,22e-4 (p = 0,003). Doğrulayıcıya göre `T1` aynı deseni gösteriyor (132, 125, 142 µs; p = 0,0037); etki `T1` üzerinden geçiyor olabilir, bu bir ipucu.",
+  "**Sıçramalar ve `T1` dipleri.** `sx` sıçramalarının %16,7'sinde `T1` seviyesinin 1,5 kat altında; kaydırılmış eşleştirmede ortalama %10,9, en çok %14,0. Koherans sınırı bir sıçramanın fazla hatasının yalnız medyan %0,5'ini açıklıyor."
+ ],
+ "charts": [
+  {
+   "id": "tk-takma-ad",
+   "type": "bar",
+   "orient": "h",
+   "title": "`x`, `id`, `rx` ve `xslow` her kayıtta `sx` ile aynı değeri bildiriyor",
+   "subtitle": "Her takma adın `sx` ile karşılaştırılan kayıtlarında değer ve tarih uyuşmazlıkları; `id`, `rx`, `x` için 274.560, `xslow` için 136.032 kayıt. Değer uyuşmazlığı ve ölçülmüş kayıtta tarih uyuşmazlığı her takma adda 0 olduğu için çizilmedi",
+   "read": "Değer uyuşmazlığı hiçbirinde yok. Çubuklar tarih uyuşmazlıklarını sayıyor (979, 645, 374, 310); hepsi `q17`, `q72` ve `q149`'un yer tutucu kayıtlarında (bu kayıtlar `sx` için toplam 1.975, `xslow` için 915; uyuşmazlık bunların bir kısmında) ve fark daima tam 1 saniye; ölçülmüş kayıtlarda uyuşmazlık 0. Yer tutucular maskelenince her takma adın 155 serisi `sx`'inkiyle özdeş: kübit başına tek bir tek-kübit hata serisi var.",
+   "caveat": "IBM `sx`, `id` ve `x` hatalarının eşit varsayıldığını belgeliyor; `rx` ve `xslow` eşitliği yalnız arşivde gözlenen bir olgu. Doğrulayıcı `xslow` için \"`sx`'ten kopyalanmış\" sözünü zayıflattı: veri iki alanın her kayıtta eşit olduğunu gösteriyor, bir kopyalama mekanizmasını değil.",
+   "source": "04 §0, §1, §6 ve Doğrulama; results/gates_1q/aliases_and_schema.json (aliases)",
+   "x": {
+    "label": "Kayıt sayısı",
+    "scale": "linear"
+   },
+   "y": {
+    "label": "Takma ad",
+    "scale": "band"
+   },
+   "categories": [
+    "id",
+    "rx",
+    "x",
+    "xslow"
+   ],
+   "series": [
+    {
+     "name": "Tarih uyuşmazlığı, yer tutucu kayıtta",
+     "values": [
+      979,
+      645,
+      374,
+      310
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tk-xslow",
+   "type": "hist",
+   "title": "1.000 ns'lik `xslow`'un bildirdiği hata, kendi koherans sınırının çok altında",
+   "subtitle": "`xslow` kayıtlarının bulunduğu iki dönemde (2026-05-14 ile 05-29 ve 2026-09-10'dan sonra) eşli 6.033 olay: 1.000 ns için koherans sınırının bildirilen hataya oranı, log10 ekseninde 0,05 dekadlık kutular",
+   "read": "Tam sınırla olayların %99,67'sinde oran 1'in üstünde (medyan 17,2 kat); `T2 = 2 T1` alınıp saf faz kaybı sıfırlansa bile %99,27 (medyan 8,9 kat). 1.000 ns'lik bir talimat, 24 ns'lik `sx` ile aynı hatayı bildiriyor; bu hata, o süre boyunca yalnız boşta beklemenin yaratacağı bozunmadan da küçük.",
+   "caveat": "Eşitlik 136.032 kaydın hepsinde yeniden üretildi; bir kopyalama mekanizması gösterilmedi, veri yalnız eşitliği gösteriyor (04 Doğrulama). Sınır formülü `T2`'nin düşük olduğu yerde vekildir, ama yalnız `T1` varyantı (%99,27) bundan etkilenmez. `xslow`'un ne için olduğunu hiçbir kaynak söylemiyor.",
+   "source": "04 §0, §1 ve Doğrulama; results/gates_1q/sx_coherence.json (xslow_coherence_floor); oranlar önbellekten sx_coherence.py tanımlarıyla",
+   "x": {
+    "label": "Koherans sınırı / bildirilen hata",
+    "scale": "log",
+    "min": 0.2239,
+    "max": 177.8
+   },
+   "y": {
+    "label": "Olay sayısı",
+    "scale": "linear"
+   },
+   "markers": [
+    {
+     "axis": "x",
+     "value": 1,
+     "label": "oran = 1"
+    }
+   ],
+   "series": [
+    {
+     "name": "Tam sınır (T1 ve T2)",
+     "edges": [
+      0.2239,
+      0.2512,
+      0.2818,
+      0.3162,
+      0.3548,
+      0.3981,
+      0.4467,
+      0.5012,
+      0.5623,
+      0.631,
+      0.7079,
+      0.7943,
+      0.8913,
+      1.0,
+      1.122,
+      1.259,
+      1.413,
+      1.585,
+      1.778,
+      1.995,
+      2.239,
+      2.512,
+      2.818,
+      3.162,
+      3.548,
+      3.981,
+      4.467,
+      5.012,
+      5.623,
+      6.31,
+      7.079,
+      7.943,
+      8.913,
+      10.0,
+      11.22,
+      12.59,
+      14.13,
+      15.85,
+      17.78,
+      19.95,
+      22.39,
+      25.12,
+      28.18,
+      31.62,
+      35.48,
+      39.81,
+      44.67,
+      50.12,
+      56.23,
+      63.1,
+      70.79,
+      79.43,
+      89.13,
+      100.0,
+      112.2,
+      125.9,
+      141.3,
+      158.5,
+      177.8
+     ],
+     "counts": [
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      2,
+      0,
+      1,
+      3,
+      1,
+      6,
+      5,
+      5,
+      8,
+      7,
+      4,
+      2,
+      3,
+      8,
+      13,
+      8,
+      9,
+      8,
+      26,
+      32,
+      47,
+      76,
+      88,
+      129,
+      165,
+      193,
+      267,
+      311,
+      381,
+      391,
+      447,
+      503,
+      495,
+      462,
+      418,
+      337,
+      217,
+      193,
+      141,
+      126,
+      91,
+      66,
+      78,
+      72,
+      74,
+      42,
+      26,
+      16,
+      12,
+      6,
+      7,
+      3
+     ]
+    },
+    {
+     "name": "Yalnız T1 (T2 = 2 T1)",
+     "edges": [
+      0.2239,
+      0.2512,
+      0.2818,
+      0.3162,
+      0.3548,
+      0.3981,
+      0.4467,
+      0.5012,
+      0.5623,
+      0.631,
+      0.7079,
+      0.7943,
+      0.8913,
+      1.0,
+      1.122,
+      1.259,
+      1.413,
+      1.585,
+      1.778,
+      1.995,
+      2.239,
+      2.512,
+      2.818,
+      3.162,
+      3.548,
+      3.981,
+      4.467,
+      5.012,
+      5.623,
+      6.31,
+      7.079,
+      7.943,
+      8.913,
+      10.0,
+      11.22,
+      12.59,
+      14.13,
+      15.85,
+      17.78,
+      19.95,
+      22.39,
+      25.12,
+      28.18,
+      31.62,
+      35.48,
+      39.81,
+      44.67,
+      50.12,
+      56.23,
+      63.1,
+      70.79,
+      79.43,
+      89.13,
+      100.0,
+      112.2,
+      125.9,
+      141.3,
+      158.5,
+      177.8
+     ],
+     "counts": [
+      1,
+      0,
+      2,
+      1,
+      0,
+      5,
+      1,
+      5,
+      5,
+      2,
+      5,
+      11,
+      6,
+      6,
+      7,
+      12,
+      10,
+      20,
+      14,
+      21,
+      27,
+      61,
+      60,
+      85,
+      124,
+      169,
+      204,
+      266,
+      352,
+      415,
+      543,
+      562,
+      659,
+      616,
+      588,
+      398,
+      300,
+      197,
+      120,
+      56,
+      40,
+      15,
+      20,
+      8,
+      4,
+      3,
+      2,
+      1,
+      0,
+      2,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tk-sx-dagilim",
+   "type": "hist",
+   "title": "`sx` hatası 3e-4 çevresinde toplanıyor, üst kuyruk 1e-2'yi geçiyor",
+   "subtitle": "Olay başına `sx` hatası (yer tutucular olaylar kurulmadan maskelendi; 155 kübit, 20.207 olay), log10 ekseninde 0,05 dekadlık kutular",
+   "read": "Medyan 3,10e-4; yüzde 1'lik dilim 1,42e-4, yüzde 99'luk dilim 2,54e-3, en büyük olay 1,71e-2 (`q149`). Olayların %4,88'i 1e-3'ün, 7'si 1e-2'nin üstünde. log varyansın 0,744'ü kübitler arasında: kuyruğun bir kısmı kötü kübitlerden, bir kısmı kübit içi sıçramalardan geliyor (sonraki grafik).",
+   "source": "04 §0, §2; results/gates_1q/sx_profile.json (distribution)",
+   "x": {
+    "label": "sx hatası",
+    "scale": "log",
+    "min": 7.079e-05,
+    "max": 0.01778
+   },
+   "y": {
+    "label": "Olay sayısı",
+    "scale": "linear"
+   },
+   "markers": [
+    {
+     "axis": "x",
+     "value": 0.00030952,
+     "label": "medyan 3,10e-4"
+    },
+    {
+     "axis": "x",
+     "value": 0.0025414,
+     "label": "yüzde 99: 2,54e-3"
+    }
+   ],
+   "series": [
+    {
+     "name": "sx olayı",
+     "edges": [
+      7.079e-05,
+      7.943e-05,
+      8.913e-05,
+      0.0001,
+      0.0001122,
+      0.0001259,
+      0.0001413,
+      0.0001585,
+      0.0001778,
+      0.0001995,
+      0.0002239,
+      0.0002512,
+      0.0002818,
+      0.0003162,
+      0.0003548,
+      0.0003981,
+      0.0004467,
+      0.0005012,
+      0.0005623,
+      0.000631,
+      0.0007079,
+      0.0007943,
+      0.0008913,
+      0.001,
+      0.001122,
+      0.001259,
+      0.001413,
+      0.001585,
+      0.001778,
+      0.001995,
+      0.002239,
+      0.002512,
+      0.002818,
+      0.003162,
+      0.003548,
+      0.003981,
+      0.004467,
+      0.005012,
+      0.005623,
+      0.00631,
+      0.007079,
+      0.007943,
+      0.008913,
+      0.01,
+      0.01122,
+      0.01259,
+      0.01413,
+      0.01585,
+      0.01778
+     ],
+     "counts": [
+      1,
+      2,
+      6,
+      17,
+      46,
+      124,
+      271,
+      634,
+      1071,
+      1620,
+      2035,
+      2345,
+      2366,
+      2090,
+      1840,
+      1490,
+      1016,
+      774,
+      531,
+      354,
+      243,
+      193,
+      152,
+      147,
+      131,
+      93,
+      84,
+      76,
+      106,
+      77,
+      67,
+      30,
+      7,
+      7,
+      15,
+      27,
+      23,
+      33,
+      27,
+      19,
+      4,
+      4,
+      2,
+      2,
+      2,
+      0,
+      1,
+      2
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tk-kuyruk",
+   "type": "line",
+   "title": "Kübit içinde `sx` sapmaları yukarı doğru tek taraflı",
+   "subtitle": "Her olayın kayan seviyesinden log10 sapması (her yandan en çok 5 olayın medyanı, olayın kendisi hariç); 0,05 dekadlık kutularda olay sayısı, log ekseni; 20.207 olay",
+   "read": "Gövde simetrik (Bowley çarpıklığı 0,047), kuyruklar değil: olayların %1,95'i seviyenin 2 katından fazla üstünde, %0,28'i 2 katından fazla altında; yarım dekadın üstünde %0,56, altında hiç olay yok. 366 sıçrama epizodunun %93,7'si tek olay: sıçrama bir sonraki ölçümde, yaklaşık bir gün sonra, geçmiş oluyor.",
+   "caveat": "Tek taraflı sapmalar hatayı kötüleştiren ayrık olaylara (örneğin rezonansa giren bir kusur) uyar; ara sıra yukarı yönde başarısız olan bir RB fiti de aynı deseni üretir. Bu bir ipucu, karar değil (04 §4). Sıçramaların turlarda kümelenmesi tespit edilmedi (dağılım indeksi 1,16, p = 0,10); doğrulayıcıya göre bu \"kümelenmiyor\" değil, \"kümelenme tespit edilmedi\" demek.",
+   "source": "04 §0, §3, §4 ve Doğrulama; results/gates_1q/sx_profile.json (changes.residual_from_running_level), sx_temporal.json (spikes)",
+   "x": {
+    "label": "Kayan seviyeden sapma",
+    "scale": "linear",
+    "unit": "dekad"
+   },
+   "y": {
+    "label": "Olay sayısı",
+    "scale": "log"
+   },
+   "markers": [
+    {
+     "axis": "x",
+     "value": -0.3010299956639812,
+     "label": "2 kat altı"
+    },
+    {
+     "axis": "x",
+     "value": 0.3010299956639812,
+     "label": "2 kat üstü"
+    }
+   ],
+   "series": [
+    {
+     "name": "Olay sayısı",
+     "style": "line+dots",
+     "points": [
+      [
+       -0.475,
+       4
+      ],
+      [
+       -0.425,
+       9
+      ],
+      [
+       -0.375,
+       18
+      ],
+      [
+       -0.325,
+       25
+      ],
+      [
+       -0.275,
+       83
+      ],
+      [
+       -0.225,
+       190
+      ],
+      [
+       -0.175,
+       613
+      ],
+      [
+       -0.125,
+       1608
+      ],
+      [
+       -0.075,
+       3155
+      ],
+      [
+       -0.025,
+       4463
+      ],
+      [
+       0.025,
+       4165
+      ],
+      [
+       0.075,
+       2697
+      ],
+      [
+       0.125,
+       1479
+      ],
+      [
+       0.175,
+       718
+      ],
+      [
+       0.225,
+       384
+      ],
+      [
+       0.275,
+       201
+      ],
+      [
+       0.325,
+       122
+      ],
+      [
+       0.375,
+       66
+      ],
+      [
+       0.425,
+       45
+      ],
+      [
+       0.475,
+       48
+      ],
+      [
+       0.525,
+       21
+      ],
+      [
+       0.575,
+       13
+      ],
+      [
+       0.625,
+       13
+      ],
+      [
+       0.675,
+       16
+      ],
+      [
+       0.725,
+       14
+      ],
+      [
+       0.775,
+       5
+      ],
+      [
+       0.825,
+       8
+      ],
+      [
+       0.875,
+       6
+      ],
+      [
+       0.925,
+       3
+      ],
+      [
+       0.975,
+       3
+      ],
+      [
+       1.025,
+       2
+      ],
+      [
+       1.075,
+       1
+      ],
+      [
+       1.125,
+       null
+      ],
+      [
+       1.175,
+       3
+      ],
+      [
+       1.225,
+       null
+      ],
+      [
+       1.275,
+       1
+      ],
+      [
+       1.325,
+       1
+      ],
+      [
+       1.375,
+       null
+      ],
+      [
+       1.425,
+       null
+      ],
+      [
+       1.475,
+       3
+      ],
+      [
+       1.525,
+       1
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tk-kararlilik",
+   "type": "scatter",
+   "title": "Kübitlerin `sx` seviyeleri beş ay boyunca yerinde duruyor",
+   "subtitle": "Kübit başına `sx` hata medyanı: 2026-07-25'ten önceki olaylar (x) ve sonraki olaylar (y), log eksenler; her yarıda en az 5 olay, 155 kübit",
+   "read": "Noktalar köşegene yapışık: sıra korelasyonu 0,972, kübitlerin %85,8'i aynı üçte birlik dilimde kalıyor, medyan kayma 0,017 dekad. Kübit seviyeleri 1,54e-4 (`q131`) ile 5,31e-3 (`q27`) arasında, 34,5 kat.",
+   "caveat": "Seviye sabit olsa da her olay seviyenin etrafında büyük ve hafızasız bir bileşen taşıyor (değişimlerin lag-1 otokorelasyonu -0,49; robust büyüklük 0,086 dekad, yaklaşık 1,22 kat). 11 kübitte anlamlı seviye değişimi var (blok permütasyon, BH 0,05); en büyüğü `q102`'de +0,64 dekad (2026-07-19).",
+   "source": "04 §2, §3, §4 ve Doğrulama; results/gates_1q/sx_profile.json (stability), sx_temporal.json (entity_changepoints)",
+   "x": {
+    "label": "Medyan, ilk yarı",
+    "scale": "log"
+   },
+   "y": {
+    "label": "Medyan, ikinci yarı",
+    "scale": "log"
+   },
+   "diag": true,
+   "series": [
+    {
+     "name": "Kübit",
+     "points": [
+      [
+       0.002183,
+       0.001745,
+       "q0"
+      ],
+      [
+       0.0003419,
+       0.0003107,
+       "q1"
+      ],
+      [
+       0.0001943,
+       0.0001967,
+       "q2"
+      ],
+      [
+       0.0001976,
+       0.0002129,
+       "q3"
+      ],
+      [
+       0.0002729,
+       0.0002649,
+       "q4"
+      ],
+      [
+       0.0003168,
+       0.0003707,
+       "q5"
+      ],
+      [
+       0.0002742,
+       0.0002905,
+       "q6"
+      ],
+      [
+       0.0004632,
+       0.0004432,
+       "q7"
+      ],
+      [
+       0.0004066,
+       0.0003953,
+       "q8"
+      ],
+      [
+       0.0002295,
+       0.0002325,
+       "q9"
+      ],
+      [
+       0.0002364,
+       0.0002164,
+       "q10"
+      ],
+      [
+       0.001374,
+       0.002179,
+       "q11"
+      ],
+      [
+       0.0004074,
+       0.0004162,
+       "q12"
+      ],
+      [
+       0.0003846,
+       0.0003642,
+       "q13"
+      ],
+      [
+       0.0002557,
+       0.0002546,
+       "q14"
+      ],
+      [
+       0.0001991,
+       0.0001969,
+       "q15"
+      ],
+      [
+       0.0004813,
+       0.000425,
+       "q16"
+      ],
+      [
+       0.0003029,
+       0.000278,
+       "q17"
+      ],
+      [
+       0.0003629,
+       0.0003504,
+       "q18"
+      ],
+      [
+       0.0006002,
+       0.0006628,
+       "q19"
+      ],
+      [
+       0.0004013,
+       0.0003828,
+       "q20"
+      ],
+      [
+       0.0002653,
+       0.0002993,
+       "q21"
+      ],
+      [
+       0.0002094,
+       0.0002011,
+       "q22"
+      ],
+      [
+       0.0002028,
+       0.000211,
+       "q23"
+      ],
+      [
+       0.0013,
+       0.001235,
+       "q24"
+      ],
+      [
+       0.0002526,
+       0.0002274,
+       "q25"
+      ],
+      [
+       0.0002888,
+       0.0002919,
+       "q26"
+      ],
+      [
+       0.005032,
+       0.005551,
+       "q27"
+      ],
+      [
+       0.0002593,
+       0.0002517,
+       "q28"
+      ],
+      [
+       0.0002465,
+       0.0002601,
+       "q29"
+      ],
+      [
+       0.0002699,
+       0.0002823,
+       "q30"
+      ],
+      [
+       0.0004562,
+       0.0003801,
+       "q31"
+      ],
+      [
+       0.0002778,
+       0.0002798,
+       "q32"
+      ],
+      [
+       0.0002373,
+       0.0002492,
+       "q33"
+      ],
+      [
+       0.0006636,
+       0.0006317,
+       "q34"
+      ],
+      [
+       0.0002895,
+       0.0002859,
+       "q35"
+      ],
+      [
+       0.000534,
+       0.0005363,
+       "q36"
+      ],
+      [
+       0.0003234,
+       0.0003339,
+       "q37"
+      ],
+      [
+       0.0002908,
+       0.0003186,
+       "q38"
+      ],
+      [
+       0.0005802,
+       0.0006025,
+       "q39"
+      ],
+      [
+       0.0002741,
+       0.0002673,
+       "q40"
+      ],
+      [
+       0.0002088,
+       0.0001958,
+       "q41"
+      ],
+      [
+       0.0002683,
+       0.0002802,
+       "q42"
+      ],
+      [
+       0.0003313,
+       0.0002957,
+       "q43"
+      ],
+      [
+       0.0004508,
+       0.0004523,
+       "q44"
+      ],
+      [
+       0.0002176,
+       0.0002115,
+       "q45"
+      ],
+      [
+       0.0004552,
+       0.0004513,
+       "q46"
+      ],
+      [
+       0.0003185,
+       0.0003348,
+       "q47"
+      ],
+      [
+       0.0003391,
+       0.0003694,
+       "q48"
+      ],
+      [
+       0.0003983,
+       0.0004375,
+       "q49"
+      ],
+      [
+       0.0002881,
+       0.000275,
+       "q50"
+      ],
+      [
+       0.0002717,
+       0.0002853,
+       "q51"
+      ],
+      [
+       0.0003539,
+       0.0003549,
+       "q52"
+      ],
+      [
+       0.0002344,
+       0.000219,
+       "q53"
+      ],
+      [
+       0.0008101,
+       0.000706,
+       "q54"
+      ],
+      [
+       0.0004424,
+       0.0004141,
+       "q55"
+      ],
+      [
+       0.0005032,
+       0.000478,
+       "q56"
+      ],
+      [
+       0.000766,
+       0.0007798,
+       "q57"
+      ],
+      [
+       0.000363,
+       0.0003527,
+       "q58"
+      ],
+      [
+       0.0005205,
+       0.000527,
+       "q59"
+      ],
+      [
+       0.0003676,
+       0.000373,
+       "q60"
+      ],
+      [
+       0.000218,
+       0.0002216,
+       "q61"
+      ],
+      [
+       0.0003197,
+       0.0003116,
+       "q62"
+      ],
+      [
+       0.0005789,
+       0.0006026,
+       "q63"
+      ],
+      [
+       0.0003914,
+       0.0004171,
+       "q64"
+      ],
+      [
+       0.0003462,
+       0.0003756,
+       "q65"
+      ],
+      [
+       0.0002686,
+       0.0002765,
+       "q66"
+      ],
+      [
+       0.0003353,
+       0.000348,
+       "q67"
+      ],
+      [
+       0.0003131,
+       0.0003189,
+       "q68"
+      ],
+      [
+       0.0002665,
+       0.0002695,
+       "q69"
+      ],
+      [
+       0.0003079,
+       0.0003314,
+       "q70"
+      ],
+      [
+       0.0003596,
+       0.0003543,
+       "q71"
+      ],
+      [
+       0.000284,
+       0.0002837,
+       "q73"
+      ],
+      [
+       0.0003749,
+       0.0003679,
+       "q74"
+      ],
+      [
+       0.0003776,
+       0.0003676,
+       "q75"
+      ],
+      [
+       0.0004497,
+       0.0004673,
+       "q76"
+      ],
+      [
+       0.0003557,
+       0.0003424,
+       "q77"
+      ],
+      [
+       0.0003313,
+       0.0003228,
+       "q78"
+      ],
+      [
+       0.0003296,
+       0.0003198,
+       "q79"
+      ],
+      [
+       0.0002499,
+       0.000248,
+       "q80"
+      ],
+      [
+       0.0001886,
+       0.0002041,
+       "q81"
+      ],
+      [
+       0.0003373,
+       0.0003407,
+       "q82"
+      ],
+      [
+       0.000222,
+       0.0002034,
+       "q83"
+      ],
+      [
+       0.0003009,
+       0.0003082,
+       "q84"
+      ],
+      [
+       0.0002475,
+       0.0002391,
+       "q85"
+      ],
+      [
+       0.000329,
+       0.0003558,
+       "q86"
+      ],
+      [
+       0.0002967,
+       0.0003438,
+       "q87"
+      ],
+      [
+       0.0003415,
+       0.0003382,
+       "q88"
+      ],
+      [
+       0.0002915,
+       0.0002499,
+       "q89"
+      ],
+      [
+       0.0003201,
+       0.000344,
+       "q90"
+      ],
+      [
+       0.0002678,
+       0.0002695,
+       "q91"
+      ],
+      [
+       0.000353,
+       0.0003464,
+       "q92"
+      ],
+      [
+       0.0004362,
+       0.0004331,
+       "q93"
+      ],
+      [
+       0.0002964,
+       0.0002896,
+       "q94"
+      ],
+      [
+       0.000326,
+       0.0003018,
+       "q95"
+      ],
+      [
+       0.0002788,
+       0.0002823,
+       "q96"
+      ],
+      [
+       0.0004036,
+       0.0004129,
+       "q97"
+      ],
+      [
+       0.0002395,
+       0.0002797,
+       "q98"
+      ],
+      [
+       0.0002663,
+       0.0002695,
+       "q99"
+      ],
+      [
+       0.001249,
+       0.001285,
+       "q100"
+      ],
+      [
+       0.0003299,
+       0.0003723,
+       "q101"
+      ],
+      [
+       0.0004361,
+       0.001894,
+       "q102"
+      ],
+      [
+       0.0003042,
+       0.0002653,
+       "q103"
+      ],
+      [
+       0.0002439,
+       0.000242,
+       "q104"
+      ],
+      [
+       0.0002762,
+       0.0003178,
+       "q105"
+      ],
+      [
+       0.0002186,
+       0.0002179,
+       "q106"
+      ],
+      [
+       0.0003522,
+       0.0003359,
+       "q107"
+      ],
+      [
+       0.0004074,
+       0.000438,
+       "q108"
+      ],
+      [
+       0.0002763,
+       0.0002756,
+       "q109"
+      ],
+      [
+       0.0002372,
+       0.0002296,
+       "q110"
+      ],
+      [
+       0.0002337,
+       0.0002465,
+       "q111"
+      ],
+      [
+       0.0002857,
+       0.0002688,
+       "q112"
+      ],
+      [
+       0.0002434,
+       0.0002406,
+       "q113"
+      ],
+      [
+       0.0003272,
+       0.0003187,
+       "q114"
+      ],
+      [
+       0.0002179,
+       0.0002218,
+       "q115"
+      ],
+      [
+       0.0002471,
+       0.0002134,
+       "q116"
+      ],
+      [
+       0.0002616,
+       0.0002675,
+       "q117"
+      ],
+      [
+       0.0002827,
+       0.0002639,
+       "q118"
+      ],
+      [
+       0.0005971,
+       0.00057,
+       "q119"
+      ],
+      [
+       0.0002377,
+       0.0002167,
+       "q120"
+      ],
+      [
+       0.0002044,
+       0.0002054,
+       "q121"
+      ],
+      [
+       0.0004563,
+       0.0004767,
+       "q122"
+      ],
+      [
+       0.0002223,
+       0.0002278,
+       "q123"
+      ],
+      [
+       0.0003017,
+       0.0003266,
+       "q124"
+      ],
+      [
+       0.000195,
+       0.0002107,
+       "q125"
+      ],
+      [
+       0.0009933,
+       0.001114,
+       "q126"
+      ],
+      [
+       0.000215,
+       0.000285,
+       "q127"
+      ],
+      [
+       0.0002492,
+       0.0002376,
+       "q128"
+      ],
+      [
+       0.0002344,
+       0.0002212,
+       "q129"
+      ],
+      [
+       0.0004856,
+       0.0004728,
+       "q130"
+      ],
+      [
+       0.0001629,
+       0.0001483,
+       "q131"
+      ],
+      [
+       0.00019,
+       0.0001923,
+       "q132"
+      ],
+      [
+       0.0001909,
+       0.0001989,
+       "q133"
+      ],
+      [
+       0.0003874,
+       0.0003865,
+       "q134"
+      ],
+      [
+       0.0001869,
+       0.0001793,
+       "q135"
+      ],
+      [
+       0.0002584,
+       0.0002556,
+       "q136"
+      ],
+      [
+       0.0002792,
+       0.000278,
+       "q137"
+      ],
+      [
+       0.0003139,
+       0.0003124,
+       "q138"
+      ],
+      [
+       0.0004466,
+       0.0004387,
+       "q139"
+      ],
+      [
+       0.0002822,
+       0.0002955,
+       "q140"
+      ],
+      [
+       0.0001989,
+       0.0001997,
+       "q141"
+      ],
+      [
+       0.00033,
+       0.0003051,
+       "q142"
+      ],
+      [
+       0.0002229,
+       0.0002172,
+       "q143"
+      ],
+      [
+       0.0003248,
+       0.000321,
+       "q144"
+      ],
+      [
+       0.0001965,
+       0.0001948,
+       "q145"
+      ],
+      [
+       0.000222,
+       0.0002207,
+       "q146"
+      ],
+      [
+       0.0002743,
+       0.0002733,
+       "q147"
+      ],
+      [
+       0.000397,
+       0.000394,
+       "q148"
+      ],
+      [
+       0.001472,
+       0.001283,
+       "q149"
+      ],
+      [
+       0.0008389,
+       0.0008162,
+       "q150"
+      ],
+      [
+       0.000206,
+       0.0001941,
+       "q151"
+      ],
+      [
+       0.0004096,
+       0.0003856,
+       "q152"
+      ],
+      [
+       0.0002717,
+       0.0002777,
+       "q153"
+      ],
+      [
+       0.0002693,
+       0.0002538,
+       "q154"
+      ],
+      [
+       0.000185,
+       0.0001971,
+       "q155"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tk-koherans-orani",
+   "type": "hist",
+   "title": "Koherans sınırı, bildirilen `sx` hatasının medyanda beşte ikisi",
+   "subtitle": "Eşli 18.301 olay (`T1` ve `T2` olayı `sx` damgasından en çok 6 saat uzakta): 24 ns'lik koherans sınırının bildirilen hataya oranı, log10 ekseninde 0,05 dekadlık kutular",
+   "read": "Medyan 0,402 (yüzde 10'luk dilim 0,178, yüzde 90'lık dilim 0,992); olayların %9,82'sinde oran 1'in üstünde. Medyanda bildirilen hatanın beşte ikisi 24 ns'lik boşta beklemenin bozunmasına karşılık geliyor; kalanı bu bozunma değil. Sınırın medyan %29'u `T1` teriminden geliyor, kalanı `T2` teriminden.",
+   "caveat": "Medyan oranı 1'in üstünde olan 13 kübitin hepsinde `T2` düşük (5,2 ile 35,6 µs; eşli olaylarda cihaz medyanı 94,5 µs). Formül üstel faz kaybını varsayar; düşük bir yankı `T2`'si yavaş gürültüden geliyorsa 24 ns'de biriken faz kaybı çok daha küçüktür. Sınır bir alt sınır değil bir vekildir, en zayıf olduğu yer de `T2`'nin kötü olduğu yer.",
+   "source": "04 §7; results/gates_1q/sx_coherence.json (ratio, matching); oranlar önbellekten sx_coherence.py tanımlarıyla",
+   "x": {
+    "label": "Koherans sınırı / bildirilen sx hatası",
+    "scale": "log",
+    "min": 0.00631,
+    "max": 10.0
+   },
+   "y": {
+    "label": "Olay sayısı",
+    "scale": "linear"
+   },
+   "markers": [
+    {
+     "axis": "x",
+     "value": 0.4018,
+     "label": "medyan 0,40"
+    },
+    {
+     "axis": "x",
+     "value": 1,
+     "label": "oran = 1"
+    }
+   ],
+   "series": [
+    {
+     "name": "Eşli olay",
+     "edges": [
+      0.00631,
+      0.007079,
+      0.007943,
+      0.008913,
+      0.01,
+      0.01122,
+      0.01259,
+      0.01413,
+      0.01585,
+      0.01778,
+      0.01995,
+      0.02239,
+      0.02512,
+      0.02818,
+      0.03162,
+      0.03548,
+      0.03981,
+      0.04467,
+      0.05012,
+      0.05623,
+      0.0631,
+      0.07079,
+      0.07943,
+      0.08913,
+      0.1,
+      0.1122,
+      0.1259,
+      0.1413,
+      0.1585,
+      0.1778,
+      0.1995,
+      0.2239,
+      0.2512,
+      0.2818,
+      0.3162,
+      0.3548,
+      0.3981,
+      0.4467,
+      0.5012,
+      0.5623,
+      0.631,
+      0.7079,
+      0.7943,
+      0.8913,
+      1.0,
+      1.122,
+      1.259,
+      1.413,
+      1.585,
+      1.778,
+      1.995,
+      2.239,
+      2.512,
+      2.818,
+      3.162,
+      3.548,
+      3.981,
+      4.467,
+      5.012,
+      5.623,
+      6.31,
+      7.079,
+      7.943,
+      8.913,
+      10.0
+     ],
+     "counts": [
+      1,
+      0,
+      0,
+      0,
+      2,
+      3,
+      0,
+      8,
+      15,
+      15,
+      22,
+      23,
+      9,
+      15,
+      12,
+      17,
+      7,
+      23,
+      28,
+      33,
+      44,
+      47,
+      56,
+      82,
+      127,
+      181,
+      259,
+      363,
+      439,
+      598,
+      749,
+      843,
+      1115,
+      1202,
+      1312,
+      1404,
+      1422,
+      1317,
+      1193,
+      1041,
+      841,
+      662,
+      564,
+      410,
+      353,
+      254,
+      230,
+      209,
+      206,
+      179,
+      140,
+      93,
+      41,
+      38,
+      32,
+      12,
+      6,
+      2,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tk-sx-t1",
+   "type": "scatter",
+   "title": "Kübitler arasında `T1`'i kısa olanın `sx` hatası yüksek",
+   "subtitle": "Kübit başına eşli olayların medyanı: `T1` (µs, x) ve `sx` hatası (y), log eksenler; renk kübitin bağlantı derecesi; 155 kübit",
+   "read": "Spearman -0,434 (%95 güven aralığı -0,558 ile -0,291; 2.000 bootstrap). Aynı kübitlerde koherans sınırıyla yalnız 0,199 (0,022 ile 0,355), `T2` ile -0,161 (-0,315 ile 0,016): `sx`, sınırı belirleyen `T2`'den çok `T1`'i izliyor.",
+   "caveat": "Bu kübitler arası bir ilişki, nedensellik göstermez. Derece sınıfları `sx` ve `T1` üzerinde aynı yönde ayrışıyor (sonraki grafik); ortak bir kübit özelliği ikisini birlikte belirliyor olabilir.",
+   "source": "04 §7 (between qubits); results/gates_1q/sx_coherence.json (between_qubits); kübit medyanları önbellekten sx_coherence.py eşleştirmesiyle",
+   "x": {
+    "label": "Medyan T1",
+    "scale": "log",
+    "unit": "µs"
+   },
+   "y": {
+    "label": "Medyan sx hatası",
+    "scale": "log"
+   },
+   "series": [
+    {
+     "name": "Derece 1 (8 kübit)",
+     "points": [
+      [
+       50.81,
+       0.001896,
+       "q0"
+      ],
+      [
+       146.5,
+       0.0004013,
+       "q20"
+      ],
+      [
+       137.0,
+       0.0002673,
+       "q40"
+      ],
+      [
+       119.3,
+       0.0003716,
+       "q60"
+      ],
+      [
+       131.3,
+       0.0002499,
+       "q80"
+      ],
+      [
+       133.2,
+       0.00125,
+       "q100"
+      ],
+      [
+       137.4,
+       0.0002232,
+       "q120"
+      ],
+      [
+       102.9,
+       0.0002901,
+       "q140"
+      ]
+     ]
+    },
+    {
+     "name": "Derece 2 (99 kübit)",
+     "points": [
+      [
+       181.9,
+       0.0003286,
+       "q1"
+      ],
+      [
+       199.9,
+       0.0001967,
+       "q2"
+      ],
+      [
+       151.7,
+       0.0002682,
+       "q4"
+      ],
+      [
+       163.6,
+       0.0003483,
+       "q5"
+      ],
+      [
+       166.8,
+       0.0002814,
+       "q6"
+      ],
+      [
+       142.5,
+       0.000404,
+       "q8"
+      ],
+      [
+       203.9,
+       0.0002296,
+       "q9"
+      ],
+      [
+       172.6,
+       0.0002274,
+       "q10"
+      ],
+      [
+       66.41,
+       0.0004081,
+       "q12"
+      ],
+      [
+       237.9,
+       0.0003708,
+       "q13"
+      ],
+      [
+       184.6,
+       0.0002546,
+       "q14"
+      ],
+      [
+       256.7,
+       0.0001988,
+       "q15"
+      ],
+      [
+       127.6,
+       0.0004587,
+       "q16"
+      ],
+      [
+       120.8,
+       0.0002828,
+       "q17"
+      ],
+      [
+       120.5,
+       0.0003542,
+       "q18"
+      ],
+      [
+       127.3,
+       0.0006103,
+       "q19"
+      ],
+      [
+       143.1,
+       0.0002039,
+       "q22"
+      ],
+      [
+       127.0,
+       0.001253,
+       "q24"
+      ],
+      [
+       120.0,
+       0.0002878,
+       "q26"
+      ],
+      [
+       147.4,
+       0.0002526,
+       "q28"
+      ],
+      [
+       120.4,
+       0.0002766,
+       "q30"
+      ],
+      [
+       110.8,
+       0.0002809,
+       "q32"
+      ],
+      [
+       130.9,
+       0.0006408,
+       "q34"
+      ],
+      [
+       133.4,
+       0.0002866,
+       "q35"
+      ],
+      [
+       123.2,
+       0.0005363,
+       "q36"
+      ],
+      [
+       126.7,
+       0.0003317,
+       "q37"
+      ],
+      [
+       110.3,
+       0.000295,
+       "q38"
+      ],
+      [
+       124.6,
+       0.000593,
+       "q39"
+      ],
+      [
+       133.5,
+       0.0002739,
+       "q42"
+      ],
+      [
+       131.3,
+       0.000451,
+       "q44"
+      ],
+      [
+       122.7,
+       0.0004519,
+       "q46"
+      ],
+      [
+       128.5,
+       0.0003514,
+       "q48"
+      ],
+      [
+       127.3,
+       0.0002799,
+       "q50"
+      ],
+      [
+       125.0,
+       0.0003551,
+       "q52"
+      ],
+      [
+       123.9,
+       0.0007846,
+       "q54"
+      ],
+      [
+       119.8,
+       0.0004315,
+       "q55"
+      ],
+      [
+       130.0,
+       0.0004972,
+       "q56"
+      ],
+      [
+       94.05,
+       0.000766,
+       "q57"
+      ],
+      [
+       125.1,
+       0.0003598,
+       "q58"
+      ],
+      [
+       118.7,
+       0.000521,
+       "q59"
+      ],
+      [
+       121.0,
+       0.0003179,
+       "q62"
+      ],
+      [
+       117.8,
+       0.0004131,
+       "q64"
+      ],
+      [
+       98.76,
+       0.0002762,
+       "q66"
+      ],
+      [
+       109.8,
+       0.0003141,
+       "q68"
+      ],
+      [
+       89.05,
+       0.000316,
+       "q70"
+      ],
+      [
+       103.0,
+       0.0003689,
+       "q74"
+      ],
+      [
+       155.8,
+       0.0003692,
+       "q75"
+      ],
+      [
+       140.9,
+       0.0004567,
+       "q76"
+      ],
+      [
+       116.4,
+       0.000344,
+       "q77"
+      ],
+      [
+       92.05,
+       0.0003279,
+       "q78"
+      ],
+      [
+       104.1,
+       0.0003205,
+       "q79"
+      ],
+      [
+       107.3,
+       0.000343,
+       "q82"
+      ],
+      [
+       125.2,
+       0.0003009,
+       "q84"
+      ],
+      [
+       131.3,
+       0.0003419,
+       "q86"
+      ],
+      [
+       113.4,
+       0.0003392,
+       "q88"
+      ],
+      [
+       124.6,
+       0.0003231,
+       "q90"
+      ],
+      [
+       113.4,
+       0.0003492,
+       "q92"
+      ],
+      [
+       132.5,
+       0.0002949,
+       "q94"
+      ],
+      [
+       130.6,
+       0.0003202,
+       "q95"
+      ],
+      [
+       124.4,
+       0.0002823,
+       "q96"
+      ],
+      [
+       98.42,
+       0.0004058,
+       "q97"
+      ],
+      [
+       122.6,
+       0.0002535,
+       "q98"
+      ],
+      [
+       112.7,
+       0.0002695,
+       "q99"
+      ],
+      [
+       123.2,
+       0.001052,
+       "q102"
+      ],
+      [
+       102.8,
+       0.0002424,
+       "q104"
+      ],
+      [
+       132.1,
+       0.0002185,
+       "q106"
+      ],
+      [
+       104.9,
+       0.0004198,
+       "q108"
+      ],
+      [
+       137.5,
+       0.0002353,
+       "q110"
+      ],
+      [
+       117.0,
+       0.0002755,
+       "q112"
+      ],
+      [
+       101.2,
+       0.0003238,
+       "q114"
+      ],
+      [
+       129.0,
+       0.0002183,
+       "q115"
+      ],
+      [
+       133.8,
+       0.0002238,
+       "q116"
+      ],
+      [
+       121.9,
+       0.0002628,
+       "q117"
+      ],
+      [
+       129.5,
+       0.0002781,
+       "q118"
+      ],
+      [
+       84.25,
+       0.0005848,
+       "q119"
+      ],
+      [
+       126.5,
+       0.0004677,
+       "q122"
+      ],
+      [
+       103.2,
+       0.0003125,
+       "q124"
+      ],
+      [
+       98.81,
+       0.001077,
+       "q126"
+      ],
+      [
+       103.6,
+       0.0002447,
+       "q128"
+      ],
+      [
+       127.1,
+       0.000483,
+       "q130"
+      ],
+      [
+       128.3,
+       0.0001952,
+       "q132"
+      ],
+      [
+       137.1,
+       0.0003867,
+       "q134"
+      ],
+      [
+       160.1,
+       0.0001814,
+       "q135"
+      ],
+      [
+       118.9,
+       0.0002584,
+       "q136"
+      ],
+      [
+       124.9,
+       0.0002777,
+       "q137"
+      ],
+      [
+       87.49,
+       0.0003127,
+       "q138"
+      ],
+      [
+       86.38,
+       0.0004454,
+       "q139"
+      ],
+      [
+       147.8,
+       0.0001995,
+       "q141"
+      ],
+      [
+       159.9,
+       0.0003145,
+       "q142"
+      ],
+      [
+       135.1,
+       0.0003234,
+       "q144"
+      ],
+      [
+       155.5,
+       0.0001951,
+       "q145"
+      ],
+      [
+       122.3,
+       0.0002238,
+       "q146"
+      ],
+      [
+       98.07,
+       0.0003932,
+       "q148"
+      ],
+      [
+       48.65,
+       0.0013,
+       "q149"
+      ],
+      [
+       117.2,
+       0.0008265,
+       "q150"
+      ],
+      [
+       97.68,
+       0.0004005,
+       "q152"
+      ],
+      [
+       127.3,
+       0.0002784,
+       "q153"
+      ],
+      [
+       126.9,
+       0.0002587,
+       "q154"
+      ],
+      [
+       160.7,
+       0.0001883,
+       "q155"
+      ]
+     ]
+    },
+    {
+     "name": "Derece 3 (48 kübit)",
+     "points": [
+      [
+       189.7,
+       0.0002058,
+       "q3"
+      ],
+      [
+       115.8,
+       0.0004489,
+       "q7"
+      ],
+      [
+       88.43,
+       0.001289,
+       "q11"
+      ],
+      [
+       175.1,
+       0.0002769,
+       "q21"
+      ],
+      [
+       171.1,
+       0.0002089,
+       "q23"
+      ],
+      [
+       152.4,
+       0.0002408,
+       "q25"
+      ],
+      [
+       101.8,
+       0.005295,
+       "q27"
+      ],
+      [
+       134.2,
+       0.0002561,
+       "q29"
+      ],
+      [
+       123.0,
+       0.0004236,
+       "q31"
+      ],
+      [
+       121.9,
+       0.0002403,
+       "q33"
+      ],
+      [
+       166.4,
+       0.0002042,
+       "q41"
+      ],
+      [
+       144.2,
+       0.0003029,
+       "q43"
+      ],
+      [
+       145.0,
+       0.0002147,
+       "q45"
+      ],
+      [
+       129.4,
+       0.0003214,
+       "q47"
+      ],
+      [
+       125.1,
+       0.0004229,
+       "q49"
+      ],
+      [
+       56.96,
+       0.0002804,
+       "q51"
+      ],
+      [
+       128.4,
+       0.0002243,
+       "q53"
+      ],
+      [
+       164.9,
+       0.00022,
+       "q61"
+      ],
+      [
+       144.6,
+       0.0005818,
+       "q63"
+      ],
+      [
+       153.9,
+       0.0003573,
+       "q65"
+      ],
+      [
+       133.6,
+       0.0003423,
+       "q67"
+      ],
+      [
+       121.3,
+       0.000268,
+       "q69"
+      ],
+      [
+       152.7,
+       0.000358,
+       "q71"
+      ],
+      [
+       147.8,
+       0.0002831,
+       "q73"
+      ],
+      [
+       141.7,
+       0.000195,
+       "q81"
+      ],
+      [
+       143.3,
+       0.0002134,
+       "q83"
+      ],
+      [
+       147.3,
+       0.0002472,
+       "q85"
+      ],
+      [
+       121.4,
+       0.0003186,
+       "q87"
+      ],
+      [
+       141.7,
+       0.0002699,
+       "q89"
+      ],
+      [
+       142.1,
+       0.0002693,
+       "q91"
+      ],
+      [
+       151.9,
+       0.0004342,
+       "q93"
+      ],
+      [
+       157.2,
+       0.0003456,
+       "q101"
+      ],
+      [
+       96.42,
+       0.0002778,
+       "q103"
+      ],
+      [
+       148.6,
+       0.0002876,
+       "q105"
+      ],
+      [
+       110.7,
+       0.0003463,
+       "q107"
+      ],
+      [
+       137.7,
+       0.0002759,
+       "q109"
+      ],
+      [
+       140.1,
+       0.0002424,
+       "q111"
+      ],
+      [
+       141.9,
+       0.0002434,
+       "q113"
+      ],
+      [
+       139.5,
+       0.000205,
+       "q121"
+      ],
+      [
+       143.5,
+       0.0002248,
+       "q123"
+      ],
+      [
+       132.5,
+       0.0002029,
+       "q125"
+      ],
+      [
+       144.5,
+       0.0002389,
+       "q127"
+      ],
+      [
+       118.5,
+       0.0002273,
+       "q129"
+      ],
+      [
+       161.2,
+       0.0001536,
+       "q131"
+      ],
+      [
+       147.6,
+       0.0001935,
+       "q133"
+      ],
+      [
+       151.2,
+       0.0002184,
+       "q143"
+      ],
+      [
+       129.5,
+       0.000273,
+       "q147"
+      ],
+      [
+       91.37,
+       0.0001982,
+       "q151"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tk-derece",
+   "type": "bar",
+   "title": "3. dereceli kübitlerde `sx` hatası %17 düşük, `T1` %13 uzun",
+   "subtitle": "Kübit medyanlarının derece sınıfı içindeki medyanı, 2. derece sınıfına göre fark (%); `sx` için 8, 99, 48 kübit, `T1` için 8, 100, 48 kübit (1. derece yalnız 8 kübit)",
+   "read": "`sx`: 3,28e-4, 3,22e-4, 2,69e-4 (derece 1, 2, 3; Kruskal-Wallis p = 0,003, 10 testlik Bonferroni eşiği 0,005'in altında; yalnız uzun sıralarda 3. ile 2. derece p = 0,013). `T1`: 132, 125, 142 µs; doğrulayıcı bu deseni p = 0,0037 ile buldu, 02 §5 aynı testte p = 0,0028 veriyor.",
+   "caveat": "Nedeni gösterilmedi. 48 üçüncü derece kübitin hepsi uzun sıralarda, 28 bağlayıcı sıra kübitinin hepsi 2. derecede; derece ile sıra tipi örtüşüyor. `sx` kübitler arasında `T1`'i izlediği için etki `T1` üzerinden geçiyor olabilir; bu bir ipucu, bulgu değil (04 Doğrulama). `T1` derece testi 02'nin 36 testlik Bonferroni eşiğini geçmiyor.",
+   "source": "04 §5 ve Doğrulama; 02 §5; results/gates_1q/sx_spatial.json (tests.level_by_degree_*); results/coherence/spatial.json (per_qubit_stats.T1)",
+   "x": {
+    "label": "Bağlantı derecesi",
+    "scale": "band"
+   },
+   "y": {
+    "label": "Derece 2'ye göre fark",
+    "scale": "linear",
+    "unit": "%"
+   },
+   "categories": [
+    "Derece 1",
+    "Derece 2 (referans)",
+    "Derece 3"
+   ],
+   "series": [
+    {
+     "name": "sx hatası",
+     "values": [
+      2.0,
+      0.0,
+      -16.6
+     ]
+    },
+    {
+     "name": "T1",
+     "values": [
+      5.5,
+      0.0,
+      13.2
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tk-sx-harita",
+   "type": "map",
+   "title": "Kübit medyanı `sx` hatasında mekânsal yapı saptanmadı; en kötü kübitler dağınık",
+   "subtitle": "Her kübitin `sx` olaylarının medyanı, heavy-hex yerleşiminde, log renk ölçeği; 155 kübit (`q72` her dosyada yer tutucu)",
+   "read": "Moran's I -0,049 (p = 0,56). En kötüler `q27` 5,31e-3, `q11` 1,99e-3, `q0` 1,93e-3, `q149` 1,38e-3, `q24` 1,30e-3; çipin farklı yerlerinde. `q72`'nin komşuları sıradan: `q71` 155 kübit içinde 110., `q73` 71.",
+   "caveat": "RB tüm kübitlerde eşzamanlı koşulduğu halde bağlı kübitlerin sıçramaları aynı turda şanstan sık görülmüyor (174 çiftte 9 ortak tur, beklenen 8,92). Bu bölümün Moran testlerini doğrulayıcı yeniden üretmedi; mekânsal testlerden yalnız derece testi yeniden üretildi.",
+   "source": "04 §5; results/gates_1q/sx_spatial.json (tests, worst_qubits, q72_neighbours); kübit medyanları önbellekten",
+   "scale": "seqlog",
+   "node_label": "medyan sx hatası",
+   "node_values": {
+    "0": 0.001931,
+    "1": 0.0003312,
+    "2": 0.0001956,
+    "3": 0.0002075,
+    "4": 0.0002682,
+    "5": 0.000336,
+    "6": 0.0002819,
+    "7": 0.0004489,
+    "8": 0.0003995,
+    "9": 0.0002296,
+    "10": 0.0002305,
+    "11": 0.001991,
+    "12": 0.0004106,
+    "13": 0.0003666,
+    "14": 0.0002546,
+    "15": 0.0001988,
+    "16": 0.0004573,
+    "17": 0.0002843,
+    "18": 0.0003525,
+    "19": 0.0006212,
+    "20": 0.0003977,
+    "21": 0.0002767,
+    "22": 0.0002033,
+    "23": 0.0002074,
+    "24": 0.001296,
+    "25": 0.0002391,
+    "26": 0.0002919,
+    "27": 0.005306,
+    "28": 0.0002529,
+    "29": 0.0002561,
+    "30": 0.0002783,
+    "31": 0.0004242,
+    "32": 0.0002798,
+    "33": 0.0002413,
+    "34": 0.0006431,
+    "35": 0.0002872,
+    "36": 0.000536,
+    "37": 0.0003304,
+    "38": 0.0003003,
+    "39": 0.000593,
+    "40": 0.0002675,
+    "41": 0.0002031,
+    "42": 0.0002722,
+    "43": 0.0003027,
+    "44": 0.0004508,
+    "45": 0.0002149,
+    "46": 0.0004536,
+    "47": 0.0003214,
+    "48": 0.0003514,
+    "49": 0.0004244,
+    "50": 0.0002799,
+    "51": 0.0002809,
+    "52": 0.0003543,
+    "53": 0.0002238,
+    "54": 0.0007846,
+    "55": 0.000432,
+    "56": 0.0004955,
+    "57": 0.0007662,
+    "58": 0.0003596,
+    "59": 0.0005265,
+    "60": 0.0003718,
+    "61": 0.0002192,
+    "62": 0.0003151,
+    "63": 0.0005852,
+    "64": 0.0004043,
+    "65": 0.0003574,
+    "66": 0.0002746,
+    "67": 0.0003393,
+    "68": 0.0003136,
+    "69": 0.000268,
+    "70": 0.0003153,
+    "71": 0.0003577,
+    "73": 0.0002837,
+    "74": 0.0003689,
+    "75": 0.0003744,
+    "76": 0.0004639,
+    "77": 0.0003475,
+    "78": 0.0003243,
+    "79": 0.0003253,
+    "80": 0.0002495,
+    "81": 0.0001935,
+    "82": 0.0003388,
+    "83": 0.000212,
+    "84": 0.0003035,
+    "85": 0.0002472,
+    "86": 0.0003383,
+    "87": 0.0003172,
+    "88": 0.0003392,
+    "89": 0.0002732,
+    "90": 0.0003231,
+    "91": 0.0002693,
+    "92": 0.0003486,
+    "93": 0.0004342,
+    "94": 0.000295,
+    "95": 0.000322,
+    "96": 0.0002806,
+    "97": 0.0004058,
+    "98": 0.0002535,
+    "99": 0.0002672,
+    "100": 0.001252,
+    "101": 0.0003456,
+    "102": 0.000979,
+    "103": 0.0002778,
+    "104": 0.0002425,
+    "105": 0.0002857,
+    "106": 0.0002182,
+    "107": 0.0003433,
+    "108": 0.0004246,
+    "109": 0.0002759,
+    "110": 0.0002344,
+    "111": 0.0002417,
+    "112": 0.0002754,
+    "113": 0.0002427,
+    "114": 0.0003215,
+    "115": 0.0002187,
+    "116": 0.0002277,
+    "117": 0.0002627,
+    "118": 0.0002765,
+    "119": 0.0005886,
+    "120": 0.0002206,
+    "121": 0.0002048,
+    "122": 0.0004685,
+    "123": 0.0002235,
+    "124": 0.0003119,
+    "125": 0.0002016,
+    "126": 0.001088,
+    "127": 0.00023,
+    "128": 0.0002425,
+    "129": 0.0002276,
+    "130": 0.000483,
+    "131": 0.0001536,
+    "132": 0.0001903,
+    "133": 0.0001957,
+    "134": 0.0003867,
+    "135": 0.0001808,
+    "136": 0.0002576,
+    "137": 0.0002784,
+    "138": 0.0003126,
+    "139": 0.0004439,
+    "140": 0.0002901,
+    "141": 0.0001992,
+    "142": 0.000316,
+    "143": 0.0002184,
+    "144": 0.0003232,
+    "145": 0.0001948,
+    "146": 0.0002212,
+    "147": 0.0002743,
+    "148": 0.0003946,
+    "149": 0.001382,
+    "150": 0.0008265,
+    "151": 0.0002009,
+    "152": 0.0004,
+    "153": 0.0002743,
+    "154": 0.0002621,
+    "155": 0.0001937,
+    "72": null
+   },
+   "node_flags": {
+    "72": "yer"
+   },
+   "flags": {
+    "yer": "her dosyada yer tutucu (gate_error = 1)"
+   }
+  },
+  {
+   "id": "tk-sicrama-dip",
+   "type": "bar",
+   "title": "`sx` sıçramalarında `T1` dipi şanstan sık görülüyor, `T2` dipi değil",
+   "subtitle": "Eşli 18.301 olaydaki 324 `sx` sıçramasında (kayan seviyenin 2 katından fazla üstü) aynı turda `T1` ya da `T2` dipi görülme oranı; kaydırılmış eşleştirmede (36 kaydırma) ortalama ve en büyük oran",
+   "read": "`T1`'in 1,5 kat dipi sıçramaların %16,7'sinde (324'te 54); kaydırılmış eşleştirmede ortalama %10,9, en çok %14,0. 2 kat eşiğinde de gözlenen oran 36 kaydırmanın hepsini aşıyor; `T2` için kaydırmaların aralığında kalıyor. Koherans sınırı bir sıçramanın fazla hatasının yalnız medyan %0,5'ini açıklıyor (`T1` dipli 54 sıçramada %13,6).",
+   "caveat": "324 sıçramanın 270'inde `T1` dipi yok. Sıçrama yapan kübitler genel olarak daha çok `T1` dipi gösteriyor (iki oran arasında Spearman 0,23), bu yüzden doğru karşılaştırma kaydırılmış eşleştirme. İkisini birlikte hareket ettiren şey bilinmiyor: aynı turdaki `sx` ile `T1` sapmaları arasındaki zayıf bağ (-0,062) deneyler arasında paylaşılan bir parça; zaman ölçeği ve fiziksel mi yöntemsel mi olduğu belirlenmedi (04 Doğrulama).",
+   "source": "04 §0, §7 ve Doğrulama; results/gates_1q/sx_coherence.json (coincidence)",
+   "x": {
+    "label": "Dip tanımı",
+    "scale": "band"
+   },
+   "y": {
+    "label": "Sıçramada dip oranı",
+    "scale": "linear"
+   },
+   "categories": [
+    "T1, 1,5 kat altı",
+    "T1, 2 kat altı",
+    "T2, 1,5 kat altı",
+    "T2, 2 kat altı"
+   ],
+   "series": [
+    {
+     "name": "Sıçramada gözlenen",
+     "values": [
+      0.1667,
+      0.0833,
+      0.1142,
+      0.0525
+     ]
+    },
+    {
+     "name": "Kaydırılmış, ortalama",
+     "values": [
+      0.1093,
+      0.0418,
+      0.096,
+      0.0394
+     ]
+    },
+    {
+     "name": "Kaydırılmış, en büyük",
+     "values": [
+      0.1404,
+      0.0596,
+      0.1384,
+      0.0647
+     ]
+    }
+   ]
+  }
+ ]
+}

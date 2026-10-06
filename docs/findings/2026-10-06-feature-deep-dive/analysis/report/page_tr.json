@@ -1,0 +1,134 @@
+{
+ "order": [
+  ["veri", "Veri"],
+  ["kok-soru", "Kök soru"],
+  ["koherans", "Koherans"],
+  ["readout", "Readout"],
+  ["tek-kubit", "Tek-kübit kapıları"],
+  ["iki-kubit", "İki-kübit kapıları"],
+  ["cihaz", "Cihaz ve zaman"],
+  ["bagimlilik", "Bağımlılık"]
+ ],
+ "page": {
+  "lede": "1.760 kalibrasyon belgesindeki her alan veriden başlayarak incelendi: her alan ne ölçüyor, nasıl değişiyor, öteki alanlarla nasıl ilişkili ve makalenin kök soruları neler. Her bölüm, onu yazmamış bağımsız bir doğrulayıcının yeniden hesapladığı sayılara dayanıyor.",
+  "banner": "**Ön sonuçlar.** Tüm sayılar 6 Ekim 2026'da laptopta, `calibration-data` `7b84b50` üzerinde ölçüldü. Doğrulama masaüstünde yeniden çalıştırılana kadar geçicidir ve sayısal iddia kaydına girmedi. Bu sayfa karar içermez: A1 ile A9 arası kararlar ve planın §9 soruları açıktır.",
+  "tiles": [
+   {"label": "Kalibrasyon belgesi", "value": "1.760", "sub": "13 Mayıs ile 6 Ekim 2026 arası; 760 ayrık kübit durumu"},
+   {"label": "Bilgi taşıyan alan", "value": "12 / 33", "sub": "geri kalanı kopya, sabit, uzunluk, ayar ya da boş"},
+   {"label": "Değişimlerin lag-1 otokorelasyonu", "value": "-0,43 ile -0,51", "sub": "her ailede: seviyenin etrafında hafızasız bir bileşen"},
+   {"label": "Aynı turda `T1` ile `T2` sapmaları", "value": "0,70", "sub": "iki fit arasında ortak bir parça; doğrulandı"},
+   {"label": "Atış (shot) gürültüsünün açıkladığı pay", "value": "yaklaşık %24", "sub": "readout'un en kısa gecikmedeki değişkenliği içinde"},
+   {"label": "Katmanlı hata / izole tahmin", "value": "yaklaşık 1,4 kat", "sub": "layer fidelity; zincir uzunluğundan bağımsız"}
+  ],
+  "footer": [
+   "**Kaynak.** `calibration-data` @ `7b84b506ef77beb6e6c1b25a7357c574cfaf5117`, 1.760 `ibm_fez` belgesi. Alan önbelleğinin özeti (sha256, bütün `.npy` dosyaları): `10df569c700977aa71c649a09f8beceb0bab0e2008a0dd5696d98acfcc91f5da`.",
+   "**Belgeler ve betikler.** Depoda `docs/findings/2026-10-06-feature-deep-dive/` (genel bakış, veri sözlüğü, altı kapsam belgesi ve her sayıyı üreten betikler). Bu sayfanın grafik verisi aynı klasörde `analysis/report/` altındaki betiklerden üretildi.",
+   "**Nasıl üretildi.** Veri katmanı bir kez çıkarıldı. Altı kapsam ajanı belgeleri yazdı, her belgeyi ayrı bir doğrulayıcı denetledi. Bu sayfanın bölümlerini beş ajan hazırladı ve ayrı bir doğrulayıcı sayfadaki sayıları belgelerle karşılaştırdı.",
+   "Tüm sayılar geçicidir ve doğrulama masaüstünde yeniden çalıştırılacaktır. Öneri olarak işaretlenen maddeler dışında bu sayfa öneri ya da karar içermez."
+  ]
+ },
+ "questions": {
+  "section": "sorular",
+  "toc_tr": "Kök sorular",
+  "title_tr": "Makale için kök sorular ve bilinmeyenler",
+  "intro_tr": [
+   "Derin incelemenin vardığı yer şu: bilgi taşıyan her seri üç parçalı. Aylarca sabit kalan, varlığa özgü bir seviye; haftalar ile aylar içinde yavaş bir kayma; ve bir ölçümden ötekine hafızası olmayan büyük bir bileşen. Bu son bileşenin ne olduğu açık.",
+   "Arşiv iki basit okumayı dışlıyor. Bileşen, sabit bir seviyenin etrafındaki bağımsız tahmin hatasından ibaret değil: yavaş seviye ve deneyler arası korelasyonlar buna karşı. Readout bileşeni de binom atış (shot) gürültüsünden ibaret değil: atış gürültüsü azınlıkta. Ama arşiv bileşenin çoğunun fiziksel olduğunu da göstermiyor. Bu yüzden bileşene ne IBM tahmin gürültüsü ne de fiziksel dalgalanma deniyor."
+  ],
+  "blocks_tr": [
+   {
+    "h": "Kök sorular",
+    "ordered": true,
+    "items": [
+     "**Kalıcı olmayan bileşen nedir?** Tahmin hatası, örnekleme aralığından hızlı gerçek dinamikler ya da turlar arası yeniden kalibrasyon olabilir. Arşiv bunları ayıramıyor (00 §4.1).",
+     "**Bileşenin büyüklüğü durağan mı?** `T1`'in tur-tur robust yarı varyansı 15 ile 27 Mayıs arasındaki 13 turda 0,000404 ile 0,000686 arasındaydı, sonra tipik değeri 0,0146 oldu; 26 ile 29 Haziran arasında bir adım daha var (Pettitt p = 5,5e-12). Rejimlere yayılan bir model bu değişimi miras alır (00 §4.2).",
+     "**Bir kübitteki ayrı deneyler arasında ortak bir parça var mı, hangi zaman ölçeğinde?** Aynı turda `T1` ile `T2` 0,70; ortak kübit paylaşan kuplörler 0,22; `cz` ile `rzz` 1 saat içinde 0,205. Bağımsız hatalar bunu üretemez, iki deneye ortak bir girdi üretebilir (00 §4.3).",
+     "**Kübit kalitesinin iki ekseni ve örgünün rolü.** Readout ekseni ile koherans ve kapı ekseni ayrı; readout'un uzamsal deseni büyük ölçüde örgüdeki derece sınıflarından geliyor (00 §4.4).",
+     "**Kapı hataları dekoheransın ötesinde ne içeriyor?** Koherans limiti `sx` hatasının medyan 0,40'ı, `cz`'nin 0,333'ü; katmanlı hata izole `cz` tahmininin yaklaşık 1,4 katı (00 §4.5).",
+     "**Cihazın geçmişi ve takvimi.** Değişim noktaları bilinen olaylarla ancak şans düzeyinde örtüşüyor: en tutucu cezada 17 noktanın 5'i, beklenen 3,29 (00 §4.6).",
+     "**IBM değerleri nasıl üretiyor?** Damgalar toplu yazım zamanları gibi davranıyor; `zz` yaklaşık 5 saatte bir yeniden belirleniyor; günlük readout oturumlarının shot sayısı belirsiz (00 §4.7)."
+    ]
+   },
+   {
+    "h": "Bilinmeyenler, makale için önem sırasıyla",
+    "ordered": true,
+    "items": [
+     "Kalıcı olmayan bileşenin büyük kısmının ne olduğu. Bir tahmin bandının ölçüm hassasiyeti bandı mı yoksa fiziksel bir band mı olduğunu bu belirler.",
+     "Bileşenin büyüklüğünün durağan olup olmadığı; Mayıs 2026'da ve 26 ile 29 Haziran arasında cihaz genelinde ne değiştiği.",
+     "Ortak `T1`/`T2` bileşeninin ne olduğu. Bir turdaki readout ya da başlatma değişiminin ikisini birden oynatıp oynatmadığı henüz test edilmedi.",
+     "Deneyler arası ortak bileşenin zaman ölçeği.",
+     "Günlük readout oturumlarının shot sayısı: 2.048 mi, 4.096 mı.",
+     "Kapı hatalarının dekoherans dışındaki içeriği ve 1,4 katsayısının kaynağı.",
+     "Uzamsal desenlerin fiziksel kökeni; önbellekte kübit frekansı yok.",
+     "Üretim semantiği: `zz` nasıl üretiliyor, `lf` damgaları ne anlama geliyor.",
+     "Tekil anomaliler: 32-33 kuplörünün kalıcı arızası, Ağustos sonundaki `init_error` bölümü, 17 Mayıs'ta bilinen bir olay olmadan görülen readout düşüşü."
+    ]
+   },
+   {
+    "h": "Ayırt edecek ölçümler (yalnızca öneri; donanım zamanı ekibin kararı)",
+    "ordered": false,
+    "items": [
+     "Birkaç kübit ve kuplörde dakika aralıklı ardışık tekrarlar: `T1`, Hahn eko, tek ve iki kübitli RB, bilinen shot sayılı atama deneyleri; fit belirsizlikleri kaydedilerek, aralarda yeniden kalibrasyonlu ve kalibrasyonsuz. Tahmin gürültüsü en kısa gecikmeden itibaren düz bir variogram öngörür; hızlı dinamikler dakikalardan saatlere yükselen bir eğri öngörür.",
+     "IBM meta verisi: RB ayarları, değer başına fit belirsizliği, iş kimlikleri, günlük readout shot sayısı.",
+     "Yalnızca arşivle: 07'nin seviye penceresi testini (±2 gün ile ±7 gün) 02, 04 ve 05'teki eşleşmelere uygulamak; sonraki ref'lerde 2 saatten yakın readout oturum çiftleri biriktirmek."
+    ]
+   }
+  ]
+ },
+ "verification": {
+  "section": "dogrulama",
+  "toc_tr": "Doğrulama",
+  "title_tr": "Doğrulama durumu ve veri kuralları",
+  "intro_tr": [
+   "Her kapsam belgesini, onu yazmamış bağımsız bir ajan doğruladı. Sahibin bütün betiklerini yeniden çalıştırdı; sonuç dosyaları zaman damgası dışında alan alan aynı çıktı. En çok yük taşıyan sayıları kendi yazdığı kodla yeniden hesapladı ve yorumları çürütmeye çalıştı. Hiçbir ana sayı hatalı çıkmadı; düzeltmeler ifadelerin gücüne, testlerin geçerliliğine ve atıflara yöneldi.",
+   "Bu doğrulama aynı makinedeki ikinci bir ajandır; doğrulama masaüstündeki tekrarın yerini tutmaz."
+  ],
+  "rows": [
+   ["02", "02 Koherans", "7 / 7", 16, 3, 2, 3, 0],
+   ["03", "03 Readout ve ölçüm", "7 / 7", 19, 3, 1, 4, 0],
+   ["04", "04 Tek-kübit kapıları", "6 / 6", 21, 4, 0, 4, 0],
+   ["05", "05 İki-kübit kapıları", "7 / 7", 23, 5, 0, 3, 1],
+   ["06", "06 Cihaz, zaman, topoloji", "7 / 7", 27, 5, 0, 4, 0],
+   ["07", "07 Aileler arası bağımlılık", "7 / 7", 16, 3, 0, 3, 1]
+  ],
+  "table_head": ["Belge", "Sahip betikleri yeniden üretildi", "Bağımsız yeniden hesaplanan sayı", "Yorumlar"],
+  "verdict_names": ["Korundu", "Kısmen korundu", "Zayıflatıldı", "Çürütüldü"],
+  "verdict_words": ["korundu", "kısmen korundu", "zayıflatıldı", "çürütüldü"],
+  "chart_verdicts": {
+   "id": "dogrulama-kararlar",
+   "type": "stack",
+   "title": "Her belgede yorumların çoğu korundu ya da zayıflatıldı",
+   "subtitle": "Doğrulayıcının sınadığı yorum sayısı, karara göre; belge başına 7 ile 9 yorum",
+   "read": "Çürütülen iki yorum var: 05'teki \"gün içi ikinci kalibrasyon\" p-değerleri (sözde tekrar) ve 07'deki bir permütasyon geçerlilik öncülü; 07'nin boş sonucu yine de geçerli.",
+   "source": "00-overview.md, verification-status table",
+   "x": {"label": "belge", "scale": "band"},
+   "y": {"label": "yorum sayısı", "scale": "linear"}
+  },
+  "chart_numbers": {
+   "id": "dogrulama-sayilar",
+   "type": "bar",
+   "title": "Doğrulayıcılar 122 sayıyı kendi koduyla yeniden hesapladı",
+   "subtitle": "Belge başına, doğrulayıcının tablosundaki satır sayısı",
+   "read": "Uyuşmayan tek satır 06'daki bir rastgele çekim minimumu (7,8 yerine 7,62); tohuma bağlı. Yaklaşık uyuşmalar kayıt seçimi ya da medyan tanımı farkından geliyor.",
+   "source": "00-overview.md, verification-status table",
+   "x": {"label": "belge", "scale": "band"},
+   "y": {"label": "yeniden hesaplanan sayı", "scale": "linear"}
+  },
+  "blocks_tr": [
+   {
+    "h": "Bu arşivi kullanan her analizin uyması gereken kurallar",
+    "ordered": true,
+    "items": [
+     "`gate_error >= 1` IBM'in \"kalibre edilmedi\" yer tutucusudur; olaylar oluşturulmadan önce maskelenmeli.",
+     "Olay kuralı alanın tarih anlamına göre seçilmeli: ölçülmüş alanlarda değer ve damga birlikte yeni olmalı; belge oluşturulurken damgalanan alanlarda (eşikler, `zz`, `jq`, `rz`) ve uzunluklarda yalnızca değer değişimi sayılır.",
+     "`x`, `id`, `rx`, `xslow` hataları `sx`'in kopyasıdır; `measure` hatası `readout_error`'dır; bir kuplörün iki yönü aynı değeri taşır. Kopyalar ayrı bilgi gibi sayılmamalı.",
+     "Arşiv kapsamı dönemden döneme değişti: Ağustos başına kadar yalnızca saatlik yoklama vardı, sonra geçmiş belgeler eklendi. Aylar arası olay hızı ve kadans karşılaştırmaları bunu hesaba katmalı.",
+     "Şema başlangıçları eksik veri değildir: `measure.threshold` 8 Haziran, `init_error` 4 Ağustos, `measure_2` 7 Ağustos, `measure_reset` ve `reset_2` 2 Eylül.",
+     "Kalıcı arızalı varlıklar dışlanmalı ve listelenmeli: `sx` için `q72`; `cz` için 27-28, 32-33, 71-72, 72-73; `rzz` için 32-33, 71-72, 72-73, 95-99, 99-115.",
+     "`last_update_date` bir ölçüm zamanı değildir. Ayrık durum özeti yalnızca kübit kayıtlarını kapsar, kapı değişimlerini görmez.",
+     "Kalıcı olmayan bileşene kanıt olmadan ölçüm ya da tahmin gürültüsü denmemeli."
+    ]
+   }
+  ]
+ }
+}

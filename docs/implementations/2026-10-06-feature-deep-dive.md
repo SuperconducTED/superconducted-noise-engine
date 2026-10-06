@@ -167,6 +167,30 @@ colliding identifier (no document here defines an ADR or NC id); no test under `
 `test_feature_patterns`, `test_pipeline_health`, `test_parameterization`) pass, 211 cases, in the
 scratch Python 3.12 venv with `PYTHONPATH=src`. `mypy --strict` does not cover `docs/`.
 
+## The advisor report page (added later on 2026-10-06)
+
+The lead then asked for an artifact for Dr. Akba that presents every finding with many charts,
+in Turkish. It is built from this folder and adds no new analysis.
+
+| File | One-sentence description |
+| --- | --- |
+| `analysis/report/spec_check.py` | The contract for one report section (Turkish text plus chart specs of nine types) and its validator: types, sizes, ISO times, finite numbers, no em dash. |
+| `analysis/report/<section folder>/*.py`, `results/report/<section>.json` | Five folders (`data_device`, `root`, `coh_1q`, `readout`, `q2_cross`) whose scripts write the eight section specs from the scope results JSON and, where a chart needs a series no results file holds, from the cache with the owners' own functions. |
+| `analysis/report/template.html` | The page and its d3 renderer (Turkish locale, both themes, a table view for every chart, hover tooltips, device maps on the heavy-hex layout). |
+| `analysis/report/page_tr.json` | The page header and the closing sections in Turkish (root questions, unknowns, verification status, data rules), every figure quoted from `00-overview.md`; kept in JSON so the Python stays free of ruff's ambiguous-character rule. |
+| `analysis/report/build_page.py` | Assembles the specs, the closing sections and the device layout into one self-contained HTML file. |
+
+How it was checked. Five agents wrote the sections (disjoint folders); a verifier checked about
+170 figures against the documents and found no wrong number, and its 14 wording findings (one
+overclaiming title, fractions written as if percentages, "yok" where the documents say "not
+detected", spelling consistency) were applied in the scripts and the specs regenerated. Every
+chart was then rendered alone in headless Chrome and the 88 screenshots reviewed; the 32 visual
+defects (unrendered backticks in legends, indistinguishable map flags, log axes rounded out to
+whole decades, colliding marker labels, maps flattened by outliers) were fixed in the renderer.
+The section scripts carry a file-level `# ruff: noqa: RUF001` for Turkish text, and two also
+`E501`; the page itself is not committed (it is rebuilt with
+`python analysis/report/build_page.py --out <file.html>`).
+
 ## Related docs
 
 - `docs/findings/2026-10-06-feature-deep-dive/` (this deep dive)

@@ -1,0 +1,1595 @@
+{
+ "section": "bagimlilik",
+ "title_tr": "Aileler arası bağımlılık: kalibrasyon aileleri neyi paylaşıyor, neyi paylaşmıyor",
+ "intro_tr": [
+  "Bu bölüm on bir ölçüm ailesi arasındaki ilişkileri inceler: `T1`, `T2`, RO (`readout_error`), P(1|0), P(0|1), `init_error`, `measure_2`, `sx`, `cz`, `rzz` ve `|zz|`. Kuplör aileleri kübite, komşu kuplörlerin ortalaması olarak taşınır. Test ailesi, başka belgelere ait bağlar çıkarıldıktan sonra kalan 23 aileler arası çifttir; `T1` ile `T2` ve RO ile P(0|1) yalnızca pozitif kontrol olarak aynı araçlardan geçirilir.",
+  "Saat, neyin paylaşılabileceğini sınırlar: bir kübitte `T1` ve `T2` saniyeler arayla, `sx` yaklaşık bir saat sonra, `cz` ve `rzz` saatler sonra damgalanır; okuma yaklaşık 4,5 saatte bir yenilenir. Bu aralıklardan kısa süren bir dalgalanma, iki aile arasında ortak olarak görülemez.",
+  "Genel tablo: kübitler arasında aileler iki ayrı kalite eksenine ayrılır; bir kübitin içinde ortak hareket saptanabilir ama çok küçüktür; bir ailenin yakın geçmişi diğerinin bir sonraki değerini öngörmez; cihaz çapındaki ortak bileşen küçüktür. Kalıcı olmayan bileşenin küçük bir kısmı aileler arasında paylaşılıyor; bu kısmın zaman ölçeği ve kökeni henüz belirlenmemiştir, geri kalanı hiçbir aileler arası testle bir kaynağa bağlanamıyor."
+ ],
+ "bullets_tr": [
+  "**Kübitler arası seviye bağı saptanmadı.** 23 çiftin hiçbiri Benjamini-Hochberg düzeltmesinden sonra anlamlı değil (en küçük q 0,514); bütün %95 aralıkları -0,323 ile 0,291 arasında (116 ile 156 kübit). Kübitler arası yapı başka belgelere ait çiftlerde, örneğin `T1` ile `sx` -0,430.",
+  "**İki ayrı kalite ekseni.** 154 kübit ve 10 alanda bir okuma faktörü (özdeğer 3,83, varyansın %38'i) ve bir koherans-ve-kapı faktörü (2,58, %26) paralel analizi aşar. Okuma ekseni ile koherans-ve-kapı ekseni neredeyse ayrı; bu, yük örüntüsüne dayanan betimleyici bir okuma.",
+  "**Korelasyonlu sürekliliğin ötesinde arketip yok.** k = 2 ile 6 arasında Ward kümeleri, gözlenen korelasyonları taşıyan bir Gauss bulutunu hiçbir k için geçemez (p 0,154 ile 0,965) ve kararsızdır (bootstrap ARI medyanı 0,37 ile 0,42).",
+  "**Kübit içi ortak hareket saptanabilir ama çok küçük.** Ham artıklarda 23 çiftten 11 tanesi, ortak mod çıkarılınca 10 tanesi anlamlı; en büyük korelasyon 0,057 (`sx` ile P(0|1)), kontrollerde 0,693 ve 0,781. Doğrulayıcının pencere testinden sonra paylaşılan kısmın zaman ölçeği açık bir sorudur.",
+  "**Öncülük ya da gecikme saptanmadı.** Üç modelin hiçbirinde 45 (ya da 44) yönden anlamlı olan yok; en iyi zaman dışı oran 0,99854 (`init_error` → `T2`).",
+  "**Cihaz çapındaki pay küçük.** Tur ortak modu artık varyansının 0,012 (`|zz|`) ile 0,130 (`T1`) arasını taşır; okuma ve koherans için cihaz payı ay ölçeğinde büyür, yani yavaş kayan bir cihaz seviyesidir.",
+  "**Günlük cihaz değişimleri aile içinde hareket eder.** 55 aile çiftinden 8 tanesi anlamlı ve biri dışında hepsi aile içi; aileler arası tek çift P(1|0) ile `sx` (-0,341, 113 gün), bir aday.",
+  "**Aday bağ: `|zz|` ve okuma.** `|zz|` artıkları okuma hatalarıyla negatif korelasyonlu (RO ile -0,043, 166.855 eşleşme); işaret kübit-gün düzeyinde (-0,061) ve anlamlı olmadan cihaz-gün düzeyinde (-0,251) tekrar eder. `zz` yalnızca dosya zamanı taşıdığından mekanizma ve zamanlama karara bağlanamaz."
+ ],
+ "charts": [
+  {
+   "id": "seviye-korelasyon-matrisi",
+   "type": "heatmap",
+   "title": "Kübit seviyeleri aile blokları içinde bağlı; test edilen 23 aileler arası çiftin hiçbiri anlamlı değil",
+   "subtitle": "Kübit başına seviyelerin (yaşam boyu `log10` olay medyanı) Spearman korelasyonu; 11 alan, çifte göre 116 ile 156 kübit. Kuplör aileleri, kübite komşu kuplörlerin ortalaması. P(0|1) = `prob_meas0_prep1`, P(1|0) = `prob_meas1_prep0`. Köşegen boş.",
+   "read": "Belirgin değerler başka belgelere ait çiftlerde: okuma bloğu 0,644 (`init_error` ile `measure_2`) ile 0,984 (RO ile P(0|1)) arasında, `T1` ile `sx` -0,430, `sx` ile `cz` (komşu) 0,416, `T1` ile `T2` 0,305. 07'nin test ettiği 23 aileler arası çift -0,145 ile 0,118 arasında; Benjamini-Hochberg sonrası en küçük q 0,514, karşılıklı bilgi de hiçbirinde anlamlı değil. Bu örneklem, bu çiftler için yaklaşık 0,3'ün ötesinde bir sıra korelasyonunu dışlar; daha zayıf bağları dışlamaz.",
+   "caveat": "Doğrulayıcı: altı çift (`measure_2` ile üç komşu kuplör alanı; RO, P(1|0) ve P(0|1) ile `|zz|` (komşu)) uzamsal öz-korelasyonu anlamlı iki alanı birleştirir; bu durumda permütasyon testinin geçerlilik önermesi tutmaz. Hiçbiri anlamlı olmadığından sıfır sonucu değişmez.",
+   "source": "07 §7.1, §5 and Verification; results/cross/levels.json (pairs), summary.json (levels)",
+   "rows": [
+    "T1",
+    "T2",
+    "RO",
+    "P(1|0)",
+    "P(0|1)",
+    "init_error",
+    "measure_2",
+    "sx",
+    "cz (komşu)",
+    "rzz (komşu)",
+    "|zz| (komşu)"
+   ],
+   "cols": [
+    "T1",
+    "T2",
+    "RO",
+    "P(1|0)",
+    "P(0|1)",
+    "init_error",
+    "measure_2",
+    "sx",
+    "cz (komşu)",
+    "rzz (komşu)",
+    "|zz| (komşu)"
+   ],
+   "values": [
+    [
+     null,
+     0.305,
+     0.00758,
+     0.0795,
+     -0.0277,
+     -0.0667,
+     0.158,
+     -0.43,
+     -0.265,
+     -0.264,
+     -0.00547
+    ],
+    [
+     0.305,
+     null,
+     -0.13,
+     -0.11,
+     -0.134,
+     -0.145,
+     -0.115,
+     -0.164,
+     -0.225,
+     -0.237,
+     0.0733
+    ],
+    [
+     0.00758,
+     -0.13,
+     null,
+     0.957,
+     0.984,
+     0.828,
+     0.863,
+     -0.00971,
+     0.165,
+     0.176,
+     -0.0217
+    ],
+    [
+     0.0795,
+     -0.11,
+     0.957,
+     null,
+     0.906,
+     0.937,
+     0.857,
+     -0.105,
+     0.0894,
+     0.103,
+     -0.0232
+    ],
+    [
+     -0.0277,
+     -0.134,
+     0.984,
+     0.906,
+     null,
+     0.707,
+     0.845,
+     0.0299,
+     0.183,
+     0.204,
+     -0.0315
+    ],
+    [
+     -0.0667,
+     -0.145,
+     0.828,
+     0.937,
+     0.707,
+     null,
+     0.644,
+     -0.034,
+     0.101,
+     0.108,
+     0.0283
+    ],
+    [
+     0.158,
+     -0.115,
+     0.863,
+     0.857,
+     0.845,
+     0.644,
+     null,
+     -0.123,
+     0.118,
+     0.116,
+     -0.0309
+    ],
+    [
+     -0.43,
+     -0.164,
+     -0.00971,
+     -0.105,
+     0.0299,
+     -0.034,
+     -0.123,
+     null,
+     0.416,
+     0.387,
+     -0.0155
+    ],
+    [
+     -0.265,
+     -0.225,
+     0.165,
+     0.0894,
+     0.183,
+     0.101,
+     0.118,
+     0.416,
+     null,
+     0.899,
+     0.0308
+    ],
+    [
+     -0.264,
+     -0.237,
+     0.176,
+     0.103,
+     0.204,
+     0.108,
+     0.116,
+     0.387,
+     0.899,
+     null,
+     -0.00265
+    ],
+    [
+     -0.00547,
+     0.0733,
+     -0.0217,
+     -0.0232,
+     -0.0315,
+     0.0283,
+     -0.0309,
+     -0.0155,
+     0.0308,
+     -0.00265,
+     null
+    ]
+   ],
+   "scale": "div",
+   "domain": [
+    -1,
+    1
+   ],
+   "fmt": ".2f"
+  },
+  {
+   "id": "iki-kalite-ekseni",
+   "type": "bar",
+   "orient": "h",
+   "title": "Okuma kalitesi ile koherans-ve-kapı kalitesi iki ayrı eksendir",
+   "subtitle": "Kübit seviyelerinin normal skorlarından PCA: ilk iki bileşenin yükleri ve %95 bootstrap aralıkları (154 kübit, 10 alan; q72 ve q99 eksik alan nedeniyle dışarıda; 500 yeniden örnekleme).",
+   "read": "PC1 (özdeğer 3,83, varyansın %38'i) okuma eksenidir: RO, P(0|1), P(1|0) ve `measure_2` yükleri 0,46 ile 0,49 arasında. PC2 (2,58, %26) koherans-ve-kapı eksenidir: `cz` (komşu) 0,489, `rzz` (komşu) 0,478, `sx` 0,457, `T1` -0,404. Her okuma alanının PC2 aralığı sıfırı içerir. Üçüncü bileşen (1,04) paralel analiz eşiğini (1,26) geçmez.",
+   "caveat": "Bileşenlerin dikliğini PCA kendisi dayatır; \"iki ayrı eksen\" kanıtı yüklerin örüntüsüdür. `init_error` eklenince (116 kübit) aynı iki bileşen kalır ve `init_error` okuma eksenine yüklenir.",
+   "source": "07 §7.5; results/cross/levels.json (multivariate.A_10_fields_no_init.pca)",
+   "x": {
+    "label": "Yük",
+    "scale": "linear",
+    "min": -0.6,
+    "max": 0.7
+   },
+   "categories": [
+    "T1",
+    "T2",
+    "RO",
+    "P(1|0)",
+    "P(0|1)",
+    "measure_2",
+    "sx",
+    "cz (komşu)",
+    "rzz (komşu)",
+    "|zz| (komşu)"
+   ],
+   "series": [
+    {
+     "name": "PC1",
+     "values": [
+      -0.0312,
+      -0.106,
+      0.494,
+      0.471,
+      0.489,
+      0.458,
+      0.0508,
+      0.184,
+      0.193,
+      -0.00358
+     ],
+     "lo": [
+      -0.181,
+      -0.22,
+      0.444,
+      0.405,
+      0.444,
+      0.399,
+      -0.174,
+      -0.059,
+      -0.0472,
+      -0.117
+     ],
+     "hi": [
+      0.159,
+      0.0567,
+      0.51,
+      0.5,
+      0.499,
+      0.483,
+      0.204,
+      0.298,
+      0.311,
+      0.108
+     ]
+    },
+    {
+     "name": "PC2",
+     "values": [
+      -0.404,
+      -0.292,
+      -0.111,
+      -0.179,
+      -0.0735,
+      -0.16,
+      0.457,
+      0.489,
+      0.478,
+      0.00914
+     ],
+     "lo": [
+      -0.453,
+      -0.369,
+      -0.233,
+      -0.309,
+      -0.194,
+      -0.291,
+      0.384,
+      0.391,
+      0.381,
+      -0.141
+     ],
+     "hi": [
+      -0.307,
+      -0.145,
+      0.111,
+      0.0593,
+      0.146,
+      0.0641,
+      0.488,
+      0.564,
+      0.557,
+      0.16
+     ]
+    }
+   ]
+  },
+  {
+   "id": "arketip-yok",
+   "type": "line",
+   "title": "Kübitler ayrık türlere ayrılmıyor: kümeler korelasyonlu bir süreklilikten iyi değil",
+   "subtitle": "Ward kümelemesinin siluet değeri, küme sayısı k = 2 ile 6; iki sıfır modelinin %95 noktası (200'er çekim): sütunları ayrı ayrı karıştırılmış veri ve gözlenen korelasyon matrisli Gauss bulutu. 154 kübit, 10 alan.",
+   "read": "Siluet (0,138 ile 0,155) karıştırılmış sıfırın eşiğini her k için aşar, yani alanlar korelasyonludur; ama korelasyonlu Gauss eşiğini hiçbir k için aşmaz (p 0,154 ile 0,965). Etiketler de kararsız: bootstrap ARI medyanı 0,37 ile 0,42. k = 3'teki 20 kübitlik \"hemen her şeyde kötü\" grup, iki eksenin de kötü olduğu kuyruktur, ayrı bir tür değil.",
+   "source": "07 §7.6; results/cross/levels.json (multivariate.A_10_fields_no_init.archetypes_ward)",
+   "x": {
+    "label": "Küme sayısı k",
+    "scale": "linear",
+    "min": 2,
+    "max": 6
+   },
+   "y": {
+    "label": "Siluet",
+    "scale": "linear",
+    "min": 0
+   },
+   "series": [
+    {
+     "name": "gözlenen siluet",
+     "style": "line+dots",
+     "points": [
+      [
+       2,
+       0.155
+      ],
+      [
+       3,
+       0.154
+      ],
+      [
+       4,
+       0.139
+      ],
+      [
+       5,
+       0.138
+      ],
+      [
+       6,
+       0.14
+      ]
+     ]
+    },
+    {
+     "name": "korelasyonlu Gauss sıfırı, %95",
+     "style": "line",
+     "points": [
+      [
+       2,
+       0.231
+      ],
+      [
+       3,
+       0.186
+      ],
+      [
+       4,
+       0.167
+      ],
+      [
+       5,
+       0.158
+      ],
+      [
+       6,
+       0.147
+      ]
+     ]
+    },
+    {
+     "name": "karıştırılmış sıfır, %95",
+     "style": "line",
+     "points": [
+      [
+       2,
+       0.084
+      ],
+      [
+       3,
+       0.0709
+      ],
+      [
+       4,
+       0.0698
+      ],
+      [
+       5,
+       0.072
+      ],
+      [
+       6,
+       0.0747
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kubit-ici-ortak-hareket",
+   "type": "forest",
+   "title": "Bir kübitte aileler birlikte hareket ediyor, ama kontrollerin yanında çok zayıf",
+   "subtitle": "En yakın olay eşleşmesiyle (aynı kübit, 3 saat içinde; `|zz|` ile 12 saat) artık korelasyonu: normal skorların Pearson r'si, ham artıklar; kübitler üzerinden küme bootstrap %95 aralığı. 23 çift ve 2 pozitif kontrol.",
+   "read": "23 çiftten 11 tanesi Benjamini-Hochberg sonrası anlamlı (ortak mod çıkarılınca 10), ama en büyük r 0,057 (`sx` ile P(0|1), 15.993 eşleşme). Kontroller 0,693 (`T1` ile `T2`) ve 0,781 (RO ile P(0|1)): araç, bağımlılık varsa onu görüyor. Anlamlı çiftlerin çoğunda iki büyüklük birlikte kötüleşir; istisnalar `sx` ile P(1|0) ve `|zz|` ile okuma hataları (büyük `|zz|`, küçük okuma hatası).",
+   "caveat": "Artık, aynı varlığın ±7 gün içindeki diğer olaylarının medyanına göre tanımlıdır. Doğrulayıcı, aynı artıkların zaman aralığı dilimlerinde pencere ±2 güne indirilince `sx` ile P(0|1) korelasyonunun en kısa dilimde 0,108'den 0,032'ye düştüğünü gösterdi; paylaşılan kısmın zaman ölçeği (saatler mi, günler mi) ve kökeni henüz belirlenmemiştir.",
+   "source": "07 §7.2, §4.1 and Verification; results/cross/comovement.json (pairs[*].raw), summary.json (comovement)",
+   "x": {
+    "label": "Artık korelasyonu r",
+    "scale": "linear"
+   },
+   "ref": 0,
+   "rows": [
+    {
+     "label": "measure_2 · T2",
+     "est": -0.0499,
+     "lo": -0.0724,
+     "hi": -0.0277,
+     "group": "BH sonrası anlamlı"
+    },
+    {
+     "label": "T1 · init_error",
+     "est": -0.0437,
+     "lo": -0.0793,
+     "hi": -0.00735,
+     "group": "BH sonrası anlamlı"
+    },
+    {
+     "label": "|zz| · RO",
+     "est": -0.043,
+     "lo": -0.0514,
+     "hi": -0.0347,
+     "group": "BH sonrası anlamlı"
+    },
+    {
+     "label": "T2 · init_error",
+     "est": -0.0414,
+     "lo": -0.0754,
+     "hi": -0.00837,
+     "group": "BH sonrası anlamlı"
+    },
+    {
+     "label": "|zz| · P(1|0)",
+     "est": -0.037,
+     "lo": -0.0463,
+     "hi": -0.0282,
+     "group": "BH sonrası anlamlı"
+    },
+    {
+     "label": "|zz| · P(0|1)",
+     "est": -0.0294,
+     "lo": -0.0359,
+     "hi": -0.0227,
+     "group": "BH sonrası anlamlı"
+    },
+    {
+     "label": "T2 · P(0|1)",
+     "est": -0.0265,
+     "lo": -0.0418,
+     "hi": -0.0107,
+     "group": "BH sonrası anlamlı"
+    },
+    {
+     "label": "T2 · RO",
+     "est": -0.0255,
+     "lo": -0.0411,
+     "hi": -0.0101,
+     "group": "BH sonrası anlamlı"
+    },
+    {
+     "label": "sx · P(1|0)",
+     "est": -0.0186,
+     "lo": -0.0352,
+     "hi": -0.00185,
+     "group": "BH sonrası anlamlı"
+    },
+    {
+     "label": "T2 · P(1|0)",
+     "est": -0.0155,
+     "lo": -0.0321,
+     "hi": 0.000219,
+     "group": "anlamlı değil"
+    },
+    {
+     "label": "rzz · init_error",
+     "est": -0.0144,
+     "lo": -0.0466,
+     "hi": 0.0188,
+     "group": "anlamlı değil"
+    },
+    {
+     "label": "init_error · |zz|",
+     "est": -0.00936,
+     "lo": -0.0237,
+     "hi": 0.00471,
+     "group": "anlamlı değil"
+    },
+    {
+     "label": "measure_2 · |zz|",
+     "est": -0.0077,
+     "lo": -0.0293,
+     "hi": 0.0143,
+     "group": "anlamlı değil"
+    },
+    {
+     "label": "T1 · |zz|",
+     "est": -0.00281,
+     "lo": -0.0153,
+     "hi": 0.00983,
+     "group": "anlamlı değil"
+    },
+    {
+     "label": "T2 · |zz|",
+     "est": -0.000873,
+     "lo": -0.0149,
+     "hi": 0.0127,
+     "group": "anlamlı değil"
+    },
+    {
+     "label": "sx · init_error",
+     "est": 0.0021,
+     "lo": -0.0414,
+     "hi": 0.0455,
+     "group": "anlamlı değil"
+    },
+    {
+     "label": "sx · |zz|",
+     "est": 0.00316,
+     "lo": -0.0101,
+     "hi": 0.0172,
+     "group": "anlamlı değil"
+    },
+    {
+     "label": "measure_2 · rzz",
+     "est": 0.00421,
+     "lo": -0.0696,
+     "hi": 0.0791,
+     "group": "anlamlı değil"
+    },
+    {
+     "label": "cz · init_error",
+     "est": 0.00479,
+     "lo": -0.0188,
+     "hi": 0.0305,
+     "group": "anlamlı değil"
+    },
+    {
+     "label": "measure_2 · cz",
+     "est": 0.0258,
+     "lo": -0.0383,
+     "hi": 0.0896,
+     "group": "anlamlı değil"
+    },
+    {
+     "label": "measure_2 · sx",
+     "est": 0.0267,
+     "lo": -0.00239,
+     "hi": 0.0548,
+     "group": "anlamlı değil"
+    },
+    {
+     "label": "sx · RO",
+     "est": 0.0306,
+     "lo": 0.0124,
+     "hi": 0.0512,
+     "group": "BH sonrası anlamlı"
+    },
+    {
+     "label": "sx · P(0|1)",
+     "est": 0.0574,
+     "lo": 0.039,
+     "hi": 0.0754,
+     "group": "BH sonrası anlamlı"
+    },
+    {
+     "label": "T1 · T2",
+     "est": 0.693,
+     "lo": 0.665,
+     "hi": 0.719,
+     "group": "pozitif kontrol"
+    },
+    {
+     "label": "P(0|1) · RO",
+     "est": 0.781,
+     "lo": 0.754,
+     "hi": 0.803,
+     "group": "pozitif kontrol"
+    }
+   ]
+  },
+  {
+   "id": "onculuk-gecikme-yok",
+   "type": "forest",
+   "title": "Bir ailenin yakın geçmişi, başka bir ailenin bir sonraki değerini öngörmüyor",
+   "subtitle": "Zaman dışı test dönemindeki ortalama mutlak hata / yalnız sabit terimli referansın hatası, 45 yön; model: tüm biçimler, yalnızca hedeften en az 3 saat önce damgalanmış öngörücü olayları (hedefin kendi turundan değil). Hedef varlıkları üzerinden küme bootstrap %95 aralığı; 1'in altı kazançtır.",
+   "read": "En iyi oran 0,99854 (`init_error` → `T2`), yani yaklaşık binde 1,5 kazanç, ve anlamlı değil; 45 yönün hiçbiri Benjamini-Hochberg'den geçmez. 18 aralığın tamamı 1'in üstünde (en kötüsü `measure_2` → `rzz`, 1,0315): eğitimde uydurulan ve genellemeyen aşırı uyum, sinyal değil. Diğer iki modelde de anlamlı yön yok (gecikme 1, tüm biçimler: 45 yön; doğrusal gecikme 1 ile 3: 44 yön).",
+   "caveat": "Test dönemi her hedefin son %30'udur ve 2026-08'deki kapsam değişiminden sonraya düşer; yalnızca daha önce var olmuş ya da üç olaydan uzun gecikmeyle işleyen bağlar test edilmedi. Başka belgelere ait bağlar (örneğin `T1` ile `sx`) bu testte yok.",
+   "source": "07 §7.3, §6; results/cross/leadlag.json (pairs[*].strict_all), summary.json (leadlag)",
+   "x": {
+    "label": "Test hatası / referans hatası",
+    "scale": "linear"
+   },
+   "ref": 1,
+   "rows": [
+    {
+     "label": "init_error → T2",
+     "est": 0.998535,
+     "lo": 0.996959,
+     "hi": 1.00012,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "P(1|0) → T2",
+     "est": 0.99939,
+     "lo": 0.998563,
+     "hi": 1.0002,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "T2 → measure_2",
+     "est": 0.999467,
+     "lo": 0.996394,
+     "hi": 1.0025,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "RO → sx",
+     "est": 0.999488,
+     "lo": 0.998587,
+     "hi": 1.00045,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "|zz| → sx",
+     "est": 0.999634,
+     "lo": 0.998846,
+     "hi": 1.00039,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "init_error → sx",
+     "est": 0.999845,
+     "lo": 0.998922,
+     "hi": 1.00076,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "P(0|1) → sx",
+     "est": 0.999884,
+     "lo": 0.998917,
+     "hi": 1.00085,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "T2 → P(1|0)",
+     "est": 0.999949,
+     "lo": 0.999591,
+     "hi": 1.00033,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "|zz| → P(0|1)",
+     "est": 1.00002,
+     "lo": 0.999827,
+     "hi": 1.0002,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "sx → P(0|1)",
+     "est": 1.00008,
+     "lo": 0.999903,
+     "hi": 1.00024,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "T2 → RO",
+     "est": 1.00012,
+     "lo": 0.99984,
+     "hi": 1.00042,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "|zz| → RO",
+     "est": 1.00013,
+     "lo": 0.999946,
+     "hi": 1.00033,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "init_error → cz",
+     "est": 1.00014,
+     "lo": 0.999673,
+     "hi": 1.00061,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "|zz| → P(1|0)",
+     "est": 1.00019,
+     "lo": 0.999901,
+     "hi": 1.00061,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "init_error → T1",
+     "est": 1.00021,
+     "lo": 0.999454,
+     "hi": 1.00104,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "sx → RO",
+     "est": 1.00022,
+     "lo": 0.999977,
+     "hi": 1.00048,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "P(1|0) → sx",
+     "est": 1.00025,
+     "lo": 0.999836,
+     "hi": 1.00067,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "T2 → P(0|1)",
+     "est": 1.00028,
+     "lo": 0.999958,
+     "hi": 1.00057,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "sx → P(1|0)",
+     "est": 1.00029,
+     "lo": 0.999965,
+     "hi": 1.00062,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "T1 → |zz|",
+     "est": 1.00037,
+     "lo": 1.00009,
+     "hi": 1.00067,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "T2 → |zz|",
+     "est": 1.00039,
+     "lo": 1.00001,
+     "hi": 1.00082,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "P(0|1) → |zz|",
+     "est": 1.00042,
+     "lo": 0.999938,
+     "hi": 1.0009,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "|zz| → T1",
+     "est": 1.00069,
+     "lo": 0.999798,
+     "hi": 1.00154,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "|zz| → T2",
+     "est": 1.00072,
+     "lo": 0.999768,
+     "hi": 1.00173,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "P(0|1) → T2",
+     "est": 1.00102,
+     "lo": 1.00022,
+     "hi": 1.00179,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "measure_2 → sx",
+     "est": 1.00102,
+     "lo": 0.998778,
+     "hi": 1.00314,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "|zz| → init_error",
+     "est": 1.00106,
+     "lo": 0.999797,
+     "hi": 1.00235,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "rzz → init_error",
+     "est": 1.00133,
+     "lo": 0.999374,
+     "hi": 1.00358,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "sx → |zz|",
+     "est": 1.0014,
+     "lo": 1.00082,
+     "hi": 1.00201,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "RO → |zz|",
+     "est": 1.00162,
+     "lo": 1.00076,
+     "hi": 1.00258,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "cz → measure_2",
+     "est": 1.00164,
+     "lo": 0.999073,
+     "hi": 1.00419,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "P(1|0) → |zz|",
+     "est": 1.00176,
+     "lo": 1.00096,
+     "hi": 1.00262,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "RO → T2",
+     "est": 1.00187,
+     "lo": 1.00074,
+     "hi": 1.00311,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "|zz| → measure_2",
+     "est": 1.00204,
+     "lo": 0.999272,
+     "hi": 1.0049,
+     "group": "aralık 1'i içeriyor"
+    },
+    {
+     "label": "cz → init_error",
+     "est": 1.00234,
+     "lo": 1.00127,
+     "hi": 1.0035,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "measure_2 → T2",
+     "est": 1.00258,
+     "lo": 1.00058,
+     "hi": 1.00484,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "sx → init_error",
+     "est": 1.00266,
+     "lo": 1.00074,
+     "hi": 1.00462,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "T1 → init_error",
+     "est": 1.00279,
+     "lo": 1.00034,
+     "hi": 1.00509,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "sx → measure_2",
+     "est": 1.00433,
+     "lo": 1.00031,
+     "hi": 1.00976,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "rzz → measure_2",
+     "est": 1.00446,
+     "lo": 1.00129,
+     "hi": 1.00822,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "measure_2 → cz",
+     "est": 1.0045,
+     "lo": 1.00179,
+     "hi": 1.0074,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "init_error → rzz",
+     "est": 1.00753,
+     "lo": 1.00318,
+     "hi": 1.01203,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "T2 → init_error",
+     "est": 1.00792,
+     "lo": 1.00419,
+     "hi": 1.01165,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "init_error → |zz|",
+     "est": 1.00966,
+     "lo": 1.00681,
+     "hi": 1.013,
+     "group": "aralık 1'in üstünde"
+    },
+    {
+     "label": "measure_2 → rzz",
+     "est": 1.03148,
+     "lo": 1.02155,
+     "hi": 1.04236,
+     "group": "aralık 1'in üstünde"
+    }
+   ]
+  },
+  {
+   "id": "cihaz-ortak-mod-payi",
+   "type": "bar",
+   "orient": "v",
+   "title": "Cihaz çapındaki ortak bileşen her ailede küçük, en büyüğü koherans ailesinde",
+   "subtitle": "Tur ortak modunun (aynı turda ölçülen varlıkların medyan artığı, en az 20 varlık) artık varyansındaki payı, aile başına: sağlam biçim `1 - (MAD(r_cm) / MAD(r))^2` ve düz varyans payı. Olay sayısı aileye göre 7.925 ile 90.383.",
+   "read": "Sağlam pay 0,012 (`|zz|`) ile 0,130 (`T1`) arasında; düz varyans payı daha küçük (`T1` 0,074, `sx` 0,015). En kısa gecikmede cihaz serisi RO, P(1|0), `measure_2` ve `|zz|` için bağımsız varlıkların öngördüğü kadar küçülür. Okuma alanlarında cihaz/varlık yarı-varyans oranı ay ölçeğinde (744 ile 1.488 saat) 0,107 ile 0,158, `T1`'de 0,121: ortak kısım çoğunlukla yavaş kayan bir cihaz seviyesidir.",
+   "caveat": "Cihaz serisi karşılaştırmaları 14 ile 111 cihaz çiftine dayanır ve bağımsızlık öngörüsü Gauss yaklaşımıyla kurulur; oranlar test değil, gösterge niteliğindedir.",
+   "source": "07 §3.1, §4.3; results/cross/common_mode.json (common_mode_share), summary.json (common_mode.variogram_vs_independence)",
+   "y": {
+    "label": "Artık varyansındaki pay",
+    "scale": "linear",
+    "min": 0
+   },
+   "categories": [
+    "T1",
+    "T2",
+    "RO",
+    "P(1|0)",
+    "P(0|1)",
+    "init_error",
+    "measure_2",
+    "sx",
+    "cz",
+    "rzz",
+    "|zz|"
+   ],
+   "series": [
+    {
+     "name": "sağlam pay",
+     "values": [
+      0.13,
+      0.119,
+      0.0817,
+      0.0656,
+      0.0588,
+      0.105,
+      0.0394,
+      0.0436,
+      0.0312,
+      0.0269,
+      0.0125
+     ]
+    },
+    {
+     "name": "düz varyans payı",
+     "values": [
+      0.0738,
+      0.049,
+      0.0246,
+      0.0269,
+      0.0172,
+      0.0227,
+      0.00785,
+      0.0146,
+      0.0117,
+      0.0205,
+      0.00182
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gunluk-cihaz-degisimleri",
+   "type": "heatmap",
+   "title": "Cihaz düzeyindeki günlük değişimler aile blokları halinde hareket ediyor",
+   "subtitle": "Operasyonel gün (16:00 UTC'den başlar) başına cihaz medyanının günden güne değişimleri arasında Spearman korelasyonu; 11 aile, 55 çift, çifte göre 23 ile 132 ortak gün. Köşegen boş.",
+   "read": "55 çiftten 8 tanesi Benjamini-Hochberg'den geçer ve biri dışında hepsi aile içidir (`T1` ile `T2` 0,660, okuma alanları kendi aralarında, `cz` ile `rzz` 0,422). Tek aileler arası çift P(1|0) ile `sx`: -0,341 (113 gün, q 0,0039); ortak bir sürücü adayı, mekanizma değil. En az üç ailenin aynı gün sıçradığı 3 günden yalnızca 2026-05-14 farklı fiziksel aileleri birleştirir (koherans düşer, tüm kapı hataları artar).",
+   "caveat": "Okuma üçlüsü kısmen aritmetik olarak birlikte hareket eder: RO, P(0|1) ve P(1|0)'ın ortalamasıdır.",
+   "source": "07 §3.2, §7.7; results/cross/common_mode.json (device_daily)",
+   "rows": [
+    "T1",
+    "T2",
+    "RO",
+    "P(1|0)",
+    "P(0|1)",
+    "init_error",
+    "measure_2",
+    "sx",
+    "cz",
+    "rzz",
+    "|zz|"
+   ],
+   "cols": [
+    "T1",
+    "T2",
+    "RO",
+    "P(1|0)",
+    "P(0|1)",
+    "init_error",
+    "measure_2",
+    "sx",
+    "cz",
+    "rzz",
+    "|zz|"
+   ],
+   "values": [
+    [
+     null,
+     0.66,
+     -0.122,
+     0.00428,
+     0.0528,
+     -0.302,
+     -0.389,
+     -0.107,
+     0.102,
+     0.00145,
+     -0.0197
+    ],
+    [
+     0.66,
+     null,
+     -0.144,
+     0.00323,
+     -0.0132,
+     -0.221,
+     -0.24,
+     -0.2,
+     0.0363,
+     -0.126,
+     0.0837
+    ],
+    [
+     -0.122,
+     -0.144,
+     null,
+     0.603,
+     0.603,
+     0.385,
+     0.309,
+     -0.193,
+     0.227,
+     0.0977,
+     -0.251
+    ],
+    [
+     0.00428,
+     0.00323,
+     0.603,
+     null,
+     0.344,
+     0.417,
+     0.23,
+     -0.341,
+     0.284,
+     0.115,
+     -0.14
+    ],
+    [
+     0.0528,
+     -0.0132,
+     0.603,
+     0.344,
+     null,
+     0.174,
+     0.00474,
+     -0.0851,
+     0.244,
+     0.137,
+     -0.236
+    ],
+    [
+     -0.302,
+     -0.221,
+     0.385,
+     0.417,
+     0.174,
+     null,
+     0.531,
+     -0.26,
+     0.0476,
+     -0.0202,
+     0.0625
+    ],
+    [
+     -0.389,
+     -0.24,
+     0.309,
+     0.23,
+     0.00474,
+     0.531,
+     null,
+     -0.0471,
+     -0.0544,
+     0.334,
+     -0.0125
+    ],
+    [
+     -0.107,
+     -0.2,
+     -0.193,
+     -0.341,
+     -0.0851,
+     -0.26,
+     -0.0471,
+     null,
+     -0.154,
+     0.0703,
+     0.0176
+    ],
+    [
+     0.102,
+     0.0363,
+     0.227,
+     0.284,
+     0.244,
+     0.0476,
+     -0.0544,
+     -0.154,
+     null,
+     0.422,
+     0.0771
+    ],
+    [
+     0.00145,
+     -0.126,
+     0.0977,
+     0.115,
+     0.137,
+     -0.0202,
+     0.334,
+     0.0703,
+     0.422,
+     null,
+     -0.124
+    ],
+    [
+     -0.0197,
+     0.0837,
+     -0.251,
+     -0.14,
+     -0.236,
+     0.0625,
+     -0.0125,
+     0.0176,
+     0.0771,
+     -0.124,
+     null
+    ]
+   ],
+   "scale": "div",
+   "domain": [
+    -1,
+    1
+   ],
+   "fmt": ".2f"
+  },
+  {
+   "id": "zz-okuma-aday",
+   "type": "forest",
+   "title": "Aday bağ: `|zz|` büyükken kübitin okuma hatası küçük",
+   "subtitle": "`|zz|` ile okuma hataları arasındaki korelasyon, üç düzeyde: olay (en yakın eşleşme, 12 saat içinde; küme bootstrap %95), kübit-gün (günlük medyan artıklar; aralık yok) ve cihaz-gün değişimleri (blok bootstrap %95).",
+   "read": "Olay düzeyinde RO ile -0,043 (166.855 eşleşme), P(1|0) ile -0,037, P(0|1) ile -0,029; üçü de Benjamini-Hochberg sonrası anlamlı. Kübit-gün düzeyinde -0,061, -0,051 ve -0,038 (anlamlı). Cihaz-gün düzeyinde RO ile -0,251 (q 0,058): blok bootstrap aralığı sıfırı dışlıyor, ama 55 çiftlik Benjamini-Hochberg düzeltmesinden sonra anlamlı değil; işaret aynı.",
+   "caveat": "Aday, mekanizma değil: `zz` yalnızca dosya zamanı taşır ve nasıl üretildiği hiçbir IBM kaynağında belgelenmemiş. Bir okuma kalibrasyonunun `zz` değerini mi beslediği, yoksa ikisinin kübitin tek bir değişimine mi yanıt verdiği buradan karar verilemez.",
+   "source": "07 §7.2, §7.5, §7.7; results/cross/comovement.json, common_mode.json (change_matrix.raw, device_daily)",
+   "x": {
+    "label": "Korelasyon",
+    "scale": "linear"
+   },
+   "ref": 0,
+   "rows": [
+    {
+     "label": "olay: |zz| · RO",
+     "est": -0.043,
+     "lo": -0.0514,
+     "hi": -0.0347,
+     "group": "olay (en yakın eşleşme)"
+    },
+    {
+     "label": "olay: |zz| · P(1|0)",
+     "est": -0.037,
+     "lo": -0.0463,
+     "hi": -0.0282,
+     "group": "olay (en yakın eşleşme)"
+    },
+    {
+     "label": "olay: |zz| · P(0|1)",
+     "est": -0.0294,
+     "lo": -0.0359,
+     "hi": -0.0227,
+     "group": "olay (en yakın eşleşme)"
+    },
+    {
+     "label": "kübit-gün: |zz| (komşu) · RO",
+     "est": -0.0612,
+     "group": "kübit-gün"
+    },
+    {
+     "label": "kübit-gün: |zz| (komşu) · P(1|0)",
+     "est": -0.0506,
+     "group": "kübit-gün"
+    },
+    {
+     "label": "kübit-gün: |zz| (komşu) · P(0|1)",
+     "est": -0.0379,
+     "group": "kübit-gün"
+    },
+    {
+     "label": "cihaz-gün: |zz| · RO",
+     "est": -0.251,
+     "lo": -0.447,
+     "hi": -0.0464,
+     "group": "cihaz-gün (anlamlı değil)"
+    },
+    {
+     "label": "cihaz-gün: |zz| · P(1|0)",
+     "est": -0.14,
+     "lo": -0.328,
+     "hi": 0.0977,
+     "group": "cihaz-gün (anlamlı değil)"
+    },
+    {
+     "label": "cihaz-gün: |zz| · P(0|1)",
+     "est": -0.236,
+     "lo": -0.474,
+     "hi": -0.0143,
+     "group": "cihaz-gün (anlamlı değil)"
+    }
+   ]
+  },
+  {
+   "id": "okuma-ekseni-haritasi",
+   "type": "map",
+   "title": "Okuma ekseni kübitin kafesteki derecesini izler, komşuluk öbekleri oluşturmaz",
+   "subtitle": "Kübit başına PC1 (okuma ekseni) skoru, 154 kübit (ıraksak ölçek; yüksek değer kötü okuma). q72, q99 eksik alan nedeniyle boş.",
+   "read": "PC1 skoru kübitin kuplör sayısıyla artar (Spearman 0,420). Ağır altıgen kafeste kuplörlerin çoğu derece 3 ve derece 2 kübitleri birleştirdiğinden komşular birbirine benzemez: Moran's I -0,143 (iki yönlü p 0,057).",
+   "caveat": "03'ün doğrulayıcısına göre okumadaki \"dama tahtası\" görünümü büyük ölçüde derece sınıflarıdır: her derece sınıfının medyanı çıkarılınca RO'nun Moran's I değeri -0,047'ye (p 0,59) iner. Frekans grubu yorumu RO için desteklenmiyor.",
+   "source": "07 §5, §7.5; 03 Verification; results/cross/levels.json (multivariate.A_10_fields_no_init.pc_spatial)",
+   "scale": "div",
+   "node_values": {
+    "0": 1.61,
+    "1": 1.53,
+    "2": -4.09,
+    "3": 1.06,
+    "4": -3.86,
+    "5": -0.297,
+    "6": -2.68,
+    "7": 1.83,
+    "8": -1.38,
+    "9": -0.261,
+    "10": -1.46,
+    "11": 3.96,
+    "12": 2.15,
+    "13": 0.937,
+    "14": -3.75,
+    "15": 0.966,
+    "16": -0.187,
+    "17": 1.59,
+    "18": -0.991,
+    "19": 0.133,
+    "20": -0.0667,
+    "21": 0.0619,
+    "22": -4.63,
+    "23": -1.75,
+    "24": 0.713,
+    "25": -0.186,
+    "26": -1.12,
+    "27": 0.933,
+    "28": -0.765,
+    "29": 0.796,
+    "30": -0.591,
+    "31": 1.47,
+    "32": 2.47,
+    "33": 0.932,
+    "34": -0.113,
+    "35": 1.05,
+    "36": -1.37,
+    "37": -1.35,
+    "38": -0.453,
+    "39": 0.627,
+    "40": 0.447,
+    "41": 2.95,
+    "42": -0.251,
+    "43": 4.13,
+    "44": -2.05,
+    "45": 1.7,
+    "46": -0.429,
+    "47": 1.68,
+    "48": -1.59,
+    "49": 1.85,
+    "50": -2.46,
+    "51": 1.96,
+    "52": -0.158,
+    "53": 3.21,
+    "54": -1.49,
+    "55": 3.24,
+    "56": -0.249,
+    "57": 0.707,
+    "58": -2.76,
+    "59": -0.877,
+    "60": 1.66,
+    "61": 2.35,
+    "62": 2.07,
+    "63": 3.29,
+    "64": -1.68,
+    "65": 3.36,
+    "66": -0.151,
+    "67": 3.01,
+    "68": -0.513,
+    "69": -0.76,
+    "70": -2.83,
+    "71": -1.31,
+    "72": null,
+    "73": 0.761,
+    "74": -0.968,
+    "75": -0.985,
+    "76": 1.82,
+    "77": 0.677,
+    "78": 0.711,
+    "79": 0.153,
+    "80": -1.09,
+    "81": 2.2,
+    "82": -0.502,
+    "83": 4.7,
+    "84": -2.41,
+    "85": -0.201,
+    "86": -1.79,
+    "87": 2.42,
+    "88": -1.84,
+    "89": 0.758,
+    "90": -1.98,
+    "91": 1.31,
+    "92": -0.499,
+    "93": 2.05,
+    "94": -0.899,
+    "95": 0.00719,
+    "96": 0.773,
+    "97": -0.739,
+    "98": -1.47,
+    "99": null,
+    "100": 0.847,
+    "101": 2.9,
+    "102": 3.27,
+    "103": 0.865,
+    "104": -0.148,
+    "105": 0.18,
+    "106": -1.51,
+    "107": -0.218,
+    "108": -0.717,
+    "109": 0.128,
+    "110": -3.08,
+    "111": 0.113,
+    "112": -0.596,
+    "113": 3.86,
+    "114": -1.87,
+    "115": -0.817,
+    "116": 0.568,
+    "117": 0.477,
+    "118": -1.48,
+    "119": 0.532,
+    "120": -0.953,
+    "121": 0.0599,
+    "122": -0.828,
+    "123": -0.212,
+    "124": -4.02,
+    "125": 1.0,
+    "126": 3.6,
+    "127": 0.691,
+    "128": 1.56,
+    "129": 1.16,
+    "130": -3.24,
+    "131": 2.65,
+    "132": -3.82,
+    "133": 1.16,
+    "134": -2.28,
+    "135": 2.8,
+    "136": -2.41,
+    "137": -2.73,
+    "138": -0.903,
+    "139": 0.26,
+    "140": -0.548,
+    "141": -1.41,
+    "142": -2.99,
+    "143": -1.51,
+    "144": -2.94,
+    "145": 0.341,
+    "146": -2.74,
+    "147": -1.32,
+    "148": -0.39,
+    "149": 3.94,
+    "150": -1.71,
+    "151": 0.858,
+    "152": -0.564,
+    "153": 0.984,
+    "154": -2.26,
+    "155": 1.12
+   },
+   "node_label": "PC1 skoru"
+  },
+  {
+   "id": "koherans-kapi-ekseni-haritasi",
+   "type": "map",
+   "title": "Koherans-ve-kapı ekseni cihazda öbeklenir; merkeze doğru kötüleşme betimleyici bir aday",
+   "subtitle": "Kübit başına PC2 (koherans-ve-kapı ekseni) skoru, 154 kübit (ıraksak ölçek; yüksek değer kötü kapı ve kısa `T1`). q72, q99 boş.",
+   "read": "PC2 uzamsal olarak öz-korelasyonludur (Moran's I 0,241, iki yönlü p 0,002) ve merkezden uzaklaştıkça azalır (Spearman -0,264); kübit derecesiyle Spearman -0,194.",
+   "caveat": "Öbeklenme kısmen yapı gereğidir: komşu kuplör ortalamaları (`cz`, `rzz`) PC2'ye yüklenir ve komşu kübitler kuplör paylaşır.",
+   "source": "07 §5, §7.5; results/cross/levels.json (multivariate.A_10_fields_no_init.pc_spatial)",
+   "scale": "div",
+   "node_values": {
+    "0": 3.33,
+    "1": -0.654,
+    "2": -2.52,
+    "3": -3.59,
+    "4": -0.256,
+    "5": 0.376,
+    "6": 0.901,
+    "7": 0.947,
+    "8": 0.609,
+    "9": -2.48,
+    "10": 0.249,
+    "11": 3.06,
+    "12": 2.08,
+    "13": -1.18,
+    "14": -1.89,
+    "15": -3.14,
+    "16": 0.423,
+    "17": 1.49,
+    "18": 2.07,
+    "19": -0.169,
+    "20": 0.417,
+    "21": -0.154,
+    "22": -1.36,
+    "23": -0.488,
+    "24": 2.33,
+    "25": 0.391,
+    "26": 2.04,
+    "27": 4.03,
+    "28": 0.743,
+    "29": -0.541,
+    "30": 0.238,
+    "31": 1.55,
+    "32": 1.49,
+    "33": -2.07,
+    "34": -0.151,
+    "35": -1.19,
+    "36": 1.79,
+    "37": -1.55,
+    "38": 0.358,
+    "39": 0.475,
+    "40": -1.88,
+    "41": -2.6,
+    "42": 0.243,
+    "43": -1.53,
+    "44": -0.203,
+    "45": -2.22,
+    "46": 1.64,
+    "47": 0.322,
+    "48": 1.18,
+    "49": 1.34,
+    "50": 1.32,
+    "51": -0.28,
+    "52": -0.482,
+    "53": 0.151,
+    "54": 1.67,
+    "55": -0.262,
+    "56": 0.915,
+    "57": 2.63,
+    "58": 0.0486,
+    "59": 0.829,
+    "60": -1.11,
+    "61": -1.88,
+    "62": 1.09,
+    "63": 1.7,
+    "64": 2.95,
+    "65": -0.838,
+    "66": 0.959,
+    "67": 0.345,
+    "68": 1.0,
+    "69": 0.688,
+    "70": 2.27,
+    "71": -0.374,
+    "72": null,
+    "73": -1.11,
+    "74": 0.143,
+    "75": -0.261,
+    "76": -0.627,
+    "77": 1.1,
+    "78": 0.343,
+    "79": 1.25,
+    "80": -0.598,
+    "81": -1.08,
+    "82": 2.21,
+    "83": -2.12,
+    "84": 0.248,
+    "85": -0.135,
+    "86": 0.867,
+    "87": -0.75,
+    "88": 0.257,
+    "89": -0.426,
+    "90": 0.685,
+    "91": -1.26,
+    "92": -0.79,
+    "93": -0.38,
+    "94": 0.144,
+    "95": -0.872,
+    "96": 0.371,
+    "97": 0.755,
+    "98": 0.227,
+    "99": null,
+    "100": 1.71,
+    "101": -0.911,
+    "102": 2.23,
+    "103": 2.0,
+    "104": 0.544,
+    "105": -1.67,
+    "106": -1.16,
+    "107": 0.899,
+    "108": 1.38,
+    "109": -0.602,
+    "110": -0.864,
+    "111": -0.944,
+    "112": -0.132,
+    "113": -1.07,
+    "114": 1.07,
+    "115": -1.24,
+    "116": -2.67,
+    "117": -1.42,
+    "118": -0.0998,
+    "119": 1.52,
+    "120": -2.19,
+    "121": -1.81,
+    "122": 1.28,
+    "123": -1.08,
+    "124": 0.316,
+    "125": -0.666,
+    "126": 1.83,
+    "127": -0.335,
+    "128": 0.832,
+    "129": -0.517,
+    "130": 0.809,
+    "131": -4.89,
+    "132": -2.08,
+    "133": -1.16,
+    "134": 0.526,
+    "135": -2.44,
+    "136": -0.00773,
+    "137": -0.398,
+    "138": 0.373,
+    "139": 2.15,
+    "140": -2.48,
+    "141": -2.89,
+    "142": -1.69,
+    "143": -1.83,
+    "144": -1.09,
+    "145": -3.62,
+    "146": -0.256,
+    "147": 0.0432,
+    "148": 2.42,
+    "149": 3.97,
+    "150": 4.1,
+    "151": 0.263,
+    "152": 0.501,
+    "153": -0.548,
+    "154": -0.345,
+    "155": -1.57
+   },
+   "node_label": "PC2 skoru"
+  }
+ ]
+}
