@@ -296,6 +296,38 @@ result: the ten `tests/test_file_snapshots.py` failures disappear and nothing
 else moves. That is a differential expectation; the absolute count depends on
 the branch measured.
 
+**Desktop runbook.** The authoritative run is on Burak's desktop (bash on WSL2),
+which is also the machine that supplies the policy. The full runbook is the
+second comment on PR #112 and pins the PR head SHA. These are its checks, each
+differential or self-consistent:
+
+1. Record where the policy comes from with
+   `git config --show-scope --get-all safe.bareRepository`; his 2026-10-07
+   record reports it from git's command-line scope.
+2. Fresh `git clone --filter=blob:none --single-branch --branch
+   mert/file-snapshots-bare-repo`, then
+   `git fetch origin main:refs/remotes/origin/main`. Stop unless
+   `git rev-parse HEAD` equals the SHA in the comment; the merge base is `e39af50`.
+3. New venv from the CI install recipe, a check that the packages match the
+   pins, a machine fingerprint, and the four static gates.
+4. The full suite in his normal shell with no override: NC-021 equals the live
+   `--collect-only` count, and the run reports passed = collected minus 1, with
+   exactly the archive skip and nothing failed. The same command on the PR #107
+   tree gave 10 failures.
+5. Before and after on the same machine under a forced `explicit`: a worktree at
+   the merge base fails 10 of 10 with 10 refusals, and this branch passes 10 of
+   10 with none.
+6. M0 as above, under a forced `explicit` (10 failed) and a forced `all` (10
+   passed), with the file restored clean.
+7. Scope: only this document and the test file differ from `main`; nothing under
+   `src` or `scripts`.
+
+A `GIT_CONFIG_COUNT` override does not beat a value supplied through
+`GIT_CONFIG_PARAMETERS` (measured on Git 2.53.0.windows.2: the effective value
+stays `explicit`). Burak's `=all` diagnostic on 2026-10-07 did take effect, so
+his policy does not arrive that way, and the runbook's forced settings apply on
+his machine.
+
 ## Related docs
 
 - `docs/numerical-claims.md`, NC-021 (unchanged; see the NC-021 section above)
