@@ -111,7 +111,10 @@ The only bare repository involved is the remote, which the script names as
 transport. The script never runs git with its working directory inside a bare
 repository.
 
-*Empirical.* In the pre-fix strict run, the nine tests that assert
+*Empirical.* `_run` hands the script `dict(os.environ)` as its environment, so
+in a strict run the three `GIT_CONFIG_*` variables reach every git command the
+script and `push_with_retry.sh` execute. In the pre-fix strict run, the nine
+tests that assert
 `result.returncode == 0` passed that assertion before failing at a read, and
 `test_a_missing_digest_refuses_to_file_anything` passed its exit-1 and
 "missing" assertions first. After the fix the strict run passes every
@@ -246,6 +249,20 @@ and restores it byte for byte (it confirmed the restore).
 
 M1 to M7 were run under the policy only: under default config each restores one
 call site to its `e39af50` form, which the "before" row already shows passing.
+
+M0, the load-bearing one, can be reproduced from this document alone. Strip the
+flag from both helpers (the diff is exactly those two lines):
+
+```bash
+sed -i 's/f"--git-dir={origin}", //' tests/test_file_snapshots.py
+```
+
+Then run the two mode commands above: expect 10 passed under default config and
+10 failed under `explicit`. Restore the file afterwards:
+
+```bash
+git checkout -- tests/test_file_snapshots.py
+```
 
 M0 shows the flag is what makes the strict run pass and that the default path
 is unaffected. M1 to M7 show every converted site is reached under the policy,
