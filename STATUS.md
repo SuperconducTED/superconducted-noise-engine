@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-10-08 06:26 UTC · main at `e39af506` (2026-10-06) · 23 days to 2026-10-31_
+_Generated 2026-10-09 05:39 UTC · main at `e39af506` (2026-10-06) · 22 days to 2026-10-31_
 
 
 ## Milestones
@@ -135,6 +135,7 @@ _Generated 2026-10-08 06:26 UTC · main at `e39af506` (2026-10-06) · 23 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-10-09 | 12/28 | 6 | 1 | 4 | nothing moved |
 | 2026-10-08 | 12/28 | 6 | 1 | 4 | nothing moved |
 | 2026-10-07 | 12/28 | 6 | 1 | 4 | nothing moved |
 | 2026-10-06 | 12/28 | 6 | 1 | 4 | #54 Capture rate ~70% during normal operation: in review to closed; #74 first_ensemble_run must transpile before prepare: in review to closed; main moved to e39af506 |
