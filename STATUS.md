@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-10-09 05:39 UTC · main at `e39af506` (2026-10-06) · 22 days to 2026-10-31_
+_Generated 2026-10-10 08:37 UTC · main at `e39af506` (2026-10-06) · 21 days to 2026-10-31_
 
 
 ## Milestones
@@ -135,6 +135,7 @@ _Generated 2026-10-09 05:39 UTC · main at `e39af506` (2026-10-06) · 22 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-10-10 | 12/28 | 6 | 1 | 4 | nothing moved |
 | 2026-10-09 | 12/28 | 6 | 1 | 4 | nothing moved |
 | 2026-10-08 | 12/28 | 6 | 1 | 4 | nothing moved |
 | 2026-10-07 | 12/28 | 6 | 1 | 4 | nothing moved |
