@@ -117,17 +117,17 @@ Registered as NC-041 (quantiles), NC-042 (per-qubit spread), NC-043 (file
 count) and NC-044 (runtime) in `docs/numerical-claims.md`. The committed TSV is
 the audit trail for individual cells.
 
-**Runtime.** 55-64 s wall clock for the full 975-file walk, measured
-2026-09-08 at `3d1569d` on Mert's laptop over three uncontended runs
-(55.08 s, 61.34 s, 63.70 s). Reported as a range rather than a point because a
-single figure does not survive a re-run: a fourth run that overlapped a full
-`pytest` on the same machine took 93.39 s. The walk is 975 `git show`
+**Runtime.** 70.72 s (`runtime_seconds`; 76.95 s wall time) for the full
+975-file walk at `3d1569d`, one uncontended run on Burak's desktop at `main` @
+`110cfad`. This is the canonical figure (NC-044), from the batch-1 record
+`docs/verification/2026-10-01-phase-3-batch-1-burak-desktop.md`.
+It supersedes the provisional laptop range of 55-64 s measured 2026-09-08 over
+three uncontended runs (55.08 s, 61.34 s, 63.70 s). That range was a range
+because a single figure does not survive a re-run: a fourth laptop run that
+overlapped a full `pytest` took 93.39 s. The walk is 975 `git show`
 subprocesses and about 1.2 GB of JSON parsing, so it measures the machine's
-spare I/O as much as the script. **Provisional** under the team's
-verification convention (NFR-3) until Burak's next batch desktop record
-(`docs/verification/2026-09-XX-phase-3-batch-N-burak-desktop.md`, architect
-decision C2) replaces it. `--limit N` exists so smoke runs do not pay the full
-cost.
+spare I/O as much as the script. `--limit N` exists so smoke runs do not pay
+the full cost.
 
 ## What the row count is not
 

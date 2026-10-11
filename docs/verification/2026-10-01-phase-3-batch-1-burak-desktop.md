@@ -81,7 +81,7 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt -r requirements-dev.txt
 pip install -e . --no-deps
 python -m pytest tests/ --collect-only -q -o addopts='' -p no:cacheprovider
-python -m pytest tests/ -q
+python -m pytest tests/ -q -p no:cacheprovider
 ruff check .
 ruff format --check .
 python -m mypy --strict
@@ -97,10 +97,23 @@ on `PYTHONPATH`.
 
 ## Covered PRs and deferrals
 
-This batch covers the 21 PRs merged after the 2026-09-05 batch record and
-through the measured commit: #67, #82, #69, #81, #78, #80, #83, #85, #86, #87,
-#88, #70, #91, #89, #90, #94, #95, #68, #96, #99, and #102. PR #96 has its own
-record at `docs/verification/2026-09-18-pr96-burak-desktop.md`.
+This batch covers the 24 PRs merged after the 2026-09-05 Issue #57 record
+(`docs/verification/2026-09-05-issue-57-burak-desktop.md`, the last desktop
+record before this one) and contained in the measured commit: #51, #52, #67,
+#68, #69, #70, #71, #78, #80, #81, #82, #83, #85, #86, #87, #88, #89, #90, #91,
+#94, #95, #96, #99, and #102.
+
+The counting rule is: merged on or after 2026-09-05, and the merge commit is an
+ancestor of `110cfad`. That gives 23 PRs merged into `main`. #71 is the 24th: it
+merged into `feature/issue-57-training-target` on 2026-09-06 and reached `main`
+through #69. The list is Issue #100's 21 plus #96, #99 and #102, which merged
+after the issue was written. PR #96 also has its own record at
+`docs/verification/2026-09-18-pr96-burak-desktop.md`. #98, #103 and #105 merged
+after `110cfad` and belong to batch 2.
+
+Covered means the gates above ran over a tree containing these PRs. The only
+register rows they left marked provisional were NC-044 to NC-047, promoted here,
+and NC-052 and NC-055, deferred below.
 
 NC-052 and NC-055 are deferred to batch 2. Their provisional measurements are
 not promoted by this record.

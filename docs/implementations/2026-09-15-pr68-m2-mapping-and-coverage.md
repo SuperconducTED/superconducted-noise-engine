@@ -304,6 +304,10 @@ These runs are **provisional, laptop** (Mert's). Under architect decision C2 thi
 PR does not get its own desktop record; the numbers are included in the next
 batch record `docs/verification/2026-09-XX-phase-3-batch-N-burak-desktop.md`.
 
+**As of 2026-10-11:** that record is the batch-1 record
+`docs/verification/2026-10-01-phase-3-batch-1-burak-desktop.md`, which
+covers PR #68 and promotes NC-044.
+
 ## Related docs
 
 - Issue #59 sections 6.3 (the per-shape mapping table), 7 (decision 2), 8 step
