@@ -1,9 +1,9 @@
 {
-  "generated": "2026-10-11 05:37 UTC",
+  "generated": "2026-10-12 10:08 UTC",
   "main": {
-    "sha": "e39af506",
-    "date": "2026-10-06",
-    "msg": "Merge pull request #105 from SuperconducTED/mert/issue-54-capture-rate",
+    "sha": "9b52fe66",
+    "date": "2026-10-11",
+    "msg": "Merge pull request #106 from SuperconducTED/feature/issue-100-batch-1-verification",
     "adr": {
       "ADR-001": "Accepted",
       "ADR-002": "Accepted",
@@ -380,8 +380,70 @@
       "title": "ADR-014: build the hybrid ANFIS trainer in training/anfis.py so phase 3 ends with a fitted model, type-agnostic over T1 and IT2 so it does not wait on ADR-009",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/60",
       "issue_state": "OPEN",
-      "state": "ready",
-      "all_prs": [],
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOENjDJQ",
+            "is_bot": false,
+            "login": "BurakOztekin",
+            "name": ""
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-10-11T15:13:25Z",
+          "headRefName": "feature/issue-60-anfis-core",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 114,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "feat(training): add ANFIS ridge LSE core (Issue #60)",
+          "updatedAt": "2026-10-11T15:30:58Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/114",
+          "headRefOid": "fe5daf222a6ce6ea31280c437ef1c909143bce56",
+          "additions": 738,
+          "deletions": 0,
+          "file_count": 4,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-11T15:18"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-11T15:18"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-11T15:18"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-11T15:18"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-11T15:18"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-11T15:18"
+            }
+          ],
+          "checks_newest": "2026-10-11T15:18",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
       "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [
@@ -393,12 +455,17 @@
         }
       ],
       "unmet_soft": [],
-      "blockers": [],
+      "blockers": [
+        {
+          "severity": "high",
+          "text": "No approving review yet: main's ruleset requires one."
+        }
+      ],
       "declared_unblocks": [
         64
       ],
       "notes_info": [],
-      "pr": null
+      "pr": 114
     },
     {
       "id": 61,
@@ -544,18 +611,83 @@
       "title": "Training-set builder: one row per distinct device state from a pinned archive ref, so the trainer is fit on the unit NC-012 actually counts and the results doc can name the commit it read",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/63",
       "issue_state": "OPEN",
-      "state": "ready",
-      "all_prs": [],
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOCWD9LQ",
+            "is_bot": false,
+            "login": "BahaJarad",
+            "name": ""
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-10-11T09:38:02Z",
+          "headRefName": "feature/issue-63-training-set-builder",
+          "isDraft": false,
+          "mergeable": "CONFLICTING",
+          "mergedAt": null,
+          "number": 113,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "Training Set Builder (Issue #63)",
+          "updatedAt": "2026-10-11T09:42:21Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/113",
+          "headRefOid": "7d26e893c55902706072abd4aac00e0d887c5bf9",
+          "additions": 2187,
+          "deletions": 0,
+          "file_count": 12,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-11T09:42"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-11T09:42"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-11T09:42"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-11T09:43"
+            }
+          ],
+          "checks_newest": "2026-10-11T09:43",
+          "checks_failing": [],
+          "checks_stale_vs_main": true
+        }
+      ],
       "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
-      "blockers": [],
+      "blockers": [
+        {
+          "severity": "critical",
+          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
+        },
+        {
+          "severity": "high",
+          "text": "Its green checks last ran 2026-10-11T09:43 against a main that has moved since; they are not evidence about the merge result."
+        },
+        {
+          "severity": "high",
+          "text": "No approving review yet: main's ruleset requires one."
+        }
+      ],
       "declared_unblocks": [
         60
       ],
       "notes_info": [],
-      "pr": null
+      "pr": 113
     },
     {
       "id": 48,
@@ -1514,7 +1646,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -36
+      "days_left": -37
     },
     {
       "id": "M1",
@@ -1556,7 +1688,7 @@
       "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -30
+      "days_left": -31
     },
     {
       "id": "M2",
@@ -1599,7 +1731,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -23
+      "days_left": -24
     },
     {
       "id": "M3",
@@ -1630,7 +1762,7 @@
         },
         {
           "text": "training/dataset.py merged with its evidence TSV (#63)",
-          "status": "not_done",
+          "status": "partial",
           "note": null
         },
         {
@@ -1640,14 +1772,14 @@
         },
         {
           "text": "Trainer full loop merged, first archive fit, time-split metrics",
-          "status": "not_done",
+          "status": "partial",
           "note": null
         }
       ],
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": -16
+      "days_left": -17
     },
     {
       "id": "M4",
@@ -1685,7 +1817,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": -11
+      "days_left": -12
     }
   ]
 }
