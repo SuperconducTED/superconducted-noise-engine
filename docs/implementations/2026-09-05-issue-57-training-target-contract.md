@@ -84,3 +84,15 @@ record is not an acceptance of those pending architectural decisions.
 - Issue #57
 - ADR-027 in `docs/decisions.md`
 - `tests/fixtures/calibration/README.md`
+
+## Units, as-of 2026-10-03
+
+Everything above is left unedited. The sentence in "Implementation approach"
+that `feature_target_fn` expects `BasicCalibrationVectorizer` output "whose
+coherence values are currently in microseconds" stopped being true when issue
+#66 (PR #99) made `extract` emit SI seconds. From `4621b74`,
+`feature_target_fn` no longer assumes a unit: it takes a required
+`coherence_unit`, `"us"` for `ArchiveUnitFeatureExtractor` output and survey
+anchors, `"s"` for `extract` output. NC-039's source is re-pointed accordingly
+and its value is unchanged. See
+`docs/implementations/2026-10-03-feature-target-fn-units.md`.
