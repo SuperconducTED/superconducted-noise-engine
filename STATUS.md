@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-10-12 10:08 UTC · main at `9b52fe66` (2026-10-11) · 19 days to 2026-10-31_
+_Generated 2026-10-13 06:21 UTC · main at `c33e438e` (2026-10-12) · 18 days to 2026-10-31_
 
 
 ## Milestones
@@ -81,14 +81,18 @@ _Generated 2026-10-12 10:08 UTC · main at `9b52fe66` (2026-10-11) · 19 days to
 **Burak Öztekin** (@BurakOztekin)
 
 1. Unstick PR #114 for #60: ADR-014 hybrid ANFIS trainer
-   - No approving review yet: main's ruleset requires one. Start the rest now: the archive fit part waits on #63.
+   - CHANGES_REQUESTED standing from @mertefesensoy (2026-10-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix. Start the rest now: the archive fit part waits on #63.
 
 **Mert Efe Şensoy** (@mertefesensoy)
 
 1. Send Dr. Akba the four ADR-027 questions (#84)
    - FR-15 routes all advisor contact through the lead, so no one else can send it. The decision-by date was 2026-09-08 and has passed. ADR-027 stays Open, ADR-014 stays Deferred, and the M3 ADR-009 memo has no answer to build on until this goes out.
+1. Re-review PR #113 (#63: Training-set builder (training/dataset.py))
+   - Your CHANGES_REQUESTED from 2026-10-12 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Finish #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
    - The contract merged; only the advisor half of its definition of done is outstanding.
+1. Re-review PR #114 (#60: ADR-014 hybrid ANFIS trainer)
+   - Your CHANGES_REQUESTED from 2026-10-12 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 
 **Yiğit Arda Kaderoğlu** (@yigit-arda)
 
@@ -113,7 +117,7 @@ _Generated 2026-10-12 10:08 UTC · main at `9b52fe66` (2026-10-11) · 19 days to
 
 **#60: ADR-014 hybrid ANFIS trainer** (@BurakOztekin)
 
-- [high] No approving review yet: main's ruleset requires one.
+- [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-10-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **#61: ADR-011 evidence + premise gradients** (@bengisucvd)
 
@@ -122,8 +126,8 @@ _Generated 2026-10-12 10:08 UTC · main at `9b52fe66` (2026-10-11) · 19 days to
 **#63: Training-set builder (training/dataset.py)** (@BahaJarad)
 
 - [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
+- [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-10-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 - [high] Its green checks last ran 2026-10-11T09:43 against a main that has moved since; they are not evidence about the merge result.
-- [high] No approving review yet: main's ruleset requires one.
 
 **#75: Decide the LOCKED Kraus projector boundary** (@bengisucvd)
 
@@ -145,6 +149,7 @@ _Generated 2026-10-12 10:08 UTC · main at `9b52fe66` (2026-10-11) · 19 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-10-13 | 12/28 | 4 | 3 | 4 | main moved to c33e438e |
 | 2026-10-12 | 12/28 | 4 | 3 | 4 | #60 ADR-014 hybrid ANFIS trainer: ready to start to in review; #63 Training-set builder (training/dataset.py): ready to start to in review; main moved to 9b52fe66 |
 | 2026-10-11 | 12/28 | 6 | 1 | 4 | nothing moved |
 | 2026-10-10 | 12/28 | 6 | 1 | 4 | nothing moved |

@@ -1,9 +1,9 @@
 {
-  "generated": "2026-10-12 10:08 UTC",
+  "generated": "2026-10-13 06:21 UTC",
   "main": {
-    "sha": "9b52fe66",
-    "date": "2026-10-11",
-    "msg": "Merge pull request #106 from SuperconducTED/feature/issue-100-batch-1-verification",
+    "sha": "c33e438e",
+    "date": "2026-10-12",
+    "msg": "Merge pull request #112 from SuperconducTED/mert/file-snapshots-bare-repo",
     "adr": {
       "ADR-001": "Accepted",
       "ADR-002": "Accepted",
@@ -396,16 +396,23 @@
           "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 114,
-          "reviewDecision": "REVIEW_REQUIRED",
+          "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "feat(training): add ANFIS ridge LSE core (Issue #60)",
-          "updatedAt": "2026-10-11T15:30:58Z",
+          "updatedAt": "2026-10-12T22:22:18Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/114",
           "headRefOid": "fe5daf222a6ce6ea31280c437ef1c909143bce56",
           "additions": 738,
           "deletions": 0,
           "file_count": 4,
-          "latest_reviews": [],
+          "latest_reviews": [
+            {
+              "who": "mertefesensoy",
+              "state": "CHANGES_REQUESTED",
+              "at": "2026-10-12",
+              "last_activity": "2026-10-12"
+            }
+          ],
           "looked_since": [],
           "checks": [
             {
@@ -457,8 +464,8 @@
       "unmet_soft": [],
       "blockers": [
         {
-          "severity": "high",
-          "text": "No approving review yet: main's ruleset requires one."
+          "severity": "critical",
+          "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-10-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
         }
       ],
       "declared_unblocks": [
@@ -627,16 +634,23 @@
           "mergeable": "CONFLICTING",
           "mergedAt": null,
           "number": 113,
-          "reviewDecision": "REVIEW_REQUIRED",
+          "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "Training Set Builder (Issue #63)",
-          "updatedAt": "2026-10-11T09:42:21Z",
+          "updatedAt": "2026-10-12T22:20:20Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/113",
           "headRefOid": "7d26e893c55902706072abd4aac00e0d887c5bf9",
           "additions": 2187,
           "deletions": 0,
           "file_count": 12,
-          "latest_reviews": [],
+          "latest_reviews": [
+            {
+              "who": "mertefesensoy",
+              "state": "CHANGES_REQUESTED",
+              "at": "2026-10-12",
+              "last_activity": "2026-10-12"
+            }
+          ],
           "looked_since": [],
           "checks": [
             {
@@ -679,8 +693,8 @@
           "text": "Its green checks last ran 2026-10-11T09:43 against a main that has moved since; they are not evidence about the merge result."
         },
         {
-          "severity": "high",
-          "text": "No approving review yet: main's ruleset requires one."
+          "severity": "critical",
+          "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-10-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
         }
       ],
       "declared_unblocks": [
@@ -1646,7 +1660,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -37
+      "days_left": -38
     },
     {
       "id": "M1",
@@ -1688,7 +1702,7 @@
       "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -31
+      "days_left": -32
     },
     {
       "id": "M2",
@@ -1731,7 +1745,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -24
+      "days_left": -25
     },
     {
       "id": "M3",
@@ -1779,7 +1793,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": -17
+      "days_left": -18
     },
     {
       "id": "M4",
@@ -1817,7 +1831,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": -12
+      "days_left": -13
     }
   ]
 }
