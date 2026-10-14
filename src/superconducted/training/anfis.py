@@ -40,18 +40,43 @@ _MF_TYPES = (
 
 
 def evaluate_rmse(rule_base: TSKRuleBase, data: TrainingSet) -> npt.NDArray[np.float64]:
-    """Return the raw-unit RMSE for each target dimension."""
-    predictions = _predict(rule_base, data.features)
-    return np.asarray(np.sqrt(np.mean((predictions - data.targets) ** 2, axis=0)), dtype=np.float64)
+    """Return per-target raw-unit RMSE, excluding zero-firing rows.
+
+    This follows the trainer's FR-12 policy: rows for which the T1 total or
+    either IT2 bound is zero have no defined defuzzified output and are not
+    scored. Raises ``ValueError`` when every row is excluded.
+    """
+    predictions, kept = _predictions_with_mask(rule_base, data.features)
+    return _rmse(predictions[kept], data.targets[kept])
 
 
 class HybridANFISTrainer(TSKTrainer):
-    """Fit TSK consequents with batch ridge least squares.
+    """Fit a ``TSKRuleBase`` with batch ridge least squares in standardized space.
 
-    ``epochs=0`` is the M2 trainer-core contract: premise MFs remain fixed and
-    the consequent stage is solved exactly in standardized space. Positive
-    ``epochs`` reserve the public configuration for the finite-difference
-    premise stage, which is intentionally not part of this initial slice.
+    Args:
+        epochs: Must be zero in the M2 core; positive values reserve the
+            finite-difference premise stage.
+        premise_lr: Positive future premise-step learning rate.
+        ridge: Non-negative L2 penalty around the mapped warm-start
+            consequents.
+        seed: Recorded in the result for reproducibility.
+        gradient: Reserved premise-gradient strategy.
+        validation: Optional compatible raw-unit validation set.
+        fd_step: Positive future finite-difference step.
+        patience: Positive future early-stopping patience.
+        max_halvings: Non-negative future premise-step retry count.
+
+    ``fit`` returns a new rule base, never mutates caller-owned membership
+    functions or consequent arrays, and excludes zero-firing training rows
+    from the solve and reported training metrics. ``TypeError`` is raised for
+    another ``RuleBase`` implementation, ``ValueError`` for incompatible data,
+    invalid warm starts, or non-finite fitted outputs, and
+    ``NotImplementedError`` for a positive ``epochs`` value.
+
+    The standardization and exact raw-unit map-back implement the M2 portion
+    of ADR-014 while it remains Deferred; T1 and IT2 weights respectively
+    match ADR-011's shipped weighted-average and Nie-Tan paths without
+    deciding ADR-009.
     """
 
     def __init__(
@@ -92,7 +117,12 @@ class HybridANFISTrainer(TSKTrainer):
         self._max_halvings = max_halvings
 
     def fit(self, rule_base: RuleBase, data: TrainingSet) -> TrainingResult:
-        """Fit a TSK rule base without mutating the caller's parameter values."""
+        """Fit immutable caller state and return raw-unit metrics and diagnostics.
+
+        The warm-start guard implements ADR-024 clause 5's documented
+        deterministic anchored-baseline mechanism: every training row must
+        produce a non-identity damping prediction before fitting begins.
+        """
         if not isinstance(rule_base, TSKRuleBase):
             raise TypeError("HybridANFISTrainer requires a TSKRuleBase")
         if self._epochs != 0:
@@ -134,7 +164,7 @@ class HybridANFISTrainer(TSKTrainer):
         raw_rule_base = _to_raw_rule_base(
             fitted, feature_mean, feature_scale, target_mean, target_scale
         )
-        raw_predictions, raw_kept = _predictions_with_mask(raw_rule_base, data.features)
+        raw_predictions = _predict(raw_rule_base, data.features[kept])
         validation_predictions: npt.NDArray[np.float64] | None = None
         validation_kept: npt.NDArray[np.bool_] | None = None
         if self._validation is not None:
@@ -143,13 +173,16 @@ class HybridANFISTrainer(TSKTrainer):
             )
         _ensure_finite_model(
             raw_rule_base,
-            ((raw_predictions, raw_kept),)
+            ((raw_predictions, np.ones(raw_predictions.shape[0], dtype=np.bool_)),)
             if validation_predictions is None or validation_kept is None
-            else ((raw_predictions, raw_kept), (validation_predictions, validation_kept)),
+            else (
+                (raw_predictions, np.ones(raw_predictions.shape[0], dtype=np.bool_)),
+                (validation_predictions, validation_kept),
+            ),
         )
 
         fitted_predictions = _predict(fitted, features[kept])
-        train_loss = float(np.mean((fitted_predictions - targets[kept]) ** 2))
+        train_loss = float(np.mean(np.sum((fitted_predictions - targets[kept]) ** 2, axis=1)))
         validation_rmse = None
         if self._validation is not None:
             assert validation_predictions is not None
@@ -159,13 +192,8 @@ class HybridANFISTrainer(TSKTrainer):
                 self._validation.targets[validation_kept],
             )
         diagnostics = TrainingDiagnostics(
-            clip_binding_rate=float(
-                np.mean((raw_predictions[raw_kept] < 0.0) | (raw_predictions[raw_kept] > 1.0))
-            ),
-            zero_firing_rows_dropped=int(
-                np.count_nonzero(~raw_kept)
-                + (0 if validation_kept is None else np.count_nonzero(~validation_kept))
-            ),
+            clip_binding_rate=float(np.mean((raw_predictions < 0.0) | (raw_predictions > 1.0))),
+            zero_firing_rows_dropped=int(np.count_nonzero(~kept)),
             nonfinite_rows_rejected=0,
             lse_condition_number=condition_number,
             premise_steps_rejected=0,
@@ -175,7 +203,7 @@ class HybridANFISTrainer(TSKTrainer):
         )
         return TrainingResult(
             rule_base=raw_rule_base,
-            train_rmse=_rmse(raw_predictions[raw_kept], data.targets[raw_kept]),
+            train_rmse=_rmse(raw_predictions, data.targets[kept]),
             validation_rmse=validation_rmse,
             loss_history=(train_loss,),
             diagnostics=diagnostics,
@@ -281,7 +309,8 @@ def _fit_consequents(
     ).reshape(rule_base.n_rules * (rule_base.input_dim + 1), rule_base.output_dim)
     row_scale = np.ones(design.shape[0], dtype=np.float64)
     if weights is not None:
-        row_scale = np.sqrt(weights)
+        normalized_weights = weights / np.mean(weights)
+        row_scale = np.sqrt(normalized_weights)
     weighted_design = design * row_scale[:, None]
     residual = (targets - design @ prior) * row_scale[:, None]
     if ridge == 0.0:
@@ -476,7 +505,10 @@ def _reject_identity_warm_start(rule_base: TSKRuleBase, features: npt.NDArray[np
     if not np.any(kept):
         return
     relevant = predictions[kept, : min(2, rule_base.output_dim)]
-    if not np.any(relevant > 0.0):
+    # This intentionally mirrors aer_factory.is_identity_damping without
+    # importing qiskit_aer into the training core; only the first two damping
+    # outputs define the channel identity predicate.
+    if np.all(relevant <= 0.0):
         raise ValueError(
             "warm-start rule base is identity damping on every training row; "
             "use an anchored baseline or a viable random seed"

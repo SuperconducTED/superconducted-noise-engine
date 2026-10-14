@@ -31,6 +31,7 @@ collaborator — see "Reviews from outside GitHub" below.
 | `calibration/storage.py` | Baha Jarad | Mert Efe Şensoy |
 | `calibration/features.py` | Baha Jarad | Bengisu |
 | `training/` (`__init__.py`, `parameters.py`, `targets.py`) | Mert Efe Şensoy | Burak Öztekin |
+| `training/anfis.py` | Burak Öztekin | Bengisu |
 | `fuzzy/membership.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
 | `fuzzy/parameterization.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
 | `fuzzy/tsk.py` (LOCKED) | Burak Öztekin | Mert Efe Şensoy + Bengisu |
