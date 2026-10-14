@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-10-13 06:21 UTC · main at `c33e438e` (2026-10-12) · 18 days to 2026-10-31_
+_Generated 2026-10-14 06:08 UTC · main at `c33e438e` (2026-10-12) · 17 days to 2026-10-31_
 
 
 ## Milestones
@@ -149,6 +149,7 @@ _Generated 2026-10-13 06:21 UTC · main at `c33e438e` (2026-10-12) · 18 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-10-14 | 12/28 | 4 | 3 | 4 | nothing moved |
 | 2026-10-13 | 12/28 | 4 | 3 | 4 | main moved to c33e438e |
 | 2026-10-12 | 12/28 | 4 | 3 | 4 | #60 ADR-014 hybrid ANFIS trainer: ready to start to in review; #63 Training-set builder (training/dataset.py): ready to start to in review; main moved to 9b52fe66 |
 | 2026-10-11 | 12/28 | 6 | 1 | 4 | nothing moved |
