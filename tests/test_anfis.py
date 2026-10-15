@@ -337,7 +337,13 @@ def _planted_grid(interval: bool, *, warm: bool) -> TSKRuleBase:
 
 
 def _planted_box_features() -> np.ndarray:
-    """8x8x8 grid over the NC-041 [p1, p99] box, in the vectorizer's units."""
+    """8x8x8 grid over the NC-041 [p1, p99] box, in archive units.
+
+    Archive units are microseconds for T1 and T2 and dimensionless readout error, as
+    emitted by ``ArchiveUnitFeatureExtractor`` and the feature survey. Since #66,
+    ``BasicCalibrationVectorizer`` emits SI seconds instead; the trainer standardizes,
+    so recovery does not depend on the unit.
+    """
     coordinates = np.meshgrid(
         np.linspace(98.8, 154.4, 8),
         np.linspace(67.4, 110.5, 8),

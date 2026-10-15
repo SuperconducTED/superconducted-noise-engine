@@ -92,12 +92,23 @@ Each fix maps to one review finding.
 - The trainer's forward pass `w @ c` and the defuzzifiers' `sum(f c) / sum(f)`
   differ only in summation order, so their difference is a few eps of the
   term scale `sum_r |w_r| |c_r|`.
-- Measured over the 512-row grid: 3.6 eps (T1) and 2.7 eps (IT2). The test
-  bound is 8 eps.
-- Relative to the output itself the gap reaches 1.2e-14 (T1) and 5.6e-14
-  (IT2), because some outputs cancel. That is why the issue's literal
-  "1e-15 relative" could not hold and Mert ratified the scale-aware bound on
-  #60.
+- **On the committed fixture** (`_planted_grid`, coefficients drawn from
+  `uniform(0.05, 0.2)`, over the 512-row box), measured at `45d8278`:
+  - the worst gap is 3.6 eps (T1) and 2.7 eps (IT2) of the term scale, inside
+    the test's 8 eps bound;
+  - relative to the output itself, the gap is 7.9e-16 (T1) and 6.1e-16 (IT2);
+  - every output is positive (the minimum is 17.5), so nothing cancels.
+- **On a separate probe fixture** (not in the repo; Mert's round-1 review
+  probe at `fe5daf2`, re-measured at `45d8278`), the gap behaves differently:
+  - setup: a 3x3x3 `GaussianMF` grid from `grid_partition` on the survey
+    `3d1569d`; consequent slopes `N(0, 1) * 1e-4 / p99`; bias
+    `1e-4 + |N(0, 1)| * 1e-4`; rng seed 7; the same 512-row box;
+  - relative to the term scale the gap is still only 3.7 eps (T1) and 2.5 eps
+    (IT2);
+  - relative to the output it reaches 1.2e-14 (T1) and 5.6e-14 (IT2), because
+    mixed-sign slopes make some outputs cancel.
+- The probe case is why the issue's literal "1e-15 relative" cannot hold in
+  general, and why Mert ratified the scale-aware bound on #60.
 
 **Midpoint gap.** Over the IT2 grid the midpoint-weight output misses Nie-Tan
 by 7.8e-4 to 3.3e-2 of `max|y|`. At the tested point the gap is 1.2e-3, so the
@@ -147,8 +158,8 @@ numpy 2.4.4, mypy 1.20.2, ruff 0.15.12), at this commit on top of
 - `mypy --strict`
 - `python scripts/check_ids.py`
 - `pytest -q tests/test_anfis.py`: 38 passed
-- `pytest -q`: see the PR review for the count; NC-021 is re-measured at the
-  real merge commit (Rule 6), not here.
+- `pytest -q`: 809 collected, 809 passed at `45d8278`. NC-021 is
+  re-measured at the real merge commit (Rule 6), not here.
 
 **Seeded-bug check.** Each line is a one-line edit of `anfis.py`, run against
 `tests/test_anfis.py` and then reverted. All 23 are caught at this commit.
@@ -174,6 +185,28 @@ numpy 2.4.4, mypy 1.20.2, ruff 0.15.12), at this commit on top of
 | `evaluate_rmse` scores dropped rows | zero-firing test |
 | ridge penalty `ridge**2` | closed-form test (new) |
 | non-finite warm-start check disabled | non-finite warm-start test (new) |
+
+## Corrections after Bengisu's review
+
+Bengisu approved `45d8278` (PR #114 review 5532835004) and raised three
+non-blocking notes. All three were verified and corrected in a follow-up
+docs-only commit:
+
+1. **Units label.** The planting box was called "vectorizer units", but
+   `BasicCalibrationVectorizer` has emitted SI seconds since #66. The box is
+   in archive units, those of `ArchiveUnitFeatureExtractor` and the survey.
+   The test docstring and the M2 doc now say so. Issue #60's section 2
+   "Feature units" row predates #66, which is where the label came from.
+2. **FR-3 provenance.** The 1.2e-14 / 5.6e-14 output-relative gaps were
+   measured on Mert's probe fixture, not on the committed one, whose gap is
+   7.9e-16 / 6.1e-16 with no cancellation. The FR-3 paragraph above now names
+   both fixtures. Mert's #60 comment 6191368826 carried the same unattributed
+   figures and is corrected by a follow-up comment there.
+3. **Test count.** PR #114's description reported 805 passed (Burak's run at
+   `ce6b112`); at `45d8278` the count is 809. A dated note was appended to
+   the description.
+
+Bengisu also confirmed Issue #60 decisions 1 and 6 in that review.
 
 ## Related docs
 

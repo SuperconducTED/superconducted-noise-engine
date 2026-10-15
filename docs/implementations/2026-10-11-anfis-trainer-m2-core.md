@@ -89,10 +89,14 @@ The seven shipped membership shapes use their exact location-scale mappings:
 | Tanh sigmoid | `[(c-m)/s, slope*s]` |
 | Tanh bell | endpoints `(p-m)/s`; slope `slope*s` |
 
-The planted M2 gate samples the vectorizer-unit box
+The planted M2 gate samples the archive-unit box
 `T1=[98.8, 154.4] us`, `T2=[67.4, 110.5] us`, and
 `readout=[0.0171, 0.0374]` on an 8x8x8 grid; the box is the [p1, p99]
-range of the committed feature survey at `3d1569d` (NC-041). It recovers the
+range of the committed feature survey at `3d1569d` (NC-041). Archive units
+are those of `ArchiveUnitFeatureExtractor` and the survey: microseconds for
+T1 and T2. Since #66, `BasicCalibrationVectorizer` emits SI seconds instead.
+Because the trainer standardizes, the recovery result does not depend on
+which unit the box is written in. It recovers the
 T1 and IT2 3x3x3 Gaussian-grid consequents. The comparison runs in
 standardized units, with the bound
 `8 * cond(Phi_augmented) * eps * max(abs(B_planted))`: a backward-stable
