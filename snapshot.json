@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-14 06:08 UTC",
+  "generated": "2026-10-15 07:08 UTC",
   "main": {
     "sha": "c33e438e",
     "date": "2026-10-12",
@@ -399,12 +399,12 @@
           "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "feat(training): add ANFIS ridge LSE core (Issue #60)",
-          "updatedAt": "2026-10-12T22:22:18Z",
+          "updatedAt": "2026-10-14T21:08:08Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/114",
-          "headRefOid": "fe5daf222a6ce6ea31280c437ef1c909143bce56",
-          "additions": 738,
-          "deletions": 0,
-          "file_count": 4,
+          "headRefOid": "ce6b11218d7469e5f873a1e34a721a1fdead253d",
+          "additions": 1227,
+          "deletions": 1,
+          "file_count": 5,
           "latest_reviews": [
             {
               "who": "mertefesensoy",
@@ -418,35 +418,35 @@
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-11T15:18"
+              "started": "2026-10-14T21:08"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-11T15:18"
+              "started": "2026-10-14T21:07"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-11T15:18"
+              "started": "2026-10-14T21:07"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-11T15:18"
+              "started": "2026-10-14T21:08"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-11T15:18"
+              "started": "2026-10-14T21:07"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-10-11T15:18"
+              "started": "2026-10-14T21:08"
             }
           ],
-          "checks_newest": "2026-10-11T15:18",
+          "checks_newest": "2026-10-14T21:08",
           "checks_failing": [],
           "checks_stale_vs_main": false
         }
@@ -1660,7 +1660,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -39
+      "days_left": -40
     },
     {
       "id": "M1",
@@ -1702,7 +1702,7 @@
       "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -33
+      "days_left": -34
     },
     {
       "id": "M2",
@@ -1745,7 +1745,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -26
+      "days_left": -27
     },
     {
       "id": "M3",
@@ -1793,7 +1793,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": -19
+      "days_left": -20
     },
     {
       "id": "M4",
@@ -1831,7 +1831,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": -14
+      "days_left": -15
     }
   ]
 }
