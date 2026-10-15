@@ -119,9 +119,13 @@ class HybridANFISTrainer(TSKTrainer):
     def fit(self, rule_base: RuleBase, data: TrainingSet) -> TrainingResult:
         """Fit immutable caller state and return raw-unit metrics and diagnostics.
 
-        The warm-start guard implements ADR-024 clause 5's documented
-        deterministic anchored-baseline mechanism: every training row must
-        produce a non-identity damping prediction before fitting begins.
+        Before fitting, every warm-start parameter must be finite, and the warm
+        start must not be identity damping on every training row (FR-9). A warm
+        start that is identity damping on some rows but not all is accepted.
+        Together with a deterministic anchored warm start (Issue #59), this
+        degeneracy check is the third mechanism Issue #60 records for ADR-024
+        clause 5: it meets the clause's intent without claiming either of the
+        two mechanisms the clause enumerates.
         """
         if not isinstance(rule_base, TSKRuleBase):
             raise TypeError("HybridANFISTrainer requires a TSKRuleBase")
@@ -142,6 +146,7 @@ class HybridANFISTrainer(TSKTrainer):
         if self._validation is not None:
             _validate_validation(self._validation, data)
 
+        _reject_nonfinite_warm_start(rule_base)
         _reject_identity_warm_start(rule_base, data.features)
         feature_mean, feature_scale = _standardization(data.features)
         target_mean, target_scale = _standardization(data.targets)
@@ -500,14 +505,30 @@ def _location_scale_to_raw(
     return transformed
 
 
+def _reject_nonfinite_warm_start(rule_base: TSKRuleBase) -> None:
+    # Neither TSKRule nor GaussianMF rejects NaN, and without this check a NaN
+    # warm start surfaces later under a message that names the fit or the
+    # membership degree rather than the caller's input.
+    for index, rule in enumerate(rule_base.rules):
+        if not np.all(np.isfinite(rule.consequent_params)):
+            raise ValueError(f"warm-start rule {index} has non-finite consequent parameters")
+        if any(not np.all(np.isfinite(mf.parameters())) for mf in rule.antecedent_mfs):
+            raise ValueError(
+                f"warm-start rule {index} has a membership function with non-finite parameters"
+            )
+
+
 def _reject_identity_warm_start(rule_base: TSKRuleBase, features: npt.NDArray[np.float64]) -> None:
     predictions, kept = _predictions_with_mask(rule_base, features)
     if not np.any(kept):
         return
     relevant = predictions[kept, : min(2, rule_base.output_dim)]
-    # This intentionally mirrors aer_factory.is_identity_damping without
+    # This mirrors aer_factory.is_identity_damping on finite outputs without
     # importing qiskit_aer into the training core; only the first two damping
-    # outputs define the channel identity predicate.
+    # outputs define the channel identity predicate. The two differ on NaN:
+    # is_identity_damping reports a NaN vector as identity and this check does
+    # not, which is the safer reading (Issue #60 decision 5), and fit refuses
+    # non-finite warm-start parameters before reaching this point.
     if np.all(relevant <= 0.0):
         raise ValueError(
             "warm-start rule base is identity damping on every training row; "

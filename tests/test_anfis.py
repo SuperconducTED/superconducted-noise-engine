@@ -336,18 +336,23 @@ def _planted_grid(interval: bool, *, warm: bool) -> TSKRuleBase:
     )
 
 
-@pytest.mark.parametrize("interval", [False, True], ids=("t1", "it2"))
-def test_m2_planted_3x3x3_grid_recovers_each_consequent(interval: bool) -> None:
-    planted = _planted_grid(interval, warm=False)
-    warm = _planted_grid(interval, warm=True)
-    defuzzifier = NieTanDefuzzifier() if interval else WeightedAverageDefuzzifier()
+def _planted_box_features() -> np.ndarray:
+    """8x8x8 grid over the NC-041 [p1, p99] box, in the vectorizer's units."""
     coordinates = np.meshgrid(
         np.linspace(98.8, 154.4, 8),
         np.linspace(67.4, 110.5, 8),
         np.linspace(0.0171, 0.0374, 8),
         indexing="ij",
     )
-    features = np.column_stack([axis.ravel() for axis in coordinates])
+    return np.column_stack([axis.ravel() for axis in coordinates])
+
+
+@pytest.mark.parametrize("interval", [False, True], ids=("t1", "it2"))
+def test_m2_planted_3x3x3_grid_recovers_each_consequent(interval: bool) -> None:
+    planted = _planted_grid(interval, warm=False)
+    warm = _planted_grid(interval, warm=True)
+    defuzzifier = NieTanDefuzzifier() if interval else WeightedAverageDefuzzifier()
+    features = _planted_box_features()
     data = _data(
         features,
         np.array([defuzzifier.defuzzify(planted.evaluate(row)) for row in features]),
@@ -356,40 +361,53 @@ def test_m2_planted_3x3x3_grid_recovers_each_consequent(interval: bool) -> None:
     result = HybridANFISTrainer(ridge=0.0).fit(warm, data)
 
     assert isinstance(result.rule_base, TSKRuleBase)
-    tolerance = result.diagnostics.lse_condition_number * np.finfo(np.float64).eps * 2048.0
-    for fitted, expected in zip(result.rule_base.rules, planted.rules, strict=True):
-        assert fitted.consequent_params == pytest.approx(
-            expected.consequent_params,
-            abs=tolerance * np.max(np.abs(expected.consequent_params)),
-        )
+    # Compare in the standardized units the solve runs in, where a backward-stable
+    # least-squares solve bounds the error by a small multiple of cond * eps. Raw units
+    # divide each slope by its feature spread (0.0066 for readout error here), so a
+    # raw-unit bound would depend on the planting box. Measured worst error on
+    # 2026-10-15: 0.17 (T1) and 0.18 (IT2) of cond * eps * max|B|.
+    feature_mean, feature_scale, target_mean, target_scale = result.diagnostics.standardization
+    fitted_std = _to_standardized_rule_base(
+        result.rule_base, feature_mean, feature_scale, target_mean, target_scale
+    )
+    planted_std = _to_standardized_rule_base(
+        planted, feature_mean, feature_scale, target_mean, target_scale
+    )
+    got = np.stack([rule.consequent_params for rule in fitted_std.rules])
+    expected = np.stack([rule.consequent_params for rule in planted_std.rules])
+    bound = 8.0 * result.diagnostics.lse_condition_number * np.finfo(np.float64).eps
+    assert np.max(np.abs(got - expected)) <= bound * np.max(np.abs(expected))
+    assert np.max(np.abs(_predict(result.rule_base, features) - data.targets)) <= 1e-9 * np.max(
+        np.abs(data.targets)
+    )
 
 
 @pytest.mark.parametrize("interval", [False, True], ids=("t1", "it2"))
 def test_effective_weights_match_shipped_defuzzifier(interval: bool) -> None:
     rule_base = _planted_grid(interval, warm=False)
-    firing = rule_base.evaluate(np.array([128.0, 90.0, 0.028]))
     defuzzifier = NieTanDefuzzifier() if interval else WeightedAverageDefuzzifier()
 
-    weights = _effective_weights(firing)
-    assert weights is not None
-    prediction = weights @ firing.consequent_outputs
-    expected = defuzzifier.defuzzify(firing)
-    scale = np.sum(
-        np.abs(weights)[:, None] * np.abs(firing.consequent_outputs),
-        axis=0,
-    )
-    assert np.all(np.abs(prediction - expected) <= np.finfo(np.float64).eps * 8.0 * scale)
+    # FR-3's bound is scale-aware: 8 eps of sum_r |w_r| |c_r|. Measured worst over this
+    # grid on 2026-10-15: 3.6 eps (T1) and 2.7 eps (IT2).
+    for row in _planted_box_features():
+        firing = rule_base.evaluate(row)
+        weights = _effective_weights(firing)
+        assert weights is not None
+        prediction = weights @ firing.consequent_outputs
+        expected = defuzzifier.defuzzify(firing)
+        scale = np.sum(np.abs(weights)[:, None] * np.abs(firing.consequent_outputs), axis=0)
+        assert np.all(np.abs(prediction - expected) <= np.finfo(np.float64).eps * 8.0 * scale)
 
 
 def test_it2_effective_weights_are_not_midpoint_firing_strengths() -> None:
     rule_base = _planted_grid(True, warm=False)
     firing = rule_base.evaluate(np.array([128.0, 90.0, 0.028]))
-    weights = _effective_weights(firing)
-    assert weights is not None
-    nie_tan = weights @ firing.consequent_outputs
+    nie_tan = NieTanDefuzzifier().defuzzify(firing)
     midpoint = (firing.firing_strengths / firing.firing_strengths.sum()) @ firing.consequent_outputs
 
-    assert nie_tan != pytest.approx(midpoint, abs=1e-8)
+    # The midpoint misses Nie-Tan by 1.2e-3 of max|y| at this point (measured
+    # 2026-10-15); the bound sits 12x below that gap.
+    assert np.max(np.abs(midpoint - nie_tan)) > 1e-4 * np.max(np.abs(nie_tan))
 
 
 def test_ridge_targets_warm_start_and_weight_scale_is_invariant() -> None:
@@ -430,6 +448,7 @@ def test_trainer_preserves_mf_sharing_values_and_parameter_count() -> None:
         for rule in rule_base.rules
         for membership in rule.antecedent_mfs
     ]
+    before_consequents = [rule.consequent_params.copy() for rule in rule_base.rules]
 
     result = HybridANFISTrainer().fit(rule_base, data)
 
@@ -441,8 +460,11 @@ def test_trainer_preserves_mf_sharing_values_and_parameter_count() -> None:
     after = [
         membership.parameters() for rule in rule_base.rules for membership in rule.antecedent_mfs
     ]
+    # FR-8 is by value, so exact equality, not a tolerance.
     for original, current in zip(before, after, strict=True):
-        assert current == pytest.approx(original)
+        assert np.array_equal(current, original)
+    for original, rule in zip(before_consequents, rule_base.rules, strict=True):
+        assert np.array_equal(rule.consequent_params, original)
 
 
 def test_trainer_rejects_shared_membership_at_two_input_indices() -> None:
@@ -482,8 +504,9 @@ def test_trainer_is_deterministic_and_accepts_constant_feature_columns() -> None
     first = HybridANFISTrainer(ridge=0.0).fit(rule_base, data)
     second = HybridANFISTrainer(ridge=0.0).fit(rule_base, data)
 
-    assert first.train_rmse == pytest.approx(second.train_rmse)
-    assert first.loss_history == pytest.approx(second.loss_history)
+    # FR-14 asks for bit-identical results, so exact equality throughout.
+    assert np.array_equal(first.train_rmse, second.train_rmse)
+    assert first.loss_history == second.loss_history
     assert isinstance(first.rule_base, TSKRuleBase)
     assert isinstance(second.rule_base, TSKRuleBase)
     for left, right in zip(first.rule_base.rules, second.rule_base.rules, strict=True):
@@ -535,6 +558,105 @@ def test_diagnostics_report_clip_condition_and_validation_metrics() -> None:
         np.sum((_predict(standardized, standardized_features) - standardized_targets) ** 2, axis=1)
     )
     assert result.loss_history[0] == pytest.approx(expected_loss)
+
+
+def _standardized_design(
+    standardized: TSKRuleBase, standardized_features: np.ndarray
+) -> np.ndarray:
+    """T1 design matrix built from firing strengths, independent of the trainer's helpers."""
+    rows = []
+    for row in standardized_features:
+        strengths = standardized.evaluate(row).firing_strengths
+        rows.append(np.kron(strengths / strengths.sum(), np.append(row, 1.0)))
+    return np.array(rows)
+
+
+def test_weighted_finite_ridge_fit_matches_closed_form() -> None:
+    warm = _rule_base(False, fitted=False)
+    planted = _rule_base(False, fitted=True)
+    features = np.linspace(-1.5, 1.5, 21, dtype=np.float64)[:, None]
+    targets = np.array(
+        [WeightedAverageDefuzzifier().defuzzify(planted.evaluate(row)) for row in features]
+    ) + 0.01 * np.sin(7.0 * features)
+    weights = np.random.default_rng(3).uniform(0.2, 3.0, size=features.shape[0])
+    ridge = 0.3
+
+    result = HybridANFISTrainer(ridge=ridge).fit(warm, _data(features, targets, weights=weights))
+
+    feature_mean, feature_scale = features.mean(axis=0), features.std(axis=0)
+    target_mean, target_scale = targets.mean(axis=0), targets.std(axis=0)
+    standardized_warm = _to_standardized_rule_base(
+        warm, feature_mean, feature_scale, target_mean, target_scale
+    )
+    design = _standardized_design(standardized_warm, (features - feature_mean) / feature_scale)
+    prior = np.concatenate([rule.consequent_params.T for rule in standardized_warm.rules])
+    row_weights = np.diag(weights / weights.mean())
+    residual = (targets - target_mean) / target_scale - design @ prior
+    closed_form = prior + np.linalg.solve(
+        design.T @ row_weights @ design + ridge * np.eye(design.shape[1]),
+        design.T @ row_weights @ residual,
+    )
+    assert isinstance(result.rule_base, TSKRuleBase)
+    fitted = _to_standardized_rule_base(
+        result.rule_base, feature_mean, feature_scale, target_mean, target_scale
+    )
+    got = np.concatenate([rule.consequent_params.T for rule in fitted.rules])
+    assert got == pytest.approx(closed_form, abs=1e-10)
+
+
+def test_loss_history_and_condition_number_are_pinned_for_two_outputs() -> None:
+    memberships = (GaussianMF(-1.0, 0.8), GaussianMF(1.0, 0.8))
+    rule_base = TSKRuleBase(
+        [
+            TSKRule((memberships[0],), np.array([[0.01, 0.12], [0.01, 0.08]])),
+            TSKRule((memberships[1],), np.array([[0.01, 0.12], [0.01, 0.08]])),
+        ],
+        input_dim=1,
+        output_dim=2,
+    )
+    features = np.linspace(-1.5, 1.5, 9, dtype=np.float64)[:, None]
+    targets = np.column_stack(
+        [0.1 + 0.05 * np.sin(3.0 * features[:, 0]), 0.2 + 0.08 * np.cos(2.0 * features[:, 0])]
+    )
+
+    result = HybridANFISTrainer(ridge=0.0).fit(rule_base, _data(features, targets))
+
+    feature_mean, feature_scale = features.mean(axis=0), features.std(axis=0)
+    target_mean, target_scale = targets.mean(axis=0), targets.std(axis=0)
+    assert isinstance(result.rule_base, TSKRuleBase)
+    standardized = _to_standardized_rule_base(
+        result.rule_base, feature_mean, feature_scale, target_mean, target_scale
+    )
+    standardized_features = (features - feature_mean) / feature_scale
+    design = _standardized_design(standardized, standardized_features)
+    assert result.diagnostics.lse_condition_number == pytest.approx(
+        np.linalg.cond(design), rel=1e-6
+    )
+    residual = (
+        _predict(standardized, standardized_features) - (targets - target_mean) / target_scale
+    )
+    # Section 6.4: mean over rows of the squared norm over outputs (not over rows * outputs).
+    expected_loss = np.mean(np.sum(residual**2, axis=1))
+    assert expected_loss > 0.0
+    assert result.loss_history[0] == pytest.approx(expected_loss, rel=1e-9)
+
+
+@pytest.mark.parametrize(
+    ("membership", "consequent", "message"),
+    [
+        (GaussianMF(0.0, 1.0), np.array([[np.nan, 0.1]]), "non-finite consequent"),
+        (GaussianMF(float("nan"), 1.0), np.array([[0.1, 0.2]]), "non-finite parameters"),
+    ],
+    ids=("consequent", "membership"),
+)
+def test_nonfinite_warm_start_is_refused_naming_the_input(
+    membership: GaussianMF, consequent: np.ndarray, message: str
+) -> None:
+    rule_base = TSKRuleBase([TSKRule((membership,), consequent)], input_dim=1, output_dim=1)
+    with pytest.raises(ValueError, match=f"warm-start rule 0 has .*{message}"):
+        HybridANFISTrainer().fit(
+            rule_base, _data(np.array([[0.0], [0.5]]), np.array([[0.1], [0.2]]))
+        )
 
 
 def test_nonfinite_prediction_guard_raises_before_result_construction() -> None:

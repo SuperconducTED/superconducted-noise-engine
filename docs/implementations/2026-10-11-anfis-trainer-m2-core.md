@@ -22,6 +22,7 @@ also evidence for proposed ADR-027, not a status change under that ADR.
 | `src/superconducted/training/__init__.py` | Re-exports the trainer through the existing public training package. |
 | `tests/test_anfis.py` | Pins T1/IT2 fitting, standardization, weight, diagnostics, and immutability contracts. |
 | `docs/team.md` | Records `training/anfis.py` ownership: Burak primary, Bengisu secondary. |
+| `docs/implementations/2026-10-15-pr114-review-fixes.md` | Records the round-2 review fixes Mert landed on this branch. |
 
 ## Implementation approach
 
@@ -90,11 +91,19 @@ The seven shipped membership shapes use their exact location-scale mappings:
 
 The planted M2 gate samples the vectorizer-unit box
 `T1=[98.8, 154.4] us`, `T2=[67.4, 110.5] us`, and
-`readout=[0.0171, 0.0374]` on an 8x8x8 grid. It recovers the T1 and IT2
-3x3x3 Gaussian-grid consequents using an absolute allowance of
-`2048 * cond(Phi_augmented) * eps * max(abs(expected_consequents))`; the
-multiplier covers the raw-space consequent map-back after the least-squares
-solve and remains conditioning-dependent.
+`readout=[0.0171, 0.0374]` on an 8x8x8 grid; the box is the [p1, p99]
+range of the committed feature survey at `3d1569d` (NC-041). It recovers the
+T1 and IT2 3x3x3 Gaussian-grid consequents. The comparison runs in
+standardized units, with the bound
+`8 * cond(Phi_augmented) * eps * max(abs(B_planted))`: a backward-stable
+least-squares solve keeps the forward error to a small multiple of
+`cond * eps`. Measured worst errors (2026-10-15, provisional laptop run at
+the review-fix commit) are 0.17 (T1) and 0.18 (IT2) of
+`cond * eps * max|B|`. A raw-unit bound would also carry each slope's
+`1 / s[j]` (about 150 for readout error on this box), which is what the
+earlier raw-unit allowance of 2048 was absorbing; see
+`2026-10-15-pr114-review-fixes.md`. The test also checks that the raw-unit
+predictions reproduce the planted targets to `1e-9` of `max|y|`.
 
 ## Design decisions
 
@@ -103,13 +112,18 @@ solve and remains conditioning-dependent.
   Issue #61's shared gradients helper without changing this contract. This
   follows ADR-009/ADR-011's still-open choice without pre-judging it.
 - **Warm start:** Ridge regularizes toward the input consequents, including
-  biases. The implementation rejects identity damping on every training row,
-  recording the deterministic anchored-baseline mechanism required by
-  ADR-024 clause 5 without claiming that clause's two enumerated mechanisms.
+  biases. `fit` refuses a warm start with any non-finite consequent or
+  membership parameter, then refuses one that is identity damping on every
+  training row (FR-9); one that is identity on only some rows is accepted.
+  Together with Issue #59's deterministic anchored warm start, this records
+  the third mechanism for ADR-024 clause 5, without claiming either of that
+  clause's two enumerated mechanisms.
 - **No runtime Aer dependency:** The trainer mirrors the first-two-output
   identity predicate instead of importing `aer_factory.is_identity_damping`,
   because importing Aer is outside the numerical training core. A two-output
-  agreement test pins this narrow duplication.
+  agreement test pins this narrow duplication. The two differ on NaN:
+  `is_identity_damping` reports a NaN vector as identity, while this check
+  does not, which is the safer reading (Issue #60 decision 5).
 - **Defaults:** `epochs=0` makes the M2 boundary explicit; `ridge=1e-6`
   regularizes rank-deficient archive fits without changing the `ridge=0`
   ordinary-LSE path; `fd_step=6e-6` is the cube root of float64 epsilon for
