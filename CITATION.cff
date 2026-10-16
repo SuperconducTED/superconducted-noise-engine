@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "SuperconducTED noise engine"
+abstract: >-
+  A fuzzy-logic noise engine for Qiskit Aer. It turns IBM calibration
+  snapshots into an ensemble of noise models through a Takagi-Sugeno-Kang
+  fuzzy inference layer, aiming for interval-valued simulation output that
+  tracks real hardware across calibration cycles. Research preview.
+authors:
+  - given-names: "Mert Efe"
+    family-names: "Şensoy"
+    affiliation: "TED University"
+  - given-names: "Burak"
+    family-names: "Öztekin"
+    affiliation: "TED University"
+  - given-names: "Baha"
+    family-names: "Jarad"
+    affiliation: "TED University"
+  - given-names: "Bengisu"
+    family-names: "Cıvdı"
+    affiliation: "TED University"
+  - given-names: "Fırat"
+    family-names: "Akba"
+    affiliation: "TED University"
+version: "0.1.0"
+license: MIT
+repository-code: "https://github.com/SuperconducTED/superconducted-noise-engine"
+url: "https://superconducted.github.io/"
+keywords:
+  - quantum computing
+  - qiskit-aer
+  - noise model
+  - superconducting qubits
+  - fuzzy logic
+  - Takagi-Sugeno-Kang
+  - ANFIS
+  - uncertainty quantification
+  - calibration drift
