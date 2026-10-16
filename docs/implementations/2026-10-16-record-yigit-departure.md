@@ -121,10 +121,26 @@ GitHub Projects boards, because the `gh` token lacks the `read:project` scope.
 
 ## GitHub changes made on Mert's word
 
-Mert ticked each of these individually on 2026-10-16. Nothing else on GitHub was
-changed.
+Mert ticked each of these individually on 2026-10-16, after PR #118 opened.
+Nothing else on GitHub was changed.
 
-- To be filled in as each change is made.
+| Item | Change | Link |
+| --- | --- | --- |
+| #84 | Assignee `@yigit-arda` replaced by `@mertefesensoy`; comment (Turkish, collapsed English) saying Mert writes the flip PR and Bengisu approves it. | [comment 6220648509](https://github.com/SuperconducTED/superconducted-noise-engine/issues/84#issuecomment-6220648509) |
+| #57 | New comment amending only steps 4 and 5 of the 2026-10-13 close plan; the plan comment itself is not edited. | [comment 6220651686](https://github.com/SuperconducTED/superconducted-noise-engine/issues/57#issuecomment-6220651686) |
+| #62 | Assignee `@yigit-arda` replaced by `@BahaJarad`; comment (English, as Mert's reviews to Baha are) naming #61 decision 2 and #60's M4 hand-off as part of the ticket. | [comment 6220653270](https://github.com/SuperconducTED/superconducted-noise-engine/issues/62#issuecomment-6220653270) |
+| #60 | Comment: the "Model JSON handed to @yigit-arda" box and the M4 comparison now go to Baha; the body is not edited. | [comment 6220653941](https://github.com/SuperconducTED/superconducted-noise-engine/issues/60#issuecomment-6220653941) |
+| #61 | Comment: decision 2's footprint-ratio set is agreed by Bengisu and Baha; the body is not edited. | [comment 6220654528](https://github.com/SuperconducTED/superconducted-noise-engine/issues/61#issuecomment-6220654528) |
+| `phase-3-dashboard` | Commit `ca63ddec` on `plan.json` only: #84 owner Mert with the co-owner cleared and its note rewritten, #62 owner Baha, Baha in Yiğit's place among M4's owners. Built in the scratch clone `C:/t-dash-src`, rendered before and after through `C:/t-dash/drive.py` from one frozen fetch, then fast-forwarded into the daily routine's worktree and pushed from there, so the routine's next push stays a fast-forward. | `ca63ddec` |
+
+After these changes `gh issue list --assignee yigit-arda --state open` returns
+nothing.
+
+Left as they were: closed #59 and the past milestones M1 and M2 keep him as owner
+in `plan.json`, as history. `generate.py` is unchanged (Mert's choice), and its
+person lists still include `yigit-arda`, so the rendered page keeps a row for him
+reading "Nothing ready and nothing owed. Available for reviews." Removing that row
+needs a `generate.py` change.
 
 ## Design decisions
 
