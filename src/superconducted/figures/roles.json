@@ -1,0 +1,581 @@
+{
+  "schema": 1,
+  "generated_by": "brand/figures/build_styles.py",
+  "source": "brand/tools/palettes.py",
+  "band_tint": {
+    "a": 0.2,
+    "rule": "t = (1 - a) * ground + a * accent, per sRGB channel, rounded to 8 bits",
+    "floor": {
+      "light": 0.19,
+      "dark": 0.16
+    },
+    "floor_binding_palette": {
+      "light": "figure",
+      "dark": "heatleak"
+    },
+    "ceiling": {
+      "light": 0.23,
+      "dark": 0.44
+    },
+    "ceiling_binding_palette": {
+      "light": "heatleak",
+      "dark": "heatleak"
+    },
+    "why": "The smallest coverage at which the band reads as a region for every reader (Delta E >= 8 against the ground under normal, protan and deutan vision, in all six palettes and both modes), rounded up to a memorable 0.05 step. It stays a quiet wash (the dataviz method: never a saturated block) and keeps ink and text on the band at >= 4.5:1 and the accent edge at >= 3:1 on its own fill."
+  },
+  "gates": {
+    "text_on_ground": 4.5,
+    "marks_on_ground": 3.0,
+    "ink_and_text_on_band": 4.5,
+    "edge_on_band": 3.0,
+    "series_lightness_band": {
+      "light": [
+        0.43,
+        0.77
+      ],
+      "dark": [
+        0.48,
+        0.67
+      ]
+    },
+    "series_chroma_floor": 0.1,
+    "series_adjacent_cvd_target": 8.0,
+    "series_normal_floor": 15.0,
+    "series_all_pairs_goal": 3,
+    "series_vs_reserved": {
+      "normal": 15.0,
+      "cvd": 8.0
+    },
+    "hue_window_deg": 30.0,
+    "secondary_text_target": 7.0,
+    "axis_target": 3.0,
+    "grid_mix": 0.12,
+    "grid_note": "Gridlines are decoration (WCAG 1.4.11 covers graphics needed to understand the content; tick labels carry the values), so they are kept recessive and exempt from 3:1."
+  },
+  "reference_hues": {
+    "blue": {
+      "light": "#2A78D6",
+      "dark": "#3987E5"
+    },
+    "orange": {
+      "light": "#EB6834",
+      "dark": "#D95926"
+    },
+    "aqua": {
+      "light": "#1BAF7A",
+      "dark": "#199E70"
+    },
+    "yellow": {
+      "light": "#EDA100",
+      "dark": "#C98500"
+    },
+    "magenta": {
+      "light": "#E87BA4",
+      "dark": "#D55181"
+    },
+    "green": {
+      "light": "#008300",
+      "dark": "#008300"
+    },
+    "violet": {
+      "light": "#4A3AA7",
+      "dark": "#9085E9"
+    },
+    "red": {
+      "light": "#E34948",
+      "dark": "#E66767"
+    }
+  },
+  "palettes": {
+    "cryostat": {
+      "name": "Cryostat",
+      "why": "The cold of the dilution refrigerator: ice on blue-black.",
+      "series_excluded_families": {},
+      "series_unused_families": [
+        "aqua",
+        "red"
+      ],
+      "light": {
+        "ground": "#EEF3F5",
+        "text": "#0A1B24",
+        "text_secondary": "#45535A",
+        "axis": "#838D93",
+        "grid": "#D3D9DC",
+        "ink": "#0A1B24",
+        "accent": "#0A6C7C",
+        "band_fill": "#C0D8DD",
+        "band_edge": "#0A6C7C",
+        "crisp": "#0A1B24",
+        "measured": "#0A1B24",
+        "measured_ring": "#EEF3F5",
+        "series": [
+          "#D36992",
+          "#008300",
+          "#4A3AA7",
+          "#BD7F00",
+          "#2D7BD9",
+          "#E6632F"
+        ],
+        "series_families": [
+          "magenta",
+          "green",
+          "violet",
+          "yellow",
+          "blue",
+          "orange"
+        ],
+        "series_all_pairs_slots": 3,
+        "mix": {
+          "text_secondary": 0.74,
+          "axis": 0.47,
+          "grid": 0.12,
+          "band_fill": 0.2
+        }
+      },
+      "dark": {
+        "ground": "#0A1B24",
+        "text": "#EEF3F5",
+        "text_secondary": "#9CA5AA",
+        "axis": "#5A676D",
+        "grid": "#25353D",
+        "ink": "#EEF3F5",
+        "accent": "#4FD6E6",
+        "band_fill": "#18404B",
+        "band_edge": "#4FD6E6",
+        "crisp": "#EEF3F5",
+        "measured": "#EEF3F5",
+        "measured_ring": "#0A1B24",
+        "series": [
+          "#D55181",
+          "#008300",
+          "#9085E9",
+          "#C98500",
+          "#3987E5",
+          "#D95926"
+        ],
+        "series_families": [
+          "magenta",
+          "green",
+          "violet",
+          "yellow",
+          "blue",
+          "orange"
+        ],
+        "series_all_pairs_slots": 3,
+        "mix": {
+          "text_secondary": 0.64,
+          "axis": 0.35,
+          "grid": 0.12,
+          "band_fill": 0.2
+        }
+      }
+    },
+    "heatleak": {
+      "name": "Heat leak",
+      "why": "Cold machine, warm noise: the machine in ice blue, the range it drifts through in ember.",
+      "series_excluded_families": {
+        "orange": "within 30 deg of the light accent's hue (2 deg)",
+        "red": "within 30 deg of the light accent's hue (14 deg)",
+        "yellow": "within 30 deg of the dark accent's hue (26 deg)"
+      },
+      "series_unused_families": [],
+      "light": {
+        "ground": "#F1F4F7",
+        "text": "#0B1622",
+        "text_secondary": "#49525C",
+        "axis": "#878E95",
+        "grid": "#D5D9DD",
+        "ink": "#1F5F86",
+        "accent": "#B8461B",
+        "band_fill": "#E6D1CB",
+        "band_edge": "#B8461B",
+        "crisp": "#1F5F86",
+        "measured": "#1F5F86",
+        "measured_ring": "#F1F4F7",
+        "series": [
+          "#317EDD",
+          "#00A06E",
+          "#6B61D1",
+          "#D56A93"
+        ],
+        "series_families": [
+          "blue",
+          "aqua",
+          "violet",
+          "magenta"
+        ],
+        "series_all_pairs_slots": 2,
+        "mix": {
+          "text_secondary": 0.73,
+          "axis": 0.46,
+          "grid": 0.12,
+          "band_fill": 0.2
+        }
+      },
+      "dark": {
+        "ground": "#0B1622",
+        "text": "#F1F4F7",
+        "text_secondary": "#9CA2A8",
+        "axis": "#5B646D",
+        "grid": "#27313C",
+        "ink": "#8FD3F4",
+        "accent": "#FF8A4C",
+        "band_fill": "#3C2D2A",
+        "band_edge": "#FF8A4C",
+        "crisp": "#8FD3F4",
+        "measured": "#8FD3F4",
+        "measured_ring": "#0B1622",
+        "series": [
+          "#3987E5",
+          "#009366",
+          "#9085E9",
+          "#D55181"
+        ],
+        "series_families": [
+          "blue",
+          "aqua",
+          "violet",
+          "magenta"
+        ],
+        "series_all_pairs_slots": 2,
+        "mix": {
+          "text_secondary": 0.63,
+          "axis": 0.35,
+          "grid": 0.12,
+          "band_fill": 0.2
+        }
+      }
+    },
+    "copper": {
+      "name": "Copper stage",
+      "why": "The refrigerator's plates are copper: copper on graphite. Close in feel to CASSANDRA's terracotta.",
+      "series_excluded_families": {
+        "orange": "within 30 deg of the light accent's hue (9 deg)",
+        "yellow": "within 30 deg of the light accent's hue (26 deg)",
+        "red": "within 30 deg of the light accent's hue (24 deg)"
+      },
+      "series_unused_families": [],
+      "light": {
+        "ground": "#F5F3EF",
+        "text": "#15171A",
+        "text_secondary": "#515254",
+        "axis": "#8C8C8B",
+        "grid": "#DAD9D5",
+        "ink": "#15171A",
+        "accent": "#9C4E1C",
+        "band_fill": "#E3D2C5",
+        "band_edge": "#9C4E1C",
+        "crisp": "#15171A",
+        "measured": "#15171A",
+        "measured_ring": "#F5F3EF",
+        "series": [
+          "#D56A93",
+          "#4A3AA7",
+          "#2C9A28",
+          "#2A78D6",
+          "#00A06E"
+        ],
+        "series_families": [
+          "magenta",
+          "violet",
+          "green",
+          "blue",
+          "aqua"
+        ],
+        "series_all_pairs_slots": 4,
+        "mix": {
+          "text_secondary": 0.73,
+          "axis": 0.47,
+          "grid": 0.12,
+          "band_fill": 0.2
+        }
+      },
+      "dark": {
+        "ground": "#15171A",
+        "text": "#F5F3EF",
+        "text_secondary": "#A2A2A0",
+        "axis": "#636465",
+        "grid": "#303134",
+        "ink": "#F5F3EF",
+        "accent": "#E39256",
+        "band_fill": "#3E3026",
+        "band_edge": "#E39256",
+        "crisp": "#F5F3EF",
+        "measured": "#F5F3EF",
+        "measured_ring": "#15171A",
+        "series": [
+          "#D55181",
+          "#9085E9",
+          "#008300",
+          "#3987E5",
+          "#009165"
+        ],
+        "series_families": [
+          "magenta",
+          "violet",
+          "green",
+          "blue",
+          "aqua"
+        ],
+        "series_all_pairs_slots": 3,
+        "mix": {
+          "text_secondary": 0.63,
+          "axis": 0.35,
+          "grid": 0.12,
+          "band_fill": 0.2
+        }
+      }
+    },
+    "phosphor": {
+      "name": "Phosphor",
+      "why": "The oscilloscope trace, the instrument that shows a signal drifting.",
+      "series_excluded_families": {
+        "aqua": "within 30 deg of the light accent's hue (5 deg)",
+        "green": "within 30 deg of the light accent's hue (14 deg)"
+      },
+      "series_unused_families": [],
+      "light": {
+        "ground": "#EEF3EF",
+        "text": "#0B1410",
+        "text_secondary": "#4B524E",
+        "axis": "#868C88",
+        "grid": "#D3D8D4",
+        "ink": "#0B1410",
+        "accent": "#0B7446",
+        "band_fill": "#C1DACD",
+        "band_edge": "#0B7446",
+        "crisp": "#0B1410",
+        "measured": "#0B1410",
+        "measured_ring": "#EEF3EF",
+        "series": [
+          "#BD7F00",
+          "#D36992",
+          "#4A3AA7",
+          "#B63F00",
+          "#2A78D6",
+          "#C62B30"
+        ],
+        "series_families": [
+          "yellow",
+          "magenta",
+          "violet",
+          "orange",
+          "blue",
+          "red"
+        ],
+        "series_all_pairs_slots": 3,
+        "mix": {
+          "text_secondary": 0.72,
+          "axis": 0.46,
+          "grid": 0.12,
+          "band_fill": 0.2
+        }
+      },
+      "dark": {
+        "ground": "#0B1410",
+        "text": "#EEF3EF",
+        "text_secondary": "#9AA09C",
+        "axis": "#5D6460",
+        "grid": "#262F2B",
+        "ink": "#EEF3EF",
+        "accent": "#5BF0A0",
+        "band_fill": "#1B402D",
+        "band_edge": "#5BF0A0",
+        "crisp": "#EEF3EF",
+        "measured": "#EEF3EF",
+        "measured_ring": "#0B1410",
+        "series": [
+          "#C98500",
+          "#D55181",
+          "#9085E9",
+          "#D95926",
+          "#3987E5",
+          "#E66767"
+        ],
+        "series_families": [
+          "yellow",
+          "magenta",
+          "violet",
+          "orange",
+          "blue",
+          "red"
+        ],
+        "series_all_pairs_slots": 3,
+        "mix": {
+          "text_secondary": 0.63,
+          "axis": 0.36,
+          "grid": 0.12,
+          "band_fill": 0.2
+        }
+      }
+    },
+    "figure": {
+      "name": "Figure",
+      "why": "Matplotlib's default blue (#1F77B4), the colour of nearly every Python plot, error bands included.",
+      "series_excluded_families": {
+        "blue": "within 30 deg of the light accent's hue (11 deg)"
+      },
+      "series_unused_families": [
+        "red"
+      ],
+      "light": {
+        "ground": "#FFFFFF",
+        "text": "#16191D",
+        "text_secondary": "#57595C",
+        "axis": "#919395",
+        "grid": "#E3E3E4",
+        "ink": "#16191D",
+        "accent": "#1F77B4",
+        "band_fill": "#D2E4F0",
+        "band_edge": "#1F77B4",
+        "crisp": "#16191D",
+        "measured": "#16191D",
+        "measured_ring": "#FFFFFF",
+        "series": [
+          "#EB6834",
+          "#08A974",
+          "#4A3AA7",
+          "#C78600",
+          "#DE729B",
+          "#008300"
+        ],
+        "series_families": [
+          "orange",
+          "aqua",
+          "violet",
+          "yellow",
+          "magenta",
+          "green"
+        ],
+        "series_all_pairs_slots": 3,
+        "mix": {
+          "text_secondary": 0.72,
+          "axis": 0.47,
+          "grid": 0.12,
+          "band_fill": 0.2
+        }
+      },
+      "dark": {
+        "ground": "#16191D",
+        "text": "#FFFFFF",
+        "text_secondary": "#A4A5A7",
+        "axis": "#636568",
+        "grid": "#323538",
+        "ink": "#FFFFFF",
+        "accent": "#6FB1E3",
+        "band_fill": "#283745",
+        "band_edge": "#6FB1E3",
+        "crisp": "#FFFFFF",
+        "measured": "#FFFFFF",
+        "measured_ring": "#16191D",
+        "series": [
+          "#D95926",
+          "#199E70",
+          "#8377DA",
+          "#C98500",
+          "#D55181",
+          "#008300"
+        ],
+        "series_families": [
+          "orange",
+          "aqua",
+          "violet",
+          "yellow",
+          "magenta",
+          "green"
+        ],
+        "series_all_pairs_slots": 3,
+        "mix": {
+          "text_secondary": 0.61,
+          "axis": 0.33,
+          "grid": 0.12,
+          "band_fill": 0.2
+        }
+      }
+    },
+    "mono": {
+      "name": "Monochrome",
+      "why": "No colour to lean on: ink, paper and one grey for the range.",
+      "series_excluded_families": {},
+      "series_unused_families": [
+        "green",
+        "red"
+      ],
+      "light": {
+        "ground": "#F7F7F5",
+        "text": "#111214",
+        "text_secondary": "#545455",
+        "axis": "#8D8E8E",
+        "grid": "#DBDCDA",
+        "ink": "#111214",
+        "accent": "#5F6368",
+        "band_fill": "#D9D9D9",
+        "band_edge": "#5F6368",
+        "crisp": "#111214",
+        "measured": "#111214",
+        "measured_ring": "#F7F7F5",
+        "series": [
+          "#E96632",
+          "#2A78D6",
+          "#00A26F",
+          "#4A3AA7",
+          "#C18200",
+          "#D76C95"
+        ],
+        "series_families": [
+          "orange",
+          "blue",
+          "aqua",
+          "violet",
+          "yellow",
+          "magenta"
+        ],
+        "series_all_pairs_slots": 4,
+        "mix": {
+          "text_secondary": 0.71,
+          "axis": 0.46,
+          "grid": 0.12,
+          "band_fill": 0.2
+        }
+      },
+      "dark": {
+        "ground": "#111214",
+        "text": "#F7F7F5",
+        "text_secondary": "#A0A0A0",
+        "axis": "#626263",
+        "grid": "#2D2D2F",
+        "ink": "#F7F7F5",
+        "accent": "#9AA0A6",
+        "band_fill": "#2C2E31",
+        "band_edge": "#9AA0A6",
+        "crisp": "#F7F7F5",
+        "measured": "#F7F7F5",
+        "measured_ring": "#111214",
+        "series": [
+          "#D95926",
+          "#3987E5",
+          "#169C6F",
+          "#877CDF",
+          "#C98500",
+          "#D34F80"
+        ],
+        "series_families": [
+          "orange",
+          "blue",
+          "aqua",
+          "violet",
+          "yellow",
+          "magenta"
+        ],
+        "series_all_pairs_slots": 3,
+        "mix": {
+          "text_secondary": 0.62,
+          "axis": 0.35,
+          "grid": 0.12,
+          "band_fill": 0.2
+        }
+      }
+    }
+  },
+  "chosen": "cryostat"
+}
