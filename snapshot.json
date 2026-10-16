@@ -1,9 +1,9 @@
 {
-  "generated": "2026-10-15 07:08 UTC",
+  "generated": "2026-10-16 05:37 UTC",
   "main": {
-    "sha": "c33e438e",
-    "date": "2026-10-12",
-    "msg": "Merge pull request #112 from SuperconducTED/mert/file-snapshots-bare-repo",
+    "sha": "fec055c1",
+    "date": "2026-10-15",
+    "msg": "Merge pull request #114 from SuperconducTED/feature/issue-60-anfis-core",
     "adr": {
       "ADR-001": "Accepted",
       "ADR-002": "Accepted",
@@ -380,78 +380,28 @@
       "title": "ADR-014: build the hybrid ANFIS trainer in training/anfis.py so phase 3 ends with a fitted model, type-agnostic over T1 and IT2 so it does not wait on ADR-009",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/60",
       "issue_state": "OPEN",
-      "state": "in_review",
-      "all_prs": [
-        {
-          "author": {
-            "id": "U_kgDOENjDJQ",
-            "is_bot": false,
-            "login": "BurakOztekin",
-            "name": ""
-          },
-          "closingIssuesReferences": [],
-          "createdAt": "2026-10-11T15:13:25Z",
-          "headRefName": "feature/issue-60-anfis-core",
-          "isDraft": false,
-          "mergeable": "MERGEABLE",
-          "mergedAt": null,
-          "number": 114,
-          "reviewDecision": "CHANGES_REQUESTED",
-          "state": "OPEN",
-          "title": "feat(training): add ANFIS ridge LSE core (Issue #60)",
-          "updatedAt": "2026-10-14T21:08:08Z",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/114",
-          "headRefOid": "ce6b11218d7469e5f873a1e34a721a1fdead253d",
-          "additions": 1227,
-          "deletions": 1,
-          "file_count": 5,
-          "latest_reviews": [
-            {
-              "who": "mertefesensoy",
-              "state": "CHANGES_REQUESTED",
-              "at": "2026-10-12",
-              "last_activity": "2026-10-12"
-            }
-          ],
-          "looked_since": [],
-          "checks": [
-            {
-              "name": "test (3.11)",
-              "conclusion": "SUCCESS",
-              "started": "2026-10-14T21:08"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-10-14T21:07"
-            },
-            {
-              "name": "Analyze (actions)",
-              "conclusion": "SUCCESS",
-              "started": "2026-10-14T21:07"
-            },
-            {
-              "name": "test (3.12)",
-              "conclusion": "SUCCESS",
-              "started": "2026-10-14T21:08"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-10-14T21:07"
-            },
-            {
-              "name": "CodeQL",
-              "conclusion": "SUCCESS",
-              "started": "2026-10-14T21:08"
-            }
-          ],
-          "checks_newest": "2026-10-14T21:08",
-          "checks_failing": [],
-          "checks_stale_vs_main": false
-        }
-      ],
-      "merged_pr": null,
+      "state": "ready",
+      "all_prs": [],
+      "merged_pr": {
+        "author": {
+          "id": "U_kgDOENjDJQ",
+          "is_bot": false,
+          "login": "BurakOztekin",
+          "name": ""
+        },
+        "closingIssuesReferences": [],
+        "createdAt": "2026-10-11T15:13:25Z",
+        "headRefName": "feature/issue-60-anfis-core",
+        "isDraft": false,
+        "mergeable": "UNKNOWN",
+        "mergedAt": "2026-10-15T13:07:38Z",
+        "number": 114,
+        "reviewDecision": "APPROVED",
+        "state": "MERGED",
+        "title": "feat(training): add ANFIS ridge LSE core (Issue #60)",
+        "updatedAt": "2026-10-15T14:34:03Z",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/114"
+      },
       "unmet_hard": [],
       "unmet_partial": [
         {
@@ -462,17 +412,12 @@
         }
       ],
       "unmet_soft": [],
-      "blockers": [
-        {
-          "severity": "critical",
-          "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-10-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
-        }
-      ],
+      "blockers": [],
       "declared_unblocks": [
         64
       ],
       "notes_info": [],
-      "pr": 114
+      "pr": null
     },
     {
       "id": 61,
@@ -1660,7 +1605,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -40
+      "days_left": -41
     },
     {
       "id": "M1",
@@ -1702,7 +1647,7 @@
       "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -34
+      "days_left": -35
     },
     {
       "id": "M2",
@@ -1745,7 +1690,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -27
+      "days_left": -28
     },
     {
       "id": "M3",
@@ -1786,14 +1731,14 @@
         },
         {
           "text": "Trainer full loop merged, first archive fit, time-split metrics",
-          "status": "partial",
+          "status": "not_done",
           "note": null
         }
       ],
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": -20
+      "days_left": -21
     },
     {
       "id": "M4",
@@ -1831,7 +1776,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": -15
+      "days_left": -16
     }
   ]
 }

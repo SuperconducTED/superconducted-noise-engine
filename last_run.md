@@ -1,22 +1,22 @@
-run-token: 2026-10-15T07:07:25Z-181810
-outcome: ok: chore: phase-3 dashboard: state moved (2026-10-15)
+run-token: 2026-10-16T05:37:09Z-7167
+outcome: ok: chore: phase-3 dashboard: state moved (2026-10-16)
 
-**12/28 milestone gates met** · 16 days to 2026-10-31 · calendar 73% burned against 43% of gates, 30 points behind.
+**12/28 milestone gates met** · 15 days to 2026-10-31 · calendar 75% burned against 43% of gates, 32 points behind.
 
-**Since 2026-10-14:** nothing moved.
+**Since 2026-10-15:** #60 ADR-014 hybrid ANFIS trainer: in review to ready to start; main moved to fec055c1.
 
 **Needs attention**
-- M0 (Queue clear) is 40 days past its 2026-09-05 target at 7/8
-- M1 (Contracts and instruments) is 34 days past its 2026-09-11 target at 3/5
-- M2 (First measurements) is 27 days past its 2026-09-18 target at 2/5
-- M3 (Decisions) is 20 days past its 2026-09-25 target at 0/6
-- M4 (ANFIS results) is 15 days past its 2026-09-30 target at 0/4
+- M0 (Queue clear) is 41 days past its 2026-09-05 target at 7/8
+- M1 (Contracts and instruments) is 35 days past its 2026-09-11 target at 3/5
+- M2 (First measurements) is 28 days past its 2026-09-18 target at 2/5
+- M3 (Decisions) is 21 days past its 2026-09-25 target at 0/6
+- M4 (ANFIS results) is 16 days past its 2026-09-30 target at 0/4
 - PR #79 (#58) conflicts with main, so its checks are not evidence and it cannot merge
 - PR #113 (#63) conflicts with main, so its checks are not evidence and it cannot merge
 
 **Next action per person**
 - Mert Efe Şensoy: Send Dr. Akba the four ADR-027 questions (#84)
-- Burak Öztekin: Unstick PR #114 for #60: ADR-014 hybrid ANFIS trainer
+- Burak Öztekin: Finish #60: ADR-014 hybrid ANFIS trainer
 - Yiğit Arda Kaderoğlu: Start #84: Close the #57 advisor loop
 - Bengisu Cıvdı: Unstick PR #79 for #58: Certify the benchmark instruments
 - Baha Jarad: Unstick PR #113 for #63: Training-set builder (training/dataset.py)

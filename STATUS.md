@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-10-15 07:08 UTC · main at `c33e438e` (2026-10-12) · 16 days to 2026-10-31_
+_Generated 2026-10-16 05:37 UTC · main at `fec055c1` (2026-10-15) · 15 days to 2026-10-31_
 
 
 ## Milestones
@@ -49,7 +49,7 @@ _Generated 2026-10-15 07:08 UTC · main at `c33e438e` (2026-10-12) · 16 days to
 - 🟡 training/dataset.py merged with its evidence TSV (#63)
 - ❌ Floor derived from the actual parameter count and registered
   - _Replaces the reconstructed 126 behind NC-012. Owned by #56._
-- 🟡 Trainer full loop merged, first archive fit, time-split metrics
+- ❌ Trainer full loop merged, first archive fit, time-split metrics
 
 ### ❌ M4 · ANFIS results, target 2026-09-30 (0/4)
 
@@ -80,8 +80,8 @@ _Generated 2026-10-15 07:08 UTC · main at `c33e438e` (2026-10-12) · 16 days to
 
 **Burak Öztekin** (@BurakOztekin)
 
-1. Unstick PR #114 for #60: ADR-014 hybrid ANFIS trainer
-   - CHANGES_REQUESTED standing from @mertefesensoy (2026-10-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix. Start the rest now: the archive fit part waits on #63.
+1. Finish #60: ADR-014 hybrid ANFIS trainer
+   - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.
 
 **Mert Efe Şensoy** (@mertefesensoy)
 
@@ -91,8 +91,6 @@ _Generated 2026-10-15 07:08 UTC · main at `c33e438e` (2026-10-12) · 16 days to
    - Your CHANGES_REQUESTED from 2026-10-12 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Finish #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
    - The contract merged; only the advisor half of its definition of done is outstanding.
-1. Re-review PR #114 (#60: ADR-014 hybrid ANFIS trainer)
-   - Your CHANGES_REQUESTED from 2026-10-12 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 
 **Yiğit Arda Kaderoğlu** (@yigit-arda)
 
@@ -114,10 +112,6 @@ _Generated 2026-10-15 07:08 UTC · main at `c33e438e` (2026-10-12) · 16 days to
 - [high] Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result.
 - [high] No approving review yet: main's ruleset requires one.
 - [medium] Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
-
-**#60: ADR-014 hybrid ANFIS trainer** (@BurakOztekin)
-
-- [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-10-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **#61: ADR-011 evidence + premise gradients** (@bengisucvd)
 
@@ -149,6 +143,7 @@ _Generated 2026-10-15 07:08 UTC · main at `c33e438e` (2026-10-12) · 16 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-10-16 | 12/28 | 5 | 2 | 4 | #60 ADR-014 hybrid ANFIS trainer: in review to ready to start; main moved to fec055c1 |
 | 2026-10-15 | 12/28 | 4 | 3 | 4 | nothing moved |
 | 2026-10-14 | 12/28 | 4 | 3 | 4 | nothing moved |
 | 2026-10-13 | 12/28 | 4 | 3 | 4 | main moved to c33e438e |
