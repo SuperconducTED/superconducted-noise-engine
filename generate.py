@@ -648,9 +648,11 @@ def action_queue(model: dict, plan: dict) -> dict[str, list[dict]]:
         else:
             act = None
 
-        # A co-owner with a named handoff gets their own row. #84's brief is
-        # Yiğit's to write and Mert's to send; only listing the owner would
-        # leave the send unassigned, which is exactly how it went unsent.
+        # A co-owner with a named handoff gets their own row. #84 is why: its
+        # brief was Yiğit's to write and Mert's to send, and listing only the
+        # owner left the send unassigned, which is exactly how it went unsent.
+        # Since 2026-10-16 #84 is Mert's alone, with Bengisu approving the
+        # ADR-027 flip PR.
         if act and t.get("co_owner") and t.get("co_owner_action"):
             by_person[t["co_owner"]].append({
                 **act, "kind": act["kind"],
@@ -818,7 +820,7 @@ def render_run_report(plan: dict, model: dict, queue: dict, main: dict, now: str
     a("")
 
     a("**Next action per person**")
-    order = ["mertefesensoy", "BurakOztekin", "yigit-arda", "bengisucvd", "BahaJarad"]
+    order = ["mertefesensoy", "BurakOztekin", "bengisucvd", "BahaJarad"]
     for login in order + [k for k in queue if k not in order]:
         who = plan["people"].get(login, {}).get("name", login)
         acts = queue.get(login, [])
@@ -880,7 +882,7 @@ def render_readme_block(plan: dict, model: dict, queue: dict, main: dict, now: s
     a("")
     a("| Who | Next action | Why |")
     a("| --- | --- | --- |")
-    order = ["mertefesensoy", "BurakOztekin", "yigit-arda", "bengisucvd", "BahaJarad"]
+    order = ["mertefesensoy", "BurakOztekin", "bengisucvd", "BahaJarad"]
     for login in order + [k for k in queue if k not in order]:
         acts = queue.get(login, [])
         who = plan["people"].get(login, {}).get("name", login)
@@ -1155,7 +1157,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
       'A ticket waiting on an upstream dependency is never listed against its own owner; it is '
       'listed as a review or a start against whoever owns the blocker.</div>')
     a('<div class="grid two">')
-    order = ["mertefesensoy", "BurakOztekin", "yigit-arda", "bengisucvd", "BahaJarad"]
+    order = ["mertefesensoy", "BurakOztekin", "bengisucvd", "BahaJarad"]
     for login in order + [k for k in queue if k not in order]:
         acts = queue.get(login, [])
         meta = plan["people"].get(login, {"name": login, "role": "", "colour": "idle"})
