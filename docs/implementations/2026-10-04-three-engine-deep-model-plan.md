@@ -29,6 +29,7 @@ architecture decisions of 2026-10-04.
 | `docs/roadmap/2026-10-04-deep-engine-architecture-research.md` | The architecture research Dr. Akba asked for: four strategy families judged against the forecasting task, the T1/T2 epoch finding, a recommended first version (documented, not adopted), a fair test of supervised contrastive learning, and 68 sources, 67 of them with identifiers verified. |
 | `docs/advisor/2026-10-04-uc-motor-ve-derin-model-ozeti.md` | A Turkish summary of the plan and the research for the lead to walk Dr. Akba through, ending with the ten decisions that are his. |
 | `docs/implementations/2026-10-04-three-engine-deep-model-plan.md` | This record. |
+| `docs/roadmap/2026-10-04-three-engine-and-deep-model-plan.md` and `docs/roadmap/2026-10-04-deep-engine-architecture-research.md` | Append the 2026-10-16 English capstone topic framing without changing earlier planning or research records. |
 
 No code, test, ADR or register row changes. The ledger changes the plan needs are tasks in
 it (§6), not edits here.
@@ -107,6 +108,11 @@ not a guarantee.
    Karnik-Mendel band is left to Dr. Akba as plan §1.1 and question 2.
 6. **A roadmap document, not an ADR.** The plan proposes; the ADRs follow as tasks once the
    decisions are approved and the evidence exists.
+7. **An umbrella capstone topic, not a new result.** “Drift-Aware Adaptive Model Selection
+   for Robust Time-Series Forecasting” connects the three-engine comparison to the
+   forecasting/drift evaluation problem while retaining quantum calibration and noise
+   modelling as the project domain. It records no implemented adaptive selector and does
+   not alter any prior decision.
 
 ## Verification
 
