@@ -7,6 +7,7 @@ import io
 import logging
 import warnings
 from collections.abc import Iterator
+from pathlib import Path
 
 import matplotlib
 
@@ -18,16 +19,22 @@ import pytest
 from matplotlib.colors import to_hex
 
 from superconducted import figures as scf
+from superconducted.figures import superconducted_figures as brand
 
-BRAND_COMMIT = "06f1959"
-"""SuperconducTED/.github, branch brand/superconducted-identity: the kit this copy came from."""
+BRAND_COMMIT = "3ff5e86"
+"""SuperconducTED/.github, the typed helper of PR #3; the data files are as at 06f1959."""
+
+FIGURES = Path(brand.HERE)
 
 VENDORED_SHA256 = {
+    "superconducted_figures.py": (
+        "e98c3e471741c615420378588df48cbb01f0f0cee476c6f26e63338382f6dc04"
+    ),
     "roles.json": "5a0f224fc96dc4a1a85120970939bb371ba6b443e6354db01bf323abd10dc2a3",
-    "styles/superconducted.mplstyle": (
+    "styles/superconducted-cryostat.mplstyle": (
         "aab480568cf1e21bf7405bc2725f1c4a276ba86c9b41d36b6221723ca755c60f"
     ),
-    "styles/superconducted-dark.mplstyle": (
+    "styles/superconducted-cryostat-dark.mplstyle": (
         "6d1aca214f6d97ba6d5ce39e79bea231909f0b6c03cc015300215914b0d50a59"
     ),
 }
@@ -39,7 +46,7 @@ COLOUR_KEYWORDS = ("color", "c", "facecolor", "edgecolor", "fc", "ec", "markerfa
 @pytest.fixture(autouse=True)
 def _fresh_style(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     """Every test starts before use() and leaves matplotlib's global state as it found it."""
-    monkeypatch.setattr(scf, "_current", None)
+    monkeypatch.setattr(brand, "_current", None)
     with matplotlib.rc_context():
         yield
     plt.close("all")
@@ -50,20 +57,30 @@ def _hex(colour: object) -> str:
 
 
 class TestVendoredFiles:
-    def test_data_files_are_byte_identical_to_the_brand_kit(self) -> None:
+    def test_every_vendored_file_is_byte_identical_to_the_brand_kit(self) -> None:
         """Never hand-edited: a change belongs in the brand repository, then re-vendored."""
         for name, expected in VENDORED_SHA256.items():
-            body = (scf.HERE / name).read_bytes().replace(b"\r\n", b"\n")
+            body = (FIGURES / name).read_bytes().replace(b"\r\n", b"\n")
             assert hashlib.sha256(body).hexdigest() == expected, (
                 f"{name} differs from brand/figures/{name} at {BRAND_COMMIT}"
             )
 
     def test_the_engine_ships_the_chosen_palette_only(self) -> None:
         assert scf.PALETTES == ("cryostat",)
-        assert {p.name for p in scf.STYLES.iterdir()} == {
-            "superconducted.mplstyle",
-            "superconducted-dark.mplstyle",
+        assert {p.name for p in Path(brand.STYLES).iterdir()} == {
+            "superconducted-cryostat.mplstyle",
+            "superconducted-cryostat-dark.mplstyle",
         }
+        assert set(VENDORED_SHA256) == {
+            p.relative_to(FIGURES).as_posix()
+            for p in FIGURES.rglob("*")
+            if p.is_file() and p.name != "__init__.py" and "__pycache__" not in p.parts
+        }, "a file was added beside the vendored kit without a pin"
+
+    def test_the_package_re_exports_the_brand_helper_not_a_copy(self) -> None:
+        """Everything but use() and style_path() is the brand's own function object."""
+        for name in ("band", "band_handle", "crisp", "measured", "mono_ticks", "roles", "series"):
+            assert getattr(scf, name) is getattr(brand, name), name
 
     @pytest.mark.parametrize("dark", [False, True])
     def test_the_style_loads_without_a_warning(

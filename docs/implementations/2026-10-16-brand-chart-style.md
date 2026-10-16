@@ -4,8 +4,8 @@
 
 On 2026-10-16 the SuperconducTED brand was finalised: the technical-cutaway mark, the Cryostat
 palette and the tagline "Noise as a range, not a number." It ships a validated matplotlib chart
-style (`SuperconducTED/.github`, branch `brand/superconducted-identity`, folder
-`brand/figures/`, commit `06f1959`) whose one colour rule is that the accent marks a range
+style (`SuperconducTED/.github`, folder `brand/figures/`, commit `06f1959`, merged to that
+repository's `main` in PR #1) whose one colour rule is that the accent marks a range
 (the engine's interval) and nothing else. The engine had no chart style at all, so every
 figure the team draws would pick its own colours, and Phase 3 is about to produce the first
 figures that show the engine's answer as an interval.
@@ -30,13 +30,14 @@ covers figures or the brand, so this change has no linked issue.
 
 | File | One-sentence description |
 | --- | --- |
-| `src/superconducted/figures/__init__.py` | The brand's chart helper (`use`, `band`, `crisp`, `measured`, `series`, `band_handle`, `mono_ticks`), typed for `mypy --strict`, Cryostat only. |
-| `src/superconducted/figures/roles.json` | Every named chart colour per palette and mode, a byte-identical copy of the brand's file at `06f1959`. |
-| `src/superconducted/figures/styles/superconducted.mplstyle` | The Cryostat light-ground matplotlib style, byte-identical to the brand's. |
-| `src/superconducted/figures/styles/superconducted-dark.mplstyle` | The Cryostat dark-ground style, byte-identical to the brand's. |
+| `src/superconducted/figures/superconducted_figures.py` | The brand's chart helper (`use`, `band`, `crisp`, `measured`, `series`, `band_handle`, `mono_ticks`), byte-identical to the typed version in SuperconducTED/.github#3 (commit `3ff5e86`). |
+| `src/superconducted/figures/__init__.py` | The engine's only code here: re-exports the helper and allows the chosen palette (Cryostat) alone. |
+| `src/superconducted/figures/roles.json` | Every named chart colour per palette and mode, byte-identical to the brand's file (unchanged since `06f1959`). |
+| `src/superconducted/figures/styles/superconducted-cryostat.mplstyle` | The Cryostat light-ground matplotlib style, byte-identical to the brand's. |
+| `src/superconducted/figures/styles/superconducted-cryostat-dark.mplstyle` | The Cryostat dark-ground style, byte-identical to the brand's. |
 | `pyproject.toml` | New optional extra `figures = ["matplotlib>=3.8,<4"]`; the same requirement added to `dev`. |
 | `requirements-dev.txt` | Pins `matplotlib==3.11.2`, the version the brand's style checks ran on. |
-| `tests/test_figures.py` | 49 tests: the vendored bytes, the style loading silently, every role's look and guard, `mono_ticks`, and a silent font fallback. |
+| `tests/test_figures.py` | 50 tests: all four vendored files pinned by sha256 and no unpinned file beside them, the re-exports being the brand's own functions, the style loading silently, every role's look and guard, `mono_ticks`, and a silent font fallback. |
 | `scripts/pipeline_health.py` | `render_svg` draws in the Cryostat roles, read from the vendored `roles.json` as JSON (`ROLES_FILE`, `chart_colours`, `COLOURS`). |
 | `tests/test_pipeline_health.py` | Two colour pins follow the new roles; new `TestBrandColours` (4 tests) pins the mapping, bans the accent and gates contrast. |
 | `tests/fixtures/pipeline_health/expected/progress.svg` | The golden artifact, regenerated; colours only. |
@@ -47,24 +48,27 @@ covers figures or the brand, so this change has no linked issue.
 
 ### A. The kit, vendored as `superconducted.figures`
 
-The three data files are copied byte for byte from the brand commit (`git show
-06f1959:brand/figures/<path>`), and `tests/test_figures.py::TestVendoredFiles` pins each one's
-sha256, so a hand edit fails CI. The brand's own rule is that `styles/` and `roles.json` are
-generated, never edited; a change belongs in the brand repository and is re-vendored here.
+All four of the kit's files are copied byte for byte from the brand repository (`git show
+3ff5e86:brand/figures/<path>`), and `tests/test_figures.py::TestVendoredFiles` pins each one's
+sha256 and fails if any other file appears beside them, so a hand edit fails CI. The brand's
+own rule is that `styles/` and `roles.json` are generated, never edited; a change belongs in the
+brand repository and is re-vendored here.
 
-The helper is the brand's `superconducted_figures.py` with four differences, listed in its
-module docstring and nowhere else:
+The helper went across unchanged because the brand's copy was first annotated for this:
+SuperconducTED/.github#3 (commit `3ff5e86`, on top of the brand's `main`) adds type
+annotations, so the file passes `mypy --strict` here (its home is `src/superconducted`, in
+mypy's `files`), and tells a `Figure`, an `Axes` and an iterable of `Axes` apart with
+`isinstance`; the brand's 46 style checks pass before and after it with all 26 demos
+byte-identical. Until #3 merges, this copy follows that PR's head; if review changes the
+helper, re-vendor it and update the pin.
 
-1. Type annotations, so it passes `mypy --strict` (its home is `src/superconducted`, which is
-   in mypy's `files`). `band` returns the `PolyCollection` that `fill_between` makes;
-   `crisp` and `measured` return a `Line2D`; `mono_ticks` returns its argument's own type.
-2. Only the chosen palette ships. `PALETTES` is `("cryostat",)`; the two styles keep the
-   brand's generic names `superconducted.mplstyle` and `superconducted-dark.mplstyle`, which
-   the brand's build copies byte for byte from the Cryostat files. Asking for one of the five
-   other brand options raises `ValueError` and applies nothing.
-3. `mono_ticks` tells a `Figure`, an `Axes` and an iterable of `Axes` apart with
-   `isinstance`, where the brand checks `hasattr(target, "tick_params")`.
-4. Error messages name `superconducted.figures`.
+The styles keep the brand's palette names (`superconducted-cryostat.mplstyle` and
+`-dark`), which is where the helper's `style_path` looks. The package's `__init__.py` is the
+engine's only code: it re-exports the helper's functions (the same objects, a test checks
+identity) and wraps `use` and `style_path` so that only the identity's chosen palette is
+accepted. `PALETTES` is `("cryostat",)`; asking for one of the five other brand options raises
+`ValueError` before anything is applied. Messages from inside the helper name it as the brand
+does (`call superconducted_figures.use(<palette>) first`).
 
 Contract (unchanged from the brand): `use(palette=None, dark=False)` applies the style
 globally (`plt.style.use`) and selects the roles; `band`, `crisp`, `measured`, `series` and
@@ -174,16 +178,20 @@ ceiling (0.23 light). The derivation is in the brand README, section "The band t
   notebooks, scripts and future report builders alike; `from superconducted import figures`
   works from all of them, and the wheel ships the data files (checked: `pip wheel .` carries
   `roles.json` and both styles).
-- **Typed copy over a mypy exclusion.** Excluding the module would leave the one file
-  team figure code imports unchecked. The cost is that the copy is no longer byte-identical
-  to the brand's helper; the four differences are listed in its docstring, and annotating the
-  brand's copy would make the two converge (see Follow-ups).
-- **Cryostat only.** The other five palettes are the record of a decision already taken;
-  shipping them would invite their use.
+- **Type the brand's helper and vendor it verbatim, over a typed engine-only copy or a
+  mypy exclusion.** Excluding the module would leave the one file team figure code imports
+  unchecked. A typed copy kept here (this change's first version) differed from the brand's
+  in four hand-maintained ways, so a brand fix would reach the engine only if someone ported
+  it. Annotating the source (SuperconducTED/.github#3) lets all four files be pinned by hash;
+  the engine owns a thin `__init__.py` and nothing else (Mert's choice, 2026-10-16).
+- **Cryostat only, enforced by the shim rather than by trimming the helper.** The other five
+  palettes are the record of a decision already taken; shipping their styles would invite
+  their use. Only Cryostat's two styles are vendored, and the wrapper refuses the others
+  before matplotlib is touched, so the helper itself stays the brand's file.
 - **matplotlib as an optional extra, also in `dev`.** The engine itself draws nothing, so
   runtime users do not pay for matplotlib. Listing it in `dev` too (and pinning it in
   `requirements-dev.txt`, which CI installs) means `tests/test_figures.py` imports it
-  unconditionally: a missing matplotlib is a loud failure, not 49 silently skipped tests.
+  unconditionally: a missing matplotlib is a loud failure, not 50 silently skipped tests.
 - **B reads `roles.json`, it does not hard-code the hex values.** One source: when the
   brand's palette is re-vendored, the dashboard follows. `TestBrandColours` pins the mapping
   from roles to SVG parts, so a re-vendor that moves a colour is a visible golden diff.
@@ -198,7 +206,7 @@ ceiling (0.23 light). The derivation is in the brand README, section "The band t
 All on the pinned stack (Python 3.12.10, a fresh venv from `requirements.txt` and
 `requirements-dev.txt`, then `pip install -e . --no-deps`, the CI recipe):
 
-- `python -m pytest tests/test_figures.py tests/test_pipeline_health.py -q`: 109 passed.
+- `python -m pytest tests/test_figures.py tests/test_pipeline_health.py -q`: 110 passed.
 - `python -m pytest tests/ -q`: see NC-021 for the size and the commit it was run at.
 - `ruff check .`, `ruff format --check .`, `mypy --strict`: clean.
 - **Only colours changed in the SVG.** An element-by-element comparison of the old and new
@@ -210,7 +218,11 @@ All on the pinned stack (Python 3.12.10, a fresh venv from `requirements.txt` an
   `roles.json`; a solid crisp line; `mono_ticks` setting `sans-serif`; dropping `ec` from the
   colour-override guard; disabling the band's bound check; ringing measured points in ink;
   painting the SVG's track in the accent; a label colour below 4.5:1; and rendering a fired
-  hour in the old blue.
+  hour in the old blue. After the helper was vendored verbatim, four more: one byte of the
+  helper; an unpinned file beside the kit; `band` wrapped instead of re-exported; and `use()`
+  without its palette refusal.
+- **Vendoring the typed helper changed no drawing.** The example figure re-rendered with
+  the verbatim helper is byte-identical to the one rendered with the earlier typed copy.
 - **Nothing outside `superconducted.figures` needs matplotlib.** In a second venv built the
   way the `calibration-health` poll job builds it (`requirements.txt` only, then
   `pip install -e . --no-deps`), matplotlib is absent; `import superconducted` and
@@ -232,19 +244,21 @@ treats it like any other byte change.
 
 ## Follow-ups
 
-- `phase-3-dashboard` (orphan branch): its burn-up line is drawn in `--accent:#00707f`,
-  which the brand's colour rule reserves for a range. Its generator and CSS tokens should
-  take the Cryostat roles; that lands on that branch, not through a pull request to `main`.
-- Annotate the brand's own `superconducted_figures.py` the same way, so the engine's copy
-  becomes byte-identical too and the sync test can pin all four files.
+- Done the same day: `phase-3-dashboard` (orphan branch) drew its burn-up line in the
+  accent; its generator now takes the Cryostat roles (`6d68e32` on that branch, pushed on
+  Mert's word; the daily run regenerates the page). The brand's helper was annotated in
+  SuperconducTED/.github#3, which is what lets this copy be verbatim.
+- When SuperconducTED/.github#3 merges, nothing changes here unless review changed the
+  helper; if it did, re-vendor and update the pin in `tests/test_figures.py`.
 - When the first Phase 3 figure is drawn (the interval report of #64 is the natural first
   user of `band`), it should use `superconducted.figures`; any number it shows needs its row
   in `docs/numerical-claims.md`.
 
 ## Related docs
 
-- Brand kit: `SuperconducTED/.github`, branch `brand/superconducted-identity`, commit
-  `06f1959`, `brand/figures/README.md` (roles, rules, fonts, validation).
+- Brand kit: `SuperconducTED/.github`, `brand/figures/README.md` (roles, rules, fonts,
+  validation), merged to that repository's `main` in PR #1 (`06f1959`); the typed helper in
+  PR #3 (`3ff5e86`), with its record `docs/implementations/2026-10-16-type-the-chart-helper.md`.
 - `docs/implementations/2026-09-05-pipeline-health-dashboard.md` (the dashboard's contract:
   NFR-3 determinism, the golden fixture, commit-on-change).
 - ADR-004 in `docs/decisions.md` (pinned requirements files, loose ranges in
