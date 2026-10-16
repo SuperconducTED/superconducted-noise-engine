@@ -305,7 +305,7 @@
       "target": "2026-09-30",
       "owners": [
         "BurakOztekin",
-        "yigit-arda",
+        "BahaJarad",
         "bengisucvd",
         "mertefesensoy"
       ],
@@ -349,8 +349,8 @@
     {
       "id": 84,
       "short": "Close the #57 advisor loop",
-      "owner": "yigit-arda",
-      "co_owner": "mertefesensoy",
+      "owner": "mertefesensoy",
+      "co_owner": null,
       "milestone": "M1",
       "track": "governance",
       "priority": "high",
@@ -381,7 +381,7 @@
         61
       ],
       "why_now": "The only phase-3 blocker with a multi-week external latency tail, and the only M1 gate with no work in flight. Every day it waits is a day added to M3.",
-      "note": "Yiğit writes the brief; Mert sends it. ADR-027 stays Status: Open until the answers land.",
+      "note": "Mert writes the ADR-027 flip PR (#84 section 6) and Bengisu approves it, per the #57 close plan as amended on 2026-10-16. ADR-027 stays Status: Open until that PR merges.",
       "external_latency": true,
       "co_owner_action": "Send Dr. Akba the four ADR-027 questions",
       "co_owner_why": "FR-15 routes all advisor contact through the lead, so no one else can send it. The decision-by date was 2026-09-08 and has passed. ADR-027 stays Open, ADR-014 stays Deferred, and the M3 ADR-009 memo has no answer to build on until this goes out."
@@ -532,7 +532,7 @@
     {
       "id": 62,
       "short": "Run the ADR-019 ablation, publish the table",
-      "owner": "yigit-arda",
+      "owner": "BahaJarad",
       "milestone": "M2",
       "track": "benchmarks",
       "priority": "high",
