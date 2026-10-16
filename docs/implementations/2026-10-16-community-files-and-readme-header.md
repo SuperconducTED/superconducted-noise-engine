@@ -114,3 +114,11 @@ branch).
   `2026-10-16-repository-presence.md`, `brand/README.md` ("Digital applications")
 - [`docs/team.md`](../team.md), [`docs/decisions.md`](../decisions.md),
   [`docs/numerical-claims.md`](../numerical-claims.md)
+
+## As of 2026-10-16, later
+
+Cherry-picked unchanged onto `main` @ `fec055c1` as branch `mert/readme-citation-community`,
+where the README is then rewritten from the beginning and gains a `CITATION.cff`
+(`2026-10-16-readme-and-citation.md`). The header now loads
+`brand/web/readme-header-noise-engine.svg`: `SuperconducTED/.github` PR #5 moves the kit from
+`brand/kit/` to `brand/`.
