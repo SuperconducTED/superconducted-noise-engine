@@ -1,3 +1,5 @@
+<p align="center"><a href="https://github.com/SuperconducTED"><img src="https://raw.githubusercontent.com/SuperconducTED/.github/main/brand/kit/web/readme-header-noise-engine.svg" alt="SuperconducTED noise engine: fuzzy-logic noise engine for Qiskit Aer-based quantum computer emulators" width="100%"></a></p>
+
 # SuperconducTED
 
 Fuzzy-logic noise engine for Qiskit Aer-based quantum computer emulators.
@@ -79,6 +81,14 @@ template.
 
 Five contributors plus a faculty advisor. See [docs/team.md](docs/team.md) for
 the roster and module ownership table.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Ask questions in
+[Discussions, Q&A](https://github.com/SuperconducTED/superconducted-noise-engine/discussions/categories/q-a);
+report security problems privately, as the
+[security policy](https://github.com/SuperconducTED/.github/blob/main/SECURITY.md)
+describes.
 
 ## License
 
