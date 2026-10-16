@@ -5,7 +5,7 @@
 | Name | GitHub | Role | Primary modules |
 | --- | --- | --- | --- |
 | Dr. Fırat Akba | **none — reviews out-of-band; sign-off recorded in `docs/advisor/2026-09-03-decisions-from-akba.md`** | Faculty advisor | Reviews `docs/architecture.md` and architectural ADRs |
-| Mert Efe Şensoy | `@mertefesensoy` | CS junior | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger, `fuzzy/squashing.py` |
+| Mert Efe Şensoy | `@mertefesensoy` | CS senior | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger, `fuzzy/squashing.py` |
 | Burak Öztekin | `@BurakOztekin` | CS&EE senior | `fuzzy/tsk.py` (LOCKED), `fuzzy/fuzzification.py`, `integration/aer_factory.py`, `benchmarks/harness.py`, `benchmarks/circuits.py` |
 | Baha Jarad | `@BahaJarad` | CS&EE junior | `calibration/poller.py`, `calibration/storage.py`, `calibration/features.py`, `fuzzy/parameterization.py` |
 | Bengisu | `@bengisucvd` | Math junior | `fuzzy/defuzzification.py`, `channels/kraus.py` (LOCKED, co-owned), `benchmarks/metrics.py`, `fuzzy/membership.py` |
