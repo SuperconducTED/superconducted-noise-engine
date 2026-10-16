@@ -15,8 +15,10 @@ import pytest
 from scripts.backfill_state_index import main as backfill_main
 from scripts.capture_record import CaptureRow
 from scripts.pipeline_health import (
+    COLOURS,
     FONT_PX,
     NOTHING_TO_PUBLISH,
+    ROLES_FILE,
     PollRow,
     StateRow,
     build_metrics,
@@ -126,7 +128,7 @@ def test_svg_is_deterministic_well_formed_and_safe() -> None:
     assert "<script" not in svg and "<foreignObject" not in svg and "href=" not in svg
     root = ElementTree.fromstring(svg)
     assert root.attrib["viewBox"] == "0 0 900 510"
-    assert 'fill="#f8fafc"' in svg
+    assert f'<rect width="100%" height="100%" fill="{COLOURS["ground"]}"/>' in svg
     assert 'y="207"' in svg and 'y="222"' in svg
 
 
@@ -285,8 +287,98 @@ class TestConformance:
         """Overshooting a candidate floor must not paint outside the bar."""
         states = [StateRow(f"{n}.json", NOW, str(n), True) for n in range(40)]
         svg = render_svg(build_metrics(states, [], [("small", 4)], NOW))
-        assert '<rect x="55" y="165" width="790.00" height="24" rx="4" fill="#166534"/>' in svg
+        bar = f'<rect x="55" y="165" width="790.00" height="24" rx="4" fill="{COLOURS["ink"]}"/>'
+        assert bar in svg
         assert '<path d="M845.00 159v36"' in svg
+
+
+def _contrast(a: str, b: str) -> float:
+    """WCAG 2.x contrast ratio of two ``#RRGGBB`` colours (the brand's ``wcag.py`` formula)."""
+
+    def luminance(colour: str) -> float:
+        srgb = [int(colour[i : i + 2], 16) / 255 for i in (1, 3, 5)]
+        lin = [c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4 for c in srgb]
+        return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2]
+
+    high, low = sorted((luminance(a), luminance(b)), reverse=True)
+    return (high + 0.05) / (low + 0.05)
+
+
+SVG_NS = "{http://www.w3.org/2000/svg}"
+TEXT_FILL = re.compile(r"\.(\w+)\{font:[^;}]*;fill:(#[0-9A-Fa-f]{6})\}")
+
+
+class TestBrandColours:
+    """The dashboard draws in the SuperconducTED chart roles, Cryostat on its light ground.
+
+    Read from the published artifact the end-to-end fixture pins byte for byte, so every
+    part is present: floor ticks, fired and unfired poll hours, non-zero daily bars.
+    """
+
+    SVG: ClassVar[str] = (
+        (Path(__file__).resolve().parent / "fixtures" / "pipeline_health" / "expected")
+        .joinpath("progress.svg")
+        .read_text(encoding="utf-8")
+    )
+
+    @staticmethod
+    def _text_fills(svg: str) -> dict[str, str]:
+        style = ElementTree.fromstring(svg)[0].text or ""
+        return dict(TEXT_FILL.findall(style))
+
+    @staticmethod
+    def _mark_colours(svg: str) -> list[str]:
+        """Fill or stroke of every rect and path, the background rect included."""
+        return [
+            node.attrib.get("fill") or node.attrib["stroke"]
+            for node in ElementTree.fromstring(svg).iter()
+            if node.tag in (f"{SVG_NS}rect", f"{SVG_NS}path")
+        ]
+
+    def test_the_colours_are_the_vendored_cryostat_light_roles(self) -> None:
+        """One source: the roles.json superconducted.figures ships, not a second copy."""
+        repo = Path(__file__).resolve().parents[1]
+        assert repo / "src" / "superconducted" / "figures" / "roles.json" == ROLES_FILE
+        light = json.loads(ROLES_FILE.read_text(encoding="utf-8"))["palettes"]["cryostat"]
+        light = light["light"]
+        assert {
+            "ground": light["ground"],
+            "text": light["text"],
+            "text_secondary": light["text_secondary"],
+            "ink": light["ink"],
+            "track": light["grid"],
+        } == COLOURS
+
+    def test_every_colour_drawn_is_a_role_and_the_accent_is_absent(self) -> None:
+        """The brand's one colour rule: the accent marks a range, and this chart has none."""
+        text, marks = self._text_fills(self.SVG), self._mark_colours(self.SVG)
+        assert set(text) == set(FONT_PX), "a text class was not read"
+        assert set(marks) == {COLOURS[k] for k in ("ground", "track", "ink", "text_secondary")}
+        assert set(text.values()) | set(marks) <= set(COLOURS.values())
+        light = json.loads(ROLES_FILE.read_text(encoding="utf-8"))["palettes"]["cryostat"]
+        banned = [light["light"][k] for k in ("accent", "band_fill", "band_edge")]
+        banned += light["light"]["series"]
+        for colour in banned:
+            assert colour.lower() not in self.SVG.lower(), f"{colour} is drawn"
+
+    def test_text_and_marks_clear_the_contrast_floors(self) -> None:
+        """Text >= 4.5:1 and data marks >= 3:1 on the ground (WCAG 2.x, the brand's gates).
+
+        The track and unfired hours are exempt: they are the empty slot a mark sits in, the
+        brand's grid role, which it reports and does not gate.
+        """
+        ground = COLOURS["ground"]
+        for name, colour in self._text_fills(self.SVG).items():
+            assert _contrast(colour, ground) >= 4.5, name
+        drawn = [c for c in self._mark_colours(self.SVG) if c not in (ground, COLOURS["track"])]
+        assert drawn, "no data mark read, so nothing was checked"
+        for colour in drawn:
+            assert _contrast(colour, ground) >= 3.0, colour
+
+    def test_contrast_is_the_published_wcag_ratio(self) -> None:
+        """Pin the formula itself: black on white is 21:1 and a colour on itself is 1:1."""
+        assert _contrast("#000000", "#FFFFFF") == pytest.approx(21.0)
+        assert _contrast("#EEF3F5", "#EEF3F5") == pytest.approx(1.0)
 
 
 class TestCommitOnChange:
