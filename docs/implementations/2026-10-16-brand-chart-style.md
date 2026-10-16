@@ -211,6 +211,16 @@ All on the pinned stack (Python 3.12.10, a fresh venv from `requirements.txt` an
   colour-override guard; disabling the band's bound check; ringing measured points in ink;
   painting the SVG's track in the accent; a label colour below 4.5:1; and rendering a fired
   hour in the old blue.
+- **Nothing outside `superconducted.figures` needs matplotlib.** In a second venv built the
+  way the `calibration-health` poll job builds it (`requirements.txt` only, then
+  `pip install -e . --no-deps`), matplotlib is absent; `import superconducted` and
+  `import superconducted.calibration.poller` load without it, `superconducted-poll --help`
+  runs, and `import superconducted.figures` fails with a plain `ModuleNotFoundError` naming
+  matplotlib. With the bare 3.12 interpreter and `PYTHONPATH` set to the checkout, as the
+  render job runs it, `backfill_state_index.py` then `pipeline_health.py` over a copy of the
+  end-to-end fixture write a `progress.svg` and `metrics.json` byte-identical to the golden
+  ones. (Run the copy under a short path: below a Windows path near 260 characters the
+  backfill cannot open the snapshot files and indexes nothing.)
 - **The font fallback is silent.** With the style applied and the brand fonts absent (this
   machine), a full figure renders with no `matplotlib` warning; forcing a missing font
   produces `findfont` warnings, which the test would catch.
