@@ -422,3 +422,23 @@ recommendations.
   planned as gated tasks (the lead's rule of 2026-10-04), not run ahead of his say-so. The
   feature-patterns document's steps M0 to M8 are the pre-meeting proposal and have not been
   re-ordered.
+
+## As of 2026-10-16: capstone topic framing
+
+Appended 2026-10-16; the planning and meeting records above are unchanged.
+
+The English capstone topic for this documentation sequence is:
+
+> **Drift-Aware Adaptive Model Selection for Robust Time-Series Forecasting**
+
+This is an umbrella framing, not a replacement for the project-specific research question.
+In this repository, the time series are superconducting-quantum-device calibration states;
+the predicted targets are later noise parameters and gate errors; and the candidate models
+are the Type-1 fuzzy, Interval Type-2 fuzzy, and deep forecasting engines. “Drift-aware”
+names the measured calibration re-measurement cadence and the planned epoch/change-event
+protocol. “Adaptive model selection” names the planned comparison and selection among the
+three engine modes; it does not claim that an adaptive selector has already been implemented.
+
+The detailed forecasting motivation, drift evidence, and recommended evaluation protocol
+remain in `2026-10-04-deep-engine-architecture-research.md`. The topic therefore describes
+the research program without promoting its open recommendations or planned tasks into results.

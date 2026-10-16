@@ -429,3 +429,20 @@ All resolved on 2026-10-04: arXiv IDs against the arXiv API, DOIs against Crossr
 | Mahadevan and Mathioudakis, Cost-Effective Retraining (2023) | arXiv:2310.04216 | Retraining cost trade-off |
 | Regol et al., When to Retrain a ML Model (2025) | arXiv:2505.14903 | Retraining by forecast, not RL |
 | IBM, Migrate from Qiskit Pulse to fractional gates | https://quantum.cloud.ibm.com/docs/en/guides/pulse-migration | Pulse-level control deprecated (vendor documentation, no DOI) |
+
+## As of 2026-10-16: capstone topic alignment
+
+The capstone topic, **Drift-Aware Adaptive Model Selection for Robust Time-Series
+Forecasting**, summarizes this research document's role in the wider three-engine plan.
+
+- **Drift-aware** refers to the calibration re-measurement process and the epoch-based
+  evaluation concern documented in §0.
+- **Adaptive model selection** refers to evaluating the common target and split across the
+  Type-1 fuzzy, Interval Type-2 fuzzy, and deep forecasting engines; it is not a claim that
+  online model switching is implemented.
+- **Robust time-series forecasting** refers to later-state targets, change-event coverage,
+  and drift-robust uncertainty bands rather than same-snapshot regression.
+
+The repository-specific domain remains superconducting-qubit calibration and quantum-noise
+modelling. This title is an English academic framing for the capstone, not a new architecture
+decision or a result.
