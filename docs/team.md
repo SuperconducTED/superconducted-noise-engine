@@ -8,7 +8,6 @@
 | Mert Efe Şensoy | `@mertefesensoy` | CS junior | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger |
 | Burak Öztekin | `@BurakOztekin` | CS&EE senior | `fuzzy/tsk.py` (LOCKED), `fuzzy/fuzzification.py`, `integration/aer_factory.py`, `benchmarks/harness.py` |
 | Baha Jarad | `@BahaJarad` | CS&EE junior | `calibration/poller.py`, `calibration/storage.py`, `calibration/features.py` |
-| Yiğit Arda Kaderoğlu | `@yigit-arda` | CS sophomore | `fuzzy/membership.py`, `fuzzy/parameterization.py`, `fuzzy/squashing.py`, `benchmarks/circuits.py` |
 | Bengisu | `@bengisucvd` | Math junior | `fuzzy/defuzzification.py`, `channels/kraus.py` (LOCKED, co-owned), `benchmarks/metrics.py` |
 
 Handles are from `gh api repos/SuperconducTED/superconducted-noise-engine/collaborators`,
@@ -22,6 +21,18 @@ collaborator — see "Reviews from outside GitHub" below.
 > three times. Copy the handle from this table rather than guessing it from a
 > first name.
 
+### Former contributors
+
+| Name | GitHub | Role on the team | Modules owned | Departure |
+| --- | --- | --- | --- | --- |
+| Yiğit Arda Kaderoğlu | `@yigit-arda` | CS sophomore | `fuzzy/membership.py`, `fuzzy/parameterization.py`, `fuzzy/squashing.py`, `benchmarks/circuits.py` | Left the team; reported by Mert Efe Şensoy on 2026-10-16 (leaving date not recorded) |
+
+Earlier issues, PRs and dated docs that name `@yigit-arda` as an owner, author or
+approver describe the state when they were written and are not rewritten. His
+four modules read "Owner to be decided" in the table below until the team names
+new owners; the departure is recorded in
+`docs/implementations/2026-10-16-record-yigit-departure.md`.
+
 ## Module ownership
 
 | Module | Primary owner | Secondary reviewer |
@@ -32,20 +43,30 @@ collaborator — see "Reviews from outside GitHub" below.
 | `calibration/features.py` | Baha Jarad | Bengisu |
 | `training/` (`__init__.py`, `parameters.py`, `targets.py`) | Mert Efe Şensoy | Burak Öztekin |
 | `training/anfis.py` | Burak Öztekin | Bengisu |
-| `fuzzy/membership.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
-| `fuzzy/parameterization.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
+| `fuzzy/membership.py` | Owner to be decided (since 2026-10-16) | Burak Öztekin |
+| `fuzzy/parameterization.py` | Owner to be decided (since 2026-10-16) | Burak Öztekin |
 | `fuzzy/tsk.py` (LOCKED) | Burak Öztekin | Mert Efe Şensoy + Bengisu |
 | `fuzzy/defuzzification.py` | Bengisu | Burak Öztekin |
 | `fuzzy/fuzzification.py` | Burak Öztekin | Mert Efe Şensoy |
-| `fuzzy/squashing.py` | Yiğit Arda Kaderoğlu | Bengisu |
+| `fuzzy/squashing.py` | Owner to be decided (since 2026-10-16) | Bengisu |
 | `channels/kraus.py` (LOCKED) | Bengisu | Burak Öztekin |
 | `integration/aer_factory.py` | Burak Öztekin | Mert Efe Şensoy |
-| `benchmarks/circuits.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
+| `benchmarks/circuits.py` | Owner to be decided (since 2026-10-16) | Burak Öztekin |
 | `benchmarks/metrics.py` | Bengisu | Mert Efe Şensoy |
 | `benchmarks/harness.py` | Burak Öztekin | Mert Efe Şensoy |
 | `tests/*` | Owner of the implementation under test | — |
 | `docs/architecture.md` | Dr. Fırat Akba | Mert Efe Şensoy |
 | `docs/decisions.md` (ADR ledger) | Dr. Fırat Akba | Mert Efe Şensoy |
+
+> **NOTE · Four rows have no primary owner.** `fuzzy/membership.py`,
+> `fuzzy/parameterization.py`, `fuzzy/squashing.py` and `benchmarks/circuits.py`
+> read "Owner to be decided" since their owner left the team (see "Former
+> contributors" above). This is not a reassignment. Until the team names an
+> owner, the standing rule in "How ownership works" applies: the secondary
+> reviewer stands in when the primary owner is unavailable, so a PR touching one
+> of these files, or the tests of one (which the `tests/*` row gives to the
+> module's owner), requests that module's secondary reviewer. The PR template's
+> "Tag the module owner" line resolves the same way.
 
 ## How ownership works
 
