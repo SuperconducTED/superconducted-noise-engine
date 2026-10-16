@@ -5,11 +5,10 @@
 | Name | GitHub | Role | Primary modules |
 | --- | --- | --- | --- |
 | Dr. Fırat Akba | **none — reviews out-of-band; sign-off recorded in `docs/advisor/2026-09-03-decisions-from-akba.md`** | Faculty advisor | Reviews `docs/architecture.md` and architectural ADRs |
-| Mert Efe Şensoy | `@mertefesensoy` | CS junior | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger |
-| Burak Öztekin | `@BurakOztekin` | CS&EE senior | `fuzzy/tsk.py` (LOCKED), `fuzzy/fuzzification.py`, `integration/aer_factory.py`, `benchmarks/harness.py` |
-| Baha Jarad | `@BahaJarad` | CS&EE junior | `calibration/poller.py`, `calibration/storage.py`, `calibration/features.py` |
-| Yiğit Arda Kaderoğlu | `@yigit-arda` | CS sophomore | `fuzzy/membership.py`, `fuzzy/parameterization.py`, `fuzzy/squashing.py`, `benchmarks/circuits.py` |
-| Bengisu | `@bengisucvd` | Math junior | `fuzzy/defuzzification.py`, `channels/kraus.py` (LOCKED, co-owned), `benchmarks/metrics.py` |
+| Mert Efe Şensoy | `@mertefesensoy` | CS senior | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger, `fuzzy/squashing.py` |
+| Burak Öztekin | `@BurakOztekin` | CS&EE senior | `fuzzy/tsk.py` (LOCKED), `fuzzy/fuzzification.py`, `integration/aer_factory.py`, `benchmarks/harness.py`, `benchmarks/circuits.py` |
+| Baha Jarad | `@BahaJarad` | CS&EE senior | `calibration/poller.py`, `calibration/storage.py`, `calibration/features.py`, `fuzzy/parameterization.py` |
+| Bengisu | `@bengisucvd` | Math senior | `fuzzy/defuzzification.py`, `channels/kraus.py` (LOCKED, co-owned), `benchmarks/metrics.py`, `fuzzy/membership.py` |
 
 Handles are from `gh api repos/SuperconducTED/superconducted-noise-engine/collaborators`,
 run 2026-09-07. A blank cell would be ambiguous, so an absent account is stated
@@ -32,15 +31,15 @@ collaborator — see "Reviews from outside GitHub" below.
 | `calibration/features.py` | Baha Jarad | Bengisu |
 | `training/` (`__init__.py`, `parameters.py`, `targets.py`) | Mert Efe Şensoy | Burak Öztekin |
 | `training/anfis.py` | Burak Öztekin | Bengisu |
-| `fuzzy/membership.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
-| `fuzzy/parameterization.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
+| `fuzzy/membership.py` | Bengisu | Burak Öztekin |
+| `fuzzy/parameterization.py` | Baha Jarad | Burak Öztekin |
 | `fuzzy/tsk.py` (LOCKED) | Burak Öztekin | Mert Efe Şensoy + Bengisu |
 | `fuzzy/defuzzification.py` | Bengisu | Burak Öztekin |
 | `fuzzy/fuzzification.py` | Burak Öztekin | Mert Efe Şensoy |
-| `fuzzy/squashing.py` | Yiğit Arda Kaderoğlu | Bengisu |
+| `fuzzy/squashing.py` | Mert Efe Şensoy | Bengisu |
 | `channels/kraus.py` (LOCKED) | Bengisu | Burak Öztekin |
 | `integration/aer_factory.py` | Burak Öztekin | Mert Efe Şensoy |
-| `benchmarks/circuits.py` | Yiğit Arda Kaderoğlu | Burak Öztekin |
+| `benchmarks/circuits.py` | Burak Öztekin | Bengisu |
 | `benchmarks/metrics.py` | Bengisu | Mert Efe Şensoy |
 | `benchmarks/harness.py` | Burak Öztekin | Mert Efe Şensoy |
 | `tests/*` | Owner of the implementation under test | — |
