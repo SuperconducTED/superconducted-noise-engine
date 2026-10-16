@@ -157,6 +157,46 @@ already moved. They are marked stale rather than green.
 | ❌ | Not done. |
 | ⬜ | No machine-checkable source. Deliberately not amber: an unknown must never read as progress. |
 
+## Colours
+
+Since 2026-10-16 the page draws in the SuperconducTED **Cryostat** chart roles
+(`SuperconducTED/.github`, branch `brand/superconducted-identity`, `brand/figures/roles.json`
+at `06f1959`; the engine vendors the same file as `src/superconducted/figures/roles.json`).
+The brand's one colour rule is that the accent marks a range, the engine's interval, and
+nothing else. Nothing on this page is a range, so the page has **no accent token**: the
+teal it used for links, focus rings, the calendar bar, milestone ids, "ready" pills and the
+burn-up line is gone, and those now wear ink.
+
+| Token | Light | Dark | Role, and what wears it |
+| --- | --- | --- | --- |
+| `--bg`, `--panel` | `#EEF3F5` | `#0A1B24` | `ground`. Page and cards share it; cards keep their border and shadow |
+| `--ink` | `#0A1B24` | `#EEF3F5` | `ink`: text, links (underlined), focus ring, calendar bar, burn-up line and dot, "ready" pill text |
+| `--ink-2` | `#28373F` | `#C5CCCF` | ink over ground at 87 (light) and 82 (dark) percent |
+| `--muted` | `#45535A` | `#9CA5AA` | `text_secondary`: secondary text, milestone ids |
+| `--axis`, `--idle` | `#838D93` | `#5A676D` | `axis`: link underlines, the "ready" pill outline, low-severity marks, the advisor's card |
+| `--line`, `--idle-bg` | `#D3D9DC` | `#25353D` | `grid`: hairlines, idle pill fill |
+| `--sunk` | `#DEE4E6` | `#1A2A33` | ink over ground at 7 percent: the calendar bar's track |
+| `--s1` .. `--s6` | brand series | brand series | per-person identity, from `plan.json` (below) |
+
+**People** take the brand's categorical sequence by name, not by rank, so removing one
+never repaints the others: `plan.json`'s `colour` is `series-1` .. `series-6` or `idle`, and
+`person_colour()` turns it into `var(--sN)`. Bengisu `series-1` (magenta), Baha `series-2`
+(green), Mert `series-3` (violet), Yiğit `series-4` (yellow), Burak `series-5` (blue), Dr.
+Akba `idle`. Each kept the hue family it had. A `#rrggbb` value still passes through.
+
+**Contrast** (WCAG 2.x, on the ground): text at least 4.5:1 (`--ink` 15.71 in both modes,
+`--ink-2` 10.99 light and 10.80 dark, `--muted` 7.12 and 7.01, `--bad` 6.73 and 6.21); marks
+at least 3:1 (series 3.03 to 7.65 light and 3.55 to 5.72 dark over all six slots, `--axis`
+3.03 and 3.01). The brand tuned the series to clear 3:1 on the ground itself, which is why
+the cards no longer sit on a lighter or darker panel. Gridlines are decoration, not gated.
+
+**Not from the brand, on purpose.** `--ok`, `--warn` and `--bad` (with their `-bg` pairs)
+are this page's own status colours, unchanged: the brand defines no status colours yet,
+and inventing them belongs in the brand, not here. Their pill text clears 5.33:1 or more on
+its own fill in both modes. The type is still IBM Plex Sans and Mono; the brand's faces are
+Space Grotesk and Space Mono, and switching them changes widths across the whole page, so it
+is a separate decision.
+
 ## The block in this README
 
 The **Current status** section at the top is generated. `generate.py` rewrites everything
@@ -216,7 +256,8 @@ Edit it when, and only when, one of these is true:
 
 - a milestone gate's wording or target changes in the plan document;
 - a ticket's stated `Depends on` row changes on GitHub;
-- a new ticket joins the phase, or an owner changes;
+- a new ticket joins the phase, or an owner changes (a new person takes the next free
+  `series-N` colour, never a raw hex; see "Colours");
 - a manual gate (`"kind": "manual"`) becomes machine-checkable, or its `note` goes stale.
 
 Everything else (issue state, PR state, review decisions, CI, ADR statuses) is read live

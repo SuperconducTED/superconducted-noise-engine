@@ -503,6 +503,22 @@ def day_events(prev: dict, cur: dict, plan: dict) -> list[str]:
     return ev
 
 
+def person_colour(value: str) -> str:
+    """The CSS value for a person's identity colour, from plan.json's ``colour``.
+
+    ``series-1`` .. ``series-6`` name the brand's categorical sequence (``--s1`` ..
+    ``--s6``, defined per light and dark mode, fixed order: colour follows the person,
+    never their rank), ``idle`` the neutral for someone outside the team's rotation. Any
+    other value, such as a ``#rrggbb`` hex, passes through unchanged, so an unmapped
+    entry still renders.
+    """
+    if value.startswith("series-") and value[7:].isdigit() and 1 <= int(value[7:]) <= 6:
+        return f"var(--s{value[7:]})"
+    if value == "idle":
+        return "var(--idle)"
+    return value
+
+
 def burnup_svg(history: list[dict], plan: dict) -> str:
     """Gates met over the phase, against an even-pace reference.
 
@@ -549,11 +565,11 @@ def burnup_svg(history: list[dict], plan: dict) -> str:
              f'stroke-dasharray="4 4" fill="none" opacity=".65"/>')
     s.append(f'<text x="{W-R+8}" y="{y(total)+4:.1f}" fill="var(--muted)" font-size="11" '
              f'font-family="var(--sans)">even pace</text>')
-    # Measured series.
-    s.append(f'<path d="{path}" stroke="var(--accent)" stroke-width="2" fill="none" '
+    # Measured series, in ink: a measurement, not a range, so never the accent.
+    s.append(f'<path d="{path}" stroke="var(--ink)" stroke-width="2" fill="none" '
              f'stroke-linejoin="round" stroke-linecap="round"/>')
     s.append(f'<circle cx="{pts[-1][0]:.1f}" cy="{pts[-1][1]:.1f}" r="4.5" '
-             f'fill="var(--accent)" stroke="var(--panel)" stroke-width="2"/>')
+             f'fill="var(--ink)" stroke="var(--panel)" stroke-width="2"/>')
     s.append(f'<text x="{pts[-1][0]+10:.1f}" y="{pts[-1][1]+4:.1f}" fill="var(--ink)" '
              f'font-size="12" font-weight="600" font-family="var(--sans)">'
              f'{last["gates_done"]} met</text>')
@@ -937,49 +953,56 @@ def render_html(plan: dict, model: dict, queue: dict, main: dict, now: str,
       'family=IBM+Plex+Sans:wght@400;450;500;600;700&display=swap">')
     a("<style>")
     a("""
-/* Palette: a cryostat, not a cream document. The neutral carries a cool blue
-   bias toward the accent, which is the teal of a dilution-fridge readout rather
-   than a default indigo. Semantic colours (met / in flight / not done) are a
-   separate axis from the accent and never borrow it. */
+/* Palette: SuperconducTED Cryostat, the chart roles in SuperconducTED/.github
+   brand/figures/roles.json at 06f1959. The brand's one colour rule is that the
+   accent marks a range (the engine's interval) and nothing else; nothing on this
+   page is a range, so the page has no accent token at all. Ink carries the data
+   (progress, the burn-up), links and focus. --ink-2 and --sunk are ink laid over
+   the ground (87/82 and 7 percent), the brand's own way of deriving neutrals;
+   --muted, --axis and --line are its text_secondary, axis and grid. Page and
+   cards share the ground because the series colours (--s1..--s6, per-person
+   identity, fixed order) clear 3:1 on the ground exactly. The status colours
+   (--ok, --warn, --bad) are this page's own: the brand defines none yet. */
 :root{
-  --bg:#f4f6f8; --panel:#fff; --sunk:#eceff3;
-  --ink:#101519; --ink-2:#39434d; --muted:#5f6b78; --line:#dde3e9;
-  --accent:#00707f; --accent-bg:#dff1f3; --accent-ink:#00707f;
+  --bg:#EEF3F5; --panel:#EEF3F5; --sunk:#DEE4E6;
+  --ink:#0A1B24; --ink-2:#28373F; --muted:#45535A; --line:#D3D9DC; --axis:#838D93;
   --ok:#146b3a; --ok-bg:#e2f2e8;
   --warn:#8f5406; --warn-bg:#faeedd;
   --bad:#a80f37; --bad-bg:#fbe6ec;
-  --idle:#6b7783; --idle-bg:#e7ebef;
-  --shadow:0 1px 1px rgba(16,21,25,.03), 0 12px 28px -20px rgba(16,21,25,.28);
+  --idle:#838D93; --idle-bg:#D3D9DC;
+  --s1:#D36992; --s2:#008300; --s3:#4A3AA7; --s4:#BD7F00; --s5:#2D7BD9; --s6:#E6632F;
+  --shadow:0 1px 1px rgba(10,27,36,.03), 0 12px 28px -20px rgba(10,27,36,.28);
   --sans:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0d1215; --panel:#141b20; --sunk:#101619;
-  --ink:#e6edf1; --ink-2:#b9c5ce; --muted:#8b98a4; --line:#242e35;
-  --accent:#4ecdd8; --accent-bg:#0d2f34; --accent-ink:#7fdde6;
+  --bg:#0A1B24; --panel:#0A1B24; --sunk:#1A2A33;
+  --ink:#EEF3F5; --ink-2:#C5CCCF; --muted:#9CA5AA; --line:#25353D; --axis:#5A676D;
   --ok:#59c584; --ok-bg:#10291b;
   --warn:#d9a24f; --warn-bg:#2a2011;
   --bad:#f0708f; --bad-bg:#2c1219;
-  --idle:#7b8895; --idle-bg:#1a2126;
+  --idle:#5A676D; --idle-bg:#25353D;
+  --s1:#D55181; --s2:#008300; --s3:#9085E9; --s4:#C98500; --s5:#3987E5; --s6:#D95926;
   --shadow:0 1px 1px rgba(0,0,0,.4), 0 12px 28px -20px rgba(0,0,0,.8);
 }}
 :root[data-theme="dark"]{
-  --bg:#0d1215; --panel:#141b20; --sunk:#101619;
-  --ink:#e6edf1; --ink-2:#b9c5ce; --muted:#8b98a4; --line:#242e35;
-  --accent:#4ecdd8; --accent-bg:#0d2f34; --accent-ink:#7fdde6;
+  --bg:#0A1B24; --panel:#0A1B24; --sunk:#1A2A33;
+  --ink:#EEF3F5; --ink-2:#C5CCCF; --muted:#9CA5AA; --line:#25353D; --axis:#5A676D;
   --ok:#59c584; --ok-bg:#10291b;
   --warn:#d9a24f; --warn-bg:#2a2011;
   --bad:#f0708f; --bad-bg:#2c1219;
-  --idle:#7b8895; --idle-bg:#1a2126;
+  --idle:#5A676D; --idle-bg:#25353D;
+  --s1:#D55181; --s2:#008300; --s3:#9085E9; --s4:#C98500; --s5:#3987E5; --s6:#D95926;
   --shadow:0 1px 1px rgba(0,0,0,.4), 0 12px 28px -20px rgba(0,0,0,.8);
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);
   font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased;padding:0 0 88px}
 .wrap{max-width:1200px;margin:0 auto;padding:0 26px}
-a{color:var(--accent);text-decoration:none}
-a:hover{text-decoration:underline}
-a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--axis);
+  text-underline-offset:2px}
+a:hover{text-decoration-color:var(--ink)}
+a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:3px}
 code,.mono,.num,td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
 h1,h2,h3{text-wrap:balance}
 
@@ -1000,7 +1023,7 @@ h1 .goal{color:var(--muted);font-weight:400}
   color:var(--muted);font-weight:600;margin-top:9px}
 .readout .v.alarm{color:var(--bad)}
 .bar{height:4px;border-radius:99px;background:var(--sunk);overflow:hidden;margin-top:12px}
-.bar > i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.bar > i{display:block;height:100%;background:var(--ink);border-radius:99px}
 .calendar{padding:15px 17px;background:var(--panel);grid-column:1/-1}
 
 /* ---- section headings: hairline rule, no card ---- */
@@ -1015,7 +1038,7 @@ h2{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mu
 @media(min-width:920px){.grid.two{grid-template-columns:1fr 1fr}}
 
 /* ---- per-person action queue: the operating surface ---- */
-.person{border-top:3px solid var(--pc,var(--accent))}
+.person{border-top:3px solid var(--pc,var(--idle))}
 .person h3{margin:0;font-size:16px;font-weight:600;letter-spacing:-.008em}
 .person .role{color:var(--muted);font-size:12px;margin:1px 0 13px;font-family:var(--mono)}
 ol.acts{list-style:none;counter-reset:a;margin:0;padding:0;display:flex;
@@ -1034,7 +1057,7 @@ ol.acts .tags{margin-top:8px;display:flex;gap:5px;flex-wrap:wrap}
 /* ---- milestone blocks ---- */
 .ms{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start}
 .ms h3{margin:0 0 2px;font-size:16px;font-weight:600;letter-spacing:-.008em}
-.ms h3 .id{font-family:var(--mono);color:var(--accent);margin-right:7px}
+.ms h3 .id{font-family:var(--mono);color:var(--muted);margin-right:7px}
 .ms .when{text-align:right;white-space:nowrap}
 .ms .when .d{font-family:var(--mono);font-size:14px;font-weight:500}
 .ms .prog{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:3px}
@@ -1050,7 +1073,7 @@ ol.acts .tags{margin-top:8px;display:flex;gap:5px;flex-wrap:wrap}
 .pill.warn{background:var(--warn-bg);color:var(--warn)}
 .pill.bad{background:var(--bad-bg);color:var(--bad)}
 .pill.idle{background:var(--idle-bg);color:var(--muted)}
-.pill.accent{background:var(--accent-bg);color:var(--accent-ink)}
+.pill.ready{background:none;color:var(--ink);box-shadow:inset 0 0 0 1px var(--axis)}
 
 /* ---- tables: hairlines only, no card chrome competing with the data ---- */
 .scroll{overflow-x:auto}
@@ -1135,8 +1158,8 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
     order = ["mertefesensoy", "BurakOztekin", "yigit-arda", "bengisucvd", "BahaJarad"]
     for login in order + [k for k in queue if k not in order]:
         acts = queue.get(login, [])
-        meta = plan["people"].get(login, {"name": login, "role": "", "colour": "#6b7280"})
-        a(f'<div class="card person" style="--pc:{e(meta["colour"])}">')
+        meta = plan["people"].get(login, {"name": login, "role": "", "colour": "idle"})
+        a(f'<div class="card person" style="--pc:{e(person_colour(meta["colour"]))}">')
         a(f'<h3>{e(meta["name"])}</h3><div class="role">@{e(login)} · {e(meta["role"])}</div>')
         if not acts:
             a('<div class="empty">Nothing ready and nothing owed. Available for reviews.</div>')
@@ -1148,7 +1171,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
                 a(f'<span class="act">{e(act["action"])}</span>')
                 a(f'<span class="why">{e(act["why"])}</span>')
                 a('<span class="tags">')
-                kind_pill = {"ready": ("accent", "ready to start"),
+                kind_pill = {"ready": ("ready", "ready to start"),
                              "review": ("bad", "you are the blocker"),
                              "in_review": ("warn", "in review")}[act["kind"]]
                 a(f'<span class="pill {kind_pill[0]}">{kind_pill[1]}</span>')
@@ -1201,7 +1224,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
                  f'{"draft" if pr.get("isDraft") else "open"}</span>'
                  f'<div class="sub">+{pr.get("additions",0)}/−{pr.get("deletions",0)} · '
                  f'{pr.get("file_count",0)} files</div>') if pr else \
-                '<span class="pill accent">no branch yet</span>'
+                '<span class="pill ready">no branch yet</span>'
         ordered = sorted(t["blockers"], key=lambda x: SEV_RANK.get(x["severity"], 9))
         worst = ordered[0]["severity"] if ordered else "low"
         a(f'<tr class="sev-{e(worst)}"><td class="num"><a href="{e(t["url"])}">#{t["id"]}</a>'

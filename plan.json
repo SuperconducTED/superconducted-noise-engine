@@ -41,32 +41,32 @@
     "mertefesensoy": {
       "name": "Mert Efe Şensoy",
       "role": "Lead: unblock others",
-      "colour": "#4338ca"
+      "colour": "series-3"
     },
     "BurakOztekin": {
       "name": "Burak Öztekin",
       "role": "The long pole: the trainer",
-      "colour": "#1d4ed8"
+      "colour": "series-5"
     },
     "yigit-arda": {
       "name": "Yiğit Arda Kaderoğlu",
       "role": "The keystone: parameterization + ablation",
-      "colour": "#b45309"
+      "colour": "series-4"
     },
     "bengisucvd": {
       "name": "Bengisu Cıvdı",
       "role": "The instruments",
-      "colour": "#be185d"
+      "colour": "series-1"
     },
     "BahaJarad": {
       "name": "Baha Jarad",
       "role": "The data track",
-      "colour": "#15803d"
+      "colour": "series-2"
     },
     "akba": {
       "name": "Dr. Fırat Akba",
       "role": "Advisor: out of band via the lead",
-      "colour": "#6b7280"
+      "colour": "idle"
     }
   },
   "milestones": [
