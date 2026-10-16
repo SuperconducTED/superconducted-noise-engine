@@ -62,42 +62,6 @@ inside the canvas and fails the conformance check early, while under-estimating
 lets one escape, so the error belongs on this side.
 """
 
-ROLES_FILE = (
-    Path(__file__).resolve().parents[1] / "src" / "superconducted" / "figures" / "roles.json"
-)
-"""The SuperconducTED chart roles, vendored from the brand kit with ``superconducted.figures``.
-
-Read as JSON, never imported: the render job runs this script with a bare interpreter
-(``PYTHONPATH=source``, nothing installed), and importing ``superconducted.figures`` would
-import matplotlib. A missing or renamed file fails the render loudly instead of falling back
-to colours nobody chose.
-"""
-
-
-def chart_colours(path: Path = ROLES_FILE) -> dict[str, str]:
-    """The SVG's colours, by the brand role each part of the dashboard plays.
-
-    Reads the light-ground roles of the identity's chosen palette (``"chosen"`` in the file,
-    Cryostat). The dashboard has no interval, so the accent, which means "the range" and
-    nothing else, is deliberately absent: ``text`` for headings and figures,
-    ``text_secondary`` for labels and the floor ticks, ``ink`` for every data mark (progress,
-    fired poll hours, daily bars), and ``grid`` for the empty track and unfired hours, which
-    are decoration a reader is not asked to read.
-    """
-    doc = json.loads(path.read_text(encoding="utf-8"))
-    light = doc["palettes"][doc["chosen"]]["light"]
-    return {
-        "ground": str(light["ground"]),
-        "text": str(light["text"]),
-        "text_secondary": str(light["text_secondary"]),
-        "ink": str(light["ink"]),
-        "track": str(light["grid"]),
-    }
-
-
-COLOURS = chart_colours()
-"""Role name to ``#RRGGBB``, as ``render_svg`` draws them; see ``chart_colours``."""
-
 
 def text_span(x: float, text: str, font_px: float, anchor: str) -> tuple[float, float]:
     """Estimate the horizontal extent a text node occupies, as ``(left, right)``.
@@ -461,10 +425,8 @@ def render_svg(metrics: dict[str, Any]) -> str:
         f'<text x="525" y="76" class="metric">{duplicate:.1f}% duplicate</text>',
         f'<text x="55" y="116" class="label">Time since last new state: {stale_text}</text>',
         '<text x="55" y="154" class="label">Distinct states against candidate floors</text>',
-        f'<rect x="{bar_x}" y="165" width="{bar_width}" height="24" rx="4" '
-        f'fill="{COLOURS["track"]}"/>',
-        f'<rect x="{bar_x}" y="165" width="{progress:.2f}" height="24" rx="4" '
-        f'fill="{COLOURS["ink"]}"/>',
+        f'<rect x="{bar_x}" y="165" width="{bar_width}" height="24" rx="4" fill="#d7e0ea"/>',
+        f'<rect x="{bar_x}" y="165" width="{progress:.2f}" height="24" rx="4" fill="#166534"/>',
     ]
     # Draw ticks left to right whatever order the workflow supplied them in.
     # metrics.json keeps the operator's order; only the drawing is sorted, so
@@ -475,9 +437,7 @@ def render_svg(metrics: dict[str, Any]) -> str:
     for index, floor in enumerate(ordered):
         x = bar_x + min(int(floor["value"]) / max_floor, 1) * bar_width
         drawn = f"{floor['label']}: {floor['value']}"
-        labels.append(
-            f'<path d="M{x:.2f} 159v36" stroke="{COLOURS["text_secondary"]}" stroke-width="2"/>'
-        )
+        labels.append(f'<path d="M{x:.2f} 159v36" stroke="#9a3412" stroke-width="2"/>')
         # Three rows, not two: with two, the first and third tick share a
         # baseline and collide again as soon as a third floor is configured.
         baseline = (207, 222, 237)[index % 3]
@@ -491,7 +451,7 @@ def render_svg(metrics: dict[str, Any]) -> str:
     labels.append('<text x="55" y="252" class="label">Poll health — last 72 hours</text>')
     for index, fired in enumerate(metrics["poll_hours_72h"]):
         x = 55 + index * 11
-        colour = COLOURS["ink"] if fired else COLOURS["track"]
+        colour = "#166534" if fired else "#cbd5e1"
         labels.append(f'<rect x="{x}" y="263" width="8" height="20" rx="1" fill="{colour}"/>')
     labels.append(f'<text x="55" y="310" class="label">72-hour coverage: {coverage:.1f}%</text>')
     labels.append('<text x="55" y="350" class="label">New states per day — trailing 30 days</text>')
@@ -502,7 +462,7 @@ def render_svg(metrics: dict[str, Any]) -> str:
         x = 55 + index * 25
         labels.append(
             f'<rect x="{x}" y="{445 - height:.2f}" width="18" '
-            f'height="{height:.2f}" fill="{COLOURS["ink"]}"/>'
+            f'height="{height:.2f}" fill="#2563eb"/>'
         )
     labels.append(f'<text x="55" y="370" class="metric">{rate_text:.2f} states/day</text>')
     # Rendered exactly, not in bands: the graphic already changes bytes on every
@@ -522,14 +482,13 @@ def render_svg(metrics: dict[str, Any]) -> str:
         f"Capture, last {span} settled days: {html.escape(capture_text)}</text>"
     )
     body = "".join(labels)
-    text, secondary = COLOURS["text"], COLOURS["text_secondary"]
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} 510" role="img" '
         'aria-label="Calibration pipeline health dashboard">\n'
-        f"<style>.title{{font:700 24px sans-serif;fill:{text}}}.value{{font:700 22px sans-serif;"
-        f"fill:{text}}}.metric{{font:16px sans-serif;fill:{text}}}.label{{font:15px sans-serif;"
-        f"fill:{secondary}}}.tiny{{font:12px sans-serif;fill:{secondary}}}</style>\n"
-        f'<rect width="100%" height="100%" fill="{COLOURS["ground"]}"/>{body}</svg>\n'
+        "<style>.title{font:700 24px sans-serif;fill:#0f172a}.value{font:700 22px sans-serif;"
+        "fill:#166534}.metric{font:16px sans-serif;fill:#1e293b}.label{font:15px sans-serif;"
+        "fill:#334155}.tiny{font:12px sans-serif;fill:#7c2d12}</style>\n"
+        f'<rect width="100%" height="100%" fill="#f8fafc"/>{body}</svg>\n'
     )
 
 
