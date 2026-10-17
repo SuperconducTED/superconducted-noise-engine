@@ -1,9 +1,9 @@
 {
-  "generated": "2026-10-16 05:37 UTC",
+  "generated": "2026-10-17 05:37 UTC",
   "main": {
-    "sha": "fec055c1",
-    "date": "2026-10-15",
-    "msg": "Merge pull request #114 from SuperconducTED/feature/issue-60-anfis-core",
+    "sha": "6cf008da",
+    "date": "2026-10-16",
+    "msg": "Merge pull request #118 from SuperconducTED/docs/record-yigit-departure",
     "adr": {
       "ADR-001": "Accepted",
       "ADR-002": "Accepted",
@@ -41,8 +41,8 @@
     {
       "id": 84,
       "short": "Close the #57 advisor loop",
-      "owner": "yigit-arda",
-      "co_owner": "mertefesensoy",
+      "owner": "mertefesensoy",
+      "co_owner": null,
       "milestone": "M1",
       "track": "governance",
       "priority": "high",
@@ -68,7 +68,7 @@
       ],
       "unblocks": [],
       "why_now": "The only phase-3 blocker with a multi-week external latency tail, and the only M1 gate with no work in flight. Every day it waits is a day added to M3.",
-      "note": "Yiğit writes the brief; Mert sends it. ADR-027 stays Status: Open until the answers land.",
+      "note": "Mert writes the ADR-027 flip PR (#84 section 6) and Bengisu approves it, per the #57 close plan as amended on 2026-10-16. ADR-027 stays Status: Open until that PR merges.",
       "external_latency": true,
       "co_owner_action": "Send Dr. Akba the four ADR-027 questions",
       "co_owner_why": "FR-15 routes all advisor contact through the lead, so no one else can send it. The decision-by date was 2026-09-08 and has passed. ADR-027 stays Open, ADR-014 stays Deferred, and the M3 ADR-009 memo has no answer to build on until this goes out.",
@@ -479,7 +479,7 @@
     {
       "id": 62,
       "short": "Run the ADR-019 ablation, publish the table",
-      "owner": "yigit-arda",
+      "owner": "BahaJarad",
       "milestone": "M2",
       "track": "benchmarks",
       "priority": "high",
@@ -576,7 +576,7 @@
           "createdAt": "2026-10-11T09:38:02Z",
           "headRefName": "feature/issue-63-training-set-builder",
           "isDraft": false,
-          "mergeable": "CONFLICTING",
+          "mergeable": "UNKNOWN",
           "mergedAt": null,
           "number": 113,
           "reviewDecision": "CHANGES_REQUESTED",
@@ -621,7 +621,7 @@
           ],
           "checks_newest": "2026-10-11T09:43",
           "checks_failing": [],
-          "checks_stale_vs_main": true
+          "checks_stale_vs_main": false
         }
       ],
       "merged_pr": null,
@@ -629,14 +629,6 @@
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
-        {
-          "severity": "critical",
-          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
-        },
-        {
-          "severity": "high",
-          "text": "Its green checks last ran 2026-10-11T09:43 against a main that has moved since; they are not evidence about the merge result."
-        },
         {
           "severity": "critical",
           "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-10-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
@@ -1605,7 +1597,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -41
+      "days_left": -42
     },
     {
       "id": "M1",
@@ -1647,7 +1639,7 @@
       "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -35
+      "days_left": -36
     },
     {
       "id": "M2",
@@ -1690,7 +1682,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -28
+      "days_left": -29
     },
     {
       "id": "M3",
@@ -1738,7 +1730,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": -21
+      "days_left": -22
     },
     {
       "id": "M4",
@@ -1746,7 +1738,7 @@
       "target": "2026-09-30",
       "owners": [
         "BurakOztekin",
-        "yigit-arda",
+        "BahaJarad",
         "bengisucvd",
         "mertefesensoy"
       ],
@@ -1776,7 +1768,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": -16
+      "days_left": -17
     }
   ]
 }

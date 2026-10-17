@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-10-16 05:37 UTC · main at `fec055c1` (2026-10-15) · 15 days to 2026-10-31_
+_Generated 2026-10-17 05:37 UTC · main at `6cf008da` (2026-10-16) · 14 days to 2026-10-31_
 
 
 ## Milestones
@@ -67,7 +67,7 @@ _Generated 2026-10-16 05:37 UTC · main at `fec055c1` (2026-10-15) · 15 days to
 **Baha Jarad** (@BahaJarad)
 
 1. Unstick PR #113 for #63: Training-set builder (training/dataset.py)
-   - Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
+   - CHANGES_REQUESTED standing from @mertefesensoy (2026-10-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **Bengisu Cıvdı** (@bengisucvd)
 
@@ -85,22 +85,17 @@ _Generated 2026-10-16 05:37 UTC · main at `fec055c1` (2026-10-15) · 15 days to
 
 **Mert Efe Şensoy** (@mertefesensoy)
 
-1. Send Dr. Akba the four ADR-027 questions (#84)
-   - FR-15 routes all advisor contact through the lead, so no one else can send it. The decision-by date was 2026-09-08 and has passed. ADR-027 stays Open, ADR-014 stays Deferred, and the M3 ADR-009 memo has no answer to build on until this goes out.
+1. Start #84: Close the #57 advisor loop
+   - The only phase-3 blocker with a multi-week external latency tail, and the only M1 gate with no work in flight. Every day it waits is a day added to M3.
 1. Re-review PR #113 (#63: Training-set builder (training/dataset.py))
    - Your CHANGES_REQUESTED from 2026-10-12 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Finish #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
    - The contract merged; only the advisor half of its definition of done is outstanding.
 
-**Yiğit Arda Kaderoğlu** (@yigit-arda)
-
-1. Start #84: Close the #57 advisor loop
-   - The only phase-3 blocker with a multi-week external latency tail, and the only M1 gate with no work in flight. Every day it waits is a day added to M3.
-
 ## Not blocked by anything upstream, so what is holding them?
 
 
-**#84: Close the #57 advisor loop** (@yigit-arda)
+**#84: Close the #57 advisor loop** (@mertefesensoy)
 
 - [critical] Dr. Akba must answer four ADR-027 questions. He has no GitHub account; FR-15 routes all contact through the lead.
 - [critical] The FR-15 decision-by date was 2026-09-08 and has passed with the brief unsent.
@@ -119,9 +114,7 @@ _Generated 2026-10-16 05:37 UTC · main at `fec055c1` (2026-10-15) · 15 days to
 
 **#63: Training-set builder (training/dataset.py)** (@BahaJarad)
 
-- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-10-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
-- [high] Its green checks last ran 2026-10-11T09:43 against a main that has moved since; they are not evidence about the merge result.
 
 **#75: Decide the LOCKED Kraus projector boundary** (@bengisucvd)
 
@@ -133,7 +126,7 @@ _Generated 2026-10-16 05:37 UTC · main at `fec055c1` (2026-10-15) · 15 days to
 
 ## Blocked upstream
 
-- **#62** Run the ADR-019 ablation, publish the table (@yigit-arda), waiting on #58 (certified harness (basis_gates, mode, seed, transpile-then-prepare, no silent NaN) and benchmarks/reference.py::build_reference)
+- **#62** Run the ADR-019 ablation, publish the table (@BahaJarad), waiting on #58 (certified harness (basis_gates, mode, seed, transpile-then-prepare, no silent NaN) and benchmarks/reference.py::build_reference)
 - **#64** ADR-015 / ADR-016 ensemble + intervals (@bengisucvd), waiting on #58 (density-matrix mode, transpile-then-prepare, no silent NaN, build_reference, simulate_engine signature); M3 gate (gated on the ADR-009 decision and #60's first archive fit)
 - **#65** ADR-007 pre/between-gates fuzzification (@BurakOztekin), waiting on #58 (certified harness and build_reference); M3 gate (phase 4; the M3 gate is the earliest conceivable start, not a promise)
 - **#76** Promote diagonal Hellinger to a certified metric (@bengisucvd), waiting on #58 (certified density-matrix harness); #62 (the helper and evidence format must stabilise first)
@@ -143,6 +136,7 @@ _Generated 2026-10-16 05:37 UTC · main at `fec055c1` (2026-10-15) · 15 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-10-17 | 12/28 | 5 | 2 | 4 | main moved to 6cf008da |
 | 2026-10-16 | 12/28 | 5 | 2 | 4 | #60 ADR-014 hybrid ANFIS trainer: in review to ready to start; main moved to fec055c1 |
 | 2026-10-15 | 12/28 | 4 | 3 | 4 | nothing moved |
 | 2026-10-14 | 12/28 | 4 | 3 | 4 | nothing moved |
