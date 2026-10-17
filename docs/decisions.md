@@ -435,6 +435,19 @@ Richer extractors implement `CalibrationFeatureExtractor`.
 > and reconciliation of missing/non-finite-value policies. The dated audit
 > `docs/audits/2026-05-25-followup-issues.md` remains unchanged.
 
+> Revisited - 2026-10-17 - Baha Jarad's issue #63 implementation, prepared by
+> Codex, reads a pinned archive with one row per distinct state. UC-6 dashboard
+> agreement requires the bare-qubit digest to match
+> `scripts/canonical_snapshot_digest.py::qubit_digest`: parameter dates are
+> normalized away while names, units and values remain. This follows Baha
+> Jarad's explicit request to implement digest alignment; it supersedes the
+> issue's date-inclusive recommendation without claiming advisor sign-off.
+> ADR-010 still governs the SI vectorizer. ArchiveUnitFeatureExtractor explicitly
+> converts X back to archive microseconds for the survey/quantile stack; spread
+> columns use the same units. ADR-027 owns dimensionless Y. Richer-extractor
+> comparison stays deferred. The advisor read is handed to issue #56 and must
+> be recorded in docs/advisor/2026-09-03-decisions-from-akba.md before approval.
+
 ---
 
 ## ADR-014 — TSK trainer architecture
