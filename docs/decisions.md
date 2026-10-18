@@ -448,6 +448,7 @@ Richer extractors implement `CalibrationFeatureExtractor`.
 > comparison stays deferred. The advisor read is handed to issue #56 and must
 > be recorded in docs/advisor/2026-09-03-decisions-from-akba.md before approval.
 
+
 ---
 
 ## ADR-014 — TSK trainer architecture

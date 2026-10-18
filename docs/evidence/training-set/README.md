@@ -23,7 +23,7 @@ Kept-document loader missingness: `{"init_error_absent": 67331, "init_error_expl
 
 UTC row-hour histogram: `{"0": 15, "1": 13, "2": 7, "3": 29, "4": 23, "5": 12, "6": 16, "7": 25, "8": 16, "9": 21, "10": 24, "11": 30, "12": 20, "13": 18, "14": 22, "15": 16, "16": 24, "17": 25, "18": 34, "19": 28, "20": 27, "21": 23, "22": 23, "23": 13}`.
 
-Measured runtime: 72 seconds (machine-specific). Growth estimate: to be measured. These figures are audited by this TSV; register claim IDs at merge time.
+Measured runtime: 72 seconds (machine-specific). Growth estimate: to be measured. These figures are audited by this TSV; the claim mapping is recorded below. Recheck identifiers at merge time.
 
 X uses ArchiveUnitFeatureExtractor: T1/T2 in archive microseconds, readout error dimensionless. ADR-010's BasicCalibrationVectorizer emits SI; the wrapper explicitly converts it back to the survey/quantile stack's units. Y is dimensionless; target inputs use SI seconds (training/targets.py, ADR-027). Feature spread uses sample standard deviation (ddof=1); a singleton has an empty std cell. Target gamma spread follows snapshot_target's population standard deviation. Both weight columns are emitted; uniform is the default. Digests match the dashboard: parameter dates are normalized away; measurement names, units and values remain. Parameter date bounds are retained as provenance columns.
 
@@ -52,7 +52,7 @@ Kept-document loader missingness: `{"init_error_absent": 79054, "init_error_expl
 
 UTC row-hour histogram: `{"0": 30, "1": 22, "2": 25, "3": 33, "4": 32, "5": 23, "6": 30, "7": 35, "8": 28, "9": 31, "10": 35, "11": 44, "12": 27, "13": 27, "14": 36, "15": 31, "16": 36, "17": 38, "18": 41, "19": 47, "20": 45, "21": 38, "22": 36, "23": 27}`.
 
-Measured runtime: 151 seconds (machine-specific). Growth estimate: to be measured. These figures are audited by this TSV; register claim IDs at merge time.
+Measured runtime: 151 seconds (machine-specific). Growth estimate: to be measured. These figures are audited by this TSV; the claim mapping is recorded below. Recheck identifiers at merge time.
 
 X uses ArchiveUnitFeatureExtractor: T1/T2 in archive microseconds, readout error dimensionless. ADR-010's BasicCalibrationVectorizer emits SI; the wrapper explicitly converts it back to the survey/quantile stack's units. Y is dimensionless; target inputs use SI seconds (training/targets.py, ADR-027). Feature spread uses sample standard deviation (ddof=1); a singleton has an empty std cell. Target gamma spread follows snapshot_target's population standard deviation. Both weight columns are emitted; uniform is the default. Digests match the dashboard: parameter dates are normalized away; measurement names, units and values remain. Parameter date bounds are retained as provenance columns.
 
@@ -81,5 +81,8 @@ An independent second pass at the same source and historical archive ref
 produced a byte-identical TSV. SHA-256: `007c8089772bd9d143d64a6e89a4f10a8653311773bcd6747d4d8ae4bd1ad66e`.
 
 Only this October 17 evidence pair is retained. Recheck NC identifiers before
-merging; no growth, sufficiency or independence claim is made. Nothing has
-been pushed by this change.
+merging; no growth, sufficiency or independence claim is made. As checked on
+2026-10-18, this evidence is published in PR #113 at `718d77e9`. Builder
+source remains `6143f427`; publication does not change measurement provenance.
+See the [implementation document](../../implementations/2026-10-10-training-set-builder.md#publication-and-coordination--2026-10-18) for
+pending confirmations and prepared publication text.

@@ -1,9 +1,10 @@
 # 2026-10-10: Training-set builder
 
-Updated through 2026-10-17 to include the PR #113 review fixes. The changes are
-committed locally on `feature/issue-63-training-set-builder`. Evidence is
-regenerated from the source commit; publication and owner confirmations remain
-pending.
+Updated through 2026-10-18. The published PR #113 and local branch
+`feature/issue-63-training-set-builder` both point to `718d77e9`. Evidence
+was generated at source commit `6143f427`; owner, advisor and consumer
+confirmations remain pending. Local publication drafts and the remaining
+coordination checklist are in [the publication and coordination section](#publication-and-coordination--2026-10-18).
 
 ## Problem / Motivation
 
@@ -157,7 +158,7 @@ python -m pytest tests/ -q
 ## Branch state and remaining publication steps
 
 The branch contains only issue #63 code, tests, evidence and documentation
-changes relative to live main `6cf008da`. The former conflicted head
+changes relative to its recorded main base `6cf008da`. The former conflicted head
 `106c7fb7b17a5d433768d96d5a56e68990d59609` is preserved as
 `backup/issue63-before-conflict-cleanup-20261017`. The temporary-file commits
 and unrelated work from main are not introduced by the new issue commits.
@@ -169,20 +170,161 @@ measured 875 at `6143f427`. NC-070 through NC-075 cite that source commit,
 the full archive refs and their evidence files. No working-tree measurements
 are presented as final committed-source evidence.
 
-Nothing has been pushed, so GitHub PR #113 will update only when the cleaned
-branch is published. Before merging:
+As checked on 2026-10-18, GitHub PR #113 points to local HEAD
+`718d77e98498be8e071baa917ccdc762fc0abc28`, reports no merge conflicts,
+and has successful Python 3.11 and 3.12 CI jobs. Those jobs include lint,
+formatting, identifier uniqueness, strict typing and tests. This supersedes
+this document's earlier unpublished-branch status.
 
-1. Recheck NC identifiers against main and update citations if concurrent
-   changes have claimed the same IDs.
-2. Publish decisions 1 through 6 from this document on issue #63 with their
-   attribution and outstanding confirmations. No decision comment or advisor
-   sign-off is implied by the local commits.
-3. Apply the issue's PR labels: `priority:high`, `area:fuzzy`, `type:feature`,
-   `area:calibration`; use its Phase 3 ANFIS results milestone.
-4. Obtain owner, advisor and trainer-consumer confirmations and include the
-   measurements in the canonical desktop batch verification record.
+A focused local rerun at that head passed 34 builder/loader tests on Python
+3.14.5 after Windows sandbox restrictions on pytest temporary directories
+were removed. Targeted Ruff and the identifier check also passed. This is
+separate from NC-021's full-suite measurement on Python 3.12.10 at `6143f427`;
+it does not replace that measurement or the desktop batch verification.
+
+The [publication and coordination section](#publication-and-coordination--2026-10-18)
+contains a replacement PR description, the issue #63 decision-comment draft,
+metadata instructions and the owner/advisor/consumer requests. The issue
+thread still had no comments and the PR had no labels or milestone at that
+check. Posting these drafts, applying metadata and obtaining confirmations
+remain external actions. Recheck NC identifiers against main before merging.
 
 ## Related docs
 
 - [Issue #63](https://github.com/SuperconducTED/superconducted-noise-engine/issues/63)
 
+
+## Publication and coordination ? 2026-10-18
+
+Prepared for Baha Jarad. Text below is ready for publication; it has not been
+posted by this cleanup. Pending requests are not recorded approvals.
+
+PR: https://github.com/SuperconducTED/superconducted-noise-engine/pull/113
+
+Issue: https://github.com/SuperconducTED/superconducted-noise-engine/issues/63
+
+### Status and remaining actions
+
+At the 2026-10-18 check, local HEAD and PR head were both
+`718d77e98498be8e071baa917ccdc762fc0abc28`. GitHub reported the PR mergeable
+with successful Python 3.11/3.12 CI and CodeQL checks. The issue had no
+comments; PR labels and milestone were absent. These are dated observations.
+
+- [ ] Replace the PR description with the draft below.
+- [ ] Post the six-decision comment on issue #63 and link it from the PR.
+- [ ] Record digest-body/date normalization agreement in issue #48, linking
+      the issue #63 comment. This records the current choice; it cannot
+      retroactively satisfy the original requirement to agree before coding.
+- [ ] Apply `priority:high`, `area:fuzzy`, `type:feature`, `area:calibration`
+      and the issue's `Phase 3 · ANFIS results` milestone to the PR.
+- [ ] Obtain owner reviews from @mertefesensoy and @bengisucvd.
+- [ ] Obtain @BurakOztekin's trainer-consumer confirmation.
+- [ ] Ask Mert via issue #56 to obtain Dr. Akba's ADR-013 read and append the
+      actual answer/date to `docs/advisor/2026-09-03-decisions-from-akba.md`.
+      The handoff is prepared locally; delivery and approval are pending.
+- [ ] Include NC-070–075 and the historical reproduction in the next canonical
+      desktop batch verification record. Keep local measurements provisional.
+- [ ] Recheck NC identifiers against current main and rerun required CI after
+      subsequent changes before merging.
+
+### Replacement PR description draft
+
+Issue #63 needs a reproducible trainer dataset with one row per distinct device
+state. This PR reads a pinned calibration archive through Git, selects the
+earliest document per qubit digest, and produces a `TrainingSet` plus auditable
+TSV evidence with features, physics targets, both weight columns, provenance
+and skip accounting. The data branch is read-only.
+
+The default `ArchiveUnitFeatureExtractor` explicitly converts the ADR-010 SI
+vectorizer output to archive microseconds, matching T1/T2 spread columns.
+Readout error and ADR-027 gamma/lambda targets are dimensionless. Uniform
+weighting remains the default. Digests match the dashboard's bare qubit-list
+hash with parameter dates normalized away; date bounds remain provenance.
+This deliberately differs from issue #63's date-inclusive recommendation.
+
+Review corrections include the unit boundary, NC-ID renumbering, committed
+measurement provenance, UTF-8 ignore rules, cleaned temporary-file history,
+ownership-table rows, shared filename decoding, naive-timestamp rejection,
+CLI failure exits and the requested regression coverage.
+
+Evidence was regenerated at builder source
+`6143f4279df3442fb34363934d01ef5636305fdf`:
+
+- Historical archive `f0930b9b54975470a4a87866cbc691f7897295cb`:
+  504 states, 894 documents, 390 duplicates, zero document skips (NC-073).
+- Pinned October archive `e5688d2f6a333e98bb01f1c1d81b694ff69574f5`:
+  797 states, 1,891 documents, 1,094 duplicates (NC-070), with exclusions
+  recorded in NC-071. This is a pinned measurement, not a live-tip count.
+- UTC-hour bias, digest conformance and rounded local runtimes are NC-072,
+  NC-074 and NC-075. No sample-sufficiency claim is made.
+
+Validation: the recorded full suite passed 875 tests on Python 3.12.10 at
+`6143f427` (NC-021). At published head `718d77e9`, Python 3.11/3.12 CI passed;
+a separate local Python 3.14.5 builder/loader rerun passed 34 tests, and
+targeted Ruff and identifier checks passed. The local evidence remains
+provisional pending canonical desktop batch verification.
+
+Before merge: publish the attributed decisions on #63 and digest agreement
+on #48, apply labels/milestone, obtain owner reviews, trainer-consumer
+confirmation and the advisor read via #56, and recheck claim IDs. These
+confirmations have not been granted by this description.
+
+See `docs/implementations/2026-10-10-training-set-builder.md`,
+`docs/evidence/training-set/README.md`, NC-021 and NC-070–075.
+
+### Issue #63 decision-comment draft
+
+The following records Baha Jarad's implementation choices, prepared by Codex
+under his request to implement #63 and address PR #113's review. Independent
+reviewer, advisor and consumer confirmations remain pending.
+
+1. **Row timestamp:** UTC `properties.last_update_date`; preserve parameter
+   date bounds in TSV provenance. Mert's confirmation is requested.
+2. **Loader boundary:** expose `parse_snapshot(data, source=...)` and share
+   validation with `load_snapshot`, avoiding temporary files and bypass parsing.
+3. **Digest body:** hash the canonical bare `properties.qubits` list. Keep
+   package and stdlib dashboard implementations separate because `scripts/`
+   is not shipped in the wheel; pin byte equality with conformance tests.
+   Record this agreement on #48 as well; the original advance-agreement
+   requirement was not fulfilled by a local implementation document.
+4. **ADR-013 note:** retain the descriptive revisit; richer-extractor comparison
+   remains deferred. The advisor-read request is prepared for #56 via Mert.
+   Record Dr. Akba's actual answer and date in
+   `docs/advisor/2026-09-03-decisions-from-akba.md` when received. No advisor
+   approval or completed handoff is claimed here.
+5. **Parameter dates:** Baha requested dashboard alignment (UC-6). Remove
+   `date` only from mappings carrying `value`, matching
+   `scripts/canonical_snapshot_digest.py::qubit_digest`; preserve other
+   metadata and list order. This changes the issue's date-inclusive
+   recommendation. Date-only republication therefore collapses to one state;
+   date bounds remain in the TSV. Reviewer confirmation is requested.
+6. **Spread carrier:** TSV and `BuildReport`, with the required column names
+   and sample standard deviation (`ddof=1`); no shared-type metadata field.
+
+X uses `ArchiveUnitFeatureExtractor` so T1/T2 means and spreads both use archive
+microseconds; ADR-010 still governs the underlying SI vectorizer. Y delegates
+to ADR-027 helpers. Evidence and claims cite source `6143f427`, not an
+uncommitted tree. Historical reproduction is 504 states from 894 documents
+(NC-073); the pinned October measurement is NC-070. Details and commands:
+`docs/evidence/training-set/README.md`.
+
+@mertefesensoy and @bengisucvd: please review PR #113 and the choices above,
+including the timestamp and digest semantics. Mert: please route the ADR-013
+read through #56 and record the advisor's response in the canonical register.
+@BurakOztekin: please confirm that the emitted `TrainingSet` is consumable by
+`HybridANFISTrainer.fit` and include these measurements in the next desktop
+batch verification. Each request remains open until its response is recorded.
+
+### Review follow-up note draft
+
+The reviewed unit mismatch, claim-ID collisions, source provenance, ignore
+encoding, temporary-file history and regression gaps are addressed in head
+`718d77e9`. The current description and NC-021/NC-070–075 replace the old
+NC-052–057 and working-tree measurements. The coordination checklist above
+tracks the outstanding human confirmations and publication tasks.
+
+The bot's unused-`SPREAD_NAMES` comment appears to be a false positive:
+`scripts/build_training_set.py` imports it and expands it in the TSV column
+list. The syntax-error comment refers to the earlier head; the current CLI
+imports and runs in the passing builder tests. Thread resolution remains a
+reviewer action.
