@@ -153,9 +153,11 @@ On 2026-10-17, at source commit `6143f4279df3442fb34363934d01ef5636305fdf`
 based on main `6cf008da5b3dd8e25bbc20e69e96d21c4a161d15`, the full suite
 collected and passed **875 tests**, including 16 builder cases, using Python
 3.12.10, numpy 2.4.4, qiskit 2.4.1, aer 0.17.2, mypy 1.20.2, pytest 9.0.3 and
-ruff 0.15.12, with main's Matplotlib dependency installed. CI reported 874 passed and 1 skipped on Python 3.11 and 3.12 (875 collected)
-at `b447ed8` (run 39151288067) and again at `07354d3` (run 39580563318), after
-the round-1 review fixes, which edit two existing tests and add none. The skip is
+ruff 0.15.12, with main's Matplotlib dependency installed. CI reported 874
+passed and 1 skipped on Python 3.11 and 3.12 (875 collected) at `b447ed8`
+(run 39151288067), again at `07354d3` (run 39580563318) after the round-1
+review fixes, and at `1f5c3c1` (run 39586208064) after round 2; the fixes edit
+existing tests and add none. The skip is
 `test_feature_distribution.py::test_the_committed_survey_reproduces_from_the_archive`,
 which skips when `calibration-data` has not been fetched.
 

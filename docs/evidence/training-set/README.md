@@ -83,7 +83,9 @@ produced a byte-identical TSV. SHA-256: `007c8089772bd9d143d64a6e89a4f10a8653311
 
 Only this October 17 evidence pair is retained. Builder source remains
 `6143f427`; later commits change no selection, feature, target or weight code.
-No growth, sufficiency or independence claim is made. Design decisions and
+Both generated sections above name that source revision, but their
+"Measured runtime" sentence was reworded at `1f5c3c1` to match the wording that
+commit's generator emits; no figure in either section changed. No growth, sufficiency or independence claim is made. Design decisions and
 their confirmations are in the
 [implementation document](../../implementations/2026-10-10-training-set-builder.md#design-decisions)
 and on [issue #63](https://github.com/SuperconducTED/superconducted-noise-engine/issues/63#issuecomment-6313102883).
