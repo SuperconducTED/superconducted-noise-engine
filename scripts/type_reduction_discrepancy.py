@@ -126,8 +126,9 @@ point share them.
   (NC-035's ``sx`` length), outputs ``gamma`` and ``lambda`` per ``sx`` gate.
 - **Point sets.** ``lattice``: the 27 anchor triples. ``uniform``: ``--points``
   draws in the box from ``numpy.random.default_rng(seed)``. ``survey``: the
-  survey rows themselves, which is where the archive sits (about 2% lie outside
-  the box by construction). ``pooled``: all requested sets together.
+  survey rows themselves, which is where the archive sits (on the ``3d1569d``
+  survey, 44 of 975 lie outside the ``[p1, p99]`` box in at least one feature).
+  ``pooled``: all requested sets together.
 - **Distances.** ``D = |y - (y_l + y_r) / 2|`` with the Karnik-Mendel endpoints;
   ``Dc = D / (max c - min c)`` (#61 FR-3); ``Db = D / (y_r - y_l)`` (#84 File 02's
   pre-registered score), set to 0 and counted where the band width is within

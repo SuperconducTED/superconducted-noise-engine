@@ -327,6 +327,67 @@ Results at this commit (laptop, provisional): 46 passed in `tests/test_type_redu
 (+14 for NC-021); ruff check and format clean; `mypy --strict` clean. Full suite
 (`pytest -q`): 905 passed in 191 s, which is `main`'s 859 plus the 46 tests in this file.
 
+## Addendum, commit 3 (2026-10-21): the committed sweep
+
+The sections above are left as written. This commit adds the measurement itself as
+evidence.
+
+### What changed
+
+| File | One-sentence description |
+| --- | --- |
+| `docs/evidence/adr-011-type-reduction/2026-10-21-d0f144a.tsv` | New. The FR-3 sweep produced by `scripts/type_reduction_discrepancy.py` at code commit `d0f144a`: 4 grids, 2 conventions (3 outputs), 3 point sets plus their within-cell pool, 2 reducers, 96 rows. |
+| `docs/evidence/adr-011-type-reduction/README.md` | New. Covers provenance (code commit, survey ref, machine, runtime, SHA-256), the exact command, units, grids, the `s_i` assumption, the column meanings, and what the file does not establish. |
+| `scripts/type_reduction_discrepancy.py` | Docstring only: corrects "about 2% of survey rows lie outside the box" to the measured 44 of 975. |
+| `docs/implementations/2026-10-21-type-reduction-reference.md` | This addendum. |
+
+### Implementation approach
+
+- **Generation.** The TSV was written by the command in the README, run from a clean tree
+  at `d0f144a`, so its `# commit:` line names that commit without `+dirty`.
+- **Reproducibility.** An earlier run of the same command into a scratch directory gave a
+  byte-identical file: SHA-256 `6782340a...0cb7` for both.
+- **Runtime.** 21.5 s and 33.7 s for the two runs; #61 NFR-4 asks for it to be measured and
+  written down, not asserted.
+- **Line endings.** `.gitattributes` (`* text=auto eol=lf`) keeps the file LF on every
+  checkout, so the committed bytes match what the script writes.
+
+### Mathematical / statistical details
+
+N/A for new mathematics. This commit records measured output whose definitions are in the
+commit 2 addendum. Two points matter when reading it:
+
+- Every `*_max` is a sample maximum over 3002 points (or fewer, in a single point set), not
+  a supremum over the domain box.
+- `km_guard_stops` counts rounding-level events whose number depends on the arithmetic, so
+  it describes this implementation and not the problem.
+
+### Design decisions
+
+- **The TSV is named after the code commit** (`<date>-<sha>`, as #61 section 6.1 asks), not
+  after the commit that adds it. That way the filename, the `# commit:` line and the README
+  all name the code that produced the numbers.
+- **No figure from this file appears in prose here.** Registration is per conclusion, at
+  merge time (B8), after decisions 1 and 2 are agreed. Until then the file is the audit
+  trail and the NC rows are not drafted against it.
+
+### Verification
+
+```bash
+sha256sum docs/evidence/adr-011-type-reduction/2026-10-21-d0f144a.tsv
+git -c advice.detachedHead=false worktree add /tmp/t61 d0f144a
+cd /tmp/t61
+PYTHONPATH=src python -m scripts.type_reduction_discrepancy \
+    --range-source survey:docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv \
+    --footprint 0.1 --footprint 0.3 --footprint 0.6 --footprint g59 \
+    --points 2000 --seed 84 --out /tmp/rerun.tsv
+cmp /tmp/rerun.tsv <repo>/docs/evidence/adr-011-type-reduction/2026-10-21-d0f144a.tsv
+```
+
+Expected: SHA-256 `6782340a1716553f7798f4237cd2f4d96b4554e1e4968482e592061d43300cb7` on the
+laptop. On another machine, expect agreement to rounding; a byte difference in the last
+digits is not by itself a failure.
+
 ## Related docs
 
 - Issue #61 (Part A, FR-1, FR-2, section 6.3), #84 File 02 section 2.4 (comment
