@@ -74,15 +74,67 @@ desktop batch verification and owner/advisor/consumer confirmations.
 | Document exclusions, target skips and loader missingness | NC-071 |
 | State-level UTC hour bias: 230 rows at 00-07, 308 at 16-23; ratio 308/230 | NC-072 |
 | Historical NC-025 reproduction | NC-073 |
-| Dashboard digest conformance | NC-074 |
+| Builder digest against the dashboard's `qubit_digest`, every document at both refs | NC-074 |
 | Rounded machine-specific runtime | NC-075 |
+| Decision 5's comparison: distinct states under the date-inclusive digest | NC-076 |
 
 An independent second pass at the same source and historical archive ref
 produced a byte-identical TSV. SHA-256: `007c8089772bd9d143d64a6e89a4f10a8653311773bcd6747d4d8ae4bd1ad66e`.
 
-Only this October 17 evidence pair is retained. Recheck NC identifiers before
-merging; no growth, sufficiency or independence claim is made. As checked on
-2026-10-18, this evidence is published in PR #113 at `718d77e9`. Builder
-source remains `6143f427`; publication does not change measurement provenance.
-See the [implementation document](../../implementations/2026-10-10-training-set-builder.md#publication-and-coordination--2026-10-18) for
-pending confirmations and prepared publication text.
+Only this October 17 evidence pair is retained. Builder source remains
+`6143f427`; later commits change no selection, feature, target or weight code.
+No growth, sufficiency or independence claim is made. Design decisions and
+their confirmations are in the
+[implementation document](../../implementations/2026-10-10-training-set-builder.md#design-decisions)
+and on [issue #63](https://github.com/SuperconducTED/superconducted-noise-engine/issues/63#issuecomment-6313102883).
+
+## Digest definitions (NC-074, NC-076)
+
+Issue #63 decision 5 replaced the date-inclusive digest the issue first specified
+with the dashboard's, which normalizes each parameter's `date` away, and asked
+for the other definition's count to be reported as a measured, unused number.
+This pass also checks the builder's digest against the dashboard's byte for byte
+on every real document. Run from the repository root of an installed checkout,
+after `git fetch superconducted-noise-engine calibration-data`:
+
+```sh
+python - <<'EOF'
+import hashlib
+import json
+from pathlib import Path
+
+from scripts.canonical_snapshot_digest import qubit_digest
+from superconducted.training.dataset import iter_archive, qubit_block_digest
+
+REFS = (
+    "f0930b9b54975470a4a87866cbc691f7897295cb",
+    "e5688d2f6a333e98bb01f1c1d81b694ff69574f5",
+)
+for ref in REFS:
+    documents, equal, dashboard, inclusive = 0, 0, set(), set()
+    for path, doc in iter_archive(Path("."), ref):
+        if Path(path).parent.name != "ibm_fez":
+            continue
+        documents += 1
+        builder = qubit_block_digest(doc)
+        equal += builder == qubit_digest(doc)
+        dashboard.add(builder)
+        body = json.dumps(doc["properties"]["qubits"], sort_keys=True, separators=(",", ":"))
+        inclusive.add(hashlib.sha256(body.encode("utf-8")).hexdigest())
+    print(
+        f"{ref[:8]} documents={documents} byte_equal={equal} "
+        f"dashboard_states={len(dashboard)} date_inclusive_states={len(inclusive)}"
+    )
+EOF
+```
+
+Output at engine `0f9ab0f2a342df7873c2dfcb9d1bbe0d22695509` on Python 3.12.10
+(pinned stack), 2026-10-21:
+
+```text
+f0930b9b documents=894 byte_equal=894 dashboard_states=504 date_inclusive_states=504
+e5688d2f documents=1891 byte_equal=1891 dashboard_states=797 date_inclusive_states=798
+```
+
+The dashboard counts equal NC-073's and NC-070's row counts because neither
+ref has a skipped document. The date-inclusive count is not used for training.

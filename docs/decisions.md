@@ -440,13 +440,17 @@ Richer extractors implement `CalibrationFeatureExtractor`.
 > agreement requires the bare-qubit digest to match
 > `scripts/canonical_snapshot_digest.py::qubit_digest`: parameter dates are
 > normalized away while names, units and values remain. This follows Baha
-> Jarad's explicit request to implement digest alignment; it supersedes the
-> issue's date-inclusive recommendation without claiming advisor sign-off.
+> Jarad's explicit request to implement digest alignment and supersedes the
+> issue's date-inclusive recommendation; Mert Efe Şensoy confirmed it on issue
+> #63 on 2026-10-21, and the date-inclusive count is kept as a measured, unused
+> number (NC-076).
 > ADR-010 still governs the SI vectorizer. ArchiveUnitFeatureExtractor explicitly
 > converts X back to archive microseconds for the survey/quantile stack; spread
 > columns use the same units. ADR-027 owns dimensionless Y. Richer-extractor
-> comparison stays deferred. The advisor read is handed to issue #56 and must
-> be recorded in docs/advisor/2026-09-03-decisions-from-akba.md before approval.
+> comparison stays deferred. The advisor read is Mert Efe Şensoy's sign-off as
+> lead in the advisor role, recorded on 2026-10-21 in
+> `docs/advisor/2026-09-03-decisions-from-akba.md`. It covers this note as
+> written and changes no `**Status**` line.
 
 
 ---
