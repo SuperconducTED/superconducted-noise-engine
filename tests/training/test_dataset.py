@@ -274,11 +274,15 @@ def test_cli_reports_git_read_failures_without_traceback(tmp_path, monkeypatch, 
         return original(repo, *args)
 
     monkeypatch.setattr(dataset, "_git", fail_read)
-    assert main(["--repo", str(repo), "--ref", "HEAD"]) == 2
+    out = tmp_path / "evidence"
+    assert main(["--repo", str(repo), "--ref", "HEAD", "--out", str(out)]) == 2
     assert "Traceback" not in capsys.readouterr().err
+    assert not out.exists()
 
 
 def test_cli_timestamp_tie_is_not_reported_as_no_usable_rows(tmp_path, capsys):
     repo = archive(tmp_path, [(path(1), document()), (path(2), document(1, 110))])
-    assert main(["--repo", str(repo), "--ref", "HEAD"]) == 2
+    out = tmp_path / "evidence"
+    assert main(["--repo", str(repo), "--ref", "HEAD", "--out", str(out)]) == 2
     assert "Distinct states share last_update_date" in capsys.readouterr().err
+    assert not out.exists()

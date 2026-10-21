@@ -27,6 +27,23 @@ from ..interfaces import CalibrationFeatureExtractor
 from ..types import CalibrationSnapshot, TrainingSet
 from .targets import gate_lengths, qubit_targets, snapshot_target
 
+# The public surface. SPREAD_NAMES and TARGET_SPREAD_NAMES are consumed by
+# scripts/build_training_set.py, not by this module, so they are listed here.
+__all__ = [
+    "SPREAD_NAMES",
+    "TARGET_SPREAD_NAMES",
+    "ArchiveRefError",
+    "ArchiveTimestampError",
+    "BuildReport",
+    "NoUsableRowsError",
+    "build_training_set",
+    "dedup_by_qubit_block",
+    "hour_of_day_weights",
+    "iter_archive",
+    "qubit_block_digest",
+    "resolve_archive_ref",
+]
+
 # Fixed TSV columns: usable count, sample std and quantiles in archive units
 # (T1/T2 microseconds, readout_error dimensionless). No I/O or X columns added.
 SPREAD_NAMES: tuple[str, ...] = tuple(
