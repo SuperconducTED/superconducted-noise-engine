@@ -1,8 +1,17 @@
 """Thermal-relaxation reference models derived from calibration snapshots.
 
 The builder converts IBM calibration units at the module boundary, applies
-ADR-017's non-imputing skip rule, and returns a plain Aer ``NoiseModel``.
-Provenance is available separately through :func:`build_reference_report`.
+ADR-017's non-imputing skip rule with ADR-027's ordered reasons, and returns a
+plain Aer ``NoiseModel``. Provenance is available separately through
+:func:`build_reference_report`.
+
+A qubit is rejected by its first applicable reason, in ADR-027's order:
+``t1_missing``, ``t2_missing``, ``nonpositive``, ``t2_exceeds_2t1``. ADR-027's
+third reason, ``gate_length_missing``, is per gate here rather than per qubit,
+because the reference times every gate by its own duration where the target
+reads only ``sx``: a gate entry with no recorded length, or a negative one,
+installs nothing and is recorded, which is ADR-028's fail-closed rule for the
+engine. A corrupt value (wrong unit, null, non-numeric, non-finite) raises.
 """
 
 from __future__ import annotations
@@ -20,13 +29,18 @@ ReferenceScope = Literal["single_qubit_relaxation", "full_device"]
 
 _NON_UNITARY_GATE_NAMES = frozenset({"measure", "measure_2", "reset"})
 _TIME_UNIT_SCALE = {"us": 1e-6, "ns": 1e-9}
-_SKIP_REASONS = ("missing_t1_t2", "t2_exceeds_2t1")
+_SKIP_REASONS = ("t1_missing", "t2_missing", "nonpositive", "t2_exceeds_2t1")
+_GATE_SKIP_REASONS = ("gate_length_missing", "nonpositive")
 
 
 @dataclass(frozen=True)
 class ReferenceReport:
     """Auditable provenance for one reference-model build.
 
+    ``skipped`` maps each qubit-level reason (ADR-027's order, see the module
+    docstring) to the rejected qubits. ``skipped_gates`` maps
+    ``gate_length_missing`` and ``nonpositive`` to the ``(gate, qubits)`` entries
+    on usable qubits that installed nothing for want of a usable duration.
     ``gate_lengths_s`` includes considered zero-duration gates even though
     their identity channels are deliberately not installed. ``dead_pairs``
     records directed ``cz`` entries with ``gate_error == 1``; ADR-017 still
@@ -36,6 +50,7 @@ class ReferenceReport:
     scope: str
     qubits_used: tuple[int, ...]
     skipped: Mapping[str, tuple[int, ...]]
+    skipped_gates: Mapping[str, tuple[tuple[str, tuple[int, ...]], ...]]
     gate_lengths_s: Mapping[tuple[str, tuple[int, ...]], float]
     overridden_gate_lengths: tuple[str, ...]
     dead_pairs: tuple[tuple[int, int], ...]
@@ -130,11 +145,15 @@ def _qubit_parameters(
         t2_s = _read_quantity(
             entries, "T2", "us", context=f"properties.qubits[{q}]", missing_ok=True
         )
-        if t1_s is None or t2_s is None:
-            skipped["missing_t1_t2"].append(q)
+        if t1_s is None:
+            skipped["t1_missing"].append(q)
+            continue
+        if t2_s is None:
+            skipped["t2_missing"].append(q)
             continue
         if t1_s <= 0.0 or t2_s <= 0.0:
-            raise ValueError(f"qubit {q} requires positive T1 and T2; got {t1_s}, {t2_s}")
+            skipped["nonpositive"].append(q)
+            continue
         if t2_s > 2.0 * t1_s:
             skipped["t2_exceeds_2t1"].append(q)
             continue
@@ -214,23 +233,37 @@ def _gate_qubits(entry: Mapping[str, Any], *, context: str) -> tuple[int, ...]:
 
 def _gate_length_s(
     entry: Mapping[str, Any], gate_name: str, overrides: Mapping[str, float], *, context: str
-) -> float:
+) -> float | None:
+    """Return the entry's duration in seconds, or ``None`` when it has no record.
+
+    Mirrors ``training.targets.gate_lengths``, which ADR-028's eligibility
+    policy also reads: an absent ``parameters`` list or ``gate_length`` entry is
+    a missing record, while a wrong unit or a null, non-numeric or non-finite
+    value is corrupt and raises. A negative duration is returned as read; the
+    caller records it as ``nonpositive``.
+    """
     if gate_name in overrides:
         return overrides[gate_name]
-    parameters = _named_entries(entry.get("parameters"), context=f"{context}.parameters")
+    raw_parameters = entry.get("parameters")
+    if not isinstance(raw_parameters, list):
+        return None
+    parameters = _named_entries(raw_parameters, context=f"{context}.parameters")
+    if "gate_length" not in parameters:
+        return None
     length = _read_quantity(
         parameters, "gate_length", "ns", context=f"{context}.parameters", missing_ok=False
     )
     assert length is not None
-    if length < 0.0:
-        raise ValueError(f"{context} gate_length must be non-negative; got {length}")
     return length
 
 
 def _is_dead_cz(entry: Mapping[str, Any], *, context: str) -> bool:
     if entry.get("gate") != "cz":
         return False
-    parameters = _named_entries(entry.get("parameters"), context=f"{context}.parameters")
+    raw_parameters = entry.get("parameters")
+    if not isinstance(raw_parameters, list):
+        return False
+    parameters = _named_entries(raw_parameters, context=f"{context}.parameters")
     error = _read_quantity(
         parameters, "gate_error", "", context=f"{context}.parameters", missing_ok=True
     )
@@ -262,12 +295,23 @@ def _build(
     selected = _selected_qubits(raw_qubits, qubits)
     selected_set = set(selected)
     usable, skipped = _qubit_parameters(raw_qubits, selected)
+    if not usable:
+        # training.targets.snapshot_target returns None in this case; a model
+        # here would be noise-free and still simulate, which is the silent
+        # switched-off reference this module exists to prevent.
+        raise ValueError(
+            "no selected qubit has usable T1/T2 calibration, so the reference would "
+            f"install nothing; skipped: {skipped}"
+        )
     gates = _gate_entries(snapshot)
     basis = _basis_gates(gates)
     overrides = _validated_overrides(gate_lengths)
     model = NoiseModel(basis_gates=list(basis))
     lengths: dict[tuple[str, tuple[int, ...]], float] = {}
     dead_pairs: list[tuple[int, int]] = []
+    skipped_gates: dict[str, list[tuple[str, tuple[int, ...]]]] = {
+        reason: [] for reason in _GATE_SKIP_REASONS
+    }
     override_names_used: set[str] = set()
     seen_gate_keys: set[tuple[str, tuple[int, ...]]] = set()
     used_qubits: set[int] = set()
@@ -298,9 +342,15 @@ def _build(
         if any(q not in usable for q in gate_qubits):
             continue
         length_s = _gate_length_s(entry, gate_name, overrides, context=context)
-        lengths[key] = length_s
+        if length_s is None:
+            skipped_gates["gate_length_missing"].append(key)
+            continue
         if gate_name in overrides:
             override_names_used.add(gate_name)
+        if length_s < 0.0:
+            skipped_gates["nonpositive"].append(key)
+            continue
+        lengths[key] = length_s
         if length_s == 0.0:
             continue
         if len(gate_qubits) == 1:
@@ -326,6 +376,7 @@ def _build(
         scope=scope,
         qubits_used=tuple(sorted(used_qubits)),
         skipped=skipped,
+        skipped_gates={reason: tuple(keys) for reason, keys in skipped_gates.items()},
         gate_lengths_s=dict(sorted(lengths.items())),
         overridden_gate_lengths=tuple(sorted(override_names_used)),
         dead_pairs=tuple(sorted(dead_pairs)),
@@ -345,7 +396,9 @@ def build_reference(
     ``single_qubit_relaxation`` installs only positive-duration one-qubit
     gate errors. ``full_device`` additionally installs two-qubit product
     channels and per-qubit readout errors. ``gate_lengths`` overrides are in
-    SI seconds. Missing or unphysical T1/T2 values are never imputed.
+    SI seconds. Missing or unphysical T1/T2 values are never imputed: such a
+    qubit is skipped by ADR-027's first applicable reason, and a selection with
+    no usable qubit raises ``ValueError`` rather than return a noise-free model.
     """
     checked_scope = _validate_scope(scope)
     model, _report = _build(

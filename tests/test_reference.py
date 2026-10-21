@@ -17,6 +17,9 @@ from qiskit_aer.noise import NoiseModel, thermal_relaxation_error
 from superconducted.benchmarks.circuits import qft_circuit
 from superconducted.benchmarks.harness import simulate_reference
 from superconducted.benchmarks.reference import build_reference, build_reference_report
+from superconducted.calibration.loader import load_snapshot
+from superconducted.channels.kraus import KrausChannelProjector, NoOpNormalization
+from superconducted.training.targets import SkipCounts, gate_lengths, qubit_targets
 from superconducted.types import CalibrationSnapshot
 
 
@@ -180,13 +183,17 @@ def test_zero_duration_rz_is_reported_but_not_installed() -> None:
 
 
 def test_skip_rules_are_non_imputing_and_fully_counted() -> None:
+    """Each qubit is rejected by its first applicable reason, in ADR-027's order."""
     qubits = [
         _qubit(),
         _qubit(t1_us=None),
         _qubit(t2_us=float("inf")),
         _qubit(t1_us=40.0, t2_us=81.0),
+        _qubit(t1_us=0.0),
+        _qubit(t1_us=None, t2_us=None),
+        _qubit(t1_us=-1.0, t2_us=-1.0),
     ]
-    gates = [_gate("sx", [q]) for q in range(4)]
+    gates = [_gate("sx", [q]) for q in range(len(qubits))]
     snapshot = _snapshot(qubits=qubits, gates=gates)
 
     model = build_reference(snapshot, scope="single_qubit_relaxation")
@@ -194,9 +201,12 @@ def test_skip_rules_are_non_imputing_and_fully_counted() -> None:
 
     assert report.qubits_used == (0,)
     assert report.skipped == {
-        "missing_t1_t2": (1, 2),
+        "t1_missing": (1, 5),
+        "t2_missing": (2,),
+        "nonpositive": (4, 6),
         "t2_exceeds_2t1": (3,),
     }
+    assert list(report.skipped) == ["t1_missing", "t2_missing", "nonpositive", "t2_exceeds_2t1"]
     assert set(model._local_quantum_errors["sx"]) == {(0,)}
 
 
@@ -242,7 +252,7 @@ def test_dead_pairs_are_reported_when_adr017_prevents_installation() -> None:
     report = build_reference_report(snapshot, scope="full_device")
 
     assert report.dead_pairs == ((0, 1),)
-    assert report.skipped["missing_t1_t2"] == (1,)
+    assert report.skipped["t1_missing"] == (1,)
     assert "cz" not in model.noise_instructions
 
 
@@ -328,14 +338,8 @@ WITH_GATES_FIXTURE = (
 )
 
 
-@pytest.mark.skipif(
-    not WITH_GATES_FIXTURE.exists(),
-    reason="Issue #57 has not yet landed ibm_fez_20260513T121322Z_with_gates.json",
-)
-def test_issue_57_fixture_reference_provenance() -> None:
-    """Consume #57's sole gates fixture after it lands; never create a duplicate here."""
-    data = json.loads(WITH_GATES_FIXTURE.read_text(encoding="utf-8"))
-    snapshot = CalibrationSnapshot(
+def _calibration_snapshot(data: dict[str, Any]) -> CalibrationSnapshot:
+    return CalibrationSnapshot(
         backend=str(data["backend"]),
         timestamp=datetime.fromisoformat(str(data["timestamp"]).replace("Z", "+00:00")),
         schema_version=str(data["schema_version"]),
@@ -344,21 +348,151 @@ def test_issue_57_fixture_reference_provenance() -> None:
         configuration=data.get("configuration"),
     )
 
+
+def test_issue_57_fixture_reference_provenance() -> None:
+    """Consume #57's sole gates fixture; never create a duplicate here."""
+    data = json.loads(WITH_GATES_FIXTURE.read_text(encoding="utf-8"))
+    snapshot = _calibration_snapshot(data)
+
     model = build_reference(snapshot, scope="full_device")
     report = build_reference_report(snapshot, scope="full_device")
 
     assert len(report.qubits_used) == 155
-    assert report.skipped["missing_t1_t2"] == (72,)
+    assert report.skipped == {
+        "t1_missing": (72,),
+        "t2_missing": (),
+        "nonpositive": (),
+        "t2_exceeds_2t1": (),
+    }
+    assert report.skipped_gates == {"gate_length_missing": (), "nonpositive": ()}
     assert len(report.dead_pairs) == 10
     assert set(model.basis_gates) == {"cz", "id", "rx", "rz", "sx", "x"}
-    assert report.gate_lengths_s[("sx", (0,))] == 24e-9
+    # 24 ns read through the ns -> s boundary: 24 * 1e-9 is one ulp above the
+    # literal 24e-9, so the pin is to rounding, not to bit equality (NC-035).
+    assert report.gate_lengths_s[("sx", (0,))] == pytest.approx(24e-9, rel=1e-15)
 
 
-@pytest.mark.skip(
-    reason=(
-        "Issue #57 owns test_reference_matches_training_targets_per_qubit; "
-        "unskip after training/targets.py lands"
+def test_missing_or_negative_gate_length_installs_nothing_and_is_recorded() -> None:
+    """ADR-028's fail-closed rule: no usable duration means no channel, recorded."""
+    no_length = {"gate": "x", "name": "x0", "qubits": [0], "parameters": []}
+    no_parameters = {"gate": "rx", "name": "rx0", "qubits": [0]}
+    snapshot = _snapshot(
+        gates=[_gate("sx", [0]), no_length, no_parameters, _gate("id", [0], length_ns=-1.0)]
     )
+
+    model = build_reference(snapshot, scope="single_qubit_relaxation")
+    report = build_reference_report(snapshot, scope="single_qubit_relaxation")
+
+    assert set(model.noise_instructions) == {"sx"}
+    assert report.skipped_gates == {
+        "gate_length_missing": (("x", (0,)), ("rx", (0,))),
+        "nonpositive": (("id", (0,)),),
+    }
+    assert ("x", (0,)) not in report.gate_lengths_s
+    assert ("id", (0,)) not in report.gate_lengths_s
+
+
+@pytest.mark.parametrize(
+    "value",
+    [None, "fast", float("nan"), float("inf")],
+    ids=("null", "non-numeric", "nan", "inf"),
 )
-def test_reference_matches_training_targets_per_qubit() -> None:
-    """Reserved cross-module SuperOp consistency pin owned by issue #57."""
+def test_corrupt_gate_length_raises(value: object) -> None:
+    """A record that exists but cannot be read is corrupt, not missing."""
+    entry = _gate("sx", [0])
+    entry["parameters"][1]["value"] = value
+
+    with pytest.raises(ValueError, match="gate_length"):
+        build_reference(_snapshot(gates=[entry]), scope="single_qubit_relaxation")
+
+
+def test_no_usable_qubit_raises_instead_of_returning_a_noise_free_model() -> None:
+    snapshot = _snapshot(
+        qubits=[_qubit(t1_us=None), _qubit(t1_us=40.0, t2_us=81.0)],
+        gates=[_gate("sx", [0]), _gate("sx", [1])],
+    )
+
+    with pytest.raises(ValueError, match="no selected qubit has usable"):
+        build_reference(snapshot, scope="single_qubit_relaxation")
+    with pytest.raises(ValueError, match="no selected qubit has usable"):
+        build_reference(
+            _snapshot(qubits=[_qubit(), _qubit(t1_us=None)]), scope="full_device", qubits=[1]
+        )
+
+
+def _set_nduv(qubit: list[dict[str, Any]], name: str, value: float | None) -> None:
+    for entry in qubit:
+        if entry["name"] == name:
+            entry["value"] = value
+            return
+    raise AssertionError(f"fixture qubit has no {name} entry")
+
+
+def _nduv_value(qubit: list[dict[str, Any]], name: str) -> float:
+    return float(next(entry["value"] for entry in qubit if entry["name"] == name))
+
+
+def _fixture_with_every_skip_reason() -> dict[str, Any]:
+    """The real fixture with qubits 0-5 edited to hit each ADR-027 reason once."""
+    data = json.loads(WITH_GATES_FIXTURE.read_text(encoding="utf-8"))
+    qubits = data["properties"]["qubits"]
+    _set_nduv(qubits[0], "T1", None)  # t1_missing
+    _set_nduv(qubits[1], "T2", float("nan"))  # t2_missing, through the non-finite path
+    _set_nduv(qubits[2], "T1", -5.0)  # nonpositive
+    _set_nduv(qubits[3], "T2", 2.0 * _nduv_value(qubits[3], "T1") + 1.0)  # t2_exceeds_2t1
+    _set_nduv(qubits[4], "T1", None)  # both missing: the first reason wins
+    _set_nduv(qubits[4], "T2", None)
+    _set_nduv(qubits[5], "T2", 2.0 * _nduv_value(qubits[5], "T1"))  # boundary, usable
+    return data
+
+
+@pytest.mark.parametrize("variant", ["fixture", "every_skip_reason"])
+def test_reference_matches_training_targets_per_qubit(variant: str, tmp_path: Path) -> None:
+    """Cross-module pin (#58 FR-5, #57 section 7 item 3): one skip rule, one channel.
+
+    On the same snapshot, ``build_reference`` and ``training.targets.qubit_targets``
+    reject exactly the same qubits, with the same count per ADR-027 reason, and on
+    every usable qubit the reference's ``sx`` channel equals the engine's projector
+    applied to that qubit's ``(gamma, lambda)`` target, under ``SuperOp``.
+    """
+    if variant == "fixture":
+        data = json.loads(WITH_GATES_FIXTURE.read_text(encoding="utf-8"))
+    else:
+        data = _fixture_with_every_skip_reason()
+    path = tmp_path / "snapshot.json"
+    path.write_text(json.dumps(data), encoding="utf-8")
+
+    targets = qubit_targets(load_snapshot(path), gate_lengths(data["properties"], "sx"))
+    snapshot = _calibration_snapshot(data)
+    model = build_reference(snapshot, scope="single_qubit_relaxation")
+    report = build_reference_report(snapshot, scope="single_qubit_relaxation")
+
+    rejected = {q for qubits in report.skipped.values() for q in qubits}
+    assert {q for q in range(len(targets.usable)) if targets.usable[q]} == (
+        set(range(len(targets.usable))) - rejected
+    )
+    assert targets.skipped == SkipCounts(
+        t1_missing=len(report.skipped["t1_missing"]),
+        t2_missing=len(report.skipped["t2_missing"]),
+        gate_length_missing=0,
+        nonpositive=len(report.skipped["nonpositive"]),
+        t2_exceeds_2t1=len(report.skipped["t2_exceeds_2t1"]),
+    )
+    if variant == "every_skip_reason":
+        assert report.skipped == {
+            "t1_missing": (0, 4, 72),
+            "t2_missing": (1,),
+            "nonpositive": (2,),
+            "t2_exceeds_2t1": (3,),
+        }
+
+    projector = KrausChannelProjector(NoOpNormalization())
+    worst = 0.0
+    for q in np.flatnonzero(targets.usable):
+        engine_channel = projector.project(targets.values[q], "sx", (int(q),))
+        reference_channel = _quantum_error(model, "sx", (int(q),))
+        worst = max(
+            worst,
+            float(np.max(np.abs(SuperOp(reference_channel).data - SuperOp(engine_channel).data))),
+        )
+    assert worst <= 1e-12
