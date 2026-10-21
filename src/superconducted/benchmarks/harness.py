@@ -1,10 +1,14 @@
 """Certified benchmark harness for engine-versus-reference comparisons.
 
-Every circuit is transpiled once to an explicit device basis before either
-the fuzzy engine or the reference model sees it. Counts are summed across
-ensemble members. Density matrices are mixed with the arithmetic mean,
-``rho_ens = (1 / N) sum_m rho_m``; interval aggregation remains deferred to
-ADR-016.
+Bootstrap status: full. Every circuit is transpiled once to an explicit
+device basis before either the fuzzy engine or the reference model sees
+it. Aggregates ensemble counts (across members) by element-wise sum,
+retaining the total shot count so metric functions normalize correctly,
+into a single :class:`SimulationResult` per circuit
+— probability-equivalent to a mean of per-member distributions under
+those normalized metrics. Density matrices are mixed with the arithmetic
+mean, ``rho_ens = (1 / N) sum_m rho_m``. Interval-valued aggregation
+across ensemble members is deferred to ADR-016.
 """
 
 from __future__ import annotations

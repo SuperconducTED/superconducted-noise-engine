@@ -1,0 +1,383 @@
+name: Calibration Pipeline Health
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: 'Build the state index before rendering.'
+        required: false
+        type: boolean
+        default: false
+      rebuild:
+        description: 'With backfill: rewrite the whole index in last_update_date order. Required once the poller has appended rows. Disable Calibration Poll first: this job fetches ~1.3 GB before it pushes a whole-file rewrite, and a poll landing inside that window makes the replay conflict and the run fail.'
+        required: false
+        type: boolean
+        default: false
+      floors:
+        description: 'Space-separated LABEL=VALUE candidate floors. Blank uses the workflow default below.'
+        required: false
+        type: string
+        default: ''
+      data_branch:
+        description: 'Data branch to read and update. Use a scratch branch for validation.'
+        required: false
+        type: string
+        default: calibration-data
+
+# FR-7: candidate floors are configuration, never a literal in the renderer.
+#
+# 1170 is NC-012 as corrected on 2026-09-09 (#56 FR-10): NC-045 measures the rule
+# base in use with count_trainable_parameters and gets 234 parameters, times the
+# x5 samples-per-parameter rule of thumb. It supersedes the 630 this workflow
+# shipped until now, whose 126 no reachable file derives and which undercounts
+# the consequent term by one output dimension.
+#
+# 1215 is the same rule of thumb for TanhBellMF, which NC-046 measures at 243
+# parameters because it carries 3 premise parameters per MF rather than 2. It is
+# the candidate issue #48 section 1.2 names by hand, as the 675 of its day.
+#
+# 1260 is the top of NC-046's own registered range: that row reports 234 to 252
+# parameters, floor 1170 to 1260, with 252 for the four-premise-parameter shapes.
+# Shipping only 1170 and 1215 rendered the bottom and middle of a measured
+# bracket and left its top invisible, which is not cosmetic here: `max_floor` in
+# the renderer sets the progress bar's full scale, so the omission drew 504
+# states as 41.5% complete where the honest worst case is 40.0%. A dashboard
+# whose bar reads fuller when a candidate is left out is the failure section 1.2
+# is written to prevent.
+#
+# Every label names the register row it is traceable to, per FR-7's requirement
+# that a rendered floor carry its source (UC-6). `TanhBellMF` alone did not: it
+# is a membership-function shape, not a row, so a reader could not grep it.
+#
+# All three ship as labelled candidates: issue #48 section 1.2 is explicit that
+# this pipeline does not decide the training floor, and NC-045 and NC-046 are
+# both still provisional laptop measurements awaiting the batch-2 canonical
+# record.
+
+# How old this dashboard's own heartbeat may get before something says so.
+#
+# NC-053 holds the derivation and is the source of truth for the value. Two
+# workflows carry it, and `tests/test_check_dashboard_freshness.py` asserts they
+# agree, so the copy in calibration-poll.yml cannot drift away from this one.
+#
+# Not a round number chosen for looking reasonable. Measured over the seven
+# intervals between the eight renders this workflow has published to
+# calibration-data: min 23.728 h, max 24.656 h, mean 24.050 h. A 24 h bound --
+# the obvious guess for a daily job -- fires on 3 of those 7 healthy intervals,
+# a 43% false-alarm rate, because GitHub starts a scheduled run late by a varying
+# amount (this cron asks for 03:17 UTC and has been served between 07:59 and
+# 09:03, a 64-minute spread). 25 h clears the observed record by 0.34 h, which is
+# less than that spread. 48 h is one whole missed render: GitHub documents
+# dropping scheduled runs under load, so a single miss is normal and not
+# actionable, and the alarm should want a second one before it speaks. It fires
+# 0/7 on the healthy record and still catches a dead renderer within two days,
+# against the quarter-scale blindness issue #48 exists to end.
+env:
+  HEALTH_FLOORS: 'NC-012=1170 NC-046-TanhBellMF=1215 NC-046-max=1260'
+  DASHBOARD_MAX_AGE_HOURS: '48'
+
+# Deliberately NOT the poller's group. Sharing one would let a render cancel a
+# queued poll, and a cancelled poll writes no ledger row. The resulting push
+# race is handled by scripts/push_with_retry.sh instead.
+concurrency:
+  group: calibration-health
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    if: ${{ inputs.backfill }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    env:
+      DATA_BRANCH: ${{ inputs.data_branch || 'calibration-data' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: source
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DATA_BRANCH }}
+          path: data
+          fetch-depth: 1
+          sparse-checkout: |
+            snapshots
+            health
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # Operating note for the one-time dispatch. This job's checkout faults in
+      # the whole ~1.3 GB archive, so it runs for minutes, and `--rebuild`
+      # rewrites `health/state-index.tsv` end to end rather than appending. The
+      # poller appends to that same file on `cron: 37 * * * *` and files a new
+      # document in most hours (NC-030), so a poll landing inside this job's
+      # window leaves push_with_retry.sh replaying a whole-file rewrite onto a
+      # one-line append, which conflicts. Conflicting is the designed outcome --
+      # a silent merge would drop the poller's row -- but it costs the dispatch,
+      # so disable Calibration Poll for the duration instead of retrying into it.
+      - name: Build and commit the state index
+        run: |
+          PYTHONPATH=source python source/scripts/backfill_state_index.py \
+            --root data ${{ inputs.rebuild && '--rebuild' || '' }}
+          cd data
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add health/state-index.tsv
+          git diff --cached --quiet && exit 0
+          git commit -m 'health: backfill state index'
+          ../source/scripts/push_with_retry.sh origin "$DATA_BRANCH"
+
+  # Capture (#54): what share of the documents IBM publishes the unattended
+  # pipeline retrieves. The ledger alone cannot answer that, because a document
+  # nobody fetched is in no ledger row, so this job asks IBM's own history. It
+  # enumerates each settled day read-only at a grid four times finer than the
+  # daily sweep's, diffs the stamps served against what the *scheduled* runs
+  # retrieved, and appends the per-document result to health/capture.tsv, a file
+  # only this job writes (ADR-025 amendment, 2026-09-29). NC-058 is the one-off
+  # measurement this repeats. Documents a person recovered by dispatch count as
+  # missed (`backfilled`), so a manual backfill can never raise the figure.
+  #
+  # It must never cost a render: the render is the heartbeat NC-053 reads, so an
+  # IBM outage here is a warning and the day stays pending for the next run.
+  capture:
+    needs: backfill
+    if: ${{ always() && (needs.backfill.result == 'success' || needs.backfill.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    # The enumeration step has its own, shorter timeout below, so this bound is
+    # never what stops the job: a job-level timeout cancels every later step,
+    # and that once discarded a day already measured (PR #105 review, reproduced
+    # in run 36958446803).
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      # To tell a manual dispatch's ledger rows from a scheduled run's.
+      actions: read
+    env:
+      DATA_BRANCH: ${{ inputs.data_branch || 'calibration-data' }}
+      # Finer than the sweep's 1 h, or the enumeration shares its blind spots and
+      # finds nothing the sweep missed. 15 min served 200 of 200 held documents
+      # over 2026-09-13..20 (NC-059).
+      CAPTURE_STEP_HOURS: '0.25'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: source
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DATA_BRANCH }}
+          path: data
+          fetch-depth: 1
+          sparse-checkout: |
+            health
+            ledger
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: source/requirements.txt
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r source/requirements.txt
+          python -m pip install -e source --no-deps
+      - name: Enumerate settled days and record capture
+        # Up to three days of about 97 queries each at 1.0-1.2 s is about six
+        # minutes (run 36523409692: 5 min 34 s). On timeout this step fails and
+        # the commit step below, which is `always()`, still pushes every day
+        # already recorded; each record is an atomic replace, so a kill mid-write
+        # leaves the previous file whole.
+        timeout-minutes: 11
+        env:
+          IBM_QUANTUM_TOKEN: ${{ secrets.IBM_QUANTUM_TOKEN }}
+          RUN_ID: ${{ github.run_id }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          days=$(PYTHONPATH=source python source/scripts/capture_record.py pending \
+            --root data --today "$(date -u +%F)")
+          if [ -z "$days" ]; then
+            echo "every settled day is already recorded" | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          # Manual dispatches of the poller, whose ledger rows must not count as
+          # the pipeline's own retrievals. Without this list a day cannot be told
+          # apart from one a person healed, so nothing is recorded at all.
+          #
+          # The jobs of each dispatch, every attempt, not the runs: a run queued
+          # behind a scheduled poll keeps its creation time as its run-level start,
+          # so a run window would claim that poll's rows (PR #105 review, round 2).
+          # A job's started_at is when a runner took it. `set -e` is off inside a
+          # function called from `if`, hence the explicit `|| return 1`.
+          list_dispatch_jobs() {
+            local ids id
+            ids=$(gh run list -R "$GITHUB_REPOSITORY" --workflow calibration-poll.yml \
+              --event workflow_dispatch --limit 500 --json databaseId --jq '.[].databaseId') \
+              || return 1
+            for id in $ids; do
+              gh api "repos/$GITHUB_REPOSITORY/actions/runs/$id/jobs?filter=all&per_page=100" \
+                --jq '.jobs[] | {run_id, started_at, completed_at, conclusion}' || return 1
+            done
+          }
+          if ! list_dispatch_jobs > dispatch-jobs.jsonl; then
+            echo "::warning::could not list poller dispatch jobs; every day stays pending"
+            exit 0
+          fi
+          jq -s . dispatch-jobs.jsonl > dispatches.json
+          for day in $days; do
+            next=$(date -u -d "$day + 1 day" +%F)
+            rm -f served.txt
+            # The probe writes served.txt only when every query was honoured, so
+            # a failed day leaves nothing to record and stays pending.
+            if PYTHONPATH=source python source/scripts/probe_historical_properties.py \
+                --backend ibm_fez --served-out served.txt \
+                --enumerate "${day}T00:00:00Z" "${next}T00:00:00Z" "$CAPTURE_STEP_HOURS" \
+                > "probe-$day.log" 2>&1 && [ -f served.txt ]; then
+              PYTHONPATH=source python source/scripts/capture_record.py record \
+                --root data --day "$day" --served served.txt --dispatches dispatches.json \
+                --step "$CAPTURE_STEP_HOURS" --run-id "$RUN_ID" | tee -a "$GITHUB_STEP_SUMMARY"
+            else
+              tail -n 5 "probe-$day.log"
+              echo "::warning::enumeration of $day did not complete; it stays pending"
+            fi
+          done
+      - name: Commit the capture record
+        # `always()`: a day measured before the enumeration step timed out or
+        # failed is still a measurement, and must reach the branch.
+        if: always()
+        run: |
+          [ -d data/.git ] || exit 0
+          cd data
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add health/capture.tsv 2>/dev/null || true
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'health: record calibration capture'
+          ../source/scripts/push_with_retry.sh origin "$DATA_BRANCH"
+
+  render:
+    # `capture` is listed so the render reads the day it just recorded, and is
+    # deliberately absent from the condition: a failed capture must still render.
+    needs: [backfill, capture]
+    if: ${{ always() && (needs.backfill.result == 'success' || needs.backfill.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    env:
+      DATA_BRANCH: ${{ inputs.data_branch || 'calibration-data' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: source
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DATA_BRANCH }}
+          path: data
+          fetch-depth: 1
+          sparse-checkout: |
+            health
+            ledger
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Reads the heartbeat left by the PREVIOUS render, before this run
+      # overwrites it, so a renderer that has been down reports the gap it is
+      # closing. This cannot be the primary alarm and is not meant to be: a
+      # process cannot report its own death, so it speaks only once it is
+      # already alive again. calibration-poll.yml carries the alarm that works
+      # while this workflow does not.
+      #
+      # Never allowed to fail the job. A stale heartbeat is a reason to render,
+      # not a reason to refuse to.
+      - name: Report the render gap this run is closing
+        run: |
+          PYTHONPATH=source python source/scripts/check_dashboard_freshness.py \
+            --root data --max-age-hours "$DASHBOARD_MAX_AGE_HOURS" \
+            | tee -a "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Render metrics and SVG
+        id: render
+        env:
+          FLOORS: ${{ inputs.floors || env.HEALTH_FLOORS }}
+        run: |
+          floor_args=()
+          for floor in $FLOORS; do floor_args+=(--floor "$floor"); done
+          set +e
+          PYTHONPATH=source python source/scripts/pipeline_health.py \
+            --root data "${floor_args[@]}"
+          status=$?
+          set -e
+          # 3 is "the index is empty or absent, nothing was written". That is the
+          # state of this branch until the one-time backfill is dispatched, and
+          # committing then would publish a dashboard reporting zero states.
+          if [ "$status" -eq 3 ]; then
+            echo 'published=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          [ "$status" -eq 0 ] || exit "$status"
+          echo 'published=true' >> "$GITHUB_OUTPUT"
+      - name: Commit the render
+        if: steps.render.outputs.published == 'true'
+        run: |
+          cd data
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add health/
+          # `git add` stages the whole tree, but a commit records only what
+          # actually changed: an unchanged progress.svg reuses its existing blob
+          # and contributes nothing to the commit. FR-6's churn budget is
+          # therefore still honoured where it was aimed -- the 8.5 KB graphic
+          # enters history only when its bytes move -- while the 2 KB
+          # metrics.json now commits on every render.
+          #
+          # That asymmetry is the whole point of this step. The previous shape
+          # ran `git restore --staged health/metrics.json` and exited whenever
+          # the SVG was unchanged, so a render that found nothing new committed
+          # nothing at all and `generated_at` did not advance. A quiet archive
+          # and a stopped renderer were then byte-identical on this branch,
+          # distinguishable only from Actions history, which expires at ~90
+          # days. ADR-025 records that exact failure for the poller -- "a quiet
+          # stretch looked identical to a stopped poller" -- and fixes it with a
+          # record written on every run including the no-ops. This is the same
+          # fix applied to the branch's second writer, which was added after that
+          # ADR was written. The commit history of metrics.json is the render log.
+          #
+          # Measured before the change: 8 runs on calibration-data (the
+          # 2026-09-10 dispatch and the 2026-09-11..17 scheduled runs) produced
+          # 8 commits, so the discarded-metrics guard had never once suppressed
+          # a commit. The added cost is zero in that observed regime and one
+          # 2 KB blob per day in a fully quiet one, which is precisely the
+          # regime the heartbeat exists to cover. NC-053 records the bound that
+          # reads this heartbeat and how it was derived.
+          #
+          # state-index.tsv is not written by this job; the backfill job above
+          # commits it itself.
+          if git diff --cached --quiet -- health/progress.svg; then
+            # Keeps `health: refresh pipeline dashboard` meaning exactly what it
+            # meant before this change -- the rendered graphic moved -- so a
+            # reader scanning the log can still tell the two apart.
+            message='health: heartbeat, rendered dashboard unchanged'
+          else
+            message='health: refresh pipeline dashboard'
+          fi
+          # Written as an `if` rather than `... && exit 0` to match
+          # file_snapshots.sh's idiom, and because the `&&` form's safety under
+          # `set -e` rests on a bash subtlety a reviewer would have to re-derive.
+          if git diff --cached --quiet; then
+            echo '::warning::nothing staged after a successful render'
+            exit 0
+          fi
+          git commit -m "$message"
+          ../source/scripts/push_with_retry.sh origin "$DATA_BRANCH"

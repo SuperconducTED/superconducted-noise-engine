@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import abc
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
@@ -19,6 +20,9 @@ from qiskit.circuit import Instruction, QuantumCircuit
 from qiskit_aer.noise import NoiseModel, QuantumError
 
 from .types import CalibrationSnapshot, MembershipDegree, RuleFiringResult, SimulationResult
+
+if TYPE_CHECKING:
+    from .types import TrainingResult, TrainingSet
 
 
 class MembershipFunction(abc.ABC):
@@ -31,8 +35,7 @@ class MembershipFunction(abc.ABC):
     ones.
 
     Trainable parameters are exposed as a flat 1-D ``float64`` vector for the
-    hybrid LSE/SGD ANFIS trainer that lives in
-    :mod:`superconducted.fuzzy.tsk` (deferred to ADR-014).
+    hybrid LSE/SGD ANFIS trainer in :mod:`superconducted.training`.
     """
 
     @abc.abstractmethod
@@ -83,6 +86,37 @@ class CalibrationFeatureExtractor(abc.ABC):
         """Human-readable names of the features, in vector order."""
 
 
+class GateEligibilityPolicy(abc.ABC):
+    """Select physical gate-qubit pairs eligible for fuzzy noise.
+
+    Covers ADR-028: the calibration snapshot's positive-duration gate records
+    are the authority, with an injected allowlist as the alternative.
+
+    The policy separates calibration-specific physical-gate semantics from
+    :class:`ChannelProjector`, which only constructs a channel once a gate is
+    eligible. Callers pass a circuit compiled to the physical basis whose
+    names this policy returns.
+
+    The returned qubit tuples are **physical** indices as the calibration
+    numbers them. :class:`FuzzificationStrategy` implementations match them
+    against an instruction's *positional* index in ``circuit.qubits``, so the
+    two only line up when the circuit was compiled to that device with a
+    trivial layout. See :meth:`FuzzyNoiseModel.prepare` for what goes wrong
+    otherwise.
+
+    Implementations must be pure in ``snapshot``: callers are free to resolve
+    the set once and reuse it for the lifetime of a model, and
+    :class:`FuzzyNoiseModel` does exactly that.
+    """
+
+    @abc.abstractmethod
+    def eligible_operations(
+        self,
+        snapshot: CalibrationSnapshot,
+    ) -> frozenset[tuple[str, tuple[int, ...]]]:
+        """Return eligible ``(gate_name, physical_qubits)`` pairs."""
+
+
 class FuzzificationStrategy(abc.ABC):
     """Strategy for placing fuzzy-derived noise relative to gates in a circuit.
 
@@ -97,13 +131,14 @@ class FuzzificationStrategy(abc.ABC):
         self,
         circuit: QuantumCircuit,
         noise_model: NoiseModel,
-        error_provider: Callable[[Instruction, tuple[int, ...]], QuantumError],
+        error_provider: Callable[[Instruction, tuple[int, ...]], QuantumError | None],
     ) -> tuple[QuantumCircuit, NoiseModel]:
         """Apply this fuzzification strategy.
 
-        ``error_provider(gate, qubits) -> QuantumError`` lets the strategy
-        request the right error for any gate-qubit pair without knowing
-        anything about the TSK pipeline.
+        ``error_provider(gate, qubits) -> QuantumError | None`` lets the
+        strategy request an error for any eligible gate-qubit pair without
+        knowing anything about the TSK pipeline. ``None`` leaves the
+        instruction noise-free.
 
         Returns ``(circuit, noise_model)``: the circuit is unchanged for
         post-gate strategies and transformed for pre/between; the noise
@@ -139,6 +174,67 @@ class RuleBase(abc.ABC):
     @property
     @abc.abstractmethod
     def is_interval_type2(self) -> bool: ...
+
+
+class TSKTrainer(abc.ABC):
+    """Fit a validated training set without mutating the caller's rule base.
+
+    *Inputs.* A :class:`RuleBase` — concretely a
+    :class:`superconducted.fuzzy.tsk.TSKRuleBase`, but annotated as the ABC
+    because ``fuzzy/tsk.py`` imports this module and the reverse import would
+    be circular. Implementations therefore ``isinstance``-check the argument
+    and raise :class:`TypeError` for any other :class:`RuleBase`. The second
+    input is a validated :class:`superconducted.types.TrainingSet`.
+
+    *Output.* A :class:`superconducted.types.TrainingResult` whose
+    ``rule_base`` is a **new** object.
+
+    *Side effects.* None on the caller's rule base.
+
+    *Invariants.*
+
+    (a) The input rule base's parameter **values** are unchanged after
+        ``fit`` — every ``TSKRule.consequent_params`` and every
+        ``MembershipFunction.parameters()``.
+    (b) Every consequent entry and MF parameter in the returned rule base is
+        finite.
+    (c) The returned rule base has the same ``n_rules``, ``input_dim``,
+        ``output_dim`` and ``is_interval_type2``.
+
+    Invariant (a) is the trainer's obligation rather than a property of the
+    LOCKED ``fuzzy/tsk.py``, because that module is shallowly read-only in
+    three ways:
+
+    - ``TSKRule.consequent_params`` has no setter but returns the *live*
+      internal ndarray, so ``rb.rules[0].consequent_params[0, -1] = 42.0``
+      changes what ``consequent()`` returns.
+    - ``TSKRule.__init__`` calls ``np.asarray(consequent_params,
+      dtype=np.float64)``, which **aliases** a caller's float64 array rather
+      than copying it.
+    - ``TSKRuleBase.from_grid`` iterates ``product(*per_input_mfs)`` and
+      reuses one MF object across every rule naming it, while
+      ``set_parameters`` mutates in place — so a 3x3x3 grid has 27 rules and
+      81 antecedent references over only 9 distinct objects.
+
+    Implementations must therefore ``copy.deepcopy`` the membership functions
+    before calling ``set_parameters``, pass freshly allocated consequent
+    arrays into rebuilt ``TSKRule`` objects, and never write through
+    ``rule.consequent_params[...]``.
+
+    *Warm start.* An implementation must satisfy ADR-024 clause 5 — call
+    ``first_viable_seed`` when initializing, or adopt a squashing strategy
+    with everywhere-nonzero gradient (``SigmoidSquashing`` per ADR-012) and
+    define its own viability predicate — **or record the mechanism it uses
+    instead**. The clause is written against *drawn* initializations; an
+    anchored consequent evaluated at each rule's centre is not drawn at all,
+    so it meets the clause's intent while falling outside its letter, and
+    such a trainer documents that third mechanism rather than claiming the
+    clause.
+    """
+
+    @abc.abstractmethod
+    def fit(self, rule_base: RuleBase, data: TrainingSet) -> TrainingResult:
+        """Fit ``rule_base`` to ``data`` and return a new training result."""
 
 
 class Defuzzifier(abc.ABC):

@@ -265,3 +265,26 @@ Local runs are provisional; the authoritative run is on the designated desktop.
 - `docs/evidence/pr47-outage-enumeration/README.md` — the two archived
   documents the sweep never returned, cited in the Aug 7–17 correction
 - PR #50; its review thread; #45 (decisions), #46 (byte stability)
+
+---
+
+## Floor correction · as-of 2026-09-09
+
+Everything above this heading is left unedited. Recording that a figure this document uses
+has been measured and corrected (#56 FR-10).
+
+Review item 4 above frames the floor as `630 = 126 × 5`, and the discussion of effective
+sample size states that "the ratio to 126 trainable parameters is below 4.0". The
+**126 is wrong**: no file in this repository ever derived it, and it undercounts the
+consequent term of a two-output model by one output dimension.
+
+Measured at `main` @ `5f935ea` on the rule base in use (3x3x3 `GaussianMF`,
+`output_dim = 2`): **234** trainable parameters, so the floor is **1170**, not 630, and the
+ratio at NC-025's 504 distinct states is **2.15**, not 4.0. Registered as NC-045, with the
+per-shape spread as NC-046; NC-012 is corrected.
+
+**The argument this document makes survives intact and is strengthened.** Its point was
+that 504 distinct states must not be read as 504 independent samples, because temporal
+correlation puts the effective sample size below the distinct-state count. That reasoning
+is unaffected by the denominator, and the corrected denominator makes the gap between what
+we have and what the rule of thumb asks for wider than this document reported.

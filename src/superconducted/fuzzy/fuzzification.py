@@ -35,7 +35,7 @@ class PostGateFuzzification(FuzzificationStrategy):
         self,
         circuit: QuantumCircuit,
         noise_model: NoiseModel,
-        error_provider: Callable[[Instruction, tuple[int, ...]], QuantumError],
+        error_provider: Callable[[Instruction, tuple[int, ...]], QuantumError | None],
     ) -> tuple[QuantumCircuit, NoiseModel]:
         qubit_index = {q: i for i, q in enumerate(circuit.qubits)}
         registered: set[tuple[str, tuple[int, ...]]] = set()
@@ -67,7 +67,7 @@ class PreGateFuzzification(FuzzificationStrategy):
         self,
         circuit: QuantumCircuit,
         noise_model: NoiseModel,
-        error_provider: Callable[[Instruction, tuple[int, ...]], QuantumError],
+        error_provider: Callable[[Instruction, tuple[int, ...]], QuantumError | None],
     ) -> tuple[QuantumCircuit, NoiseModel]:
         raise NotImplementedError(
             "PreGateFuzzification is deferred to ADR-007. Use PostGateFuzzification "
@@ -86,7 +86,7 @@ class BetweenGatesFuzzification(FuzzificationStrategy):
         self,
         circuit: QuantumCircuit,
         noise_model: NoiseModel,
-        error_provider: Callable[[Instruction, tuple[int, ...]], QuantumError],
+        error_provider: Callable[[Instruction, tuple[int, ...]], QuantumError | None],
     ) -> tuple[QuantumCircuit, NoiseModel]:
         raise NotImplementedError(
             "BetweenGatesFuzzification is deferred to ADR-007. Use "

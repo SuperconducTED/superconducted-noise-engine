@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Ask a question
+    url: https://github.com/SuperconducTED/superconducted-noise-engine/discussions/categories/q-a
+    about: Open questions, how-tos and ideas go to Discussions, where an answer can be marked.
+  - name: Security vulnerability
+    url: https://github.com/SuperconducTED/.github/blob/main/SECURITY.md
+    about: Never report a security problem in a public issue. The security policy explains how to report it privately.
+  - name: Code of conduct
+    url: https://github.com/SuperconducTED/.github/blob/main/CODE_OF_CONDUCT.md
+    about: The standards everyone here follows, and whom to contact about a conduct concern.

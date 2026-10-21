@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02 · Tip sistemi (ADR-009, ADR-011) · SuperconducTED</title>
+<style>
+  :root{
+    --ink:#16212e; --ink-soft:#41505f; --line:#d8dee6; --paper:#fbfaf7;
+    --navy:#1a3a5c; --navy-soft:#e8eef5; --rust:#a8541c; --rust-soft:#fbf0e6;
+    --green:#2f6b45; --green-soft:#e9f3ec; --grey:#6b7684; --grey-soft:#eef0f3;
+    --red:#93321f; --red-soft:#fbeae6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:16px/1.65 Georgia,"Times New Roman",serif}
+  .wrap{max-width:860px;margin:0 auto;padding:44px 28px 96px}
+  a.back{font:600 12px/1 -apple-system,Segoe UI,sans-serif;color:var(--rust);
+    text-decoration:none;letter-spacing:.08em;text-transform:uppercase}
+  a.back:hover{text-decoration:underline}
+  header.mast{border-bottom:3px double var(--navy);padding-bottom:20px;margin:16px 0 32px}
+  .kicker{font:600 11px/1 -apple-system,Segoe UI,sans-serif;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--rust);margin-bottom:12px}
+  h1{font-size:29px;line-height:1.24;margin:0 0 12px;color:var(--navy);letter-spacing:-.01em}
+  .sub{color:var(--ink-soft);font-size:16.5px;margin:0}
+  h2{font-size:21px;margin:42px 0 6px;color:var(--navy);
+    border-bottom:1px solid var(--line);padding-bottom:7px}
+  p{margin:0 0 15px}
+  ul,ol{margin:0 0 15px;padding-left:22px}
+  li{margin-bottom:7px}
+  .qbox{border:1px solid var(--line);border-top:5px solid var(--navy);background:#fff;
+    border-radius:3px;padding:24px 26px;margin:26px 0}
+  .qbox.rat{border-top-color:var(--green)}
+  .qbox.no{border-top-color:var(--grey);background:#f7f8f9}
+  .qhead{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .qbox h4{margin:0;font-size:20px;color:var(--navy);flex:1;min-width:260px;line-height:1.3}
+  .qbox.no h4{color:var(--grey)}
+  .badge{display:inline-block;font:600 11px/1 -apple-system,Segoe UI,sans-serif;
+    padding:5px 9px;border-radius:3px;letter-spacing:.03em;white-space:nowrap}
+  .b-ask{background:var(--navy-soft);color:var(--navy)}
+  .b-rat{background:var(--green-soft);color:var(--green)}
+  .b-no{background:var(--grey-soft);color:var(--grey)}
+  .field{margin:16px 0 0}
+  .field .lbl{font:700 11px/1 -apple-system,Segoe UI,sans-serif;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--rust);display:block;margin-bottom:6px}
+  .field.why .lbl{color:var(--navy)}
+  .note{background:var(--rust-soft);border-left:4px solid var(--rust);
+    padding:15px 19px;margin:20px 0;border-radius:0 3px 3px 0}
+  .note strong{color:var(--rust)}
+  .note p:last-child{margin-bottom:0}
+  .key{background:var(--green-soft);border-left:4px solid var(--green);
+    padding:15px 19px;margin:20px 0;border-radius:0 3px 3px 0}
+  .key strong{color:var(--green)}
+  .key p:last-child{margin-bottom:0}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+  th{text-align:left;background:var(--navy);color:#fff;padding:10px 12px;
+    font:600 12.5px/1.4 -apple-system,Segoe UI,sans-serif}
+  td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:nth-child(even) td{background:#fff}
+  td.num{font-family:Consolas,monospace;text-align:right}
+  tr.hi td{background:var(--green-soft) !important;font-weight:600}
+  code{font:13.5px/1.5 "SF Mono",Consolas,monospace;background:var(--grey-soft);
+    padding:1px 5px;border-radius:3px;color:var(--navy)}
+  figure{margin:24px 0;text-align:center}
+  figcaption{font:13.5px/1.6 -apple-system,Segoe UI,sans-serif;color:var(--ink-soft);
+    margin-top:10px;text-align:left}
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
+    font:13px/1.7 -apple-system,Segoe UI,sans-serif;color:var(--grey)}
+  @media print{body{background:#fff}.wrap{padding:0}a.back{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<a class="back" href="index.html">&larr; Karar dosyası</a>
+
+<header class="mast">
+  <div class="kicker">Dosya 02 · Faz 3 · Karar tarihi 23 Eylül 2026</div>
+  <h1>Tip sistemi: Tip-1 mi, Aralık Tip-2 mi, ve arkasından gelen durulaştırma</h1>
+  <p class="sub">ADR-009 ve ADR-011 · Bağımlılık grafiğinde en yüksek yayılıma sahip
+     karar: ADR-011, ADR-015 ve ADR-021 buna bağlı.</p>
+</header>
+
+<h2>Arka plan</h2>
+
+<p>Hocam, projenin çekirdeğinde bir tercih var ve iki yıldır "geçici olarak" açık
+duruyor. Tip-1 bulanık sistemde her üyelik fonksiyonunun bir girdiye karşılık tek bir
+üyelik derecesi vardır. Aralık Tip-2'de ise iki derece vardır: bir alt, bir üst sınır.
+Aradaki bölgeye <em>belirsizlik ayak izi</em> deniyor ve bu, "bu üyelik derecesinden
+ne kadar eminim" sorusunu modelin içine taşımanın yolu.</p>
+
+<p>Bu proje için IT2'nin çekiciliği açık: biz kalibrasyon <em>kaymasını</em>
+modelliyoruz. Bir kübitin T1 değeri saat başı değişiyor ve iki ölçüm arasında ne
+olduğunu bilmiyoruz. Bu tam olarak epistemik belirsizlik, yani IT2'nin var olma
+sebebi. ADR-009 bugün "geçici olarak IT2'yi tercih et" diyor ama <strong>Status
+alanı hâlâ Open</strong> ve o "geçici tercih" hiçbir ölçüme dayanmıyor.</p>
+
+<figure>
+<svg viewBox="0 0 760 250" width="100%" style="max-width:760px" xmlns="http://www.w3.org/2000/svg"
+     role="img" aria-label="Tip-1 tek eğri, Aralık Tip-2 alt ve üst eğri arasında bir ayak izi">
+  <text x="176" y="20" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="13.5" font-weight="600" fill="#1a3a5c">Tip-1 · tek eğri</text>
+  <text x="560" y="20" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="13.5" font-weight="600" fill="#a8541c">Aralık Tip-2 · belirsizlik ayak izi</text>
+
+  <line x1="40" y1="200" x2="320" y2="200" stroke="#41505f" stroke-width="1.2"/>
+  <line x1="40" y1="200" x2="40" y2="52" stroke="#41505f" stroke-width="1.2"/>
+  <path d="M50 199 Q120 199 150 120 Q176 46 202 120 Q232 199 310 199" fill="none" stroke="#1a3a5c" stroke-width="2.4"/>
+  <line x1="176" y1="200" x2="176" y2="46" stroke="#6b7684" stroke-width="1" stroke-dasharray="3 3"/>
+  <circle cx="176" cy="46" r="3.5" fill="#1a3a5c"/>
+  <text x="176" y="218" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11.5" fill="#41505f">girdi</text>
+  <text x="26" y="128" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11.5" fill="#41505f" transform="rotate(-90 26 128)">üyelik</text>
+  <text x="176" y="238" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11.5" fill="#6b7684">bir girdi &#8594; bir derece</text>
+
+  <line x1="424" y1="200" x2="720" y2="200" stroke="#41505f" stroke-width="1.2"/>
+  <line x1="424" y1="200" x2="424" y2="52" stroke="#41505f" stroke-width="1.2"/>
+  <path d="M434 199 Q500 199 528 104 Q560 34 592 104 Q620 199 712 199 L712 199 Q620 199 596 134 Q560 72 524 134 Q500 199 434 199 Z" fill="#fbf0e6" stroke="none"/>
+  <path d="M434 199 Q500 199 528 104 Q560 34 592 104 Q620 199 712 199" fill="none" stroke="#a8541c" stroke-width="2.2"/>
+  <path d="M434 199 Q500 199 524 134 Q560 72 596 134 Q620 199 712 199" fill="none" stroke="#a8541c" stroke-width="2.2" stroke-dasharray="5 3"/>
+  <line x1="560" y1="34" x2="560" y2="200" stroke="#6b7684" stroke-width="1" stroke-dasharray="3 3"/>
+  <circle cx="560" cy="34" r="3.5" fill="#a8541c"/>
+  <circle cx="560" cy="72" r="3.5" fill="#a8541c"/>
+  <line x1="560" y1="34" x2="560" y2="72" stroke="#a8541c" stroke-width="4"/>
+  <text x="612" y="56" font-family="Segoe UI,sans-serif" font-size="11.5" fill="#a8541c">alt ve üst</text>
+  <text x="560" y="238" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11.5" fill="#6b7684">bir girdi &#8594; bir aralık</text>
+</svg>
+<figcaption>Fark tek bir cümleyle: Tip-2 "bilmiyorum"u modelin <em>içinde</em> temsil
+eder, Tip-1 ise belirsizliği modelin dışına, topluluk katmanına atar. Bizde her ikisi
+de kodlu ve çalışıyor.</figcaption>
+</figure>
+
+<h2>Bu oturumda ölçtüğümüz bir şey kararı değiştirebilir</h2>
+
+<p>IT2'ye karşı öne sürülen standart itiraz "parametre sayısı iki katına çıkar,
+eğitim verisi yetmez" biçimindedir. <strong>Bu projede öyle değil, ve bunu bugün
+ilk kez ölçtük.</strong></p>
+
+<table>
+  <tr><th>Üyelik fonksiyonu şekli</th><th>MF başına</th><th>Öncül</th><th>Sonuç</th>
+      <th>Toplam eğitilebilir</th><th>Eşik (×5)</th></tr>
+  <tr class="hi"><td>GaussianMF <em>(bugünkü varsayılan, Tip-1)</em></td>
+      <td class="num">2</td><td class="num">18</td><td class="num">216</td>
+      <td class="num">234</td><td class="num">1170</td></tr>
+  <tr><td>TanhSigmoidMF</td><td class="num">2</td><td class="num">18</td>
+      <td class="num">216</td><td class="num">234</td><td class="num">1170</td></tr>
+  <tr><td>TriangularMF</td><td class="num">3</td><td class="num">27</td>
+      <td class="num">216</td><td class="num">243</td><td class="num">1215</td></tr>
+  <tr><td>TanhBellMF</td><td class="num">3</td><td class="num">27</td>
+      <td class="num">216</td><td class="num">243</td><td class="num">1215</td></tr>
+  <tr class="hi"><td><b>IntervalGaussianMF</b> <em>(IT2)</em></td>
+      <td class="num">3</td><td class="num">27</td><td class="num">216</td>
+      <td class="num"><b>243</b></td><td class="num"><b>1215</b></td></tr>
+  <tr><td>TrapezoidalMF</td><td class="num">4</td><td class="num">36</td>
+      <td class="num">216</td><td class="num">252</td><td class="num">1260</td></tr>
+  <tr><td>TanhMF</td><td class="num">4</td><td class="num">36</td>
+      <td class="num">216</td><td class="num">252</td><td class="num">1260</td></tr>
+</table>
+
+<div class="key">
+  <p><strong>IT2'ye geçmenin parametre maliyeti +9, yüzde olarak %3.8.</strong>
+  İki katı değil. Sebep basit: 3×3×3 ızgarada 27 kural var ve her kural
+  (3 girdi + 1 sabit) × 2 çıktı = 8 sonuç katsayısı taşıyor, toplam 216. Öncül
+  tarafı ise <em>yalnızca 9 benzersiz MF nesnesi</em>, çünkü <code>from_grid</code>
+  aynı MF nesnesini onu kullanan her kuralda paylaşıyor. IT2 o 9 nesnenin her birine
+  bir parametre ekliyor: 9 × 1 = 9. Toplamı 216 olan sonuç tarafı baskın olduğu için
+  öncül tarafındaki artış kayboluyor.</p>
+</div>
+
+<p style="font-size:14.5px;color:#41505f">Ölçüm: <code>count_trainable_parameters</code>,
+<code>main @ 5f935ea</code>, 3×3×3 ızgara, <code>output_dim = 2</code>. Gaussian satırı
+sicildeki NC-037 ile birebir aynı (234). Diğer altı satır bu oturumda ölçüldü ve
+#56'nın M3 pull request'inde sicile kaydediliyor.</p>
+
+<h2>Sorular</h2>
+
+<div class="qbox">
+  <div class="qhead">
+    <h4>1 · IT2, bu yayının bilimsel iddiasının parçası mı, yoksa bir uygulama detayı mı?</h4>
+    <span class="badge b-ask">SOR · kapsam</span>
+  </div>
+
+  <div class="field"><span class="lbl">Soru</span>
+    <p>ADR-009 bugün "geçici olarak IT2" diyor ve ADR-019 ablasyonunun IT2'nin
+    kalibrasyon kaymasına dayanıklılığı <em>anlamlı biçimde</em> iyileştirdiğini
+    göstermesi hâlinde onaylanmasını öngörüyor. Sorumuz: <strong>"anlamlı" ölçüsünü
+    biz mi koyuyoruz, siz mi?</strong> Ve daha önemlisi: ablasyon IT2 lehine
+    <em>çıkmazsa</em>, IT2'yi yine de bir katkı noktası olarak tutmalı mıyız?</p>
+  </div>
+
+  <div class="field"><span class="lbl">Neden bu bir kapsam sorusu</span>
+    <p>Çünkü iki farklı makale var burada. Birincisi: "kalibrasyon verisinden
+    gürültü modeli çıkaran bir mimari" ki bu Tip-1 ile de yazılır ve IT2 bir
+    ek deney olur. İkincisi: "epistemik belirsizliği bulanık tip-2 ile temsil
+    eden bir gürültü modeli" ki burada IT2 <em>iddianın kendisi</em> olur ve
+    ablasyon sonucu ne olursa olsun kalır. Bu iki makale farklı hakem kitlesine
+    gider.</p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden size soruyoruz, deneyip görmüyoruz</span>
+    <p>Deneyi zaten yapıyoruz: #62 numaralı bilet ablasyonu yedi şekil için
+    çalıştırıyor ve IT2 ile Tip-1'i aynı tabloda karşılaştıracak. <strong>Bize
+    eksik olan sayı değil, sayının ne anlama geldiğine dair ölçüt.</strong>
+    Diyelim ki IT2, Hellinger mesafesinde %2 iyileştirme getirdi. Bu "anlamlı"
+    mı? Bu sorunun cevabı ölçümde değil, alanın beklentisinde. Yanlış tarafı
+    seçersek ya savunulamaz bir iddiayla ya da boşuna karmaşıklıkla çıkarız.</p>
+    <p>Ayrıca yukarıdaki tablo kararı kolaylaştırıyor olabilir: parametre
+    maliyeti argümanı büyük ölçüde çöktü. Eğer IT2'yi "çok pahalı" olduğu için
+    ertelemeyi düşünüyorduysanız, +9 parametre o gerekçeyi zayıflatıyor.</p>
+  </div>
+</div>
+
+<div class="qbox rat">
+  <div class="qhead">
+    <h4>2 · ADR-011: Nie-Tan mı, Karnik-Mendel mi?</h4>
+    <span class="badge b-rat">ONAYLA</span>
+  </div>
+
+  <div class="field"><span class="lbl">Arka plan</span>
+    <p>IT2 bir aralık üretir; onu tek bir sayıya indirmeye <em>tip indirgeme</em>
+    deniyor. İki yöntem kodlu: Karnik-Mendel yinelemeli ve kesin sonucu verir,
+    Nie-Tan kapalı formda ve yaklaşıktır ama çok daha ucuzdur. ADR-011 bugün
+    "Open (her yol için fiilen seçilmiş)" durumunda ve kararını açıkça ADR-009'a
+    havale ediyor, yani ADR-009 kapanmadan kapanamaz.</p>
+  </div>
+
+  <div class="field"><span class="lbl">Ne yapıyoruz</span>
+    <p>#61 numaralı bilet Nie-Tan'ı Karnik-Mendel'e karşı <em>ölçüyor</em>:
+    yaklaşımın getirdiği hata ile kazandırdığı hesap süresi. Sonuç bir sayı
+    olacak, tercih değil.</p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden size soruyoruz</span>
+    <p>Sormuyoruz aslında; <strong>onaylamanızı istiyoruz.</strong> Bu maddeyi
+    listeye koymamızın tek sebebi ADR-011'in sizin sahip olduğunuz karar
+    defterinde durması ve Status alanının sizin onayınızla değişmesi. Ölçüm
+    elimize geçtiğinde size tek paragraflık bir özet göndereceğiz: "şu hata,
+    şu hız, dolayısıyla şunu seçtik". Sizden beklediğimiz "tamam" ya da
+    "hayır, kesin sonucu tercih edin" demeniz.</p>
+    <p>Bunu kendi başımıza kapatmıyoruz çünkü karar defterine yazılan bir
+    Status satırının sahibi sizsiniz, ve bu projede daha önce ölçülmemiş bir
+    tercihin "geçici" diye yazılıp iki yıl kalması yaşandı. Aynı hatayı
+    tekrarlamak istemiyoruz.</p>
+  </div>
+</div>
+
+<h2>Sormadıklarımız ve nedeni</h2>
+
+<div class="qbox no">
+  <div class="qhead">
+    <h4>Eski Soru 7 · "Tip-1/Tip-2 kararını eğiticiden önce mi sonra mı verelim?"</h4>
+    <span class="badge b-no">SORMUYORUZ</span>
+  </div>
+  <p>25 Mayıs 2026 listesinde bu vardı ve o zaman gerçek bir soruydu. Artık değil,
+  çünkü <strong>mimari bir çözümle sorunun kendisini ortadan kaldırdık.</strong></p>
+  <p>#60 numaralı bilet eğiticiyi <em>tipten bağımsız</em> yazıyor: Tip-1'i, alt ve
+  üst sınırın eşit olduğu bir Tip-2 özel durumu olarak ele alıyor. Böylece eğitici
+  ADR-009'un kararını beklemiyor; karar geldiğinde aynı eğitici her iki yolu da
+  çalıştırıyor. Sıralama sorusu kalmadı.</p>
+  <p>Bunu size sormak, çözülmüş bir problemi masaya geri koymak olurdu. Yine de
+  bilginiz olsun diye yazıyoruz: eski listenin bu maddesi <em>cevapsız kalmadı,
+  geçersizleşti</em>.</p>
+</div>
+
+<div class="qbox no">
+  <div class="qhead">
+    <h4>"Ablasyonun kazananı hangi şekil olsun?"</h4>
+    <span class="badge b-no">SORMUYORUZ</span>
+  </div>
+  <p>ADR-019 kapanışı bir ölçüm sonucudur, bir tercih değil. #62 yedi şekli aynı
+  protokolle (dört devre, dört metrik, sabit tohum, 4096 atış, topluluk boyutu 8)
+  çalıştırıp tabloyu yayınlıyor. Kazananı tablo söyleyecek.</p>
+  <p>Size <em>protokolün kendisini</em> sorabilirdik ama onu da 25 Mayıs'ta
+  sormuştuk ve ADR-019 metnine yazdık; değiştirmemiz gereken bir şey görürseniz
+  Dosya 05'teki metrik sıralaması sorusu o kapıyı açık tutuyor.</p>
+</div>
+
+<footer>
+  Kaynaklar: <code>docs/decisions.md</code> ADR-009, ADR-011, ADR-019 &nbsp;·&nbsp;
+  NC-037 &nbsp;·&nbsp; <code>src/superconducted/training/parameters.py</code> &nbsp;·&nbsp;
+  <code>src/superconducted/fuzzy/membership.py</code> &nbsp;·&nbsp;
+  biletler #60, #61, #62 &nbsp;·&nbsp; ölçüm referansı <code>main @ 5f935ea</code>
+</footer>
+
+</div>
+</body>
+</html>

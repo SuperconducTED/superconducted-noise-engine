@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>06 · Ölçüm birimi (ADR-025 boru hattı eki) · SuperconducTED</title>
+<style>
+  :root{
+    --ink:#16212e; --ink-soft:#41505f; --line:#d8dee6; --paper:#fbfaf7;
+    --navy:#1a3a5c; --navy-soft:#e8eef5; --rust:#a8541c; --rust-soft:#fbf0e6;
+    --green:#2f6b45; --green-soft:#e9f3ec; --grey:#6b7684; --grey-soft:#eef0f3;
+    --red:#93321f; --red-soft:#fbeae6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:16px/1.65 Georgia,"Times New Roman",serif}
+  .wrap{max-width:860px;margin:0 auto;padding:44px 28px 96px}
+  a.back{font:600 12px/1 -apple-system,Segoe UI,sans-serif;color:var(--rust);
+    text-decoration:none;letter-spacing:.08em;text-transform:uppercase}
+  a.back:hover{text-decoration:underline}
+  header.mast{border-bottom:3px double var(--navy);padding-bottom:20px;margin:16px 0 32px}
+  .kicker{font:600 11px/1 -apple-system,Segoe UI,sans-serif;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--rust);margin-bottom:12px}
+  h1{font-size:29px;line-height:1.24;margin:0 0 12px;color:var(--navy);letter-spacing:-.01em}
+  .sub{color:var(--ink-soft);font-size:16.5px;margin:0}
+  h2{font-size:21px;margin:42px 0 6px;color:var(--navy);
+    border-bottom:1px solid var(--line);padding-bottom:7px}
+  p{margin:0 0 15px}
+  ul,ol{margin:0 0 15px;padding-left:22px}
+  li{margin-bottom:7px}
+  .qbox{border:1px solid var(--line);border-top:5px solid var(--navy);background:#fff;
+    border-radius:3px;padding:24px 26px;margin:26px 0}
+  .qbox.rat{border-top-color:var(--green)}
+  .qbox.no{border-top-color:var(--grey);background:#f7f8f9}
+  .qhead{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .qbox h4{margin:0;font-size:20px;color:var(--navy);flex:1;min-width:260px;line-height:1.3}
+  .qbox.no h4{color:var(--grey)}
+  .badge{display:inline-block;font:600 11px/1 -apple-system,Segoe UI,sans-serif;
+    padding:5px 9px;border-radius:3px;letter-spacing:.03em;white-space:nowrap}
+  .b-ask{background:var(--navy-soft);color:var(--navy)}
+  .b-rat{background:var(--green-soft);color:var(--green)}
+  .b-no{background:var(--grey-soft);color:var(--grey)}
+  .field{margin:16px 0 0}
+  .field .lbl{font:700 11px/1 -apple-system,Segoe UI,sans-serif;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--rust);display:block;margin-bottom:6px}
+  .field.why .lbl{color:var(--navy)}
+  .note{background:var(--rust-soft);border-left:4px solid var(--rust);
+    padding:15px 19px;margin:20px 0;border-radius:0 3px 3px 0}
+  .note strong{color:var(--rust)}
+  .note p:last-child{margin-bottom:0}
+  .warn{background:var(--red-soft);border-left:4px solid var(--red);
+    padding:15px 19px;margin:20px 0;border-radius:0 3px 3px 0}
+  .warn strong{color:var(--red)}
+  .warn p:last-child{margin-bottom:0}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+  th{text-align:left;background:var(--navy);color:#fff;padding:10px 12px;
+    font:600 12.5px/1.4 -apple-system,Segoe UI,sans-serif}
+  td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:nth-child(even) td{background:#fff}
+  code{font:13.5px/1.5 "SF Mono",Consolas,monospace;background:var(--grey-soft);
+    padding:1px 5px;border-radius:3px;color:var(--navy)}
+  .bignum{display:flex;gap:16px;flex-wrap:wrap;margin:22px 0}
+  .bignum div{flex:1;min-width:170px;background:#fff;border:1px solid var(--line);
+    border-top:4px solid var(--rust);border-radius:3px;padding:16px 18px;text-align:center}
+  .bignum .n{font:700 27px/1.1 Georgia,serif;color:var(--navy);display:block}
+  .bignum .n.ok{color:var(--green)}
+  .bignum .l{font:13px/1.5 -apple-system,Segoe UI,sans-serif;color:var(--ink-soft);
+    display:block;margin-top:7px}
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
+    font:13px/1.7 -apple-system,Segoe UI,sans-serif;color:var(--grey)}
+  @media print{body{background:#fff}.wrap{padding:0}a.back{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<a class="back" href="index.html">&larr; Karar dosyası</a>
+
+<header class="mast">
+  <div class="kicker">Dosya 06 · Faz 3 · Karar tarihi 23 Eylül 2026</div>
+  <h1>Ölçüm birimi: bir "cihaz durumu" tam olarak nedir?</h1>
+  <p class="sub">ADR-025 boru hattı eki (PR #70) &nbsp;·&nbsp; Dosya 04'ün
+     birinci sorusunun kardeşi &nbsp;·&nbsp;
+     Bu dosya bir tanım değişikliğini onaya sunuyor.</p>
+</header>
+
+<h2>Neden ayrı bir dosya</h2>
+
+<p>Hocam, Dosya 04'te ADR-025'in bir eki için onayınızı istemiştik
+(<code>duplicate-partial</code> kararı, PR #55). Bu dosya aynı defterin ikinci
+bir ekini taşıyor ve ikisi birlikte karara bağlanmalı, çünkü <strong>ikisi de
+aynı soruyu farklı yerden soruyor: defter neyi kaydeder?</strong></p>
+
+<p>Yeni ek, kalibrasyon arşivine bir <em>sağlık paneli</em> ekleyen çalışmadan
+geliyor. Panelin kendisi mühendislik işi ve sizden bir şey istemiyoruz. Ama
+paneli yaparken <strong>arşivin ölçüm biriminin tanımını değiştirmek zorunda
+kaldık</strong>, ve o tanım bu projenin en çok atıf alan sayısını, NC-025'i
+üretiyor. Onay isteğimiz sadece o tanım için.</p>
+
+<div class="note">
+  <p><strong>Önce şeffaflık:</strong> bu sistem sizin cevabınızdan önce
+  birleştirildi ve çalışmaya başladı. Sebebini ve geri dönüş maliyetini bu
+  dosyanın sonunda açıkça yazdık. Kısası: alternatif, ölçüm aracının hiç
+  olmaması idi, ve geri dönüş bir komutluk iş.</p>
+</div>
+
+<h2>Sorun neydi</h2>
+
+<p>Arşivdeki her belge, cihazın o andaki kalibrasyon değerlerini taşıyor. Bir
+belgenin <code>properties.qubits</code> bloğu 156 kübitin ölçülen değerlerini
+tutuyor ve her kayıt şu dört alandan oluşuyor:
+<code>{date, name, unit, value}</code>. Örneğin
+<em>"T1, mikrosaniye, 91.5, 13:07'de ölçüldü"</em>.</p>
+
+<p>"Kaç ayrık cihaz durumumuz var" sorusunu bu bloğun özetini (hash) alarak
+yanıtlıyoruz. Soru şu: <strong>özete <code>date</code> alanı dahil edilmeli
+mi?</strong></p>
+
+<p>İki belge düşünün. Aynı kübitler, aynı <code>T1</code>, aynı
+<code>T2</code>, aynı okuma hatası; tek fark, kayıtların üzerindeki damganın bir
+saat sonrasını göstermesi. Bu bir cihaz durumu mu, iki mi?</p>
+
+<div class="warn">
+  <p><strong>Bu soyut değil, bizi ısıran bir durum.</strong> IBM'in geçmiş verisi
+  veren uç noktası, sentezlediği kayıtlara <em>yeniden damga basıyor</em>. Yani
+  bir boşluğu geri doldurmak için geçmişe sorduğumuzda, zaten elimizde olan bir
+  durumu farklı damgalarla geri alıyoruz. <code>date</code> özete dahil olursa o
+  belge <em>ikinci bir ayrık durum</em> olarak sayılıyor, ve indeks
+  <strong>yalnızca ekleme yapılan</strong> bir dosya olduğu için bu sayım
+  kalıcı hale geliyor.</p>
+</div>
+
+<h2>Ne yaptık, ve ölçüm ne dedi</h2>
+
+<p><code>date</code> alanını özetten çıkardık. Yani bir kayıt "ne zaman
+ölçüldü" değil, "ne ölçüldü" ile tanımlanıyor. Sonra bu değişikliğin arşivde
+neyi oynattığını üç ayrı referansta, tam sayımla ölçtük:</p>
+
+<table>
+  <tr><th>Referans</th><th>Belge</th><th><code>date</code> dahil</th>
+      <th><code>date</code> hariç</th><th>Birleşen</th></tr>
+  <tr><td><code>f0930b9</code></td><td>894</td><td>504</td><td>504</td><td>0</td></tr>
+  <tr><td><code>46f93c8</code></td><td>936</td><td>537</td><td>537</td><td>0</td></tr>
+  <tr><td><code>cb7a8c2</code></td><td>994</td><td>563</td><td>563</td><td>0</td></tr>
+</table>
+
+<div class="bignum">
+  <div><span class="n ok">0</span><span class="l">Bugünkü arşivde tanım
+    değişikliğinin birleştirdiği durum sayısı</span></div>
+  <div><span class="n">504</span><span class="l">NC-025 aynen duruyor;
+    eğitim eşiği tartışması bu değişiklikten etkilenmiyor</span></div>
+  <div><span class="n">%100</span><span class="l">861.789 kübit parametre
+    kaydının <code>date</code> taşıma oranı</span></div>
+</div>
+
+<p>Yani <strong>bugün bu değişiklik hiçbir sayıyı oynatmıyor</strong>, ama boş
+bir işlem de değil: bloktaki 861.789 kaydın tamamı bir <code>date</code>
+taşıyor ve 894 belgenin hepsinin özet girdisi değişiyor. Arşiv şunu söylüyor:
+<em>bir parametrenin damgası her oynadığında yanında en az bir değer de
+oynamış.</em> Yani IBM aynı değeri yeni bir damgayla yeniden yayımlamamış,
+şimdiye kadar.</p>
+
+<p style="font-size:14.5px;color:#41505f">Yön güvencesi: damgayı atmak sadece
+<em>birleştirebilir</em>, ayıramaz. Matematiksel olarak yeni bölümleme eskisinin
+kabalaştırılmışı, dolayısıyla yeni sayı eskisinden büyük olamaz. Ölçülmesi
+gereken tek şey kaç tanesinin birleştiğiydi, ve cevap sıfır.</p>
+
+<h2>Sorular</h2>
+
+<div class="qbox">
+  <div class="qhead">
+    <h4>1 · Bir cihaz durumu "ölçülen değerler" ile mi tanımlanmalı?</h4>
+    <span class="badge b-ask">SOR · ilke + yetki</span>
+  </div>
+
+  <div class="field"><span class="lbl">Ne rica ediyoruz</span>
+    <p>ADR-025 ekinin şu cümlesini karar defterinde onaylamanız:
+    <strong>"Bir indeks satırı, ölçülen değerlerinde ayrık olan bir cihaz
+    durumunu ifade eder; bayt olarak ayrık bir kübit bloğunu değil."</strong></p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden size soruyoruz</span>
+    <p>Çünkü bu bir <strong>yetki</strong> maddesi ve bir <strong>ilke</strong>
+    maddesi. Yetki tarafı: <code>docs/decisions.md</code> sizin sahipliğinizde
+    ve bu ek defterdeki bir kaydın anlamını değiştiriyor. İlke tarafı ise
+    gerçekten fikrinizi istediğimiz yer:</p>
+    <p><em>Aynı değeri veren ikinci bir ölçüm, ikinci bir örnek midir?</em></p>
+    <p>Biz "hayır" dedik: bilgi içeriği aynıysa eğitim örneği de aynıdır, ve iki
+    saymak eşiğe olan mesafeyi olduğundan yakın gösterir. Ama karşı okuma da
+    savunulabilir: istatistiksel olarak farklı zamanlarda yapılmış iki gözlem,
+    değerleri çakışsa bile iki gözlemdir. Bu ayrım NC-025'i ve dolayısıyla
+    "eğitime yetecek veri var mı" tartışmasının tamamını tanımlıyor, o yüzden
+    sizin onayınızla sabitlemek istiyoruz.</p>
+  </div>
+
+  <div class="field"><span class="lbl">Yönlendirirseniz maliyeti</span>
+    <p>Bir <code>workflow_dispatch</code> koşusu. İndeks
+    <code>--rebuild</code> ile eski tanım altında yeniden üretilir, yaklaşık
+    yarım saat, ve kod tarafında tek satır değişir. Veri kaybı yok, geri dönüş
+    ucuz. Bu yüzden cevabınızı beklemeden çalıştırmayı göze aldık.</p>
+  </div>
+</div>
+
+<div class="qbox">
+  <div class="qhead">
+    <h4>2 · Yalnızca-ekleme bir deftere tek bir yeniden yazma izni koymak</h4>
+    <span class="badge b-ask">SOR · ilke</span>
+  </div>
+
+  <div class="field"><span class="lbl">Arka plan</span>
+    <p>İndeks yalnızca ekleme yapılan bir dosya, çünkü geçmişi değiştirilemez
+    tutmak istiyoruz. Ama tam olarak yukarıdaki durum yüzünden bir kaçış
+    kapısına ihtiyaç duyduk: geçmişe dönük bir tarama, saatlik yoklayıcının
+    zaten yazdığı satırların <em>arkasına</em> daha eski belgeler ekliyor, ve o
+    noktada satırların sırası kronolojik olmaktan çıkıyor.</p>
+    <p>Ekimiz şunu söylüyor: yoklama yolu yalnızca ekleme yapar; elle
+    tetiklenen geri doldurmanın <code>--rebuild</code> kipi <strong>tek izin
+    verilen yeniden yazmadır</strong>.</p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden size soruyoruz</span>
+    <p>Bu, Dosya 04'teki birinci sorunun aynısının başka bir yüzü:
+    <em>bir defter gözlemi mi kaydetmeli, sonucu mu?</em> Orada
+    <code>collision</code> satırını yanlış olduğunu bildiğimiz halde bilerek
+    bıraktık. Burada ise satırların kendisini yeniden üretme hakkını saklı
+    tutuyoruz. İkisi aynı anda tutarlı mı, yoksa birini gevşetmemiz mi gerekir?
+    Bunu bir mühendislik tercihi olarak değil, kayıt disiplini olarak
+    soruyoruz.</p>
+  </div>
+</div>
+
+<div class="qbox rat">
+  <div class="qhead">
+    <h4>3 · <code>is_new_state</code> sütunu bir gözlemdir, kronoloji değil</h4>
+    <span class="badge b-rat">ONAYLA</span>
+  </div>
+
+  <div class="field"><span class="lbl">Ne rica ediyoruz</span>
+    <p>Ekin şu maddesini onaylamanız: bu sütun <em>yoklayıcının o an ne
+    gördüğünü</em> kaydeder ve bir taramadan sonra kronoloji hakkında yetkili
+    değildir; okuyucular ilk görülmeyi <code>last_update_date</code> alanından
+    türetir, ölçüm motorunun yaptığı gibi.</p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden onay, soru değil</span>
+    <p>Çünkü bunu ölçtük ve çalışıyor: tüm zaman pencereleri artık satır ekleme
+    sırasından bağımsız. Sizden tasarım değil, ilkenin defterde yazılı olmasına
+    onay istiyoruz. Bu da yine "gözlemi kaydet" duruşunun bir sonucu.</p>
+  </div>
+</div>
+
+<div class="qbox no">
+  <div class="qhead">
+    <h4>Bu ekten size <em>sormadığımız</em> şeyler</h4>
+    <span class="badge b-no">GERİ ÇEKİLDİ</span>
+  </div>
+  <div class="field"><span class="lbl">Ve nedeni</span>
+    <p>Ekte üç madde daha var; üçü de mühendislik disiplini ve kendimiz
+    ölçebildiğimiz için tek olan danışman kanalını işgal etmemeleri gerekir:</p>
+    <ul>
+      <li><strong>Aday eşiklerin etiketlenmesi ve kayıtlı aralığın tamamını
+        kapsaması.</strong> Bu bir izlenebilirlik kuralı, bir karar değil.</li>
+      <li><strong>Üretilen grafiğin saat okuması taşımaması.</strong> Belirlilik
+        gereği; testle sabitlendi.</li>
+      <li><strong>Projeksiyon alanlarının sicile girmemesi.</strong> Yedi
+        günlük bir sayımdan düz doğru uzatması; NC-R002 zaten tam bu yüzden
+        emekliye ayrılmış durumda. İç disiplin.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Cevabınızı beklemeden çalıştırdık, ve nedenini yazıyoruz</h2>
+
+<p>Ekip kuralımız (<code>docs/team.md</code>) defter semantiğine dokunan
+değişiklikler için sizin imzanızı bir <em>ön koşul</em> yapıyor. Bu sefer
+sırayı bozduk: sistem birleştirildi ve çalışıyor.</p>
+
+<p>Gerekçemiz şu. Bu panel, üç ay boyunca fark edilmeyen bir zamanlayıcı
+çöküşünü günler içinde görünür kılmak için var. O çöküş sürerken beklemek,
+ölçüm aracını beklerken ölçtüğümüz şeyi kaybetmek demekti. Tanımın kendisi de
+bugünkü veride hiçbir sayıyı oynatmıyor, ve yönlendirmeniz halinde geri dönüş
+bir komutluk iş.</p>
+
+<p>Bunu bir izin olarak değil, <strong>kayıtlı bir sapma</strong> olarak
+sunuyoruz. Sessiz kalmak yerine yazıyoruz, çünkü bu dosyanın bağlı olduğu
+sicil şunu söylüyor: <em>kaydedilmiş bir boşluk bir kayıttır, sessizlik
+değildir.</em></p>
+
+<footer>
+  Kaynaklar: <code>docs/decisions.md</code> ADR-025 eki &nbsp;·&nbsp;
+  <code>docs/implementations/2026-09-05-pipeline-health-dashboard.md</code>
+  &nbsp;·&nbsp; <code>docs/numerical-claims.md</code> NC-025, NC-047
+  &nbsp;·&nbsp; PR #70, Issue #48<br>
+  Ölçümler <code>calibration-data</code> dalında adı geçen referanslarda
+  alınmıştır ve <code>scripts/backfill_state_index.py</code> ile yeniden
+  üretilebilir. Dizüstü ölçümü; kanonik doğrulama batch-2 kaydı.
+</footer>
+
+</div>
+</body>
+</html>

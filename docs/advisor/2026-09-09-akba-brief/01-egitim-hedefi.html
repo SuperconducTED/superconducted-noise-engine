@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>01 · Eğitim hedefi (ADR-027) · SuperconducTED</title>
+<style>
+  :root{
+    --ink:#16212e; --ink-soft:#41505f; --line:#d8dee6; --paper:#fbfaf7;
+    --navy:#1a3a5c; --navy-soft:#e8eef5; --rust:#a8541c; --rust-soft:#fbf0e6;
+    --green:#2f6b45; --green-soft:#e9f3ec; --grey:#6b7684; --grey-soft:#eef0f3;
+    --red:#93321f; --red-soft:#fbeae6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:16px/1.65 Georgia,"Times New Roman",serif}
+  .wrap{max-width:860px;margin:0 auto;padding:44px 28px 96px}
+  a.back{font:600 12px/1 -apple-system,Segoe UI,sans-serif;color:var(--rust);
+    text-decoration:none;letter-spacing:.08em;text-transform:uppercase}
+  a.back:hover{text-decoration:underline}
+  header.mast{border-bottom:3px double var(--navy);padding-bottom:20px;margin:16px 0 32px}
+  .kicker{font:600 11px/1 -apple-system,Segoe UI,sans-serif;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--rust);margin-bottom:12px}
+  h1{font-size:29px;line-height:1.24;margin:0 0 12px;color:var(--navy);letter-spacing:-.01em}
+  .sub{color:var(--ink-soft);font-size:16.5px;margin:0}
+  h2{font-size:21px;margin:42px 0 6px;color:var(--navy);
+    border-bottom:1px solid var(--line);padding-bottom:7px}
+  h3{font-size:16.5px;margin:24px 0 8px;color:var(--rust);
+    font:600 13px/1.4 -apple-system,Segoe UI,sans-serif;letter-spacing:.08em;
+    text-transform:uppercase}
+  p{margin:0 0 15px}
+  ul,ol{margin:0 0 15px;padding-left:22px}
+  li{margin-bottom:7px}
+  .qbox{border:1px solid var(--line);border-top:5px solid var(--navy);background:#fff;
+    border-radius:3px;padding:24px 26px;margin:26px 0}
+  .qbox.rat{border-top-color:var(--green)}
+  .qbox.no{border-top-color:var(--grey);background:#f7f8f9}
+  .qhead{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .qbox h4{margin:0;font-size:20px;color:var(--navy);flex:1;min-width:260px;line-height:1.3}
+  .qbox.no h4{color:var(--grey)}
+  .badge{display:inline-block;font:600 11px/1 -apple-system,Segoe UI,sans-serif;
+    padding:5px 9px;border-radius:3px;letter-spacing:.03em;white-space:nowrap}
+  .b-ask{background:var(--navy-soft);color:var(--navy)}
+  .b-rat{background:var(--green-soft);color:var(--green)}
+  .b-no{background:var(--grey-soft);color:var(--grey)}
+  .field{margin:16px 0 0}
+  .field .lbl{font:700 11px/1 -apple-system,Segoe UI,sans-serif;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--rust);display:block;margin-bottom:6px}
+  .field.why .lbl{color:var(--navy)}
+  .ask{background:var(--navy-soft);border-left:4px solid var(--navy);padding:14px 18px;
+    margin:16px 0;border-radius:0 3px 3px 0;font-size:16.5px}
+  .ask strong{color:var(--navy)}
+  .ask p:last-child{margin-bottom:0}
+  .note{background:var(--rust-soft);border-left:4px solid var(--rust);
+    padding:15px 19px;margin:20px 0;border-radius:0 3px 3px 0}
+  .note strong{color:var(--rust)}
+  .note p:last-child{margin-bottom:0}
+  .warn{background:var(--red-soft);border-left:4px solid var(--red);
+    padding:15px 19px;margin:20px 0;border-radius:0 3px 3px 0}
+  .warn strong{color:var(--red)}
+  .warn p:last-child{margin-bottom:0}
+  .math{background:#fff;border:1px solid var(--line);border-radius:3px;
+    padding:20px 24px;margin:18px 0;text-align:center;
+    font:19px/2 "Cambria Math",Cambria,Georgia,serif}
+  .math .var{font-style:italic}
+  .math .small{font-size:14px;color:var(--ink-soft);display:block;margin-top:8px;
+    font-family:-apple-system,Segoe UI,sans-serif;font-style:normal}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+  th{text-align:left;background:var(--navy);color:#fff;padding:10px 12px;
+    font:600 12.5px/1.4 -apple-system,Segoe UI,sans-serif}
+  td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:nth-child(even) td{background:#fff}
+  code{font:13.5px/1.5 "SF Mono",Consolas,monospace;background:var(--grey-soft);
+    padding:1px 5px;border-radius:3px;color:var(--navy)}
+  figure{margin:24px 0;text-align:center}
+  figcaption{font:13.5px/1.6 -apple-system,Segoe UI,sans-serif;color:var(--ink-soft);
+    margin-top:10px;text-align:left}
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);
+    font:13px/1.7 -apple-system,Segoe UI,sans-serif;color:var(--grey)}
+  @media print{body{background:#fff}.wrap{padding:0}a.back{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<a class="back" href="index.html">&larr; Karar dosyası</a>
+
+<header class="mast">
+  <div class="kicker">Dosya 01 · Faz 3 · Karar tarihi 16 Eylül 2026</div>
+  <h1>Eğitim hedefi: model tam olarak neyi öğrenmeye çalışıyor?</h1>
+  <p class="sub">ADR-027 · Issue #57 ve #84 · Üç faz-3 bileti (#58, #59, #60)
+     bu tanımı doğrudan tüketiyor.</p>
+</header>
+
+<h2>Arka plan</h2>
+
+<p>Hocam, bir bulanık sistemi eğitmeden önce cevaplanması gereken en sıkıcı ve en
+kritik soru şu: <strong>çıktı ne olacak?</strong> Bu proje uzun süre bu soruyu üç ayrı
+yerde üç farklı biçimde cevapladı. Eğitici bir şeye, referans model başka bir şeye,
+sabitlenmiş sonuç katsayıları üçüncü bir şeye bakıyordu. Bunların hepsi "gürültü"
+diyordu ama aynı sayıyı kastetmiyorlardı.</p>
+
+<p>ADR-027 bu dağınıklığı tek bir türetilmiş hedefe indirdi. Mantık şu: gürültü
+modelimiz kübit başına <em>tek kübitlik genlik + faz sönümleme kanalı</em> kuruyor.
+O kanalın iki parametresi var. Öyleyse eğitim hedefi de tam olarak o iki parametre
+olmalı, çünkü modelin ürettiği her şey sonunda oraya gidiyor.</p>
+
+<div class="math">
+  <span class="var">&gamma;</span> = 1 &minus; exp(&minus;<span class="var">t</span> / <span class="var">T</span><sub>1</sub>)
+  <br>
+  <span class="var">&lambda;</span> = 1 &minus; exp[&minus;<span class="var">t</span> (2/<span class="var">T</span><sub>2</sub> &minus; 1/<span class="var">T</span><sub>1</sub>)]
+  <span class="small"><span class="var">t</span> = kapı süresi (ibm_fez <code>sx</code> kapısı için 24 ns, NC-035)
+    &nbsp;·&nbsp; <span class="var">T</span><sub>1</sub>, <span class="var">T</span><sub>2</sub> = o kübitin arşivlenmiş kalibrasyon değerleri</span>
+</div>
+
+<p>Tek cümlelik hali: <strong>kübit başına &gamma; ve &lambda;, bizim bileşik Kraus
+kanalımızı o kübitin T1, T2 ve kapı süresi için Aer'in termal gevşemesine eşitleyen
+sönümleme oranlarıdır.</strong></p>
+
+<h2>Bu tanımın doğruluğu neye dayanıyor</h2>
+
+<p>Burası önemli, çünkü sizden bir formülü "güzel duruyor" diye onaylamanızı
+istemiyoruz. Formülün doğruluğunun tek bir kanıtı var ve o bir test:</p>
+
+<figure>
+<svg viewBox="0 0 780 216" width="100%" style="max-width:780px" xmlns="http://www.w3.org/2000/svg"
+     role="img" aria-label="Bizim kapalı formülümüz ve Qiskit Aer'in kendi kanalı aynı SuperOp'u üretiyor">
+  <rect x="8" y="34" width="228" height="86" rx="4" fill="#e8eef5" stroke="#1a3a5c" stroke-width="1.5"/>
+  <text x="122" y="60" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="12.5" font-weight="600" fill="#1a3a5c">Bizim kapalı formülümüz</text>
+  <text x="122" y="80" text-anchor="middle" font-family="Consolas,monospace" font-size="11.5" fill="#41505f">qubit_targets()</text>
+  <text x="122" y="99" text-anchor="middle" font-family="Consolas,monospace" font-size="11.5" fill="#41505f">&#947;, &#955; &#8594; Kraus &#8594; SuperOp</text>
+
+  <rect x="8" y="140" width="228" height="66" rx="4" fill="#fbf0e6" stroke="#a8541c" stroke-width="1.5"/>
+  <text x="122" y="164" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="12.5" font-weight="600" fill="#a8541c">Qiskit Aer'in kendi kanalı</text>
+  <text x="122" y="185" text-anchor="middle" font-family="Consolas,monospace" font-size="11.5" fill="#41505f">thermal_relaxation_error()</text>
+
+  <path d="M236 77 L318 77 L318 106 L352 106" fill="none" stroke="#1a3a5c" stroke-width="1.6"/>
+  <path d="M236 173 L318 173 L318 128 L352 128" fill="none" stroke="#a8541c" stroke-width="1.6"/>
+  <polygon points="352,106 344,102 344,110" fill="#1a3a5c"/>
+  <polygon points="352,128 344,124 344,132" fill="#a8541c"/>
+
+  <rect x="356" y="86" width="150" height="62" rx="4" fill="#fff" stroke="#41505f" stroke-width="1.5"/>
+  <text x="431" y="110" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="12.5" font-weight="600" fill="#16212e">Fark ölçülür</text>
+  <text x="431" y="130" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11.5" fill="#41505f">4 T1/T2 durumu × 2 süre</text>
+
+  <path d="M506 117 L556 117" fill="none" stroke="#2f6b45" stroke-width="1.8"/>
+  <polygon points="562,117 552,112 552,122" fill="#2f6b45"/>
+
+  <rect x="566" y="80" width="206" height="74" rx="4" fill="#e9f3ec" stroke="#2f6b45" stroke-width="2"/>
+  <text x="669" y="104" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="12.5" font-weight="600" fill="#2f6b45">Maksimum fark</text>
+  <text x="669" y="126" text-anchor="middle" font-family="Consolas,monospace" font-size="13" fill="#16212e">9.99 × 10⁻¹⁶</text>
+  <text x="669" y="144" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#41505f">kabul sınırı 10⁻¹²</text>
+
+  <text x="390" y="20" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="12" font-style="italic" fill="#6b7684">tests/training/test_aer_pin.py &#183; NC-036</text>
+</svg>
+<figcaption><b>Argümanın tamamı bu.</b> Formülü biz uydurmadık; simülatörün zaten
+yaptığı şeyi kapalı formda yeniden yazdık ve ikisinin sayısal olarak aynı süperoperatörü
+ürettiğini kayan nokta hassasiyeti mertebesinde kanıtladık. 9.99 × 10⁻¹⁶, çift
+duyarlıklı aritmetiğin gürültü tabanıdır; yani fark sıfırdır.</figcaption>
+</figure>
+
+<div class="note">
+  <p><strong>Neden bu kadar üstünde duruyoruz.</strong> Bu proje daha önce hiçbir
+  dosyanın türetmediği bir sayıyı ("126 eğitilebilir parametre") dört ayrı belgeye
+  yaydı. Sayısal iddiaların kaydını tutan bir sicil (<code>docs/numerical-claims.md</code>)
+  tam olarak bunun üzerine kuruldu. Artık bir sayının nereden geldiğini gösteremiyorsak
+  onu yazmıyoruz.</p>
+</div>
+
+<h2>Sorular</h2>
+
+<div class="qbox rat">
+  <div class="qhead">
+    <h4>D1 · Hedef ham uzayda mı tanımlansın, logit uzayında mı?</h4>
+    <span class="badge b-rat">ONAYLA</span>
+  </div>
+
+  <div class="field"><span class="lbl">Arka plan</span>
+    <p>&gamma; ve &lambda; olasılık benzeri büyüklükler, yani [0, 1] aralığında olmak
+    zorundalar. Sinir ağı ya da ANFIS eğitirken böyle sınırlı bir hedefi iki türlü
+    ele alırsınız: ya ham uzayda eğitip çıktıyı sonradan kırparsınız, ya da hedefi
+    logit dönüşümüyle sınırsız hale getirip eğitir, çıktıyı sigmoid ile geri
+    dönüştürürsünüz. İkincisi genel olarak daha güvenlidir çünkü eğitim sınırlara
+    dayanmaz.</p>
+  </div>
+
+  <div class="field"><span class="lbl">Önerimiz ve gerekçesi</span>
+    <p><b>Ham uzay.</b> Eğitim sırasında <code>IdentitySquashing</code>, çıkarım
+    sırasında <code>ProbabilityClip</code>. Gerekçe teknik ama kesin: kanalı kuran
+    <code>_amplitude_damping_kraus</code> ve <code>_phase_damping_kraus</code>
+    fonksiyonları zaten her sonlu girdiyi [0, 1] aralığına sert biçimde kırpıyor.
+    Yani ham çıktı ile kırpılmış çıktı <em>kanalda aynı yere düşüyor</em>. Logit
+    dönüşümü bu durumda ek bir güvence sağlamıyor, sadece hedef tanımını ve iki
+    ölçülmüş sayıyı (NC-039, NC-040) değiştiriyor. ADR-012'nin
+    <code>SigmoidSquashing</code>'i yerinde duruyor; ham uzay fit'i kötü davranırsa
+    #60 onu kullanabilir.</p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden size soruyoruz, kendimiz deneyip görmüyoruz</span>
+    <p>Aslında büyük ölçüde <em>denedik ve gördük</em>: iddia matematiksel olarak
+    kapalı ve testle sabitlenmiş. Bu maddeyi yine de listeye koymamızın tek sebebi,
+    <strong>yön değiştirmenin maliyetinin en yüksek olduğu madde bu olması</strong>.
+    Logit'e geçmek hedefin <em>tanımını</em> değiştirir: <code>qubit_targets</code>,
+    <code>feature_target_fn</code>, ADR-027'nin iki formülü ve ham uzayda ölçülmüş
+    NC-039 ile NC-040 satırlarının hepsi yeniden ölçülür. Böyle bir şeyi siz görmeden
+    kilitlemek istemedik. Bir itirazınız yoksa "onaylandı" demeniz yeterli.</p>
+  </div>
+</div>
+
+<div class="qbox rat">
+  <div class="qhead">
+    <h4>D3 · Kullanılamayan kübitler hangi sırayla elenmeli?</h4>
+    <span class="badge b-rat">ONAYLA</span>
+  </div>
+
+  <div class="field"><span class="lbl">Arka plan</span>
+    <p>Gerçek IBM kalibrasyon belgelerinde bazı kübitlerin T1 veya T2 değeri eksik
+    çıkıyor; ibm_fez'de 72 numaralı kübitte bunu doğruladık. Ayrıca fizik gereği
+    T2 &le; 2·T1 olmak zorunda ve ölçüm hatası bu sınırı bazen aşıyor. Bir kübiti
+    elerken <em>hangi sebeple</em> elediğimizi saymak istiyoruz, çünkü bu sayılar
+    veri kalitesinin teşhisi.</p>
+  </div>
+
+  <div class="field"><span class="lbl">Önerimiz ve gerekçesi</span>
+    <p>Beş sıralı sayaç, ilk uyan kazanır: <code>t1_missing</code>,
+    <code>t2_missing</code>, <code>gate_length_missing</code>,
+    <code>nonpositive</code>, <code>t2_exceeds_2t1</code>. Sonuncuyu
+    <code>nonpositive</code>'den ayrı tutuyoruz çünkü fiziksel okuma farklı:
+    negatif bir T1 bozuk bir kayıttır, T2 &gt; 2·T1 ise geçerli ama tutarsız bir
+    ölçümdür. Elenen satırlar konumlarını koruyor, hedefleri NaN ve
+    <code>usable</code> maskeleri false oluyor; böylece dizi hizalaması bozulmuyor.</p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden size soruyoruz</span>
+    <p>Çünkü <strong>bu madde şu anda kendi içimizde çelişiyor ve tek başımıza
+    çözersek yanlış tarafı seçme riskimiz var.</strong> #79 numaralı PR'daki
+    <code>benchmarks/reference.py</code> beş yerine iki eleme sebebi kullanıyor ve
+    iki durumda (kapı süresi eksik, T1/T2 pozitif değil) eliyor değil
+    <em>hata fırlatıyor</em>. İki davranış da savunulabilir: elemek veriyi kurtarır,
+    hata fırlatmak sessiz bozulmayı engeller. Bengisu bu konuda #79'da karar veriyor;
+    onun cevabı gelmeden size kesinleşmemiş bir şeyi onaylatmak istemiyoruz.
+    Size sorduğumuz asıl şey şu: <em>bir istatistiksel hedef üretirken sessizce
+    eksik veriyle devam etmek mi, yoksa durup hata vermek mi daha savunulabilir?</em>
+    Bu bir kod tercihi değil, metodoloji tercihi.</p>
+  </div>
+
+  <div class="warn">
+    <p><strong>Bu madde hareket halinde.</strong> Bengisu'nun #79 kararı
+    gelmeden bu soruyu göndermiyoruz; cevabı geldiğinde öneri metnini
+    güncelleyip ekleyeceğiz.</p>
+  </div>
+</div>
+
+<div class="qbox rat">
+  <div class="qhead">
+    <h4>D4 · Anlık görüntü başına tek ortalama mı, kübit başına tablo mu?</h4>
+    <span class="badge b-rat">ONAYLA</span>
+  </div>
+
+  <div class="field"><span class="lbl">Arka plan</span>
+    <p>Her kalibrasyon anlık görüntüsünde 156 kübit var, yani 156 çift (&gamma;, &lambda;).
+    Eğitim kümesinin bir satırı bunlardan <em>biri</em> mi olmalı (kübit başına tablo),
+    yoksa hepsinin özeti mi (anlık görüntü başına ortalama)?</p>
+  </div>
+
+  <div class="field"><span class="lbl">Önerimiz ve gerekçesi</span>
+    <p>Faz 3 için <b>kullanılabilir kübit hedeflerinin ortalaması</b>, yayılım
+    korunarak (standart sapma ve p10/p50/p90). Kritik ayrıntı: bu,
+    <em>ortalama T1/T2'de hesaplanan hedef değil</em>, hedeflerin ortalamasıdır.
+    İkisi aynı şey değil çünkü eşleme doğrusal değil. Bu farkı ölçtük:
+    fikstür üzerinde en büyük mutlak fark 3.797 × 10⁻⁴ (NC-039), ki hedeflerin
+    kendi büyüklüğü 10⁻⁴ mertebesinde. Yani fark ihmal edilebilir değil.</p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden size soruyoruz</span>
+    <p>Bu, listenin <strong>kod olarak en ucuz, sonuç olarak en pahalı</strong>
+    maddesi. Kod tarafında <code>snapshot_target</code>'ın dönüş şeklini değiştirmek
+    küçük bir iş. Ama o şekil, her <code>TrainingSet</code>'in Y boyutunu belirliyor;
+    o da #63'ün veri kümesi kurucusunu ve #59'un sabitlenmiş sonuç katsayılarını
+    belirliyor. İki açık bilet doğrudan bu cevaba bağlı. Ayrıca kavramsal bir soru
+    var ki cevabı bizde değil: <em>bir cihazın gürültü durumunu tek bir sayı çiftiyle
+    temsil etmek, kübit heterojenliğini kaybetmek pahasına, ilk yayın için savunulabilir
+    mi?</em> Ortalamanın yanında yayılımı taşımamızın sebebi bu soruya "kaybetmiyoruz,
+    raporluyoruz" diyebilmek.</p>
+    <p>Not: bu bir ADR-013 sorusu <em>değil</em>. ADR-013 öznitelik çıkarıcıları,
+    yani X tarafını tartışır ve eğitim hedefi hakkında hiçbir şey söylemez.</p>
+  </div>
+</div>
+
+<div class="qbox">
+  <div class="qhead">
+    <h4>D5 · İki sözleşmenin modül sahibi olarak okumanız</h4>
+    <span class="badge b-ask">SOR · yetki</span>
+  </div>
+
+  <div class="field"><span class="lbl">Arka plan</span>
+    <p><code>docs/team.md</code> sizi <code>interfaces.py</code> ve
+    <code>types.py</code> dosyalarının birincil sahibi olarak kaydediyor. PR #69
+    birincisine <code>TSKTrainer</code> soyut temel sınıfını, ikincisine dört
+    dondurulmuş değer tipini (<code>TrainingSet</code>, <code>TrainingResult</code>,
+    <code>TrainingDiagnostics</code>, <code>ParameterCount</code>) ekledi.</p>
+  </div>
+
+  <div class="field"><span class="lbl">Ne rica ediyoruz</span>
+    <p>Bu iki sözleşmeye bir göz atmanız. Özellikle <code>TSKTrainer</code>'ın
+    değişmezleri: eğiticinin çağıranın kural tabanını <em>değiştirmemesi</em>
+    zorunluluğu. Bu, LOCKED olan <code>fuzzy/tsk.py</code>'nin üç yerde yüzeysel
+    salt-okunur olmasından kaynaklanıyor; örneğin bir 3×3×3 ızgarada 27 kural ve
+    81 öncül referansı yalnızca 9 ayrı nesneyi paylaşıyor, dolayısıyla bir nesneyi
+    değiştirmek 27 kuralın hepsini birden değiştiriyor.</p>
+  </div>
+
+  <div class="field why"><span class="lbl">Neden size soruyoruz</span>
+    <p>Burada ölçülecek bir şey yok; bu bir <strong>yetki</strong> maddesi. Sözleşmeyi
+    dosyanın sahibi olarak sizin okumanız gerekiyor. Ayrıca pratik bir sebep:
+    PR #69'u Burak yazdı, dolayısıyla kendi PR'ını onaylayamadı ve #57'nin
+    "kesişen değişiklik" kuralı orada karşılanamadı. Sizin okumanız o boşluğu
+    kapatıyor. Aynı mesajda soruyoruz ki ikinci bir gidiş geliş olmasın.</p>
+  </div>
+</div>
+
+<h2>Yön değiştirirseniz maliyeti ne</h2>
+
+<p>Bunu önden yazıyoruz ki neyi hareket ettirdiğinizi bilerek karar verin.</p>
+
+<table>
+  <tr><th>Karar</th><th>Değişirse ne olur</th><th>Büyüklük</th></tr>
+  <tr><td><b>D1</b> ham &rarr; logit</td>
+      <td>Hedefin tanımı değişir: <code>qubit_targets</code>,
+          <code>feature_target_fn</code>, ADR-027'nin iki formülü, ve ham uzayda
+          ölçülmüş NC-039 ile NC-040 yeniden ölçülür.</td>
+      <td>En büyük</td></tr>
+  <tr><td><b>D3</b> eleme kuralı</td>
+      <td>Beş sayaç, <code>benchmarks/reference.py</code>, testler ve ADR metni.
+          Zaten #79'da canlı.</td>
+      <td>Orta</td></tr>
+  <tr><td><b>D4</b> ortalama &rarr; kübit tablosu</td>
+      <td>Kod küçük; ama <code>TrainingSet</code>'in Y şekli, oradan #63'ün veri
+          kümesi kurucusu ve #59'un sabitlenmiş katsayıları değişir.</td>
+      <td>En geniş etki</td></tr>
+</table>
+
+<p>Vaktiniz sınırlıysa <strong>D3 ve D4</strong>'e öncelik verin: yön değişikliği
+başka arkadaşların açık biletlerine düşen ikisi bunlar.</p>
+
+<h2>Sormadıklarımız ve nedeni</h2>
+
+<div class="qbox no">
+  <div class="qhead">
+    <h4>D2 · Kapı süreleri hangi dosyada ayrıştırılsın?</h4>
+    <span class="badge b-no">SORMUYORUZ</span>
+  </div>
+  <p>İlk listemizde bu da size sorulacaklar arasındaydı. Çıkardık.</p>
+  <p><strong>Neden:</strong> Soru şu: kapı süresini <code>training/targets.py</code>
+  içinde ham <code>properties</code> sözlüğünden mi okuyalım, yoksa
+  <code>calibration/loader.py</code> içine tipli bir <code>properties.gates</code>
+  ayrıştırıcısı mı yazalım? Bu bir <strong>mimari karar değil, iç sahiplik
+  sorusu</strong>. İkinci seçenek Baha'nın modülüne dokunuyor ve onun planlayacağı
+  bir takip işi. İkisi de aynı sayıyı üretiyor, ikisi de test edilebilir, ve
+  seçim projenin dışına hiçbir şey yansıtmıyor. Faz 3 için birincisini
+  kullanıyoruz; ikincisi Baha ile aramızda bir çizelgeleme meselesi.</p>
+  <p>Bunu size sormak, sizin bir gidiş gelişinizi <em>hangi dosyada bir fonksiyon
+  duracağına</em> harcamak olurdu.</p>
+</div>
+
+<footer>
+  Kaynaklar: <code>docs/decisions.md</code> ADR-027 &nbsp;·&nbsp;
+  <code>src/superconducted/training/targets.py</code> &nbsp;·&nbsp;
+  <code>tests/training/test_aer_pin.py</code> (NC-036) &nbsp;·&nbsp;
+  NC-035, NC-038, NC-039, NC-040 &nbsp;·&nbsp; Issue #57 §6.3, §6.4, §7 &nbsp;·&nbsp;
+  Issue #84 §3, §4 &nbsp;·&nbsp; ölçüm referansı <code>main @ 5f935ea</code>
+</footer>
+
+</div>
+</body>
+</html>

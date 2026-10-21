@@ -66,6 +66,7 @@ import sys
 import time
 from collections.abc import Iterable
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any, NamedTuple, Protocol
 
 # Reused rather than reimplemented so the probe coerces timestamps exactly the
@@ -193,7 +194,11 @@ def _probe_one(backend: _PropertiesBackend, t_now: datetime, days: float) -> Pro
 
 
 def _enumerate_window(
-    backend: _PropertiesBackend, start_iso: str, end_iso: str, step_hours_s: str
+    backend: _PropertiesBackend,
+    start_iso: str,
+    end_iso: str,
+    step_hours_s: str,
+    served_out: Path | None = None,
 ) -> int:
     """Walk a window and report every distinct document the service will serve.
 
@@ -285,6 +290,16 @@ def _enumerate_window(
         print(f"\nPROBE FAILED at {failed_at}")
         print(f"Sweep stopped early at {t.isoformat()}; the window above is INCOMPLETE.")
         rc = 1
+    # Machine-readable copy for the capture job (#54), written only for a clean
+    # sweep. Every stamp absent from this file is read downstream as a document
+    # IBM does not have, so a partial list would record documents the probe
+    # never asked about as captured-by-nobody. No file is the unambiguous signal.
+    if served_out is not None and rc == 0:
+        served_out.write_text(
+            "".join(f"{s.strftime('%Y%m%dT%H%M%S%f')}Z\n" for s in in_window),
+            encoding="utf-8",
+            newline="\n",
+        )
     return rc
 
 
@@ -318,6 +333,14 @@ def main(argv: Iterable[str] | None = None) -> int:
         "last_update_date the service returns. Read-only: this is how you find out "
         "exactly which documents a polling gap missed, before deciding to backfill.",
     )
+    parser.add_argument(
+        "--served-out",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="With --enumerate: write the stamps served inside the window here, one per "
+        "line, and only if every query was honoured. Consumed by scripts/capture_record.py.",
+    )
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     from qiskit_ibm_runtime import QiskitRuntimeService
@@ -336,7 +359,10 @@ def main(argv: Iterable[str] | None = None) -> int:
     backend = QiskitRuntimeService(**kwargs).backend(args.backend)
 
     if args.enumerate:
-        return _enumerate_window(backend, *args.enumerate)
+        start_iso, end_iso, step_hours = args.enumerate
+        return _enumerate_window(
+            backend, start_iso, end_iso, step_hours, served_out=args.served_out
+        )
 
     try:
         current = _properties_with_retry(backend, None)

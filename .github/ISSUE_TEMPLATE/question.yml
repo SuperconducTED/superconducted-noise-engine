@@ -1,0 +1,34 @@
+name: Question
+description: Ask how something in the engine works, or how to use it, as a tracked issue.
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Questions are welcome. For an open question, [Discussions, Q&A](https://github.com/SuperconducTED/superconducted-noise-engine/discussions/categories/q-a) is usually the better place: there an answer can be marked. Use this form when the question should be tracked as an issue from the start.
+
+        Before asking, please read the README, [`docs/architecture.md`](https://github.com/SuperconducTED/superconducted-noise-engine/blob/main/docs/architecture.md) and the [decision ledger](https://github.com/SuperconducTED/superconducted-noise-engine/blob/main/docs/decisions.md), and search the issues and discussions, open and closed. There is no paid support: the engine is maintained by university students, who answer when they can. See [getting help](https://github.com/SuperconducTED/.github/blob/main/SUPPORT.md) for more.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: What are you trying to do, and what do you want to know?
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you tried or read
+      description: Commands and their output, as text, and the documents you have already read. Remove any tokens first, including your IBM Quantum token.
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Commit or version
+      description: "If it matters: the output of `git rev-parse --short HEAD`, and your qiskit and qiskit-aer versions."
+    validations:
+      required: false

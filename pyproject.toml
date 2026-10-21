@@ -43,6 +43,13 @@ dev = [
     "mypy>=1.20,<2",
     "ruff>=0.15,<0.20",
     "ipykernel>=7,<8",
+    # The tests of superconducted.figures run in every dev install, never skipped.
+    "matplotlib>=3.8,<4",
+]
+# The SuperconducTED chart style (superconducted.figures). Optional: the engine draws nothing;
+# 3.8 is the first release with tick_params(labelfontfamily=...), which mono_ticks() uses.
+figures = [
+    "matplotlib>=3.8,<4",
 ]
 
 [project.scripts]

@@ -20,7 +20,7 @@ underlying calibration evolves.
 The pipeline supports both Type-1 and Interval Type-2 inference paths.
 ADR-009 records the empirical winner selection as still open.
 
-## The 6-stage pipeline
+## The 7-stage pipeline
 
 The TSK fuzzy pipeline takes one calibration snapshot in and produces
 one set of `qiskit_aer.noise.QuantumError` instances out (one per
@@ -65,7 +65,19 @@ gate-qubit pair the target circuit uses).
                                  |
                                  v
 +-----------------------------------------------------------------------+
-|  Stage 6: Channel projection                                          |
+|  Stage 6: Gate eligibility                                            |
+|    - `GateEligibilityPolicy.eligible_operations(snapshot)`            |
+|      → frozenset of (gate_name, physical_qubits)                      |
+|    - Default: positive `gate_length` in `properties.gates`            |
+|    - Ineligible pairs get no channel; Stage 7 is never reached        |
+|    - NOTE: reads the snapshot, not stage 5's output. It resolves in   |
+|      `__init__` beside `crisp_params`, so it is parallel to stages    |
+|      2-5 rather than downstream of them; it gates stage 7, not 5.     |
++--------------------------------+--------------------------------------+
+                                 |
+                                 v
++-----------------------------------------------------------------------+
+|  Stage 7: Channel projection                                          |
 |    - `ChannelProjector.project(crisp, gate_name, qubits)`             |
 |      → `qiskit_aer.noise.QuantumError`                                |
 |    - LOCKED CPTP math in `channels.kraus`                             |
@@ -125,8 +137,16 @@ fuzzy / epistemic uncertainty manifests across ensemble members.
 ## Calibration polling
 
 The `superconducted-poll` console script archives `BackendProperties`
-snapshots so the team accumulates the ≥630 historical records needed
-for ANFIS training (≈ 126 trainable parameters × 5× rule of thumb).
+snapshots so the team accumulates the historical records needed for
+ANFIS training. The floor is **≥ 1170 distinct device states**, derived
+as the rule base's measured trainable-parameter count times the 5×
+samples-per-parameter rule of thumb — see `docs/numerical-claims.md`
+NC-045 for the measurement and NC-012 for the floor. This sentence read
+"≥630 ... (≈ 126 trainable parameters × 5× rule of thumb)" from
+2026-05-07 until 2026-09-09; no file ever derived that 126, and the
+measured count is 234 (NC-045). The floor moves with membership-function
+shape (NC-046), and ADR-009 is still `Open`, so it is stated against the
+configuration currently in use.
 
 - **Cadence**: cron-driven; one invocation per polling round. The
   script does NOT schedule itself. In cycle 1, polling runs hourly
@@ -163,4 +183,5 @@ for ANFIS training (≈ 126 trainable parameters × 5× rule of thumb).
 | ADR-013 Calibration features | `CalibrationFeatureExtractor` | BasicCalibrationVectorizer | per-qubit, drift-aware (deferred) |
 | ADR-014 TSK trainer | (in `fuzzy.tsk`) | none — manual params | hybrid LSE + SGD ANFIS |
 | ADR-015 Ensemble sampling | (in `integration.aer_factory`) | identical (no perturbation) | input-vector / MF / IT2 perturbation |
-| ADR-016 Benchmark aggregation | (in `benchmarks.harness`) | mean | interval-valued |
+| ADR-016 Benchmark aggregation | (in `benchmarks.harness`) | sum (probability-equivalent to mean under normalized metrics) | interval-valued |
+| ADR-028 Gate eligibility | `GateEligibilityPolicy` | CalibrationGateEligibilityPolicy (positive `gate_length`) | injected allowlist |

@@ -204,6 +204,58 @@ Downstream: ADR-011, ADR-015, and ADR-021 follow once this direction reaches Acc
 carries optional lower/upper bound arrays; `NieTanDefuzzifier` handles
 the IT2 closed form.
 
+### ADR-009 status, 2026-09-14: still Open, and why (Issue #56 FR-15)
+
+**ADR-009 is Open. Nothing in this PR decides it, and the `**Status**` line above is
+deliberately unchanged.**
+
+Issue #56 FR-15 lands ADR-009's ledger form at M3 (2026-09-23 to 25) one of two ways: the
+status flipped on Dr. Akba's recorded answer, or the ADR recorded as still Open with the
+date the request went out. This is the second. The recommendation is not this ticket's to
+make: it is the memo Issue #60 co-authors with @bengisucvd, sourced from Issue #62's
+ablation evidence, and the call is Dr. Akba's.
+
+> **NOTE · The fallback is not yet complete, and says so.** FR-15's second form names "the
+> date the request went out". **That date does not exist.** The batch has been ready since
+> 2026-09-09 and is unsent as of 2026-09-14; the slip is recorded in the decisions register's
+> `## Circulation, as-of 2026-09-14` section. The send date is appended there when the
+> message goes out, and this block is finished at that point, not before. Recording a
+> prepared-but-unsent request as though it were sent is the failure this whole requirement
+> exists to prevent.
+
+| | |
+| --- | --- |
+| **Circulated** | Not yet. Argued in `docs/advisor/2026-09-09-akba-brief/02-tip-sistemi.html`, ready 2026-09-09, unsent at 2026-09-14 |
+| **Recorded in** | `docs/advisor/2026-09-03-decisions-from-akba.md`, item 3 |
+| **Decision-by** | 2026-09-23, unchanged by the circulation slip because M3's gate is that date |
+| **Evidence still owed** | Issue #62's ADR-019 ablation table and Issue #60's memo. Neither exists on `main` at `004e14e` |
+| **Owner of the recommendation** | Issue #60 with @bengisucvd. The decision is Dr. Akba's |
+
+**One measured input the memo does not yet have.** The standard objection to Interval Type-2
+is that it doubles the parameter count. On this rule base it does not. NC-046 measures
+`IntervalGaussianMF` at 243 against `GaussianMF`'s 234: nine parameters, 3.8%, because IT2
+adds one parameter per unique membership-function object and `from_grid` shares only nine of
+them across 27 rules, while the 216-entry consequent term that dominates the total is
+type-independent. Whichever way ADR-009 goes, it should not go there on a parameter-count
+argument this configuration does not support.
+
+**What clears this block.** The answer appended to the decisions register, then one PR
+flipping the `**Status**` line with its own dated block. It is not cleared by the memo
+landing, by the ablation running, or by the passage of 2026-09-23.
+
+**As-of 2026-10-03.** The send this block waited on will not happen. On 2026-09-29 the
+lead replaced the batched e-mail with team decisions posted on Issue #84, and he now
+approves those decisions in the advisor role (decisions register, `## Advisor loop
+reshaped, as-of 2026-10-03`). Dr. Akba approved, in person between 2026-09-29 and
+2026-10-02, the decisions of File 02, which argues this ADR, as they were presented to
+him. That approval is recorded in the register; it flips nothing here. ADR-009 stays
+**Open** and still needs its evidence. The table above names Issue #62's table and Issue
+#60's memo; File 02's approved decisions make a time-split drift/coverage test the primary
+evidence, with #62's single-snapshot table supporting, and keep this ADR's own overturn
+clause (T1 wins unless IT2 beats both Gaussian T1 and a parameter-matched T1). The flip
+lands with that evidence and the lead's recorded approval, tracked in Issue #109.
+
+
 ---
 
 ## ADR-010 — Rule count and input variables
@@ -243,6 +295,26 @@ Adding more rules per input is the same.
 > The decision text itself is unchanged — this records the label fix
 > only, not a revisit. See issue #41.
 
+> Unit clarification · 2026-09-14 · Issue #66: `mean_T1` and `mean_T2`
+> are SI seconds; `mean_readout_error` is dimensionless. The vectorizer
+> now scales declared archive units consistently with the typed loader.
+> Missing unit keys are rejected, matching the typed loader. See
+> `docs/implementations/2026-09-14-vectorizer-si-units.md`.
+
+> Unit boundary · 2026-09-17 · Issue #66: the ratified features are SI
+> seconds, and that is unchanged. What this adds is where the other
+> convention lives. PR #68's archive survey, the quantile layout built
+> from it and the figures registered as NC-041 and NC-042 are all in the
+> archive's declared units, microseconds for coherence. Both are correct
+> for their own consumer, so neither is retired; they meet in exactly one
+> named place, `calibration/features.py::ArchiveUnitFeatureExtractor`,
+> which inverts the loader's own conversion table rather than hardcoding a
+> factor. A consumer that wants SI does not wrap. Recorded here because
+> ADR-010 is where a reader looks to find what unit these three features
+> are in, and the honest answer is now "seconds, unless the call site
+> wraps, and here is the only wrapper". See
+> `docs/implementations/2026-09-14-vectorizer-si-units.md`.
+
 ---
 
 ## ADR-011 — Defuzzification method
@@ -257,6 +329,47 @@ beats Karnik-Mendel iterative reduction in compute cost.
 whether the rule base is IT2.
 
 **Consequences**: No iterative numerical defuzzification at bootstrap.
+
+### ADR-011 status, 2026-09-14: blocked, and on what (Issue #56 FR-16)
+
+**ADR-011 is Open. This PR does not close it and does not choose a defuzzifier.**
+
+Issue #56 FR-16 lands ADR-011's closure at M3 in the same PR as FR-15, one of two ways: the
+closure text Issue #61 prepares landed as an appended block, or the ADR recorded as blocked
+with the missing measurement named. This is the second.
+
+**The missing measurement, named.** Issue #61 owes a Nie-Tan against Karnik-Mendel
+comparison on the certified harness: the type-reduction cost and the difference in the
+defuzzified output, measured rather than argued from the closed form's asymptotics. No such
+measurement exists on `main`. `docs/findings/` holds no ADR-011 file and #61 has no branch
+at `004e14e`.
+
+**It cannot close first, by its own text.** The Context above is conditional on the type
+system: T1's standard is weighted-average, while the Nie-Tan closed form is an IT2
+construction. Which half of that sentence is load-bearing depends on ADR-009, which is Open
+(see the status block under ADR-009). Closing ADR-011 first would ratify a defuzzifier for a
+rule base whose type nobody has decided.
+
+| | |
+| --- | --- |
+| **Blocked on** | Issue #61's Karnik-Mendel measurement, then ADR-009 |
+| **Circulated** | Not yet. Argued in `docs/advisor/2026-09-09-akba-brief/02-tip-sistemi.html` alongside ADR-009 |
+| **Recorded in** | `docs/advisor/2026-09-03-decisions-from-akba.md`, item 4 |
+| **Decision-by** | 2026-09-23 |
+| **Class** | Ratify. The measurement is ours; the confirmation is his |
+
+**What clears this block.** Issue #61's measurement, then Dr. Akba's ratification appended
+to the decisions register, then the closure text as its own dated block here. It is not
+cleared by a review, a merge, or the passage of 2026-09-23.
+
+**As-of 2026-10-03.** As under ADR-009's block: no e-mail will be sent. File 02 argues
+this ADR alongside ADR-009, and its decisions were approved by Dr. Akba in person between
+2026-09-29 and 2026-10-02, as presented. That approval is recorded in the decisions
+register and closes nothing here. ADR-011 stays **Open** and still needs its evidence:
+the table above names Issue #61's measurement, and File 02's approved decision (Q2) settles
+the point reducer by a pre-registered spike. The closure lands with that evidence, after
+ADR-009, on the lead's recorded approval, tracked in Issue #109.
+
 
 ---
 
@@ -305,6 +418,23 @@ Richer extractors implement `CalibrationFeatureExtractor`.
 **Consequences**: Future ADR will compare extractors empirically once
 ≥ 630 snapshots are accumulated.
 
+> Figure correction · 2026-09-17 · The Consequences line above says
+> ≥ 630 snapshots. NC-012 has since moved to ≥ 1170 and 630 is retired.
+> The decision text is left as written, per the convention in this file
+> that a dated entry records rather than rewrites; this note is the
+> correction. Noticed while appending the issue #66 revisit note directly
+> below it, which is exactly where a reader meets the stale number. Cite
+> the register row, not this line.
+
+> Revisit note · 2026-09-14 · Issue #66 corrects the cycle-1 audit item 6
+> assessment that both Nduv parsers produced correct results: the vectorizer
+> ignored units and returned microseconds where consumers require seconds.
+> Option A now validates declared units and shares the loader conversion table.
+> Track option B here: converge on `ParsedCalibrationSnapshot`, including the
+> cross-cutting `CalibrationFeatureExtractor.extract` input-signature change
+> and reconciliation of missing/non-finite-value policies. The dated audit
+> `docs/audits/2026-05-25-followup-issues.md` remains unchanged.
+
 ---
 
 ## ADR-014 — TSK trainer architecture
@@ -320,6 +450,11 @@ are accumulated and a target-distribution definition exists.
 
 **Consequences**: Bootstrap's `from_grid` initializes consequents to
 zero. A model trained from scratch will need the trainer.
+
+> Revisited · 2026-09-07 · ADR-027 now provides a proposed calibration
+> target definition, so the second deferral condition is satisfied. The first
+> remains unmet: NC-025 records 504 distinct states, below the 630-state floor.
+> ADR-014 remains Deferred; no trainer implementation is accepted by this note.
 
 ---
 
@@ -347,11 +482,13 @@ sampling lands later.
 
 **Status**: Deferred.
 
-**Context**: `simulate_engine` mean-aggregates counts at bootstrap.
+**Context**: `simulate_engine` sums counts element-wise at bootstrap
+(probability-equivalent to mean under normalized metrics).
 Interval-valued predictions need a different aggregation (e.g. min/max
 or quantile across members) to bracket real hardware behavior.
 
-**Decision (current)**: Mean aggregation now; revisit once ADR-015
+**Decision (current)**: Sum aggregation now, probability-equivalent to
+mean under normalized metrics; revisit once ADR-015
 delivers actual per-member variation worth bracketing.
 
 **Consequences**: Engine-vs-reference numbers at bootstrap are point
@@ -372,6 +509,18 @@ non-trivial.
 > `docs/architecture.md` (line 161) also describe the behavior as
 > "mean" — these are tracked as follow-up issues since they are outside
 > `docs/decisions.md`. Status remains Deferred.
+
+> Aligned · 2026-09-07 · Issue #25 Part 2. The Context and Decision text
+> above now describes current bootstrap aggregation as sum
+> (probability-equivalent to mean under normalized metrics), so the
+> 2026-05-25 note's opening sentence quotes the pre-alignment wording.
+> That note is left as written, per the dated-note convention. Both
+> follow-ups it tracks are closed by the same change: the `harness.py`
+> module docstring now matches `simulate_engine`'s own, and the
+> `docs/architecture.md` row now reads sum — that row is at line 166,
+> not the 161 recorded above. This aligns the DESCRIPTION only; the
+> mean-to-interval upgrade stays gated on ADR-015 and Status remains
+> Deferred.
 
 ---
 
@@ -426,6 +575,11 @@ follow-up will introduce
 `SkipStrategyVectorizer(CalibrationFeatureExtractor)` once a second
 consumer pattern emerges (e.g. when ANFIS training begins consuming
 vectorized features alongside the mean aggregates).
+
+> Promoted from draft to the ledger · 2026-06-19 · commit `105cf6c` (that
+> commit names no issue). The draft at
+> `docs/decisions/drafts/ADR-017-missing-per-qubit-calibration-fields-skip-strategy.md`
+> is retained as the authoring record; this ledger entry is canonical.
 
 ---
 
@@ -744,6 +898,109 @@ refactoring the ensemble factory.
 > Promoted from draft to the ledger · 2026-08-24 · issue #37. The draft at
 > `docs/decisions/drafts/ADR-021-aer-integration-constraint-and-factory-ensemble.md` is retained as the
 > authoring record; this ledger entry is canonical.
+
+---
+
+### ADR-021 amendment — 2026-09-18: gate eligibility, and where the circuit is compiled
+
+**Status: Open. Recorded, not ratified.** See the sign-off note below.
+
+Issue #73 found that `prepare()` passed every single-qubit instruction to the
+channel projector, which ignores `gate_name`, so the damping channel reached
+zero-duration virtual `rz` gates and could reach `delay` and Aer save
+instructions. PR #96 filters on the calibration's own
+`properties.gates[*].parameters[gate_length]` records. Two parts of the
+Accepted decision above move as a result.
+
+**1. A seventh injected dependency.** The Decision (Accepted) enumerates six.
+`FuzzyNoiseModel.__init__` now also takes
+
+7. `gate_eligibility_policy: GateEligibilityPolicy | None = None`
+
+defaulting to `CalibrationGateEligibilityPolicy`. It is optional and defaulted,
+so every existing construction site is unchanged, but the count in the Decision
+body is now seven and the DI surface this ADR ratifies is seven wide. The new
+axis itself is ADR-028.
+
+**2. Where the circuit is compiled is now load-bearing.** The Consequences
+above say high-level circuits "require explicit `transpile(circuit,
+backend=sim)` before `AerSimulator.run()`", which places compilation *after*
+`prepare()`. Once eligibility is keyed on physical gate names that ordering
+installs nothing: `prepare()` sees `h`, `cx`, `ry` or a composite `qft`, while
+the calibration offers `id`, `rx`, `sx`, `x`, `cz`. The correct contract is
+compile once to the calibrated basis, call `prepare()` on the compiled circuit,
+then run the returned circuit without a second transpilation, which is the
+invariant Issue #58 certifies.
+
+**This amendment does not claim that contract is met.** It is not, anywhere in
+the tree at the time of writing. Measured against
+`tests/fixtures/calibration/ibm_fez_20260513T121322Z_with_gates.json`:
+
+| Caller | Ordering | Installed errors |
+| --- | --- | --- |
+| `benchmarks/harness.py:75` | never transpiles | 0 on ghz, qft and vqe |
+| `scripts/first_ensemble_run.py:103` | `prepare()` then `transpile()` | 0 |
+
+`benchmarks/harness.py` is Issue #58's scope (FR-3, written on PR #79);
+`scripts/first_ensemble_run.py` is Issue #74's, which explicitly excludes
+`harness.py`. Until at least the former lands, `FuzzyNoiseModel.prepare` warns
+when it installs nothing, so the gap is audible rather than silent, and a
+phase-3 measurement run must not be taken from a tree where it still warns.
+
+**3. Two further arity notes**, recorded here so no stale count survives by
+omission. The first Consequences bullet says ensemble construction "requires
+wiring six ABC implementations"; read it as six required plus one optional.
+And `FuzzyNoiseModelEnsemble.__init__` now takes `gate_eligibility_policy`,
+`ensemble_size` and `rng` as **keyword-only**, where the Decision body describes
+the latter two as ordinary optional arguments. No caller in the tree breaks, but
+that is a narrowing of the ratified signature and it should not pass unrecorded.
+
+The Consequences bullets above are left exactly as ratified on 2026-08-24. This
+amendment supersedes their call-order clause, and annotates rather than rewrites
+the two counts named in point 3.
+
+---
+
+### ADR-021 amendment status, 2026-09-18: advisor sign-off outstanding
+
+**The 2026-09-18 amendment above is recorded but not ratified. Its status is Open.**
+
+`docs/team.md` makes Dr. Akba's out-of-band sign-off a precondition for a change
+that touches ADR ledger semantics, and this amendment is one: it changes the
+arity of the DI contract this ADR ratifies, and it supersedes a clause of its
+Consequences. That sign-off has not been obtained.
+
+This follows the shape set by the ADR-025 amendment status note below. The
+amendment text is left exactly as written, and the gap is recorded rather than
+left silent.
+
+| | |
+| --- | --- |
+| **Circulated** | Not yet. Rides with the next advisor batch. |
+| **Recorded in** | `docs/advisor/2026-09-03-decisions-from-akba.md`, item 15 |
+| **Decision-by** | 2026-09-23 |
+| **Travels with** | Item 10, the `interfaces.py` `TSKTrainer` owner read. Same file, same question of what an ABC docstring may assert about a decision he has not yet ratified. |
+| **Asks** | Three, listed in full at item 15. One Ask: does ADR-021 own the seventh dependency, or does ADR-028 own the whole axis? Two Ratify: that the calibration record beats an allowlist as the source, and that the call-order clause is superseded now rather than after #58 lands. |
+| **Owner** | @mertefesensoy. `docs/team.md` names Dr. Akba primary on this file with Mert secondary, and Dr. Akba has no GitHub account, so this cannot be a review request. |
+| **Reversal cost** | One commit. The policy is injected and defaulted, so passing a permissive `GateEligibilityPolicy` restores the previous behaviour without touching any construction site, and the ledger text above is removed by appending the answer rather than by deletion. |
+
+### ADR-021 amendment as of 2026-10-02: smoke caller conforms
+
+`scripts/first_ensemble_run.py` now compiles once to the calibrated basis before
+calling `prepare()` and runs the returned circuit without another transpilation
+(Issue #74, PR #103). Its fixed-seed `sx`-only regression demonstrates that the
+installed error fires. `benchmarks/harness.py` remains non-conforming: it is
+Issue #58 / PR #79's scope and is unchanged here. This is a fact record only;
+the amendment remains Open and awaits the advisor sign-off recorded above.
+
+In the table's own measure, against the same
+`tests/fixtures/calibration/ibm_fez_20260513T121322Z_with_gates.json`: the
+script's default `qft_circuit(2)` now installs `['rx', 'sx']`, 4 errors (both
+gates on qubits 0 and 1), and `prepare()` no longer warns; the old order still
+installs `[]`, 0 errors, with the warning. `qft_circuit(3)` installs the same two
+gates, 6 errors. Measured at `dd1ad56` (2026-10-03), the PR #103 review-fix
+commit, so after the heading's date; see
+`docs/implementations/2026-10-03-pr103-review-fixes.md`.
 
 ---
 
@@ -1172,3 +1429,368 @@ layout this extends), `.github/workflows/calibration-poll.yml`,
 
 > Extends ADR-020. `snapshots/` is unchanged; this entry adds
 > `ledger/` and `collisions/` alongside it.
+
+### ADR-025 amendment — 2026-09-05: pipeline-health tree
+
+`health/` is added as a third sibling tree on `calibration-data`:
+
+    health/state-index.tsv
+    health/metrics.json
+    health/progress.svg
+
+The state index is append-only **in the poll path**, and records one qubit-block
+canonical digest for each newly filed snapshot. That digest normalises away each
+parameter record's own `date`, by the same rule and the same code as the payload
+digest this ADR already relies on: within `properties.qubits` a `date` says when
+a value was measured, not what was measured, so a re-measurement that reproduced
+the identical value is one device state and a history-endpoint re-stamp is
+provenance. The full document digest keeps `date`, deliberately and unchanged,
+because the collision path compares two live payloads and any difference there
+belongs in front of a human. **One row of this index therefore means "a device
+state distinct in its measured values", not "a byte-distinct qubit block".**
+
+`is_new_state` records what the poller could see when it wrote the row and is
+not authoritative about chronology: a dispatched historical sweep appends
+documents older than rows already present, and the poller marks a state new
+whenever its digest is absent from the rows so far. Readers of this index must
+derive first sightings from `last_update_date`, as the metrics engine does,
+rather than trusting the column. The column stays because it records the
+observation and because a malformed one still means the file cannot be trusted.
+
+The dispatched backfill may
+regenerate it once in `last_update_date` order (`--rebuild`); this is the only
+permitted rewrite and exists because the hourly poller starts appending the
+moment this merges, which closes the append path for history and would leave
+`is_new_state` permanently mismarked.
+
+The generated JSON and SVG are derived only from the state index and ledger;
+scheduled rendering must not traverse `snapshots/`. Candidate training floors
+are configuration inputs supplied by the workflow and must be labelled in the
+rendered output; no floor value is a literal in the renderer. Each label names
+the register row it traces to, and the configured set must bracket the whole
+range that row reports rather than a part of it: the renderer scales the
+progress bar to the largest configured floor, so dropping the top of a measured
+range does not merely omit a tick, it makes the bar read fuller than the
+evidence supports.
+
+**`projected_days` and `projected_date` are not registrable claims.** They are a
+straight-line extrapolation of a single seven-day count and must never be cited
+in `docs/numerical-claims.md`, quoted as a date the project is working toward,
+or carried into a runbook expectation. NC-R002 is retired for being exactly
+this: a projected floor date that arrived with the gate unmet. The arithmetic is
+auditable and the inputs are published beside it, `states_added_7d` included, so
+a reader can see how much evidence the number rests on; that is the whole of
+what these two fields are for. `states_total`, `documents_total` and
+`duplication_ratio` are measurements and may be cited.
+
+The SVG carries **no clock reading**: every figure in it is a function of the
+committed index and ledger, plus the position of the two rolling windows FR-5
+mandates (the 72-hour poll strip and the 30-day acquisition sparkline).
+`generated_at` and the exact `hours_since_last_new_state` live in
+`metrics.json` alone, and the SVG renders the staleness as a band. This is what
+lets the health workflow commit only when rendered bytes change: a quiet
+archive reaches byte-stability within 30 days of its last new state, after
+which repeated renders produce no commit at all.
+
+`health/` is written by two workflows in separate concurrency groups, so their
+pushes can race. They resolve it by replaying onto the branch tip rather than
+by sharing a group, because a shared group lets a render cancel a queued poll
+and a cancelled poll writes no ledger row.
+
+The daily renderer uses a depth-one sparse checkout of `health/` and `ledger/`.
+The one-time backfill is explicitly dispatched and is the only health operation
+permitted to walk `snapshots/`. This amendment preserves ADR-020 snapshot
+semantics and ADR-025 ledger decisions.
+
+### ADR-025 amendment status, 2026-09-10: advisor sign-off outstanding
+
+**The 2026-09-05 amendment above is recorded but not ratified. Its status is Open.**
+
+`docs/team.md` makes Dr. Akba's out-of-band sign-off a precondition for a change that
+touches ADR ledger semantics, and this amendment is one: it changes what a row in
+`health/state-index.tsv` means, and with it the definition behind NC-025. That sign-off
+has not been obtained. PR #70 merged without it on 2026-09-10.
+
+This note exists so the deviation is visible to someone reading this file who never sees
+that pull request. The amendment text above is left exactly as written; a recorded gap is
+a record and a silence is not.
+
+| | |
+| --- | --- |
+| **Circulated** | Not yet. Brief written as `docs/advisor/2026-09-09-akba-brief/06-olcum-birimi.html`, riding with the 2026-09-09 batch |
+| **Travels with** | PR #55's `duplicate-partial` amendment, item 2 of the register. The same question from the other side: what does a ledger record? |
+| **Recorded in** | `docs/advisor/2026-09-03-decisions-from-akba.md`, item 14, appended 2026-09-10 |
+| **Owner** | Issue #84, which owns the advisor loop and the decisions register |
+| **Decision-by** | 2026-09-23 |
+| **Reversal cost** | One `workflow_dispatch` with `backfill=true rebuild=true`, one line in `canonical_snapshot_digest.py`, no data loss |
+
+Nothing on the archive is at risk while this is open: the definition change merges zero
+states at all three measured refs (894 documents to 504 states, 936 to 537, 994 to 563),
+so NC-025 and NC-047 both stand as registered.
+
+This status line is removed only by appending the answer to the decisions register. It is
+not cleared by a review, a merge, or the passage of the decision-by date.
+
+### ADR-025 amendment — 2026-09-17: the renderer records that it ran
+
+Appended rather than folded into the 2026-09-05 amendment above, which is left exactly as
+written. This changes one clause of it.
+
+That amendment closes by saying that a quiet archive "reaches byte-stability within 30 days
+of its last new state, after which repeated renders produce no commit at all." That is
+accurate about the SVG and was implemented for **both** generated files: the workflow staged
+`health/`, and whenever `health/progress.svg` was unchanged it ran
+`git restore --staged health/metrics.json` and exited, committing nothing.
+
+The consequence is the defect this ADR's own Context paragraph records for the poller. With
+no commit, `generated_at` does not advance, and a quiet archive becomes byte-indistinguishable
+from a renderer that stopped weeks ago. "A quiet stretch looked identical to a stopped poller,
+and the run history that could have told them apart expires at ~90 days" is the sentence that
+justified the poll ledger; `health/` was added here as the branch's second writer after it was
+written, and the principle was never carried across.
+
+**Amendment.** `health/metrics.json` is written on **every** render, unconditionally, on the
+same rule this ADR already applies to a ledger row: a scheduled writer to this branch records
+that it ran, including when it observed nothing. `health/progress.svg` is unchanged and stays
+under the commit-on-change guard, so the clause above still holds for the rendered graphic and
+FR-6's churn budget is untouched where it was aimed. Staging an unchanged file contributes
+nothing to a commit, so the two coexist in one `git add`.
+
+No new file is added to the tree this amendment enumerates. Because every render now produces
+exactly one commit, the commit history of `health/metrics.json` *is* the append-only render
+log, and a separate `health/render-log.tsv` was designed and then dropped as redundant with
+what git already holds.
+
+Two commit messages now distinguish the cases, so the log stays readable:
+`health: refresh pipeline dashboard` keeps its existing meaning, that the graphic moved, and
+`health: heartbeat, rendered dashboard unchanged` marks a render that only advanced the
+heartbeat.
+
+The heartbeat is read by `scripts/check_dashboard_freshness.py` against
+`DASHBOARD_MAX_AGE_HOURS`, registered as NC-053 and derived from the observed render cadence
+rather than chosen. The **hourly poller** carries that check, not only the renderer: a process
+cannot report its own death, so the alarm must be raised by a job that is still running. It is
+the poll job's last step and can never fail it, because a dashboard problem must not cost a
+poll or the ledger row that makes scheduler degradation visible.
+
+| | |
+| --- | --- |
+| **Ledger semantics** | Unchanged. No existing row, column, unit or decision vocabulary is redefined; NC-025's definition and the meaning of a `health/state-index.tsv` row are untouched. What changes is *when* one generated file is committed. |
+| **Advisor sign-off** | `docs/team.md` requires Dr. Akba's out-of-band sign-off for changes that touch ADR ledger semantics. On the reading above this does not, so none was sought. **Recorded here as a question rather than assumed**, because the 2026-09-05 amendment is itself still Open on that exact test and a second silent judgement call on the same ADR is what this file exists to prevent. If the reviewer reads the `health/` commit contract as ledger semantics, this needs the same routing as that amendment and must not be merged before it. |
+| **Reversal cost** | One revert of the workflow step. No data loss, no rewrite, no dispatch: the extra commits are additive and any already made stay valid. |
+
+### ADR-025 amendment, 2026-09-29: the capture record
+
+**Context.** Issue #54 asked what share of the calibration documents IBM publishes the
+archive captures. The ledger this ADR defines cannot answer it: a row exists only for a
+document some poll fetched, so a document nobody fetched is absent from every ratio the
+ledger can form. NC-058 answered it once, by enumerating IBM's own history for
+2026-09-13..20 read-only and diffing the result against the archive: `<= 88.1%` with the
+daily sweep live, 27 documents missed, every one superseded within 45 minutes. A figure
+measured once and never again is the failure #48 exists to end, so it is now measured daily.
+
+**Amendment.** One file is added to the `health/` tree:
+
+    health/capture.tsv
+      day <TAB> last_update_date <TAB> served <TAB> held <TAB> retrieved <TAB> status <TAB> step_hours <TAB> run_id
+
+Append-only, one row per document proven to exist on an enumerated UTC day. What it
+measures is what the **unattended** pipeline retrieved, not what the archive holds: a
+document is `retrieved` when a ledger row from a *scheduled* run names it, with any
+decision, since a scheduled run that found a document already filed would otherwise have
+filed it. A row belongs to a dispatch when its `poll_time_utc` falls inside the execution
+interval of a job of a `workflow_dispatch` run of `calibration-poll.yml`, read from the
+Actions jobs API (every attempt). Job intervals, not run windows: a run queued behind
+another in the concurrency group keeps its creation time as its run-level start (observed
+in run 37199708102), so a run window would claim the scheduled run it waited behind (PR
+#105 review, round 2). The group serialises the runs, so their jobs never overlap: at
+`calibration-data` @ `0c798dc`, the 600 job intervals since 2026-09-02 do not overlap and
+596 of 596 ledger poll times fall inside exactly one of them. `status` is `captured`,
+`MISSED` (IBM serves it and the archive does not hold it) or `archived_not_served`, the
+vocabulary of the committed evidence TSVs, plus `backfilled` (held only because a dispatch
+filed it, counted as missed, so a manual backfill can never raise the figure) and
+`no_documents`, one sentinel row for a day on which nothing existed, so that an empty day
+is recorded instead of re-enumerated forever. Both `backfilled` and the "any decision"
+rule come from the PR #105 review, as does the next guarantee: a day measured before the
+job is stopped reaches the branch, because the enumeration step has its own timeout inside
+the job's, the commit step runs `always()`, and every write is an atomic file replace. Its writer is a new `capture` job in
+`calibration-health.yml`, which enumerates each *settled* day (`today - 3`, the newest day
+both of its daily sweeps have covered) at 15 minutes, finer than the sweep's 1 h so that it
+does not share the sweep's blind spots, and catches up at most three missed days per run.
+It is the only writer of this file, which keeps `scripts/push_with_retry.sh`'s
+one-tree-per-writer replay rule intact. `render` reads it and publishes `capture_7d` with
+the evidence it rests on (`capture_days_7d`, `capture_exist_7d`, `capture_missed_7d`,
+`capture_backfilled_7d`), and
+a failed capture never costs the render, because the render is the heartbeat NC-053 reads.
+
+The job records and never recovers: a `MISSED` row names a document still inside the 60-day
+retention (NC-026) and leaves the decision to backfill it to a person. A job that healed
+what it measured would make its own figure read 100% by construction, which is how NC-032
+became vacuous.
+
+| | |
+| --- | --- |
+| **Ledger semantics** | Unchanged. No existing file, row, column, unit or decision vocabulary is redefined; the ledger and `health/state-index.tsv`, which the job only reads, and NC-025's definition are untouched. What changes is that the branch gains a third writer and a file only it writes. |
+| **Advisor sign-off** | Not sought, on the same reading as the 2026-09-17 amendment above, and **recorded as a question rather than assumed** for the same reason: the 2026-09-05 amendment is still Open on this test. If the reviewer reads a new `health/` file as ledger semantics, this needs that amendment's routing and must not merge before it. |
+| **Reversal cost** | Remove the `capture` job and the `needs` entry. `health/capture.tsv` stays on the branch as history; the renderer reads a missing or stale file as "not yet measured", never as zero. |
+
+---
+
+## ADR-027 — Calibration training target
+
+**Status**: Open.
+
+**Context**: The single-qubit amplitude-plus-phase-damping channel needs one
+supervised target derived from archived IBM calibration data. Without an
+explicit derivation, training, anchored consequents, and the thermal reference
+can disagree on formulas, missing data, or gate duration.
+
+**Decision (proposed)**: For gate duration $t$ and a qubit's $T_1$, $T_2$, use
+
+$$
+\gamma = 1 - \exp(-t/T_1), \qquad
+\lambda = 1 - \exp[-t(2/T_2 - 1/T_1)].
+$$
+
+Accept only $T_2 \leq 2T_1$. Reject each qubit by its first applicable reason:
+missing/non-finite $T_1$, missing/non-finite $T_2$, missing/non-finite gate
+duration, non-positive physical values, then $T_2 > 2T_1$. Rejected rows retain
+their positional alignment with a NaN target and false usable mask.
+
+The snapshot target is the mean of usable per-qubit targets; standard deviation
+and the 10th, 50th, and 90th percentiles are retained. It is deliberately not
+the target evaluated at mean $T_1$/$T_2$, because the mapping is nonlinear.
+`training.targets.gate_lengths` reads only the requested one-qubit gate from
+the raw `properties.gates` envelope and requires the `ns` gate-length unit.
+
+A train/validation split is cut at a **snapshot boundary**, never inside one:
+`TrainingSet.time_split(cut)` sends rows with `timestamp < cut` left and
+`>= cut` right, so rows sharing a timestamp always stay together. NC-028 is the
+precedent. Its −0.585 R² was measured across a 20-day time split, and a cut
+placed inside a snapshot proved sensitive to the order of that snapshot's rows,
+while a cut placed between snapshots cannot be moved by any ordering. The split
+raises rather than returning an empty side, because a silently empty validation
+set is worse than a crash.
+
+**Not the target.** Two other quantities are *evaluation references* in phase 3
+and explicitly not regression targets:
+
+- **(B)** a distribution-level target derived from reference-simulation counts,
+  and
+- **(C)** hardware counts.
+
+Both are how a fitted model is *judged*; neither is what it regresses onto.
+Conflating them would let a model be trained against the same counts it is
+later scored on, and would silently change the target's units and support.
+
+**Consequences**: The proposal supplies one testable target to Issue #58's
+reference model and a future trainer. It deliberately introduces neither a
+multi-qubit, readout-error, nor non-zero-excited-population target: the current
+projector installs only a single-qubit channel, while readout error is an
+outside-the-channel measurement effect. On the fixture, the readout-error
+median is $2.191162109375 \times 10^{-2}$, the `sx` gate-error median is
+$3.110293362374808 \times 10^{-4}$, and mean $(\gamma, \lambda)$ is
+$(1.7266737044123665 \times 10^{-4}, 6.630210259092216 \times 10^{-4})$
+(NC-040). The target is raw-space; existing inference projection remains
+responsible for probability clipping.
+
+The snapshot aggregate is not a per-qubit training table and is not a richer
+feature-extractor decision under ADR-013. A future target-side upgrade may pair
+a per-qubit table with a per-qubit extractor, but must make that separate
+decision here. `HybridANFISTrainer`, its synthetic CLI, and synthetic smoke
+records are Issue #60 work: they must not land under this ADR while ADR-014 is
+Deferred and the NC-025 state-count gate is unmet.
+
+**Evidence**: `tests/test_aer_pin.py` matches Qiskit Aer's zero-temperature
+`thermal_relaxation_error` under `SuperOp` comparison across both Aer branches
+at 24 ns and 60 ns. NC-036 records maximum error below $10^{-12}$; NC-035 and
+NC-038 record the fixture's 24 ns gate duration and usable-row count. NC-039
+records the nonzero mean-of-targets versus target-at-mean-features gap.
+
+**Pending decisions**: Advisor/reviewer sign-off is required for raw-space
+training, raw gate-envelope parsing, the ordered skip policy, and mean of
+per-qubit targets. This entry remains Open until those decisions are recorded.
+
+**Source**: Issue #57; `docs/decisions/drafts/ADR-027-calibration-training-target.md`;
+`src/superconducted/training/targets.py`; `tests/training/test_targets.py`;
+`tests/training/test_aer_pin.py`; ADR-008, ADR-012, ADR-013, ADR-014, ADR-017,
+ADR-020, and ADR-024 clause 5 — the warm-start obligation the `TSKTrainer`
+docstring carries, which a trainer must either satisfy or replace with a
+recorded mechanism of its own. NC-028 is cited above for the split rule.
+
+---
+
+## ADR-028 — Physical-gate eligibility as an injected policy
+
+**Status**: Open.
+
+> **NOTE ·** The id is claimed at merge time per `docs/team.md`. ADR-027 is the
+> highest in this ledger and there is deliberately no ADR-026 (recorded in
+> `docs/state-of-the-project/2026-09-09-cycle-2-close.md`), so ADR-028 is the
+> next free id. No other open PR claimed it on 2026-09-18. Renumber if one
+> lands first; `scripts/check_ids.py` catches a collision but cannot say which
+> claimant should move.
+
+**Context**: `ChannelProjector` builds a channel for a `(gate_name, qubits)`
+pair but deliberately ignores `gate_name` while doing so, and
+`channels/kraus.py` is LOCKED. Something else therefore has to decide *which*
+instructions are physical enough to carry noise at all. Issue #73 posed this as
+a decision with two candidate sources: the calibration snapshot's
+positive-duration single-qubit records, or an explicit injected allowlist.
+
+**Decision**: The authority is the calibration snapshot, behind an ABC.
+`GateEligibilityPolicy.eligible_operations(snapshot)` returns a frozen set of
+`(gate_name, physical_qubits)` pairs. `CalibrationGateEligibilityPolicy` is the
+shipped implementation and admits a single-qubit gate exactly when its
+`properties.gates[*].parameters[gate_length]` record is strictly positive.
+Implementations must be pure in the snapshot, so a caller may resolve the set
+once per model, and `FuzzyNoiseModel` does.
+
+An allowlist was rejected as the *default*: it is a second place to keep the
+device's physics, it drifts silently when the backend recalibrates, and it
+cannot express a per-qubit fact. It remains available by injection, which is
+what the ABC is for and what
+`test_prepare_uses_an_injected_gate_eligibility_policy` pins.
+
+**Consequences**:
+
+- A virtual `rz` is excluded on physical grounds, because its recorded
+  `gate_length` is 0 ns on all 156 qubits of the reference snapshot, not
+  because its metadata is missing. `delay` and Aer save instructions are
+  excluded because they have no `properties.gates` record at all.
+- Eligibility is qubit-aware: a gate calibrated on one qubit does not authorize
+  the same gate on another.
+- The returned qubit indices are **physical**, while `FuzzificationStrategy`
+  matches them against an instruction's **positional** index in
+  `circuit.qubits`. The two agree only under a trivial layout. This is benign
+  in magnitude today, because `crisp_params` is snapshot-global, but not in
+  presence: a qubit the calibration does not cover is silently ineligible.
+  Per-qubit channels (ADR-013) would make it both, and this clause is the
+  warning for whoever opens that.
+- A missing or non-positive record fails closed. A *corrupt* one fails loudly,
+  because `training/targets.py::gate_lengths` raises `CalibrationParseError`
+  first. Treating unparseable calibration as physical is the worse failure.
+- **Every multi-qubit gate is categorically ineligible**, whatever its
+  calibrated duration, because `gate_lengths` filters `len(qubits) != 1`. On the
+  reference snapshot `cz` carries a positive 68-88 ns `gate_length` on all 352
+  of its records and still never enters the eligible set. Today that matches
+  `ChannelProjector`, which is single-qubit only, so nothing is lost. But #58's
+  reference model *does* cover `cz` (its `basis_gates` are
+  `{cz, id, rx, rz, sx, x}`), so a residual engine-versus-reference scope
+  difference survives this fix, on two-qubit gates instead of virtual ones.
+  Whoever implements a multi-qubit channel under ADR-008 must change **this
+  policy** as well as the projector; changing only the projector will leave the
+  channel unreachable and the failure will be silent, because an ineligible pair
+  simply yields no error.
+- The eligible set can be empty, or can fail to intersect the circuit, and both
+  produce a `NoiseModel` that installs nothing while every call still succeeds.
+  `prepare()` warns in both cases rather than raising, because an `rz`-only
+  circuit is legitimately noise-free. See the ADR-021 amendment above.
+
+**Source**: Issue #73; PR #96; `src/superconducted/interfaces.py`
+(`GateEligibilityPolicy`); `src/superconducted/integration/aer_factory.py`
+(`CalibrationGateEligibilityPolicy`); `tests/test_noise_gate_eligibility.py`;
+`docs/implementations/2026-09-12-issue-73-physical-gate-noise-filter.md`.
+Related: ADR-002 and ADR-021 (the DI contract), ADR-007 (fuzzification
+placement), ADR-013 (per-qubit features), Issues #58 and #74 (where the circuit
+is compiled).

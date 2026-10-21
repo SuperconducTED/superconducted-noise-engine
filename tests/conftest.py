@@ -36,13 +36,13 @@ DEFAULT_PROPERTIES: dict[str, Any] = {
     "last_update_date": DEFAULT_TIMESTAMP.isoformat(),
     "qubits": [
         [
-            {"name": "T1", "value": 100e-6, "unit": "s"},
-            {"name": "T2", "value": 80e-6, "unit": "s"},
+            {"name": "T1", "value": 100.0, "unit": "us"},
+            {"name": "T2", "value": 80.0, "unit": "us"},
             {"name": "readout_error", "value": 0.01, "unit": ""},
         ],
         [
-            {"name": "T1", "value": 110e-6, "unit": "s"},
-            {"name": "T2", "value": 90e-6, "unit": "s"},
+            {"name": "T1", "value": 110.0, "unit": "us"},
+            {"name": "T2", "value": 90.0, "unit": "us"},
             {"name": "readout_error", "value": 0.012, "unit": ""},
         ],
     ],
@@ -225,6 +225,11 @@ def make_mock_service(
         backend = MagicMock()
         backend.target = None
         backend.configuration.return_value = None
+        # Null like the two above, and for the same reason: a bare MagicMock here
+        # serialises into the snapshot and blows up json.dump on save. Only the
+        # historical path touches it, which is why nothing needed it until a test
+        # persisted a swept snapshot rather than just fetching one.
+        backend.target_history = None
         if properties_side_effect is not None:
             backend.properties.side_effect = properties_side_effect
         else:

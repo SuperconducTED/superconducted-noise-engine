@@ -311,6 +311,54 @@ class TestEnumerateWindow:
         assert served.strftime("%Y%m%dT%H%M%S%f") in out  # evidence survived
 
 
+class TestServedOut:
+    """#54: the capture job reads this file, and every stamp absent from it is read
+
+    as a document that does not exist. So it is written only for a clean sweep."""
+
+    START = datetime(2026, 8, 27, 0, 0, tzinfo=UTC)
+
+    def test_a_clean_sweep_writes_exactly_the_in_window_stamps(self, tmp_path: Any) -> None:
+        before = self.START - timedelta(hours=2)
+        inside = self.START + timedelta(minutes=30)
+
+        def policy(at: datetime | None) -> Any:
+            assert at is not None
+            return _Props(inside if at >= inside else before)
+
+        out = tmp_path / "served.txt"
+        rc = probe._enumerate_window(
+            _StubBackend(policy),
+            self.START.isoformat(),
+            (self.START + timedelta(hours=2)).isoformat(),
+            "1",
+            served_out=out,
+        )
+        assert rc == 0
+        assert out.read_bytes() == f"{inside.strftime('%Y%m%dT%H%M%S%f')}Z\n".encode()
+
+    def test_an_incomplete_sweep_writes_nothing(self, tmp_path: Any) -> None:
+        """A partial list would record every unqueried document as missed by nobody."""
+        calls = {"n": 0}
+
+        def policy(_: datetime | None) -> Any:
+            calls["n"] += 1
+            if calls["n"] > 2:
+                raise RuntimeError("persistent")
+            return _Props(self.START + timedelta(minutes=1))
+
+        out = tmp_path / "served.txt"
+        rc = probe._enumerate_window(
+            _StubBackend(policy),
+            self.START.isoformat(),
+            (self.START + timedelta(hours=5)).isoformat(),
+            "1",
+            served_out=out,
+        )
+        assert rc == 1
+        assert not out.exists()
+
+
 class _StubService:
     """Stands in for QiskitRuntimeService; hands back one prepared backend."""
 
