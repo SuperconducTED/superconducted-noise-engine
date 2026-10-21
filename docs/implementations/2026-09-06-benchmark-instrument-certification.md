@@ -416,3 +416,13 @@ they prevent this branch from manufacturing governance state that does not yet e
 - ADR-016, ADR-017, ADR-019, ADR-021, ADR-022, ADR-024, and ADR-008 in
   `docs/decisions.md`
 - `docs/evidence/resolution-measurement/README.md` and `resolution.tsv`
+
+## As of 2026-10-21
+
+Everything above is left as written. The merge-time list is now resolved or moved:
+`main` @ `6cf008d` is merged in; #57's fixture is consumed by every harness test; the
+reference's skip rules follow ADR-027; the FR-7 rerun against the measured target spread
+is committed; the ADR-016 note and the `docs/team.md` row are added; and the advisor read
+now goes through the lead under the register's 2026-10-03 reshape. Decision 3's `rz`
+asymmetry is closed on `main` by ADR-028. The details, measurements and verification are
+in `docs/implementations/2026-10-21-benchmark-certification-merge-and-rerun.md`.

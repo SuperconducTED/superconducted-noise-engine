@@ -522,6 +522,20 @@ non-trivial.
 > mean-to-interval upgrade stays gated on ADR-015 and Status remains
 > Deferred.
 
+> Density mode · 2026-10-21 · Issue #58, PR #79. The second of the three
+> phase-3 notes Issue #58 FR-9 orders under this entry: below the 2026-09-07
+> alignment note, above the place #64's status block will go. The certified
+> harness gains a density-matrix mode (commit `d646e07`) that aggregates
+> members by the mixture mean, `rho_ens = (1/N) sum_m rho_m`. A convex
+> combination of density matrices is a density matrix, and its diagonal is
+> the mean of the members' outcome probabilities, which is what the
+> counts-mode sum converges to once normalized; it is not a sum of states
+> with a total. The aggregate's `shots` is `1`, never `1 * N`, because
+> nothing is sampled (#58 decision 4). This defines the point estimate
+> only: the interval mode stays gated on ADR-015 and Status remains
+> Deferred. Advisor read: pending the lead's approval under the register's
+> 2026-10-03 reshape (`docs/advisor/2026-09-03-decisions-from-akba.md`).
+
 ---
 
 ## ADR-017 — Missing per-qubit calibration fields: Skip strategy
@@ -1072,6 +1086,16 @@ before merge.
 > caller explicitly requests partial results; they are never silent NaN.
 > Status remains Accepted. Dr. Akba's out-of-band read is pending in the
 > single W1 advisor batch owned by #56.
+
+> As of 2026-10-21, issue #58 / PR #79 re-asserts the same pins with `main`
+> @ `6cf008d` merged in. After that merge the slim fixture without
+> `properties.gates` left the engine side noise-free under ADR-028, so from
+> commit `6665921` the pins run on #57's gates-bearing fixture against an
+> engine that installs noise. The note above's last sentence is overtaken:
+> the W1 batch was never sent, and the read is now the lead's approval under
+> the register's 2026-10-03 reshape
+> (`docs/advisor/2026-09-03-decisions-from-akba.md`), pending. Status remains
+> Accepted.
 
 ---
 
