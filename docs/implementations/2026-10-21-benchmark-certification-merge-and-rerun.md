@@ -104,7 +104,11 @@ identity for four hand-chosen cases; this extends it to every usable fixture qub
 
 **Ladder.** `s_gamma = sd_{ddof=1}(gamma_q)` over the same 155 qubits,
 `7.600232779751463e-05`, re-measured by two routes (the target module and the closed form
-on the raw JSON), which agree exactly. Rungs `delta_k = s_gamma * 2^k`, `k = 3..-3`; a
+on the raw JSON), which give identical `(gamma_q, lambda_q)` rows. The value is
+`np.std(rows, axis=0, ddof=1)[0]` over the `(155, 2)` array; a 1-D
+`np.std(rows[:, 0], ddof=1)` gives `7.600232779751465e-05` because numpy reduces in a
+different order, so the spread is known to 15 significant digits and the ladder fixes the
+first expression's value. Rungs `delta_k = s_gamma * 2^k`, `k = 3..-3`; a
 power-of-two factor is exact in binary floating point. The largest rung keeps
 `gamma_0 + delta <= 1` (`7.8e-4`), so `_checked_inputs` never clips.
 
@@ -142,7 +146,19 @@ from `1.619e-5` to `6.545e-6` (GHZ); the commands are in the evidence README.
   `qubits_used` and `skipped` stop partitioning the selection.
 - **Corrupt still raises.** A null, non-numeric, non-finite or wrongly-unit gate length
   raises in the reference exactly where `training.targets.gate_lengths` raises, which is
-  also where ADR-028 fails loudly.
+  also where ADR-028 fails loudly. A non-list `parameters` on a one-qubit gate is a missing
+  record, as `gate_lengths` reads it.
+- **Dead-pair reading stays strict** (from the pre-push review). A `cz` entry with no
+  `parameters` list raises in `full_device` scope, as it did on 2026-09-06. The lenient
+  reading is justified for `gate_length`, which `training.targets` also reads leniently, but
+  not for `gate_error`, which no target code reads; treating it as "not dead" would drop the
+  pair from `dead_pairs` with no signal.
+- **Stricter structure than the loader.** Duplicate fields or a non-mapping entry on a qubit
+  raise in the reference, while `load_snapshot` keeps the last duplicate. Stated in the
+  module docstring; the cross-module test does not exercise it.
+- **The intended divergence is pinned, not hidden.** A missing `sx` length rejects the
+  qubit in `qubit_targets` (`gate_length_missing`) but only the `sx` entry in the reference;
+  `test_missing_sx_length_is_qubit_level_in_targets_and_gate_level_here` asserts both sides.
 - **Rerun now, engine-true** (Bengisu, 2026-10-21). The alternatives were keeping the
   2026-09-06 controlled model, which noises `rz` and so measures a noisier engine than
   ships, or deferring the rerun to a follow-up commit. The September TSV is kept and stays
@@ -196,11 +212,11 @@ Expected: the suite passes; the promoted-warning run passes (it had 17 failures 
 these fixes); collection is `main`'s count plus this PR's differential; the last command
 prints `0` (the ledger diff is additions only).
 
-Measured on 2026-10-21 (Mert's laptop, Python 3.12.10, pinned stack, provisional): at
-`c5f2cd1` plus this commit's documentation, 933 collected and 933 passed with nothing
-skipped; the promoted-warning run 89 passed; `main` @ `6cf008d` collects 859 (NC-021's
-current value), so the differential is +74: the 2026-09-06 branch's +63 and this round's
-+11. Before these fixes the merged tree gave 2 failed, 919 passed, 1 skipped. NC-021 is
+Measured on 2026-10-21 (Mert's laptop, Python 3.12.10, pinned stack, provisional), on the
+tree with the pre-push review fixes: 939 collected and 939 passed with nothing skipped;
+the promoted-warning run 95 passed; `main` @ `6cf008d` collects 859 (NC-021's current
+value), so the differential is +80: the 2026-09-06 branch's +63 and this round's +17.
+Before these fixes the merged tree gave 2 failed, 919 passed, 1 skipped. NC-021 is
 re-measured at the merge commit under rule 6, not taken from these figures.
 
 Mutation checks run on 2026-10-21, each restored from a backup copy:
@@ -214,6 +230,8 @@ Mutation checks run on 2026-10-21, each restored from a backup copy:
 | `T2` checked before `T1` | 4 tests |
 | reference `sx` duration times `1.0001` | 6 tests |
 | eligibility filter disabled in the script | 2 tests |
+| `cz` without `parameters` silently "not dead" again | `test_cz_without_parameters_raises_in_full_device_scope` |
+| override parsed without the `ValueError` wrap | 3 tests (`none`, `list`, `text`) |
 
 Laptop figures here are provisional; the canonical numbers come from Burak's next
 batched desktop record.

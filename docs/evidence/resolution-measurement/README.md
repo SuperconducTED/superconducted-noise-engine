@@ -124,9 +124,12 @@ and the conservative all-cells quantifier.
 - Measured wall time: 15.508779 seconds (informational).
 - TSV SHA-256: `b43cdeb5dd7f339f4c228d50535191253530620bcb076f51ed7485744988d052`.
 - `s_gamma` was re-measured two ways before use: through `training.targets.qubit_targets`
-  and by the closed form applied directly to the fixture JSON; both give
-  `7.600232779751463e-05` (the 2026-09-06 figure on #58, `7.600232779751465e-05`,
-  differs only in the sixteenth significant digit).
+  and by the closed form applied directly to the fixture JSON. Both routes give identical
+  `(gamma_q, lambda_q)` rows, and `np.std(rows, axis=0, ddof=1)[0]` over the `(155, 2)`
+  array gives `7.600232779751463e-05`, the value the ladder uses. A 1-D
+  `np.std(rows[:, 0], ddof=1)` gives `7.600232779751465e-05` (the 2026-09-06 figure on
+  #58): numpy's reduction order differs between the two calls, so the figures agree to 15
+  significant digits and the last digit is not a property of the data.
 
 Run from the repository root:
 

@@ -392,6 +392,67 @@ def test_missing_or_negative_gate_length_installs_nothing_and_is_recorded() -> N
     assert ("id", (0,)) not in report.gate_lengths_s
 
 
+def test_non_list_parameters_on_a_one_qubit_gate_is_a_missing_record() -> None:
+    """Same reading as ``training.targets.gate_lengths``, which skips such an entry."""
+    snapshot = _snapshot(
+        gates=[_gate("sx", [0]), {"gate": "x", "qubits": [0], "parameters": "oops"}]
+    )
+
+    model = build_reference(snapshot, scope="single_qubit_relaxation")
+    report = build_reference_report(snapshot, scope="single_qubit_relaxation")
+
+    assert set(model.noise_instructions) == {"sx"}
+    assert report.skipped_gates["gate_length_missing"] == (("x", (0,)),)
+
+
+def test_cz_without_parameters_raises_in_full_device_scope() -> None:
+    """A cz entry that cannot say whether the pair is dead is corrupt, not missing."""
+    snapshot = _snapshot(
+        qubits=[_qubit(), _qubit()],
+        gates=[_gate("sx", [0]), _gate("sx", [1]), {"gate": "cz", "qubits": [0, 1]}],
+    )
+
+    with pytest.raises(ValueError, match="parameters must be a list"):
+        build_reference(snapshot, scope="full_device")
+    # The one-qubit scope never reads two-qubit entries, so it is unaffected.
+    assert "cz" not in build_reference(snapshot, scope="single_qubit_relaxation").noise_instructions
+
+
+@pytest.mark.parametrize("value", [None, [24e-9], "fast"], ids=("none", "list", "text"))
+def test_malformed_gate_length_override_raises_value_error(value: object) -> None:
+    with pytest.raises(ValueError, match="gate_lengths"):
+        build_reference(
+            _snapshot(),
+            scope="single_qubit_relaxation",
+            gate_lengths={"sx": value},  # type: ignore[dict-item]
+        )
+
+
+def test_missing_sx_length_is_qubit_level_in_targets_and_gate_level_here(
+    tmp_path: Path,
+) -> None:
+    """The one intended divergence from ``training.targets``, pinned rather than hidden.
+
+    The target needs one duration per qubit and rejects the qubit; the reference
+    times each gate separately, so it keeps the qubit for its other gates and
+    records only the ``sx`` entry.
+    """
+    data = json.loads(WITH_GATES_FIXTURE.read_text(encoding="utf-8"))
+    for entry in data["properties"]["gates"]:
+        if entry["gate"] == "sx" and entry["qubits"] == [0]:
+            entry["parameters"] = [p for p in entry["parameters"] if p["name"] != "gate_length"]
+    path = tmp_path / "snapshot.json"
+    path.write_text(json.dumps(data), encoding="utf-8")
+
+    targets = qubit_targets(load_snapshot(path), gate_lengths(data["properties"], "sx"))
+    report = build_reference_report(_calibration_snapshot(data), scope="single_qubit_relaxation")
+
+    assert not targets.usable[0]
+    assert targets.skipped.gate_length_missing == 1
+    assert 0 in report.qubits_used
+    assert report.skipped_gates["gate_length_missing"] == (("sx", (0,)),)
+
+
 @pytest.mark.parametrize(
     "value",
     [None, "fast", float("nan"), float("inf")],

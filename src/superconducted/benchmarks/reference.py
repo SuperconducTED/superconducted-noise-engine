@@ -12,6 +12,11 @@ because the reference times every gate by its own duration where the target
 reads only ``sx``: a gate entry with no recorded length, or a negative one,
 installs nothing and is recorded, which is ADR-028's fail-closed rule for the
 engine. A corrupt value (wrong unit, null, non-numeric, non-finite) raises.
+
+Structure is checked more strictly than the calibration loader does: a qubit
+with two entries for one field, or an entry that is not a mapping, raises here
+(the loader keeps the last duplicate), because an ambiguous record cannot be
+attributed to one physical value.
 """
 
 from __future__ import annotations
@@ -212,7 +217,12 @@ def _validated_overrides(gate_lengths: Mapping[str, float] | None) -> dict[str, 
     for name, raw_value in gate_lengths.items():
         if not isinstance(name, str) or not name:
             raise ValueError("gate_lengths keys must be non-empty strings")
-        value = float(raw_value)
+        try:
+            value = float(raw_value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                f"gate_lengths[{name!r}] must be a number of seconds; got {raw_value!r}"
+            ) from exc
         if not math.isfinite(value) or value < 0.0:
             raise ValueError(
                 f"gate_lengths[{name!r}] must be a finite, non-negative number of seconds; "
@@ -258,12 +268,12 @@ def _gate_length_s(
 
 
 def _is_dead_cz(entry: Mapping[str, Any], *, context: str) -> bool:
+    # Stricter than _gate_length_s on purpose: training.targets never reads
+    # gate_error, so there is no target behaviour to mirror, and a cz entry
+    # without a parameters list cannot say whether the pair is dead.
     if entry.get("gate") != "cz":
         return False
-    raw_parameters = entry.get("parameters")
-    if not isinstance(raw_parameters, list):
-        return False
-    parameters = _named_entries(raw_parameters, context=f"{context}.parameters")
+    parameters = _named_entries(entry.get("parameters"), context=f"{context}.parameters")
     error = _read_quantity(
         parameters, "gate_error", "", context=f"{context}.parameters", missing_ok=True
     )
