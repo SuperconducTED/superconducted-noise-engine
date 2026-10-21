@@ -18,6 +18,7 @@ import numpy as np
 import pytest
 
 from superconducted.calibration.features import BasicCalibrationVectorizer
+from superconducted.calibration.loader import UNIT_SCALE
 from superconducted.calibration.storage import CalibrationStorage
 from superconducted.channels.kraus import KrausChannelProjector, NoOpNormalization
 from superconducted.fuzzy.defuzzification import WeightedAverageDefuzzifier
@@ -70,36 +71,19 @@ def dummy_snapshot() -> CalibrationSnapshot:
 
 @pytest.fixture(scope="session")
 def benchmark_snapshot() -> CalibrationSnapshot:
-    """Load the committed IBM Fez fixture used by benchmark certification tests."""
-    fixture_path = (
-        Path(__file__).parent
-        / "fixtures"
-        / "calibration"
-        / "ibm_fez_20260513T121322Z_q72_missing_t1t2.json"
-    )
-    data = json.loads(fixture_path.read_text(encoding="utf-8"))
-    timestamp = datetime.fromisoformat(str(data["timestamp"]).replace("Z", "+00:00"))
-    return CalibrationSnapshot(
-        backend=str(data["backend"]),
-        timestamp=timestamp,
-        schema_version=str(data["schema_version"]),
-        properties=data["properties"],
-        target=data.get("target"),
-        configuration=data.get("configuration"),
-    )
+    """Load #57's gates-bearing IBM Fez fixture for benchmark certification tests.
 
-
-@pytest.fixture(scope="session")
-def issue_57_gates_snapshot() -> CalibrationSnapshot:
-    """Load #57's sole gates fixture, or skip consumers until that issue lands."""
+    It must carry ``properties.gates``: ADR-028's
+    ``CalibrationGateEligibilityPolicy`` noises only gates with a positive
+    recorded ``gate_length``, so the slim fixture without gates gives an engine
+    that installs nothing. It keeps the slim fixture's qubit-72 missing-T1/T2 case.
+    """
     fixture_path = (
         Path(__file__).parent
         / "fixtures"
         / "calibration"
         / "ibm_fez_20260513T121322Z_with_gates.json"
     )
-    if not fixture_path.exists():
-        pytest.skip("Issue #57 has not yet landed ibm_fez_20260513T121322Z_with_gates.json")
     data = json.loads(fixture_path.read_text(encoding="utf-8"))
     timestamp = datetime.fromisoformat(str(data["timestamp"]).replace("Z", "+00:00"))
     return CalibrationSnapshot(
@@ -113,8 +97,14 @@ def issue_57_gates_snapshot() -> CalibrationSnapshot:
 
 
 def _feature_range(snapshot: CalibrationSnapshot, field: str) -> tuple[float, float]:
+    """Return the per-qubit range of ``field`` in the vectorizer's units.
+
+    ``BasicCalibrationVectorizer.extract`` emits SI seconds for coherence
+    (issue #66), while the archive records microseconds, so each value is
+    converted by its own declared unit before the grid is laid out.
+    """
     values = [
-        float(entry["value"])
+        float(entry["value"]) * UNIT_SCALE[str(entry["unit"])]
         for qubit in snapshot.properties["qubits"]
         for entry in qubit
         if entry.get("name") == field

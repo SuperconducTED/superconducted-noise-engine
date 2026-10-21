@@ -32,6 +32,8 @@ from superconducted.benchmarks.metrics import (
     StateFidelity,
 )
 from superconducted.benchmarks.reference import build_reference
+from superconducted.calibration.features import BasicCalibrationVectorizer
+from superconducted.fuzzy.tsk import TSKRuleBase
 from superconducted.integration.aer_factory import FuzzyNoiseModelEnsemble
 from superconducted.interfaces import BenchmarkMetric
 from superconducted.types import CalibrationSnapshot, SimulationResult
@@ -291,6 +293,27 @@ def test_qft_and_vqe_run_in_both_modes(
     else:
         assert engine_result.density_matrix is not None
         assert reference_result.density_matrix is not None
+
+
+def test_benchmark_engine_grid_spans_the_vectorizer_inputs(
+    benchmark_snapshot: CalibrationSnapshot,
+    benchmark_ensemble: FuzzyNoiseModelEnsemble,
+) -> None:
+    """The test engine's MF grid is laid out in the units ``extract`` emits.
+
+    Issue #66 moved coherence features to SI seconds while the archive keeps
+    microseconds. A grid built from raw archive values puts every T1/T2 input
+    below its lowest centre, which pins the engine to one corner of its rule
+    base while every structural test still passes.
+    """
+    inputs = BasicCalibrationVectorizer().extract(benchmark_snapshot)
+    # Private read of the ensemble's rule base: the public API exposes members,
+    # not the grid they share.
+    rules = cast(TSKRuleBase, benchmark_ensemble._rule_base).rules
+
+    for index, value in enumerate(inputs):
+        centres = [float(rule.antecedent_mfs[index].parameters()[0]) for rule in rules]
+        assert min(centres) < float(value) < max(centres)
 
 
 def test_transpiled_qft_installs_only_executed_noise_instructions(
@@ -699,19 +722,19 @@ def test_all_four_circuits_produce_finite_mode_appropriate_rows(
 
 @pytest.mark.slow
 def test_issue_57_fixture_four_circuit_reference_integration(
-    issue_57_gates_snapshot: CalibrationSnapshot,
+    benchmark_snapshot: CalibrationSnapshot,
     make_benchmark_ensemble: Callable[..., FuzzyNoiseModelEnsemble],
 ) -> None:
-    """Run the required 12+4 rows against #57's physical reference after it lands."""
+    """Run the required 12+4 rows against the physical reference from #57's fixture."""
     circuits = [
         random_clifford_circuit(3, 2, rng=np.random.default_rng(0)),
         ghz_state_circuit(3),
         qft_circuit(3),
         vqe_ansatz_circuit(3, rng=np.random.default_rng(0)),
     ]
-    ensemble = make_benchmark_ensemble(1, snapshot=issue_57_gates_snapshot)
+    ensemble = make_benchmark_ensemble(1)
     reference = build_reference(
-        issue_57_gates_snapshot,
+        benchmark_snapshot,
         scope="single_qubit_relaxation",
         qubits=range(3),
     )
@@ -745,13 +768,18 @@ def test_issue_57_fixture_four_circuit_reference_integration(
 
 
 def test_issue_57_fixture_like_for_like_noise_instruction_scope(
-    issue_57_gates_snapshot: CalibrationSnapshot,
+    benchmark_snapshot: CalibrationSnapshot,
     make_benchmark_ensemble: Callable[..., FuzzyNoiseModelEnsemble],
 ) -> None:
-    """Engine-installed names are covered by the one-qubit reference, except virtual rz."""
-    ensemble = make_benchmark_ensemble(1, snapshot=issue_57_gates_snapshot)
+    """Engine-installed names are covered by the one-qubit reference, and neither noises rz.
+
+    ADR-028 (#73, PR #96) leaves the zero-length virtual ``rz`` ineligible in the
+    engine, so the asymmetry #58 decision 3 disclosed is closed on ``main``; this
+    pins it from the harness side with no exception left in the subset check.
+    """
+    ensemble = make_benchmark_ensemble(1)
     reference = build_reference(
-        issue_57_gates_snapshot,
+        benchmark_snapshot,
         scope="single_qubit_relaxation",
         qubits=range(3),
     )
@@ -763,8 +791,11 @@ def test_issue_57_fixture_like_for_like_noise_instruction_scope(
         seed=41,
     )
     reference_names = set(reference.noise_instructions)
+    assert "rz" not in reference_names
 
     for result in engine_results:
         assert result.metadata is not None
         for member_names in result.metadata["noise_instructions"]:
-            assert set(member_names) - {"rz"} <= reference_names
+            assert member_names
+            assert "rz" not in member_names
+            assert set(member_names) <= reference_names
