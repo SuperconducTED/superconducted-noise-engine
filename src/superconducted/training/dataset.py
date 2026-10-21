@@ -191,7 +191,25 @@ def hour_of_day_weights(timestamps: Iterable[datetime]) -> npt.NDArray[np.float6
 
 @dataclass
 class BuildReport:
-    """Caller-supplied audit output; reset and populated by build_training_set."""
+    """Caller-supplied audit output; reset and populated by build_training_set.
+
+    Fields, all counted over documents in the selected backend:
+
+    - ``documents``: every ``*.json`` document read at the ref.
+    - ``duplicates``: documents whose qubit-block digest an earlier-keyed
+      document already carries.
+    - ``skipped``: dropped documents keyed by reason. A document whose digest or
+      timestamp cannot be read counts once as ``parse_error``; otherwise the
+      selected representative of a dropped state counts once as
+      ``parse_error``, ``features_unusable`` or ``target_unusable``.
+    - ``missingness``: loader missingness totals over kept rows only.
+    - ``target_skips``: per-qubit target skip counts over every selected
+      representative that reached the target step, kept or not.
+    - ``rows``: one dict per kept row, in timestamp order, holding the TSV columns.
+
+    Invariant after a successful build:
+    ``len(rows) + sum(skipped.values()) + duplicates == documents``.
+    """
 
     documents: int = 0
     duplicates: int = 0
@@ -342,7 +360,14 @@ def build_training_set(
             timestamps.append(timestamp)
             audit.rows.append(row)
             audit.missingness.update(missingness)
-    assert len(audit.rows) + sum(audit.skipped.values()) + audit.duplicates == audit.documents
+    accounted = len(audit.rows) + sum(audit.skipped.values()) + audit.duplicates
+    if accounted != audit.documents:
+        # FR-10's identity. An explicit raise rather than assert, so it still
+        # holds under python -O; reaching it means a bookkeeping bug here.
+        raise RuntimeError(
+            f"Accounting identity broken: {accounted} rows, skips and duplicates "
+            f"for {audit.documents} documents"
+        )
     if not audit.rows:
         raise NoUsableRowsError("Archive has no usable rows")
     hourly = hour_of_day_weights(timestamps)

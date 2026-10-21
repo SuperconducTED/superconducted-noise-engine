@@ -435,8 +435,13 @@ Richer extractors implement `CalibrationFeatureExtractor`.
 > and reconciliation of missing/non-finite-value policies. The dated audit
 > `docs/audits/2026-05-25-followup-issues.md` remains unchanged.
 
-> Revisited - 2026-10-17 - Baha Jarad's issue #63 implementation, prepared by
-> Codex, reads a pinned archive with one row per distinct state. UC-6 dashboard
+> Revisited · 2026-10-21 · Baha Jarad's issue #63 implementation, prepared by
+> Codex, reads a pinned archive with one row per distinct state, still through
+> this ADR's bootstrap mean extractor. The distinct-state training set exists at
+> `calibration-data` @ `f0930b9b54975470a4a87866cbc691f7897295cb` with 504 rows
+> (NC-073) and @ `e5688d2f6a333e98bb01f1c1d81b694ff69574f5` with 797 rows
+> (NC-070), each committed as an evidence TSV under
+> `docs/evidence/training-set/`. UC-6 dashboard
 > agreement requires the bare-qubit digest to match
 > `scripts/canonical_snapshot_digest.py::qubit_digest`: parameter dates are
 > normalized away while names, units and values remain. This follows Baha
@@ -451,7 +456,6 @@ Richer extractors implement `CalibrationFeatureExtractor`.
 > lead in the advisor role, recorded on 2026-10-21 in
 > `docs/advisor/2026-09-03-decisions-from-akba.md`. It covers this note as
 > written and changes no `**Status**` line.
-
 
 ---
 

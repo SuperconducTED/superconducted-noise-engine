@@ -23,7 +23,7 @@ Kept-document loader missingness: `{"init_error_absent": 67331, "init_error_expl
 
 UTC row-hour histogram: `{"0": 15, "1": 13, "2": 7, "3": 29, "4": 23, "5": 12, "6": 16, "7": 25, "8": 16, "9": 21, "10": 24, "11": 30, "12": 20, "13": 18, "14": 22, "15": 16, "16": 24, "17": 25, "18": 34, "19": 28, "20": 27, "21": 23, "22": 23, "23": 13}`.
 
-Measured runtime: 72 seconds (machine-specific). Growth estimate: to be measured. These figures are audited by this TSV; the claim mapping is recorded below. Recheck identifiers at merge time.
+Measured runtime: 72 seconds (machine-specific). Growth estimate: to be measured. These figures are audited by this TSV.
 
 X uses ArchiveUnitFeatureExtractor: T1/T2 in archive microseconds, readout error dimensionless. ADR-010's BasicCalibrationVectorizer emits SI; the wrapper explicitly converts it back to the survey/quantile stack's units. Y is dimensionless; target inputs use SI seconds (training/targets.py, ADR-027). Feature spread uses sample standard deviation (ddof=1); a singleton has an empty std cell. Target gamma spread follows snapshot_target's population standard deviation. Both weight columns are emitted; uniform is the default. Digests match the dashboard: parameter dates are normalized away; measurement names, units and values remain. Parameter date bounds are retained as provenance columns.
 
@@ -52,7 +52,7 @@ Kept-document loader missingness: `{"init_error_absent": 79054, "init_error_expl
 
 UTC row-hour histogram: `{"0": 30, "1": 22, "2": 25, "3": 33, "4": 32, "5": 23, "6": 30, "7": 35, "8": 28, "9": 31, "10": 35, "11": 44, "12": 27, "13": 27, "14": 36, "15": 31, "16": 36, "17": 38, "18": 41, "19": 47, "20": 45, "21": 38, "22": 36, "23": 27}`.
 
-Measured runtime: 151 seconds (machine-specific). Growth estimate: to be measured. These figures are audited by this TSV; the claim mapping is recorded below. Recheck identifiers at merge time.
+Measured runtime: 151 seconds (machine-specific). Growth estimate: to be measured. These figures are audited by this TSV.
 
 X uses ArchiveUnitFeatureExtractor: T1/T2 in archive microseconds, readout error dimensionless. ADR-010's BasicCalibrationVectorizer emits SI; the wrapper explicitly converts it back to the survey/quantile stack's units. Y is dimensionless; target inputs use SI seconds (training/targets.py, ADR-027). Feature spread uses sample standard deviation (ddof=1); a singleton has an empty std cell. Target gamma spread follows snapshot_target's population standard deviation. Both weight columns are emitted; uniform is the default. Digests match the dashboard: parameter dates are normalized away; measurement names, units and values remain. Parameter date bounds are retained as provenance columns.
 
@@ -71,9 +71,9 @@ desktop batch verification and owner/advisor/consumer confirmations.
 | Conclusion | Register |
 | --- | --- |
 | Pinned October-tip state/document/duplicate counts | NC-070 |
-| Document exclusions, target skips and loader missingness | NC-071 |
+| Pinned October-tip document exclusions, target skips and loader missingness | NC-071 |
 | State-level UTC hour bias: 230 rows at 00-07, 308 at 16-23; ratio 308/230 | NC-072 |
-| Historical NC-025 reproduction | NC-073 |
+| Historical NC-025 reproduction, with that ref's target skips, loader missingness and hour histogram | NC-073 |
 | Builder digest against the dashboard's `qubit_digest`, every document at both refs | NC-074 |
 | Rounded machine-specific runtime | NC-075 |
 | Decision 5's comparison: distinct states under the date-inclusive digest | NC-076 |

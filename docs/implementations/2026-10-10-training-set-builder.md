@@ -75,9 +75,19 @@ empty. Tests allow the rounding inherent in SI conversion and inverse scaling.
 Y delegates to `gate_lengths`, `qubit_targets` and `snapshot_target` under
 ADR-027. Per-qubit `sx` durations and coherence inputs use SI seconds; gamma
 and lambda are dimensionless. Gamma spread follows the target helper's
-population standard deviation. Inverse UTC-hour row frequencies are normalized
-to mean one; naive weighting timestamps are rejected. Both weight columns
-are always emitted. No independence, floor or growth-sufficiency claim is made.
+population standard deviation. No independence, floor or growth-sufficiency
+claim is made.
+
+**Hour-of-day weights.** With `n` rows, `h(i)` the UTC hour of row `i`'s
+timestamp, `c_h` the number of rows in hour `h`, and `H` the number of hours
+with at least one row, `hour_of_day_weights` computes `r_i = 1 / c_{h(i)}` and
+returns `w_i = r_i / mean(r)`. Since `sum_i r_i = H`, this is
+`w_i = n / (H * c_{h(i)})`: `mean(w) = 1`, and every populated hour carries the
+same total weight `n / H`. An empty hour contributes no row, so nothing
+divides by zero; with all 24 hours populated this is issue #63's
+`n / (24 * c_h)`. Naive timestamps are rejected rather than read in the
+machine's timezone. Both weight columns are always emitted; `TrainingSet.weights`
+is the uniform one unless `weighting="hour_of_day"`.
 
 The committed-source historical reproduction yields 504 rows from 894 documents
 with 390 duplicates (NC-073). The pinned October tip yields 797 rows from 1891
@@ -143,9 +153,9 @@ On 2026-10-17, at source commit `6143f4279df3442fb34363934d01ef5636305fdf`
 based on main `6cf008da5b3dd8e25bbc20e69e96d21c4a161d15`, the full suite
 collected and passed **875 tests**, including 16 builder cases, using Python
 3.12.10, numpy 2.4.4, qiskit 2.4.1, aer 0.17.2, mypy 1.20.2, pytest 9.0.3 and
-ruff 0.15.12, with main's Matplotlib dependency installed. CI on the PR head
-(run 39151288067) reported 874 passed and 1 skipped on Python 3.11 and 3.12:
-875 collected. The skip is
+ruff 0.15.12, with main's Matplotlib dependency installed. CI reported 874 passed and 1 skipped on Python 3.11 and 3.12 (875 collected)
+at `b447ed8` (run 39151288067) and again at `07354d3` (run 39580563318), after
+the round-1 review fixes, which edit two existing tests and add none. The skip is
 `test_feature_distribution.py::test_the_committed_survey_reproduces_from_the_archive`,
 which skips when `calibration-data` has not been fetched.
 
@@ -188,6 +198,14 @@ byte (SHA-256 `007c8089...`, NC-073) whenever the builder source is unchanged.
   decision-5 comparison, an `__all__` for the code-quality bot, `--out` in two
   failing-path CLI tests, and labels. Fixed on the PR branch by Mert Efe Şensoy;
   the PR conversation lists each fix against its finding.
+- **2026-10-21, independent review of `07354d3`** (approved, with minors and
+  nits): NC-021's provenance sentence and separator, the historical ref's skip,
+  missingness and histogram figures under NC-073, the ADR-013 note's evidence
+  refs and row counts (amended with the lead's re-confirmation), a leftover
+  to-do in the generated README text, `BuildReport` field documentation, an
+  explicit raise for the FR-10 identity, the `archive_ref` test against
+  `git rev-parse HEAD`, and the hour-weight notation above. Fixed on the PR
+  branch in a second round.
 
 ## Related docs
 

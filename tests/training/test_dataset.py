@@ -169,7 +169,11 @@ def test_pipeline_selects_before_usability_and_accounts_every_document(tmp_path)
     assert all(timestamp < cut for timestamp in train.timestamps)
     assert all(timestamp >= cut for timestamp in validation.timestamps)
     assert np.all(result.weights == 1)
-    assert len(result.archive_ref) == 40
+    head = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+    ).stdout.strip()
+    assert result.archive_ref == head
+    assert len(head) == 40
     assert len(list(iter_archive(repo, "HEAD"))) == 8
 
 
