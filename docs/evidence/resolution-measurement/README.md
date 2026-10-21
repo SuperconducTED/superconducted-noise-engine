@@ -77,3 +77,79 @@ The exact values for all 24 `(circuit, mode, metric, delta)` cells are in
 counts claim remains blocked on the QFT R² decision, every laptop result remains
 provisional until Burak's batch-1 desktop verification, and any eventual IDs will be
 chosen from the merge-time ledger head rather than reserved here.
+
+---
+
+## As of 2026-10-21: spread-anchored, engine-true rerun
+
+Everything above describes the 2026-09-06 run and is left as written. This section adds
+the rerun FR-7 requires once #59's survey exists, in a second file,
+`resolution-2026-10-21-spread-ladder.tsv`. `resolution.tsv` is unchanged and still
+regenerates exactly at this commit.
+
+Two inputs changed, both chosen by @bengisucvd on 2026-10-21 before the run:
+
+- **Ladder.** `delta_k = s_gamma * 2^k` for `k = 3, 2, 1, 0, -1, -2, -3`, where
+  `s_gamma = 7.600232779751463e-05` is the sample standard deviation (`ddof=1`) of the
+  per-qubit `sx` target `gamma_q = 1 - exp(-t_q / T1_q)` over the 155 usable qubits of
+  `tests/fixtures/calibration/ibm_fez_20260513T121322Z_with_gates.json` (NC-038; q72
+  skipped as `t1_missing`). It is the target-space counterpart of #59 decision 3's
+  within-device spread `s_q`. Multiplying by a power of two is exact in binary floating
+  point, so the seven rungs are exact multiples.
+- **Eligibility.** The controlled model follows ADR-028: `--eligibility-snapshot` applies
+  the shipped `CalibrationGateEligibilityPolicy` to the same fixture (624 operations,
+  `id`, `rx`, `sx`, `x` on all 156 qubits), so the zero-length virtual `rz` carries no
+  channel, exactly as in `FuzzyNoiseModel.prepare` since PR #96. The 2026-09-06 run
+  noised `rz` too. At `delta = s_gamma` this changes the density discrepancy from
+  `1.492e-05` to `1.349e-05` (QFT) and from `1.619e-05` to `6.545e-06` (GHZ), so the two
+  runs are not directly comparable cell by cell. Those four figures are in neither TSV;
+  they come from the density rows of
+  `measure_resolution(gamma=0.00017266737044123665, lam=0.0006630210259092216,
+  deltas=[7.600232779751463e-05], repeats=2, shots=64, seed=58,
+  basis_gates=["cz", "id", "rx", "rz", "sx", "x"], eligible_operations=E)` with `E = None`
+  and with `E = eligible_operations_from_snapshot(<the fixture>)`; density rows do not
+  depend on `repeats`, `shots` or `seed`.
+
+Unchanged: `gamma_0`, `lambda_0` (NC-040), basis `cz,id,rx,rz,sx,x`, 32 pairs, 4096 shots,
+base seed 58 with the same seed schedule, the `1e-10` density floor, the decision rule,
+and the conservative all-cells quantifier.
+
+### Provenance
+
+- Generator and evidence commit: `eba93cf2432e97cc23c446adf4acbcbf63ba357d` (script, tests
+  and TSV land together; the script at that commit is the generator).
+- Merged tree: `main` @ `6cf008d` into this branch.
+- Software: Python 3.12.10, Qiskit 2.4.1, Qiskit Aer 0.17.2, NumPy 2.4.4, SciPy 1.17.1,
+  Windows (Mert's laptop).
+- Measured wall time: 15.508779 seconds (informational).
+- TSV SHA-256: `b43cdeb5dd7f339f4c228d50535191253530620bcb076f51ed7485744988d052`.
+- `s_gamma` was re-measured two ways before use: through `training.targets.qubit_targets`
+  and by the closed form applied directly to the fixture JSON; both give
+  `7.600232779751463e-05` (the 2026-09-06 figure on #58, `7.600232779751465e-05`,
+  differs only in the sixteenth significant digit).
+
+Run from the repository root:
+
+```powershell
+python -m scripts.resolution_measurement --gamma "0.00017266737044123665" --lambda "0.0006630210259092216" --deltas 0.000608018622380117 0.0003040093111900585 0.00015200465559502926 7.600232779751463e-05 3.8001163898757316e-05 1.9000581949378658e-05 9.500290974689329e-06 --repeats 32 --shots 4096 --seed 58 --basis-gates cz,id,rx,rz,sx,x --eligibility-snapshot tests/fixtures/calibration/ibm_fez_20260513T121322Z_with_gates.json --output docs/evidence/resolution-measurement/resolution-2026-10-21-spread-ladder.tsv
+```
+
+### Observed
+
+- **Counts mode: no cell resolves at any rung.** All 28 counts cells fail, so the
+  protocol verdict `not resolved on ladder` no longer rests on the QFT `1 - R²` cell
+  alone. The closest cell is GHZ Hellinger at `8 s_gamma`: between-model mean
+  `0.021947`, threshold `0.034789`. At 4096 shots, counts mode does not separate two
+  engines whose `gamma` differs by up to eight times the device's own cross-qubit spread.
+- **Density-matrix mode: every rung resolves**, down to `s_gamma / 8 = 9.500290974689329e-06`,
+  where `1 - F` is `2.2573045155294125e-07` (QFT) and `1.1535033328513578e-07` (GHZ), three
+  orders of magnitude above the `1e-10` floor. The smallest tested rung is again the
+  ladder's floor, not the instrument's: `<= 9.5e-06 tested, ladder-limited`. No value
+  below the ladder is inferred.
+- **Analytic check.** Fidelity is stationary at `delta = 0`, so `1 - F` should scale as
+  `delta^2` for small `delta`. Halving `delta` divides the QFT discrepancy by `3.31`,
+  `3.55`, `3.73`, `3.85`, `3.92`, `3.96` down the ladder, converging to `4`; GHZ behaves the
+  same way.
+
+These are laptop figures, provisional until Burak's next batched desktop record. Their NC
+ids are taken at merge time.
