@@ -424,5 +424,17 @@ Everything above is left as written. The merge-time list is now resolved or move
 reference's skip rules follow ADR-027; the FR-7 rerun against the measured target spread
 is committed; the ADR-016 note and the `docs/team.md` row are added; and the advisor read
 now goes through the lead under the register's 2026-10-03 reshape. Decision 3's `rz`
-asymmetry is closed on `main` by ADR-028. The details, measurements and verification are
-in `docs/implementations/2026-10-21-benchmark-certification-merge-and-rerun.md`.
+asymmetry is closed on `main` by ADR-028.
+
+Three statements in "Physics reference and provenance" above no longer hold:
+
+- Non-positive T1/T2 no longer raises: the qubit is skipped as `nonpositive`.
+- A missing or negative gate length no longer raises: that gate entry installs nothing and
+  is listed in the new `ReferenceReport.skipped_gates`. A null, non-numeric or non-finite
+  length, and a wrong unit, still raise.
+- `ReferenceReport.skipped` no longer has the merged `missing_t1_t2` key. Its keys are
+  ADR-027's `t1_missing`, `t2_missing`, `nonpositive` and `t2_exceeds_2t1`, in that
+  order. A selection with no usable qubit now raises.
+
+The details, measurements and verification are in
+`docs/implementations/2026-10-21-benchmark-certification-merge-and-rerun.md`.
