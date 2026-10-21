@@ -1090,7 +1090,7 @@ before merge.
 > As of 2026-10-21, issue #58 / PR #79 re-asserts the same pins with `main`
 > @ `6cf008d` merged in. After that merge the slim fixture without
 > `properties.gates` left the engine side noise-free under ADR-028, so from
-> commit `6665921` the pins run on #57's gates-bearing fixture against an
+> commit `218475c` the pins run on #57's gates-bearing fixture against an
 > engine that installs noise. The note above's last sentence is overtaken:
 > the W1 batch was never sent, and the read is now the lead's approval under
 > the register's 2026-10-03 reshape

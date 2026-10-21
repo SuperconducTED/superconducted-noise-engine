@@ -40,7 +40,7 @@ which the 2026-09-06 implementation record lists as merge-time work.
 
 ## Implementation approach
 
-**Merge first, unchanged.** Commit `dc00259` is conflict resolution only, so a reviewer
+**Merge first, unchanged.** Commit `a56a088` is conflict resolution only, so a reviewer
 can diff it against Mert's proposed resolution and see nothing else. Every behavioural
 fix follows in its own commit.
 

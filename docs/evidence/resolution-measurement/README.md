@@ -116,7 +116,7 @@ and the conservative all-cells quantifier.
 
 ### Provenance
 
-- Generator and evidence commit: `eba93cf2432e97cc23c446adf4acbcbf63ba357d` (script, tests
+- Generator and evidence commit: `481396b1180e098285b92ff00c93108b3ebb9ead` (script, tests
   and TSV land together; the script at that commit is the generator).
 - Merged tree: `main` @ `6cf008d` into this branch.
 - Software: Python 3.12.10, Qiskit 2.4.1, Qiskit Aer 0.17.2, NumPy 2.4.4, SciPy 1.17.1,
