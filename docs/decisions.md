@@ -1733,7 +1733,7 @@ recorded mechanism of its own. NC-028 is cited above for the split rule.
 
 > Advisor decision · 2026-10-13 · D1, D3 and D4 accepted by @mertefesensoy
 > under Dr. Akba's fuzzy-engine delegation, announced on Issue #57 (comment
-> 6140571135, decision C). Recorded on 2026-10-21 in
+> 6140571135, decision C and step 3). Recorded on 2026-10-21 in
 > `docs/advisor/2026-09-03-decisions-from-akba.md` as the item 1 entry, after
 > the delegation entry it rests on, and posted first on Issue #84 (comment
 > 6312713600). D2 was withdrawn from the ask (register item 1b). The Status
