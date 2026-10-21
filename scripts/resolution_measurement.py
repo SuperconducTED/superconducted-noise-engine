@@ -6,6 +6,13 @@ fuzzy inference pipeline: :class:`PostGateFuzzification` installs channels
 projected by :class:`KrausChannelProjector` on one circuit transpiled to an
 explicit basis.  The same compiled circuit is then used for both models.
 
+By default the channel goes on every single-qubit instruction, the
+2026-09-06 protocol.  Given ``--eligibility-snapshot``, it goes only on the
+``(gate, qubits)`` pairs ADR-028's shipped
+:class:`CalibrationGateEligibilityPolicy` admits for that snapshot, which is
+what ``FuzzyNoiseModel.prepare`` installs since PR #96: zero-length virtual
+``rz`` then carries no channel.
+
 Counts mode measures Hellinger distance and ``1 - R^2``.  The latter is a
 discrepancy (zero for identical samples), which is the orientation required
 by the issue's "larger than the noise floor" rule.  Density-matrix mode
@@ -23,11 +30,13 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import math
 import time
 from collections import Counter
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, fields
+from datetime import datetime
 from pathlib import Path
 from typing import Literal, cast
 
@@ -43,10 +52,12 @@ from superconducted.benchmarks.circuits import ghz_state_circuit, qft_circuit
 from superconducted.benchmarks.metrics import HellingerDistance, R2Score, StateFidelity
 from superconducted.channels.kraus import KrausChannelProjector, NoOpNormalization
 from superconducted.fuzzy.fuzzification import PostGateFuzzification
+from superconducted.integration.aer_factory import CalibrationGateEligibilityPolicy
 from superconducted.interfaces import BenchmarkMetric
-from superconducted.types import SimulationResult
+from superconducted.types import CalibrationSnapshot, SimulationResult
 
 Mode = Literal["counts", "density_matrix"]
+EligibleOperations = frozenset[tuple[str, tuple[int, ...]]]
 
 _TRANSPILE_OPTIMIZATION_LEVEL = 1
 _TRANSPILE_SEED = 0
@@ -149,12 +160,15 @@ def _controlled_model(
     gamma: float,
     lam: float,
     basis: tuple[str, ...],
+    eligible: EligibleOperations | None,
 ) -> tuple[QuantumCircuit, NoiseModel]:
     projector = KrausChannelProjector(NoOpNormalization())
     params = np.asarray([gamma, lam], dtype=np.float64)
 
     def provider(gate: Instruction, qubits: tuple[int, ...]) -> QuantumError | None:
         if len(qubits) != 1:
+            return None
+        if eligible is not None and (gate.name, qubits) not in eligible:
             return None
         return projector.project(params, gate.name, qubits)
 
@@ -228,9 +242,12 @@ def _counts_rows(
     shots: int,
     seed: int,
     basis: tuple[str, ...],
+    eligible: EligibleOperations | None,
 ) -> list[ResolutionRow]:
     simulator = AerSimulator()
-    prepared_a, model_a = _controlled_model(circuit, gamma=gamma, lam=lam, basis=basis)
+    prepared_a, model_a = _controlled_model(
+        circuit, gamma=gamma, lam=lam, basis=basis, eligible=eligible
+    )
     sample_a: list[SimulationResult] = []
     independent_a: list[SimulationResult] = []
     for repeat in range(repeats):
@@ -275,6 +292,7 @@ def _counts_rows(
             gamma=gamma + delta,
             lam=lam,
             basis=basis,
+            eligible=eligible,
         )
         if prepared_a != prepared_b:
             raise RuntimeError(
@@ -328,6 +346,7 @@ def _density_rows(
     lam: float,
     deltas: tuple[float, ...],
     basis: tuple[str, ...],
+    eligible: EligibleOperations | None,
 ) -> list[ResolutionRow]:
     simulator = AerSimulator(method="density_matrix")
     circuit_without_measurements = circuit.remove_final_measurements(inplace=False)
@@ -336,6 +355,7 @@ def _density_rows(
         gamma=gamma,
         lam=lam,
         basis=basis,
+        eligible=eligible,
     )
     state_a = _density_result(simulator, prepared_a, model_a, label="A")
     metric = StateFidelity()
@@ -346,6 +366,7 @@ def _density_rows(
             gamma=gamma + delta,
             lam=lam,
             basis=basis,
+            eligible=eligible,
         )
         if prepared_a != prepared_b:
             raise RuntimeError(
@@ -387,17 +408,23 @@ def measure_resolution(
     shots: int,
     seed: int,
     basis_gates: Sequence[str],
+    eligible_operations: EligibleOperations | None = None,
 ) -> MeasurementResult:
     """Run the two-circuit controlled experiment and return all TSV rows.
 
     ``repeats`` is the number of independent counts pairs and must be at
     least two because the threshold uses the baseline's sample standard
-    deviation (``ddof=1``).  The public inputs are validated without
+    deviation (``ddof=1``).  ``eligible_operations``, when given, restricts
+    the channel to those ``(gate, qubits)`` pairs (see
+    :func:`eligible_operations_from_snapshot`); ``None`` noises every
+    single-qubit instruction.  The public inputs are validated without
     clipping.  The function performs local Aer simulations only and has no
     filesystem or network side effects.
     """
     checked_gamma, checked_lam, checked_deltas = _checked_inputs(gamma, lam, deltas, repeats, shots)
     basis = _checked_basis(basis_gates)
+    if eligible_operations is not None and not eligible_operations:
+        raise ValueError("eligible_operations is empty, so neither model would install noise")
     circuits = (qft_circuit(3), ghz_state_circuit(3))
     start = time.perf_counter()
     rows: list[ResolutionRow] = []
@@ -419,6 +446,7 @@ def measure_resolution(
                 shots=shots,
                 seed=seed,
                 basis=basis,
+                eligible=eligible_operations,
             )
         )
         rows.extend(
@@ -428,9 +456,31 @@ def measure_resolution(
                 lam=checked_lam,
                 deltas=checked_deltas,
                 basis=basis,
+                eligible=eligible_operations,
             )
         )
     return MeasurementResult(rows=tuple(rows), elapsed_seconds=time.perf_counter() - start)
+
+
+def eligible_operations_from_snapshot(path: Path) -> EligibleOperations:
+    """Return ADR-028's eligible ``(gate, qubits)`` pairs for a snapshot JSON file.
+
+    Reads an archive-shaped snapshot (``backend``, ``timestamp``,
+    ``schema_version``, ``properties``) and applies the shipped
+    :class:`CalibrationGateEligibilityPolicy`, so the controlled model noises
+    exactly the operations the engine would.  Read-only; raises on a corrupt
+    gate-length record as the policy does.
+    """
+    data = json.loads(path.read_text(encoding="utf-8"))
+    snapshot = CalibrationSnapshot(
+        backend=str(data["backend"]),
+        timestamp=datetime.fromisoformat(str(data["timestamp"]).replace("Z", "+00:00")),
+        schema_version=str(data["schema_version"]),
+        properties=data["properties"],
+        target=data.get("target"),
+        configuration=data.get("configuration"),
+    )
+    return CalibrationGateEligibilityPolicy().eligible_operations(snapshot)
 
 
 def smallest_resolved_delta(rows: Sequence[ResolutionRow], mode: Mode) -> float | None:
@@ -500,6 +550,15 @@ def _parser() -> argparse.ArgumentParser:
         required=True,
         help="comma-separated explicit device basis",
     )
+    parser.add_argument(
+        "--eligibility-snapshot",
+        type=Path,
+        default=None,
+        help=(
+            "snapshot JSON whose ADR-028 gate eligibility the controlled model follows; "
+            "omit to noise every single-qubit instruction (the 2026-09-06 protocol)"
+        ),
+    )
     parser.add_argument("--output", type=Path, required=True, help="TSV output path")
     return parser
 
@@ -508,6 +567,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Parse CLI arguments, run the measurement, write its TSV, and summarize."""
     args = _parser().parse_args(argv)
     basis = tuple(name.strip() for name in args.basis_gates.split(","))
+    eligible = (
+        None
+        if args.eligibility_snapshot is None
+        else eligible_operations_from_snapshot(args.eligibility_snapshot)
+    )
     result = measure_resolution(
         gamma=args.gamma,
         lam=args.lam,
@@ -516,8 +580,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         shots=args.shots,
         seed=args.seed,
         basis_gates=basis,
+        eligible_operations=eligible,
     )
     write_tsv(args.output, result.rows)
+    if eligible is None:
+        print("eligibility: every single-qubit instruction")
+    else:
+        names = sorted({name for name, _qubits in eligible})
+        print(f"eligibility: ADR-028 policy, {len(eligible)} operations over {names}")
     for mode in ("counts", "density_matrix"):
         resolved = smallest_resolved_delta(result.rows, mode)
         conclusion = "not resolved on ladder" if resolved is None else format(resolved, ".17g")

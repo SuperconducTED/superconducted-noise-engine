@@ -8,13 +8,17 @@ from dataclasses import replace
 from pathlib import Path
 
 import pytest
+from qiskit import transpile
 from scripts.resolution_measurement import (
     ResolutionRow,
+    _controlled_model,
+    eligible_operations_from_snapshot,
     measure_resolution,
     smallest_resolved_delta,
     write_tsv,
 )
 
+from superconducted.benchmarks.circuits import ghz_state_circuit
 from superconducted.benchmarks.metrics import R2Score
 from superconducted.types import SimulationResult
 
@@ -93,35 +97,52 @@ def test_protocol_threshold_rejects_missing_mode() -> None:
         smallest_resolved_delta([], "density_matrix")
 
 
-@pytest.mark.slow
-def test_measurement_regenerates_committed_tsv(tmp_path: Path) -> None:
-    """Regeneration obeys NFR-1's exact/local and 1e-12/cross-machine contracts."""
-    kwargs = {
-        "gamma": 0.00017266737044123665,
-        "lam": 0.0006630210259092216,
-        "deltas": [0.1, 0.01, 0.001, 0.0001],
-        "repeats": 32,
-        "shots": 4096,
-        "seed": 58,
-        "basis_gates": ["cz", "id", "rx", "rz", "sx", "x"],
-    }
-    result = measure_resolution(**kwargs)
+EVIDENCE = Path(__file__).parents[1] / "docs" / "evidence" / "resolution-measurement"
+FIXTURE = (
+    Path(__file__).parent / "fixtures" / "calibration" / "ibm_fez_20260513T121322Z_with_gates.json"
+)
+# ddof=1 spread of the fixture's per-qubit sx gamma target over its 155 usable
+# qubits; the 2026-10-21 ladder is this value times 8, 4, 2, 1, 1/2, 1/4, 1/8.
+S_GAMMA = 7.600232779751463e-05
 
-    assert len(result.rows) == 24
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    ("tsv_name", "deltas", "eligible"),
+    [
+        ("resolution.tsv", [0.1, 0.01, 0.001, 0.0001], False),
+        (
+            "resolution-2026-10-21-spread-ladder.tsv",
+            [S_GAMMA * k for k in (8, 4, 2, 1, 0.5, 0.25, 0.125)],
+            True,
+        ),
+    ],
+    ids=("2026-09-06-placeholder", "2026-10-21-spread-ladder"),
+)
+def test_measurement_regenerates_committed_tsv(
+    tsv_name: str, deltas: list[float], eligible: bool, tmp_path: Path
+) -> None:
+    """Regeneration obeys NFR-1's exact/local and 1e-12/cross-machine contracts."""
+    result = measure_resolution(
+        gamma=0.00017266737044123665,
+        lam=0.0006630210259092216,
+        deltas=deltas,
+        repeats=32,
+        shots=4096,
+        seed=58,
+        basis_gates=["cz", "id", "rx", "rz", "sx", "x"],
+        eligible_operations=eligible_operations_from_snapshot(FIXTURE) if eligible else None,
+    )
+
+    assert len(result.rows) == 6 * len(deltas)
     assert {row.circuit for row in result.rows} == {"qft_n3", "ghz_n3"}
     assert {row.metric for row in result.rows} == {
         "hellinger",
         "one_minus_r2",
         "one_minus_state_fidelity",
     }
-    regenerated = tmp_path / "resolution.tsv"
-    committed = (
-        Path(__file__).parents[1]
-        / "docs"
-        / "evidence"
-        / "resolution-measurement"
-        / "resolution.tsv"
-    )
+    regenerated = tmp_path / tsv_name
+    committed = EVIDENCE / tsv_name
     write_tsv(regenerated, result.rows)
 
     # Serialization of one set of rows is byte-stable on the same machine.
@@ -160,3 +181,50 @@ def test_measurement_regenerates_committed_tsv(tmp_path: Path) -> None:
             else:
                 # Protocol, inputs, provenance, ordering, and verdict stay exact.
                 assert regenerated_row[field] == committed_row[field]
+
+
+def test_engine_true_eligibility_leaves_virtual_rz_noise_free() -> None:
+    """With ADR-028 eligibility the controlled model noises what the engine does.
+
+    The 2026-09-06 protocol (no eligibility) also damps the zero-length virtual
+    ``rz``; the engine has not since PR #96, which is why the 2026-10-21 run
+    passes the fixture's policy.
+    """
+    compiled = transpile(
+        ghz_state_circuit(3),
+        basis_gates=["cz", "id", "rx", "rz", "sx", "x"],
+        optimization_level=1,
+        seed_transpiler=0,
+    )
+    assert "rz" in compiled.count_ops()
+    eligible = eligible_operations_from_snapshot(FIXTURE)
+    assert {name for name, _qubits in eligible} == {"id", "rx", "sx", "x"}
+
+    _, every = _controlled_model(
+        compiled, gamma=1e-3, lam=1e-3, basis=("cz", "id", "rx", "rz", "sx", "x"), eligible=None
+    )
+    _, engine_true = _controlled_model(
+        compiled,
+        gamma=1e-3,
+        lam=1e-3,
+        basis=("cz", "id", "rx", "rz", "sx", "x"),
+        eligible=eligible,
+    )
+
+    assert "rz" in every.noise_instructions
+    assert "rz" not in engine_true.noise_instructions
+    assert set(engine_true.noise_instructions) == set(every.noise_instructions) - {"rz"}
+
+
+def test_empty_eligibility_is_rejected() -> None:
+    with pytest.raises(ValueError, match="eligible_operations is empty"):
+        measure_resolution(
+            gamma=0.1,
+            lam=0.1,
+            deltas=[0.01],
+            repeats=2,
+            shots=8,
+            seed=1,
+            basis_gates=["sx"],
+            eligible_operations=frozenset(),
+        )
