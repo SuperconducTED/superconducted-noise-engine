@@ -208,6 +208,125 @@ What the 32 tests establish:
 
 New tests for NC-021: +32 at this commit, counted differentially (#61 NFR-7).
 
+## Addendum, commit 2 (2026-10-21): the sweep (FR-3, FR-4)
+
+The sections above describe commit 1 and are left as written. This addendum covers the
+second commit on the same branch: the measurement code. No measured figure is reported
+here; the laptop run and its comparison with #84 File 02 come next, and the registered
+figures come from the committed TSV.
+
+### What changed
+
+| File | One-sentence description |
+| --- | --- |
+| `scripts/type_reduction_discrepancy.py` | Adds the FR-3 sweep: survey loading, the domain box, the grids, both consequent conventions, the point sets, per-cell summaries, the TSV writer and the `python -m scripts.type_reduction_discrepancy` CLI. |
+| `tests/test_type_reduction.py` | Adds 14 tests, for 46 in total. They cover NC-041 and NC-042 reproduced from the survey, grid geometry, consequent structure, the lattice and degenerate-footprint limits on the grid, argument parsing, byte-identical reruns, the provenance header, the sweep invariants, and a mutation check on the summary counters. |
+| `docs/implementations/2026-10-21-type-reduction-reference.md` | This addendum. |
+
+### Implementation approach
+
+```bash
+python -m scripts.type_reduction_discrepancy \
+    --range-source survey:docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv \
+    --footprint 0.1 --footprint 0.3 --footprint 0.6 --footprint g59 \
+    --points 2000 --seed 84 --out <tsv>
+```
+
+- **Units.** Archive units throughout: `mean_T1` and `mean_T2` in microseconds,
+  `mean_readout_error` dimensionless. These are the survey's units, and the units of
+  `fuzzy.parameterization`'s quantile layouts and of `feature_target_fn(...,
+  coherence_unit="us")`. #61's section 2 and NFR-9 still name `BasicCalibrationVectorizer`
+  as the source of microseconds; since #66 that is out of date, because the vectorizer
+  emits SI seconds.
+- **Box.** Per-feature `[p1, p99]`, computed with `DOMAIN_LO_QUANTILE`,
+  `DOMAIN_HI_QUANTILE` and `QUANTILE_METHOD` from `fuzzy.parameterization`. A test
+  reproduces NC-041's six bounds to their registered digits.
+- **Grids** (#61 decision 2 as proposed; @BahaJarad has not yet agreed to it):
+  - `w=<ratio>` places `IntervalGaussianMF(c, s(1 - w), s(1 + w))` on the centers and
+    widths of `grid_partition(GaussianMF, ..., k=3)`. This is section 6.2's symmetric
+    geometry.
+  - `G59-assumed` is `grid_partition(IntervalGaussianMF, ..., k=3, qubit_spread=s_i)`,
+    where the lower MF is the T1 Gaussian and `s_high = sqrt(s_low^2 + s_i^2)`.
+- **The `s_i` assumption.** `s_i` is the median of the survey's `<feature>_qubit_std`
+  column, which is NC-042's statistic; a test reproduces NC-042's three values. This is an
+  **assumption**: #84 File 02 called this grid "#59's shipped footprint" without stating
+  its `qubit_spread`, and no production caller passes one. On the #61 owner's instruction
+  (2026-10-21), the grid is labelled `G59-assumed` and the TSV header carries a
+  `g59_qubit_spread: ASSUMED, pending confirmation by @mertefesensoy` line until Mert
+  confirms what File 02 used.
+- **Conventions.**
+  - `unit-spread`: zero-order, rule `r` gets bias `r/26`, one output.
+  - `anchored`: `anchored_rule_base` with `feature_target_fn(t_seconds=24e-9,
+    coherence_unit="us")` at the quantile anchors (NC-035's `sx` length), with outputs
+    `gamma` and `lambda`.
+- **Point sets.**
+  - `lattice`: the 27 anchor triples.
+  - `uniform`: `--points` draws in the box from `default_rng(seed)`.
+  - `survey`: the 975 survey rows.
+  - `pooled`: all of them.
+- **Firing.** Each point is evaluated by the library's own `TSKRuleBase.evaluate`, so the
+  firing bounds are exactly what the engine computes.
+- **Per cell** (grid, convention, output, point set, reducer), the TSV records:
+  - the number of points, skipped points (zero lower sum), degenerate bands and bracket
+    violations;
+  - max, mean, median and p90 of `D`, `Dc` and `Db`;
+  - KM pass counts, guard stops, and the largest gap between the iterative and exhaustive
+    routes.
+
+### Mathematical / statistical details
+
+- **The three distances.**
+  - `D = |y - m|`, where `m = (y_l + y_r)/2` comes from the Karnik-Mendel endpoints.
+  - `Dc = D / (max_r c_r - min_r c_r)`, #61 FR-3's scale-free form. It is invariant under
+    `c -> a c + b`.
+  - `Db = D / (y_r - y_l)`, #84 File 02's pre-registered score. Because both reducers lie
+    inside the band, it lies in `[0, 1/2]`.
+- **Zero-width bands.** Where the band width is within rounding (`<= 64 R eps max|c|`),
+  `Db` is set to 0 and the point is counted in `n_degenerate_band`, instead of dividing by
+  rounding noise.
+- **The 1/2 cap on `Db`.** Above that threshold, `Db` is clipped at `1/2`. On a band only
+  slightly wider than the tolerance, a reducer one ulp outside it would otherwise score
+  `1/2 + ulp/width`. A real excursion is still counted in `n_bracket_violations`.
+- **Bracket violations.** A reducer value outside `[y_l - tol, y_r + tol]` counts as a
+  violation. By the sandwich property the count must be zero, so a non-zero count is a
+  defect, not a finding.
+- **Statistics.** Median and p90 use numpy's linear interpolation. A sample maximum is a
+  maximum over the sampled points, not a supremum over the box.
+
+### Design decisions
+
+- **`fixture-box` is not implemented.** It raises `NotImplementedError`, which is a
+  deviation from FR-3's text. That source was #61's stand-in for before the
+  feature-distribution survey existed. It supplies no samples for the quantile grids, no
+  per-qubit spreads for `G59`, and no survey point set, so it would need a second,
+  differently placed grid family that nothing else in the repository uses. The deviation
+  is put to the #61 owner rather than decided here. Any other unknown range source still
+  raises `ValueError` (FR-3).
+- **Firing evaluated once per convention.** Each rule base is evaluated on its own,
+  instead of reusing one convention's firing for the other. This costs about twice the
+  time (a few seconds per grid), and the measured path stays the library's own.
+- **`# key: value` provenance lines above the column row.** FR-3 needs the commit, range
+  source, units, grids, seed and conventions in the file itself. Readers skip lines
+  starting with `#`. Floats are written with Python's shortest round-trip `repr`.
+- **Determinism scope.** Two runs give byte-identical output on the same machine and
+  commit; a test checks this. Across machines the last bits of a dot product can differ
+  with the BLAS build, which the canonical run on Burak's desktop will show.
+- **The commit field.** It reads `+dirty` when tracked files differ from `HEAD`, so a TSV
+  produced from uncommitted code cannot pass as produced from the commit.
+
+### Verification
+
+```bash
+PYTHONPATH=src C:/pvci/Scripts/python.exe -m pytest tests/test_type_reduction.py -v
+C:/pvci/Scripts/python.exe -m ruff check .
+C:/pvci/Scripts/python.exe -m ruff format --check .
+PYTHONPATH=src C:/pvci/Scripts/python.exe -m mypy
+```
+
+Results at this commit (laptop, provisional): 46 passed in `tests/test_type_reduction.py`
+(+14 for NC-021); ruff check and format clean; `mypy --strict` clean. Full suite
+(`pytest -q`): 905 passed in 191 s, which is `main`'s 859 plus the 46 tests in this file.
+
 ## Related docs
 
 - Issue #61 (Part A, FR-1, FR-2, section 6.3), #84 File 02 section 2.4 (comment
