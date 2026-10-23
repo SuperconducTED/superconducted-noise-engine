@@ -108,7 +108,7 @@ longer record changes the answer.
 
 **Provenance.** Script `measure_predictability.py` (this folder), pinned interpreter
 `C:\pvci` (numpy 2.4.4; only numpy beyond the project's code), `PYTHONPATH=src:.`
-(Windows `;`) from the repository root. Outputs `results.tsv`, `summary.json`.
+(Windows `;`) from the repository root. Outputs `results.tsv`, `rows.tsv`, `summary.json`.
 
 ### 2.1 Amended before the run, 2026-10-23 (no number existed yet)
 
@@ -152,7 +152,7 @@ before the script produced anything.
 
 Also fixed before the run: the common-mode regression leaves the qubit out of the chip mean it
 is regressed on; the test rows (state time, qubit, as-of time, `D_H`, change flag, per
-component) are written to `rows.tsv` so a later model is scored on identical, citable rows;
+component) are written to `rows.tsv` (committed as `rows.tsv.gz`) so a later model is scored on identical, citable rows;
 the effective training window is printed, since `level`, `log_age` and `last_inc` need
 history and the first weeks drop out; the archive walk and as-of lookup are imported from
 `../persistence-band/measure_persistence_band.py`, so there is one definition of each.
@@ -161,7 +161,7 @@ history and the first weeks drop out; the archive walk and as-of lookup are impo
 
 Produced by `measure_predictability.py` at commit `261d9df3` of this branch, run 2026-10-23
 on Mert's laptop with `C:\pvci` (Python 3.12.10, numpy 2.4.4) against `calibration-data` @
-`5828b4a2`. Every figure is in `results.tsv`; the test rows (193,754) are in `rows.tsv`.
+`5828b4a2`. Every figure is in `results.tsv`; the test rows (193,754) are in `rows.tsv.gz` (the script writes `rows.tsv`; it is committed gzip-compressed, SHA-256 in `summary.json`).
 **Laptop, provisional.** Checks passed: 924 states equal to the state index; the zero-width
 band covers exactly 0.0 of the `change` rows at both horizons and both components (0.168 and
 0.141 of `all` rows at 24 h). The lambda floor is 9.59e-5 and excluded 20,885 of the lambda
@@ -198,9 +198,10 @@ Conformal 80% half-widths: persistence 0.50 (gamma, 24 h), shrinkage 0.375, line
 bands are wide because the per-qubit jumps are, not because the models are poor.
 
 - **Shrinkage sits at the cap.** Shrinking 75 to 83% of the way to the qubit's own 30-day
-  level explains 43 to 45% of the variance of the next change, inside the local-level cap's
-  interval (0.34 to 0.44 train; the test period's own cap is 0.48 to 0.50). There is no
-  structure left for an own-history model to find.
+  level explains 43 to 45% of the variance of the next change: at the upper edge of the
+  training-period cap's interval (0.435) and below the test period's own cap (0.48 to 0.50),
+  which is the period the `R^2` is measured on. There is no structure left for an own-history
+  model to find.
 - **The feature set adds nothing.** The ridge's standardised coefficients are -0.17 to -0.27
   on `dev` and below 0.06 in absolute value on everything else (`last_inc`, age since the last
   re-measurement, time since chip-wide recalibration, standing relative to the chip, hour of
@@ -239,9 +240,21 @@ level-tracking band.
 ### 3.5 What this does and does not say
 
 - It says: with the features calibration history provides, the next per-qubit value is the
-  qubit's level plus independent noise of about ±37% (80%) in the target, and no model built on
-  this history, deep or otherwise, can narrow that band materially. The local-level cap is a
-  property of the series, not of a model.
+  qubit's level plus independent scatter of about 0.37 log units at 80% (about +45% and -31%
+  in the target), and no model built on this history, deep or otherwise, can narrow that band
+  materially. The local-level cap is a property of the series, not of a model.
+- **The positive reading, as a hypothesis for the next measurement.** A lag-1 autocorrelation
+  of -0.49 with `q` near 0.06 says each daily reading is a slowly moving level plus independent
+  scatter. The archive cannot tell whether that scatter is the calibration measurement's own
+  noise or genuine fast fluctuation of the qubit (the two-level-system picture of Carroll et al.
+  2021 and Burnett et al. 2019, both in the novelty check's search), and for a noise model it
+  does not need to: under either reading the quantity to put in the channel at run time is the
+  qubit's **level**, not its latest reading. `NoiseModel.from_backend`, every calibration-based
+  digital twin the novelty check found, and this engine all use the latest reading. A
+  level-tracking per-qubit channel is therefore a simple, defensible and, as far as the search
+  went, unpublished contribution that this measurement motivates directly, and the fuzzy or IT2
+  band becomes the band around that level. The test is reading-versus-level against hardware
+  counts; until it runs, this is a hypothesis, not a registered claim.
 - It does not say the deep engine can never help. The cap is a cap on own-history and
   same-time cross-sectional information. Exogenous inputs (pulse-level calibration internals,
   the environmental covariates the public dataset carries, queue and usage state) are outside
@@ -259,8 +272,10 @@ level-tracking band.
   and the observed shrinkage `R^2` of 0.44 is consistent with it.
 - `nanmean` warnings during the level computation come from early state times with no
   history; those rows are excluded by the five-state rule and do not enter any figure.
-- The lambda floor removed about a quarter of lambda qubit-rows; the lambda findings are for
-  the usable, non-boundary qubits only.
+- The lambda floor removed 20,885 file-by-qubit cells, about 6% of the roughly 351,000 in the
+  archive; in the horizon view lambda has 4% fewer fit rows than gamma (46,441 against 48,576)
+  and 10% fewer test rows (52,465 against 58,244). The lambda findings are for the usable,
+  non-boundary qubits only.
 
 ## 4. Caveats fixed in advance
 
