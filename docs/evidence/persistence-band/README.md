@@ -197,10 +197,12 @@ Three things the table says.
    20 to 40% within two months on this device, whichever way the device moves.
 2. **The rolling 30-day 10th to 90th percentile band beats the fitted persistence band on
    interval score in all four cases**, with no fitted parameter: 0.210 against 0.300 and
-   0.157 against 0.233 at 24 h, 0.207 against 0.356 and 0.154 against 0.299 at 168 h. It is
-   22% to 28% narrower at 24 h at near-nominal coverage (0.78, 0.78), and its coverage barely
-   moves from 24 h to 168 h (0.78 to 0.76, 0.78 to 0.80), while the persistence band has to
-   widen by two thirds to hold a week. The device's snapshot mean behaves like fluctuation
+   0.157 against 0.233 at 24 h, 0.207 against 0.356 and 0.154 against 0.299 at 168 h. At
+   24 h it is 22% narrower for gamma (0.163 against 0.210) and 49% narrower for lambda
+   (0.116 against 0.228) at near-nominal coverage (0.78, 0.78); at 168 h, 53% and 60%. Its
+   coverage barely moves from 24 h to 168 h (0.78 to 0.76, 0.78 to 0.80), while the
+   persistence scale has to grow by two thirds for gamma (0.105 to 0.175) and by a third for
+   lambda (0.114 to 0.150) to hold a week. The device's snapshot mean behaves like fluctuation
    around a slowly moving level, not like a random walk from the last value, and a band
    centred on the recent range exploits that while a band centred on the last value cannot.
 3. **The bar for the fuzzy band is therefore the rolling 30-day percentile band**, not the
@@ -223,9 +225,11 @@ Per-bin 80th percentiles of `|d|` on training `change` rows, with 90% bootstrap 
 - **Only the level of the target carries information about drift.** Hour of day and time
   since the last chip-wide recalibration give oracle width ratios within 4% of 1 everywhere:
   nothing to find. The `level` binning shows the same shape in all four cases: the middle
-  tercile drifts about half as much as the outer terciles, and the bootstrap intervals of the
-  middle bin do not overlap the outer bins at 24 h. That is mean reversion in the snapshot
-  mean, the same fact behind the rolling band's win in 3.1.
+  tercile drifts about half as much as the outer terciles. For gamma at 24 h the middle
+  bin's bootstrap interval (0.061 to 0.070) is disjoint from both outer bins (0.106 and
+  above); for lambda the low bin's interval (0.084 to 0.124) overlaps the middle's (0.084 to
+  0.100), so the effect is established for gamma and suggestive for lambda. That is mean
+  reversion in the snapshot mean, the same fact behind the rolling band's win in 3.1.
 - **The bound is small.** Even an oracle that knows the test period's per-level scales gains
   14% width for gamma and 11% for lambda at 24 h, 2% and 7% at 168 h, at equal coverage.
   Against the pre-registered 10% threshold the 24 h `level` binning crosses it and nothing
@@ -257,11 +261,14 @@ Test states from 2026-09-01, all usable qubits; `r*` is the 24 h persistence `r`
 | lambda | stale per-qubit, 168 h | 0.198 | **6.7e-5** | 0.336 | 59,319 |
 
 - **A per-qubit channel a week stale beats a fresh chip-uniform one, for both components and
-  on every metric.** For gamma the fresh homogeneous model's median relative error is 26.6%
-  against 23.2% for a value 168 hours old; it places 21.7% of qubits inside the ±10.5% band
-  against 24.3%. For lambda the gap is a factor of six to seven in target units (4.4e-4
-  against 6.7e-5) and the homogeneous band holds 5% of qubits. **No staleness in the grid
-  reaches the crossover**; the gap narrows from 1 h to 24 h and is flat from 48 h to 168 h.
+  on every metric, but the margins differ by an order of magnitude.** For gamma the fresh
+  homogeneous model's median relative error is 26.6% against 23.2% for a value 168 hours
+  old, and it places 21.7% of qubits inside the ±10.5% band against 24.3%: a margin of 3.4
+  and 2.6 points, real on 60,000 rows but small. For lambda the gap is a factor of six to
+  seven in target units (4.4e-4 against 6.7e-5) and the homogeneous band holds 5.1% of
+  qubits against 33.6%: decisive. **No staleness in the grid reaches the crossover**; the
+  gap narrows from 1 h to 24 h and is flat from 48 h to 168 h. The article should lead with
+  lambda and with the band fraction; the gamma margin alone could be read as noise.
 - **Per-qubit re-measurement jumps are large.** On `moved` rows (the qubit's own value
   changed within `D`) the stale model's median relative error is 23.3% for gamma at every
   `D` from 1 h to 168 h: when a qubit's $T_1$ is re-measured, its gamma moves by about a
@@ -317,3 +324,45 @@ not noise.
 
 Issue #64 FR-9 and NFR-8 as amended by #84 comment 5970300012 (Q3c); Issue #104; ADR-013,
 ADR-016, ADR-027; NC-012, NC-041, NC-069; `docs/roadmap/2026-10-23-issue-64-pr-a-plan.md` §4.
+
+## 7. Appendix: the derivations behind the estimands
+
+Written for the reviewer who re-derives every figure. Notation as in §2.
+
+**D1, the fitted scale.** "Smallest `r` with training coverage `>= 0.80`" is the order
+statistic of `|d|` at rank `ceil(0.8 n)`, which `numpy.quantile(..., method="inverted_cdf")`
+returns. With `method="higher"` the returned value is the next order statistic up whenever
+`0.8 n` is not an integer, a training coverage of `(ceil(0.8 n) + 1) / n`.
+
+**D2, the interval score of a symmetric relative band.** With `l = y(1 - r)`, `u = y(1 + r)`
+and realisation `y' = y(1 + d)`: `(u - l) / y = 2r`; `(l - y') / y = -r - d` when `d < -r`;
+`(y' - u) / y = d - r` when `d > r`. Hence
+`S(r; d) = 2r + (2 / alpha) max(0, -r - d) + (2 / alpha) max(0, d - r)`. Proper for the
+central `(1 - alpha)` interval (Gneiting and Raftery 2007, Theorem 2), so a band fitted to
+80% and scored at `alpha = 0.2` is scored at its own nominal level. For unequal relative
+half-widths (the rolling band) the same with `r_lo` and `r_hi`. Checks: `r -> infinity` gives
+`2r` (no penalty); `r = 0` gives `(2 / alpha) |d|`.
+
+**D3, why `all` rows score a zero-width band at the repeat rate.** On `all` rows the coverage
+of `r = 0` is the fraction of pairs with `d = 0`, the probability that no usable qubit's `T1`
+or `T2` was re-measured inside the horizon. On `change` rows it is 0 by definition; the script
+stops if it is not. Measured: 0.135 at 24 h, 0.0 at 168 h.
+
+**D4, the oracle is a lower bound on the width ratio.** For a binning `b(t)` and per-bin
+scales `r_b` fitted on the test rows themselves to 80%, the row-weighted mean width
+`sum_b n_b 2 r_b / n` is the narrowest a band constant within bins can be while covering 80%
+in every bin (D1 per bin). A band varying only through `b(t)` that reaches 80% overall is at
+least as wide as the best reallocation across bins, which can be narrower than the
+per-bin-80% band only by lowering coverage in some bins. So against the constant oracle on the
+same rows, `width_oracle_conditional / width_oracle_constant` bounds from below the width
+ratio any such band achieves at equal coverage. In the run every oracle ratio was at most
+1.04, the excess being per-bin rank rounding on small bins.
+
+**D5, relative error on lambda is a denominator artefact.** `lambda_q -> 0` as
+`T2_q -> 2 T1_q` from below, a boundary ADR-027 admits as usable, so `|yhat / lambda_q - 1|`
+is unbounded on that tail while `|yhat - lambda_q|` is bounded. Both are reported; lambda is
+cited in target units.
+
+**Cross-check.** File 03 M3 (whole archive, no split, 24 h gamma) gave ±11.2% at 80%; the
+training-period fit here is 0.1049 with a 90% interval reaching 0.1119: the same size, the
+difference being the split and the change-row definition.
