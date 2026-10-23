@@ -436,5 +436,16 @@ Three statements in "Physics reference and provenance" above no longer hold:
   ADR-027's `t1_missing`, `t2_missing`, `nonpositive` and `t2_exceeds_2t1`, in that
   order. A selection with no usable qubit now raises.
 
+Two more statements above were corrected in the 2026-10-23 review round (Burak's #79
+review):
+
+- "This ordering is materially tested on one qubit" stopped holding once ADR-028 merged:
+  the default eligibility policy never admits `save_density_matrix`, so the pin passed
+  whatever the order. The test now admits that instruction explicitly, and a
+  save-before-`prepare()` mutant fails it.
+- The LOCKED-file check under Verification uses base `7d39a2b`, which fails on the merged
+  tree because `main` changed three of those files. The branch's own changes are checked
+  with `git diff --exit-code origin/main...HEAD -- <the same five paths>`.
+
 The details, measurements and verification are in
 `docs/implementations/2026-10-21-benchmark-certification-merge-and-rerun.md`.

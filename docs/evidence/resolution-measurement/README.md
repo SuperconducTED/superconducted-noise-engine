@@ -93,22 +93,26 @@ Two inputs changed, both chosen by @bengisucvd on 2026-10-21 before the run:
   `s_gamma = 7.600232779751463e-05` is the sample standard deviation (`ddof=1`) of the
   per-qubit `sx` target `gamma_q = 1 - exp(-t_q / T1_q)` over the 155 usable qubits of
   `tests/fixtures/calibration/ibm_fez_20260513T121322Z_with_gates.json` (NC-038; q72
-  skipped as `t1_missing`). It is the target-space counterpart of #59 decision 3's
-  within-device spread `s_q`. Multiplying by a power of two is exact in binary floating
-  point, so the seven rungs are exact multiples.
+  skipped as `t1_missing`). It is one snapshot's cross-qubit spread of the target, not
+  #59's survey statistic: #59 decision 3's `s_q` is a within-snapshot spread of the
+  features (`T1`, `T2`, readout error), summarised over the archive as NC-042, and
+  nothing here is drawn from that survey. Multiplying by a power of two is exact in
+  binary floating point, so the seven rungs are exact multiples.
 - **Eligibility.** The controlled model follows ADR-028: `--eligibility-snapshot` applies
   the shipped `CalibrationGateEligibilityPolicy` to the same fixture (624 operations,
   `id`, `rx`, `sx`, `x` on all 156 qubits), so the zero-length virtual `rz` carries no
   channel, exactly as in `FuzzyNoiseModel.prepare` since PR #96. The 2026-09-06 run
   noised `rz` too. At `delta = s_gamma` this changes the density discrepancy from
   `1.492e-05` to `1.349e-05` (QFT) and from `1.619e-05` to `6.545e-06` (GHZ), so the two
-  runs are not directly comparable cell by cell. Those four figures are in neither TSV;
-  they come from the density rows of
+  runs are not directly comparable cell by cell. The two ADR-028 figures are this run's
+  own `delta = s_gamma` rung in `resolution-2026-10-21-spread-ladder.tsv`. The two
+  every-instruction figures are in neither TSV; they come from the density rows of
   `measure_resolution(gamma=0.00017266737044123665, lam=0.0006630210259092216,
   deltas=[7.600232779751463e-05], repeats=2, shots=64, seed=58,
-  basis_gates=["cz", "id", "rx", "rz", "sx", "x"], eligible_operations=E)` with `E = None`
-  and with `E = eligible_operations_from_snapshot(<the fixture>)`; density rows do not
-  depend on `repeats`, `shots` or `seed`.
+  basis_gates=["cz", "id", "rx", "rz", "sx", "x"], eligible_operations=None)`, and the
+  same call with `eligible_operations=eligible_operations_from_snapshot(<the fixture>)`
+  reproduces the ADR-028 pair; density rows do not depend on `repeats`, `shots` or
+  `seed`.
 
 Unchanged: `gamma_0`, `lambda_0` (NC-040), basis `cz,id,rx,rz,sx,x`, 32 pairs, 4096 shots,
 base seed 58 with the same seed schedule, the `1e-10` density floor, the decision rule,
@@ -143,7 +147,18 @@ python -m scripts.resolution_measurement --gamma "0.00017266737044123665" --lamb
   protocol verdict `not resolved on ladder` no longer rests on the QFT `1 - R²` cell
   alone. The closest cell is GHZ Hellinger at `8 s_gamma`: between-model mean
   `0.021947`, threshold `0.034789`. At 4096 shots, counts mode does not separate two
-  engines whose `gamma` differs by up to eight times the device's own cross-qubit spread.
+  engines whose `gamma` differs by up to eight times this snapshot's cross-qubit spread.
+- **The `1 - R²` conditioning problem is not QFT-only.** GHZ's same-model floor (mean
+  `0.022296380316724883`, sample SD `0.12265519232742669`, threshold
+  `0.39026195729900492`) is set by one pair: replicate `i = 29` (seeds 116 and 117), whose
+  two samples both saw only `000` and `111`, gives `0.6944444444444444`, while the next
+  largest of the 32 is `0.0027781047281375537`. Without that pair the threshold would be
+  `0.0028401517181451323`. `R2Score` works over the union of observed outcomes, so with
+  only `000` and `111` present the reference's two bins sit near their own mean of 1/2
+  and `ss_tot` is shot noise: the same mechanism as QFT's uniform output. The verdict does
+  not change, because GHZ's `1 - R²` between-model mean stays below `7.4e-6` at every rung,
+  under either threshold. The cell stays in the protocol (@BurakOztekin, 2026-10-23: a
+  post-hoc exclusion would weaken it).
 - **Density-matrix mode: every rung resolves**, down to `s_gamma / 8 = 9.500290974689329e-06`,
   where `1 - F` is `2.2573045155294125e-07` (QFT) and `1.1535033328513578e-07` (GHZ), three
   orders of magnitude above the `1e-10` floor. The smallest tested rung is again the
@@ -151,8 +166,14 @@ python -m scripts.resolution_measurement --gamma "0.00017266737044123665" --lamb
   below the ladder is inferred.
 - **Analytic check.** Fidelity is stationary at `delta = 0`, so `1 - F` should scale as
   `delta^2` for small `delta`. Halving `delta` divides the QFT discrepancy by `3.31`,
-  `3.55`, `3.73`, `3.85`, `3.92`, `3.96` down the ladder, converging to `4`; GHZ behaves the
-  same way.
+  `3.55`, `3.73`, `3.85`, `3.92`, `3.96` down the ladder, converging to `4`; GHZ's ratios
+  run from `3.11` to `3.92`.
 
 These are laptop figures, provisional until Burak's next batched desktop record. Their NC
 ids are taken at merge time.
+
+Corrected on 2026-10-23 after @BurakOztekin's review of PR #79: the `s_gamma` label (one
+snapshot's spread, not #59's `s_q`), the "neither TSV" sentence (two of the four figures
+are in this run's TSV), the GHZ `1 - R²` floor bullet (new; re-measured with the script's
+own helpers and seed schedule, and it reproduces the TSV's mean, SD and threshold
+exactly), and the GHZ ratio range (`3.92`, not `3.93`). No TSV value changed.

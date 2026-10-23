@@ -103,7 +103,8 @@ entry over the fixture's 155 usable qubits: `1.3322676295501878e-15` (114 qubits
 identity for four hand-chosen cases; this extends it to every usable fixture qubit.
 
 **Ladder.** `s_gamma = sd_{ddof=1}(gamma_q)` over the same 155 qubits,
-`7.600232779751463e-05`, re-measured by two routes (the target module and the closed form
+`7.600232779751463e-05`: one snapshot's cross-qubit spread of the target, not #59's survey
+statistic `s_q` (a within-snapshot spread of the features, summarised as NC-042). Re-measured by two routes (the target module and the closed form
 on the raw JSON), which give identical `(gamma_q, lambda_q)` rows. The value is
 `np.std(rows, axis=0, ddof=1)[0]` over the `(155, 2)` array; a 1-D
 `np.std(rows[:, 0], ddof=1)` gives `7.600232779751465e-05` because numpy reduces in a
@@ -122,7 +123,7 @@ resolves `delta` only if every prescribed cell does.
 derivative vanishes and `1 - F = c delta^2 + O(delta^3)`: halving `delta` should divide
 `1 - F` by about 4. Smoothness is an assumption (fidelity can be non-smooth at
 rank-deficient states), and the data are consistent with it: the QFT ratios down the
-ladder are 3.31, 3.55, 3.73, 3.85, 3.92, 3.96, and GHZ's run from 3.11 to 3.93. That
+ladder are 3.31, 3.55, 3.73, 3.85, 3.92, 3.96, and GHZ's run from 3.11 to 3.92. That
 convergence is the analytic cross-check on the density column, not a proof.
 
 **Result (laptop, provisional).** Counts mode resolves no cell at any rung (closest: GHZ
@@ -142,12 +143,16 @@ from `1.619e-5` to `6.545e-6` (GHZ); the commands are in the evidence README.
   before ADR-027 existed. Keeping it would make the per-reason counts incomparable with
   `SkipCounts`; no caller outside this PR reads it yet.
 - **Gate-level reasons go in a new field, not in `skipped`.** `skipped` maps reasons to
-  qubits; a missing duration belongs to a `(gate, qubits)` entry. Mixing the two would make
-  `qubits_used` and `skipped` stop partitioning the selection.
-- **Corrupt still raises.** A null, non-numeric, non-finite or wrongly-unit gate length
-  raises in the reference exactly where `training.targets.gate_lengths` raises, which is
-  also where ADR-028 fails loudly. A non-list `parameters` on a one-qubit gate is a missing
-  record, as `gate_lengths` reads it.
+  qubits; a missing duration belongs to a `(gate, qubits)` entry. Recording it under
+  `skipped` would mark as rejected a qubit the model still uses for its other gates.
+  (`qubits_used` and `skipped` do not partition the selection in any case: a usable qubit
+  with no installed error is in neither.)
+- **Corrupt still raises.** A null, non-numeric, non-finite or wrongly-unit one-qubit gate
+  length raises in the reference as it does in `training.targets.gate_lengths`, which is
+  also where ADR-028 fails loudly. Not everywhere the target raises, though: the reference
+  reads durations only on usable qubits (the target parses every `sx` entry), and it also
+  reads two-qubit durations, which the target never does. A non-list `parameters` on a
+  one-qubit gate is a missing record, as `gate_lengths` reads it.
 - **Dead-pair reading stays strict** (from the pre-push review). A `cz` entry with no
   `parameters` list raises in `full_device` scope, as it did on 2026-09-06. The lenient
   reading is justified for `gate_length`, which `training.targets` also reads leniently, but
@@ -156,9 +161,12 @@ from `1.619e-5` to `6.545e-6` (GHZ); the commands are in the evidence README.
 - **Stricter structure than the loader.** Duplicate fields or a non-mapping entry on a qubit
   raise in the reference, while `load_snapshot` keeps the last duplicate. Stated in the
   module docstring; the cross-module test does not exercise it.
-- **The intended divergence is pinned, not hidden.** A missing `sx` length rejects the
-  qubit in `qubit_targets` (`gate_length_missing`) but only the `sx` entry in the reference;
-  `test_missing_sx_length_is_qubit_level_in_targets_and_gate_level_here` asserts both sides.
+- **The intended divergences are pinned, not hidden.** There are two. A missing `sx`
+  length rejects the qubit in `qubit_targets` (`gate_length_missing`), and so does a
+  negative one (`nonpositive`); the reference rejects only the `sx` entry, under the same
+  reason name in `skipped_gates`, and keeps the qubit for its other gates.
+  `test_sx_length_gaps_are_qubit_level_in_targets_and_gate_level_here` asserts both sides
+  for both cases.
 - **Rerun now, engine-true** (Bengisu, 2026-10-21). The alternatives were keeping the
   2026-09-06 controlled model, which noises `rz` and so measures a noisier engine than
   ships, or deferring the rerun to a follow-up commit. The September TSV is kept and stays
@@ -205,12 +213,12 @@ python scripts/check_ids.py
 ```
 
 ```bash
-git diff origin/main -- docs/decisions.md | grep "^-" | grep -vc "^---"
+git diff --numstat origin/main -- docs/decisions.md
 ```
 
 Expected: the suite passes; the promoted-warning run passes (it had 17 failures before
 these fixes); collection is `main`'s count plus this PR's differential; the last command
-prints `0` (the ledger diff is additions only).
+prints `0` in its second (deleted lines) column, so the ledger diff is additions only.
 
 Measured on 2026-10-21 (Mert's laptop, Python 3.12.10, pinned stack, provisional), on the
 tree with the pre-push review fixes: 939 collected and 939 passed with nothing skipped;
@@ -235,6 +243,101 @@ Mutation checks run on 2026-10-21, each restored from a backup copy:
 
 Laptop figures here are provisional; the canonical numbers come from Burak's next
 batched desktop record.
+
+## Review round, 2026-10-23
+
+@BurakOztekin reviewed `e7218d3` on 2026-10-21 (review 5602131046, changes requested). He
+found the harness and the reference correct, and asked for changes to tests and records
+that claimed more than they proved. Each finding below was reproduced on the old code
+before it was fixed.
+
+**Ratified by Burak as harness owner** (#58 section 7): items 1, 2, 3 (identity mapping;
+option (a) no longer applies because ADR-028 closed the `rz` asymmetry), 4, 6, 7 and 8, and
+the FR-7 baseline (`gamma_0`, `lambda_0` from NC-040, basis `cz,id,rx,rz,sx,x`).
+
+**His two open decisions:**
+
+- *The 12 dead one-qubit entries need no `ReferenceReport` field.* The fixture carries
+  `gate_error == 1` on `id`, `rx`, `sx` and `x` at q17, q72 and q149 (re-counted
+  2026-10-23). q72 is skipped (`t1_missing`); on q17 and q149 `single_qubit_relaxation`
+  installs relaxation on those gates like any other, because relaxation is about time, not
+  about whether the gate works. The reference never reads `gate_error` there, and the
+  certified 3-qubit circuits run on q0 to q2. To be revisited if #62 places circuits on
+  those qubits.
+- *The QFT `1 - R²` cell stays in the protocol.* Dropping it after seeing the data would be
+  a post-hoc exclusion; on the 2026-10-21 run it no longer decides the verdict. The
+  disclosure now covers GHZ too (below).
+
+**Blocking items and what changed:**
+
+| # | Finding | Change |
+| --- | --- | --- |
+| 1 | The ADR-022 notes misdescribed the tests: the nine `*_adr022_*` tests use hand-built `NoiseModel`s, so the merge never affected them; the rejection pins came from `bb38152`, not `d646e07` | Both branch-only notes rewritten in place |
+| 2 | The density ordering pin was no longer causal: ADR-028's default policy never admits `save_density_matrix`, so a save-before-`prepare()` mutant passed all 37 harness tests | The test engine takes a policy that also admits `("save_density_matrix", (0,))`; the test asserts `[["sx"]]`, and the mutant gives `[["save_density_matrix", "sx"]]` |
+| 3 | `run_benchmark`'s default `on_error="raise"` was never tested at the public entry; an always-record mutant passed | Three new `run_benchmark` tests: default raise, both wrong-mode cases (raise by default, NaN row with a non-empty `failure` under `record`), and `on_error="bogus"` |
+| 4 | `metadata["noise_instructions"]` was pinned only for shape, on one-member engines; circuit-derived and first-member-only mutants passed | A two-member static ensemble whose models (`x` only, nothing) differ from the circuit's gates, asserting `[["x"], []]` in both modes |
+
+**Non-blocking items, all in the same push:**
+
+- Density mode raises `ValueError` when a measurement that is not final, or a control-flow
+  operation, survives `remove_final_measurements`, on both the engine and the reference
+  paths. The four benchmark circuits are unaffected (checked).
+- `build_reference` raises when the model it would return is ideal (`NoiseModel.is_ideal()`),
+  in either scope. Aer silently drops an ideal `ReadoutError`, so a `full_device` model on a
+  qubit with `p01 = p10 = 0` and no timed gate is ideal too, and such a qubit no longer counts
+  in `qubits_used`.
+- `_is_dead_cz` reads `gate_error` with `missing_ok=False`: an absent, null or NaN value, or
+  `parameters: []`, raises in `full_device` scope. All 352 `cz` entries in the fixture carry
+  a finite one.
+- The reference path copies `noise_instructions` per circuit instead of sharing one list.
+- `tests/test_metrics.py` restores `main`'s mixed-argument rejection pins, parametrized over
+  which side is wrong, for all four metrics.
+- The readout-orientation pin gains the prepared-|1> row.
+- The identical-members pin compares `make_benchmark_ensemble(3)` with `(1)`, so it now
+  depends on the harness's equal-states fast path (a mutant that always averages fails it),
+  and says it holds only while members are identical, which after #64 means only under
+  `IdentityPerturbation`.
+- Records: the GHZ `1 - R²` floor disclosure, the `s_gamma` label, the "neither TSV"
+  sentence and the GHZ ratio in the evidence README; the two `sx`-length divergences, the
+  "raises where `training.targets` raises" and "partition" sentences, and the numstat check
+  in this document; an ADR-021 as-of note (the harness conforms); an outstanding item in
+  `docs/advisor/2026-09-03-decisions-from-akba.md` for the advisor read of the #58 notes;
+  two corrections in the 2026-09-06 record's as-of section (the ordering claim, the
+  LOCKED-check base); docstrings for the seed contract, the metadata keys, the error
+  contract, the `dead_pairs` scope and the density-mode readout caveat.
+
+**GHZ `1 - R²` floor, re-measured.** With the script's own helpers and seed schedule,
+replicate `i = 29` (seeds 116 and 117) saw only `000` and `111` in both samples and gives
+`0.6944444444444444`; the next largest of the 32 is `0.0027781047281375537`. The floor's
+mean, SD and threshold reproduce the TSV exactly (`0.39026195729900492`); without that pair
+the threshold would be `0.0028401517181451323`. GHZ's between-model `1 - R²` stays below
+`7.4e-6` at every rung, so no verdict changes.
+
+**Mutation checks added this round** (each restored from a backup copy):
+
+| Mutation | Tests that failed |
+| --- | --- |
+| `save_density_matrix` appended before `prepare()` | the ordering pin |
+| `run_benchmark` always records | 4 tests (default raise, both wrong-mode cases, unknown `on_error`) |
+| density metadata read from the circuit's gates | 2 tests |
+| counts metadata kept for the first member only | the two-member metadata pin (counts) |
+| reference metadata list shared across circuits | the per-circuit copy pin |
+| equal-states fast path removed | the identical-members pin |
+| density-mode guard for a non-final `measure` disabled | 2 tests (engine and reference paths) |
+| `build_reference`'s ideal-model guard disabled | the no-timed-gate pin |
+| an ideal readout error counted as a used qubit | the `qubits_used` pin |
+| `_is_dead_cz` back to `missing_ok=True` | 4 tests (empty, absent, null, NaN `gate_error`) |
+
+Measured on 2026-10-23 (Mert's laptop, Python 3.12.10, pinned stack, provisional): 964
+collected and 964 passed with nothing skipped; the promoted-warning run 120 passed; ruff,
+format, `mypy --strict` and `check_ids` clean; `git diff --numstat origin/main --
+docs/decisions.md` shows 0 deleted lines. The differential against `main` @ `6cf008d`'s 859
+is now +105: +63 from 2026-09-06, +17 on 2026-10-21 and +25 this round.
+
+**FYI for #62, not measured here.** Burak's quick check suggests that even 8 members with
+`reference_shots=32768` only just resolves GHZ Hellinger at `8 s_gamma`, and QFT never; that
+is his figure, not one this record re-measured. What this record does show is that at 4096
+shots counts mode resolves no cell up to `8 s_gamma`, while density mode resolves every rung.
 
 ## Related docs
 
