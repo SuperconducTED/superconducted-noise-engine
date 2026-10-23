@@ -21,6 +21,7 @@ record.
 | `docs/evidence/public-archive-overlap-2026-10/README.md` | New. Refs, hashes, out-of-pins readers, the three public-table defects and how each is handled. |
 | `docs/numerical-claims.md` | Three rows appended, NC-077 to NC-079, in the dated-anchor form Issue #92 proposes. |
 | `docs/decisions/drafts/ADR-029-public-calibration-archive-as-training-source.md` | New draft: the public table is admissible to the training set, not to the archive, under three stated rules and a plausibility guard. |
+| `docs/findings/2026-10-23-adr-015-what-an-interval-needs.md` | New. The novelty check's first "what flips the verdict" item, split into its three gates (mechanism, scale from a fit and a split, resolution), the ticket-versus-posted-decision divergences on #64, the vacuous-coverage trap, and the owner of each step. Assessment only. |
 
 No source, test or ADR status changed. The ADR is a draft; its ledger entry lands with the
 adopting PR.
