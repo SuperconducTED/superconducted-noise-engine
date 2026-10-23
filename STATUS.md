@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-10-21 04:31 UTC · main at `6cf008da` (2026-10-16) · 10 days to 2026-10-31_
+_Generated 2026-10-23 06:22 UTC · main at `6cf008da` (2026-10-16) · 8 days to 2026-10-31_
 
 
 ## Milestones
@@ -67,12 +67,12 @@ _Generated 2026-10-21 04:31 UTC · main at `6cf008da` (2026-10-16) · 10 days to
 **Baha Jarad** (@BahaJarad)
 
 1. Unstick PR #113 for #63: Training-set builder (training/dataset.py)
-   - CHANGES_REQUESTED standing from @mertefesensoy (2026-10-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+   - Awaiting merge.
 
 **Bengisu Cıvdı** (@bengisucvd)
 
 1. Unstick PR #79 for #58: Certify the benchmark instruments
-   - Still a draft: CI and reviewers will not treat it as ready.
+   - CHANGES_REQUESTED standing from @BurakOztekin (2026-10-21). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 1. Start #61: ADR-011 evidence + premise gradients
    - Part B is unblocked (#57 merged) and the plan schedules it in W2 because the trainer's verification depends on it.
 1. Start #75: Decide the LOCKED Kraus projector boundary
@@ -80,17 +80,17 @@ _Generated 2026-10-21 04:31 UTC · main at `6cf008da` (2026-10-16) · 10 days to
 
 **Burak Öztekin** (@BurakOztekin)
 
+1. Re-review PR #79 (#58: Certify the benchmark instruments)
+   - Your CHANGES_REQUESTED from 2026-10-21 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Finish #60: ADR-014 hybrid ANFIS trainer
    - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.
 
 **Mert Efe Şensoy** (@mertefesensoy)
 
-1. Start #84: Close the #57 advisor loop
-   - The only phase-3 blocker with a multi-week external latency tail, and the only M1 gate with no work in flight. Every day it waits is a day added to M3.
-1. Re-review PR #113 (#63: Training-set builder (training/dataset.py))
-   - Your CHANGES_REQUESTED from 2026-10-12 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
-1. Finish #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
-   - The contract merged; only the advisor half of its definition of done is outstanding.
+1. Unstick PR #120 for #84: Close the #57 advisor loop
+   - No approving review yet: main's ruleset requires one.
+1. Unstick PR #120 for #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
+   - No approving review yet: main's ruleset requires one.
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -99,22 +99,16 @@ _Generated 2026-10-21 04:31 UTC · main at `6cf008da` (2026-10-16) · 10 days to
 
 - [critical] Dr. Akba must answer four ADR-027 questions. He has no GitHub account; FR-15 routes all contact through the lead.
 - [critical] The FR-15 decision-by date was 2026-09-08 and has passed with the brief unsent.
+- [high] No approving review yet: main's ruleset requires one.
 
 **#58: Certify the benchmark instruments** (@bengisucvd)
 
-- [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
-- [high] Still a draft: CI and reviewers will not treat it as ready.
-- [high] Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result.
-- [high] No approving review yet: main's ruleset requires one.
+- [critical] CHANGES_REQUESTED standing from @BurakOztekin (2026-10-21). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 - [medium] Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
 
 **#61: ADR-011 evidence + premise gradients** (@bengisucvd)
 
 - [low] FR-4's consequent convention and the raw-space vs logit-space choice both depend on #57's decision.
-
-**#63: Training-set builder (training/dataset.py)** (@BahaJarad)
-
-- [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-10-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **#75: Decide the LOCKED Kraus projector boundary** (@bengisucvd)
 
@@ -123,6 +117,7 @@ _Generated 2026-10-21 04:31 UTC · main at `6cf008da` (2026-10-16) · 10 days to
 **#57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py** (@mertefesensoy)
 
 - [critical] Code landed in PR #69, but the ticket's own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened; #84 owns it.
+- [high] No approving review yet: main's ruleset requires one.
 
 ## Blocked upstream
 
@@ -136,6 +131,7 @@ _Generated 2026-10-21 04:31 UTC · main at `6cf008da` (2026-10-16) · 10 days to
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-10-23 | 12/28 | 3 | 4 | 4 | #57 Training contract: ADR-027, TSKTrainer ABC, training/targets.py: ready to start to in review; #84 Close the #57 advisor loop: ready to start to in review |
 | 2026-10-21 | 12/28 | 5 | 2 | 4 | nothing moved |
 | 2026-10-19 | 12/28 | 5 | 2 | 4 | nothing moved |
 | 2026-10-18 | 12/28 | 5 | 2 | 4 | nothing moved |

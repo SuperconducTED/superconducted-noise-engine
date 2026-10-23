@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-21 04:31 UTC",
+  "generated": "2026-10-23 06:22 UTC",
   "main": {
     "sha": "6cf008da",
     "date": "2026-10-16",
@@ -75,13 +75,79 @@
       "title": "Close the Issue #57 advisor loop: get Dr. Akba's four decisions on ADR-027, record them, flip the ADR",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/84",
       "issue_state": "OPEN",
-      "state": "ready",
-      "all_prs": [],
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-10-21T09:39:40Z",
+          "headRefName": "docs/adr-027-accepted",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 120,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "docs: accept ADR-027 and record its register entries (#84, #57 step 4)",
+          "updatedAt": "2026-10-21T09:39:46Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/120",
+          "headRefOid": "320ed419557c5e772fd58b9d2dfb690c0a056a72",
+          "additions": 275,
+          "deletions": 6,
+          "file_count": 3,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-21T09:39"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-21T09:39"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-21T09:39"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-21T09:39"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-21T09:39"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-21T09:40"
+            }
+          ],
+          "checks_newest": "2026-10-21T09:40",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
       "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
+        {
+          "severity": "high",
+          "text": "No approving review yet: main's ruleset requires one."
+        },
         {
           "kind": "advisor",
           "text": "Dr. Akba must answer four ADR-027 questions. He has no GitHub account; FR-15 routes all contact through the lead.",
@@ -100,7 +166,7 @@
         61
       ],
       "notes_info": [],
-      "pr": null
+      "pr": 120
     },
     {
       "id": 58,
@@ -166,81 +232,63 @@
           ],
           "createdAt": "2026-09-06T21:11:52Z",
           "headRefName": "bengisu/issue-58-benchmark-certification",
-          "isDraft": true,
-          "mergeable": "CONFLICTING",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 79,
-          "reviewDecision": "REVIEW_REQUIRED",
+          "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "Certify benchmark harness modes and calibration reference (#58) ",
-          "updatedAt": "2026-09-29T06:44:30Z",
+          "updatedAt": "2026-10-21T15:30:44Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/79",
-          "headRefOid": "5400702579c31ad9d2a57a871db5f3cd358b197d",
-          "additions": 3215,
+          "headRefOid": "e7218d3647391f1d812859d11aec2982f6ec19af",
+          "additions": 4047,
           "deletions": 79,
-          "file_count": 14,
-          "latest_reviews": [],
+          "file_count": 16,
+          "latest_reviews": [
+            {
+              "who": "BurakOztekin",
+              "state": "CHANGES_REQUESTED",
+              "at": "2026-10-21",
+              "last_activity": "2026-10-21"
+            }
+          ],
           "looked_since": [],
           "checks": [
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-06T21:05"
-            },
-            {
-              "name": "test (3.11)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-06T21:11"
+              "started": "2026-10-21T11:10"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-06T21:05"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-06T21:11"
+              "started": "2026-10-21T11:10"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-06T21:05"
-            },
-            {
-              "name": "Analyze (actions)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-06T21:11"
+              "started": "2026-10-21T11:10"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-06T21:05"
-            },
-            {
-              "name": "test (3.12)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-06T21:11"
+              "started": "2026-10-21T11:10"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-09-06T21:05"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-09-06T21:11"
+              "started": "2026-10-21T11:10"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-09-06T21:06"
+              "started": "2026-10-21T11:11"
             }
           ],
-          "checks_newest": "2026-09-06T21:11",
+          "checks_newest": "2026-10-21T11:11",
           "checks_failing": [],
-          "checks_stale_vs_main": true
+          "checks_stale_vs_main": false
         }
       ],
       "merged_pr": null,
@@ -249,20 +297,8 @@
       "unmet_soft": [],
       "blockers": [
         {
-          "severity": "high",
-          "text": "Still a draft: CI and reviewers will not treat it as ready."
-        },
-        {
           "severity": "critical",
-          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
-        },
-        {
-          "severity": "high",
-          "text": "Its green checks last ran 2026-09-06T21:11 against a main that has moved since; they are not evidence about the merge result."
-        },
-        {
-          "severity": "high",
-          "text": "No approving review yet: main's ruleset requires one."
+          "text": "CHANGES_REQUESTED standing from @BurakOztekin (2026-10-21). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
         },
         {
           "kind": "signoff",
@@ -579,21 +615,21 @@
           "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 113,
-          "reviewDecision": "CHANGES_REQUESTED",
+          "reviewDecision": "APPROVED",
           "state": "OPEN",
           "title": "Training Set Builder (Issue #63)",
-          "updatedAt": "2026-10-18T17:50:36Z",
+          "updatedAt": "2026-10-21T12:22:07Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/113",
-          "headRefOid": "b447ed8d4d774347d704deeb51633c7d55a866f3",
-          "additions": 2557,
+          "headRefOid": "0f2a90ee3c328e77596e7d1c14cfe7071447bd33",
+          "additions": 2578,
           "deletions": 5,
-          "file_count": 12,
+          "file_count": 13,
           "latest_reviews": [
             {
               "who": "mertefesensoy",
-              "state": "CHANGES_REQUESTED",
-              "at": "2026-10-12",
-              "last_activity": "2026-10-12"
+              "state": "APPROVED",
+              "at": "2026-10-21",
+              "last_activity": "2026-10-21"
             }
           ],
           "looked_since": [],
@@ -601,35 +637,35 @@
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-18T17:48"
+              "started": "2026-10-21T10:46"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-18T17:48"
+              "started": "2026-10-21T10:46"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-18T17:48"
+              "started": "2026-10-21T10:46"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-18T17:48"
+              "started": "2026-10-21T10:46"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-18T17:48"
+              "started": "2026-10-21T10:46"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-10-18T17:49"
+              "started": "2026-10-21T10:47"
             }
           ],
-          "checks_newest": "2026-10-18T17:49",
+          "checks_newest": "2026-10-21T10:47",
           "checks_failing": [],
           "checks_stale_vs_main": false
         }
@@ -638,12 +674,7 @@
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
-      "blockers": [
-        {
-          "severity": "critical",
-          "text": "CHANGES_REQUESTED standing from @mertefesensoy (2026-10-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
-        }
-      ],
+      "blockers": [],
       "declared_unblocks": [
         60
       ],
@@ -1511,32 +1542,79 @@
       "title": "Training contract: a target ADR pinned to Aer by SuperOp, the TSKTrainer ABC and training/targets.py, so the trainer, the anchored consequents and the reference model regress onto one derived target instead of three remembered ones",
       "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/57",
       "issue_state": "OPEN",
-      "state": "ready",
-      "all_prs": [],
-      "merged_pr": {
-        "author": {
-          "id": "U_kgDOCJLpDw",
-          "is_bot": false,
-          "login": "mertefesensoy",
-          "name": "Mert Efe Şensoy"
-        },
-        "closingIssuesReferences": [],
-        "createdAt": "2026-09-08T12:37:18Z",
-        "headRefName": "mert/issue-57-dod-cleanup",
-        "isDraft": false,
-        "mergeable": "UNKNOWN",
-        "mergedAt": "2026-09-08T22:19:37Z",
-        "number": 83,
-        "reviewDecision": "APPROVED",
-        "state": "MERGED",
-        "title": "docs: close the three fixable Issue #57 definition-of-done gaps",
-        "updatedAt": "2026-09-08T22:19:40Z",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/83"
-      },
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-10-21T09:39:40Z",
+          "headRefName": "docs/adr-027-accepted",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 120,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "docs: accept ADR-027 and record its register entries (#84, #57 step 4)",
+          "updatedAt": "2026-10-21T09:39:46Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/120",
+          "headRefOid": "320ed419557c5e772fd58b9d2dfb690c0a056a72",
+          "additions": 275,
+          "deletions": 6,
+          "file_count": 3,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-21T09:39"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-21T09:39"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-21T09:39"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-21T09:39"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-21T09:39"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-21T09:40"
+            }
+          ],
+          "checks_newest": "2026-10-21T09:40",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
+      "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
+        {
+          "severity": "high",
+          "text": "No approving review yet: main's ruleset requires one."
+        },
         {
           "kind": "advisor",
           "text": "Code landed in PR #69, but the ticket's own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened; #84 owns it.",
@@ -1550,7 +1628,7 @@
         63
       ],
       "notes_info": [],
-      "pr": null
+      "pr": 120
     }
   ],
   "milestones": [
@@ -1607,7 +1685,7 @@
       "done": 7,
       "total": 8,
       "status": "partial",
-      "days_left": -46
+      "days_left": -48
     },
     {
       "id": "M1",
@@ -1649,7 +1727,7 @@
       "done": 3,
       "total": 5,
       "status": "partial",
-      "days_left": -40
+      "days_left": -42
     },
     {
       "id": "M2",
@@ -1692,7 +1770,7 @@
       "done": 2,
       "total": 5,
       "status": "partial",
-      "days_left": -33
+      "days_left": -35
     },
     {
       "id": "M3",
@@ -1740,7 +1818,7 @@
       "done": 0,
       "total": 6,
       "status": "not_done",
-      "days_left": -26
+      "days_left": -28
     },
     {
       "id": "M4",
@@ -1778,7 +1856,7 @@
       "done": 0,
       "total": 4,
       "status": "not_done",
-      "days_left": -21
+      "days_left": -23
     }
   ]
 }
