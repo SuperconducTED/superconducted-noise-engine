@@ -1,8 +1,12 @@
 # Hardware test: does the calibration *level* predict the device better than the latest *reading*?
 
-**Date**: 2026-10-23 · **Author**: Mert Efe Şensoy · **Owner of the run**: @BurakOztekin (harness,
-circuits, desktop verification) · **Status**: design for approval, pre-registration to be
-completed and committed before the first QPU job · **Decides**: strategy S1 of
+**Date**: 2026-10-23 · **Author**: Mert Efe Şensoy · **Owners**: @mertefesensoy for the QPU
+side (account allowance, submissions, usage and queue logging, the archive-side predictions,
+the pre-registration commit); @BurakOztekin for the offline side (circuits, pipeline, dry run
+against Aer, scoring harness, desktop reproduction); @bengisucvd reviews the decision rule and
+the statistics · **Status**: approved by the lead on 2026-10-23 with this ownership;
+pre-registration (frozen thresholds, the four control qubits) still to be committed before the
+first QPU job · **Decides**: strategy S1 of
 `docs/findings/2026-10-23-strategy-audit.md`, and the engine's value for the design-time goal
 stated there in §3.1
 
@@ -159,11 +163,15 @@ Written here as the proposal; the numbers are frozen when the pre-registration i
 
 | Item | Owner | Blocking |
 | --- | --- | --- |
-| Approval of this design and of spending QPU time | Mert | yes |
-| Usage-page check of the Open Plan allowance and reset rule | Burak | yes |
-| `scripts/hardware_reading_vs_level.py`: selection, circuits, predictions, submission, archiving of properties at `t_s` and `t_execute`, scoring | Burak (circuits, harness), Mert (prediction from the archive) | yes |
+| Approval of this design and of spending QPU time | Mert | given 2026-10-23 |
+| Usage-page check of the Open Plan allowance and reset rule, on the submitting account | Mert | yes |
+| `scripts/hardware_reading_vs_level.py`, offline half: qubit and layout selection rules, circuit construction, scoring, the dry run against Aer | Burak | yes |
+| Same script, archive half: the four predictors per qubit from the archive at `t_s`, and the execution-time control from the archived properties | Mert | yes |
+| Submission, logging of QPU time and queue delay per job, archiving of properties at `t_s` and `t_execute`, the budget gate after job 1 | Mert | yes |
 | Dry run against Aer, committed | Burak | yes |
 | Pre-registration commit with frozen thresholds and the four control qubits | Mert | yes, before job 1 |
+| Desktop reproduction of the archive-side predictions and of the scoring on the collected data | Burak | after the run |
+| Second account as the named fallback for the daily cadence | a team member other than Mert, to be named | no, but before job 2 |
 | Readout-error predictability result (S5), to confirm the readout source in §2 | Mert | no; informs §2 if readout is forecastable |
 | ADR-029 adoption for the 30-day level before 2026-05-13 | Baha | no; the level uses our own archive for this run |
 
