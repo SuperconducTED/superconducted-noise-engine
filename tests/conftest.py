@@ -6,14 +6,31 @@ package can break under newer pytest collection rules.
 
 from __future__ import annotations
 
+import json
+import math
 from collections.abc import Callable
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
+import numpy as np
 import pytest
 
+from superconducted.calibration.features import BasicCalibrationVectorizer
+from superconducted.calibration.loader import UNIT_SCALE
 from superconducted.calibration.storage import CalibrationStorage
+from superconducted.channels.kraus import KrausChannelProjector, NoOpNormalization
+from superconducted.fuzzy.defuzzification import WeightedAverageDefuzzifier
+from superconducted.fuzzy.fuzzification import PostGateFuzzification
+from superconducted.fuzzy.membership import GaussianMF
+from superconducted.fuzzy.squashing import ProbabilityClip
+from superconducted.fuzzy.tsk import TSKRuleBase
+from superconducted.integration.aer_factory import (
+    FuzzyNoiseModelEnsemble,
+    first_viable_seed,
+)
+from superconducted.interfaces import GateEligibilityPolicy
 from superconducted.types import CalibrationSnapshot
 
 DEFAULT_TIMESTAMP = datetime(2026, 5, 7, 12, 0, 0, tzinfo=UTC)
@@ -51,6 +68,126 @@ def dummy_snapshot() -> CalibrationSnapshot:
         target=None,
         configuration=None,
     )
+
+
+@pytest.fixture(scope="session")
+def benchmark_snapshot() -> CalibrationSnapshot:
+    """Load #57's gates-bearing IBM Fez fixture for benchmark certification tests.
+
+    It must carry ``properties.gates``: ADR-028's
+    ``CalibrationGateEligibilityPolicy`` noises only gates with a positive
+    recorded ``gate_length``, so the slim fixture without gates gives an engine
+    that installs nothing. It keeps the slim fixture's qubit-72 missing-T1/T2 case.
+    """
+    fixture_path = (
+        Path(__file__).parent
+        / "fixtures"
+        / "calibration"
+        / "ibm_fez_20260513T121322Z_with_gates.json"
+    )
+    data = json.loads(fixture_path.read_text(encoding="utf-8"))
+    timestamp = datetime.fromisoformat(str(data["timestamp"]).replace("Z", "+00:00"))
+    return CalibrationSnapshot(
+        backend=str(data["backend"]),
+        timestamp=timestamp,
+        schema_version=str(data["schema_version"]),
+        properties=data["properties"],
+        target=data.get("target"),
+        configuration=data.get("configuration"),
+    )
+
+
+def _feature_range(snapshot: CalibrationSnapshot, field: str) -> tuple[float, float]:
+    """Return the per-qubit range of ``field`` in the vectorizer's units.
+
+    ``BasicCalibrationVectorizer.extract`` emits SI seconds for coherence
+    (issue #66), while the archive records microseconds, so each value is
+    converted by its own declared unit before the grid is laid out.
+    """
+    values = [
+        float(entry["value"]) * UNIT_SCALE[str(entry["unit"])]
+        for qubit in snapshot.properties["qubits"]
+        for entry in qubit
+        if entry.get("name") == field
+        and entry.get("value") is not None
+        and math.isfinite(float(entry["value"]))
+    ]
+    if not values:
+        raise ValueError(f"benchmark fixture has no finite {field} values")
+    lo, hi = min(values), max(values)
+    if lo == hi:
+        raise ValueError(f"benchmark fixture has no {field} range")
+    return lo, hi
+
+
+def _benchmark_ensemble_for_seed(
+    snapshot: CalibrationSnapshot,
+    seed: int,
+    ensemble_size: int = 1,
+    gate_eligibility_policy: GateEligibilityPolicy | None = None,
+) -> FuzzyNoiseModelEnsemble:
+    """Build the issue #58 one-member, 3x3x3 Gaussian test ensemble.
+
+    ``gate_eligibility_policy`` defaults to ADR-028's calibration policy;
+    tests pass another one only to make an ordering or scope pin causal.
+    """
+    vectorizer = BasicCalibrationVectorizer()
+    fields = ("T1", "T2", "readout_error")
+    per_input_mfs: list[list[GaussianMF]] = []
+    for field in fields:
+        lo, hi = _feature_range(snapshot, field)
+        sigma = (hi - lo) * 0.25
+        per_input_mfs.append(
+            [GaussianMF(center=float(center), sigma=sigma) for center in np.linspace(lo, hi, 3)]
+        )
+    return FuzzyNoiseModelEnsemble(
+        calibration=snapshot,
+        feature_extractor=vectorizer,
+        rule_base=TSKRuleBase.from_grid(
+            per_input_mfs=per_input_mfs,
+            output_dim=2,
+            consequent_init="random",
+            rng=np.random.default_rng(seed),
+        ),
+        defuzzifier=WeightedAverageDefuzzifier(),
+        squashing=ProbabilityClip(),
+        channel_projector=KrausChannelProjector(NoOpNormalization()),
+        fuzzification_strategy=PostGateFuzzification(),
+        gate_eligibility_policy=gate_eligibility_policy,
+        ensemble_size=ensemble_size,
+    )
+
+
+@pytest.fixture(scope="session")
+def make_benchmark_ensemble(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> Callable[..., FuzzyNoiseModelEnsemble]:
+    """Build viable issue #58 engines of a requested size from one fixed seed."""
+    _members, seed = first_viable_seed(
+        lambda candidate: list(_benchmark_ensemble_for_seed(benchmark_snapshot, candidate)),
+        context="issue #58 committed-fixture 3x3x3 Gaussian grid",
+    )
+
+    def _factory(
+        ensemble_size: int = 1,
+        *,
+        snapshot: CalibrationSnapshot | None = None,
+        gate_eligibility_policy: GateEligibilityPolicy | None = None,
+    ) -> FuzzyNoiseModelEnsemble:
+        selected_snapshot = benchmark_snapshot if snapshot is None else snapshot
+        return _benchmark_ensemble_for_seed(
+            selected_snapshot, seed, ensemble_size, gate_eligibility_policy
+        )
+
+    return _factory
+
+
+@pytest.fixture(scope="session")
+def benchmark_ensemble(
+    make_benchmark_ensemble: Callable[..., FuzzyNoiseModelEnsemble],
+) -> FuzzyNoiseModelEnsemble:
+    """Return the first viable one-member engine, avoiding ADR-024's identity trap."""
+    return make_benchmark_ensemble(1)
 
 
 @pytest.fixture

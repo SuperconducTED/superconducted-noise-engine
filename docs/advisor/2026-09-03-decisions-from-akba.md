@@ -388,3 +388,18 @@ stays Open / Deferred: the note decides nothing about richer extractors, and the
 empirical comparison remains a future ADR. It flips no `**Status**` line. Issue #63's
 decisions 1 and 5 (the row timestamp and the dashboard-aligned digest) were confirmed
 separately, on Issue #63, on the same day; they are issue decisions, not advisor items.
+
+## Outstanding items, as of 2026-10-23
+
+Not a decision entry. Issue #58 section 10 asks for the advisor's read of the two
+`docs/decisions.md` notes PR #79 appends, and for that ask to be recorded in this file.
+It had no item here; @BurakOztekin's 2026-10-23 review of PR #79 asked for one. Recorded
+without a register number, because PR #120 also appends to this file and numbers are
+better given once both have merged.
+
+**#58 notes, advisor read.** The ADR-016 "Density mode · 2026-10-21" note (the mixture
+mean as the density-mode point estimate; Status stays Deferred) and the ADR-022 notes of
+2026-09-06 and 2026-10-21 (the property set asserted on the density-matrix path; Status
+stays Accepted). Ask: Read. Under the 2026-10-03 entry above this closes through the
+lead's approval, recorded here by @mertefesensoy when given. Outstanding; it does not
+block PR #79's merge, whose remaining gates are listed in that PR.
