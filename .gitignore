@@ -43,7 +43,5 @@ qiskit-ibm.json
 data/*
 !data/.gitkeep
 
-
-
-
-
+# Issue-specific pytest temporary directories
+.pytest-issue*/
