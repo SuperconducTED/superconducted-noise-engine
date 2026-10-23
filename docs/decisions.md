@@ -1769,6 +1769,11 @@ recorded mechanism of its own. NC-028 is cited above for the split rule.
 > new path. The decision text itself is unchanged; this records the two fixes
 > only, not a revisit. See Issue #84.
 
+> Revisited · 2026-10-23 · PR #79 added a skip-rule alignment to
+> `benchmarks/reference.py` on 2026-10-21 (`6b39bcdf`, unchanged at its head
+> `e15c0479` on 2026-10-23); whether it meets Issue #58's obligation above is
+> decided in #58's review.
+
 ---
 
 ## ADR-028 — Physical-gate eligibility as an injected policy
