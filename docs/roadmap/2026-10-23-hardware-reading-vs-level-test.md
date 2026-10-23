@@ -34,11 +34,15 @@ For qubit `q` at submission time `t_s`, with `T1_q` the value in question:
 | --- | --- | --- |
 | `reading` | the latest calibration reading at `t_s` | `NoiseModel.from_backend`, the digital twins, this engine today |
 | `level` | the geometric mean of the qubit's readings over the trailing 30 days of distinct states | the level-tracking channel (S1) |
-| `shrink` | `exp(level + (1 - kappa) (log reading - level))` with `kappa = 0.75` (NC-085's fitted value for gamma, pre-fixed) | the archive's best point forecast |
 | `band` | the per-qubit 10th to 90th percentile of log readings over the same 30 days | the range (NC-081's per-qubit form) |
+| `reading_at_execution` | the latest reading at `t_execute`, computed **after the fact** from the properties archived at execution | not a design-time tool and not a competitor: the control that separates "readings are noisy" from "readings go stale in the queue" |
+
+A shrinkage predictor is deliberately left out: NC-085's `kappa` was fitted on `gamma`, not on
+`log T1`, and Arm A is a two-predictor question (reading against level) with one control.
 
 Readout error enters every prediction the same way, from the same source as `T1_q` in each
-row (reading with reading, level with level), so the arms test the choice consistently.
+row (reading with reading, level with level, execution with execution), so the arms test the
+choice consistently.
 
 ## 3. Arm A: decay circuits
 
@@ -47,22 +51,34 @@ row (reading with reading, level with level), so the arms test the choice consis
 - **Delays.** `tau` in `{0, 0.5, 1.0, 2.0} x T1_level,q`, per qubit, so every qubit is probed
   where the decay is most sensitive to `T1` (`d p / d log T1` is largest near `tau = T1`),
   plus `tau = 0` as the readout-only control. Rounded to the backend's `dt` granularity.
-- **Prediction.** `p_1(tau) = (1 - e_10) s + e_01 (1 - s)` with `s = exp(-tau / T1_q)`,
-  `e_10 = prob_meas0_prep1`, `e_01 = prob_meas1_prep0`, each from the predictor's source.
-  The `band` gives `[p_1(T1_hi), p_1(T1_lo)]`.
-- **Qubits.** Twelve per job: eight chosen at `t_s` as the usable qubits with the largest
-  `|log reading - level|` among those with at least 20 re-measurement events in the archive
-  (the test has power only where the two predictors disagree), and four fixed controls chosen
-  once, before the first job, as the median-scatter qubits of the archive. The selection rule
-  is pre-registered; the selected indices are logged per job.
+- **Prediction.** Through the engine's own channel, so Arm A and Arm B use one noise model:
+  the prepared `|1>` passes through ADR-027's amplitude damping with
+  `gamma = 1 - exp(-tau / T1_q)` (phase damping does not move the population), then the
+  readout assignment matrix built from `prob_meas0_prep1` and `prob_meas1_prep0` of the same
+  source. To first order this is `p_1 = (1 - e_10) s + e_01 (1 - s)` with
+  `s = exp(-tau / T1_q)`; the omissions are named: no thermal excited-state population, no
+  readout-induced transitions, and the assignment probabilities treated as properties of the
+  measured state. These are second order for discriminating `T1` sources and identical across
+  predictors. The `band` gives `[p_1(T1_hi), p_1(T1_lo)]`.
+- **Qubits, two strata reported separately in every table.** Eight *discriminating* qubits
+  chosen at `t_s` as the usable qubits with the largest `|log reading - level|` among those with
+  at least 20 re-measurement events in the archive, and four *control* qubits chosen once,
+  before the first job, as the median-scatter qubits of the archive, without reference to any
+  current reading. The discriminating stratum is where the predictors disagree, and it is
+  **biased toward `level` by construction**: under the measured lag-1 autocorrelation of
+  minus 0.49, the readings furthest from level are the ones most likely to revert, whether the
+  scatter is physical or measurement noise. Those rows answer "where the two disagree, which
+  one is right"; they are never a random sample of qubits, and the control stratum is the
+  unbiased one. The selection rule is pre-registered; the selected indices are logged per job.
 - **Shots.** 2,048 per circuit: binomial standard error about 0.011 at `p = 0.5`, below the
   predicted reading-versus-level gap for the selected qubits (a 0.37 log-unit `T1` gap at
   `tau = T1` moves `p_1` by about 0.09).
 - **Scoring, per (job, qubit, delay).** Absolute error `|p_hat - p_pred|` for each point
-  predictor; log score under the binomial; band coverage of `p_hat` after widening the band by
-  one binomial standard error on each side (so shot noise cannot fail a correct band);
-  band width. Aggregated per predictor over all rows, and separately over rows where
-  `|log reading - level| > 0.2` (the rows that discriminate).
+  predictor including the `reading_at_execution` control; log score under the binomial; band
+  coverage of `p_hat` scored at the band's nominal 80% with the shortfall reported, and
+  separately after widening the band by one binomial standard error on each side (so the
+  shot-noise contribution to any shortfall is visible); band width. Aggregated per predictor
+  over all rows, and per stratum.
 
 ## 4. Arm B: layouts
 
@@ -75,9 +91,12 @@ row (reading with reading, level with level), so the arms test the choice consis
   the rule and the chosen triples are logged.
 - **Prediction.** Each predictor gives a noise model (per-qubit amplitude and phase damping
   from its `T1`, `T2` source through the engine's ADR-027 channel; readout from the same
-  source; the backend's own `cz` error for the two-qubit gates, identical across predictors
+  source; the backend's latest `cz` error for the two-qubit gates, identical across predictors
   since it is not under test) and a predicted outcome distribution from Aer in density-matrix
-  mode; the figure of merit is the Hellinger fidelity to the ideal GHZ distribution.
+  mode; the figure of merit is the Hellinger fidelity to the ideal GHZ distribution. Because
+  the `cz` error is the latest reading for every predictor, Arm B is `reading` on the two-qubit
+  gates throughout, and any advantage `level` shows there is a lower bound on what a fully
+  level-based model would show.
 - **Shots.** 4,096 per layout.
 - **Scoring.** Spearman rank correlation between predicted and measured fidelity over the six
   layouts, per predictor, per job; the fraction of jobs in which the predictor's top-ranked
@@ -92,14 +111,16 @@ row (reading with reading, level with level), so the arms test the choice consis
 - **Queue delay.** Logged per job (`t_execute - t_s`). Predictions are frozen at `t_s`; the
   properties at `t_execute` are also archived so the analysis can report how much of any
   reading-versus-level difference is staleness and how much is scatter.
-- **Budget, estimated, to be confirmed on the first job's usage report.** Arm A: 4 circuits
-  times 2,048 shots at roughly 0.5 ms per shot including reset, about 4 s of QPU time. Arm B:
-  6 circuits times 4,096 shots at roughly 0.3 ms, about 7 s. About 11 s per job, about 2.6 min
-  for 14 jobs. The Open Plan gives 10 minutes of QPU execution time per rolling window (IBM's
-  product page says per month; secondary sources say a 28-day window; the reset rule is
-  **unverified** and must be read from the platform's usage page before the schedule is
-  fixed). One account covers the run with margin; a second account is the fallback, run under
-  its own token and named in the log.
+- **Budget: sized by the measured rate, not by an estimate.** A per-shot arithmetic (delays
+  up to `2 x T1_level`, about 300 µs on the best qubits, plus reset and readout) gives a few
+  seconds per job, but per-circuit overhead on Heron is seconds, not milliseconds, and nothing
+  here has been measured. So: **job 1 is Arm A only**, its QPU time is read from the usage
+  report, and the 14-day schedule with Arm B is confirmed only if the measured per-job cost is
+  below 25 seconds; otherwise the shots or the layout count are cut and the schedule re-fixed
+  before job 2. The Open Plan gives 10 minutes of QPU execution time per rolling window
+  (IBM's product page says per month; secondary sources say a 28-day window; the reset rule
+  is **unverified** and must be read from the platform's usage page before the schedule is
+  fixed). A second account is the fallback, run under its own token and named in the log.
 - **Dry run first.** The whole pipeline (selection rule, circuit construction, prediction,
   scoring) runs against Aer with a `from_backend` model built from an archived snapshot before
   any QPU job, and its output is committed as the pipeline's zero-cost acceptance test.
@@ -108,7 +129,8 @@ row (reading with reading, level with level), so the arms test the choice consis
 
 On the eight selected qubits of the first and last jobs, a Qiskit Experiments `T1`
 characterization (eight delays, 1,024 shots) gives a fitted `T1` with a per-fit standard
-error. If the per-fit standard error is a few percent while consecutive IBM readings differ
+error. Qiskit Experiments is not in the project's pins; it runs from a separate environment,
+as the DuckDB readers did for the archive cross-check, with its version recorded. If the per-fit standard error is a few percent while consecutive IBM readings differ
 by 0.37 log units, the scatter is not fit noise and the `band` is the honest product; if the
 two are of the same size, the readings are noisy measurements of a stable level and the
 `level` predictor should win Arm A outright. Budget: about 8 s per characterization, twice.
@@ -117,15 +139,19 @@ two are of the same size, the readings are noisy measurements of a stable level 
 
 Written here as the proposal; the numbers are frozen when the pre-registration is committed.
 
-- **S1 passes** if, over all Arm A rows, `level` has lower mean absolute error than `reading`
-  with a paired bootstrap 90% interval excluding zero, **and** `band` covers at least 70% of
-  rows after the shot-noise widening at a mean width no larger than `reading`'s error
-  distribution would imply. **S1 passes for the engineer's purpose** if, in Arm B, `level` or
-  `band` ranks layouts at least as well as `reading` on Spearman correlation and picks the
-  measured-best layout at least as often.
-- **S1 fails** if `reading` is at least as good as `level` on Arm A's discriminating rows.
-  The range then survives as the product, and the paper is the fuzzy-systems one with this
-  run as its hardware section.
+- **S1 passes** if, on Arm A's discriminating rows, `level` has lower mean absolute error
+  than **both** `reading` and `reading_at_execution`, each with a paired bootstrap 90% interval
+  excluding zero (beating `reading` alone could be staleness; beating the execution-time
+  reading is the claim), **and** the same ordering holds in sign on the control stratum, **and**
+  `band` covers its nominal 80% of rows within the shot-noise widening. **S1 passes for the
+  engineer's purpose** if, in Arm B, `level` or `band` ranks layouts at least as well as
+  `reading` on Spearman correlation and picks the measured-best layout at least as often.
+- **S1 fails** if `reading_at_execution` is at least as good as `level` on the discriminating
+  rows: the scatter is then what the device does between readings, the range survives as the
+  product, and the paper is the fuzzy-systems one with this run as its hardware section.
+- If `level` beats `reading` but not `reading_at_execution`, the finding is about staleness,
+  not about noise; it still supports carrying something other than the submission-time
+  reading, and the design-time product becomes level-or-band plus a staleness model.
 - Either way the run produces the first hardware numbers for outcome-space resolution
   (gates record §4) and the first design-time comparison against `from_backend`.
 
