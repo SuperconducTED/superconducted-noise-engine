@@ -372,6 +372,23 @@ answer the ratification question or alter the item's Outstanding status, which
 under the 2026-10-03 entry above closes only through the lead's approval
 session (Issue #109).
 
+## Decision, 2026-10-21: the ADR-013 revisit note for Issue #63 stands
+
+| | |
+| --- | --- |
+| **Question** | Issue #63 decision 4: does the `> Revisited · 2026-10-21` note that PR #113 appends under ADR-013 in `docs/decisions.md` stand? |
+| **Answer** | Yes, as amended on 2026-10-21 in PR #113. The amendment, approved by the same approver the same day, adds the evidence refs and row counts decision 4 asked for (504 rows at `f0930b9`, 797 at `e5688d2`), uses the ledger's separator and dates the note 2026-10-21; the sign-off covers the amended text. |
+| **Approver** | @mertefesensoy, as lead in the advisor role (the 2026-10-03 reshape above) |
+| **Date given** | 2026-10-21 |
+| **Medium** | Chosen by @mertefesensoy during the PR #113 review and recorded here in that PR. This is the lead's sign-off, not a read from Dr. Akba. |
+| **Unblocks** | Issue #63's decision 4 and the ADR-013 half of PR #113's definition of done. |
+
+**The scope of this approval, stated exactly.** It covers the note's text only. ADR-013
+stays Open / Deferred: the note decides nothing about richer extractors, and their
+empirical comparison remains a future ADR. It flips no `**Status**` line. Issue #63's
+decisions 1 and 5 (the row timestamp and the dashboard-aligned digest) were confirmed
+separately, on Issue #63, on the same day; they are issue decisions, not advisor items.
+
 ## Decision, 2026-10-21: Dr. Akba gives the fuzzy-engine approvals through the lead's signature
 
 | | |

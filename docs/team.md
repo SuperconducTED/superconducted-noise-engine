@@ -29,6 +29,9 @@ collaborator — see "Reviews from outside GitHub" below.
 | `calibration/poller.py` | Baha Jarad | Mert Efe Şensoy |
 | `calibration/storage.py` | Baha Jarad | Mert Efe Şensoy |
 | `calibration/features.py` | Baha Jarad | Bengisu |
+| `calibration/loader.py` | Baha Jarad | Mert Efe Şensoy |
+| `training/dataset.py` | Baha Jarad | Mert Efe Şensoy |
+| `scripts/build_training_set.py` | Baha Jarad | Mert Efe Şensoy |
 | `training/` (`__init__.py`, `parameters.py`, `targets.py`) | Mert Efe Şensoy | Burak Öztekin |
 | `training/anfis.py` | Burak Öztekin | Bengisu |
 | `fuzzy/membership.py` | Bengisu | Burak Öztekin |
