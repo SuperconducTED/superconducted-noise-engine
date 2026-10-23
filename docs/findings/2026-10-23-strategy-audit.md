@@ -186,6 +186,33 @@ The venue decision stays with Mert and Dr. Akba.
   NC-084 and NC-085 contradict for T1 and T2. That is Issue #110's decision to revisit, after
   S5 reports on readout.
 
+## 3.1 The second goal, stated by the lead on 2026-10-23 (appended after §0 to §3 were written)
+
+Beside the article, the engine exists for a practical reason: engineers turning digital
+circuit designs into physical ones on IBM hardware are not reaching the fidelity they expect,
+and Aer's stock noise model, built from the latest calibration reading, is not a useful guide
+to what will happen at run time. The engine should be a materially better design-time
+predictor: which physical qubits to use, how deep the circuit can be, what fidelity to expect,
+with an honest range.
+
+What this does to the audit:
+
+- It makes S1 a product requirement, not only a paper claim. The user-facing metrics are
+  fidelity prediction error and layout-ranking accuracy at run time against hardware, compared
+  with `NoiseModel.from_backend` and with a stale per-qubit model (NC-083's table is the first
+  row of that comparison).
+- It widens S2 from decay on idle circuits to the decisions an engineer makes: for a given
+  circuit, several candidate layouts, predicted fidelity from the latest reading, from the
+  level and from the band, scored against the measured fidelity on each layout. The
+  compilation-side precedent (arXiv 2407.21462: historical calibration more robust than the
+  latest for layout choice on IBM Perth and Brisbane) says the effect is real for the choice
+  itself; the engine's job is to predict the fidelity and its range, which that work did not.
+- It makes the per-qubit channel non-negotiable in the same way the quantum venue does, and it
+  makes staleness a first-class input: an engineer's prediction is made hours before the job
+  runs.
+- It does not change the order of §2. S5 and S2 remain the first two steps; S2's design gains
+  the layout-ranking arm.
+
 ## 4. Related
 
 `docs/findings/2026-10-23-novelty-check-q1-article.md` §4, §5;
