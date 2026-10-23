@@ -1,0 +1,55 @@
+{
+  "ref": "5828b4a2",
+  "files": 2249,
+  "distinct_states": 924,
+  "cut": "2026-09-01T00:00:00+00:00",
+  "fit_cut": "2026-08-10T00:00:00+00:00",
+  "lambda_floor": 9.589577582702617e-05,
+  "chipwide_t1_recalibrations": 151,
+  "gamma_rows_excluded_by_floor": 0,
+  "gamma_H24h": {
+    "rows_fit": 48576,
+    "rows_cal": 10289,
+    "rows_test_change": 48470,
+    "rows_test_all": 58244,
+    "effective_training_window": [
+      "2026-05-13T21:57:06+00:00",
+      "2026-08-06T08:47:40+00:00"
+    ]
+  },
+  "gamma_H168h": {
+    "rows_fit": 55389,
+    "rows_cal": 9129,
+    "rows_test_change": 52745,
+    "rows_test_all": 52998,
+    "effective_training_window": [
+      "2026-05-13T21:57:06+00:00",
+      "2026-08-07T03:21:59+00:00"
+    ]
+  },
+  "lambda_rows_excluded_by_floor": 20885,
+  "lambda_H24h": {
+    "rows_fit": 46441,
+    "rows_cal": 9786,
+    "rows_test_change": 45061,
+    "rows_test_all": 52465,
+    "effective_training_window": [
+      "2026-05-13T21:57:06+00:00",
+      "2026-08-06T08:47:40+00:00"
+    ]
+  },
+  "lambda_H168h": {
+    "rows_fit": 51421,
+    "rows_cal": 8311,
+    "rows_test_change": 47478,
+    "rows_test_all": 47478,
+    "effective_training_window": [
+      "2026-05-13T21:57:06+00:00",
+      "2026-08-07T03:21:59+00:00"
+    ]
+  },
+  "results_rows": 144,
+  "test_rows_written": 193754,
+  "python": "3.12.10",
+  "numpy": "2.4.4"
+}
