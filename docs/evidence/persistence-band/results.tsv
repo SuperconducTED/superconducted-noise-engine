@@ -1,0 +1,477 @@
+measurement	component	horizon_h	rowset	metric	value	n	ci90_low	ci90_high	r	window_d	binning	bin	variant	fallback_bins	model	staleness_h	r_star	states
+zero_width_band	gamma	24.0	all	coverage	0.1349206349206349	378.0												
+zero_width_band	gamma	24.0	change	coverage	0.0	327.0												
+persistence_fit	gamma	24.0	change	r_train	0.10491521416004401	397.0	0.09370321935882986	0.11192264855729328										
+persistence_fit	gamma	24.0	change	r_oracle_test	0.12485685477084985	327.0												
+persistence_band	gamma	24.0	change	coverage	0.7155963302752294	327.0			0.10491521416004401									
+persistence_band	gamma	24.0	change	mean_rel_width	0.20983042832008805	327.0			0.10491521416004401									
+persistence_band	gamma	24.0	change	interval_score_rel	0.2996234832558411	327.0			0.10491521416004401									
+persistence_band	gamma	24.0	distinct	coverage	0.753968253968254	378.0			0.10491521416004401									
+persistence_band	gamma	24.0	distinct	mean_rel_width	0.209830428320088	378.0			0.10491521416004401									
+persistence_band	gamma	24.0	distinct	interval_score_rel	0.2875085472724458	378.0			0.10491521416004401									
+persistence_band	gamma	24.0	all	coverage	0.753968253968254	378.0			0.10491521416004401									
+persistence_band	gamma	24.0	all	mean_rel_width	0.209830428320088	378.0			0.10491521416004401									
+persistence_band	gamma	24.0	all	interval_score_rel	0.2875085472724458	378.0			0.10491521416004401									
+rolling_percentile_band	gamma	24.0	change	coverage	0.72782874617737	327.0				7.0								
+rolling_percentile_band	gamma	24.0	change	mean_rel_width	0.1384358117119518	327.0				7.0								
+rolling_percentile_band	gamma	24.0	change	interval_score_rel	0.23206829867009632	327.0				7.0								
+rolling_percentile_band	gamma	24.0	all	coverage	0.7354497354497355	378.0				7.0								
+rolling_percentile_band	gamma	24.0	all	mean_rel_width	0.13926612689824533	378.0				7.0								
+rolling_percentile_band	gamma	24.0	all	interval_score_rel	0.2287234174314033	378.0				7.0								
+rolling_percentile_band	gamma	24.0	change	coverage	0.7798165137614679	327.0				30.0								
+rolling_percentile_band	gamma	24.0	change	mean_rel_width	0.16344571857564374	327.0				30.0								
+rolling_percentile_band	gamma	24.0	change	interval_score_rel	0.2095446439243223	327.0				30.0								
+rolling_percentile_band	gamma	24.0	all	coverage	0.7698412698412699	378.0				30.0								
+rolling_percentile_band	gamma	24.0	all	mean_rel_width	0.16386588114788786	378.0				30.0								
+rolling_percentile_band	gamma	24.0	all	interval_score_rel	0.21035046943728963	378.0				30.0								
+hetero_bin_fit	gamma	24.0	change	r_b_train	0.11192264855729328	129.0	0.10558735664091334	0.13303966752332397			level	high						
+hetero_bin_fit	gamma	24.0	change	r_b_train	0.11312803466224186	134.0	0.1074388735436056	0.13498619106922716			level	low						
+hetero_bin_fit	gamma	24.0	change	r_b_train	0.061801322895097766	134.0	0.060548948381556666	0.0697090083220715			level	mid						
+hetero_band	gamma	24.0	change	coverage	0.5932721712538226	327.0					level		conditional					
+hetero_band	gamma	24.0	change	mean_rel_width	0.1586043199123397	327.0					level		conditional					
+hetero_band	gamma	24.0	change	interval_score_rel	0.3188100279129304	327.0					level		conditional					
+hetero_band	gamma	24.0	change	coverage	0.7155963302752294	327.0					level		constant					
+hetero_band	gamma	24.0	change	mean_rel_width	0.20983042832008805	327.0					level		constant					
+hetero_band	gamma	24.0	change	interval_score_rel	0.2996234832558411	327.0					level		constant					
+hetero_band	gamma	24.0	change	coverage	0.8134556574923547	327.0					level		oracle_conditional					
+hetero_band	gamma	24.0	change	mean_rel_width	0.21393289223858697	327.0					level		oracle_conditional					
+hetero_band	gamma	24.0	change	interval_score_rel	0.2815399922074142	327.0					level		oracle_conditional					
+hetero_band	gamma	24.0	change	coverage	0.8042813455657493	327.0					level		oracle_constant					
+hetero_band	gamma	24.0	change	mean_rel_width	0.24971370954169972	327.0					level		oracle_constant					
+hetero_band	gamma	24.0	change	interval_score_rel	0.28979079133853597	327.0					level		oracle_constant					
+hetero_band	gamma	24.0	change	ratio	0.7558690185314546	327.0					level		width_ratio_conditional_over_constant					
+hetero_band	gamma	24.0	change	ratio	0.8567126435757917	327.0					level		width_ratio_oracle_conditional_over_oracle_constant					
+hetero_bin_fit	gamma	24.0	change	r_b_train	0.10247803068100514	81.0	0.07768034762102172	0.12120895471600446			hour	00-06						
+hetero_bin_fit	gamma	24.0	change	r_b_train	0.10558735664091334	106.0	0.09360934538440269	0.11192264855729328			hour	06-12						
+hetero_bin_fit	gamma	24.0	change	r_b_train	0.11192264855729328	102.0	0.09982965238656927	0.13303966752332397			hour	12-18						
+hetero_bin_fit	gamma	24.0	change	r_b_train	0.09360934538440269	108.0	0.06250080095556221	0.11192264855729328			hour	18-24						
+hetero_band	gamma	24.0	change	coverage	0.6972477064220184	327.0					hour		conditional					
+hetero_band	gamma	24.0	change	mean_rel_width	0.2068120616979806	327.0					hour		conditional					
+hetero_band	gamma	24.0	change	interval_score_rel	0.30383059548045505	327.0					hour		conditional					
+hetero_band	gamma	24.0	change	coverage	0.7155963302752294	327.0					hour		constant					
+hetero_band	gamma	24.0	change	mean_rel_width	0.20983042832008805	327.0					hour		constant					
+hetero_band	gamma	24.0	change	interval_score_rel	0.2996234832558411	327.0					hour		constant					
+hetero_band	gamma	24.0	change	coverage	0.8134556574923547	327.0					hour		oracle_conditional					
+hetero_band	gamma	24.0	change	mean_rel_width	0.25291652354284994	327.0					hour		oracle_conditional					
+hetero_band	gamma	24.0	change	interval_score_rel	0.2895252464056556	327.0					hour		oracle_conditional					
+hetero_band	gamma	24.0	change	coverage	0.8042813455657493	327.0					hour		oracle_constant					
+hetero_band	gamma	24.0	change	mean_rel_width	0.24971370954169972	327.0					hour		oracle_constant					
+hetero_band	gamma	24.0	change	interval_score_rel	0.28979079133853597	327.0					hour		oracle_constant					
+hetero_band	gamma	24.0	change	ratio	0.9856152101186056	327.0					hour		width_ratio_conditional_over_constant					
+hetero_band	gamma	24.0	change	ratio	1.0128259437858993	327.0					hour		width_ratio_oracle_conditional_over_oracle_constant					
+hetero_bin_fit	gamma	24.0	change	r_b_train	0.10558735664091334	183.0	0.09370321935882986	0.12120895471600446			recal	12-24h						
+hetero_bin_fit	gamma	24.0	change	r_b_train	0.09370321935882986	183.0	0.0915835825185558	0.10491521416004401			recal	<12h						
+hetero_bin_fit	gamma	24.0	change	r_b_train	0.10750361113615425	27.0	0.07770644745770938	0.10750361113615425			recal	>24h						
+hetero_band	gamma	24.0	change	coverage	0.6819571865443425	327.0					recal		conditional					
+hetero_band	gamma	24.0	change	mean_rel_width	0.2011814877883153	327.0					recal		conditional					
+hetero_band	gamma	24.0	change	interval_score_rel	0.3071240172592609	327.0					recal		conditional					
+hetero_band	gamma	24.0	change	coverage	0.7155963302752294	327.0					recal		constant					
+hetero_band	gamma	24.0	change	mean_rel_width	0.20983042832008805	327.0					recal		constant					
+hetero_band	gamma	24.0	change	interval_score_rel	0.2996234832558411	327.0					recal		constant					
+hetero_band	gamma	24.0	change	coverage	0.8042813455657493	327.0					recal		oracle_conditional					
+hetero_band	gamma	24.0	change	mean_rel_width	0.24684102644335937	327.0					recal		oracle_conditional					
+hetero_band	gamma	24.0	change	interval_score_rel	0.28568165141672425	327.0					recal		oracle_conditional					
+hetero_band	gamma	24.0	change	coverage	0.8042813455657493	327.0					recal		oracle_constant					
+hetero_band	gamma	24.0	change	mean_rel_width	0.24971370954169972	327.0					recal		oracle_constant					
+hetero_band	gamma	24.0	change	interval_score_rel	0.28979079133853597	327.0					recal		oracle_constant					
+hetero_band	gamma	24.0	change	ratio	0.9587812854359753	327.0					recal		width_ratio_conditional_over_constant					
+hetero_band	gamma	24.0	change	ratio	0.9884960937722939	327.0					recal		width_ratio_oracle_conditional_over_oracle_constant					
+zero_width_band	lambda	24.0	all	coverage	0.1349206349206349	378.0												
+zero_width_band	lambda	24.0	change	coverage	0.0	327.0												
+persistence_fit	lambda	24.0	change	r_train	0.11403588167110679	397.0	0.10216477838227193	0.12078905351716107										
+persistence_fit	lambda	24.0	change	r_oracle_test	0.06999908769631191	327.0												
+persistence_band	lambda	24.0	change	coverage	0.9510703363914373	327.0			0.11403588167110679									
+persistence_band	lambda	24.0	change	mean_rel_width	0.22807176334221355	327.0			0.11403588167110679									
+persistence_band	lambda	24.0	change	interval_score_rel	0.23255948344302718	327.0			0.11403588167110679									
+persistence_band	lambda	24.0	distinct	coverage	0.9576719576719577	378.0			0.11403588167110679									
+persistence_band	lambda	24.0	distinct	mean_rel_width	0.2280717633422135	378.0			0.11403588167110679									
+persistence_band	lambda	24.0	distinct	interval_score_rel	0.2319539973976793	378.0			0.11403588167110679									
+persistence_band	lambda	24.0	all	coverage	0.9576719576719577	378.0			0.11403588167110679									
+persistence_band	lambda	24.0	all	mean_rel_width	0.2280717633422135	378.0			0.11403588167110679									
+persistence_band	lambda	24.0	all	interval_score_rel	0.2319539973976793	378.0			0.11403588167110679									
+rolling_percentile_band	lambda	24.0	change	coverage	0.7370030581039755	327.0				7.0								
+rolling_percentile_band	lambda	24.0	change	mean_rel_width	0.10283466590600894	327.0				7.0								
+rolling_percentile_band	lambda	24.0	change	interval_score_rel	0.1775068630918835	327.0				7.0								
+rolling_percentile_band	lambda	24.0	all	coverage	0.7328042328042328	378.0				7.0								
+rolling_percentile_band	lambda	24.0	all	mean_rel_width	0.10240976008827606	378.0				7.0								
+rolling_percentile_band	lambda	24.0	all	interval_score_rel	0.17427563785748612	378.0				7.0								
+rolling_percentile_band	lambda	24.0	change	coverage	0.7767584097859327	327.0				30.0								
+rolling_percentile_band	lambda	24.0	change	mean_rel_width	0.11621243728231381	327.0				30.0								
+rolling_percentile_band	lambda	24.0	change	interval_score_rel	0.15665719174684728	327.0				30.0								
+rolling_percentile_band	lambda	24.0	all	coverage	0.7698412698412699	378.0				30.0								
+rolling_percentile_band	lambda	24.0	all	mean_rel_width	0.1168359209178183	378.0				30.0								
+rolling_percentile_band	lambda	24.0	all	interval_score_rel	0.15597332833185232	378.0				30.0								
+hetero_bin_fit	lambda	24.0	change	r_b_train	0.12078905351716107	129.0	0.11306993774798835	0.12922320988710834			level	high						
+hetero_bin_fit	lambda	24.0	change	r_b_train	0.11723469106619477	134.0	0.08386939544980798	0.12405229288473674			level	low						
+hetero_bin_fit	lambda	24.0	change	r_b_train	0.09060948548822867	134.0	0.08411966660067183	0.10019831967309623			level	mid						
+hetero_band	lambda	24.0	change	coverage	0.9174311926605505	327.0					level		conditional					
+hetero_band	lambda	24.0	change	mean_rel_width	0.21263783968431554	327.0					level		conditional					
+hetero_band	lambda	24.0	change	interval_score_rel	0.22038772722269678	327.0					level		conditional					
+hetero_band	lambda	24.0	change	coverage	0.9510703363914373	327.0					level		constant					
+hetero_band	lambda	24.0	change	mean_rel_width	0.22807176334221355	327.0					level		constant					
+hetero_band	lambda	24.0	change	interval_score_rel	0.23255948344302718	327.0					level		constant					
+hetero_band	lambda	24.0	change	coverage	0.8287461773700305	327.0					level		oracle_conditional					
+hetero_band	lambda	24.0	change	mean_rel_width	0.12511922087918892	327.0					level		oracle_conditional					
+hetero_band	lambda	24.0	change	interval_score_rel	0.18127768710486608	327.0					level		oracle_conditional					
+hetero_band	lambda	24.0	change	coverage	0.8073394495412844	327.0					level		oracle_constant					
+hetero_band	lambda	24.0	change	mean_rel_width	0.13999817539262382	327.0					level		oracle_constant					
+hetero_band	lambda	24.0	change	interval_score_rel	0.19761556528294122	327.0					level		oracle_constant					
+hetero_band	lambda	24.0	change	ratio	0.9323286520359825	327.0					level		width_ratio_conditional_over_constant					
+hetero_band	lambda	24.0	change	ratio	0.8937203683426088	327.0					level		width_ratio_oracle_conditional_over_oracle_constant					
+hetero_bin_fit	lambda	24.0	change	r_b_train	0.11723469106619477	81.0	0.08411966660067183	0.12817528514440202			hour	00-06						
+hetero_bin_fit	lambda	24.0	change	r_b_train	0.10146416654170942	106.0	0.08411966660067183	0.12078905351716107			hour	06-12						
+hetero_bin_fit	lambda	24.0	change	r_b_train	0.11436813844405735	102.0	0.10019831967309623	0.1268013333651511			hour	12-18						
+hetero_bin_fit	lambda	24.0	change	r_b_train	0.11306993774798835	108.0	0.09060948548822867	0.12405229288473674			hour	18-24						
+hetero_band	lambda	24.0	change	coverage	0.9480122324159022	327.0					hour		conditional					
+hetero_band	lambda	24.0	change	mean_rel_width	0.2222423481078214	327.0					hour		conditional					
+hetero_band	lambda	24.0	change	interval_score_rel	0.22778752405781896	327.0					hour		conditional					
+hetero_band	lambda	24.0	change	coverage	0.9510703363914373	327.0					hour		constant					
+hetero_band	lambda	24.0	change	mean_rel_width	0.22807176334221355	327.0					hour		constant					
+hetero_band	lambda	24.0	change	interval_score_rel	0.23255948344302718	327.0					hour		constant					
+hetero_band	lambda	24.0	change	coverage	0.8073394495412844	327.0					hour		oracle_conditional					
+hetero_band	lambda	24.0	change	mean_rel_width	0.1382991537912118	327.0					hour		oracle_conditional					
+hetero_band	lambda	24.0	change	interval_score_rel	0.19734854497611592	327.0					hour		oracle_conditional					
+hetero_band	lambda	24.0	change	coverage	0.8073394495412844	327.0					hour		oracle_constant					
+hetero_band	lambda	24.0	change	mean_rel_width	0.13999817539262382	327.0					hour		oracle_constant					
+hetero_band	lambda	24.0	change	interval_score_rel	0.19761556528294122	327.0					hour		oracle_constant					
+hetero_band	lambda	24.0	change	ratio	0.9744404342345294	327.0					hour		width_ratio_conditional_over_constant					
+hetero_band	lambda	24.0	change	ratio	0.9878639732507433	327.0					hour		width_ratio_oracle_conditional_over_oracle_constant					
+hetero_bin_fit	lambda	24.0	change	r_b_train	0.10556169336626187	183.0	0.09060948548822867	0.11723469106619477			recal	12-24h						
+hetero_bin_fit	lambda	24.0	change	r_b_train	0.11723469106619477	183.0	0.10146416654170942	0.12405229288473674			recal	<12h						
+hetero_bin_fit	lambda	24.0	change	r_b_train	0.13937626324993702	27.0	0.10220165268966996	0.13937626324993702			recal	>24h						
+hetero_band	lambda	24.0	change	coverage	0.9571865443425076	327.0					recal		conditional					
+hetero_band	lambda	24.0	change	mean_rel_width	0.22705227743670334	327.0					recal		conditional					
+hetero_band	lambda	24.0	change	interval_score_rel	0.23172281266440334	327.0					recal		conditional					
+hetero_band	lambda	24.0	change	coverage	0.9510703363914373	327.0					recal		constant					
+hetero_band	lambda	24.0	change	mean_rel_width	0.22807176334221355	327.0					recal		constant					
+hetero_band	lambda	24.0	change	interval_score_rel	0.23255948344302718	327.0					recal		constant					
+hetero_band	lambda	24.0	change	coverage	0.8042813455657493	327.0					recal		oracle_conditional					
+hetero_band	lambda	24.0	change	mean_rel_width	0.14543717508497295	327.0					recal		oracle_conditional					
+hetero_band	lambda	24.0	change	interval_score_rel	0.19726448504130184	327.0					recal		oracle_conditional					
+hetero_band	lambda	24.0	change	coverage	0.8073394495412844	327.0					recal		oracle_constant					
+hetero_band	lambda	24.0	change	mean_rel_width	0.13999817539262382	327.0					recal		oracle_constant					
+hetero_band	lambda	24.0	change	interval_score_rel	0.19761556528294122	327.0					recal		oracle_constant					
+hetero_band	lambda	24.0	change	ratio	0.9955299775361472	327.0					recal		width_ratio_conditional_over_constant					
+hetero_band	lambda	24.0	change	ratio	1.038850504137611	327.0					recal		width_ratio_oracle_conditional_over_oracle_constant					
+zero_width_band	gamma	168.0	all	coverage	0.0	344.0												
+zero_width_band	gamma	168.0	change	coverage	0.0	344.0												
+persistence_fit	gamma	168.0	change	r_train	0.17509668036697845	423.0	0.1617958825712167	0.19891550491394605										
+persistence_fit	gamma	168.0	change	r_oracle_test	0.11194175694738195	344.0												
+persistence_band	gamma	168.0	change	coverage	0.9244186046511628	344.0			0.17509668036697845									
+persistence_band	gamma	168.0	change	mean_rel_width	0.35019336073395696	344.0			0.17509668036697845									
+persistence_band	gamma	168.0	change	interval_score_rel	0.35630842779829863	344.0			0.17509668036697845									
+persistence_band	gamma	168.0	distinct	coverage	0.9244186046511628	344.0			0.17509668036697845									
+persistence_band	gamma	168.0	distinct	mean_rel_width	0.35019336073395696	344.0			0.17509668036697845									
+persistence_band	gamma	168.0	distinct	interval_score_rel	0.35630842779829863	344.0			0.17509668036697845									
+persistence_band	gamma	168.0	all	coverage	0.9244186046511628	344.0			0.17509668036697845									
+persistence_band	gamma	168.0	all	mean_rel_width	0.35019336073395696	344.0			0.17509668036697845									
+persistence_band	gamma	168.0	all	interval_score_rel	0.35630842779829863	344.0			0.17509668036697845									
+rolling_percentile_band	gamma	168.0	change	coverage	0.7238372093023255	344.0				7.0								
+rolling_percentile_band	gamma	168.0	change	mean_rel_width	0.1406468904137084	344.0				7.0								
+rolling_percentile_band	gamma	168.0	change	interval_score_rel	0.2092585335588556	344.0				7.0								
+rolling_percentile_band	gamma	168.0	all	coverage	0.7238372093023255	344.0				7.0								
+rolling_percentile_band	gamma	168.0	all	mean_rel_width	0.1406468904137084	344.0				7.0								
+rolling_percentile_band	gamma	168.0	all	interval_score_rel	0.2092585335588556	344.0				7.0								
+rolling_percentile_band	gamma	168.0	change	coverage	0.7558139534883721	344.0				30.0								
+rolling_percentile_band	gamma	168.0	change	mean_rel_width	0.16535293309335505	344.0				30.0								
+rolling_percentile_band	gamma	168.0	change	interval_score_rel	0.20653793694147884	344.0				30.0								
+rolling_percentile_band	gamma	168.0	all	coverage	0.7558139534883721	344.0				30.0								
+rolling_percentile_band	gamma	168.0	all	mean_rel_width	0.16535293309335505	344.0				30.0								
+rolling_percentile_band	gamma	168.0	all	interval_score_rel	0.20653793694147884	344.0				30.0								
+hetero_bin_fit	gamma	168.0	change	r_b_train	0.2698633853005382	136.0	0.19560004857571622	0.28212361771191663			level	high						
+hetero_bin_fit	gamma	168.0	change	r_b_train	0.19995743427995616	141.0	0.17509668036697845	0.2220568786782524			level	low						
+hetero_bin_fit	gamma	168.0	change	r_b_train	0.11951106437012937	146.0	0.10092002849450349	0.13480313082947237			level	mid						
+hetero_band	gamma	168.0	change	coverage	0.9593023255813954	344.0					level		conditional					
+hetero_band	gamma	168.0	change	mean_rel_width	0.3088822992273845	344.0					level		conditional					
+hetero_band	gamma	168.0	change	interval_score_rel	0.3192573809885232	344.0					level		conditional					
+hetero_band	gamma	168.0	change	coverage	0.9244186046511628	344.0					level		constant					
+hetero_band	gamma	168.0	change	mean_rel_width	0.35019336073395696	344.0					level		constant					
+hetero_band	gamma	168.0	change	interval_score_rel	0.35630842779829863	344.0					level		constant					
+hetero_band	gamma	168.0	change	coverage	0.8313953488372093	344.0					level		oracle_conditional					
+hetero_band	gamma	168.0	change	mean_rel_width	0.21942807781374035	344.0					level		oracle_conditional					
+hetero_band	gamma	168.0	change	interval_score_rel	0.26663377509986896	344.0					level		oracle_conditional					
+hetero_band	gamma	168.0	change	coverage	0.8284883720930233	344.0					level		oracle_constant					
+hetero_band	gamma	168.0	change	mean_rel_width	0.2238835138947639	344.0					level		oracle_constant					
+hetero_band	gamma	168.0	change	interval_score_rel	0.2978403309064185	344.0					level		oracle_constant					
+hetero_band	gamma	168.0	change	ratio	0.882033567341225	344.0					level		width_ratio_conditional_over_constant					
+hetero_band	gamma	168.0	change	ratio	0.9800993114521249	344.0					level		width_ratio_oracle_conditional_over_oracle_constant					
+hetero_bin_fit	gamma	168.0	change	r_b_train	0.19891550491394605	82.0	0.15670690766419004	0.26632624872091615			hour	00-06						
+hetero_bin_fit	gamma	168.0	change	r_b_train	0.15788106554441017	113.0	0.14979632018676436	0.19560004857571622			hour	06-12						
+hetero_bin_fit	gamma	168.0	change	r_b_train	0.17220661825694883	100.0	0.14979632018676436	0.20017776266599796			hour	12-18						
+hetero_bin_fit	gamma	168.0	change	r_b_train	0.1972584516552106	128.0	0.1583578325875995	0.23037610314431323			hour	18-24						
+hetero_band	gamma	168.0	change	coverage	0.9505813953488372	344.0					hour		conditional					
+hetero_band	gamma	168.0	change	mean_rel_width	0.36278005767445387	344.0					hour		conditional					
+hetero_band	gamma	168.0	change	interval_score_rel	0.37230588030659917	344.0					hour		conditional					
+hetero_band	gamma	168.0	change	coverage	0.9244186046511628	344.0					hour		constant					
+hetero_band	gamma	168.0	change	mean_rel_width	0.35019336073395696	344.0					hour		constant					
+hetero_band	gamma	168.0	change	interval_score_rel	0.35630842779829863	344.0					hour		constant					
+hetero_band	gamma	168.0	change	coverage	0.811046511627907	344.0					hour		oracle_conditional					
+hetero_band	gamma	168.0	change	mean_rel_width	0.22137143205061696	344.0					hour		oracle_conditional					
+hetero_band	gamma	168.0	change	interval_score_rel	0.2975109182802679	344.0					hour		oracle_conditional					
+hetero_band	gamma	168.0	change	coverage	0.8284883720930233	344.0					hour		oracle_constant					
+hetero_band	gamma	168.0	change	mean_rel_width	0.2238835138947639	344.0					hour		oracle_constant					
+hetero_band	gamma	168.0	change	interval_score_rel	0.2978403309064185	344.0					hour		oracle_constant					
+hetero_band	gamma	168.0	change	ratio	1.03594213469415	344.0					hour		width_ratio_conditional_over_constant					
+hetero_band	gamma	168.0	change	ratio	0.9887795139514929	344.0					hour		width_ratio_oracle_conditional_over_oracle_constant					
+hetero_bin_fit	gamma	168.0	change	r_b_train	0.1972584516552106	174.0	0.16609074889706887	0.23037610314431323			recal	12-24h						
+hetero_bin_fit	gamma	168.0	change	r_b_train	0.1583578325875995	217.0	0.15617056518858763	0.1846557550954877			recal	<12h						
+hetero_bin_fit	gamma	168.0	change	r_b_train	0.18613114548904974	28.0	0.0951125196598811	0.20017776266599796			recal	>24h						
+hetero_band	gamma	168.0	change	coverage	0.9244186046511628	344.0					recal		conditional					
+hetero_band	gamma	168.0	change	mean_rel_width	0.35438658236964177	344.0					recal		conditional					
+hetero_band	gamma	168.0	change	interval_score_rel	0.373153104150956	344.0					recal		conditional					
+hetero_band	gamma	168.0	change	coverage	0.9244186046511628	344.0					recal		constant					
+hetero_band	gamma	168.0	change	mean_rel_width	0.35019336073395696	344.0					recal		constant					
+hetero_band	gamma	168.0	change	interval_score_rel	0.35630842779829863	344.0					recal		constant					
+hetero_band	gamma	168.0	change	coverage	0.813953488372093	344.0					recal		oracle_conditional					
+hetero_band	gamma	168.0	change	mean_rel_width	0.2261990734901489	344.0					recal		oracle_conditional					
+hetero_band	gamma	168.0	change	interval_score_rel	0.2946437449648423	344.0					recal		oracle_conditional					
+hetero_band	gamma	168.0	change	coverage	0.8284883720930233	344.0					recal		oracle_constant					
+hetero_band	gamma	168.0	change	mean_rel_width	0.2238835138947639	344.0					recal		oracle_constant					
+hetero_band	gamma	168.0	change	interval_score_rel	0.2978403309064185	344.0					recal		oracle_constant					
+hetero_band	gamma	168.0	change	ratio	1.0119740180878827	344.0					recal		width_ratio_conditional_over_constant					
+hetero_band	gamma	168.0	change	ratio	1.0103426981071657	344.0					recal		width_ratio_oracle_conditional_over_oracle_constant					
+zero_width_band	lambda	168.0	all	coverage	0.0	344.0												
+zero_width_band	lambda	168.0	change	coverage	0.0	344.0												
+persistence_fit	lambda	168.0	change	r_train	0.14957045635822808	423.0	0.13467854174813398	0.15735190925666065										
+persistence_fit	lambda	168.0	change	r_oracle_test	0.07328375846304414	344.0												
+persistence_band	lambda	168.0	change	coverage	1.0	344.0			0.14957045635822808									
+persistence_band	lambda	168.0	change	mean_rel_width	0.2991409127164562	344.0			0.14957045635822808									
+persistence_band	lambda	168.0	change	interval_score_rel	0.2991409127164562	344.0			0.14957045635822808									
+persistence_band	lambda	168.0	distinct	coverage	1.0	344.0			0.14957045635822808									
+persistence_band	lambda	168.0	distinct	mean_rel_width	0.2991409127164562	344.0			0.14957045635822808									
+persistence_band	lambda	168.0	distinct	interval_score_rel	0.2991409127164562	344.0			0.14957045635822808									
+persistence_band	lambda	168.0	all	coverage	1.0	344.0			0.14957045635822808									
+persistence_band	lambda	168.0	all	mean_rel_width	0.2991409127164562	344.0			0.14957045635822808									
+persistence_band	lambda	168.0	all	interval_score_rel	0.2991409127164562	344.0			0.14957045635822808									
+rolling_percentile_band	lambda	168.0	change	coverage	0.8197674418604651	344.0				7.0								
+rolling_percentile_band	lambda	168.0	change	mean_rel_width	0.10202050677280444	344.0				7.0								
+rolling_percentile_band	lambda	168.0	change	interval_score_rel	0.1463475302714836	344.0				7.0								
+rolling_percentile_band	lambda	168.0	all	coverage	0.8197674418604651	344.0				7.0								
+rolling_percentile_band	lambda	168.0	all	mean_rel_width	0.10202050677280444	344.0				7.0								
+rolling_percentile_band	lambda	168.0	all	interval_score_rel	0.1463475302714836	344.0				7.0								
+rolling_percentile_band	lambda	168.0	change	coverage	0.7994186046511628	344.0				30.0								
+rolling_percentile_band	lambda	168.0	change	mean_rel_width	0.1185249676165083	344.0				30.0								
+rolling_percentile_band	lambda	168.0	change	interval_score_rel	0.15429416678719177	344.0				30.0								
+rolling_percentile_band	lambda	168.0	all	coverage	0.7994186046511628	344.0				30.0								
+rolling_percentile_band	lambda	168.0	all	mean_rel_width	0.1185249676165083	344.0				30.0								
+rolling_percentile_band	lambda	168.0	all	interval_score_rel	0.15429416678719177	344.0				30.0								
+hetero_bin_fit	lambda	168.0	change	r_b_train	0.1569641670774583	141.0	0.13371167646759174	0.16314411439781173			level	high						
+hetero_bin_fit	lambda	168.0	change	r_b_train	0.18170872118743708	141.0	0.1549108208525951	0.21623553158857733			level	low						
+hetero_bin_fit	lambda	168.0	change	r_b_train	0.11087001262678309	141.0	0.10400510097984283	0.1166180839337434			level	mid						
+hetero_band	lambda	168.0	change	coverage	0.9941860465116279	344.0					level		conditional					
+hetero_band	lambda	168.0	change	mean_rel_width	0.3294875950950608	344.0					level		conditional					
+hetero_band	lambda	168.0	change	interval_score_rel	0.3301981528093793	344.0					level		conditional					
+hetero_band	lambda	168.0	change	coverage	1.0	344.0					level		constant					
+hetero_band	lambda	168.0	change	mean_rel_width	0.2991409127164562	344.0					level		constant					
+hetero_band	lambda	168.0	change	interval_score_rel	0.2991409127164562	344.0					level		constant					
+hetero_band	lambda	168.0	change	coverage	0.8226744186046512	344.0					level		oracle_conditional					
+hetero_band	lambda	168.0	change	mean_rel_width	0.13575634686684165	344.0					level		oracle_conditional					
+hetero_band	lambda	168.0	change	interval_score_rel	0.1807602083076041	344.0					level		oracle_conditional					
+hetero_band	lambda	168.0	change	coverage	0.8023255813953488	344.0					level		oracle_constant					
+hetero_band	lambda	168.0	change	mean_rel_width	0.14656751692608827	344.0					level		oracle_constant					
+hetero_band	lambda	168.0	change	interval_score_rel	0.19257344317328723	344.0					level		oracle_constant					
+hetero_band	lambda	168.0	change	ratio	1.1014461114764633	344.0					level		width_ratio_conditional_over_constant					
+hetero_band	lambda	168.0	change	ratio	0.9262376119485021	344.0					level		width_ratio_oracle_conditional_over_oracle_constant					
+hetero_bin_fit	lambda	168.0	change	r_b_train	0.12719606768202985	82.0	0.1171416719385221	0.16314411439781173			hour	00-06						
+hetero_bin_fit	lambda	168.0	change	r_b_train	0.15425313917703098	113.0	0.13669326385446423	0.1634204284763916			hour	06-12						
+hetero_bin_fit	lambda	168.0	change	r_b_train	0.1549108208525951	100.0	0.12687323410082008	0.17137495070827002			hour	12-18						
+hetero_bin_fit	lambda	168.0	change	r_b_train	0.14746963006182034	128.0	0.11700629537286844	0.16004433967706788			hour	18-24						
+hetero_band	lambda	168.0	change	coverage	0.997093023255814	344.0					hour		conditional					
+hetero_band	lambda	168.0	change	mean_rel_width	0.29242192235742887	344.0					hour		conditional					
+hetero_band	lambda	168.0	change	interval_score_rel	0.29276501566328983	344.0					hour		conditional					
+hetero_band	lambda	168.0	change	coverage	1.0	344.0					hour		constant					
+hetero_band	lambda	168.0	change	mean_rel_width	0.2991409127164562	344.0					hour		constant					
+hetero_band	lambda	168.0	change	interval_score_rel	0.2991409127164562	344.0					hour		constant					
+hetero_band	lambda	168.0	change	coverage	0.8168604651162791	344.0					hour		oracle_conditional					
+hetero_band	lambda	168.0	change	mean_rel_width	0.14423214468914483	344.0					hour		oracle_conditional					
+hetero_band	lambda	168.0	change	interval_score_rel	0.19152868829850325	344.0					hour		oracle_conditional					
+hetero_band	lambda	168.0	change	coverage	0.8023255813953488	344.0					hour		oracle_constant					
+hetero_band	lambda	168.0	change	mean_rel_width	0.14656751692608827	344.0					hour		oracle_constant					
+hetero_band	lambda	168.0	change	interval_score_rel	0.19257344317328723	344.0					hour		oracle_constant					
+hetero_band	lambda	168.0	change	ratio	0.9775390457359605	344.0					hour		width_ratio_conditional_over_constant					
+hetero_band	lambda	168.0	change	ratio	0.9840662359169179	344.0					hour		width_ratio_oracle_conditional_over_oracle_constant					
+hetero_bin_fit	lambda	168.0	change	r_b_train	0.13467854174813398	174.0	0.1171416719385221	0.162681469467573			recal	12-24h						
+hetero_bin_fit	lambda	168.0	change	r_b_train	0.14957045635822808	217.0	0.13371167646759174	0.15735190925666065			recal	<12h						
+hetero_bin_fit	lambda	168.0	change	r_b_train	0.14227792796462557	28.0	0.07710610378057092	0.1634204284763916			recal	>24h						
+hetero_band	lambda	168.0	change	coverage	1.0	344.0					recal		conditional					
+hetero_band	lambda	168.0	change	mean_rel_width	0.2852245807366446	344.0					recal		conditional					
+hetero_band	lambda	168.0	change	interval_score_rel	0.2852245807366446	344.0					recal		conditional					
+hetero_band	lambda	168.0	change	coverage	1.0	344.0					recal		constant					
+hetero_band	lambda	168.0	change	mean_rel_width	0.2991409127164562	344.0					recal		constant					
+hetero_band	lambda	168.0	change	interval_score_rel	0.2991409127164562	344.0					recal		constant					
+hetero_band	lambda	168.0	change	coverage	0.8052325581395349	344.0					recal		oracle_conditional					
+hetero_band	lambda	168.0	change	mean_rel_width	0.14363717915555696	344.0					recal		oracle_conditional					
+hetero_band	lambda	168.0	change	interval_score_rel	0.19227885327122005	344.0					recal		oracle_conditional					
+hetero_band	lambda	168.0	change	coverage	0.8023255813953488	344.0					recal		oracle_constant					
+hetero_band	lambda	168.0	change	mean_rel_width	0.14656751692608827	344.0					recal		oracle_constant					
+hetero_band	lambda	168.0	change	interval_score_rel	0.19257344317328723	344.0					recal		oracle_constant					
+hetero_band	lambda	168.0	change	ratio	0.9534790080920748	344.0					recal		width_ratio_conditional_over_constant					
+hetero_band	lambda	168.0	change	ratio	0.980006908542982	344.0					recal		width_ratio_oracle_conditional_over_oracle_constant					
+homogeneity_vs_staleness	gamma		all	median_rel_abs_err	0.2664788420005727	62701.0									homogeneous_fresh	0.0		
+homogeneity_vs_staleness	gamma		all	p90_rel_abs_err	0.673324427051154	62701.0									homogeneous_fresh	0.0		
+homogeneity_vs_staleness	gamma		all	median_abs_err	5.1050961083758876e-05	62701.0									homogeneous_fresh	0.0		
+homogeneity_vs_staleness	gamma		all	frac_within_rstar	0.21749254397856493	62701.0									homogeneous_fresh	0.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		all	median_rel_abs_err	0.0	61755.0									stale_per_qubit	1.0		400
+homogeneity_vs_staleness	gamma		all	p90_rel_abs_err	0.1029018192927626	61755.0									stale_per_qubit	1.0		
+homogeneity_vs_staleness	gamma		all	median_abs_err	0.0	61755.0									stale_per_qubit	1.0		
+homogeneity_vs_staleness	gamma		all	frac_within_rstar	0.9005748522386852	61755.0									stale_per_qubit	1.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		all	median_rel_abs_err	0.26647363136783886	61755.0									homogeneous_fresh_same_rows	1.0		400
+homogeneity_vs_staleness	gamma		all	p90_rel_abs_err	0.6736983599268016	61755.0									homogeneous_fresh_same_rows	1.0		
+homogeneity_vs_staleness	gamma		all	median_abs_err	5.1050961083758876e-05	61755.0									homogeneous_fresh_same_rows	1.0		
+homogeneity_vs_staleness	gamma		all	frac_within_rstar	0.21771516476398672	61755.0									homogeneous_fresh_same_rows	1.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		moved	median_rel_abs_err	0.2329450616305792	8158.0									stale_per_qubit	1.0		400
+homogeneity_vs_staleness	gamma		moved	p90_rel_abs_err	0.680889770612654	8158.0									stale_per_qubit	1.0		
+homogeneity_vs_staleness	gamma		moved	median_abs_err	4.339718520862679e-05	8158.0									stale_per_qubit	1.0		
+homogeneity_vs_staleness	gamma		moved	frac_within_rstar	0.24736455013483696	8158.0									stale_per_qubit	1.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		moved	median_rel_abs_err	0.26344824584374593	8158.0									homogeneous_fresh_same_rows	1.0		400
+homogeneity_vs_staleness	gamma		moved	p90_rel_abs_err	0.6704674288528427	8158.0									homogeneous_fresh_same_rows	1.0		
+homogeneity_vs_staleness	gamma		moved	median_abs_err	5.064946926296873e-05	8158.0									homogeneous_fresh_same_rows	1.0		
+homogeneity_vs_staleness	gamma		moved	frac_within_rstar	0.2181907330227997	8158.0									homogeneous_fresh_same_rows	1.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		all	median_rel_abs_err	0.0	59889.0									stale_per_qubit	6.0		388
+homogeneity_vs_staleness	gamma		all	p90_rel_abs_err	0.30892978261634396	59889.0									stale_per_qubit	6.0		
+homogeneity_vs_staleness	gamma		all	median_abs_err	0.0	59889.0									stale_per_qubit	6.0		
+homogeneity_vs_staleness	gamma		all	frac_within_rstar	0.7998630800313914	59889.0									stale_per_qubit	6.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		all	median_rel_abs_err	0.2660681990133258	59889.0									homogeneous_fresh_same_rows	6.0		388
+homogeneity_vs_staleness	gamma		all	p90_rel_abs_err	0.6732612723337941	59889.0									homogeneous_fresh_same_rows	6.0		
+homogeneity_vs_staleness	gamma		all	median_abs_err	5.09388792174973e-05	59889.0									homogeneous_fresh_same_rows	6.0		
+homogeneity_vs_staleness	gamma		all	frac_within_rstar	0.21812018901634692	59889.0									homogeneous_fresh_same_rows	6.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		moved	median_rel_abs_err	0.23302155974373934	16004.0									stale_per_qubit	6.0		388
+homogeneity_vs_staleness	gamma		moved	p90_rel_abs_err	0.6683690761403013	16004.0									stale_per_qubit	6.0		
+homogeneity_vs_staleness	gamma		moved	median_abs_err	4.2778993207814864e-05	16004.0									stale_per_qubit	6.0		
+homogeneity_vs_staleness	gamma		moved	frac_within_rstar	0.25106223444138964	16004.0									stale_per_qubit	6.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		moved	median_rel_abs_err	0.26162391931851514	16004.0									homogeneous_fresh_same_rows	6.0		388
+homogeneity_vs_staleness	gamma		moved	p90_rel_abs_err	0.6689340434944635	16004.0									homogeneous_fresh_same_rows	6.0		
+homogeneity_vs_staleness	gamma		moved	median_abs_err	5.015263199540434e-05	16004.0									homogeneous_fresh_same_rows	6.0		
+homogeneity_vs_staleness	gamma		moved	frac_within_rstar	0.22094476380904773	16004.0									homogeneous_fresh_same_rows	6.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		all	median_rel_abs_err	0.20121470622953863	60717.0									stale_per_qubit	24.0		394
+homogeneity_vs_staleness	gamma		all	p90_rel_abs_err	0.641852210975956	60717.0									stale_per_qubit	24.0		
+homogeneity_vs_staleness	gamma		all	median_abs_err	3.732986618742995e-05	60717.0									stale_per_qubit	24.0		
+homogeneity_vs_staleness	gamma		all	frac_within_rstar	0.32837590790058796	60717.0									stale_per_qubit	24.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		all	median_rel_abs_err	0.26679595011623136	60717.0									homogeneous_fresh_same_rows	24.0		394
+homogeneity_vs_staleness	gamma		all	p90_rel_abs_err	0.6736983599268016	60717.0									homogeneous_fresh_same_rows	24.0		
+homogeneity_vs_staleness	gamma		all	median_abs_err	5.1153369630284134e-05	60717.0									homogeneous_fresh_same_rows	24.0		
+homogeneity_vs_staleness	gamma		all	frac_within_rstar	0.21692441984946556	60717.0									homogeneous_fresh_same_rows	24.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		moved	median_rel_abs_err	0.23302222588484423	54289.0									stale_per_qubit	24.0		394
+homogeneity_vs_staleness	gamma		moved	p90_rel_abs_err	0.6699767799700669	54289.0									stale_per_qubit	24.0		
+homogeneity_vs_staleness	gamma		moved	median_abs_err	4.339718520862679e-05	54289.0									stale_per_qubit	24.0		
+homogeneity_vs_staleness	gamma		moved	frac_within_rstar	0.248853358875647	54289.0									stale_per_qubit	24.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		moved	median_rel_abs_err	0.2651890551447267	54289.0									homogeneous_fresh_same_rows	24.0		394
+homogeneity_vs_staleness	gamma		moved	p90_rel_abs_err	0.6725867935714458	54289.0									homogeneous_fresh_same_rows	24.0		
+homogeneity_vs_staleness	gamma		moved	median_abs_err	5.097997348556358e-05	54289.0									homogeneous_fresh_same_rows	24.0		
+homogeneity_vs_staleness	gamma		moved	frac_within_rstar	0.21698686658439095	54289.0									homogeneous_fresh_same_rows	24.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		all	median_rel_abs_err	0.22857512772111155	59915.0									stale_per_qubit	48.0		389
+homogeneity_vs_staleness	gamma		all	p90_rel_abs_err	0.6542431482880497	59915.0									stale_per_qubit	48.0		
+homogeneity_vs_staleness	gamma		all	median_abs_err	4.2997627862306764e-05	59915.0									stale_per_qubit	48.0		
+homogeneity_vs_staleness	gamma		all	frac_within_rstar	0.2554452140532421	59915.0									stale_per_qubit	48.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		all	median_rel_abs_err	0.26744116328457745	59915.0									homogeneous_fresh_same_rows	48.0		389
+homogeneity_vs_staleness	gamma		all	p90_rel_abs_err	0.6753027888937535	59915.0									homogeneous_fresh_same_rows	48.0		
+homogeneity_vs_staleness	gamma		all	median_abs_err	5.124325891575014e-05	59915.0									homogeneous_fresh_same_rows	48.0		
+homogeneity_vs_staleness	gamma		all	frac_within_rstar	0.2164399566051907	59915.0									homogeneous_fresh_same_rows	48.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		moved	median_rel_abs_err	0.2320561128119586	59205.0									stale_per_qubit	48.0		389
+homogeneity_vs_staleness	gamma		moved	p90_rel_abs_err	0.6593178137013396	59205.0									stale_per_qubit	48.0		
+homogeneity_vs_staleness	gamma		moved	median_abs_err	4.35630422972455e-05	59205.0									stale_per_qubit	48.0		
+homogeneity_vs_staleness	gamma		moved	frac_within_rstar	0.24651634152520902	59205.0									stale_per_qubit	48.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		moved	median_rel_abs_err	0.2664788420005727	59205.0									homogeneous_fresh_same_rows	48.0		389
+homogeneity_vs_staleness	gamma		moved	p90_rel_abs_err	0.6756212175512699	59205.0									homogeneous_fresh_same_rows	48.0		
+homogeneity_vs_staleness	gamma		moved	median_abs_err	5.1092521618894215e-05	59205.0									homogeneous_fresh_same_rows	48.0		
+homogeneity_vs_staleness	gamma		moved	frac_within_rstar	0.21640064183768262	59205.0									homogeneous_fresh_same_rows	48.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		all	median_rel_abs_err	0.2323277363320697	59319.0									stale_per_qubit	168.0		385
+homogeneity_vs_staleness	gamma		all	p90_rel_abs_err	0.6655777367860053	59319.0									stale_per_qubit	168.0		
+homogeneity_vs_staleness	gamma		all	median_abs_err	4.386531188804721e-05	59319.0									stale_per_qubit	168.0		
+homogeneity_vs_staleness	gamma		all	frac_within_rstar	0.24245182825064482	59319.0									stale_per_qubit	168.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		all	median_rel_abs_err	0.2664788420005727	59319.0									homogeneous_fresh_same_rows	168.0		385
+homogeneity_vs_staleness	gamma		all	p90_rel_abs_err	0.6725867935714458	59319.0									homogeneous_fresh_same_rows	168.0		
+homogeneity_vs_staleness	gamma		all	median_abs_err	5.1098434239672124e-05	59319.0									homogeneous_fresh_same_rows	168.0		
+homogeneity_vs_staleness	gamma		all	frac_within_rstar	0.21716482071511659	59319.0									homogeneous_fresh_same_rows	168.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		moved	median_rel_abs_err	0.2334702703206153	59062.0									stale_per_qubit	168.0		385
+homogeneity_vs_staleness	gamma		moved	p90_rel_abs_err	0.6669971022458747	59062.0									stale_per_qubit	168.0		
+homogeneity_vs_staleness	gamma		moved	median_abs_err	4.409126464477442e-05	59062.0									stale_per_qubit	168.0		
+homogeneity_vs_staleness	gamma		moved	frac_within_rstar	0.23915546374995766	59062.0									stale_per_qubit	168.0	0.10491521416004401	
+homogeneity_vs_staleness	gamma		moved	median_rel_abs_err	0.2661880597969357	59062.0									homogeneous_fresh_same_rows	168.0		385
+homogeneity_vs_staleness	gamma		moved	p90_rel_abs_err	0.6736983599268016	59062.0									homogeneous_fresh_same_rows	168.0		
+homogeneity_vs_staleness	gamma		moved	median_abs_err	5.1034191916927486e-05	59062.0									homogeneous_fresh_same_rows	168.0		
+homogeneity_vs_staleness	gamma		moved	frac_within_rstar	0.21707696996376688	59062.0									homogeneous_fresh_same_rows	168.0	0.10491521416004401	
+homogeneity_vs_staleness	lambda		all	median_rel_abs_err	1.2047834918745943	62701.0									homogeneous_fresh	0.0		
+homogeneity_vs_staleness	lambda		all	p90_rel_abs_err	4.8388418202815044	62701.0									homogeneous_fresh	0.0		
+homogeneity_vs_staleness	lambda		all	median_abs_err	0.0004412130607148886	62701.0									homogeneous_fresh	0.0		
+homogeneity_vs_staleness	lambda		all	frac_within_rstar	0.0510837147732891	62701.0									homogeneous_fresh	0.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		all	median_rel_abs_err	0.0	61755.0									stale_per_qubit	1.0		400
+homogeneity_vs_staleness	lambda		all	p90_rel_abs_err	0.08560291653701711	61755.0									stale_per_qubit	1.0		
+homogeneity_vs_staleness	lambda		all	median_abs_err	0.0	61755.0									stale_per_qubit	1.0		
+homogeneity_vs_staleness	lambda		all	frac_within_rstar	0.9105983321188568	61755.0									stale_per_qubit	1.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		all	median_rel_abs_err	1.2039407529519548	61755.0									homogeneous_fresh_same_rows	1.0		400
+homogeneity_vs_staleness	lambda		all	p90_rel_abs_err	4.8247073984044935	61755.0									homogeneous_fresh_same_rows	1.0		
+homogeneity_vs_staleness	lambda		all	median_abs_err	0.0004412130607148886	61755.0									homogeneous_fresh_same_rows	1.0		
+homogeneity_vs_staleness	lambda		all	frac_within_rstar	0.05116994575338029	61755.0									homogeneous_fresh_same_rows	1.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		moved	median_rel_abs_err	0.19448344962574793	8463.0									stale_per_qubit	1.0		400
+homogeneity_vs_staleness	lambda		moved	p90_rel_abs_err	0.7994385583057136	8463.0									stale_per_qubit	1.0		
+homogeneity_vs_staleness	lambda		moved	median_abs_err	6.479107182721933e-05	8463.0									stale_per_qubit	1.0		
+homogeneity_vs_staleness	lambda		moved	frac_within_rstar	0.347630863759896	8463.0									stale_per_qubit	1.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		moved	median_rel_abs_err	1.2089207002047355	8463.0									homogeneous_fresh_same_rows	1.0		400
+homogeneity_vs_staleness	lambda		moved	p90_rel_abs_err	4.7837988698016325	8463.0									homogeneous_fresh_same_rows	1.0		
+homogeneity_vs_staleness	lambda		moved	median_abs_err	0.0004438462403078651	8463.0									homogeneous_fresh_same_rows	1.0		
+homogeneity_vs_staleness	lambda		moved	frac_within_rstar	0.05234550395840718	8463.0									homogeneous_fresh_same_rows	1.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		all	median_rel_abs_err	0.0	59889.0									stale_per_qubit	6.0		388
+homogeneity_vs_staleness	lambda		all	p90_rel_abs_err	0.3070294744746911	59889.0									stale_per_qubit	6.0		
+homogeneity_vs_staleness	lambda		all	median_abs_err	0.0	59889.0									stale_per_qubit	6.0		
+homogeneity_vs_staleness	lambda		all	frac_within_rstar	0.8202507973083538	59889.0									stale_per_qubit	6.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		all	median_rel_abs_err	1.2073193810211298	59889.0									homogeneous_fresh_same_rows	6.0		388
+homogeneity_vs_staleness	lambda		all	p90_rel_abs_err	4.8247073984044935	59889.0									homogeneous_fresh_same_rows	6.0		
+homogeneity_vs_staleness	lambda		all	median_abs_err	0.00044192069026543536	59889.0									homogeneous_fresh_same_rows	6.0		
+homogeneity_vs_staleness	lambda		all	frac_within_rstar	0.05116131509960093	59889.0									homogeneous_fresh_same_rows	6.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		moved	median_rel_abs_err	0.19339593120968024	16608.0									stale_per_qubit	6.0		388
+homogeneity_vs_staleness	lambda		moved	p90_rel_abs_err	0.7959156018191365	16608.0									stale_per_qubit	6.0		
+homogeneity_vs_staleness	lambda		moved	median_abs_err	6.477531742132836e-05	16608.0									stale_per_qubit	6.0		
+homogeneity_vs_staleness	lambda		moved	frac_within_rstar	0.3518184007707129	16608.0									stale_per_qubit	6.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		moved	median_rel_abs_err	1.1911601876250706	16608.0									homogeneous_fresh_same_rows	6.0		388
+homogeneity_vs_staleness	lambda		moved	p90_rel_abs_err	4.771128833961904	16608.0									homogeneous_fresh_same_rows	6.0		
+homogeneity_vs_staleness	lambda		moved	median_abs_err	0.00044038932454594634	16608.0									homogeneous_fresh_same_rows	6.0		
+homogeneity_vs_staleness	lambda		moved	frac_within_rstar	0.05202312138728324	16608.0									homogeneous_fresh_same_rows	6.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		all	median_rel_abs_err	0.1702662309151941	60717.0									stale_per_qubit	24.0		394
+homogeneity_vs_staleness	lambda		all	p90_rel_abs_err	0.7702647091917887	60717.0									stale_per_qubit	24.0		
+homogeneity_vs_staleness	lambda		all	median_abs_err	5.784015413079491e-05	60717.0									stale_per_qubit	24.0		
+homogeneity_vs_staleness	lambda		all	frac_within_rstar	0.39685755225060526	60717.0									stale_per_qubit	24.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		all	median_rel_abs_err	1.2019900501610965	60717.0									homogeneous_fresh_same_rows	24.0		394
+homogeneity_vs_staleness	lambda		all	p90_rel_abs_err	4.796183515897341	60717.0									homogeneous_fresh_same_rows	24.0		
+homogeneity_vs_staleness	lambda		all	median_abs_err	0.0004413750385272012	60717.0									homogeneous_fresh_same_rows	24.0		
+homogeneity_vs_staleness	lambda		all	frac_within_rstar	0.05104007114976036	60717.0									homogeneous_fresh_same_rows	24.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		moved	median_rel_abs_err	0.1939695565545947	56313.0									stale_per_qubit	24.0		394
+homogeneity_vs_staleness	lambda		moved	p90_rel_abs_err	0.7990280980432218	56313.0									stale_per_qubit	24.0		
+homogeneity_vs_staleness	lambda		moved	median_abs_err	6.500798075337322e-05	56313.0									stale_per_qubit	24.0		
+homogeneity_vs_staleness	lambda		moved	frac_within_rstar	0.34968834904906504	56313.0									stale_per_qubit	24.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		moved	median_rel_abs_err	1.2021840724900588	56313.0									homogeneous_fresh_same_rows	24.0		394
+homogeneity_vs_staleness	lambda		moved	p90_rel_abs_err	4.817496227427744	56313.0									homogeneous_fresh_same_rows	24.0		
+homogeneity_vs_staleness	lambda		moved	median_abs_err	0.00044141830757412064	56313.0									homogeneous_fresh_same_rows	24.0		
+homogeneity_vs_staleness	lambda		moved	frac_within_rstar	0.05101841493083302	56313.0									homogeneous_fresh_same_rows	24.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		all	median_rel_abs_err	0.1927513299524254	59915.0									stale_per_qubit	48.0		389
+homogeneity_vs_staleness	lambda		all	p90_rel_abs_err	0.8186695870704641	59915.0									stale_per_qubit	48.0		
+homogeneity_vs_staleness	lambda		all	median_abs_err	6.590604325995564e-05	59915.0									stale_per_qubit	48.0		
+homogeneity_vs_staleness	lambda		all	frac_within_rstar	0.3393807894517233	59915.0									stale_per_qubit	48.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		all	median_rel_abs_err	1.2019580057009889	59915.0									homogeneous_fresh_same_rows	48.0		389
+homogeneity_vs_staleness	lambda		all	p90_rel_abs_err	4.784151900835818	59915.0									homogeneous_fresh_same_rows	48.0		
+homogeneity_vs_staleness	lambda		all	median_abs_err	0.00044092176985787617	59915.0									homogeneous_fresh_same_rows	48.0		
+homogeneity_vs_staleness	lambda		all	frac_within_rstar	0.05107235249937411	59915.0									homogeneous_fresh_same_rows	48.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		moved	median_rel_abs_err	0.19277997535258917	59905.0									stale_per_qubit	48.0		389
+homogeneity_vs_staleness	lambda		moved	p90_rel_abs_err	0.8186695870704641	59905.0									stale_per_qubit	48.0		
+homogeneity_vs_staleness	lambda		moved	median_abs_err	6.595242445806004e-05	59905.0									stale_per_qubit	48.0		
+homogeneity_vs_staleness	lambda		moved	frac_within_rstar	0.3392705116434354	59905.0									stale_per_qubit	48.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		moved	median_rel_abs_err	1.2019900501610965	59905.0									homogeneous_fresh_same_rows	48.0		389
+homogeneity_vs_staleness	lambda		moved	p90_rel_abs_err	4.784151900835818	59905.0									homogeneous_fresh_same_rows	48.0		
+homogeneity_vs_staleness	lambda		moved	median_abs_err	0.00044092176985787617	59905.0									homogeneous_fresh_same_rows	48.0		
+homogeneity_vs_staleness	lambda		moved	frac_within_rstar	0.05106418495951924	59905.0									homogeneous_fresh_same_rows	48.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		all	median_rel_abs_err	0.19749950626727997	59319.0									stale_per_qubit	168.0		385
+homogeneity_vs_staleness	lambda		all	p90_rel_abs_err	0.8210312122813225	59319.0									stale_per_qubit	168.0		
+homogeneity_vs_staleness	lambda		all	median_abs_err	6.65491405296148e-05	59319.0									stale_per_qubit	168.0		
+homogeneity_vs_staleness	lambda		all	frac_within_rstar	0.3354911579763651	59319.0									stale_per_qubit	168.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		all	median_rel_abs_err	1.201128016429093	59319.0									homogeneous_fresh_same_rows	168.0		385
+homogeneity_vs_staleness	lambda		all	p90_rel_abs_err	4.784151900835818	59319.0									homogeneous_fresh_same_rows	168.0		
+homogeneity_vs_staleness	lambda		all	median_abs_err	0.000440470666317373	59319.0									homogeneous_fresh_same_rows	168.0		
+homogeneity_vs_staleness	lambda		all	frac_within_rstar	0.05153492135740657	59319.0									homogeneous_fresh_same_rows	168.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		moved	median_rel_abs_err	0.19749950626727997	59319.0									stale_per_qubit	168.0		385
+homogeneity_vs_staleness	lambda		moved	p90_rel_abs_err	0.8210312122813225	59319.0									stale_per_qubit	168.0		
+homogeneity_vs_staleness	lambda		moved	median_abs_err	6.65491405296148e-05	59319.0									stale_per_qubit	168.0		
+homogeneity_vs_staleness	lambda		moved	frac_within_rstar	0.3354911579763651	59319.0									stale_per_qubit	168.0	0.11403588167110679	
+homogeneity_vs_staleness	lambda		moved	median_rel_abs_err	1.201128016429093	59319.0									homogeneous_fresh_same_rows	168.0		385
+homogeneity_vs_staleness	lambda		moved	p90_rel_abs_err	4.784151900835818	59319.0									homogeneous_fresh_same_rows	168.0		
+homogeneity_vs_staleness	lambda		moved	median_abs_err	0.000440470666317373	59319.0									homogeneous_fresh_same_rows	168.0		
+homogeneity_vs_staleness	lambda		moved	frac_within_rstar	0.05153492135740657	59319.0									homogeneous_fresh_same_rows	168.0	0.11403588167110679	

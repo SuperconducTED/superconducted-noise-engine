@@ -1,0 +1,39 @@
+{
+  "ref": "5828b4a2",
+  "backend": "ibm_fez",
+  "files": 2249,
+  "distinct_states": 924,
+  "state_index_distinct": 924,
+  "first_file": "2026-05-13T12:13:22+00:00",
+  "last_file": "2026-10-23T09:34:56+00:00",
+  "cut": "2026-09-01T00:00:00+00:00",
+  "chipwide_t1_recalibrations": 151,
+  "horizons_h": [
+    24.0,
+    168.0
+  ],
+  "H24h": {
+    "pairs_train": 476,
+    "pairs_test": 378,
+    "dropped": {
+      "no_file_in_window": 68,
+      "straddles_cut": 2
+    }
+  },
+  "H168h": {
+    "pairs_train": 423,
+    "pairs_test": 344,
+    "dropped": {
+      "no_file_in_window": 138,
+      "straddles_cut": 19
+    }
+  },
+  "results_rows": 476,
+  "test_pairs_written": 722,
+  "r_star_24h": {
+    "gamma": 0.10491521416004401,
+    "lambda": 0.11403588167110679
+  },
+  "python": "3.12.10",
+  "numpy": "2.4.4"
+}
