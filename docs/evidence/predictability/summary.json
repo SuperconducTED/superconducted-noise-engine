@@ -51,5 +51,7 @@
   "results_rows": 144,
   "test_rows_written": 193754,
   "python": "3.12.10",
-  "numpy": "2.4.4"
+  "numpy": "2.4.4",
+  "rows_tsv_gz_sha256": "8bf73a14d0b1e6c451afc67f08c9b5e401350fd0ed740b82ca293f206da0174c",
+  "rows_tsv_note": "rows.tsv is committed gzip-compressed as rows.tsv.gz; the script writes rows.tsv"
 }
