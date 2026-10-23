@@ -482,10 +482,10 @@ zero. A model trained from scratch will need the trainer.
 > decision` line), so the target definition that met the second deferral
 > condition is accepted, no longer only proposed. The 2026-09-07 note above
 > stands as written; its floor figure is stale, and NC-012 is the row to cite.
-> The first condition is still unmet: NC-069, the latest registered count of
-> distinct device states (the unit NC-012 counts; NC-025 and NC-047 are
-> earlier counts of it), is below the floor NC-012 records. ADR-014 remains
-> Deferred; this note flips nothing else.
+> The first condition is still unmet: NC-069, the registered count of distinct
+> device states at the latest archive ref (the unit NC-012 counts; NC-025,
+> NC-047 and NC-070 measure it at earlier refs), is below the floor NC-012
+> records. ADR-014 remains Deferred; this note flips nothing else.
 
 ---
 
