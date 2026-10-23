@@ -98,13 +98,19 @@ Mert's area), LOCKED modules, the harness, the data branch.
 
 `pytest tests/test_hardware_test_predictors.py -v`; `ruff check .`; `ruff format --check .`;
 `mypy --strict`. A dry run against `calibration-data` @ `5828b4a2` with
-`--at 2026-10-23T09:34:56Z` is checked on three numbers, not by eye: every qubit except 72
-has `n_window` equal to the number of distinct states in the last 30 days of that archive (one
-count, the same for all qubits, since a state is a whole qubit block); for every qubit with a
-`level`, `band_lo <= level <= band_hi` for `T1` (the geometric mean of a sample lies between
-its 10th and 90th percentiles unless the sample is tiny or degenerate; any violation is
-printed); and the eight selected qubits all have `n_distinct >= 20`. No number is registered
-from this half alone; the dry output is not committed.
+`--at 2026-10-23T09:34:56Z` is checked on three numbers, not by eye. (1) `n_window` counts a
+qubit's *positive finite* values among the window's states, so it equals the window's state
+count only where no value is missing; the check is that every qubit's `n_window` equals that
+count **except where a value is missing, and the exceptions are listed** (an `n_window` that
+simply echoes the state count for every qubit is a tautology, not a test; the listing is what
+can fail). (2) For every qubit with a `level`, `band_lo <= level <= band_hi` for `T1` (the
+geometric mean of a sample lies between its 10th and 90th percentiles unless the sample is
+tiny or degenerate; any violation is printed). (3) The eight selected qubits all have
+`n_distinct >= 20`. Amended after the run, before review: the run's own result for (1) was
+264 for all 156 qubits with no exceptions, because qubit 72's `T1`, absent for most of the
+archive, has been published again throughout the last 30 days; the design's §3 sentence that
+IBM omits it needs that correction. No number is registered from this half alone; the dry
+output is not committed.
 
 ## 7. What this plan does not decide
 

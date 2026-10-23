@@ -94,10 +94,17 @@ per-qubit jumps are multiplicative (NC-084, NC-085) and the band must be a relat
      reading is below the 30-day level, so on this day the discriminating stratum is a set of
      qubits in a low excursion. Proposed controls at the median `log T1` scatter (0.293 to
      0.294): 105, 112, 48, 140.
-  Two things for the pre-registration to decide, not this record: whether qubit 72 is admitted
-  to the discriminating set given its history of omission (ADR-017, NC-027's lineage) and its
-  thin `n_distinct`, and whether a day on which every discriminating qubit sits below its level
-  is representative, or whether the selection should balance the sign of the disagreement.
+  Three things for the pre-registration to decide, not this record: whether qubit 72 is
+  admitted to the discriminating set given its history of omission (ADR-017, NC-027's lineage)
+  and its thin `n_distinct`; whether a day on which every discriminating qubit sits below its
+  level is representative, or whether the selection should balance the sign of the
+  disagreement; and the delay grid, because disagreements of 0.6 to 1.7 log units are two to
+  five times the 0.37 the design's Arm A sensitivity argument assumed, so delays centred on
+  `T1_level` at `{0, 0.5, 1, 2}` sit at up to `{0, 1.5, 3, 6}` times `T1_reading` on the worst
+  qubit: the `reading` predictor forecasts near-complete decay where `level` forecasts half.
+  That is maximal power but a grid centred on one predictor favours it by construction; the
+  pre-registration either adds the `reading`-centred delays (eight delays, roughly double Arm
+  A's cost) or states the asymmetry and keeps four.
   Qubit 0 for scale: reading 52.96 µs, level 50.74 µs, band 44.95 to 56.49 µs, disagreement
   +0.043; its readout error 0.0215 against a level of 0.0255 in a band 0.0204 to 0.0316.
 
