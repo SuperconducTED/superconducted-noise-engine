@@ -298,6 +298,91 @@ def test_full_device_readout_orientation_matches_ibm_probabilities() -> None:
     assert abs(observed - 0.3) <= 3.0 * standard_error
 
 
+def test_full_device_readout_orientation_for_a_prepared_one() -> None:
+    """The prepared-|1> row: P(read 0 | prepared 1) is ``prob_meas0_prep1``.
+
+    The ``x`` gate's own relaxation at T1 = 100 us and 24 ns moves P(0) by about
+    2.4e-4, far inside the 3-sigma band of about 9.7e-3 at 20 000 shots.
+    """
+    shots = 20_000
+    model = build_reference(
+        _snapshot(qubits=[_qubit(p01=0.3, p10=0.0)], gates=[_gate("x", [0])]),
+        scope="full_device",
+    )
+    circuit = QuantumCircuit(1)
+    circuit.x(0)
+    circuit.measure_all()
+
+    result = simulate_reference(
+        [circuit], model, basis_gates=model.basis_gates, shots=shots, seed=321
+    )[0]
+    assert result.counts is not None
+    observed = result.counts.get("0", 0) / shots
+    standard_error = math.sqrt(0.3 * 0.7 / shots)
+    assert abs(observed - 0.3) <= 3.0 * standard_error
+
+
+def test_no_timed_gate_raises_unless_readout_makes_the_model_non_ideal() -> None:
+    """Usable qubits but only zero-length gates: the model would be ideal."""
+    only_rz = [_gate("rz", [0], length_ns=0.0)]
+    snapshot = _snapshot(gates=only_rz)
+
+    with pytest.raises(ValueError, match="installs no error"):
+        build_reference(snapshot, scope="single_qubit_relaxation")
+    # Aer drops an ideal ReadoutError, so p01 = p10 = 0 leaves full_device ideal too.
+    with pytest.raises(ValueError, match="installs no error"):
+        build_reference(snapshot, scope="full_device")
+
+    noisy_readout = _snapshot(qubits=[_qubit(p01=0.02, p10=0.03)], gates=only_rz)
+    model = build_reference(noisy_readout, scope="full_device")
+    report = build_reference_report(noisy_readout, scope="full_device")
+    assert set(model._local_readout_errors) == {(0,)}
+    assert report.qubits_used == (0,)
+
+
+def test_ideal_readout_does_not_count_a_qubit_as_used() -> None:
+    """``qubits_used`` means represented in the model; Aer drops an ideal readout error."""
+    snapshot = _snapshot(
+        qubits=[_qubit(p01=0.02, p10=0.03), _qubit(p01=0.0, p10=0.0)],
+        gates=[_gate("sx", [0])],
+    )
+
+    report = build_reference_report(snapshot, scope="full_device")
+
+    assert report.qubits_used == (0,)
+
+
+@pytest.mark.parametrize(
+    "parameters",
+    [[], [_nduv("gate_length", 68.0, "ns")], [_nduv("gate_error", None, "")]],
+    ids=("empty", "no-gate-error", "null-gate-error"),
+)
+def test_cz_without_a_finite_gate_error_raises_in_full_device(
+    parameters: list[dict[str, Any]],
+) -> None:
+    """A cz entry that does not state its gate_error cannot be classified dead or alive."""
+    snapshot = _snapshot(
+        qubits=[_qubit(), _qubit()],
+        gates=[
+            _gate("sx", [0]),
+            _gate("sx", [1]),
+            {"gate": "cz", "qubits": [0, 1], "parameters": parameters},
+        ],
+    )
+
+    with pytest.raises(ValueError, match="gate_error"):
+        build_reference(snapshot, scope="full_device")
+
+
+def test_cz_with_a_nan_gate_error_raises_in_full_device() -> None:
+    entry = _gate("cz", [0, 1], length_ns=68.0)
+    entry["parameters"][0]["value"] = float("nan")
+    snapshot = _snapshot(qubits=[_qubit(), _qubit()], gates=[_gate("sx", [0]), entry])
+
+    with pytest.raises(ValueError, match="gate_error"):
+        build_reference(snapshot, scope="full_device")
+
+
 def test_report_and_model_agree_and_build_is_deterministic() -> None:
     snapshot = _snapshot(
         qubits=[_qubit(), _qubit(t1_us=None)],
@@ -428,29 +513,38 @@ def test_malformed_gate_length_override_raises_value_error(value: object) -> Non
         )
 
 
-def test_missing_sx_length_is_qubit_level_in_targets_and_gate_level_here(
-    tmp_path: Path,
+@pytest.mark.parametrize("sx_length", ["missing", "negative"])
+def test_sx_length_gaps_are_qubit_level_in_targets_and_gate_level_here(
+    sx_length: str, tmp_path: Path
 ) -> None:
-    """The one intended divergence from ``training.targets``, pinned rather than hidden.
+    """The two intended divergences from ``training.targets``, pinned rather than hidden.
 
-    The target needs one duration per qubit and rejects the qubit; the reference
-    times each gate separately, so it keeps the qubit for its other gates and
-    records only the ``sx`` entry.
+    The target needs one ``sx`` duration per qubit and rejects the qubit, as
+    ``gate_length_missing`` or ``nonpositive``; the reference times each gate
+    separately, so it keeps the qubit for its other gates and records only the
+    ``sx`` entry, under the same reason name.
     """
     data = json.loads(WITH_GATES_FIXTURE.read_text(encoding="utf-8"))
     for entry in data["properties"]["gates"]:
         if entry["gate"] == "sx" and entry["qubits"] == [0]:
-            entry["parameters"] = [p for p in entry["parameters"] if p["name"] != "gate_length"]
+            if sx_length == "missing":
+                entry["parameters"] = [p for p in entry["parameters"] if p["name"] != "gate_length"]
+            else:
+                for parameter in entry["parameters"]:
+                    if parameter["name"] == "gate_length":
+                        parameter["value"] = -1.0
     path = tmp_path / "snapshot.json"
     path.write_text(json.dumps(data), encoding="utf-8")
+    reason = "gate_length_missing" if sx_length == "missing" else "nonpositive"
 
     targets = qubit_targets(load_snapshot(path), gate_lengths(data["properties"], "sx"))
     report = build_reference_report(_calibration_snapshot(data), scope="single_qubit_relaxation")
 
     assert not targets.usable[0]
-    assert targets.skipped.gate_length_missing == 1
+    assert getattr(targets.skipped, reason) == 1
     assert 0 in report.qubits_used
-    assert report.skipped_gates["gate_length_missing"] == (("sx", (0,)),)
+    assert 0 not in {q for qubits in report.skipped.values() for q in qubits}
+    assert report.skipped_gates[reason] == (("sx", (0,)),)
 
 
 @pytest.mark.parametrize(

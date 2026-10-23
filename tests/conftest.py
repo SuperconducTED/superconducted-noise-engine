@@ -30,6 +30,7 @@ from superconducted.integration.aer_factory import (
     FuzzyNoiseModelEnsemble,
     first_viable_seed,
 )
+from superconducted.interfaces import GateEligibilityPolicy
 from superconducted.types import CalibrationSnapshot
 
 DEFAULT_TIMESTAMP = datetime(2026, 5, 7, 12, 0, 0, tzinfo=UTC)
@@ -120,9 +121,16 @@ def _feature_range(snapshot: CalibrationSnapshot, field: str) -> tuple[float, fl
 
 
 def _benchmark_ensemble_for_seed(
-    snapshot: CalibrationSnapshot, seed: int, ensemble_size: int = 1
+    snapshot: CalibrationSnapshot,
+    seed: int,
+    ensemble_size: int = 1,
+    gate_eligibility_policy: GateEligibilityPolicy | None = None,
 ) -> FuzzyNoiseModelEnsemble:
-    """Build the issue #58 one-member, 3x3x3 Gaussian test ensemble."""
+    """Build the issue #58 one-member, 3x3x3 Gaussian test ensemble.
+
+    ``gate_eligibility_policy`` defaults to ADR-028's calibration policy;
+    tests pass another one only to make an ordering or scope pin causal.
+    """
     vectorizer = BasicCalibrationVectorizer()
     fields = ("T1", "T2", "readout_error")
     per_input_mfs: list[list[GaussianMF]] = []
@@ -145,6 +153,7 @@ def _benchmark_ensemble_for_seed(
         squashing=ProbabilityClip(),
         channel_projector=KrausChannelProjector(NoOpNormalization()),
         fuzzification_strategy=PostGateFuzzification(),
+        gate_eligibility_policy=gate_eligibility_policy,
         ensemble_size=ensemble_size,
     )
 
@@ -163,9 +172,12 @@ def make_benchmark_ensemble(
         ensemble_size: int = 1,
         *,
         snapshot: CalibrationSnapshot | None = None,
+        gate_eligibility_policy: GateEligibilityPolicy | None = None,
     ) -> FuzzyNoiseModelEnsemble:
         selected_snapshot = benchmark_snapshot if snapshot is None else snapshot
-        return _benchmark_ensemble_for_seed(selected_snapshot, seed, ensemble_size)
+        return _benchmark_ensemble_for_seed(
+            selected_snapshot, seed, ensemble_size, gate_eligibility_policy
+        )
 
     return _factory
 

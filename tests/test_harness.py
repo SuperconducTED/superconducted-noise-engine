@@ -34,8 +34,11 @@ from superconducted.benchmarks.metrics import (
 from superconducted.benchmarks.reference import build_reference
 from superconducted.calibration.features import BasicCalibrationVectorizer
 from superconducted.fuzzy.tsk import TSKRuleBase
-from superconducted.integration.aer_factory import FuzzyNoiseModelEnsemble
-from superconducted.interfaces import BenchmarkMetric
+from superconducted.integration.aer_factory import (
+    CalibrationGateEligibilityPolicy,
+    FuzzyNoiseModelEnsemble,
+)
+from superconducted.interfaces import BenchmarkMetric, GateEligibilityPolicy
 from superconducted.types import CalibrationSnapshot, SimulationResult
 
 
@@ -338,24 +341,39 @@ def test_transpiled_qft_installs_only_executed_noise_instructions(
     assert per_member[0] == sorted(per_member[0])
 
 
+class _AdmitsSaveDensityMatrix(GateEligibilityPolicy):
+    """ADR-028's calibration policy plus the one-qubit ``save_density_matrix``.
+
+    The shipped policy never admits ``save_density_matrix``, so with it the
+    ordering pin below would pass whatever the order. Admitting it makes the
+    pin causal: if the harness appended the save before ``prepare()``, the
+    projector would give it the damping channel and the metadata would say so.
+    """
+
+    def eligible_operations(
+        self, snapshot: CalibrationSnapshot
+    ) -> frozenset[tuple[str, tuple[int, ...]]]:
+        return CalibrationGateEligibilityPolicy().eligible_operations(snapshot) | {
+            ("save_density_matrix", (0,))
+        }
+
+
 def test_density_mode_prepares_before_save_instruction(
-    benchmark_ensemble: FuzzyNoiseModelEnsemble,
+    make_benchmark_ensemble: Callable[..., FuzzyNoiseModelEnsemble],
 ) -> None:
-    # On one qubit the current projector would accept save_density_matrix if
-    # the harness appended it before prepare(), so this is a causal ordering
-    # pin rather than merely an assertion that also passes on a 3-qubit save.
+    # One qubit, so a save_density_matrix appended before prepare() would be a
+    # single-qubit instruction the projector accepts; the policy above admits
+    # it, which is what makes this a causal ordering pin (#79 review, item 2).
+    ensemble = make_benchmark_ensemble(1, gate_eligibility_policy=_AdmitsSaveDensityMatrix())
     result = simulate_engine(
         [qft_circuit(1)],
-        benchmark_ensemble,
+        ensemble,
         basis_gates=DEVICE_BASIS,
         mode="density_matrix",
     )[0]
 
     assert result.metadata is not None
-    assert all(
-        "save_density_matrix" not in instructions
-        for instructions in result.metadata["noise_instructions"]
-    )
+    assert result.metadata["noise_instructions"] == [["sx"]]
 
 
 def test_sx_only_noise_fires_through_explicit_basis() -> None:
@@ -399,25 +417,56 @@ def test_density_result_is_physical_and_uses_one_semantic_shot(
     assert np.min(np.linalg.eigvalsh(rho)) >= -1e-12
 
 
-def test_identical_members_preserve_density_matrix_exactly() -> None:
-    model = NoiseModel(basis_gates=list(DEVICE_BASIS))
+def test_identical_members_preserve_density_matrix_exactly(
+    make_benchmark_ensemble: Callable[..., FuzzyNoiseModelEnsemble],
+) -> None:
+    """#58 section 6.3: N identical members give ``rho_ens == rho_1`` exactly.
+
+    Uses the real noise-installing engine, so the members' states have entries
+    a floating-point mean would not reproduce bit for bit. This holds only while
+    every member is identical, which after #64 means only under its default
+    ``IdentityPerturbation``; a failure under a real perturbation is expected,
+    not a regression here.
+    """
     circuit = ghz_state_circuit(2)
     single = simulate_engine(
         [circuit],
-        _as_ensemble(model),
+        make_benchmark_ensemble(1),
         basis_gates=DEVICE_BASIS,
         mode="density_matrix",
     )[0]
     mixture = simulate_engine(
         [circuit],
-        _as_ensemble(model, model, model),
+        make_benchmark_ensemble(3),
         basis_gates=DEVICE_BASIS,
         mode="density_matrix",
     )[0]
 
     assert single.density_matrix is not None and mixture.density_matrix is not None
+    assert mixture.metadata is not None and all(mixture.metadata["noise_instructions"])
     assert np.array_equal(mixture.density_matrix, single.density_matrix)
     assert mixture.shots == 1
+
+
+@pytest.mark.parametrize("path", ["engine", "reference"])
+def test_density_mode_refuses_a_mid_circuit_measurement(path: str) -> None:
+    """A measurement that is not final would give a sampled state labelled exact."""
+    circuit = QuantumCircuit(1, 2)
+    circuit.sx(0)
+    circuit.measure(0, 0)
+    circuit.sx(0)
+    circuit.measure(0, 1)
+    model = NoiseModel(basis_gates=list(DEVICE_BASIS))
+
+    with pytest.raises(ValueError, match="only measurements are final"):
+        if path == "engine":
+            simulate_engine(
+                [circuit], _as_ensemble(model), basis_gates=DEVICE_BASIS, mode="density_matrix"
+            )
+        else:
+            simulate_reference([circuit], model, basis_gates=DEVICE_BASIS, mode="density_matrix")
+    # Counts mode samples anyway, so the same circuit is legal there.
+    assert simulate_reference([circuit], model, basis_gates=DEVICE_BASIS, shots=8, seed=1)
 
 
 def test_distinct_members_form_arithmetic_density_mixture() -> None:
@@ -557,6 +606,102 @@ def test_noise_instruction_metadata_shape_in_both_modes(
         assert isinstance(engine.metadata["noise_instructions"][0], list)
         assert ref.metadata["noise_instructions"] == ["sx"]
         assert engine.metadata["basis_gates"] == ref.metadata["basis_gates"] == DEVICE_BASIS
+
+
+@pytest.mark.parametrize("mode", ["counts", "density_matrix"])
+def test_noise_instructions_are_each_members_installed_model(mode: str) -> None:
+    """#58 section 9.1: one sorted list per member, equal to that member's installed model.
+
+    The two members carry different models (``x`` only, and nothing), neither of
+    which matches the compiled circuit's gate set, so a list read from the circuit
+    or a list kept for the first member only both fail (#79 review, item 4).
+    """
+    with_x = NoiseModel(basis_gates=list(DEVICE_BASIS))
+    with_x.add_quantum_error(depolarizing_error(0.1, 1), "x", [0])
+    empty = NoiseModel(basis_gates=list(DEVICE_BASIS))
+
+    result = simulate_engine(
+        [qft_circuit(2)],
+        _as_ensemble(with_x, empty),
+        basis_gates=DEVICE_BASIS,
+        mode=mode,  # type: ignore[arg-type]
+        shots=16,
+        seed=2,
+    )[0]
+
+    assert result.metadata is not None
+    assert result.metadata["ensemble_size"] == 2
+    assert result.metadata["noise_instructions"] == [["x"], []]
+
+
+def test_reference_metadata_list_is_not_shared_between_circuits() -> None:
+    reference = NoiseModel(basis_gates=list(DEVICE_BASIS))
+    reference.add_quantum_error(depolarizing_error(0.1, 1), "sx", [0])
+
+    first, second = simulate_reference(
+        [qft_circuit(2), ghz_state_circuit(2)],
+        reference,
+        basis_gates=DEVICE_BASIS,
+        shots=16,
+        seed=2,
+    )
+
+    assert first.metadata is not None and second.metadata is not None
+    assert first.metadata["noise_instructions"] == second.metadata["noise_instructions"] == ["sx"]
+    assert first.metadata["noise_instructions"] is not second.metadata["noise_instructions"]
+
+
+def _one_x_circuit() -> QuantumCircuit:
+    circuit = QuantumCircuit(1)
+    circuit.x(0)
+    circuit.measure_all()
+    return circuit
+
+
+def test_run_benchmark_raises_handled_metric_errors_by_default() -> None:
+    """The public default is ``on_error="raise"``, not only ``_try_compute``'s (item 3)."""
+    model = NoiseModel(basis_gates=["x"])
+
+    with pytest.raises(ValueError, match="deliberate metric failure"):
+        run_benchmark([_one_x_circuit()], _as_ensemble(model), model, [_ValueErrorMetric()])
+
+
+@pytest.mark.parametrize(
+    ("metric", "mode", "message"),
+    [
+        (StateFidelity(), "counts", "density_matrix"),
+        (HellingerDistance(), "density_matrix", "Count-based metric"),
+    ],
+    ids=("state-fidelity-in-counts", "hellinger-in-density"),
+)
+def test_run_benchmark_wrong_mode_metric_raises_or_records(
+    metric: BenchmarkMetric, mode: str, message: str
+) -> None:
+    """#58 section 9.2: a metric its mode cannot compute raises, or is a recorded failure."""
+    model = NoiseModel(basis_gates=["x"])
+    kwargs: dict[str, Any] = {"mode": mode, "shots": 16, "seed": 3}
+
+    with pytest.raises(ValueError, match=message):
+        run_benchmark([_one_x_circuit()], _as_ensemble(model), model, [metric], **kwargs)
+
+    (row,) = run_benchmark(
+        [_one_x_circuit()], _as_ensemble(model), model, [metric], on_error="record", **kwargs
+    )
+    assert all(math.isnan(value) for value in (row.engine_value, row.reference_value, row.delta))
+    assert row.failure is not None and message in row.failure
+
+
+def test_run_benchmark_rejects_an_unknown_error_mode() -> None:
+    model = NoiseModel(basis_gates=["x"])
+
+    with pytest.raises(ValueError, match="on_error must be 'raise' or 'record'"):
+        run_benchmark(
+            [_one_x_circuit()],
+            _as_ensemble(model),
+            model,
+            [_ConstantMetric()],
+            on_error="bogus",  # type: ignore[arg-type]
+        )
 
 
 def _depolarizing_fidelity(p: float) -> float:

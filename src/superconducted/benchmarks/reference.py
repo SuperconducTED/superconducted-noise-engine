@@ -49,7 +49,11 @@ class ReferenceReport:
     ``gate_lengths_s`` includes considered zero-duration gates even though
     their identity channels are deliberately not installed. ``dead_pairs``
     records directed ``cz`` entries with ``gate_error == 1``; ADR-017 still
-    prevents installation when either endpoint lacks usable T1/T2 data.
+    prevents installation when either endpoint lacks usable T1/T2 data. It is
+    filled only in ``full_device`` scope: ``single_qubit_relaxation`` never
+    reads two-qubit entries, so its ``dead_pairs`` is always empty.
+    ``qubits_used`` and ``skipped`` need not cover the whole selection: a
+    usable qubit with no installed error appears in neither.
     """
 
     scope: str
@@ -270,12 +274,14 @@ def _gate_length_s(
 def _is_dead_cz(entry: Mapping[str, Any], *, context: str) -> bool:
     # Stricter than _gate_length_s on purpose: training.targets never reads
     # gate_error, so there is no target behaviour to mirror, and a cz entry
-    # without a parameters list cannot say whether the pair is dead.
+    # that does not state a finite gate_error cannot say whether the pair is
+    # dead. An absent, null or non-finite value raises rather than count as
+    # "not dead".
     if entry.get("gate") != "cz":
         return False
     parameters = _named_entries(entry.get("parameters"), context=f"{context}.parameters")
     error = _read_quantity(
-        parameters, "gate_error", "", context=f"{context}.parameters", missing_ok=True
+        parameters, "gate_error", "", context=f"{context}.parameters", missing_ok=False
     )
     return error == 1.0
 
@@ -379,8 +385,22 @@ def _build(
 
     if scope == "full_device":
         for q, params in usable.items():
-            model.add_readout_error(_readout_error(params, q), [q])
-            used_qubits.add(q)
+            readout = _readout_error(params, q)
+            # Aer silently drops an ideal ReadoutError, so such a qubit is not
+            # represented in the model and must not count as used.
+            if not readout.ideal():
+                model.add_readout_error(readout, [q])
+                used_qubits.add(q)
+
+    if model.is_ideal():
+        # Usable qubits, but nothing on them with a positive duration (and, in
+        # full_device, no non-ideal readout): the model would still simulate,
+        # the same silent switched-off reference the no-usable-qubit guard
+        # above refuses.
+        raise ValueError(
+            f"{scope} reference installs no error: no positive-duration gate on the "
+            f"usable qubits {tuple(sorted(usable))}"
+        )
 
     report = ReferenceReport(
         scope=scope,
@@ -407,8 +427,15 @@ def build_reference(
     gate errors. ``full_device`` additionally installs two-qubit product
     channels and per-qubit readout errors. ``gate_lengths`` overrides are in
     SI seconds. Missing or unphysical T1/T2 values are never imputed: such a
-    qubit is skipped by ADR-027's first applicable reason, and a selection with
-    no usable qubit raises ``ValueError`` rather than return a noise-free model.
+    qubit is skipped by ADR-027's first applicable reason. A selection with no
+    usable qubit, or one where no gate has a positive duration, raises
+    ``ValueError`` rather than return a noise-free model.
+
+    Readout error applies to ``measure`` only, so it has no effect in the
+    harness's density-matrix mode, which removes final measurements; a
+    ``full_device`` reference is therefore the same channel set as
+    ``single_qubit_relaxation`` plus the two-qubit errors there, and the two
+    modes are not expected to agree on readout-sensitive circuits.
     """
     checked_scope = _validate_scope(scope)
     model, _report = _build(

@@ -22,6 +22,7 @@ from typing import Any, Literal
 import numpy as np
 import numpy.typing as npt
 from qiskit import QuantumCircuit, transpile
+from qiskit.circuit import CONTROL_FLOW_OP_NAMES
 from qiskit_aer import AerSimulator
 from qiskit_aer.noise import NoiseModel
 
@@ -34,6 +35,10 @@ ErrorMode = Literal["raise", "record"]
 
 _TRANSPILE_OPTIMIZATION_LEVEL = 1
 _TRANSPILE_SEED = 0
+# Operations that make a density-matrix run a sampled branch rather than the
+# exact state: a measurement that is not final collapses it, and control flow
+# can branch on that outcome.
+_NOT_EXACT_IN_DENSITY_MODE = frozenset({"measure", *CONTROL_FLOW_OP_NAMES})
 
 
 @dataclass(frozen=True)
@@ -103,6 +108,21 @@ def _transpile_circuits(
     return compiled, basis
 
 
+def _state_circuit(circuit: QuantumCircuit) -> QuantumCircuit:
+    """Drop final measurements, refusing what density mode cannot evolve exactly."""
+    state_circuit = circuit.remove_final_measurements(inplace=False)
+    left = sorted(
+        {instruction.operation.name for instruction in state_circuit.data}
+        & _NOT_EXACT_IN_DENSITY_MODE
+    )
+    if left:
+        raise ValueError(
+            f"density_matrix mode needs a circuit whose only measurements are final; "
+            f"{_circuit_name(circuit)!r} still contains {left}"
+        )
+    return state_circuit
+
+
 def _density_matrix(result: Any) -> npt.NDArray[np.complex128]:
     raw = result.data(0)["density_matrix"]
     data = raw.data if hasattr(raw, "data") else raw
@@ -159,7 +179,7 @@ def _run_engine_transpiled(
             )
             continue
 
-        state_circuit = circuit.remove_final_measurements(inplace=False)
+        state_circuit = _state_circuit(circuit)
         member_states: list[npt.NDArray[np.complex128]] = []
         for member in members:
             prepared_circuit, prepared_noise = member.prepare(state_circuit.copy())
@@ -210,7 +230,9 @@ def _run_reference_transpiled(
             "ensemble_size": 1,
             "circuit_name": _circuit_name(circuit),
             "basis_gates": basis,
-            "noise_instructions": noise_instructions,
+            # A copy per circuit, so a caller editing one result's metadata
+            # cannot change another's.
+            "noise_instructions": list(noise_instructions),
         }
         if mode == "counts":
             run_options: dict[str, Any] = {
@@ -230,7 +252,7 @@ def _run_reference_transpiled(
             )
             continue
 
-        state_circuit = circuit.remove_final_measurements(inplace=False)
+        state_circuit = _state_circuit(circuit)
         state_circuit.save_density_matrix()
         result = sim.run(state_circuit, shots=1, noise_model=reference_noise).result()
         out.append(
@@ -259,6 +281,17 @@ def simulate_engine(
     are summed and carry ``shots * ensemble_size`` total shots. Density
     matrices are prepared before the save instruction is appended, averaged
     as a convex mixture, and carry ``shots=1`` because no sampling occurred.
+    Density mode raises ``ValueError`` for a circuit with a measurement that is
+    not final or with control flow, since its state would be a sampled branch.
+
+    Seeds: in counts mode member ``i`` runs at ``seed_simulator = seed + i``;
+    ``seed=None`` leaves every member unseeded. Density mode does not sample, so
+    ``seed`` has no effect there. The transpiler seed is fixed separately.
+
+    Each result's ``metadata`` holds ``mode``, ``ensemble_size``,
+    ``circuit_name``, ``basis_gates`` (the compiled basis) and
+    ``noise_instructions``: one sorted list per member of the gate names that
+    member's prepared ``NoiseModel`` carries.
     """
     checked_mode = _validate_mode(mode)
     checked_shots = _validate_shots(shots)
@@ -286,7 +319,16 @@ def simulate_reference(
 
     The explicit basis prevents Aer defaults from silently selecting a gate
     set on which the supplied noise model has no effect. Density mode removes
-    final measurements and therefore does not apply readout errors.
+    final measurements and therefore does not apply readout errors; it raises
+    ``ValueError`` for a measurement that is not final or for control flow.
+
+    Seeds: counts mode runs at ``seed_simulator = seed`` (so a one-member
+    engine and the reference share a seed); ``seed=None`` is unseeded; density
+    mode ignores ``seed``.
+
+    Each result's ``metadata`` holds the same keys as :func:`simulate_engine`,
+    with ``ensemble_size`` 1 and ``noise_instructions`` a single sorted list of
+    the gate names ``reference_noise`` carries, copied per circuit.
     """
     checked_mode = _validate_mode(mode)
     checked_shots = _validate_shots(shots)
@@ -318,8 +360,14 @@ def run_benchmark(
 
     ``basis_gates`` defaults to the reference model's device basis. Counts
     mode optionally gives the reference a distinct per-run shot count through
-    ``reference_shots``. Handled metric failures raise by default; ``record``
-    produces an auditable failure row instead of a silent NaN.
+    ``reference_shots``. ``seed`` follows :func:`simulate_engine` for the
+    engine and :func:`simulate_reference` for the reference.
+
+    ``on_error`` covers only ``ValueError`` and ``ZeroDivisionError`` from a
+    metric: ``"raise"`` (the default) propagates them, ``"record"`` returns a
+    row whose three values are NaN and whose ``failure`` names the side and the
+    exception, instead of a silent NaN. Any other exception propagates, and an
+    unknown ``on_error`` raises ``ValueError``.
     """
     checked_mode = _validate_mode(mode)
     checked_error_mode = _validate_error_mode(on_error)
