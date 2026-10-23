@@ -162,8 +162,127 @@ the script imports the shared archive-walk helpers from `scripts/`.
 
 ## 3. Results
 
-To be appended by the run, with the commit that produced them. Until then this section is
-empty on purpose.
+Produced by `measure_persistence_band.py` at commit `ed746536` of this branch, run 2026-10-23
+on Mert's laptop with `C:\pvci` (Python 3.12.10, numpy 2.4.4) against `calibration-data` @
+`5828b4a2`. Every figure is in `results.tsv`; the test rows are in `pairs.tsv`. **Laptop,
+provisional.** The script's own checks passed: 924 distinct states, equal to the state index
+at the ref; the zero-width band covers exactly 0.0 of the `change` rows at both horizons.
+
+**Counts.** 2,249 files, 924 states, first 2026-05-13T12:13:22Z, last 2026-10-23T09:34:56Z;
+151 chip-wide $T_1$ recalibrations detected. Pairs at 24 h: 476 train, 378 test, 68 dropped
+(no file in the window), 2 straddling the cut. At 168 h: 423 train, 344 test, 138 and 19
+dropped. On `all` test rows the zero-width band covers 0.135 at 24 h and 0.0 at 168 h: the
+snapshot mean moves within a day in 86% of 24 h pairs and in every 168 h pair, so the
+vacuity risk of L-026 is real at sub-daily horizons and vanishes by a week (per-qubit values
+repeat far more; see measurement 3).
+
+### 3.1 The bar: constant persistence band versus rolling percentile band
+
+Test rows are `change`; `distinct` and `all` differ from them only at 24 h and are in the TSV.
+
+| Component, horizon | n test | `r` fitted on train (90% bootstrap) | `r` the test period would have needed | Persistence: coverage, width, interval score | Rolling 7 d: coverage, width, IS | Rolling 30 d: coverage, width, IS |
+| --- | --- | --- | --- | --- | --- | --- |
+| gamma, 24 h | 327 | 0.1049 (0.0937 to 0.1119), n = 397 | 0.1249 | 0.716, 0.210, **0.300** | 0.728, 0.138, 0.232 | 0.780, 0.163, **0.210** |
+| lambda, 24 h | 327 | 0.1140 (0.1022 to 0.1208), n = 397 | 0.0700 | 0.951, 0.228, **0.233** | 0.737, 0.103, 0.178 | 0.777, 0.116, **0.157** |
+| gamma, 168 h | 344 | 0.1751 (0.1618 to 0.1989), n = 423 | 0.1119 | 0.924, 0.350, **0.356** | 0.724, 0.141, 0.209 | 0.756, 0.165, **0.207** |
+| lambda, 168 h | 344 | 0.1496 (0.1347 to 0.1574), n = 423 | 0.0733 | 1.000, 0.299, **0.299** | 0.820, 0.102, 0.146 | 0.799, 0.119, **0.154** |
+
+Three things the table says.
+
+1. **The persistence scale is not stationary.** Fitted on May to August, `r` misses 80% on
+   September to October in both directions: gamma's drift grew (72% coverage at 24 h, the
+   test period would have needed 0.125) and lambda's shrank (95%, it needed 0.070). The 90%
+   bootstrap intervals on `r` do not contain the test-period value in any of the four cases.
+   A band whose single parameter is fitted once and frozen is therefore mis-calibrated by
+   20 to 40% within two months on this device, whichever way the device moves.
+2. **The rolling 30-day 10th to 90th percentile band beats the fitted persistence band on
+   interval score in all four cases**, with no fitted parameter: 0.210 against 0.300 and
+   0.157 against 0.233 at 24 h, 0.207 against 0.356 and 0.154 against 0.299 at 168 h. It is
+   22% to 28% narrower at 24 h at near-nominal coverage (0.78, 0.78), and its coverage barely
+   moves from 24 h to 168 h (0.78 to 0.76, 0.78 to 0.80), while the persistence band has to
+   widen by two thirds to hold a week. The device's snapshot mean behaves like fluctuation
+   around a slowly moving level, not like a random walk from the last value, and a band
+   centred on the recent range exploits that while a band centred on the last value cannot.
+3. **The bar for the fuzzy band is therefore the rolling 30-day percentile band**, not the
+   persistence band: interval score 0.210 (gamma) and 0.157 (lambda) at 24 h, 0.207 and
+   0.154 at 168 h, on exactly the rows in `pairs.tsv`. The pre-registered decision rule
+   named the constant persistence band; the stronger non-fuzzy baseline found by the same
+   protocol replaces it, and that replacement is recorded here before any fuzzy band exists.
+
+### 3.2 Heteroscedasticity: is drift state-dependent?
+
+Per-bin 80th percentiles of `|d|` on training `change` rows, with 90% bootstrap intervals:
+
+| Component, horizon | `level` low / mid / high | Oracle width ratio, equal coverage: level, hour, recal | Out-of-sample conditional band (level): coverage, width ratio, IS against constant IS |
+| --- | --- | --- | --- |
+| gamma, 24 h | 0.113 (0.107 to 0.135) / **0.062** (0.061 to 0.070) / 0.112 (0.106 to 0.133) | **0.857**, 1.013, 0.989 | 0.593, 0.756, 0.319 against 0.300 (worse) |
+| lambda, 24 h | 0.117 (0.084 to 0.124) / **0.091** (0.084 to 0.100) / 0.121 (0.113 to 0.129) | **0.894**, 0.988, 1.039 | 0.917, 0.932, 0.220 against 0.233 (better) |
+| gamma, 168 h | 0.200 (0.175 to 0.222) / **0.120** (0.101 to 0.135) / 0.270 (0.196 to 0.282) | 0.980, 0.989, 1.010 | 0.959, 0.882, 0.319 against 0.356 (better) |
+| lambda, 168 h | 0.182 (0.155 to 0.216) / **0.111** (0.104 to 0.117) / 0.157 (0.134 to 0.163) | 0.926, 0.984, 0.980 | 0.994, 1.101, 0.330 against 0.299 (worse) |
+
+- **Only the level of the target carries information about drift.** Hour of day and time
+  since the last chip-wide recalibration give oracle width ratios within 4% of 1 everywhere:
+  nothing to find. The `level` binning shows the same shape in all four cases: the middle
+  tercile drifts about half as much as the outer terciles, and the bootstrap intervals of the
+  middle bin do not overlap the outer bins at 24 h. That is mean reversion in the snapshot
+  mean, the same fact behind the rolling band's win in 3.1.
+- **The bound is small.** Even an oracle that knows the test period's per-level scales gains
+  14% width for gamma and 11% for lambda at 24 h, 2% and 7% at 168 h, at equal coverage.
+  Against the pre-registered 10% threshold the 24 h `level` binning crosses it and nothing
+  else does. Out of sample, the gain is realised for lambda at 24 h and gamma at 168 h, and
+  lost for the other two, because the per-bin scales move between periods as much as the
+  constant one does.
+- **Consequence for a conditional band, the fuzzy one included.** A band whose width depends
+  on the snapshot's state has at most about 10 to 15% of width to gain over a constant band
+  at 24 h on this device, and the rolling percentile band already gains more than that by
+  centring on the recent range rather than the last value. A fuzzy band that only modulates
+  width around the current point cannot beat the rolling band here; one that also moves its
+  centre toward the recent level could.
+
+### 3.3 Homogeneity versus staleness
+
+Test states from 2026-09-01, all usable qubits; `r*` is the 24 h persistence `r` (gamma
+0.1049, lambda 0.1140). `all` rows; `moved` rows and 90th percentiles are in the TSV.
+
+| Component | Model | Median relative error | Median absolute error (target units) | Fraction within ±`r*` | Rows |
+| --- | --- | --- | --- | --- | --- |
+| gamma | fresh homogeneous (chip mean at `t`) | **0.266** | 5.1e-5 | 0.217 | 62,701 |
+| gamma | stale per-qubit, 1 h | 0.000 | 0.0 | 0.901 | 61,755 |
+| gamma | stale per-qubit, 6 h | 0.000 | 0.0 | 0.800 | 59,889 |
+| gamma | stale per-qubit, 24 h | 0.201 | 3.7e-5 | 0.328 | 60,717 |
+| gamma | stale per-qubit, 48 h | 0.229 | 4.3e-5 | 0.255 | 59,915 |
+| gamma | stale per-qubit, 168 h | **0.232** | 4.4e-5 | 0.243 | 59,319 |
+| lambda | fresh homogeneous | 1.205 (denominator artefact) | **4.4e-4** | 0.051 | 62,701 |
+| lambda | stale per-qubit, 24 h | 0.170 | 5.8e-5 | 0.397 | 60,717 |
+| lambda | stale per-qubit, 168 h | 0.198 | **6.7e-5** | 0.336 | 59,319 |
+
+- **A per-qubit channel a week stale beats a fresh chip-uniform one, for both components and
+  on every metric.** For gamma the fresh homogeneous model's median relative error is 26.6%
+  against 23.2% for a value 168 hours old; it places 21.7% of qubits inside the ±10.5% band
+  against 24.3%. For lambda the gap is a factor of six to seven in target units (4.4e-4
+  against 6.7e-5) and the homogeneous band holds 5% of qubits. **No staleness in the grid
+  reaches the crossover**; the gap narrows from 1 h to 24 h and is flat from 48 h to 168 h.
+- **Per-qubit re-measurement jumps are large.** On `moved` rows (the qubit's own value
+  changed within `D`) the stale model's median relative error is 23.3% for gamma at every
+  `D` from 1 h to 168 h: when a qubit's $T_1$ is re-measured, its gamma moves by about a
+  quarter, independent of how long ago the previous measurement was. The snapshot mean's
+  10% drift is that jump averaged over 156 qubits. A per-qubit band therefore has a natural
+  width near ±25%, and cross-qubit heterogeneity (26.6% median deviation from the mean)
+  is of the same size, which is why "fresh and uniform" ties with "a week stale per qubit"
+  rather than beating it.
+- The two findings together answer the novelty check's spatial-uniformity risk with a
+  number: on this device, replacing per-qubit structure with a fresh chip mean costs more
+  than a week of not updating at all.
+
+### 3.4 Caveats found by the run
+
+- The constant persistence band's non-stationarity (3.1, point 1) means any single fitted
+  scale, including the fuzzy arm's `r` under File 03 Q3c, will be off by tens of percent on
+  the next period; the comparison in the decision rule must be made on the same test rows
+  and reported with the scale each band needed, not only the one it had.
+- The 168 h `all` row set has no unchanged pairs, so the vacuity check there is trivially
+  passed and only the 24 h value (0.135) measures the clock.
+- Target space only; the resolution question (gates record §4) is untouched.
 
 ## 4. Caveats fixed in advance
 
