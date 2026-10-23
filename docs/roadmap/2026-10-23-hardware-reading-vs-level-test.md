@@ -6,7 +6,7 @@ the pre-registration commit); @BurakOztekin for the offline side (circuits, pipe
 against Aer, scoring harness, desktop reproduction); @bengisucvd reviews the decision rule and
 the statistics · **Status**: approved by the lead on 2026-10-23 with this ownership;
 pre-registration (frozen thresholds, the four control qubits) still to be committed before the
-first QPU job · **Decides**: strategy S1 of
+first QPU job; tracked in [Issue #125](https://github.com/SuperconducTED/superconducted-noise-engine/issues/125) · **Decides**: strategy S1 of
 `docs/findings/2026-10-23-strategy-audit.md`, and the engine's value for the design-time goal
 stated there in §3.1
 
