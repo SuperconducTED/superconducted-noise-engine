@@ -53,12 +53,13 @@ Full board: [STATUS.md](STATUS.md) · [live page](https://claude.ai/code/artifac
 | `index.html` | The dashboard. Generated, do not edit. |
 | `STATUS.md` | The same content as Markdown, for reading in a terminal or a PR. Generated. |
 | `snapshot.json` | The full computed model for the latest run, for debugging a value that looks wrong. Generated. |
-| `history/YYYY-MM-DD.json` | One small record per day: gate counts, ticket states, ADR statuses. Generated, and the only files here that accumulate. |
+| `history/YYYY-MM-DD.json` | One small record per day: gate counts, ticket states, ADR statuses, and (since 2026-10-23) how many answers each person owes. Generated, and the only files here that accumulate. |
 | `run.log` | One line per run: when it started and how it ended. Append-only. |
 | `last_run.md` | The report the most recent run is entitled to make, stamped with that run's token. Generated, and deleted at the start of every run. |
 | `report.sh` | Prints `last_run.md` if it is fresh and the run succeeded, and refuses otherwise. The only thing entitled to describe the phase. |
 | `README.md` | This file. Hand-written, **except** the block between the `DASHBOARD` markers near the top, which the generator rewrites on every run. |
 | `update.sh` | Regenerate, commit if anything changed, push. What the daily routine runs. |
+| `check_owed.py` | Synthetic checks for the "who owes an answer" rules. Reads nothing from GitHub and writes nothing; run it after changing `generate.py`. |
 
 ## Day by day
 
@@ -146,6 +147,105 @@ wrong:
 One more thing it refuses to do: treat a green check on a `CONFLICTING` PR as evidence.
 `ci.yml` does not dispatch while a PR is dirty, so those checks describe a `main` that has
 already moved. They are marked stale rather than green.
+
+## Who owes an answer
+
+Added 2026-10-23. Teammates get asked for a test, a review or a piece of research at the
+end of a long PR or deep inside an issue, and with that much context around it the ask is
+easy to lose. The board tracked where every ticket and PR stood, but not who had been asked
+for something. The **Waiting on an answer** section now lists every outstanding ask on every
+open issue and PR, plan ticket or not, per person and oldest first. Each person card carries
+an "owes N" pill linking to their list, and `STATUS.md`, the block above and the daily
+report carry the same list or its tally.
+
+**What counts as an ask.** Two signals, both of which GitHub itself closes:
+
+1. **A pending review request.** GitHub drops the request the moment the reviewer submits
+   any review, so a request still standing has not been answered. It is dated by the latest
+   request event for that reviewer, and labelled a re-review when the reviewer has reviewed
+   that PR before, naming their standing `CHANGES_REQUESTED` or approval.
+2. **An unticked checkbox that starts with the person.** It stays on the board until someone
+   ticks it.
+
+**How to ask so it is tracked.** This is the convention for the team:
+
+```markdown
+- [ ] @BurakOztekin runs the desktop runbook and posts the numbers here
+- [ ] @bengisucvd and @BahaJarad confirm the units
+```
+
+- Write the ask as a task-list item: `- [ ]`, `* [ ]` or `1. [ ]`.
+- Start it with the person, `@login does X`. For several people use `@a and @b`, `@a, @b`,
+  `@a ve @b` or `@a/@b`; each of them owes it.
+- Put no suffix on the name. `@bengisucvd's outcome is known` or `@BurakOztekin'ın onayı`
+  is a statement about that person's work rather than an ask of them, and is not tracked.
+  Write `@bengisucvd reports the outcome` instead.
+- Tick the box when it is done. Ticking is the only thing that clears a checkbox ask:
+  replying "done" in the thread does not. Anyone with write access can tick it.
+- Checkboxes inside code blocks, quotes and HTML comments are not tracked. Those are
+  templates or quotations, not live asks.
+
+The team already writes asks this way (PR #79's runbook, #108's verdict, #63's confirmation),
+so the convention picked those up on the day it shipped.
+
+**What is not tracked, and why.** Measured on the open threads on 2026-10-23 (17 issues,
+4 PRs):
+
+| Rule considered | What it found | Decision |
+| --- | --- | --- |
+| Any @mention not followed by a post from that person | 147 mention pairs, 98 "unanswered", nearly all descriptive ("@BurakOztekin authored #69") | Rejected: it would bury the real asks |
+| A line with a `?` that names someone | 2 hits; the one real question (#58, on QFT R²) had been answered in PR #79's checklist | Rejected: free text cannot see an answer given elsewhere |
+| An unresolved inline review thread | none from a human; the only threads are bot threads, all resolved | Left out: it could not be checked against real data. A small addition once the team uses inline threads |
+
+**Dates never overstate a wait.** A checkbox is dated by its post. If the post was edited on
+a later day, the box may have arrived with the edit, and GitHub does not say which edit added
+it. So the date shown is the last edit, marked "or earlier" and "N days or more": a lower
+bound, never a wait longer than the true one. PR #79's body, for example, was written on
+2026-09-06 and edited on 2026-10-23, so its runbook ask reads "since 2026-10-23 or earlier"
+rather than 47 days.
+
+**Forgot, or working on it?** Each row also says whether the owed person has posted on that
+thread since the ask ("has posted there since, on 2026-10-21") or not ("no post there
+since"). A post never clears a row, because posting is not delivering; it only tells the
+reader whether a nudge is needed.
+
+**Who is on the team.** `TEAM_ORDER` in `generate.py` holds the four members in display
+order, the single list every per-person section now uses (it used to be three copies).
+`FORMER` holds logins that were on the team: an ask addressed to a former member stays on
+the board, flagged "left the team: reassign", instead of vanishing with the work it asks
+for. Everyone else (the advisor, outside accounts, team review requests) is not tracked, and
+bot posts are ignored entirely.
+
+**Nothing is dropped silently.** Each open thread is read with its first 100 comments and
+100 reviews. A thread longer than that is named in a red "not fully read, so asks may be
+missing" line instead of quietly losing asks. A failed read exits 1 like every other read
+here, so the page can never say "nobody owes anything" because GitHub did not answer.
+
+**History.** Each day's record now carries `owed`, the count per person, and Day by day
+reports a change as "Burak Öztekin owes 4 answers (was 7)". Records written before
+2026-10-23 have no `owed` key, and a missing key means "not measured", never zero, so no
+line is drawn against those days.
+
+**Design decisions.**
+
+- *A checkbox, not a bot command or a label.* A command such as `/ask @x` needs an Action
+  or a bot to parse it and a second command to close it. A checkbox is native, readable in
+  the thread, closed by a tick, and already in use.
+- *A separate list, not the ranked action queue.* The queue ranks by how many tickets an
+  action releases, counted from dependency edges. An ask carries no edge, so mixing the two
+  would mean inventing weights. The pill on each card points at the list instead.
+- *Duplicates are kept.* PR #79 carries both a review request to Burak and a checkbox
+  "@BurakOztekin re-reviews `a25140d`". They close differently, the request when he
+  reviews and the box when someone ticks it, and merging them would mean matching on
+  wording, which is a guess.
+
+**What changed.**
+
+| File | Change |
+| --- | --- |
+| `generate.py` | `fetch_conversations()` (two paged GraphQL reads through `gh()`), the `owed_answers()` derivation, the Waiting on an answer section in `index.html` and `STATUS.md`, a pill per person card, a tally line in the block above, a per-person block in `last_run.md`, `owed` in each day's record and in `snapshot.json`, and the single `TEAM_ORDER` list |
+| `check_owed.py` | Synthetic checks for every rule above; standard library only |
+| `README.md` | This section, a row in "What is here", and new rows under Verification |
 
 ## Reading the marks
 
@@ -328,6 +428,26 @@ changes:
 | `#60` after `#57`'s contract merged | **ready**, with a scope note that the archive-fit part waits on `#63`, not blocked |
 | A reviewer who follows a `CHANGES_REQUESTED` with a `COMMENTED` | still listed as the blocker, with "looked again … without lifting it" |
 | A `CONFLICTING` PR with green checks | checks marked **stale**, never green |
+
+**Who owes an answer holds.** Run the synthetic checks after any change to `generate.py`:
+
+```bash
+python check_owed.py            # "16/16 checks passed", exit 0
+```
+
+On 2026-10-23 each guard they cover was also removed in turn from a copy of `generate.py`
+(suffix rule, fence skip, comment strip, edit dating, bot filter, pending-review filter,
+latest-request choice, ticked items, truncation warning, unmeasured history days, outsider
+filter, the line-start rule that keeps quoted items out), and every one of those 12
+mutants failed at least one check. Against live state:
+
+| Check | Expected |
+| --- | --- |
+| PR #111: Burak approved on 2026-10-04 and was re-requested on 2026-10-05 | under Burak as **re-review requested**, since 2026-10-05. PR #111 is in no plan ticket, so no other table shows it |
+| `- [ ] @bengisucvd's skip-rule outcome ...` on #84 | not listed: the suffix makes it a statement, not an ask |
+| A checkbox in a post edited on a later day (PR #79's body) | dated by the edit, "or earlier" |
+| Ticking a listed box on GitHub, then `python generate.py` | that row is gone and the person's count drops by one |
+| The first record after this change | no "owes" line in Day by day, because the day before has no `owed` key |
 
 ## Sources
 

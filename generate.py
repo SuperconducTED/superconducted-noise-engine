@@ -7,7 +7,8 @@ Reads two things and joins them:
      milestone gates, and every dependency edge quoted from a ticket's own
      "Depends on" row. This changes only when the plan or a ticket changes.
   2. Live GitHub state, via the ``gh`` CLI: issue open/closed, PR review
-     decision, mergeability, check-run conclusions, and the ADR ledger on main.
+     decision, mergeability, check-run conclusions, the ADR ledger on main, and
+     the conversations on every open issue and PR (for who owes an answer).
 
 and writes ``index.html``, ``STATUS.md`` and ``snapshot.json``.
 
@@ -49,6 +50,14 @@ REPO = "SuperconducTED/superconducted-noise-engine"
 # renders as its own grey marker so it cannot be mistaken for progress.
 DONE, NOT_DONE, PARTIAL, UNKNOWN = "done", "not_done", "partial", "unknown"
 MARK = {DONE: "✅", NOT_DONE: "❌", PARTIAL: "🟡", UNKNOWN: "⬜"}
+
+# The team, in the order every per-person list renders. One list, so a change of
+# membership is one edit: Yiğit's departure on 2026-10-16 had to be made in three
+# copies of it. FORMER holds logins that were on the team: an ask still addressed
+# to one of them is shown flagged for reassignment rather than dropped, because
+# dropping it would silently lose the work it asks for.
+TEAM_ORDER = ["mertefesensoy", "BurakOztekin", "bengisucvd", "BahaJarad"]
+FORMER = {"yigit-arda"}
 
 
 # --------------------------------------------------------------------------
@@ -187,6 +196,71 @@ def fetch_main_state() -> dict:
     )
     state["paths"] = {"docs/evidence/feature-distribution": probe.returncode == 0}
     return state
+
+
+# Every post's author, both timestamps and body. ``lastEditedAt`` matters: a
+# checkbox added to a post by a later edit is only as old as that edit, not as
+# old as the post.
+POST_FIELDS = "author { __typename login } createdAt lastEditedAt body url"
+
+ISSUE_THREADS = """
+query($owner: String!, $name: String!, $cursor: String) {
+  repository(owner: $owner, name: $name) {
+    issues(states: OPEN, first: 50, after: $cursor) {
+      pageInfo { hasNextPage endCursor }
+      nodes { number title POST_FIELDS
+              comments(first: 100) { totalCount nodes { POST_FIELDS } } }
+    }
+  }
+}""".replace("POST_FIELDS", POST_FIELDS)
+
+PR_THREADS = """
+query($owner: String!, $name: String!, $cursor: String) {
+  repository(owner: $owner, name: $name) {
+    pullRequests(states: OPEN, first: 20, after: $cursor) {
+      pageInfo { hasNextPage endCursor }
+      nodes {
+        number title isDraft POST_FIELDS
+        comments(first: 100) { totalCount nodes { POST_FIELDS } }
+        reviews(first: 100) { totalCount nodes { POST_FIELDS state submittedAt } }
+        reviewRequests(first: 20) {
+          nodes { requestedReviewer { __typename ... on User { login } } }
+        }
+        timelineItems(itemTypes: [REVIEW_REQUESTED_EVENT], last: 100) {
+          nodes { ... on ReviewRequestedEvent {
+            createdAt actor { login } requestedReviewer { ... on User { login } } } }
+        }
+      }
+    }
+  }
+}""".replace("POST_FIELDS", POST_FIELDS)
+
+
+def fetch_conversations() -> dict[str, list[dict]]:
+    """Every open issue and open PR with its posts, reviews and pending review requests.
+
+    Two paged GraphQL reads instead of one ``gh`` call per thread. Both go through
+    ``gh()``, so a failed read exits 1 like every other read here: an empty result
+    would render as "nobody owes anything", which is the most misleading thing this
+    section could say. Closed and merged threads are not read at all, because an
+    ask on a closed thread is no longer owed to anyone.
+    """
+    owner, name = REPO.split("/")
+    out: dict[str, list[dict]] = {}
+    for key, query in (("issues", ISSUE_THREADS), ("pullRequests", PR_THREADS)):
+        nodes, cursor = [], None
+        while True:
+            args = ["api", "graphql", "-f", f"query={query}",
+                    "-f", f"owner={owner}", "-f", f"name={name}"]
+            if cursor:
+                args += ["-f", f"cursor={cursor}"]
+            page = gh(*args)["data"]["repository"][key]
+            nodes += page["nodes"]
+            if not page["pageInfo"]["hasNextPage"]:
+                break
+            cursor = page["pageInfo"]["endCursor"]
+        out["prs" if key == "pullRequests" else "issues"] = nodes
+    return out
 
 
 # --------------------------------------------------------------------------
@@ -410,6 +484,256 @@ def days_between(a: str, b: str) -> int:
 
 
 # --------------------------------------------------------------------------
+# Who owes an answer
+# --------------------------------------------------------------------------
+#
+# Two signals only, because they are the two that GitHub itself closes:
+#
+#   1. a pending review request: GitHub drops the request the moment the
+#      reviewer submits any review, so "still requested" means "not answered";
+#   2. an unticked task-list item that *starts* with a teammate's @mention,
+#      "- [ ] @BurakOztekin runs the desktop runbook": it is owed until someone
+#      ticks the box, which is a deliberate act by a person who read the thread.
+#
+# A bare @mention is not an ask. Measured on the open threads on 2026-10-23, 98 of
+# 147 mention pairs had no later post by the person mentioned, and nearly every
+# one was descriptive ("@BurakOztekin authored #69"). A question mark next to a
+# mention found 2, and the one real question among them had been answered in a
+# PR's checklist rather than in the thread, which free text cannot see. Either
+# rule would bury the real asks under noise, so neither is used.
+
+TASK_ITEM = re.compile(r"^[ \t]*(?:[-*+]|\d+[.)])[ \t]+\[([ xX])\][ \t]+(\S.*)$")
+FENCE = re.compile(r"^[ \t]*(```|~~~)")
+HTML_COMMENT = re.compile(r"<!--.*?-->", re.S)
+LEAD_MENTION = re.compile(r"@([A-Za-z0-9][A-Za-z0-9-]{0,38})")
+# Between two addressees: a comma, &, /, "and", Turkish "ve", or only a space.
+MENTION_SEP = re.compile(r"[ \t]*(?:(?:,|&|/|\band\b|\bve\b)[ \t]*)?", re.I)
+MD_LINK = re.compile(r"\[([^\]]*)\]\([^)]*\)")
+
+
+def is_bot(author: dict | None) -> bool:
+    login = (author or {}).get("login") or ""
+    return ((author or {}).get("__typename") == "Bot" or login.endswith("[bot]")
+            or login.endswith("code-quality"))
+
+
+def task_items(body: str) -> list[tuple[bool, str]]:
+    """Every task-list item GitHub would render as a checkbox, as (ticked, text).
+
+    Lines inside fenced code and inside HTML comments are skipped: those are
+    templates or hidden text, and neither renders as a live checkbox anyone can
+    tick. A blockquoted item ("> - [ ] ...", someone quoting another list) needs
+    no rule of its own: TASK_ITEM requires the list marker at the start of the
+    line, so it never matches.
+    """
+    out: list[tuple[bool, str]] = []
+    fence: str | None = None
+    for line in HTML_COMMENT.sub("", body or "").splitlines():
+        f = FENCE.match(line)
+        if f:
+            # Open on a marker, close only on the same marker.
+            fence = None if fence == f.group(1) else (fence or f.group(1))
+            continue
+        if fence:
+            continue
+        m = TASK_ITEM.match(line)
+        if m:
+            out.append((m.group(1) != " ", m.group(2).strip()))
+    return out
+
+
+def addressees(text: str) -> tuple[list[str], str]:
+    """The logins a task item is addressed to, and the item's text without them.
+
+    An item is addressed to the @mentions it *opens* with: "@A runs X", "@A and
+    @B confirm", "@A, @B: ...". A mention anywhere later in the sentence is not an
+    address ("Runbook for @A posted" asks something of whoever posts it, not of A).
+    An opening mention followed by an apostrophe is a suffix, English "@A's
+    review is landed" or Turkish "@A'nın", and makes the item a statement about A
+    rather than an ask of A, so the item is addressed to nobody.
+    """
+    who: list[str] = []
+    pos = 0
+    while True:
+        m = LEAD_MENTION.match(text, pos)
+        if not m:
+            break
+        if text[m.end():m.end() + 1] in ("'", "’"):
+            return [], text
+        who.append(m.group(1))
+        pos = m.end()
+        sep = MENTION_SEP.match(text, pos)
+        if not text.startswith("@", sep.end()):
+            break
+        pos = sep.end()
+    rest = text[pos:].lstrip(" \t:,-") if who else text
+    return who, rest
+
+
+def thread_posts(th: dict) -> list[dict]:
+    """The human posts on one issue or PR: opening post, comments, submitted reviews."""
+    raw = [th, *th["comments"]["nodes"],
+           *[r for r in (th.get("reviews") or {}).get("nodes", []) if r.get("state") != "PENDING"]]
+    out = []
+    for p in raw:
+        if is_bot(p.get("author")):
+            continue
+        out.append({
+            "who": (p.get("author") or {}).get("login") or "ghost",
+            "at": p.get("submittedAt") or p["createdAt"],
+            "edited": p.get("lastEditedAt") or "",
+            "body": p.get("body") or "",
+            "url": p["url"],
+            "state": p.get("state"),
+        })
+    return out
+
+
+def owed_answers(conv: dict[str, list[dict]], today: str) -> dict:
+    """Who owes what on open issues and PRs, oldest first.
+
+    Contract: ``conv`` is ``fetch_conversations()``'s result; ``today`` is a
+    YYYY-MM-DD date, used only for ages. Returns ``{"asks": [...], "truncated":
+    [...]}``. Each ask names who owes it, what it is, where (thread and the post's
+    own URL), who asked, ``since`` (a date), and ``last_here``, the owed person's
+    latest post on that thread, so a reader can tell "forgot" from "working on it"
+    without opening the thread. ``truncated`` lists every thread whose posts were
+    not all read, so a missing ask shows up as a visible warning, never as silence.
+
+    ``since`` never overstates a wait. A review request dates from its latest
+    ReviewRequestedEvent. A checkbox dates from its post, unless the post was
+    edited later, in which case it dates from that edit (``lower_bound`` true):
+    the box may have been added by the edit, and GitHub does not say which edit
+    added it, so the latest edit is the only date that cannot accuse anyone of a
+    wait longer than the true one.
+    """
+    canon = {l.lower(): l for l in [*TEAM_ORDER, *sorted(FORMER)]}
+    asks: list[dict] = []
+    truncated: list[str] = []
+
+    for kind, threads in (("issue", conv["issues"]), ("PR", conv["prs"])):
+        for th in threads:
+            ref = {"kind": kind, "number": th["number"], "title": th["title"], "url": th["url"]}
+            for part in ("comments", "reviews"):
+                block = th.get(part)
+                if block and block["totalCount"] > len(block["nodes"]):
+                    truncated.append(f"{kind} #{th['number']}: {len(block['nodes'])} of "
+                                     f"{block['totalCount']} {part} read")
+            posts = thread_posts(th)
+            last: dict[str, str] = {}
+            for p in posts:
+                last[p["who"]] = max(last.get(p["who"], ""), p["at"])
+
+            def ask(who: str, **kw) -> dict:
+                since = kw["since"]
+                return {"who": who, "thread": ref, "former": who in FORMER,
+                        "days": days_between(since, today) if since else None,
+                        "last_here": last.get(who, "")[:10], **kw}
+
+            seen: set[tuple] = set()
+            for p in posts:
+                for ticked, text in task_items(p["body"]):
+                    if ticked:
+                        continue
+                    names, rest = addressees(text)
+                    team = [canon[n.lower()] for n in names if n.lower() in canon]
+                    for who in team:
+                        key = (who, p["url"], rest)
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        edited = bool(p["edited"]) and p["edited"][:10] > p["at"][:10]
+                        asks.append(ask(
+                            who, kind="checkbox", text=MD_LINK.sub(r"\1", rest),
+                            url=p["url"], by=p["who"],
+                            since=(p["edited"] if edited else p["at"])[:10],
+                            posted=p["at"][:10], lower_bound=edited,
+                            others=[o for o in team if o != who]))
+
+            if kind != "PR":
+                continue
+            requested: dict[str, tuple[str, str]] = {}
+            for ev in th["timelineItems"]["nodes"]:
+                rv = ((ev.get("requestedReviewer") or {}).get("login") or "").lower()
+                if rv and ev.get("createdAt", "") >= requested.get(rv, ("", ""))[0]:
+                    requested[rv] = (ev["createdAt"], (ev.get("actor") or {}).get("login") or "?")
+            for rr in th["reviewRequests"]["nodes"]:
+                who = canon.get(((rr.get("requestedReviewer") or {}).get("login") or "").lower())
+                if not who:
+                    continue  # a team, a bot, or someone outside the team
+                at, by = requested.get(who.lower(), ("", "?"))
+                mine = [p for p in posts if p["who"] == who and p["state"]]
+                standing = max((p for p in mine if p["state"] in ("APPROVED", "CHANGES_REQUESTED")),
+                               key=lambda p: p["at"], default=None)
+                if standing and standing["state"] == "CHANGES_REQUESTED":
+                    text = (f"Re-review PR #{th['number']}: your CHANGES_REQUESTED from "
+                            f"{standing['at'][:10]} still stands")
+                elif standing:
+                    text = (f"Re-review PR #{th['number']}: you approved on "
+                            f"{standing['at'][:10]} and were asked again")
+                elif mine:
+                    text = (f"Re-review PR #{th['number']}: asked again after your review of "
+                            f"{max(p['at'] for p in mine)[:10]}")
+                else:
+                    text = f"Review PR #{th['number']}"
+                asks.append(ask(who, kind="re-review" if mine else "review", text=text,
+                                url=th["url"], by=by, since=at[:10], posted=at[:10],
+                                lower_bound=False, others=[]))
+
+    order = {l: i for i, l in enumerate([*TEAM_ORDER, *sorted(FORMER)])}
+    asks.sort(key=lambda x: (order.get(x["who"], 99), x["since"] or "9999", x["thread"]["number"]))
+    return {"asks": asks, "truncated": truncated}
+
+
+def owed_by_person(owed: dict) -> dict[str, list[dict]]:
+    """``owed_answers()``'s asks grouped per login, keeping its oldest-first order."""
+    out: dict[str, list[dict]] = defaultdict(list)
+    for x in owed["asks"]:
+        out[x["who"]].append(x)
+    return dict(out)
+
+
+ASK_KIND = {"review": "review requested", "re-review": "re-review requested",
+            "checkbox": "checkbox"}
+
+
+def clip(s: str, n: int = 150) -> str:
+    return s if len(s) <= n else s[:n - 3].rstrip() + "..."
+
+
+def ask_parts(x: dict) -> dict[str, str]:
+    """The pieces every rendering of an ask shares, as plain text."""
+    t = x["thread"]
+    where = f"{t['kind']} #{t['number']}"
+    if x["kind"] == "checkbox":
+        what = clip(x["text"])
+        by = "own checklist" if x["by"] == x["who"] else f"asked by @{x['by']}"
+        if x["others"]:
+            by += ", with " + ", ".join(f"@{o}" for o in x["others"])
+    else:
+        what = x["text"]
+        by = "self-requested" if x["by"] == x["who"] else f"requested by @{x['by']}"
+    if not x["since"]:
+        age = when = "date unknown"
+    else:
+        d = x["days"]
+        age = f"{d} {'day' if d == 1 else 'days'}{' or more' if x['lower_bound'] else ''}"
+        when = f"since {x['since']}{' or earlier' if x['lower_bound'] else ''} ({age})"
+    if x["since"] and x["last_here"] > x["since"]:
+        seen = f"has posted there since, on {x['last_here']}"
+    else:
+        seen = "no post there since"
+    return {"where": where, "what": what, "by": by, "when": when, "age": age, "seen": seen}
+
+
+def ask_line(x: dict) -> str:
+    """One plain-text line for an ask, for STATUS.md and the run report."""
+    p = ask_parts(x)
+    lead = f"{p['what']} ({p['where']})" if x["kind"] == "checkbox" else p["what"]
+    return f"{lead}: {p['by']}, {p['when']}; {p['seen']}"
+
+
+# --------------------------------------------------------------------------
 # "Work on this now": the ranked queue
 # --------------------------------------------------------------------------
 
@@ -447,6 +771,7 @@ def summarise(model: dict, main: dict, now: str) -> dict:
         "counts": dict(counts),
         "tickets": {str(t["id"]): t["state"] for t in model["tickets"]},
         "adr": dict(main["adr"]),
+        "owed": {who: len(xs) for who, xs in owed_by_person(model["owed"]).items()},
     }
 
 
@@ -497,6 +822,16 @@ def day_events(prev: dict, cur: dict, plan: dict) -> list[str]:
         was = prev["adr"].get(adr)
         if was and was != status:
             ev.append(f"{adr}: {was} to {status}")
+
+    # Records written before 2026-10-23 carry no "owed" key; a missing key is
+    # "not measured", never zero, so no line is reported against such a day.
+    if "owed" in prev and "owed" in cur:
+        for who in sorted(set(prev["owed"]) | set(cur["owed"])):
+            was, now = prev["owed"].get(who, 0), cur["owed"].get(who, 0)
+            if was != now:
+                name = plan["people"].get(who, {}).get("name", who)
+                ev.append(f"{name} owes {now} {'answer' if now == 1 else 'answers'} "
+                          f"(was {was})")
 
     if prev.get("main_sha") != cur.get("main_sha"):
         ev.append(f"main moved to {cur['main_sha']}")
@@ -719,6 +1054,26 @@ def render_markdown(plan: dict, model: dict, queue: dict, main: dict, now: str,
             a(f"1. {act['action']}")
             a(f"   - {act['why']}")
 
+    a("\n## Waiting on an answer\n")
+    a("_Review requests not yet answered with a review, and unticked checkboxes that start "
+      "with the person (`- [ ] @login does X`), on every open issue and PR. Oldest first; "
+      "\"or earlier\" marks a post edited after it was written, so the wait shown is the "
+      "shortest it can be._\n")
+    for warn in model["owed"]["truncated"]:
+        a(f"- **Not fully read, asks may be missing:** {warn}")
+    owed = owed_by_person(model["owed"])
+    if not owed:
+        a("\nNobody owes an answer on any open issue or PR.")
+    for login in [*TEAM_ORDER, *[k for k in owed if k not in TEAM_ORDER]]:
+        xs = owed.get(login)
+        if not xs:
+            continue
+        who = plan["people"].get(login, {}).get("name", login)
+        left = " · **left the team: reassign these**" if login in FORMER else ""
+        a(f"\n**{who}** (@{login}), {len(xs)} owed{left}\n")
+        for x in xs:
+            a(f"- {ask_line(x)}")
+
     a("\n## Not blocked by anything upstream, so what is holding them?\n")
     for t in model["tickets"]:
         if t["state"] in ("done", "blocked") or not t["blockers"]:
@@ -820,12 +1175,24 @@ def render_run_report(plan: dict, model: dict, queue: dict, main: dict, now: str
     a("")
 
     a("**Next action per person**")
-    order = ["mertefesensoy", "BurakOztekin", "bengisucvd", "BahaJarad"]
-    for login in order + [k for k in queue if k not in order]:
+    for login in TEAM_ORDER + [k for k in queue if k not in TEAM_ORDER]:
         who = plan["people"].get(login, {}).get("name", login)
         acts = queue.get(login, [])
         a(f"- {who}: " + (acts[0]["action"] if acts
                           else "nothing ready and nothing owed"))
+    a("")
+
+    # The oldest ask per person, because that is the one most likely forgotten.
+    owed = owed_by_person(model["owed"])
+    a("**Waiting on an answer**")
+    for warn in model["owed"]["truncated"]:
+        a(f"- Not fully read, asks may be missing: {warn}")
+    for login in TEAM_ORDER + [k for k in owed if k not in TEAM_ORDER]:
+        xs = owed.get(login, [])
+        who = plan["people"].get(login, {}).get("name", login)
+        if login in FORMER:
+            who += " (left the team: reassign)"
+        a(f"- {who}: " + (f"{len(xs)}, oldest: {ask_line(xs[0])}" if xs else "nothing owed"))
     return "\n".join(L) + "\n"
 
 
@@ -882,8 +1249,7 @@ def render_readme_block(plan: dict, model: dict, queue: dict, main: dict, now: s
     a("")
     a("| Who | Next action | Why |")
     a("| --- | --- | --- |")
-    order = ["mertefesensoy", "BurakOztekin", "bengisucvd", "BahaJarad"]
-    for login in order + [k for k in queue if k not in order]:
+    for login in TEAM_ORDER + [k for k in queue if k not in TEAM_ORDER]:
         acts = queue.get(login, [])
         who = plan["people"].get(login, {}).get("name", login)
         if not acts:
@@ -893,6 +1259,14 @@ def render_readme_block(plan: dict, model: dict, queue: dict, main: dict, now: s
         why = top["why"]
         why = why[:158].rstrip() + "..." if len(why) > 160 else why
         a(f"| {who} | {top['action']} | {why} |")
+    a("")
+    owed = owed_by_person(model["owed"])
+    tally = [f"{plan['people'].get(l, {}).get('name', l)} {len(owed[l])} "
+             f"(oldest since {owed[l][0]['since'] or 'unknown'})"
+             for l in [*TEAM_ORDER, *[k for k in owed if k not in TEAM_ORDER]] if owed.get(l)]
+    a("**Waiting on an answer:** " + ("; ".join(tally) if tally else "nobody owes one")
+      + ". [Who owes what](STATUS.md#waiting-on-an-answer)"
+      + (" · **some threads were not fully read**" if model["owed"]["truncated"] else ""))
     a("")
     if len(history) >= 2:
         prev, cur = history[-2], history[-1]
@@ -1076,6 +1450,14 @@ ol.acts .tags{margin-top:8px;display:flex;gap:5px;flex-wrap:wrap}
 .pill.bad{background:var(--bad-bg);color:var(--bad)}
 .pill.idle{background:var(--idle-bg);color:var(--muted)}
 .pill.ready{background:none;color:var(--ink);box-shadow:inset 0 0 0 1px var(--axis)}
+a.pill.owes{text-decoration:none;margin:-5px 0 13px}
+
+/* ---- who owes an answer: one group row per person, then their asks ---- */
+tr.grp td{padding-top:18px;font-size:14px}
+tr:first-child + tr.grp td{padding-top:4px}
+.pdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;
+  vertical-align:baseline}
+.ask{font-size:13.6px;line-height:1.5}
 
 /* ---- tables: hairlines only, no card chrome competing with the data ---- */
 .scroll{overflow-x:auto}
@@ -1157,12 +1539,17 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
       'A ticket waiting on an upstream dependency is never listed against its own owner; it is '
       'listed as a review or a start against whoever owns the blocker.</div>')
     a('<div class="grid two">')
-    order = ["mertefesensoy", "BurakOztekin", "bengisucvd", "BahaJarad"]
-    for login in order + [k for k in queue if k not in order]:
+    owed = owed_by_person(model["owed"])
+    for login in TEAM_ORDER + [k for k in queue if k not in TEAM_ORDER]:
         acts = queue.get(login, [])
         meta = plan["people"].get(login, {"name": login, "role": "", "colour": "idle"})
         a(f'<div class="card person" style="--pc:{e(person_colour(meta["colour"]))}">')
         a(f'<h3>{e(meta["name"])}</h3><div class="role">@{e(login)} · {e(meta["role"])}</div>')
+        if owed.get(login):
+            xs = owed[login]
+            a(f'<a class="pill warn owes" href="#owed-{e(login)}">owes {len(xs)} '
+              f'{"answer" if len(xs) == 1 else "answers"} · oldest since '
+              f'{e(xs[0]["since"] or "unknown")}</a>')
         if not acts:
             a('<div class="empty">Nothing ready and nothing owed. Available for reviews.</div>')
         else:
@@ -1187,6 +1574,47 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
             a('</ol>')
         a('</div>')
     a('</div>')
+
+    # ---- who owes an answer
+    a('<h2 id="owed">Waiting on an answer</h2>')
+    a('<div class="lede">Everything a teammate has been asked for on an open issue or PR '
+      'and has not delivered yet, oldest first. Two sources, both closed by GitHub itself: '
+      'a <b>review request</b> not yet answered with a review, and an <b>unticked checkbox '
+      'that starts with the person</b>, such as <code>- [ ] @BurakOztekin runs the desktop '
+      'runbook</code>, which stays here until someone ticks it. A plain @mention elsewhere '
+      'in a sentence is not tracked. "Or earlier" marks a post edited after it was written: '
+      'the box may have arrived with the edit, so the wait shown is the shortest it can be.</div>')
+    for warn in model["owed"]["truncated"]:
+        a(f'<div class="lede" style="color:var(--bad)"><b>Not fully read, so asks may be '
+          f'missing:</b> {e(warn)}.</div>')
+    a('<div class="card"><div class="scroll"><table>')
+    a('<tr><th>What they were asked</th><th>Where</th><th>Waiting since</th></tr>')
+    if not owed:
+        a('<tr><td colspan="3" class="empty">Nobody owes an answer on any open issue or PR.</td></tr>')
+    for login in TEAM_ORDER + [k for k in owed if k not in TEAM_ORDER]:
+        xs = owed.get(login)
+        if not xs:
+            continue
+        meta = plan["people"].get(login, {"name": login, "colour": "idle"})
+        left = (' <span class="pill bad">left the team: reassign</span>'
+                if login in FORMER else "")
+        a(f'<tr class="grp" id="owed-{e(login)}"><td colspan="3">'
+          f'<span class="pdot" style="background:{e(person_colour(meta["colour"]))}"></span>'
+          f'<b>{e(meta["name"])}</b> <span class="sub">@{e(login)} · owes {len(xs)}</span>'
+          f'{left}</td></tr>')
+        for x in xs:
+            parts, th = ask_parts(x), x["thread"]
+            pill = {"review": "warn", "re-review": "bad", "checkbox": "idle"}[x["kind"]]
+            a(f'<tr><td><span class="pill {pill}">{e(ASK_KIND[x["kind"]])}</span> '
+              f'<span class="ask">{e(parts["what"])}</span>'
+              f'<div class="sub">{e(parts["by"])}</div></td>')
+            a(f'<td class="num"><a href="{e(x["url"])}">{e(th["kind"])} #{th["number"]}</a>'
+              f'<span class="cap">{e(clip(th["title"], 64))}</span></td>')
+            a(f'<td class="num">{e(x["since"] or "unknown")}'
+              f'<span class="cap">{e(parts["age"])}'
+              f'{" · posted " + e(x["posted"]) if x["lower_bound"] else ""}<br>'
+              f'{e(parts["seen"])}</span></td></tr>')
+    a('</table></div></div>')
 
     # ---- milestones
     a('<h2>Milestone gates</h2>')
@@ -1379,8 +1807,10 @@ def main() -> int:
     prs = fetch_prs()
     enrich_open_prs(prs)
     main_state = fetch_main_state()
+    conversations = fetch_conversations()
 
     model = build(plan, issues, prs, main_state)
+    model["owed"] = owed_answers(conversations, plan_today())
     queue = action_queue(model, plan)
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
@@ -1410,7 +1840,7 @@ def main() -> int:
         {"generated": now, "main": main_state,
          "tickets": [{k: v for k, v in t.items() if k != "pr"} | {
              "pr": t["pr"]["number"] if t.get("pr") else None} for t in model["tickets"]],
-         "milestones": model["milestones"]},
+         "milestones": model["milestones"], "owed": model["owed"]},
         indent=2, ensure_ascii=False, default=str))
 
     done = sum(1 for ms in model["milestones"] for g in ms["gates"] if g["status"] == DONE)
