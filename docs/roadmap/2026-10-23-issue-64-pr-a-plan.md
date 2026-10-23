@@ -2,7 +2,10 @@
 
 **Date**: 2026-10-23 · **Author**: Mert Efe Şensoy (taking PR-A, as he took the File 03 research
 on 2026-10-03) · **Reviewer and owner of the ticket**: @bengisucvd · **Measured against**:
-`main` @ `6cf008da` · **Status**: plan for approval, nothing built
+`main` @ `6cf008da` · **Status**: approved by the lead on 2026-10-23 as written; the #64
+comment carrying the stale-row corrections and D1 to D5 was posted the same day
+([#64, 6366176028](https://github.com/SuperconducTED/superconducted-noise-engine/issues/64#issuecomment-6366176028));
+nothing built until Bengisu answers D1 to D5
 
 This plan is the documented plan the engineering standard requires before any code. It takes
 Issue #64 as written on 2026-09-03, applies the File 03 decisions Bengisu posted on #84 on
