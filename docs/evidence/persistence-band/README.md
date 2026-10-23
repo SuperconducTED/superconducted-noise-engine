@@ -123,6 +123,43 @@ numpy is used) and `PYTHONPATH=src` from the repository root. Outputs `results.t
 per reported figure) and `summary.json`. Seeds: `SeedSequence(84)` for the bootstrap; nothing
 else is random.
 
+### 2.1 Amended before the run, 2026-10-23 (no number existed yet)
+
+Four definitions above were loose enough to bias or move the result. They are corrected here
+rather than edited in place, and this block was committed before the script produced
+anything.
+
+1. **As-of lookups use files, not states.** Rows remain distinct states, but the value as of
+   `t + H` (and as of `t - D` in measurement 3, and the chip-wide recalibration clock) is the
+   latest **file** with `last_update_date <= t + H` inside the 6 h window, mapped to its
+   state. The original wording ("the latest state") would have required a new state to
+   appear inside the window, dropping every pair in which the device changed earlier and then
+   sat still, and emptying the `all` row set the vacuity check needs.
+2. **Measurement 3 gains a co-primary in target units.** `|yhat / y - 1|` is unstable for
+   `lambda`, which approaches zero when `T_2` approaches `2 T_1` (heterogeneity 177% of the
+   mean in File 03). The median absolute error in target units is reported beside it, and a
+   qubit enters the stale model only if it is usable at both `t` and `t - D`. The fresh model
+   is also scored on each `D`'s `moved` rows so the two are compared on identical rows.
+3. **Heteroscedasticity, three tightenings.** (a) The width ratio is the test-row-weighted
+   mean of the applied `r_b` over the constant `r`, not a mean over bins. (b) "At equal
+   coverage" compares the per-bin oracle with the constant band's **own** oracle `r` fitted on
+   the test rows, since the train-fitted constant `r` is not at 80% on the test period. (c)
+   `level` terciles are per component: `gamma`'s drift binned by `gamma`'s level, `lambda`'s
+   by `lambda`'s. Bins with fewer than 20 training rows fall back to the constant `r` and are
+   flagged.
+4. **Quantile method.** "Smallest `r` with coverage `>= 0.80`" is the order statistic at
+   `ceil(0.8 n)`, which is `numpy.quantile(..., method="inverted_cdf")`; `"higher"` returns one
+   order statistic up on most `n`.
+
+Also fixed before the run: the mutation check of L-009 is built in (the zero-width band's
+coverage is printed on `all` and on `change` at each `H`; the first should sit near the repeat
+rate, the second must be exactly 0.0, otherwise the row definition is wrong); the test pairs
+(state time, as-of file time, digests, change flags) are written to `pairs.tsv` so the fuzzy
+band is later scored on citable, identical rows; the script asserts the distinct-state count
+against `health/state-index.tsv` at the ref and stops on a mismatch; dropped pairs are counted
+per reason. The runbook's `PYTHONPATH` must include the repository root as well as `src`, since
+the script imports the shared archive-walk helpers from `scripts/`.
+
 ## 3. Results
 
 To be appended by the run, with the commit that produced them. Until then this section is
@@ -147,8 +184,10 @@ git fetch origin calibration-data
 ```
 
 ```bash
-PYTHONPATH=src python docs/evidence/persistence-band/measure_persistence_band.py --repo . --ref 5828b4a2 --out /tmp/persistence-band
+PYTHONPATH=src:. python docs/evidence/persistence-band/measure_persistence_band.py --repo . --ref 5828b4a2 --out /tmp/persistence-band
 ```
+
+On Windows the separator is `;` (`PYTHONPATH=src;.`).
 
 Compare `/tmp/persistence-band/summary.json` with the committed one. Expected: identical
 counts and identical figures to the printed precision; the only randomness is the seeded
