@@ -157,6 +157,36 @@ the effective training window is printed, since `level`, `log_age` and `last_inc
 history and the first weeks drop out; the archive walk and as-of lookup are imported from
 `../persistence-band/measure_persistence_band.py`, so there is one definition of each.
 
+### 2.2 Readout error, pre-registered before its run, 2026-10-23 (after §3's targets run)
+
+The lead made design-time fidelity prediction the project's focus and asked for the third
+calibration feature to be measured the same way. The script gains `--feature readout`; the
+protocol is §2 and §2.1 unchanged except as stated here, and this block was committed before
+the readout run produced a number.
+
+- **Components.** `readout_error` (primary) and `prob_meas1_prep0` (the `|0>`-prepared
+  misassignment, the larger of the two conditional errors on this device). Both are
+  dimensionless probabilities read by `calibration/loader.py`; log space as before.
+- **Floor.** Both components are floored at the 5th percentile of their training-period
+  values, for the same reason lambda was: small probabilities make log increments unbounded.
+  Excluded counts printed.
+- **Quantisation.** IBM reports readout probabilities on a grid of `1 / 8192` (the dataset
+  card and a direct check of an archived snapshot: every value is a multiple of `1 / 8192`,
+  the median `readout_error` is about 0.010, the minimum about 0.003). A one-quantum change is
+  therefore a 1% to 4% log increment for a typical qubit and far larger for the best qubits.
+  The script reports the fraction of events whose absolute change equals exactly one quantum,
+  so quantisation-dominated scatter can be told from drift; the lag-1 autocorrelation and the
+  cap are read with that fraction beside them.
+- **Everything else is identical**: rows, split, fit and calibration windows, models,
+  features (the age and last-increment features now refer to the qubit's readout
+  re-measurement events, which occur about every 4.4 hours rather than daily), band
+  construction, block bootstrap, common-mode share, vacuity check, and the decision rule of
+  §2.1 item 1. The chip-wide recalibration clock stays the `T1` clock, since that is the
+  event the feature was defined on.
+- **Regression guard.** After the readout run, `--feature targets` is re-run and its
+  `summary.json` must equal the committed one, so the refactor that added the option changed
+  no gamma or lambda figure.
+
 ## 3. Results
 
 Produced by `measure_predictability.py` at commit `261d9df3` of this branch, run 2026-10-23

@@ -30,6 +30,8 @@ from typing import Any
 import numpy as np
 
 COMPONENTS = ("gamma", "lambda")
+READOUT_COMPONENTS = ("readout_error", "prob_meas1_prep0")
+READOUT_QUANTUM = 1.0 / 8192.0
 HORIZONS_H = (24.0, 168.0)
 CUT = "2026-09-01T00:00:00+00:00"
 FIT_CUT = "2026-08-10T00:00:00+00:00"
@@ -56,6 +58,31 @@ def _pb() -> ModuleType:
     sys.modules["measure_persistence_band"] = module
     spec.loader.exec_module(module)
     return module
+
+
+def _with_readout(pb: ModuleType, repo: Path, ref: str, files: list[Any]) -> list[Any]:
+    """Re-read each file and replace ``per_qubit`` with (readout_error, prob_meas1_prep0)."""
+    import dataclasses
+    import json
+    import tempfile
+
+    tmp = Path(tempfile.gettempdir()) / "persistence-band" / "readout.json"
+    tmp.parent.mkdir(exist_ok=True)
+    out = []
+    for i, rec in enumerate(files):
+        doc = pb.read_snapshot(repo, ref, rec.path)
+        tmp.write_text(json.dumps(doc), encoding="utf-8")
+        parsed = pb.load_snapshot(tmp)
+        vals = np.full((len(parsed.qubits), 2), np.nan)
+        for pos, qubit in enumerate(parsed.qubits):
+            vals[pos] = (
+                np.nan if qubit.readout_error is None else qubit.readout_error,
+                np.nan if qubit.prob_meas1_prep0 is None else qubit.prob_meas1_prep0,
+            )
+        out.append(dataclasses.replace(rec, per_qubit=vals))
+        if (i + 1) % 250 == 0:
+            print(f"  readout pass {i + 1}/{len(files)}", file=sys.stderr)
+    return out
 
 
 def _q(values: np.ndarray, level: float = NOMINAL) -> float:
@@ -110,6 +137,7 @@ def main() -> None:
     ap.add_argument("--ref", required=True)
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--backend", default="ibm_fez")
+    ap.add_argument("--feature", choices=("targets", "readout"), default="targets")
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     pb = _pb()
@@ -117,6 +145,10 @@ def main() -> None:
     cut, fit_cut = pb._epoch(CUT), pb._epoch(FIT_CUT)
 
     files = pb.load_files(args.repo, args.ref, args.backend)
+    if args.feature == "readout":
+        files = _with_readout(pb, args.repo, args.ref, files)
+    components = COMPONENTS if args.feature == "targets" else READOUT_COMPONENTS
+    quantum = None if args.feature == "targets" else READOUT_QUANTUM
     states = pb.distinct_states(files)
     expected = pb.index_digests(args.repo, args.ref)
     if {files[i].digest for i in states} != expected:
@@ -131,11 +163,16 @@ def main() -> None:
         )  # (n_files, n_q, 2), NaN where unusable
     lmat[~np.isfinite(lmat)] = np.nan
 
-    # lambda floor from training-period values
+    # floors from training-period values: lambda only for targets, both components for readout
     train_mask_files = times < cut
-    lam_train = np.exp(lmat[train_mask_files, :, 1])
-    lam_floor = float(np.nanquantile(lam_train, LAMBDA_FLOOR_Q))
-    floors = (-math.inf, math.log(lam_floor))
+    floor_values: list[float] = []
+    for ci in range(2):
+        if args.feature == "targets" and ci == 0:
+            floor_values.append(math.nan)
+            continue
+        vals = np.exp(lmat[train_mask_files, :, ci])
+        floor_values.append(float(np.nanquantile(vals, LAMBDA_FLOOR_Q)))
+    floors = tuple(-math.inf if math.isnan(v) else math.log(v) for v in floor_values)
 
     results: list[dict[str, Any]] = []
     rows_out: list[dict[str, Any]] = []
@@ -145,7 +182,8 @@ def main() -> None:
         "distinct_states": len(states),
         "cut": CUT,
         "fit_cut": FIT_CUT,
-        "lambda_floor": lam_floor,
+        "feature": args.feature,
+        "floors": dict(zip(components, floor_values, strict=True)),
         "chipwide_t1_recalibrations": len(recals),
     }
 
@@ -154,7 +192,7 @@ def main() -> None:
 
     state_times = np.array([files[s].time for s in states])
 
-    for ci, comp in enumerate(COMPONENTS):
+    for ci, comp in enumerate(components):
         floor = floors[ci]
         lq = lmat[:, :, ci].copy()
         lq[lq < floor] = np.nan  # floor applies to every use of lambda
@@ -174,6 +212,23 @@ def main() -> None:
                     ev.append((times[f], v, v - prev))
                 prev = v
             events.append(ev)
+        if quantum is not None:
+            steps = np.array(
+                [abs(math.exp(l1) - math.exp(l1 - d)) for ev in events for (_, l1, d) in ev]
+            )
+            one = (
+                float(np.mean(np.isclose(steps, quantum, rtol=1e-6, atol=quantum * 1e-3)))
+                if steps.size
+                else math.nan
+            )
+            emit(
+                "event_quantum_step",
+                component=comp,
+                metric="fraction_one_quantum",
+                value=one,
+                n=float(steps.size),
+                quantum=quantum,
+            )
         # lag-1 pairs and reversion rows
         pairs_train: list[tuple[float, float]] = []
         pairs_test: list[tuple[float, float]] = []
