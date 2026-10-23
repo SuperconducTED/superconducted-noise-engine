@@ -132,6 +132,13 @@ still needed, cost, venue class, and what kills it.
 - **Cost.** One day with the predictability script extended to readout error; no model.
 - **What kills it.** The same minus 0.5 autocorrelation. Then the deep engine has no target
   anywhere in the calibration table.
+- **Measured later the same day** (`docs/evidence/predictability/` §3.6a, NC-086): lag-1
+  autocorrelation -0.45 for both readout components, quantisation not the cause; the decision
+  rule fails on both clauses for readout too. But half of a qubit's 24 h readout change is
+  shared with the rest of the chip at the same time (0.50 against 0.02 for gamma): readout
+  drift is a chip-wide excursion-and-return process. The one forecasting target left in the
+  calibration table is the chip-level readout series; a same-time cross-sectional readout
+  "nowcast" is the design-time refinement. Both unmeasured hypotheses, recorded in §3.6a.
 
 ### S6. The deep model with exogenous inputs
 
@@ -172,6 +179,8 @@ A7 is revisited, S6 is a hedge and not a plan, S7 is a section of S4.**
 | S5 readout predictability | Mert | extend `measure_predictability.py` to readout error |
 
 The venue decision stays with Mert and Dr. Akba.
+
+Appended after S5 ran: S5's result moves the deep engine's only remaining target to the chip-level readout series; the per-qubit own-history forecaster is closed for all three features. The hardware test design (S2) is in `docs/roadmap/2026-10-23-hardware-reading-vs-level-test.md`, for approval.
 
 ## 3. Scope statements the plan must not lose
 

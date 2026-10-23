@@ -18,7 +18,8 @@ PR #123.
 | `docs/evidence/predictability/README.md` | Pre-registered protocol (§2, committed before the run), its pre-run amendment (§2.1, which replaced a decision rule that would have said yes for the wrong reason), results (§3), the decision rule applied (§3.4), and the desktop runbook. |
 | `docs/evidence/predictability/measure_predictability.py` | Event view (increment autocorrelation, local-level cap, reversion regression) and horizon view (persistence, shrinkage, ridge, rolling band, split-conformal bands, common-mode share) in log target space; imports the archive walk and as-of lookup from the persistence-band script. Ruff-clean on 0.15.12; outside mypy's scope. |
 | `docs/evidence/predictability/results.tsv`, `rows.tsv`, `summary.json` | The run's output at the pinned ref: 144 result rows, 193,754 test rows. |
-| `docs/numerical-claims.md` | NC-084 and NC-085 appended, dated-anchor form. |
+| `docs/evidence/predictability/results-readout.tsv`, `rows-readout.tsv.gz`, `summary-readout.json` | The `--feature readout` run's output at the same ref (§2.2 of the README, pre-registered after the targets run and before its own). |
+| `docs/numerical-claims.md` | NC-084, NC-085 and NC-086 appended, dated-anchor form. |
 | `docs/implementations/2026-10-23-per-qubit-predictability.md` | This record. |
 
 No source, test or ADR status changed. The branch stacks on `mert/persistence-band`
@@ -86,6 +87,9 @@ All in log target space `L_q = log y_q`, so bands are relative and increments mu
   `results.tsv` to the printed precision; the interpreter and numpy fields will differ.
 - The script's own gates: 924 states against the state index; zero-width coverage exactly 0.0
   on change rows (it aborts otherwise).
+- Regression guard for the `--feature readout` addition: `--feature targets` re-run at
+  `bcf983f7` reproduced the committed `results.tsv` byte for byte (`cmp` clean), so no gamma or
+  lambda figure moved when the option was added.
 - Analytic checks of the cap: `rho = -0.5` gives 0.5, `rho = 0` gives 0; shrinkage's measured
   `R^2` (0.43 to 0.45) lies inside the cap's training interval (0.34 to 0.44) or at the test
   limit (0.48 to 0.50), as the model predicts.

@@ -1,0 +1,147 @@
+measurement	component	metric	value	n	quantum	period	ci90_high	horizon_h	rowset	model	conformal_q	slope
+event_quantum_step	readout_error	fraction_one_quantum	0.03381966131081973	101509.0	0.0001220703125							
+event_lag1_autocorr	readout_error	rho_pooled	-0.44523677928615035	67325.0		train						
+event_lag1_autocorr	readout_error	local_level_cap_r2	0.272482505352015	67325.0		train						
+event_lag1_autocorr	readout_error	rho_pooled	-0.46821532983766	34028.0		test						
+event_lag1_autocorr	readout_error	local_level_cap_r2	0.3245736482024115	34028.0		test						
+event_lag1_autocorr	readout_error	rho_per_qubit_median	-0.4629236805188437	156.0		all						
+event_lag1_autocorr	readout_error	rho_ci90	-0.45626111766954097	67325.0		train	-0.4337245750030343					
+event_lag1_autocorr	readout_error	local_level_cap_r2_ci90	0.2512370746304079	67325.0		train	0.29548644909703115					
+event_reversion	readout_error	b_train	-0.5614051016819445	67013.0								
+event_reversion	readout_error	r2_test	0.04407430595388773	34028.0								
+event_reversion	readout_error	b_ci90	-0.6061238752086147	67013.0			-0.5212260231637149					
+zero_width_band	readout_error	coverage	0.018598730954823513	52638.0				24.0	all			
+zero_width_band	readout_error	coverage	0.0	51659.0				24.0	change			
+horizon_fit	readout_error	kappa	0.5633682207219459	55063.0				24.0				
+horizon_fit	readout_error	kappa_ci90	0.5449476565140489	55063.0			0.5822110027254189	24.0				
+horizon_fit	readout_error	ridge_beta_std_dev	-0.19576379016816067	55063.0				24.0				
+horizon_fit	readout_error	ridge_beta_std_last_inc	-0.1123208758528061	55063.0				24.0				
+horizon_fit	readout_error	ridge_beta_std_log_age	0.0008993477746781388	55063.0				24.0				
+horizon_fit	readout_error	ridge_beta_std_recal_age	0.007503649966529382	55063.0				24.0				
+horizon_fit	readout_error	ridge_beta_std_standing	-0.002109349716325385	55063.0				24.0				
+horizon_fit	readout_error	ridge_beta_std_hour_sin	0.007286658274356158	55063.0				24.0				
+horizon_fit	readout_error	ridge_beta_std_hour_cos	-0.0005308515043384469	55063.0				24.0				
+horizon_point	readout_error	r2_test_change	-0.0009475691208877812	51659.0				24.0		persistence		
+horizon_point	readout_error	median_abs_err_log	0.24512245803298516	51659.0				24.0		persistence		
+horizon_band	readout_error	coverage	0.7292436942255948	51659.0				24.0		persistence	0.46262352194811296	
+horizon_band	readout_error	mean_width	0.9252470438962258	51659.0				24.0		persistence	0.46262352194811296	
+horizon_band	readout_error	interval_score	3.2419023715594206	51659.0				24.0		persistence	0.46262352194811296	
+horizon_point	readout_error	r2_test_change	0.4362079938431985	51659.0				24.0		shrinkage		
+horizon_point	readout_error	median_abs_err_log	0.20765043734945496	51659.0				24.0		shrinkage		
+horizon_band	readout_error	coverage	0.7170289784935829	51659.0				24.0		shrinkage	0.3602721114695944	
+horizon_band	readout_error	mean_width	0.720544222939189	51659.0				24.0		shrinkage	0.3602721114695944	
+horizon_band	readout_error	interval_score	2.3702085662930754	51659.0				24.0		shrinkage	0.3602721114695944	
+horizon_point	readout_error	r2_test_change	0.4120403390373353	51659.0				24.0		linear		
+horizon_point	readout_error	median_abs_err_log	0.19613113239376262	51659.0				24.0		linear		
+horizon_band	readout_error	coverage	0.7324570742755376	51659.0				24.0		linear	0.3669122436778449	
+horizon_band	readout_error	mean_width	0.73382448735569	51659.0				24.0		linear	0.3669122436778449	
+horizon_band	readout_error	interval_score	2.4097147457385666	51659.0				24.0		linear	0.3669122436778449	
+horizon_point	readout_error	r2_gap	-0.024167654805863248	51659.0				24.0		linear_minus_shrinkage		
+horizon_band	readout_error	coverage	0.7605257554346774	51659.0				24.0		rolling_band		
+horizon_band	readout_error	mean_width	0.7886112178599353	51659.0				24.0		rolling_band		
+horizon_band	readout_error	interval_score	1.8819832757465635	51659.0				24.0		rolling_band		
+common_mode	readout_error	r2_leave_one_out	0.49800177462830386	51659.0				24.0				0.9929142937185244
+zero_width_band	readout_error	coverage	0.013984113712374582	47840.0				168.0	all			
+zero_width_band	readout_error	coverage	0.0	47171.0				168.0	change			
+horizon_fit	readout_error	kappa	0.5522925712054608	51013.0				168.0				
+horizon_fit	readout_error	kappa_ci90	0.5311057568047443	51013.0			0.5734359546666697	168.0				
+horizon_fit	readout_error	ridge_beta_std_dev	-0.2157946948025815	51013.0				168.0				
+horizon_fit	readout_error	ridge_beta_std_last_inc	-0.10377262028890008	51013.0				168.0				
+horizon_fit	readout_error	ridge_beta_std_log_age	0.006040391504480596	51013.0				168.0				
+horizon_fit	readout_error	ridge_beta_std_recal_age	0.0057516073707334315	51013.0				168.0				
+horizon_fit	readout_error	ridge_beta_std_standing	-0.022841442365388778	51013.0				168.0				
+horizon_fit	readout_error	ridge_beta_std_hour_sin	0.009011717974386385	51013.0				168.0				
+horizon_fit	readout_error	ridge_beta_std_hour_cos	-0.0038692046553775554	51013.0				168.0				
+horizon_point	readout_error	r2_test_change	-0.0054733498551842175	47171.0				168.0		persistence		
+horizon_point	readout_error	median_abs_err_log	0.2530581078857326	47171.0				168.0		persistence		
+horizon_band	readout_error	coverage	0.7536622077123657	47171.0				168.0		persistence	0.5194836865091048	
+horizon_band	readout_error	mean_width	1.0389673730182094	47171.0				168.0		persistence	0.5194836865091048	
+horizon_band	readout_error	interval_score	3.1928150821536825	47171.0				168.0		persistence	0.5194836865091048	
+horizon_point	readout_error	r2_test_change	0.4807267535502885	47171.0				168.0		shrinkage		
+horizon_point	readout_error	median_abs_err_log	0.2113397802951372	47171.0				168.0		shrinkage		
+horizon_band	readout_error	coverage	0.7483835407347735	47171.0				168.0		shrinkage	0.40131462492018544	
+horizon_band	readout_error	mean_width	0.8026292498403709	47171.0				168.0		shrinkage	0.40131462492018544	
+horizon_band	readout_error	interval_score	2.2554249904384953	47171.0				168.0		shrinkage	0.40131462492018544	
+horizon_point	readout_error	r2_test_change	0.46657760890484956	47171.0				168.0		linear		
+horizon_point	readout_error	median_abs_err_log	0.2132050181039447	47171.0				168.0		linear		
+horizon_band	readout_error	coverage	0.7843378346865659	47171.0				168.0		linear	0.45615895927422556	
+horizon_band	readout_error	mean_width	0.9123179185484513	47171.0				168.0		linear	0.45615895927422556	
+horizon_band	readout_error	interval_score	2.2626817913027426	47171.0				168.0		linear	0.45615895927422556	
+horizon_point	readout_error	r2_gap	-0.014149144645438927	47171.0				168.0		linear_minus_shrinkage		
+horizon_band	readout_error	coverage	0.7522206440397702	47171.0				168.0		rolling_band		
+horizon_band	readout_error	mean_width	0.7452071171979361	47171.0				168.0		rolling_band		
+horizon_band	readout_error	interval_score	1.725864954520158	47171.0				168.0		rolling_band		
+common_mode	readout_error	r2_leave_one_out	0.46310481244420076	47171.0				168.0				0.9918217587222982
+event_quantum_step	prob_meas1_prep0	fraction_one_quantum	0.0	99945.0	0.0001220703125							
+event_lag1_autocorr	prob_meas1_prep0	rho_pooled	-0.44803599069345007	66490.0		train						
+event_lag1_autocorr	prob_meas1_prep0	local_level_cap_r2	0.27804561044363496	66490.0		train						
+event_lag1_autocorr	prob_meas1_prep0	rho_pooled	-0.46138587500306594	33299.0		test						
+event_lag1_autocorr	prob_meas1_prep0	local_level_cap_r2	0.30732650844588105	33299.0		test						
+event_lag1_autocorr	prob_meas1_prep0	rho_per_qubit_median	-0.4522605396250061	156.0		all						
+event_lag1_autocorr	prob_meas1_prep0	rho_ci90	-0.45535431379865476	66490.0		train	-0.43975711500283615					
+event_lag1_autocorr	prob_meas1_prep0	local_level_cap_r2_ci90	0.2620637064162292	66490.0		train	0.2934753067912793					
+event_reversion	prob_meas1_prep0	b_train	-0.6500117758199718	66178.0								
+event_reversion	prob_meas1_prep0	r2_test	0.1331427213690063	33299.0								
+event_reversion	prob_meas1_prep0	b_ci90	-0.6757022296137367	66178.0			-0.6245319618438301					
+zero_width_band	prob_meas1_prep0	coverage	0.030490609428899963	52180.0				24.0	all			
+zero_width_band	prob_meas1_prep0	coverage	0.0	50589.0				24.0	change			
+horizon_fit	prob_meas1_prep0	kappa	0.7101028064123227	54307.0				24.0				
+horizon_fit	prob_meas1_prep0	kappa_ci90	0.690347163585691	54307.0			0.7300998780242423	24.0				
+horizon_fit	prob_meas1_prep0	ridge_beta_std_dev	-0.419341054374902	54307.0				24.0				
+horizon_fit	prob_meas1_prep0	ridge_beta_std_last_inc	-0.13179642766619007	54307.0				24.0				
+horizon_fit	prob_meas1_prep0	ridge_beta_std_log_age	0.005471293232847565	54307.0				24.0				
+horizon_fit	prob_meas1_prep0	ridge_beta_std_recal_age	0.018967782250934147	54307.0				24.0				
+horizon_fit	prob_meas1_prep0	ridge_beta_std_standing	0.006223153902683751	54307.0				24.0				
+horizon_fit	prob_meas1_prep0	ridge_beta_std_hour_sin	0.015870887935814024	54307.0				24.0				
+horizon_fit	prob_meas1_prep0	ridge_beta_std_hour_cos	0.003396438826157052	54307.0				24.0				
+horizon_point	prob_meas1_prep0	r2_test_change	-0.0007124650586693981	50589.0				24.0		persistence		
+horizon_point	prob_meas1_prep0	median_abs_err_log	0.534999160300067	50589.0				24.0		persistence		
+horizon_band	prob_meas1_prep0	coverage	0.7121113285496847	50589.0				24.0		persistence	0.9162907318741547	
+horizon_band	prob_meas1_prep0	mean_width	1.8325814637483084	50589.0				24.0		persistence	0.9162907318741547	
+horizon_band	prob_meas1_prep0	interval_score	4.454651245361917	50589.0				24.0		persistence	0.9162907318741547	
+horizon_point	prob_meas1_prep0	r2_test_change	0.47338182888080593	50589.0				24.0		shrinkage		
+horizon_point	prob_meas1_prep0	median_abs_err_log	0.3849919699949862	50589.0				24.0		shrinkage		
+horizon_band	prob_meas1_prep0	coverage	0.7445294431595801	50589.0				24.0		shrinkage	0.722342084116144	
+horizon_band	prob_meas1_prep0	mean_width	1.4446841682322877	50589.0				24.0		shrinkage	0.722342084116144	
+horizon_band	prob_meas1_prep0	interval_score	3.1070684957476375	50589.0				24.0		shrinkage	0.722342084116144	
+horizon_point	prob_meas1_prep0	r2_test_change	0.4557802509644321	50589.0				24.0		linear		
+horizon_point	prob_meas1_prep0	median_abs_err_log	0.39215582819960215	50589.0				24.0		linear		
+horizon_band	prob_meas1_prep0	coverage	0.7703255648461128	50589.0				24.0		linear	0.770968904822301	
+horizon_band	prob_meas1_prep0	mean_width	1.5419378096446013	50589.0				24.0		linear	0.770968904822301	
+horizon_band	prob_meas1_prep0	interval_score	3.120461428288827	50589.0				24.0		linear	0.770968904822301	
+horizon_point	prob_meas1_prep0	r2_gap	-0.017601577916373845	50589.0				24.0		linear_minus_shrinkage		
+horizon_band	prob_meas1_prep0	coverage	0.7812370278123703	50589.0				24.0		rolling_band		
+horizon_band	prob_meas1_prep0	mean_width	1.4700485247965223	50589.0				24.0		rolling_band		
+horizon_band	prob_meas1_prep0	interval_score	2.838478155763135	50589.0				24.0		rolling_band		
+common_mode	prob_meas1_prep0	r2_leave_one_out	0.3035629458239967	50589.0				24.0				0.9836252741663182
+zero_width_band	prob_meas1_prep0	coverage	0.028211778101081664	47427.0				168.0	all			
+zero_width_band	prob_meas1_prep0	coverage	0.0	46089.0				168.0	change			
+horizon_fit	prob_meas1_prep0	kappa	0.6918634357732081	50397.0				168.0				
+horizon_fit	prob_meas1_prep0	kappa_ci90	0.6696748208780298	50397.0			0.7130239436211556	168.0				
+horizon_fit	prob_meas1_prep0	ridge_beta_std_dev	-0.4323859216322928	50397.0				168.0				
+horizon_fit	prob_meas1_prep0	ridge_beta_std_last_inc	-0.12710262599129296	50397.0				168.0				
+horizon_fit	prob_meas1_prep0	ridge_beta_std_log_age	0.009370784439927506	50397.0				168.0				
+horizon_fit	prob_meas1_prep0	ridge_beta_std_recal_age	0.0007817588719359921	50397.0				168.0				
+horizon_fit	prob_meas1_prep0	ridge_beta_std_standing	-0.004674881451384283	50397.0				168.0				
+horizon_fit	prob_meas1_prep0	ridge_beta_std_hour_sin	0.009854054003215292	50397.0				168.0				
+horizon_fit	prob_meas1_prep0	ridge_beta_std_hour_cos	0.0010629190116008868	50397.0				168.0				
+horizon_point	prob_meas1_prep0	r2_test_change	-0.0015986719746070577	46089.0				168.0		persistence		
+horizon_point	prob_meas1_prep0	median_abs_err_log	0.540239508972284	46089.0				168.0		persistence		
+horizon_band	prob_meas1_prep0	coverage	0.7487252923691119	46089.0				168.0		persistence	1.0116009116784799	
+horizon_band	prob_meas1_prep0	mean_width	2.0232018233569597	46089.0				168.0		persistence	1.0116009116784799	
+horizon_band	prob_meas1_prep0	interval_score	4.397574029776553	46089.0				168.0		persistence	1.0116009116784799	
+horizon_point	prob_meas1_prep0	r2_test_change	0.516236649902176	46089.0				168.0		shrinkage		
+horizon_point	prob_meas1_prep0	median_abs_err_log	0.3959967501706495	46089.0				168.0		shrinkage		
+horizon_band	prob_meas1_prep0	coverage	0.7764108572544425	46089.0				168.0		shrinkage	0.8027483857011022	
+horizon_band	prob_meas1_prep0	mean_width	1.6054967714022044	46089.0				168.0		shrinkage	0.8027483857011022	
+horizon_band	prob_meas1_prep0	interval_score	2.9740541626327657	46089.0				168.0		shrinkage	0.8027483857011022	
+horizon_point	prob_meas1_prep0	r2_test_change	0.4879591585914027	46089.0				168.0		linear		
+horizon_point	prob_meas1_prep0	median_abs_err_log	0.42254613838383737	46089.0				168.0		linear		
+horizon_band	prob_meas1_prep0	coverage	0.8299160320249951	46089.0				168.0		linear	0.9378508033275799	
+horizon_band	prob_meas1_prep0	mean_width	1.8757016066551595	46089.0				168.0		linear	0.9378508033275799	
+horizon_band	prob_meas1_prep0	interval_score	3.0276720706964237	46089.0				168.0		linear	0.9378508033275799	
+horizon_point	prob_meas1_prep0	r2_gap	-0.028277491310773284	46089.0				168.0		linear_minus_shrinkage		
+horizon_band	prob_meas1_prep0	coverage	0.7721365184751242	46089.0				168.0		rolling_band		
+horizon_band	prob_meas1_prep0	mean_width	1.433801581928505	46089.0				168.0		rolling_band		
+horizon_band	prob_meas1_prep0	interval_score	2.6749184662151193	46089.0				168.0		rolling_band		
+common_mode	prob_meas1_prep0	r2_leave_one_out	0.27301299844607363	46089.0				168.0				0.9810275366596396

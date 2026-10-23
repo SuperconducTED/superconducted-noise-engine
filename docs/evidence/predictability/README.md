@@ -295,6 +295,60 @@ level-tracking band.
   and shrinkage already tracks it.
 - Target space, log units, one device, nine months. Nothing here is a circuit or a shot.
 
+### 3.6a Readout error (the §2.2 run)
+
+Produced by the same script with `--feature readout` at commit `bcf983f7`, same ref, same
+split, same laptop. Outputs `results-readout.tsv`, `rows-readout.tsv.gz` (195,508 test rows,
+SHA-256 in `summary-readout.json`). **Regression guard passed**: the targets mode re-run after
+the script change reproduced the committed `results.tsv` byte for byte. Floors: 0.00415
+(`readout_error`) and 0.00098 (`prob_meas1_prep0`), excluding 19,851 and 16,215 cells.
+Zero-width coverage on `all` rows 0.019 and 0.031 at 24 h (readout re-measures about every
+4.4 h, so almost every 24 h pair moved); exactly 0.0 on `change` rows.
+
+| | `readout_error` | `prob_meas1_prep0` |
+| --- | --- | --- |
+| One-quantum (1/8192) steps among events | 3.4% of 101,509 | 0.0% of 99,945 |
+| Lag-1 autocorrelation of increments, train (90% block bootstrap over qubits) | **-0.445** (-0.456 to -0.434) | **-0.448** (-0.455 to -0.440) |
+| Same, test; median over 156 qubits | -0.468; -0.463 | -0.461; -0.452 |
+| Own-history cap on next-increment `R^2`, train | 0.27 (0.25 to 0.30) | 0.28 (0.26 to 0.29) |
+| Event-view reversion slope `b`; test `R^2` | -0.56; **0.044** | -0.65; 0.133 |
+| Horizon 24 h, test change rows | 51,659 | 50,589 |
+| `R^2` of the 24 h change: persistence / shrinkage (`kappa`) / ridge; gap | 0.00 / **0.436** (0.56) / 0.412; **-0.024** | 0.00 / 0.473 (0.71) / 0.456; -0.018 |
+| Interval score, 24 h: persistence / shrinkage / ridge / rolling 30-day band | 3.24 / 2.37 / 2.41 / **1.88** (coverage 0.76, width 0.79) | 4.45 / 3.11 / 3.12 / **2.84** (0.78, 1.47) |
+| Same at 168 h | 3.19 / 2.26 / 2.26 / **1.73** | 4.40 / 2.97 / 3.03 / **2.67** |
+| Common-mode share of a qubit's change, leave-one-out: 24 h; 168 h | **0.498; 0.463** | **0.304; 0.273** |
+
+- **Quantisation is not the story.** One-quantum steps are 3% of events for `readout_error`
+  and absent for the conditional probability; the lag-1 autocorrelation and the cap are
+  read as measured.
+- **The decision rule fails for readout too**, on both clauses: the ridge is worse than
+  shrinkage (gap -0.02 at both horizons, both components) and its band is 28% worse than the
+  rolling band for `readout_error` (2.41 against 1.88). No own-history forecaster beats level
+  tracking on readout either.
+- **But readout is not T1.** The event-view reversion explains only 4% of the next increment
+  (against 46% for gamma), while the 24 h deviation from the 30-day level is strongly
+  reverting (shrinkage `R^2` 0.44), and **half of a qubit's 24 h readout change is shared with
+  the rest of the chip at the same time** (0.50 against 0.02 for gamma). Readout drift on this
+  device is a chip-wide excursion-and-return process on a scale of hours to days: consecutive
+  4.4 h readings inside an excursion do not revert, the excursion as a whole does, and it moves
+  most qubits together. That is the signature of shared readout hardware or of chip-wide
+  readout recalibration events, not of per-qubit physics. The own-history cap derived for a
+  local-level model (§2.1 item 2) therefore does not apply cleanly here: it bounds the next
+  event increment, and the horizon view spans about five readout events, where the
+  excursion-and-return structure is what shrinkage exploits.
+- **What this opens, as a hypothesis.** The one calibration-table target with large
+  same-time cross-sectional information is the chip-level readout component. A design-time
+  predictor that reads a handful of qubits' current readout error (IBM's own real-time
+  benchmarking for qubit selection does this for a different purpose) could place the whole
+  chip's readout level for the job; and a chip-level readout series, being one series rather
+  than 156, is the candidate forecasting target the deep engine did not have for T1 and T2. Both
+  are unmeasured. Neither changes the decision rule's outcome for a per-qubit own-history
+  forecaster.
+- **For the hardware test's §2**: readout enters each predictor from the same source as `T1`;
+  the readout findings say the `level` source for readout should be the 30-day level corrected
+  by the chip's current excursion when one is detectable at submission time. That refinement is
+  noted for the design and not adopted until measured.
+
 ### 3.6 Caveats found by the run
 
 - The test-period lag-1 autocorrelation sits exactly at the -0.5 limit for gamma (-0.504),
