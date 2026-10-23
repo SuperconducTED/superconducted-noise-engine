@@ -110,6 +110,53 @@ longer record changes the answer.
 `C:\pvci` (numpy 2.4.4; only numpy beyond the project's code), `PYTHONPATH=src:.`
 (Windows `;`) from the repository root. Outputs `results.tsv`, `summary.json`.
 
+### 2.1 Amended before the run, 2026-10-23 (no number existed yet)
+
+Review of §2 found that its decision rule would have said yes to the deep model in a case
+where the honest answer is no, and four looser points. Corrected here, append-only, committed
+before the script produced anything.
+
+1. **The decision rule tests the gap above shrinkage, not predictability as such.** Under
+   pure measurement noise around a fixed level with no memory at all, `L_k = mu + e_k`,
+   the increment is `D_{k+1} = e_{k+1} - e_k`, shrinkage to level (`-dev = -e_k`) leaves the
+   residual `e_{k+1}`, and `R^2 = Var(e) / Var(D) = 0.5`. A linear model whose only real
+   information is `dev` would therefore clear "`R^2 >= 0.10`" with nothing a deep model could
+   learn. Revised rule, at 24 h on test change rows, both clauses required:
+   `R^2(linear) - R^2(shrinkage) >= 0.05`, **and** the linear conformal band's interval score
+   is at least 10% below the better of the shrinkage conformal band and the per-qubit rolling
+   band. The ladder reported is persistence, shrinkage, linear, rolling band; the deep model's
+   room is the gap above the better of the top two.
+2. **An analytic cap on any own-history forecaster, from the lag-1 autocorrelation.** Under
+   a Gaussian local-level model in event time, `L_k = mu_k + e_k`, `mu_k = mu_{k-1} + eta_k`,
+   the lag-1 autocorrelation of increments is `rho = -sigma_e^2 / (sigma_eta^2 + 2 sigma_e^2)`:
+   `rho = -0.5` is noise around a fixed level (everything forecastable is the level),
+   `rho = 0` is a random walk (nothing forecastable). The signal ratio is
+   `q = -1 / rho - 2`, the steady-state filter variance ratio is
+   `P / sigma_e^2 = (q + sqrt(q^2 + 4q)) / 2`, and the best `R^2` for the next increment
+   attainable from the qubit's own history is `R^2_max = 1 - (1 + P / sigma_e^2)(-rho)`.
+   Checks: `rho = -0.5` gives 0.5, `rho = 0` gives 0. Reported with its interval from the
+   bootstrap on `rho`, under the stated assumption. Shrinkage should sit near the cap; any
+   room above it can only come from cross-sectional or exogenous features.
+3. **A floor on lambda.** `lambda_q` approaches zero at the `T_2 = 2 T_1` boundary ADR-027
+   admits, so `log lambda` increments are unbounded on that tail. Rows where `lambda_q` at
+   `t` or at `t + H` (or at either end of an event pair) is below the 5th percentile of the
+   training-period lambda values are excluded from the lambda analysis, with the excluded
+   count printed. Gamma is primary for the log-space view.
+4. **One fit per model.** `kappa` and the ridge are fitted once, on training change rows
+   with `t < 2026-08-10T00:00:00Z`; that single fit gives both the point metrics and the
+   band, whose quantile comes from the calibration rows `2026-08-10 <= t < cut`, which are
+   then genuinely out of fit. Feature standardisation uses the fit rows' statistics only.
+5. **Block bootstrap.** 156 qubits share every `t`, so row resampling understates the
+   uncertainty several-fold. Horizon-view quantities (`kappa`) resample state times; event-view
+   quantities (`rho`, `b`) resample qubits. 1,000 resamples, `SeedSequence(84)`, 90% intervals.
+
+Also fixed before the run: the common-mode regression leaves the qubit out of the chip mean it
+is regressed on; the test rows (state time, qubit, as-of time, `D_H`, change flag, per
+component) are written to `rows.tsv` so a later model is scored on identical, citable rows;
+the effective training window is printed, since `level`, `log_age` and `last_inc` need
+history and the first weeks drop out; the archive walk and as-of lookup are imported from
+`../persistence-band/measure_persistence_band.py`, so there is one definition of each.
+
 ## 3. Results
 
 To be appended by the run, with the commit that produced them. Empty on purpose until then.
