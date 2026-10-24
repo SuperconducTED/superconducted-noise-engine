@@ -4,7 +4,7 @@
 here is in force.** The commit that freezes it changes this line to "Frozen at `<commit>`" and is
 made only after all of section 6 is done · **Design it freezes**:
 `docs/roadmap/2026-10-23-hardware-reading-vs-level-test.md` (approved by the lead 2026-10-23) ·
-**Issue**: #125 · **Evidence**: `docs/evidence/hardware-reading-vs-level/` (NC-087 to NC-090)
+**Issue**: #125 · **Evidence**: `docs/evidence/hardware-reading-vs-level/` (NC-087 to NC-091)
 
 ## 1. What this document does
 
@@ -199,7 +199,12 @@ the result needs to know what the measurement cost.
 
 ## 5. What is not decided here
 
-- The fixed UTC submission hour (the lead).
+- The fixed UTC submission hour (the lead). The evidence is NC-091 (evidence README §7.5):
+  IBM's chip-wide `T1` sweeps come about daily but do not hold a clock time, so no hour gives a
+  reading younger than about ten hours on a typical day. Early-morning UTC (04:45 to 05:45 UTC,
+  07:45 to 08:45 Istanbul) gives the freshest readings, a median of 9.8 to 10.3 hours since the
+  last sweep, with a 6.8% to 8.6% chance of a sweep within three hours; mid-afternoon UTC gives the
+  least sweep risk (5.6%) with older readings; 19:45 to 20:45 UTC is worst on both.
 - The second account named as the fallback for the daily cadence (design §8: a team member other
   than Mert, before job 2).
 - Whether the S5 readout result changes the readout source of §2 (design §8, not blocking).
@@ -209,7 +214,7 @@ the result needs to know what the measurement cost.
 | Item | Owner | State on 2026-10-24 |
 | --- | --- | --- |
 | Answers on proposals A, B, C and D | Mert | **done 2026-10-24**: all four accepted as drafted (section 3.5) |
-| The fixed UTC submission hour | Mert | open |
+| The fixed UTC submission hour | Mert | open; evidence measured (NC-091, section 5) |
 | Statistics review of the decision rule (design §7) and of this draft; in particular the null-model value of each threshold (lesson L-029: derive what a no-information predictor scores before trusting a threshold), and the bootstrap's resampling unit (by job, since the qubits of one job share one device state, or by row) | Bengisu | open; review requested on PR #124 |
 | The offline half of `scripts/hardware_reading_vs_level.py` (selection, circuits for both arms, scoring) and its dry run against Aer, committed | Burak | open; no branch yet |
 | PR #120 merged | Bengisu or Burak to review | open, no review yet |
@@ -223,5 +228,5 @@ the result needs to know what the measurement cost.
   `docs/implementations/2026-10-23-hardware-test-archive-side.md` (PR #126, the dry run)
 - `docs/roadmap/2026-10-24-hardware-test-preregistration-support-plan.md` (this work's plan)
 - `docs/evidence/hardware-reading-vs-level/README.md` (the two measurements' protocol and results)
-- `docs/numerical-claims.md` NC-084, NC-085 (the scatter), NC-087 to NC-090
+- `docs/numerical-claims.md` NC-084, NC-085 (the scatter), NC-087 to NC-091
 - Issue #125; the phase-4 plan `docs/roadmap/2026-10-23-phase-4-plan.md` lane 1

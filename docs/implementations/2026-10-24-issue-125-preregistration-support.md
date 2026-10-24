@@ -170,3 +170,42 @@ branch (`6f458867`, local, not pushed), covering this count, qubit 155's roundin
 - `docs/evidence/hardware-reading-vs-level/README.md`
 - `docs/numerical-claims.md` NC-084, NC-085, NC-087 to NC-090
 - Issue #125
+
+## Addendum, 2026-10-24: measurement 3, the recalibration hour
+
+**Why.** After the lead accepted proposals A to D, the one open choice on the lead's side was
+the fixed daily submission hour. Its best value depends on when IBM's chip-wide `T1` sweeps land,
+which the archive could answer and nobody had measured. The lead asked for it, protocol first.
+
+| File | One-sentence description |
+| --- | --- |
+| `docs/evidence/hardware-reading-vs-level/README.md` | Amendment §6.3 and section 7, the protocol, committed (`1a19e844`) before the script; results appended in §7.5. |
+| `docs/evidence/hardware-reading-vs-level/measure_recal_hours.py` | New (`7bed630d`). Imports the persistence run's `load_files` and `recal_times` unchanged, dates each event by publication and by median measurement time, and simulates a daily submission at minute :45 of each UTC hour. |
+| `docs/evidence/hardware-reading-vs-level/recal-*.tsv`, `recal-summary.json` | New (`188dc9ce`). Per event, per hour, per month, and the summary with the guard. |
+| `docs/numerical-claims.md` | NC-091, in the Rule 7 form. |
+| `docs/roadmap/2026-10-24-issue-125-preregistration.md` | Section 5 and the section 6 row point the open submission hour at NC-091. |
+
+**Approach.** Reusing `recal_times` keeps one definition of a chip-wide recalibration across the
+persistence run and this one; the guard checks the event list is identical to `recal_times`'s
+and that the count is the persistence run's 151. The measured time is the median of the new T1
+`date` values among the qubits that changed, which our poll cadence cannot shift; the published
+time is the later file's `last_update_date`, which a missed poll can only delay.
+
+**Math.** For a submission instant `t` (day `D`, hour `h`, minute 45, UTC) and published event
+times `e_1 < e_2 < ...`: age `= t - max{e_i <= t}` in hours, and a sweep "within `x` hours" when
+`min{e_i > t} - t <= x`. Each is taken over every day `D` from the day after the first event to
+the last day with a file at or after `D` 23:45, and summarised by the median (age) or the share of
+days (risk). The busiest window is the start hour `s` maximising `sum_{k=0..3} count[(s + k) mod 24]`,
+ties to the earliest `s`.
+
+**Design decision.** Report all 24 hours rather than recommend one: the trade-off (freshness
+against queue risk) and the lead's own daily availability are the lead's to weigh, and the sweep
+time moved between months, so the record is a guide, not a forecast.
+
+**Verification.** The pure functions were checked on a synthetic four-file archive before the run
+(two events detected with the right measured times, identical to `recal_times`, the midnight
+wrap and tie rule of the busiest window, and the ages at three submission times); that check also
+caught a loader bug (a dataclass module imported through `importlib` must be registered in
+`sys.modules` first), fixed before the commit. The record run on the pinned venv passed its guard.
+`ruff check` and `check_ids` are clean. Not verified: a desktop reproduction; whether November's
+sweeps follow October's pattern.

@@ -316,4 +316,35 @@ hardware outcome. Laptop, provisional.
 
 ### 7.5 Results
 
-To be appended with the commit that produced them.
+Appended 2026-10-24. Run of `measure_recal_hours.py` at `7bed630d`, outputs committed at
+`188dc9ce`, on the pinned stack (Python 3.12.10, NumPy 2.4.4). Laptop, provisional (NC-091).
+The guard passed: 2,249 files and 151 events, the event list identical to `recal_times`'s.
+
+- **Sweeps are about daily but do not keep a clock time.** The median gap between events is
+  24.7 hours (10th to 90th percentile 17.7 to 30.9), so the sweep wanders round the clock over
+  the weeks. The busiest four hours hold 44 of the 151 by publication time (19:00 to 23:00 UTC,
+  29%) and 51 by measurement time (20:00 to 24:00 UTC, 34%), against 17% for an even spread.
+- **It moved during the archive** (`recal-by-month.tsv`): June's events cluster from 18:00 to
+  24:00 UTC, July's and August's spread across the day with a cluster from 09:00 to 12:00, and in
+  October 15 of the 22 were published between 21:00 and 03:00 UTC.
+- **What a fixed daily submission at minute :45 would have seen**, over 162 days from 2026-05-14
+  to 2026-10-22 (`recal-hours.tsv`):
+
+| Submit (UTC) | Istanbul | Median hours since the last sweep | Sweep within 3 h | Sweep within 6 h |
+| --- | --- | --- | --- | --- |
+| 03:45 | 06:45 | 10.0 | 9.3% | 16.7% |
+| 04:45 | 07:45 | 9.8 | 8.6% | 19.8% |
+| 05:45 | 08:45 | 10.3 | 6.8% | 22.2% |
+| 06:45 | 09:45 | 10.5 | 7.4% | 21.6% |
+| 11:45 | 14:45 | 12.9 | 7.4% | 13.0% |
+| 13:45 | 16:45 | 13.9 | 5.6% | 14.8% |
+| 14:45 | 17:45 | 14.4 | 5.6% | 19.1% |
+| 19:45 | 22:45 | 16.7 | 21.6% | 34.6% |
+| 20:45 | 23:45 | 15.7 | 21.6% | 34.0% |
+
+  No hour gives a reading younger than about ten hours on a typical day, because the sweep does
+  not hold a clock time. The early-morning UTC hours give the freshest readings; the mid-afternoon
+  UTC hours give the least chance of a sweep while a job waits in the queue; the evening UTC hours
+  are worst on both counts.
+
+None of this picks the hour; the draft carries it to the lead.
