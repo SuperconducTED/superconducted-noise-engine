@@ -16,7 +16,8 @@ the frozen rule and the amended one.
 Most of the test is fixed by the approved design and is restated here unchanged. Four items are
 **proposals** for the lead (section 3); they come from PR #126's dry run and from today's two
 measurements. The lead's answers, Bengisu's statistics review and Burak's dry run are what turn
-this draft into the frozen record.
+this draft into the frozen record. **The lead accepted all four on 2026-10-24** (section 3.5); the
+draft stays unfrozen until the rest of section 6 is done.
 
 ## 2. What is frozen
 
@@ -26,9 +27,9 @@ this draft into the frozen record.
 | Predictors | `reading` (latest file at or before `t_s`, or the live `backend.properties()` captured at `t_s`); `level` (geometric mean over the distinct states in `(t_s - 30 d, t_s]`, at least 5); `band` (10th to 90th percentile of the same window, NumPy linear interpolation); `reading_at_execution` (latest reading at `t_execute`, after the fact, the control) | design §2; implemented by `scripts/hardware_test_predictors.py` at `d62928fa` (PR #126) | unchanged |
 | Archive ref per job | the `calibration-data` commit current at `t_s`, named in that job's manifest with the live document's SHA-256 | design §5; PR #126's manifest | unchanged |
 | Arm A circuit | `X` on each selected qubit, `delay(tau)`, measure; all selected qubits in parallel in one circuit per delay; 2,048 shots | design §3 | unchanged |
-| Arm A delays | **proposal C**: per qubit, `{0} ∪ {0.5, 1, 2} x T1_level ∪ {0.5, 1, 2} x T1_reading`, seven delays (six when the two are equal), rounded to the backend's `dt` | section 3.3, NC-087 | replaces design §3's `{0, 0.5, 1, 2} x T1_level` if accepted |
-| Discriminating stratum | **proposals A and B**: eight qubits, re-selected at every job's `t_s` (section 3.1, 3.2) | NC-088, NC-089 | amends design §3 if accepted |
-| Control stratum | **proposal D**: four qubits chosen once, before job 1, excluding only qubits below the floor and nothing that depends on a reading; never eligible for the discriminating stratum (section 3.4) | design §3's text; NC-088's control check | changes PR #126's order if accepted |
+| Arm A delays | **proposal C**: per qubit, `{0} ∪ {0.5, 1, 2} x T1_level ∪ {0.5, 1, 2} x T1_reading`, seven delays (six when the two are equal), rounded to the backend's `dt` | section 3.3, NC-087 | **accepted by the lead 2026-10-24** (section 3.5); replaces design §3's `{0, 0.5, 1, 2} x T1_level` |
+| Discriminating stratum | **proposals A and B**: eight qubits, re-selected at every job's `t_s` (section 3.1, 3.2) | NC-088, NC-089 | **accepted by the lead 2026-10-24** (section 3.5); amends design §3 |
+| Control stratum | **proposal D**: four qubits chosen once, before job 1, excluding only qubits below the floor and nothing that depends on a reading; never eligible for the discriminating stratum (section 3.4) | design §3's text; NC-088's control check | **accepted by the lead 2026-10-24** (section 3.5); changes PR #126's order |
 | Arm B | six connected triples spanning `level`'s predicted fidelity, `ghz_state_circuit(3)` plus an idle block of `0.5 x` the layout's median `T1_level`, 4,096 shots | design §4 | unchanged |
 | Schedule | one job per day for 14 consecutive days at a fixed UTC hour (**the lead names the hour**); job 1 is Arm A only | design §5 | unchanged |
 | Budget | not a constraint (the lead, 2026-10-24); QPU time and queue delay are still logged per job | section 4 | replaces design §5's 25-second gate |
@@ -170,6 +171,24 @@ out moves with who is eligible; any of them serves the control's purpose. With A
 accepted, the four at `5828b4a2` would be 48, 112, 54 and 105; the frozen four are whatever the
 re-run at the freezing ref names.
 
+### 3.5 The lead's decisions, 2026-10-24
+
+Mert Efe Şensoy, as the lead and the owner of the QPU side, in this session on 2026-10-24: "I
+accept proposals A to D as drafted (window floor 15, four below plus four above, the seven-delay
+union grid, controls first)." Recorded as given:
+
+| Proposal | Accepted as |
+| --- | --- |
+| A | the discriminating stratum admits a qubit when it has at least 15 distinct `T1` values among the states of its 30-day window, replacing the design's whole-archive floor of 20 (section 3.1) |
+| B | at each job, the four admitted qubits with the largest `|d|` below the level and the four with the largest above it, a short side filled from the other and logged; the decision rule stays pooled (section 3.2) |
+| C | the union grid, `{0} ∪ {0.5, 1, 2} x T1_level ∪ {0.5, 1, 2} x T1_reading`, seven delays per qubit (section 3.3) |
+| D | the four controls frozen first at the freezing ref, excluding only qubits below the floor, and never eligible for the discriminating stratum (section 3.4) |
+
+Accepting them does not freeze anything. The submission hour is still open, and the freezing
+commit still waits on the rest of section 6. If Bengisu's review or Burak's dry run finds a
+problem with any of the four, the change is recorded here as a dated note beside this one, not
+by editing this table.
+
 ## 4. The budget
 
 The lead stated on 2026-10-24 that the QPU budget is covered. The design's usage-page check of
@@ -189,7 +208,8 @@ the result needs to know what the measurement cost.
 
 | Item | Owner | State on 2026-10-24 |
 | --- | --- | --- |
-| Answers on proposals A, B, C and D, and the submission hour | Mert | open |
+| Answers on proposals A, B, C and D | Mert | **done 2026-10-24**: all four accepted as drafted (section 3.5) |
+| The fixed UTC submission hour | Mert | open |
 | Statistics review of the decision rule (design §7) and of this draft; in particular the null-model value of each threshold (lesson L-029: derive what a no-information predictor scores before trusting a threshold), and the bootstrap's resampling unit (by job, since the qubits of one job share one device state, or by row) | Bengisu | open; review requested on PR #124 |
 | The offline half of `scripts/hardware_reading_vs_level.py` (selection, circuits for both arms, scoring) and its dry run against Aer, committed | Burak | open; no branch yet |
 | PR #120 merged | Bengisu or Burak to review | open, no review yet |
