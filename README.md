@@ -1,5 +1,10 @@
 # Phase 3 tracker
 
+> **Frozen on 2026-10-24.** This branch's daily routine was paused on that date, and nothing
+> writes here any more. The last daily record is `history/2026-10-24.json`, from the 05:37 UTC
+> run, and the block under "Current status" below is that run's. Phase 4 is tracked on the
+> `phase-4-dashboard` branch, which carries this branch's history and generator forward.
+
 A live status dashboard for phase 3 (*Results from ANFIS*, Sep 2 – Sep 30 2026), living
 on an **orphan branch**. It shares no history with `main` and contains no project code,
 so it can never conflict with, be merged into, or be picked up by anything on the
