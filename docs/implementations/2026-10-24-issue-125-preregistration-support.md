@@ -130,8 +130,11 @@ Run from the repository root with a venv built from the exact pins (`requirement
 venv):
 
 - the new and PR #126's tests: 67 passed;
-- the full suite: **942 collected, 942 passed** at `be2f8e52` (main's 875 at `88fa6a40`, plus PR
-  #126's 11, plus this work's 56). This is a local tree, not `main`; NC-021 is re-measured at the
+- the full suite: **942 collected, 942 passed** (main's 875 at `88fa6a40`, plus PR #126's 11,
+  plus this work's 56), run on the working tree at `d75de42d` with the floor script not yet
+  committed; that script is under `docs/`, outside the suite, and `tests/`, `src/` and `scripts/`
+  are identical between `d75de42d` and every later commit on the branch, so the count holds at the
+  tip. This is a local tree, not `main`; NC-021 is re-measured at the
   merge commit when this lands (Rule 6), not edited now;
 - `mypy --strict` (CI's invocation): no issues in 47 source files;
 - `ruff check .` and `ruff format --check .`: clean;

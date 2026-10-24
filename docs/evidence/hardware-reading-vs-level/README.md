@@ -173,8 +173,9 @@ above 0.5 favours the reading), selected rows of the 144:
 
 Record run of `measure_checkup_floor.py` at `b6852203`, outputs committed at `dfaf0cd7`. The
 guard of section 2.1 passed (2,249 files, 924 states, nothing skipped, qubit 72's 29, the same
-eight and the same four). Every output except the summary's timings is identical to the scratch
-runs' of sections 6.1 and 6.2.
+eight and the same four). The per-day, per-qubit and control outputs are identical, file for
+file, to the scratch run's of section 6.2 (the scratch runs wrote no summary file to compare).
+The sign and power figures below are over the qubits admitted under the design's floor.
 
 - **Window counts are bimodal.** At the guard instant 153 of 156 qubits have 28 to 31 distinct
   `T1` values in the window; qubit 11 has 3, qubit 72 has 6, qubit 108 has 13 (modal shares 0.58,

@@ -28,7 +28,7 @@ this draft into the frozen record.
 | Arm A circuit | `X` on each selected qubit, `delay(tau)`, measure; all selected qubits in parallel in one circuit per delay; 2,048 shots | design §3 | unchanged |
 | Arm A delays | **proposal C**: per qubit, `{0} ∪ {0.5, 1, 2} x T1_level ∪ {0.5, 1, 2} x T1_reading`, seven delays (six when the two are equal), rounded to the backend's `dt` | section 3.3, NC-087 | replaces design §3's `{0, 0.5, 1, 2} x T1_level` if accepted |
 | Discriminating stratum | **proposals A and B**: eight qubits, re-selected at every job's `t_s` (section 3.1, 3.2) | NC-088, NC-089 | amends design §3 if accepted |
-| Control stratum | **proposal D**: four qubits chosen once, before job 1, with nothing excluded; never eligible for the discriminating stratum (section 3.4) | design §3's text; NC-088's control check | changes PR #126's order if accepted |
+| Control stratum | **proposal D**: four qubits chosen once, before job 1, excluding only qubits below the floor and nothing that depends on a reading; never eligible for the discriminating stratum (section 3.4) | design §3's text; NC-088's control check | changes PR #126's order if accepted |
 | Arm B | six connected triples spanning `level`'s predicted fidelity, `ghz_state_circuit(3)` plus an idle block of `0.5 x` the layout's median `T1_level`, 4,096 shots | design §4 | unchanged |
 | Schedule | one job per day for 14 consecutive days at a fixed UTC hour (**the lead names the hour**); job 1 is Arm A only | design §5 | unchanged |
 | Budget | not a constraint (the lead, 2026-10-24); QPU time and queue delay are still logged per job | section 4 | replaces design §5's 25-second gate |
@@ -99,11 +99,12 @@ selection cancels it in the pooled score to first order.
 
 **How one-sided the design's rule is on the record** (NC-089, same 132 days). The largest
 disagreements are dips: all eight selected qubits read below their level on 53 days and seven of
-the eight on 40 more, although the share of admitted qubits below their level has a median of
-0.43 (0.22 to 0.75). On a pure `|d|` rule the test is a test of dips on most days.
+the eight on 40 more, although the share of admitted qubits (design's floor) below their level
+has a median of 0.43 (0.22 to 0.75). On a pure `|d|` rule the test is a test of dips on most days.
 
 **Cost.** No extra circuits: still eight qubits, still one circuit per delay. The price is
-smaller disagreements on the upper side: the fourth-largest `|d|` above the level has a median of
+smaller disagreements on the upper side: among the qubits admitted under the design's
+whole-archive floor (not proposal A's), the fourth-largest `|d|` above the level has a median of
 0.44 log units (0.28 to 0.60) over the 132 days, against 0.57 for the eighth-largest overall,
 the weakest the design's rule selects. Every day had at least four admitted qubits on each side.
 0.44 is above the 0.37 the design's sensitivity argument assumes (§3, shots), so the upper side
@@ -155,9 +156,10 @@ chooses them after the discriminating eight and excludes those eight, which make
 depend on that day's readings. And because the discriminating set is re-selected at every job,
 a control could later become discriminating.
 
-**Proposal.** Freeze the four controls first, with `propose_controls` and nothing excluded, at
-the `calibration-data` ref of the freezing commit, under the same floor as the discriminating
-stratum; exclude them from the discriminating stratum at every job.
+**Proposal.** Freeze the four controls first, at the `calibration-data` ref of the freezing
+commit, with `propose_controls` excluding only the qubits below the discriminating stratum's floor
+(and nothing reading-dependent; `propose_controls` keeps its own whole-archive floor of 20
+underneath); exclude the four from the discriminating stratum at every job.
 
 **What it does on the record** (NC-088, at the dry run's instant on `5828b4a2`,
 `checkup-floor-controls.json`). Under the current floor the two orders give the same four, 105,
