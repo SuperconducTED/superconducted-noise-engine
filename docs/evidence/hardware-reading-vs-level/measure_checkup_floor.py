@@ -171,6 +171,20 @@ def day_row(collected: Collected, at: datetime, n_qubits: int) -> dict[str, Any]
         out[f"top8_72_w{k}"] = int(Q72 in top_k)
         out[f"overlap_w{k}"] = len(set(top_k) & set(current_top))
     out["top8_below_current"] = sum(1 for q in current_top if t1[q].log_disagreement < 0.0)
+    below = sorted(
+        (-t1[q].log_disagreement for q in current_admitted if t1[q].log_disagreement < 0.0),
+        reverse=True,
+    )
+    above = sorted(
+        (t1[q].log_disagreement for q in current_admitted if t1[q].log_disagreement > 0.0),
+        reverse=True,
+    )
+    overall = sorted((abs(t1[q].log_disagreement) for q in current_admitted), reverse=True)
+    out["n_admitted_below"] = len(below)
+    out["n_admitted_above"] = len(above)
+    out["absd_8th_current"] = round(overall[TOP - 1], 4) if len(overall) >= TOP else ""
+    out["absd_4th_below"] = round(below[TOP // 2 - 1], 4) if len(below) >= TOP // 2 else ""
+    out["absd_4th_above"] = round(above[TOP // 2 - 1], 4) if len(above) >= TOP // 2 else ""
     out["admitted_below_share_current"] = (
         round(
             sum(1 for q in current_admitted if t1[q].log_disagreement < 0.0)
@@ -275,6 +289,14 @@ def summarise(days: list[dict[str, Any]]) -> dict[str, Any]:
         "min": float(min(shares)),
         "max": float(max(shares)),
     }
+    for key in ("absd_8th_current", "absd_4th_below", "absd_4th_above"):
+        vals = [float(d[key]) for d in days if d[key] != ""]
+        out[key] = {
+            "median": float(np.median(vals)),
+            "min": float(min(vals)),
+            "max": float(max(vals)),
+            "days": len(vals),
+        }
     out["union_longest_us"] = spread("union_longest_us")
     out["union_shortest_us"] = spread("union_shortest_us")
     return out

@@ -163,4 +163,26 @@ PYTHONPATH=src python -m scripts.hardware_test_grid_bias --out docs/evidence/har
 
 ## 6. Amendments
 
-Dated, append-only; none yet.
+Dated, append-only.
+
+### 6.1 2026-10-24, before the record run of measurement 1, after a scratch run of it
+
+A scratch run of `measure_checkup_floor.py`'s functions over a cached collection (same ref, same
+code, outside the repository) passed the guard and showed that the current rule's top eight is
+almost always one-sided: most days all eight, or seven of the eight, read below their level,
+while well under half of all admitted qubits do. That makes decision B's cost a question the
+protocol did not ask: if the selection takes four from each side, how much smaller are the
+disagreements on the side above the level? Added, **after seeing that scratch output and
+therefore not blind**, as descriptive columns of `checkup-floor-days.tsv`, under the current
+rule's admitted set:
+
+- `n_admitted_below`, `n_admitted_above`: admitted qubits with `d < 0` and `d > 0`;
+- `absd_8th_current`: the eighth-largest `|d|` overall, the weakest disagreement the design's
+  rule selects;
+- `absd_4th_below`, `absd_4th_above`: the fourth-largest `|d|` among `d < 0` and among `d > 0`,
+  the weakest disagreement on each side that proposal B selects (empty if a side has fewer than
+  four).
+
+The summary gains their median, minimum and maximum over days. Nothing in sections 2.1 to 2.4
+changes; the record run is the committed script end to end, and its other outputs must match the
+scratch run's.
