@@ -125,6 +125,14 @@ ol.acts .tags{margin-top:8px;display:flex;gap:5px;flex-wrap:wrap}
 .pill.bad{background:var(--bad-bg);color:var(--bad)}
 .pill.idle{background:var(--idle-bg);color:var(--muted)}
 .pill.ready{background:none;color:var(--ink);box-shadow:inset 0 0 0 1px var(--axis)}
+a.pill.owes{text-decoration:none;margin:-5px 0 13px}
+
+/* ---- who owes an answer: one group row per person, then their asks ---- */
+tr.grp td{padding-top:18px;font-size:14px}
+tr:first-child + tr.grp td{padding-top:4px}
+.pdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;
+  vertical-align:baseline}
+.ask{font-size:13.6px;line-height:1.5}
 
 /* ---- tables: hairlines only, no card chrome competing with the data ---- */
 .scroll{overflow-x:auto}
@@ -166,17 +174,17 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <div class="wrap"><header class="hero">
 <div class="eyebrow">SuperconducTED/superconducted-noise-engine</div>
 <h1>Phase 3 <span class="goal">: Results from ANFIS</span></h1>
-<div class="sub">Generated 2026-10-23 06:22 UTC from live GitHub state · main at <code>6cf008da</code> (2026-10-16) · plan of 2026-09-03 at <code>7d39a2b</code></div>
+<div class="sub">Generated 2026-10-24 05:37 UTC from live GitHub state · main at <code>88fa6a40</code> (2026-10-23) · plan of 2026-09-03 at <code>7d39a2b</code></div>
 <div class="readout">
-<div><div class="v">8</div><div class="k">days to 2026-10-31</div></div>
+<div><div class="v">7</div><div class="k">days to 2026-10-31</div></div>
 <div><div class="v">12<span>/28</span></div><div class="k">gates met</div></div>
-<div><div class="v">3</div><div class="k">ready to start</div></div>
-<div><div class="v">4</div><div class="k">in review</div></div>
+<div><div class="v">4</div><div class="k">ready to start</div></div>
+<div><div class="v">3</div><div class="k">in review</div></div>
 <div><div class="v">4</div><div class="k">blocked upstream</div></div>
 <div><div class="v alarm">5</div><div class="k">milestones overdue</div></div>
 <div class="calendar">
-<div class="bar"><i style="width:86%"></i></div>
-<div class="sub" style="margin-top:7px">Calendar burned: day 51 of 59 (<span class="mono">86%</span>) · gates met: <span class="mono">43%</span>; running <b>43 points</b> behind the calendar.</div>
+<div class="bar"><i style="width:88%"></i></div>
+<div class="sub" style="margin-top:7px">Calendar burned: day 52 of 59 (<span class="mono">88%</span>) · gates met: <span class="mono">43%</span>; running <b>45 points</b> behind the calendar.</div>
 </div>
 </div></header>
 <h2>Work on this right now</h2>
@@ -184,6 +192,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <div class="grid two">
 <div class="card person" style="--pc:var(--s3)">
 <h3>Mert Efe Şensoy</h3><div class="role">@mertefesensoy · Lead: unblock others</div>
+<a class="pill warn owes" href="#owed-mertefesensoy">owes 3 answers · oldest since 2026-09-08</a>
 <ol class="acts">
 <li>
 <span class="act">Unstick PR #120 for #84: Close the #57 advisor loop</span>
@@ -205,16 +214,8 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </div>
 <div class="card person" style="--pc:var(--s5)">
 <h3>Burak Öztekin</h3><div class="role">@BurakOztekin · The long pole: the trainer</div>
+<a class="pill warn owes" href="#owed-BurakOztekin">owes 8 answers · oldest since 2026-09-03</a>
 <ol class="acts">
-<li>
-<span class="act">Re-review PR #79 (#58: Certify the benchmark instruments)</span>
-<span class="why">Your CHANGES_REQUESTED from 2026-10-21 is the standing block. main&#x27;s ruleset does not dismiss it on push, so only you can clear it.</span>
-<span class="tags">
-<span class="pill bad">you are the blocker</span>
-<span class="pill idle">unblocks #62, #64, #65, #76</span>
-<span class="pill idle">critical</span>
-<span class="pill idle">M1</span>
-</span></li>
 <li>
 <span class="act">Finish #60: ADR-014 hybrid ANFIS trainer</span>
 <span class="why">The plan&#x27;s named long pole: four weeks of one person&#x27;s time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.</span>
@@ -227,10 +228,11 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </div>
 <div class="card person" style="--pc:var(--s1)">
 <h3>Bengisu Cıvdı</h3><div class="role">@bengisucvd · The instruments</div>
+<a class="pill warn owes" href="#owed-bengisucvd">owes 5 answers · oldest since 2026-10-21</a>
 <ol class="acts">
 <li>
 <span class="act">Unstick PR #79 for #58: Certify the benchmark instruments</span>
-<span class="why">CHANGES_REQUESTED standing from @BurakOztekin (2026-10-21). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.</span>
+<span class="why">Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).</span>
 <span class="tags">
 <span class="pill warn">in review</span>
 <span class="pill idle">unblocks #62, #64, #65, #76</span>
@@ -256,12 +258,13 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </div>
 <div class="card person" style="--pc:var(--s2)">
 <h3>Baha Jarad</h3><div class="role">@BahaJarad · The data track</div>
+<a class="pill warn owes" href="#owed-BahaJarad">owes 2 answers · oldest since 2026-10-03</a>
 <ol class="acts">
 <li>
-<span class="act">Unstick PR #113 for #63: Training-set builder (training/dataset.py)</span>
-<span class="why">Awaiting merge.</span>
+<span class="act">Finish #63: Training-set builder (training/dataset.py)</span>
+<span class="why">The reader-and-dedup half has no hard dependency the plan recognises and W2 is where it starts; #60&#x27;s first archive fit is waiting on it.</span>
 <span class="tags">
-<span class="pill warn">in review</span>
+<span class="pill ready">ready to start</span>
 <span class="pill idle">unblocks #60</span>
 <span class="pill idle">high</span>
 <span class="pill idle">M3</span>
@@ -269,12 +272,75 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </ol>
 </div>
 </div>
+<h2 id="owed">Waiting on an answer</h2>
+<div class="lede">Everything a teammate has been asked for on an open issue or PR and has not delivered yet, oldest first. Two sources, both closed by GitHub itself: a <b>review request</b> not yet answered with a review, and an <b>unticked checkbox that starts with the person</b>, such as <code>- [ ] @BurakOztekin runs the desktop runbook</code>, which stays here until someone ticks it. A plain @mention elsewhere in a sentence is not tracked. "Or earlier" marks a post edited after it was written: the box may have arrived with the edit, so the wait shown is the shortest it can be.</div>
+<div class="card"><div class="scroll"><table>
+<tr><th>What they were asked</th><th>Where</th><th>Waiting since</th></tr>
+<tr class="grp" id="owed-mertefesensoy"><td colspan="3"><span class="pdot" style="background:var(--s3)"></span><b>Mert Efe Şensoy</b> <span class="sub">@mertefesensoy · owes 3</span></td></tr>
+<tr><td><span class="pill idle">checkbox</span> <span class="ask">has sent it to Dr. Akba</span><div class="sub">own checklist</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/84">issue #84</a><span class="cap">Close the Issue #57 advisor loop: get Dr. Akba&#x27;s four decisio...</span></td>
+<td class="num">2026-09-08<span class="cap">46 days<br>has posted there since, on 2026-10-21</span></td></tr>
+<tr><td><span class="pill idle">checkbox</span> <span class="ask">links the verdict from PR #55&#x27;s thread so the PR record is complete.</span><div class="sub">own checklist</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/108">issue #108</a><span class="cap">Owner read of PR #55&#x27;s poller.py change: fractional step pars...</span></td>
+<td class="num">2026-10-03<span class="cap">21 days<br>no post there since</span></td></tr>
+<tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #79</span><div class="sub">self-requested</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/79">PR #79</a><span class="cap">Certify benchmark harness modes and calibration reference (#58) </span></td>
+<td class="num">2026-10-21<span class="cap">3 days<br>no post there since</span></td></tr>
+<tr class="grp" id="owed-BurakOztekin"><td colspan="3"><span class="pdot" style="background:var(--s5)"></span><b>Burak Öztekin</b> <span class="sub">@BurakOztekin · owes 8</span></td></tr>
+<tr><td><span class="pill idle">checkbox</span> <span class="ask">confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit`</span><div class="sub">asked by @mertefesensoy</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/63">issue #63</a><span class="cap">Training-set builder: one row per distinct device state from...</span></td>
+<td class="num">2026-09-03<span class="cap">51 days<br>no post there since</span></td></tr>
+<tr><td><span class="pill bad">re-review requested</span> <span class="ask">Re-review PR #111: you approved on 2026-10-04 and were asked again</span><div class="sub">requested by @mertefesensoy</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/111">PR #111</a><span class="cap">docs: plan the three engines and the two-stage deep model (#110)</span></td>
+<td class="num">2026-10-05<span class="cap">19 days<br>no post there since</span></td></tr>
+<tr><td><span class="pill idle">checkbox</span> <span class="ask">runs the desktop runbook (comment 6314664069, dry-run from GitHub on 2026-10-21); its results go into the next batched desktop record, which become...</span><div class="sub">asked by @bengisucvd</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/79">PR #79</a><span class="cap">Certify benchmark harness modes and calibration reference (#58) </span></td>
+<td class="num">2026-10-23<span class="cap">1 day or more · posted 2026-09-06<br>no post there since</span></td></tr>
+<tr><td><span class="pill idle">checkbox</span> <span class="ask">re-reviews `a25140d`.</span><div class="sub">asked by @bengisucvd</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/79">PR #79</a><span class="cap">Certify benchmark harness modes and calibration reference (#58) </span></td>
+<td class="num">2026-10-23<span class="cap">1 day or more · posted 2026-09-06<br>no post there since</span></td></tr>
+<tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #120</span><div class="sub">requested by @mertefesensoy</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/120">PR #120</a><span class="cap">docs: accept ADR-027 and record its register entries (#84, #5...</span></td>
+<td class="num">2026-10-23<span class="cap">1 day<br>no post there since</span></td></tr>
+<tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #123</span><div class="sub">requested by @mertefesensoy</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/123">PR #123</a><span class="cap">docs(evidence): persistence band, heteroscedasticity bound, h...</span></td>
+<td class="num">2026-10-23<span class="cap">1 day<br>no post there since</span></td></tr>
+<tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #124</span><div class="sub">requested by @mertefesensoy</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/124">PR #124</a><span class="cap">docs(evidence): per-qubit predictability ladder and local-lev...</span></td>
+<td class="num">2026-10-23<span class="cap">1 day<br>no post there since</span></td></tr>
+<tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #126</span><div class="sub">requested by @mertefesensoy</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/126">PR #126</a><span class="cap">feat(scripts): archive-side predictors for the #125 hardware...</span></td>
+<td class="num">2026-10-23<span class="cap">1 day<br>no post there since</span></td></tr>
+<tr class="grp" id="owed-bengisucvd"><td colspan="3"><span class="pdot" style="background:var(--s1)"></span><b>Bengisu Cıvdı</b> <span class="sub">@bengisucvd · owes 5</span></td></tr>
+<tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #120</span><div class="sub">requested by @mertefesensoy</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/120">PR #120</a><span class="cap">docs: accept ADR-027 and record its register entries (#84, #5...</span></td>
+<td class="num">2026-10-21<span class="cap">3 days<br>no post there since</span></td></tr>
+<tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #121</span><div class="sub">requested by @mertefesensoy</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/121">PR #121</a><span class="cap">docs: novelty check for the Q1 article, and the public calibr...</span></td>
+<td class="num">2026-10-23<span class="cap">1 day<br>no post there since</span></td></tr>
+<tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #123</span><div class="sub">requested by @mertefesensoy</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/123">PR #123</a><span class="cap">docs(evidence): persistence band, heteroscedasticity bound, h...</span></td>
+<td class="num">2026-10-23<span class="cap">1 day<br>no post there since</span></td></tr>
+<tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #124</span><div class="sub">requested by @mertefesensoy</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/124">PR #124</a><span class="cap">docs(evidence): per-qubit predictability ladder and local-lev...</span></td>
+<td class="num">2026-10-23<span class="cap">1 day<br>no post there since</span></td></tr>
+<tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #126</span><div class="sub">requested by @mertefesensoy</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/126">PR #126</a><span class="cap">feat(scripts): archive-side predictors for the #125 hardware...</span></td>
+<td class="num">2026-10-23<span class="cap">1 day<br>no post there since</span></td></tr>
+<tr class="grp" id="owed-BahaJarad"><td colspan="3"><span class="pdot" style="background:var(--s2)"></span><b>Baha Jarad</b> <span class="sub">@BahaJarad · owes 2</span></td></tr>
+<tr><td><span class="pill idle">checkbox</span> <span class="ask">posts a verdict on this issue: approve, or the defects he finds.</span><div class="sub">asked by @mertefesensoy</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/108">issue #108</a><span class="cap">Owner read of PR #55&#x27;s poller.py change: fractional step pars...</span></td>
+<td class="num">2026-10-03<span class="cap">21 days<br>no post there since</span></td></tr>
+<tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #121</span><div class="sub">requested by @mertefesensoy</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/121">PR #121</a><span class="cap">docs: novelty check for the Q1 article, and the public calibr...</span></td>
+<td class="num">2026-10-23<span class="cap">1 day<br>no post there since</span></td></tr>
+</table></div></div>
 <h2>Milestone gates</h2>
 <div class="lede">Every gate is the plan's own wording. ✅ verified against live GitHub or the ADR ledger on main · 🟡 in flight · ❌ not done · ⬜ no machine-checkable source.</div>
 <div class="grid" style="gap:13px">
 <div class="card"><div class="ms">
 <div><h3><span class="id">M0</span>🟡 Queue clear</h3><div class="sub">Everything below reads a clean main</div></div>
-<div class="when"><div class="d">2026-09-05</div><span class="pill bad">48d overdue</span><div class="prog">7/8 gates</div></div>
+<div class="when"><div class="d">2026-09-05</div><span class="pill bad">49d overdue</span><div class="prog">7/8 gates</div></div>
 <ul class="gates">
 <li><span>✅</span><span>#51 merged (aer_factory ADR references)
 </span></li>
@@ -297,7 +363,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </ul></div></div>
 <div class="card"><div class="ms">
 <div><h3><span class="id">M1</span>🟡 Contracts and instruments</h3><div class="sub">The ablation can run; the trainer has a contract; targets exist</div></div>
-<div class="when"><div class="d">2026-09-11</div><span class="pill bad">42d overdue</span><div class="prog">3/5 gates</div></div>
+<div class="when"><div class="d">2026-09-11</div><span class="pill bad">43d overdue</span><div class="prog">3/5 gates</div></div>
 <ul class="gates">
 <li><span>❌</span><span>Target ADR sent to Dr. Akba with a decision-by date
 <span class="note">ADR-027 merged with Status: Open. docs/advisor/ holds only the unanswered 2026-05-25 questions file. Issue #84 owns the brief; its own decision-by date was 2026-09-08.</span>
@@ -314,7 +380,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </ul></div></div>
 <div class="card"><div class="ms">
 <div><h3><span class="id">M2</span>🟡 First measurements</h3><div class="sub">ADR-019 closure; the premise stage</div></div>
-<div class="when"><div class="d">2026-09-18</div><span class="pill bad">35d overdue</span><div class="prog">2/5 gates</div></div>
+<div class="when"><div class="d">2026-09-18</div><span class="pill bad">36d overdue</span><div class="prog">2/5 gates</div></div>
 <ul class="gates">
 <li><span>❌</span><span>ADR-019 ablation executed with its table (#62)
 </span></li>
@@ -330,7 +396,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </ul></div></div>
 <div class="card"><div class="ms">
 <div><h3><span class="id">M3</span>❌ Decisions</h3><div class="sub">ADR-015 / ADR-016; the final configuration</div></div>
-<div class="when"><div class="d">2026-09-25</div><span class="pill bad">28d overdue</span><div class="prog">0/6 gates</div></div>
+<div class="when"><div class="d">2026-09-25</div><span class="pill bad">29d overdue</span><div class="prog">0/6 gates</div></div>
 <ul class="gates">
 <li><span>❌</span><span>ADR-019 closed with a winner
 <span class="note">Ledger on main reads: Open.</span>
@@ -341,7 +407,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <li><span>❌</span><span>ADR-011 follows
 <span class="note">Ledger on main reads: Open (effectively chosen for each path).</span>
 </span></li>
-<li><span>🟡</span><span>training/dataset.py merged with its evidence TSV (#63)
+<li><span>❌</span><span>training/dataset.py merged with its evidence TSV (#63)
 </span></li>
 <li><span>❌</span><span>Floor derived from the actual parameter count and registered
 <span class="note">Replaces the reconstructed 126 behind NC-012. Owned by #56.</span>
@@ -351,7 +417,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </ul></div></div>
 <div class="card"><div class="ms">
 <div><h3><span class="id">M4</span>❌ ANFIS results</h3><div class="sub">The paper track</div></div>
-<div class="when"><div class="d">2026-09-30</div><span class="pill bad">23d overdue</span><div class="prog">0/4 gates</div></div>
+<div class="when"><div class="d">2026-09-30</div><span class="pill bad">24d overdue</span><div class="prog">0/4 gates</div></div>
 <ul class="gates">
 <li><span>❌</span><span>Trained vs anchored baseline vs reference, four circuits, four metrics, in docs/findings/ with NC rows
 <span class="note">The phase-3 exit artifact. Produced by #62&#x27;s script re-run at M4.</span>
@@ -378,19 +444,18 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <td>@bengisucvd</td><td><span class="pill ready">no branch yet</span></td><td><ul class="blockers">
 <li><span class="dot medium"></span><span>Touches LOCKED src/superconducted/channels/kraus.py: needs a decision, not just a patch.</span></li>
 </ul></td></tr>
-<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/58">#58</a><span class="cap">Certify the benchmark instruments</span></td>
-<td>@bengisucvd</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/79">PR #79</a> <span class="pill idle">open</span><div class="sub">+4047/−79 · 16 files</div></td><td><ul class="blockers">
-<li><span class="dot critical"></span><span>CHANGES_REQUESTED standing from @BurakOztekin (2026-10-21). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.</span></li>
+<tr class="sev-medium"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/58">#58</a><span class="cap">Certify the benchmark instruments</span></td>
+<td>@bengisucvd</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/79">PR #79</a> <span class="pill idle">open</span><div class="sub">+4550/−80 · 17 files</div></td><td><ul class="blockers">
 <li><span class="dot medium"></span><span>Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).</span></li>
 </ul></td></tr>
 <tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/84">#84</a><span class="cap">Close the #57 advisor loop</span></td>
-<td>@mertefesensoy</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/120">PR #120</a> <span class="pill idle">open</span><div class="sub">+275/−6 · 3 files</div></td><td><ul class="blockers">
+<td>@mertefesensoy</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/120">PR #120</a> <span class="pill idle">open</span><div class="sub">+299/−6 · 3 files</div></td><td><ul class="blockers">
 <li><span class="dot critical"></span><span>Dr. Akba must answer four ADR-027 questions. He has no GitHub account; FR-15 routes all contact through the lead.</span></li>
 <li><span class="dot critical"></span><span>The FR-15 decision-by date was 2026-09-08 and has passed with the brief unsent.</span></li>
 <li><span class="dot high"></span><span>No approving review yet: main&#x27;s ruleset requires one.</span></li>
 </ul></td></tr>
 <tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/57">#57</a><span class="cap">Training contract: ADR-027, TSKTrainer ABC, training/targets.py</span></td>
-<td>@mertefesensoy</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/120">PR #120</a> <span class="pill idle">open</span><div class="sub">+275/−6 · 3 files</div></td><td><ul class="blockers">
+<td>@mertefesensoy</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/120">PR #120</a> <span class="pill idle">open</span><div class="sub">+299/−6 · 3 files</div></td><td><ul class="blockers">
 <li><span class="dot critical"></span><span>Code landed in PR #69, but the ticket&#x27;s own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened; #84 owns it.</span></li>
 <li><span class="dot high"></span><span>No approving review yet: main&#x27;s ruleset requires one.</span></li>
 </ul></td></tr>
@@ -417,17 +482,16 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <div class="card"><div class="scroll"><table>
 <tr><th>PR</th><th>Author</th><th>Mergeable</th><th>Review</th><th>Checks</th><th>Updated</th></tr>
 <tr class="sev-medium"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/120">#120</a><span class="cap">docs: accept ADR-027 and record its register entries (#84, #57 s · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/84">#84</a></span></td>
-<td>@mertefesensoy</td><td><span class="pill ok">clean</span></td><td><span class="pill warn">no review</span></td><td><span class="pill ok">green</span><div class="sub">2026-10-21T09:40</div></td><td class="sub">2026-10-21</td></tr>
-<tr class="sev-medium"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/113">#113</a><span class="cap">Training Set Builder (Issue #63) · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/63">#63</a></span></td>
-<td>@BahaJarad</td><td><span class="pill ok">clean</span></td><td><div><span class="pill ok">approved</span> @mertefesensoy <span class="sub">2026-10-21</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-10-21T10:47</div></td><td class="sub">2026-10-21</td></tr>
-<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/79">#79</a><span class="cap">Certify benchmark harness modes and calibration reference (#58)  · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/58">#58</a></span></td>
-<td>@bengisucvd</td><td><span class="pill ok">clean</span></td><td><div><span class="pill bad">changes requested</span> @BurakOztekin <span class="sub">2026-10-21</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-10-21T11:11</div></td><td class="sub">2026-10-21</td></tr>
+<td>@mertefesensoy</td><td><span class="pill ok">clean</span></td><td><span class="pill warn">no review</span></td><td><span class="pill ok">green</span><div class="sub">2026-10-23T19:44</div></td><td class="sub">2026-10-23</td></tr>
+<tr class="sev-medium"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/79">#79</a><span class="cap">Certify benchmark harness modes and calibration reference (#58)  · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/58">#58</a></span></td>
+<td>@bengisucvd</td><td><span class="pill ok">clean</span></td><td><div><span class="pill ok">approved</span> @BurakOztekin <span class="sub">2026-10-23</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-10-23T17:51</div></td><td class="sub">2026-10-23</td></tr>
 </table></div></div>
 <h2>Day by day</h2>
 <div class="lede">One record per day, written by the routine and diffed against the day before. Every line below is computed from those records, so it cannot drift from what the rest of this page says.</div>
-<div class="card" style="margin-bottom:13px"><svg viewBox="0 0 720 220" width="100%" role="img" aria-label="Milestone gates met over the phase, against an even-pace reference."><line x1="44" y1="186.0" x2="628" y2="186.0" stroke="var(--line)" stroke-width="1" fill="none"/><text x="36" y="190.0" text-anchor="end" fill="var(--muted)" font-size="11" font-family="var(--mono)">0</text><line x1="44" y1="16.0" x2="628" y2="16.0" stroke="var(--line)" stroke-width="1" fill="none"/><text x="36" y="20.0" text-anchor="end" fill="var(--muted)" font-size="11" font-family="var(--mono)">28</text><line x1="44.0" y1="186.0" x2="628.0" y2="16.0" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 4" fill="none" opacity=".65"/><text x="636" y="20.0" fill="var(--muted)" font-size="11" font-family="var(--sans)">even pace</text><path d="M103.4,149.6 L113.3,143.5 L123.2,137.4 L133.1,131.4 L143.0,125.3 L152.9,125.3 L162.8,125.3 L172.7,125.3 L182.6,113.1 L192.5,113.1 L202.4,113.1 L212.3,113.1 L232.1,113.1 L242.0,113.1 L251.9,119.2 L261.8,113.1 L271.7,113.1 L281.6,113.1 L291.5,113.1 L301.4,113.1 L311.3,113.1 L321.2,113.1 L331.1,113.1 L340.9,113.1 L350.8,113.1 L360.7,113.1 L370.6,113.1 L380.5,113.1 L390.4,113.1 L400.3,113.1 L410.2,113.1 L420.1,113.1 L430.0,113.1 L439.9,113.1 L449.8,113.1 L459.7,113.1 L469.6,113.1 L479.5,113.1 L489.4,113.1 L499.3,113.1 L509.2,113.1 L529.0,113.1 L548.8,113.1" stroke="var(--ink)" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><circle cx="548.8" cy="113.1" r="4.5" fill="var(--ink)" stroke="var(--panel)" stroke-width="2"/><text x="558.8" y="117.1" fill="var(--ink)" font-size="12" font-weight="600" font-family="var(--sans)">12 met</text><text x="44.0" y="210" text-anchor="start" fill="var(--muted)" font-size="11" font-family="var(--mono)">2026-09-02</text><text x="628.0" y="210" text-anchor="end" fill="var(--muted)" font-size="11" font-family="var(--mono)">2026-10-31</text></svg></div>
+<div class="card" style="margin-bottom:13px"><svg viewBox="0 0 720 220" width="100%" role="img" aria-label="Milestone gates met over the phase, against an even-pace reference."><line x1="44" y1="186.0" x2="628" y2="186.0" stroke="var(--line)" stroke-width="1" fill="none"/><text x="36" y="190.0" text-anchor="end" fill="var(--muted)" font-size="11" font-family="var(--mono)">0</text><line x1="44" y1="16.0" x2="628" y2="16.0" stroke="var(--line)" stroke-width="1" fill="none"/><text x="36" y="20.0" text-anchor="end" fill="var(--muted)" font-size="11" font-family="var(--mono)">28</text><line x1="44.0" y1="186.0" x2="628.0" y2="16.0" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 4" fill="none" opacity=".65"/><text x="636" y="20.0" fill="var(--muted)" font-size="11" font-family="var(--sans)">even pace</text><path d="M103.4,149.6 L113.3,143.5 L123.2,137.4 L133.1,131.4 L143.0,125.3 L152.9,125.3 L162.8,125.3 L172.7,125.3 L182.6,113.1 L192.5,113.1 L202.4,113.1 L212.3,113.1 L232.1,113.1 L242.0,113.1 L251.9,119.2 L261.8,113.1 L271.7,113.1 L281.6,113.1 L291.5,113.1 L301.4,113.1 L311.3,113.1 L321.2,113.1 L331.1,113.1 L340.9,113.1 L350.8,113.1 L360.7,113.1 L370.6,113.1 L380.5,113.1 L390.4,113.1 L400.3,113.1 L410.2,113.1 L420.1,113.1 L430.0,113.1 L439.9,113.1 L449.8,113.1 L459.7,113.1 L469.6,113.1 L479.5,113.1 L489.4,113.1 L499.3,113.1 L509.2,113.1 L529.0,113.1 L548.8,113.1 L558.7,113.1" stroke="var(--ink)" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/><circle cx="558.7" cy="113.1" r="4.5" fill="var(--ink)" stroke="var(--panel)" stroke-width="2"/><text x="568.7" y="117.1" fill="var(--ink)" font-size="12" font-weight="600" font-family="var(--sans)">12 met</text><text x="44.0" y="210" text-anchor="start" fill="var(--muted)" font-size="11" font-family="var(--mono)">2026-09-02</text><text x="628.0" y="210" text-anchor="end" fill="var(--muted)" font-size="11" font-family="var(--mono)">2026-10-31</text></svg></div>
 <div class="card"><div class="scroll"><table>
 <tr><th>Date</th><th>Gates</th><th>Ready</th><th>In review</th><th>Blocked</th><th>What moved</th></tr>
+<tr><td class="num">2026-10-24</td><td class="num">12/28</td><td class="num">4</td><td class="num">3</td><td class="num">4</td><td><ul class="blockers"><li><span class="dot medium"></span><span>#63 Training-set builder (training/dataset.py): in review to ready to start</span></li><li><span class="dot medium"></span><span>main moved to 88fa6a40</span></li></ul></td></tr>
 <tr><td class="num">2026-10-23</td><td class="num">12/28</td><td class="num">3</td><td class="num">4</td><td class="num">4</td><td><ul class="blockers"><li><span class="dot medium"></span><span>#57 Training contract: ADR-027, TSKTrainer ABC, training/targets.py: ready to start to in review</span></li><li><span class="dot medium"></span><span>#84 Close the #57 advisor loop: ready to start to in review</span></li></ul></td></tr>
 <tr><td class="num">2026-10-21</td><td class="num">12/28</td><td class="num">5</td><td class="num">2</td><td class="num">4</td><td><span class="sub">nothing moved</span></td></tr>
 <tr><td class="num">2026-10-19</td><td class="num">12/28</td><td class="num">5</td><td class="num">2</td><td class="num">4</td><td><span class="sub">nothing moved</span></td></tr>
@@ -517,5 +581,5 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </div>
 </div>
 <footer>
-Generated by <code>generate.py</code> on the orphan <code>phase-3-dashboard</code> branch. Static plan model: <code>plan.json</code>. Live state read via <code>gh</code> at 2026-10-23 06:22 UTC.<br>Nothing here is hand-maintained except <code>plan.json</code>, which changes only when the plan or a ticket's stated dependency changes. Source of truth for the plan itself remains <code>docs/roadmap/2026-09-03-phase-3-plan.md</code> on main.
+Generated by <code>generate.py</code> on the orphan <code>phase-3-dashboard</code> branch. Static plan model: <code>plan.json</code>. Live state read via <code>gh</code> at 2026-10-24 05:37 UTC.<br>Nothing here is hand-maintained except <code>plan.json</code>, which changes only when the plan or a ticket's stated dependency changes. Source of truth for the plan itself remains <code>docs/roadmap/2026-09-03-phase-3-plan.md</code> on main.
 </footer></div>

@@ -1,6 +1,6 @@
 # Phase 3: Results from ANFIS
 
-_Generated 2026-10-23 06:22 UTC · main at `6cf008da` (2026-10-16) · 8 days to 2026-10-31_
+_Generated 2026-10-24 05:37 UTC · main at `88fa6a40` (2026-10-23) · 7 days to 2026-10-31_
 
 
 ## Milestones
@@ -46,7 +46,7 @@ _Generated 2026-10-23 06:22 UTC · main at `6cf008da` (2026-10-16) · 8 days to 
   - _Ledger on main reads: Open._
 - ❌ ADR-011 follows
   - _Ledger on main reads: Open (effectively chosen for each path)._
-- 🟡 training/dataset.py merged with its evidence TSV (#63)
+- ❌ training/dataset.py merged with its evidence TSV (#63)
 - ❌ Floor derived from the actual parameter count and registered
   - _Replaces the reconstructed 126 behind NC-012. Owned by #56._
 - ❌ Trainer full loop merged, first archive fit, time-split metrics
@@ -66,13 +66,13 @@ _Generated 2026-10-23 06:22 UTC · main at `6cf008da` (2026-10-16) · 8 days to 
 
 **Baha Jarad** (@BahaJarad)
 
-1. Unstick PR #113 for #63: Training-set builder (training/dataset.py)
-   - Awaiting merge.
+1. Finish #63: Training-set builder (training/dataset.py)
+   - The reader-and-dedup half has no hard dependency the plan recognises and W2 is where it starts; #60's first archive fit is waiting on it.
 
 **Bengisu Cıvdı** (@bengisucvd)
 
 1. Unstick PR #79 for #58: Certify the benchmark instruments
-   - CHANGES_REQUESTED standing from @BurakOztekin (2026-10-21). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+   - Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
 1. Start #61: ADR-011 evidence + premise gradients
    - Part B is unblocked (#57 merged) and the plan schedules it in W2 because the trainer's verification depends on it.
 1. Start #75: Decide the LOCKED Kraus projector boundary
@@ -80,8 +80,6 @@ _Generated 2026-10-23 06:22 UTC · main at `6cf008da` (2026-10-16) · 8 days to 
 
 **Burak Öztekin** (@BurakOztekin)
 
-1. Re-review PR #79 (#58: Certify the benchmark instruments)
-   - Your CHANGES_REQUESTED from 2026-10-21 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Finish #60: ADR-014 hybrid ANFIS trainer
    - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.
 
@@ -91,6 +89,41 @@ _Generated 2026-10-23 06:22 UTC · main at `6cf008da` (2026-10-16) · 8 days to 
    - No approving review yet: main's ruleset requires one.
 1. Unstick PR #120 for #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
    - No approving review yet: main's ruleset requires one.
+
+## Waiting on an answer
+
+_Review requests not yet answered with a review, and unticked checkboxes that start with the person (`- [ ] @login does X`), on every open issue and PR. Oldest first; "or earlier" marks a post edited after it was written, so the wait shown is the shortest it can be._
+
+
+**Mert Efe Şensoy** (@mertefesensoy), 3 owed
+
+- has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (46 days); has posted there since, on 2026-10-21
+- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (21 days); no post there since
+- Review PR #79: self-requested, since 2026-10-21 (3 days); no post there since
+
+**Burak Öztekin** (@BurakOztekin), 8 owed
+
+- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (51 days); no post there since
+- Re-review PR #111: you approved on 2026-10-04 and were asked again: requested by @mertefesensoy, since 2026-10-05 (19 days); no post there since
+- runs the desktop runbook (comment 6314664069, dry-run from GitHub on 2026-10-21); its results go into the next batched desktop record, which become... (PR #79): asked by @bengisucvd, since 2026-10-23 or earlier (1 day or more); no post there since
+- re-reviews `a25140d`. (PR #79): asked by @bengisucvd, since 2026-10-23 or earlier (1 day or more); no post there since
+- Review PR #120: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
+- Review PR #123: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
+- Review PR #124: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
+- Review PR #126: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
+
+**Bengisu Cıvdı** (@bengisucvd), 5 owed
+
+- Review PR #120: requested by @mertefesensoy, since 2026-10-21 (3 days); no post there since
+- Review PR #121: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
+- Review PR #123: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
+- Review PR #124: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
+- Review PR #126: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
+
+**Baha Jarad** (@BahaJarad), 2 owed
+
+- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (21 days); no post there since
+- Review PR #121: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -103,7 +136,6 @@ _Generated 2026-10-23 06:22 UTC · main at `6cf008da` (2026-10-16) · 8 days to 
 
 **#58: Certify the benchmark instruments** (@bengisucvd)
 
-- [critical] CHANGES_REQUESTED standing from @BurakOztekin (2026-10-21). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 - [medium] Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
 
 **#61: ADR-011 evidence + premise gradients** (@bengisucvd)
@@ -131,6 +163,7 @@ _Generated 2026-10-23 06:22 UTC · main at `6cf008da` (2026-10-16) · 8 days to 
 
 | Date | Gates | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | --- |
+| 2026-10-24 | 12/28 | 4 | 3 | 4 | #63 Training-set builder (training/dataset.py): in review to ready to start; main moved to 88fa6a40 |
 | 2026-10-23 | 12/28 | 3 | 4 | 4 | #57 Training contract: ADR-027, TSKTrainer ABC, training/targets.py: ready to start to in review; #84 Close the #57 advisor loop: ready to start to in review |
 | 2026-10-21 | 12/28 | 5 | 2 | 4 | nothing moved |
 | 2026-10-19 | 12/28 | 5 | 2 | 4 | nothing moved |
