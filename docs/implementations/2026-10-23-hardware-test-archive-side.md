@@ -108,6 +108,30 @@ per-qubit jumps are multiplicative (NC-084, NC-085) and the band must be a relat
   Qubit 0 for scale: reading 52.96 µs, level 50.74 µs, band 44.95 to 56.49 µs, disagreement
   +0.043; its readout error 0.0215 against a level of 0.0255 in a band 0.0204 to 0.0316.
 
+### Correction, 2026-10-24
+
+Appended rather than edited in place, so the dry run's text above stays as it was first
+recorded. Three statements in it are wrong:
+
+- **Check 1, "130 to 150 for the others".** At the same ref and instant, `n_distinct` for `T1`
+  (the column this script writes to `predictors.tsv`) is 29 for qubit 72, **52 for qubit 11, 89
+  for qubit 17**, and 130 to 152 for the other 153 qubits. The range given above leaves out
+  qubits 11 and 17 and understates the top by two. Rerunning the dry-run command above and
+  reading the `T1` rows of `predictors.tsv` reproduces these; they were recomputed with this
+  branch's own `predictor_rows` on 2026-10-24 over the same 2,249 files and 924 states.
+- **Check 3, qubit 155's disagreement.** It is -0.7647, which rounds to -0.76, not -0.77. The
+  selection and its order are unaffected.
+- **The delay-grid sentence, "a grid centred on one predictor favours it by construction".**
+  Under the design's own Arm A score (mean absolute error in `p_1` over the delays, the truth
+  between the two predictions), a grid centred on one predictor favours the **other** one: the
+  centred prediction sits on the steepest part of the decay curve, where the same miss in
+  `log T1` costs it the most. The design's level-centred grid therefore favours `reading`, not
+  `level`, at both signs of the disagreement. The computation, with tests, is
+  `scripts/hardware_test_grid_bias.py` on the local pre-registration branch
+  `mert/issue-125-preregistration` (register row NC-087 there), which is not yet pushed; until it
+  lands, that branch is the source. The pre-registration's delay-grid decision was taken on the
+  corrected reading.
+
 ## Related docs
 
 - `docs/roadmap/2026-10-23-hardware-test-archive-side-plan.md`
