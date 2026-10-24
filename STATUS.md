@@ -1,6 +1,6 @@
 # Phase 4: Design-time predictor
 
-_Generated 2026-10-24 13:49 UTC · main at `88fa6a40` (2026-10-23) · starts 2026-11-01 (in 8 days) · milestone 2 due 2027-02-27 (126 days), 10 open and 0 closed_
+_Generated 2026-10-24 13:51 UTC · main at `88fa6a40` (2026-10-23) · starts 2026-11-01 (in 8 days) · milestone 2 due 2027-02-27 (126 days), 10 open and 0 closed_
 
 _Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, PR #124 open, not on main yet. Gates are ordered, not dated (plan §6)._
 
