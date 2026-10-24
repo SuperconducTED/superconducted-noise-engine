@@ -553,6 +553,20 @@ non-trivial.
 > mean-to-interval upgrade stays gated on ADR-015 and Status remains
 > Deferred.
 
+> Density mode · 2026-10-21 · Issue #58, PR #79. The second of the three
+> phase-3 notes Issue #58 FR-9 orders under this entry: below the 2026-09-07
+> alignment note, above the place #64's status block will go. The certified
+> harness gains a density-matrix mode (commit `d646e07`) that aggregates
+> members by the mixture mean, `rho_ens = (1/N) sum_m rho_m`. A convex
+> combination of density matrices is a density matrix, and its diagonal is
+> the mean of the members' outcome probabilities, which is what the
+> counts-mode sum converges to once normalized; it is not a sum of states
+> with a total. The aggregate's `shots` is `1`, never `1 * N`, because
+> nothing is sampled (#58 decision 4). This defines the point estimate
+> only: the interval mode stays gated on ADR-015 and Status remains
+> Deferred. Advisor read: pending the lead's approval under the register's
+> 2026-10-03 reshape (`docs/advisor/2026-09-03-decisions-from-akba.md`).
+
 ---
 
 ## ADR-017 — Missing per-qubit calibration fields: Skip strategy
@@ -1033,6 +1047,24 @@ gates, 6 errors. Measured at `dd1ad56` (2026-10-03), the PR #103 review-fix
 commit, so after the heading's date; see
 `docs/implementations/2026-10-03-pr103-review-fixes.md`.
 
+### ADR-021 amendment as of 2026-10-23: harness conforms
+
+`benchmarks/harness.py` now compiles each circuit once to an explicit basis
+(`run_benchmark` defaults it to the reference model's device basis), calls
+`prepare()` on the compiled circuit, and runs the returned circuit without
+another transpilation (Issue #58, PR #79). With that, both callers in the
+2026-09-18 table conform. This is a fact record only; the amendment remains
+Open and awaits the advisor sign-off recorded above.
+
+In the table's own measure, against the same
+`tests/fixtures/calibration/ibm_fez_20260513T121322Z_with_gates.json` and the
+#58 test engine (`tests/conftest.py`, first viable seed), with `prepare()`'s
+"installed no error" warning promoted to an error: `ghz_state_circuit(3)` installs
+`['sx']`, 3 errors; `qft_circuit(3)` installs `['rx', 'sx']`, 6 errors;
+`vqe_ansatz_circuit(3, rng=default_rng(0))` installs `['rx', 'sx']`, 4 errors; none
+warns. Measured 2026-10-23 on PR #79's branch (code at `e7218d3`; the review-round
+edits on top do not touch the compile or `prepare()` path).
+
 ---
 
 ## ADR-022 — Benchmark validation criteria
@@ -1095,6 +1127,26 @@ before merge.
 > authoring record; this ledger entry is canonical.
 > See ADR-023 for how the reject-don't-clip convention applies to
 > `TanhMF`, the one MF that is a documented exemption from it.
+
+> As of 2026-09-06, issue #58 extends this standing property set through the
+> certified density-matrix harness path (commit `d646e07`) and adds explicit
+> wrong-mode rejection pins for all four metrics (commit `bb38152`). Metric
+> data errors now raise by default or carry a non-empty failure record when
+> the caller explicitly requests partial results; they are never silent NaN.
+> Status remains Accepted. Dr. Akba's out-of-band read is pending in the
+> single W1 advisor batch owned by #56.
+
+> As of 2026-10-21, issue #58 / PR #79 merges `main` @ `6cf008d`. The nine
+> `*_adr022_*` property tests in `tests/test_harness.py` run on hand-built
+> `NoiseModel`s with `depolarizing_error`, so the merge did not affect them.
+> The harness certification tests that do build a fuzzy engine had run it
+> noise-free after the merge, because the slim fixture has no
+> `properties.gates` and ADR-028 then admits nothing; from commit `218475c`
+> they use #57's gates-bearing fixture and an engine that installs noise.
+> The note above's last sentence is overtaken: the W1 batch was never sent,
+> and the read is now the lead's approval under the register's 2026-10-03
+> reshape (`docs/advisor/2026-09-03-decisions-from-akba.md`), pending.
+> Status remains Accepted.
 
 ---
 
