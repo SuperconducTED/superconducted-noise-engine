@@ -1,17 +1,22 @@
-# Phase 3 tracker
+# Phase 4 tracker
 
-A live status dashboard for phase 3 (*Results from ANFIS*, Sep 2 – Sep 30 2026), living
-on an **orphan branch**. It shares no history with `main` and contains no project code,
-so it can never conflict with, be merged into, or be picked up by anything on the
-engineering branches. The only convention it follows is the one `calibration-data`
-already set: data that belongs to the repo but not to the source tree lives on its own
-root.
+A live status dashboard for phase 4 (*Design-time predictor*, from 2026-11-01; the end is
+GitHub milestone 2's due date, read on every run), living on its own branch. It shares no
+history with `main` and contains no project code, so it can never conflict with, be merged
+into, or be picked up by anything on the engineering branches. The only convention it follows
+is the one `calibration-data` already set: data that belongs to the repo but not to the source
+tree lives on its own root.
 
 ```
-phase-3-dashboard   (orphan, this branch)
+phase-4-dashboard   (this branch; cut from phase-3-dashboard's tip, so the generator keeps its history)
+phase-3-dashboard   (the phase-3 record: frozen after its last run, never written again)
 main                (the project; untouched by anything here)
 calibration-data    (orphan, snapshots and ledger)
 ```
+
+Phase 3's board, its daily records and its last `STATUS.md` stay on `phase-3-dashboard`, byte
+for byte as its routine left them. Its `history/*.json` records also ride along here, at the top
+of `history/`, untouched and unread: this branch writes and reads only `history/phase-4/`.
 
 ## Current status
 
@@ -50,46 +55,157 @@ Full board: [STATUS.md](STATUS.md) · [live page](https://claude.ai/code/artifac
 
 | File | What it is |
 | --- | --- |
-| `plan.json` | The **static plan model**: milestones and their gates, owners, and every dependency edge, each one quoted from a ticket's own `Depends on` row on GitHub rather than inferred from the milestone table. Hand-maintained, and only when the plan or a ticket actually changes. |
+| `plan.json` | The **static plan model**: lanes, the ordered gates and their conditions, owners and co-owners, and every dependency edge, each quoted from a ticket's own `Depends on` row or, where its text says so, from the plan. Hand-maintained, and only when the plan, a ticket or an owner actually changes. Holds no live value: priorities, ADR titles, milestone dates and counts are read from GitHub. |
 | `generate.py` | Joins `plan.json` against **live GitHub state** and renders the outputs. Contains no status of its own. |
 | `index.html` | The dashboard. Generated, do not edit. |
 | `STATUS.md` | The same content as Markdown, for reading in a terminal or a PR. Generated. |
 | `snapshot.json` | The full computed model for the latest run, for debugging a value that looks wrong. Generated. |
-| `history/YYYY-MM-DD.json` | One small record per day: gate counts, ticket states, ADR statuses, and (since 2026-10-23) how many answers each person owes. Generated, and the only files here that accumulate. |
+| `history/phase-4/YYYY-MM-DD.json` | One small record per day: gate and condition counts, gate states, ticket states, ADR statuses, the milestone's issue counts, and how many answers each person owes. Generated, and the only files here that accumulate. |
+| `history/YYYY-MM-DD.json` | Phase 3's records, 2026-09-08 onwards, carried over unchanged and never read here. |
 | `run.log` | One line per run: when it started and how it ended. Append-only. |
 | `last_run.md` | The report the most recent run is entitled to make, stamped with that run's token. Generated, and deleted at the start of every run. |
 | `report.sh` | Prints `last_run.md` if it is fresh and the run succeeded, and refuses otherwise. The only thing entitled to describe the phase. |
 | `README.md` | This file. Hand-written, **except** the block between the `DASHBOARD` markers near the top, which the generator rewrites on every run. |
-| `update.sh` | Regenerate, commit if anything changed, push. What the daily routine runs. |
+| `update.sh` | Regenerate, commit if anything changed, push. What the daily routine runs. The branch it may run on is the one variable at its top. |
 | `check_owed.py` | Synthetic checks for the "who owes an answer" rules. Reads nothing from GitHub and writes nothing; run it after changing `generate.py`. |
+| `check_plan.py` | Synthetic checks for the phase-4 rules below (gates, lanes, owners, delivery, history). Same contract as `check_owed.py`. |
+
+## Phase 4: what changed, and why
+
+Recorded 2026-10-24, when this branch was drafted. This section is the implementation record
+for the switch; the project's convention puts such a record under `docs/implementations/` on
+`main`, and the Verification section below explains why this branch keeps its own.
+
+### The problem
+
+Phase 3 closes on 2026-10-31, and the phase-3 board had no phase to track after it. Worse, its
+"Work on this right now" block had gone stale while the team had already moved: since the
+lead's decision of 2026-10-23 everyone works on phase 4's lane 1, and the board still read the
+phase-3 plan. Three lines were wrong on 2026-10-24, and only one of them was a generator bug:
+
+| What the board said | Why | What this branch does |
+| --- | --- | --- |
+| Baha: "Finish #63" | GitHub was read correctly: #63 is open, and PR #113 (merged 2026-10-23) carries no closing reference. The model knew only one meaning of done, the issue closing. | A ticket can name the artifact that delivers it for the plan's purpose (`done_by`). #63's is PR #113, because the plan says done is "merged". The board shows it delivered, with the open issue and its live count of unticked asks, and never closes anything. |
+| Bengisu: "@yigit-arda depends on the answer" | Hand text in the phase-3 `plan.json`, copied from #58's issue body, which still says it. | The plan model is rewritten from the phase-4 plan, and a lint now refuses any owner off the team and warns on a former member's name in free text. |
+| Mert: owes "has sent it to Dr. Akba" | A real unticked `- [ ] @mertefesensoy has sent it to Dr. Akba` on #84's body. The tracker is right, and it is unchanged. What was stale was the phase-3 model around it: an M1 gate worded "sent to Dr. Akba", #84's "brief unsent" blockers and its advisor-latency rank. | The phase-4 model has none of those: #84 is a lane 3 closing item, done when it closes. The pill clears when the box is ticked or rewritten on GitHub, which is the lead's act, not the dashboard's. |
+
+### What changed
+
+| File | Change |
+| --- | --- |
+| `plan.json` | Rewritten from `docs/roadmap/2026-10-23-phase-4-plan.md` at `951258da` on `mert/predictability`: three lanes with their rank rule, gates L1 to L5 with their conditions, 15 tickets, three planned items with no issue yet, four parked tickets, ten watched ADRs, the five named risks. No priority, title, status or date is copied in. |
+| `generate.py` | Gates and lanes instead of dated milestones; three new check kinds; `done_by`; a `co_owners` list; lane-first ranking; review rows for PRs a ticket waits on; plan lint and plan-freshness warnings; a per-phase history folder; the phase name, milestone and plan location read from `plan.json` and GitHub everywhere; no calendar-burned figure and no burn-up chart. The "who owes an answer" code is unchanged. |
+| `update.sh` | The branch is one variable (`BRANCH`), used by the guard, the push and the commit subjects; history files are found recursively. |
+| `report.sh` | Phase-neutral wording. |
+| `check_owed.py` | One fixture key, `milestones` to `gates`, because day records changed shape. Its 16 rules are unchanged. |
+| `check_plan.py` | New: 16 synthetic checks for the rules below. |
+| `README.md` | This section, and the sections it touches. |
+
+### Lanes and gates against what GitHub can tell
+
+The plan orders its gates and dates none of them (§6: "ordered, not dated"). So the page no
+longer compares calendar burned with gates met, and draws no even-pace line: either would
+assert a pace the plan declines to set. The one date is the milestone's due date, read live.
+
+Within a lane the gates are ordered, and the first one not met is that lane's **next** gate. A
+later gate reading met while an earlier one does not is shown as a plan warning, never resolved
+silently, because either reading could be the wrong one.
+
+| Gate | Plan text | What the generator checks |
+| --- | --- | --- |
+| L1 | #125's job 1 report, QPU cost, budget gate | `task_ticked`: a ticked task item on #125's body whose text starts with `L1` (at a word boundary, so `L10` never matches). Until the item exists the condition is ⬜ and its note says where to add it. |
+| L2 | #125 complete, decision applied, numbers registered | `issue_closed` #125 (amber while a #125 PR is open), and a manual condition for the NC rows: the register carries no per-ticket marker to read. |
+| L3 | PR-A1 and the first fit merged | PR-A1: manual until it has a number, then `pr_merged`. The first fit: `adr_status` ADR-014 `not` Deferred, the plan's own test for #60. |
+| L4 | The ladder with the fuzzy band's row, registered | Manual: no ticket yet. |
+| L5 | The phase-3 milestone closed | `milestone_closed` milestone 1, with its live open and closed counts. |
+
+**A gate's mark from its conditions'.** Met when every condition is met; ⬜ when every
+condition is unreadable; amber when any is met or in flight; otherwise ❌. In symbols, with
+condition states `c_1 .. c_n`: met iff all `c_i = met`; unknown iff all `c_i = unknown`;
+partial iff some `c_i` is met or in flight; not met otherwise. A gate made only of unknowns is
+⬜, not ❌, because GitHub has not said "not done".
+
+**ADR tests are strict.** A ledger status meets `want` only when it equals it or is `want` plus
+a parenthetical. ADR-021 reads "Accepted on the constraint · Open on variance-injection design";
+the phase-3 prefix test would have drawn it ✅. A `not` test (ADR-014 off Deferred) passes only
+when the word is gone entirely, so "Open / Deferred" has not left Deferred, and an ADR missing
+from the ledger is ⬜, never "off Deferred" by absence.
+
+### Work on this right now, as plan §5.1
+
+The phase-3 plan stated only dependencies, so the order had to be derived from fan-out. The
+phase-4 plan states the order itself (§5.1: everyone on lane 1 first, lane 3 beside it, lane 2
+resuming at gate L1). A derived order that contradicted that would make the board argue with
+the lead's written decision, so the lane leads. Each person's actions are sorted on the tuple
+
+`(lane rank now, external latency, -fan-out, live priority label, plan order, kind)`
+
+compared left to right. **Lane rank now** comes from `plan.json`: lane 1 is 0, lane 3 is 1, and
+lane 2 is 2 until gate L1 is met and 0 after (`rank_after`), recomputed from the live gate on
+every run. Those three numbers are this branch's reading of §5.1, and the lead's to correct.
+Lane 2 rows carry the plan's "resumes at L1" note, so someone idle on lane 1 still sees them.
+
+- **#125 has three roles.** The owner (Mert, QPU side) and a `co_owners` list (Burak, the
+  offline half; Bengisu, the decision-rule review) each get a row, and each row reads only its
+  own PR: a co-owner's row reads PRs that co-owner authored, and the owner's row reads the rest.
+  Without that, Mert's PR #126 made Burak's half read "in review".
+- **A review that releases a ticket is an action.** When a ticket waits on a PR (#122 on PR
+  #121), every teammate GitHub still has a pending review request for gets a row saying what
+  their review releases. The rows are read from the owed-answers model, so the two sections
+  cannot disagree about who was asked.
+- **Planned work with no issue yet** (the per-qubit extractor, the cross-device tables, the
+  ladder) is listed under its lane. The extractor reaches Baha's queue only once L1 is met.
+
+### Other derivations
+
+- **Plan freshness.** `plan.json` records the commit it was quoted from (`plan_sha`) and the
+  ref (`plan_ref`). Each run reads the latest commit touching the plan document on that ref,
+  then on `main` (the ref may be deleted once PR #124 merges), and warns if it is not
+  `plan_sha`. It also reads whether the plan is on `main` yet, and says so in the header.
+- **Owners against assignees.** A ticket whose `plan.json` owner is not among its GitHub
+  assignees is a plan warning. That is how a stale owner surfaces before anyone reads it.
+- **Priorities are live.** The `priority:*` label is read from the issue on every run.
+
+### Design decisions
+
+- *A new branch, cut from the tip, over renaming.* Renaming would redirect every posted link to
+  the phase-4 board and leave the phase-3 record reachable only by SHA. A new orphan root would
+  lose `git log generate.py`, where each derivation's reason was recorded. Keeping the name
+  `phase-3-dashboard` for phase 4 would mislead.
+- *A per-phase history folder over a phase key alone.* The records also carry `phase`, and
+  records with another phase are skipped, but the folder is what guarantees that a phase-4 run
+  can never overwrite a phase-3 day.
+- *Ticking a box over hand-set gate states.* A manual gate state in `plan.json` is a claim that
+  goes stale silently. A task item on the ticket is closed the way the team already closes asks,
+  in the open, by a person.
+- *Quoted risks over hand-written risk statuses.* Phase 3's risk cards carried a hand-written
+  "Now" line each, the kind of text that went stale. Phase 4's are the plan's words, plus a live
+  fact where the risk names a PR.
 
 ## Day by day
 
-The routine writes `history/<date>.json` on every run, and a later run on the same date
-overwrites its own record. So each file answers "where did the phase stand at the end of
-that day", not "what happened at 08:40". The dashboard's **Day by day** section is computed
-by diffing consecutive records, which means the day-over-day story cannot drift from what
-the rest of the page says: both are derived from the same numbers.
+The routine writes `history/phase-4/<date>.json` on every run, and a later run on the same date
+overwrites its own record. So each file answers "where did the phase stand at the end of that
+day", not "what happened at 08:40". The dashboard's **Day by day** section is computed by
+diffing consecutive records, which means the day-over-day story cannot drift from what the rest
+of the page says: both are derived from the same numbers.
 
-A record holds counts and states only, never prose. Lines such as *"#60: blocked upstream
-to ready to start"* are computed at render time from two records rather than stored. That
-is why adding a ticket to `plan.json` improves the history retroactively, and why changing
-a wording never rewrites the past.
+A record holds counts and states only, never prose. Lines such as *"#122: blocked upstream to
+ready to start"* are computed at render time from two records rather than stored. That is why
+adding a ticket to `plan.json` improves the history retroactively, and why changing a wording
+never rewrites the past.
 
 Only transitions are reported. A ticket that sat blocked all week produces no line, so the
 column reads as **what moved** rather than as a restatement of the board. A day on which
 nothing moved says exactly that.
 
-The burn-up chart appears once there are **three or more** records. Two points drawn as a
-trend line invite a reading the data cannot support, so below three the section shows the
-table alone. The chart carries one measured series against an even-pace reference, and the
-two are told apart by stroke weight and direct labels rather than by colour, so it survives
-greyscale, colour-vision deficiency, and forced-colors mode.
+There is no burn-up chart in phase 4: the gates are ordered, not dated, so the even-pace line
+the phase-3 chart drew would assert a pace the plan does not set.
 
-The history is **not backfilled**. Records start the day the branch was created
-(2026-09-08), because earlier daily states were never measured and reconstructing them
-would be fabrication. `git log` on this branch is the coarser second record: one commit per
-run, with a subject saying whether anything moved.
+The history is **not backfilled**. Phase-4 records start on this branch's first routine run,
+because earlier daily states were never measured and reconstructing them would be fabrication.
+`git log` on this branch is the coarser second record: one commit per run, with a subject
+saying whether anything moved.
 
 ## Running it
 
@@ -109,42 +225,36 @@ dependency set, so the routine cannot break on an environment drift.
 
 ## The question it exists to answer
 
-The phase-3 plan states dependencies, and GitHub states what has merged. Neither alone
-answers the question that actually governs a day's work: *given where everything is right
-now, what should each person do next, and for anything not waiting on someone else, what
-is actually holding it?* Those are two different questions and the plan conflates them.
-The dashboard separates them into two sections deliberately.
+A phase plan states the order of work and its dependencies, and GitHub states what has merged.
+Neither alone answers the question that actually governs a day's work: *given where everything
+is right now, what should each person do next, and for anything not waiting on someone else,
+what is actually holding it?* Those are two different questions, and the dashboard separates
+them into two sections deliberately.
 
-Three derivations are where the value is, and each exists because a naive reading gets it
-wrong:
+The derivations below are where the value is, and each exists because a naive reading gets it
+wrong. The first four came from phase 3 and still hold; phase 4's are in the section above.
 
-- **A dependency is on an artifact, not an issue.** `#59`, `#60`, `#61` and `#63` all list
-  `#57` as a prerequisite, but what they consume is the training contract, which merged in
-  PR #69. `#57` itself stays open for its advisor half. Keying those edges on issue closure
-  would paint the entire trainer track blocked when nothing is stopping it. So a dependency
-  may name the artifact that discharges it (`satisfied_by`), and issue closure is only the
-  fallback.
+- **A dependency is on an artifact, not an issue.** In phase 3, `#59`, `#60`, `#61` and `#63`
+  all listed `#57` as a prerequisite, but what they consumed was the training contract, which
+  merged in PR #69 while `#57` stayed open for its advisor half. Keying those edges on issue
+  closure would have painted the trainer track blocked when nothing was stopping it. So a
+  dependency may name the artifact that discharges it (`satisfied_by`), and issue closure is
+  only the fallback. In phase 4, #60's and #122's edges to #63 are discharged by PR #113.
 
-- **A dependency with a `part` gates that part, not the ticket.** `#60` needs `#63` for its
-  first archive fit and for nothing else. Its LSE stage (the M2 gate, and the whole reason
-  the trainer is called the long pole) needs nothing from `#63`. Partial dependencies
-  become scope notes on a startable ticket, never a block.
+- **A dependency with a `part` gates that part, not the ticket.** #64's PR-A2 waits on PR #79;
+  its PR-A1 needs no harness. Partial dependencies become scope notes on a startable ticket,
+  never a block.
 
-- **Fan-out is counted live, not declared.** A ticket's rank in the action queue is driven
-  by how many other tickets it is *still* holding up, counted from the unmet dependency
-  edges that actually point at it. `plan.json` also carries a declared `unblocks` list, but
-  that describes the ticket in the abstract and goes stale the moment an artifact discharges
-  those edges: `#57` declares four downstreams, yet the contract they consume merged in PR
-  #69, so a follow-up PR on `#57` now releases nobody. Ranking on the declared list put a
-  docs cleanup above starting the four-week trainer. Relatedly, the "clear your reviews
-  first" rule is conditional on fan-out, because its whole justification is that a review
-  releases someone else cheaply; a review that frees nobody sinks below fresh work.
+- **Fan-out is counted live, not declared.** How many tickets an item is *still* holding up is
+  counted from the unmet dependency edges that actually point at it, never from a declared list,
+  which goes stale the moment an artifact discharges those edges. The "clear your reviews first"
+  rule stays conditional on fan-out, because its whole justification is that a review releases
+  someone else cheaply.
 
 - **A later `COMMENTED` review does not dismiss an earlier `CHANGES_REQUESTED`.** `main`'s
   merge gate is a ruleset requiring one approval, and it does **not** dismiss stale reviews
   on push. So "latest review" is the wrong model for who is blocking: only `APPROVED`,
-  `CHANGES_REQUESTED` and `DISMISSED` move a reviewer's state. Getting this wrong hides
-  exactly the reviews holding the phase up.
+  `CHANGES_REQUESTED` and `DISMISSED` move a reviewer's state.
 
 One more thing it refuses to do: treat a green check on a `CONFLICTING` PR as evidence.
 `ci.yml` does not dispatch while a PR is dirty, so those checks describe a `main` that has
@@ -308,7 +418,7 @@ silent append: appending would leave two status blocks, and the stale one would 
 as current.
 
 It is deliberately shorter than `STATUS.md`. Someone landing on the branch wants three
-things before deciding whether to open anything: is the phase on pace, which gates are met,
+things before deciding whether to open anything: where the phase stands, which gates are met,
 and what they personally should pick up. Anything more and the README stops being a front
 page and becomes a second copy of the board, which then has to be kept honest twice.
 
@@ -355,36 +465,70 @@ mv plan.json.hidden plan.json
 
 Edit it when, and only when, one of these is true:
 
-- a milestone gate's wording or target changes in the plan document;
+- the phase plan document changes (the page warns when it has: see "Plan freshness"); update
+  `plan_sha` to the commit you re-read;
 - a ticket's stated `Depends on` row changes on GitHub;
-- a new ticket joins the phase, or an owner changes (a new person takes the next free
-  `series-N` colour, never a raw hex; see "Colours");
-- a manual gate (`"kind": "manual"`) becomes machine-checkable, or its `note` goes stale.
+- a new ticket joins the phase (a planned item gets its issue number: move it from `planned` to
+  `tickets`), or an owner changes (a new person takes the next free `series-N` colour, never a
+  raw hex; see "Colours");
+- a manual condition becomes machine-checkable: PR-A1 gets a number, or the ladder gets a ticket;
+- the lead changes a lane's rank rule.
 
-Everything else (issue state, PR state, review decisions, CI, ADR statuses) is read live
-on every run and must never be written here. If a number in the dashboard looks wrong, the
-fix is almost always in `generate.py`'s derivation or in a ticket on GitHub, not in this file.
+Everything else (issue state, priority labels, assignees, PR state, review decisions, CI, ADR
+statuses and titles, milestone dates and counts) is read live on every run and must never be
+written here. If a number in the dashboard looks wrong, the fix is almost always in
+`generate.py`'s derivation or in a ticket on GitHub, not in this file.
 
-Manual gates carry a `note` explaining what was checked and when. A `note` is a claim like
-any other in this project: it should name what was measured and where, so it can be
+Manual conditions carry a `note` explaining what would make them checkable. A `note` is a claim
+like any other in this project: it should name what was measured and where, so it can be
 re-verified rather than trusted.
 
 ## Verification
 
 The project convention puts an implementation record under `docs/implementations/` on
-`main`. This one lives here instead, deliberately: the whole point of the orphan branch is
-that phase-3 tracking never touches the engineering tree, and adding a doc to `main` to
-describe a branch that must not reach `main` would defeat it. This section is that record's
+`main`. This one lives here instead, deliberately: the whole point of the branch is that
+phase tracking never touches the engineering tree, and adding a doc to `main` to describe a
+branch that must not reach `main` would defeat it. This section is that record's
 verification half.
 
-**The generator is honest about live state.** Every ✅ traces to a live read, so the check
-is to move something on GitHub and confirm the mark follows:
+**The synthetic checks hold.** Run both after any change to `generate.py`:
 
 ```bash
-python generate.py && grep -c '✅' STATUS.md   # baseline
-gh issue close 66 && python generate.py        # then reopen it
-grep -c '✅' STATUS.md                          # must have risen by one
+python check_owed.py            # "16/16 checks passed", exit 0
+python check_plan.py            # "16/16 checks passed", exit 0
 ```
+
+On 2026-10-24 each guard `check_plan.py` covers was removed in turn from a copy of
+`generate.py` (the strict ADR test, the "not" test, the missing-ADR guard, the task marker's
+word boundary, the absent task item reading ⬜, the milestone state, the all-unknown gate,
+`done_by`, the off-team owner, the people-table exemption, the owner-assignee comparison, the
+lane term in the sort key, the co-owner's own PR, the former-member reviewer filter, the gate
+order, the plan drift and missing-plan warnings, the history phase filter), and every one of
+those 18 mutants failed at least one check.
+
+**The owed-answers section did not move.** On 2026-10-24 one GitHub fetch was frozen and
+rendered through both the phase-3 generator (`3b90ca7b`) and this one: the "Waiting on an
+answer" section was byte-identical in `STATUS.md` (35 lines) and in `index.html` (63 lines).
+
+**Against live state on 2026-10-24** (before phase 4 starts):
+
+| Check | Expected |
+| --- | --- |
+| #63 | ✅ delivered by PR #113 on 2026-10-23, issue still open with 1 unticked ask (Burak Öztekin); absent from Baha's queue |
+| Burak's first row | #125's offline half, ready; not "in review" from Mert's PR #126 |
+| Bengisu and Baha | "Review PR #121: it holds #122" first, because #122 waits on PR #121 |
+| Lane 2 rows | below lane 1 and lane 3, with the "resumes at gate L1" note |
+| L1 | ⬜, with the note naming the task item to add to #125 |
+| L5 | ❌, "13 open and 21 closed issues" on milestone 1 |
+| ADR-021 | ❌, not ✅: its status is split |
+| Plan warnings | none: the plan document's latest commit on `mert/predictability` is `951258da`, and every owner is a GitHub assignee |
+
+**The generator is honest about live state.** Every ✅ traces to a live read, so the check
+is to move something and confirm the mark follows. Once the lead adopts the convention, tick the
+L1 box on #125 and run `python generate.py`. Before that, the same move can be made on a copy:
+on 2026-10-24 the frozen fetch was rebuilt with `- [x] L1: test` appended to #125's body, and L1
+turned ✅, lane 2 lost its hold (rank 2 to 0), Burak's #60 moved above #75 without the "resumes
+at L1" note, and Baha's queue gained "Open the per-qubit extractor and channel issue (plan A.3)".
 
 **The routine does not commit noise.** Two runs in a row with nothing moving upstream must
 produce a `no change` commit, never a `state moved` one:
@@ -404,14 +548,13 @@ actually land somewhere it should not. Confirm the guard fires:
 
 ```bash
 git switch --detach && bash update.sh   # exits 1, writes nothing
-git switch phase-3-dashboard
+git switch phase-4-dashboard
 ```
 
 **A run always leaves a trace.** `update.sh` appends to `run.log` before it does
-anything and records the outcome on the way out, whatever the exit path. Without that,
-a scheduled run that failed and one that never started look identical from here: no
-commit, no push, nothing on disk. The outcome line for a failed run stays local until
-the next successful run commits it, so check the file itself, not just `git log`:
+anything and records the outcome on the way out, whatever the exit path. The outcome line
+for a failed run stays local until the next successful run commits it, so check the file
+itself, not just `git log`:
 
 ```bash
 tail -5 run.log
@@ -421,39 +564,23 @@ tail -5 run.log
 `update.sh` fails with a bad-interpreter error. `.gitattributes` pins LF; confirm after any
 fresh clone with `file update.sh`, which must not say `CRLF`.
 
-**The derivations hold.** The three corrections in the section above are the ones a naive
-implementation gets wrong, so they are the ones worth re-checking whenever `generate.py`
-changes:
+**Who owes an answer holds.** The phase-3 checks against live state still apply:
 
 | Check | Expected |
 | --- | --- |
-| `#60` after `#57`'s contract merged | **ready**, with a scope note that the archive-fit part waits on `#63`, not blocked |
-| A reviewer who follows a `CHANGES_REQUESTED` with a `COMMENTED` | still listed as the blocker, with "looked again … without lifting it" |
-| A `CONFLICTING` PR with green checks | checks marked **stale**, never green |
-
-**Who owes an answer holds.** Run the synthetic checks after any change to `generate.py`:
-
-```bash
-python check_owed.py            # "16/16 checks passed", exit 0
-```
-
-On 2026-10-23 each guard they cover was also removed in turn from a copy of `generate.py`
-(suffix rule, fence skip, comment strip, edit dating, bot filter, pending-review filter,
-latest-request choice, ticked items, truncation warning, unmeasured history days, outsider
-filter, the line-start rule that keeps quoted items out), and every one of those 12
-mutants failed at least one check. Against live state:
-
-| Check | Expected |
-| --- | --- |
-| PR #111: Burak approved on 2026-10-04 and was re-requested on 2026-10-05 | under Burak as **re-review requested**, since 2026-10-05. PR #111 is in no plan ticket, so no other table shows it |
+| PR #111: Burak approved on 2026-10-04 and was re-requested on 2026-10-05 | under Burak as **re-review requested**, since 2026-10-05 |
 | `- [ ] @bengisucvd's skip-rule outcome ...` on #84 | not listed: the suffix makes it a statement, not an ask |
 | A checkbox in a post edited on a later day (PR #79's body) | dated by the edit, "or earlier" |
 | Ticking a listed box on GitHub, then `python generate.py` | that row is gone and the person's count drops by one |
-| The first record after this change | no "owes" line in Day by day, because the day before has no `owed` key |
 
 ## Sources
 
-- `docs/roadmap/2026-09-03-phase-3-plan.md` on `main`: the plan itself, and the source of
-  truth for anything the dashboard and the plan disagree about.
-- `docs/decisions.md` on `main`: ADR statuses, read live.
-- Issues #45–#84 and their `Depends on` rows.
+- `docs/roadmap/2026-10-23-phase-4-plan.md`, at `951258da` on `mert/predictability` (PR #124,
+  not on `main` on 2026-10-24): the plan itself, and the source of truth for anything the
+  dashboard and the plan disagree about. Its §2 (lanes and gates), §3 (parked), §5.1 (the
+  per-person order) and §7 (risks) are what `plan.json` quotes.
+- `docs/roadmap/2026-09-03-phase-3-plan.md` on `main`, and the `phase-3-dashboard` branch: the
+  phase that came before, and its record.
+- `docs/decisions.md` on `main`: ADR statuses and titles, read live.
+- GitHub milestones 1 (`Phase 3 · ANFIS results`) and 2 (`Phase 4 · Design-time predictor`),
+  read live; and each lane ticket's `Depends on` row.

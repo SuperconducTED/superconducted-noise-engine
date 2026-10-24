@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Print the report from the most recent run, or refuse to print anything.
 #
-# This is the only thing entitled to describe the state of phase 3. The daily
+# This is the only thing entitled to describe the state of the phase. The daily
 # routine runs update.sh and then relays this script's output verbatim; it
 # composes no summary of its own. That division exists because the alternative
 # was tried and failed: told to "run the refresh, then report", a routine can
@@ -30,7 +30,7 @@ NO REPORT AVAILABLE.
 update.sh has not run to completion in this working tree, so there is no report
 to give. Nothing was committed and the dashboard was not refreshed.
 
-Do not describe the state of phase 3 from any other file. STATUS.md, index.html,
+Do not describe the state of the phase from any other file. STATUS.md, index.html,
 README.md and history/ are all left over from an earlier run and describe a
 moment that has passed. Report this message instead, along with the output of
 the update.sh command that was attempted.
@@ -74,11 +74,11 @@ fi
 # Fresh, but freshness is not success: a run that failed writes a report saying
 # so, and that report is as fresh as any other. The outcome line decides the
 # exit code, so a caller checking $? sees the difference between "here is the
-# state of phase 3" and "the refresh broke". The content is printed either way,
+# state of the phase" and "the refresh broke". The content is printed either way,
 # because in both cases it is the correct thing to relay.
 outcome="$(sed -n 's/^outcome: //p' last_run.md | head -1)"
 
-echo "Phase 3 refresh, ${age}s ago."
+echo "Dashboard refresh, ${age}s ago."
 echo
 cat last_run.md
 

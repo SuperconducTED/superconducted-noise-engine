@@ -223,7 +223,7 @@ def ordering_is_team_order_then_oldest():
 @check
 def owed_counts_move_in_day_by_day_only_when_both_days_measured():
     plan = {"tickets": [], "people": {B: {"name": "Burak"}}}
-    base = {"gates_done": 1, "gates_total": 2, "milestones": {}, "tickets": {}, "adr": {},
+    base = {"gates_done": 1, "gates_total": 2, "gates": {}, "tickets": {}, "adr": {},
             "main_sha": "x"}
     old = dict(base)
     cur = {**base, "owed": {B: 2}}
