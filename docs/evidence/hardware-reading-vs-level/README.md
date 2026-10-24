@@ -145,7 +145,59 @@ committed run supersedes the scratch figures; if they differ, the committed run 
 
 ## 4. Results
 
-To be appended with the commit that produced them.
+Appended 2026-10-24. Laptop runs on the pinned stack (Python 3.12.10, NumPy 2.4.4); provisional.
+
+### 4.1 Measurement 2, the delay-grid bias (NC-087)
+
+Run of `scripts/hardware_test_grid_bias.py` at `d6ed7885`, output `grid-bias.tsv` committed at
+`d75de42d`, reproduced byte for byte by a second run. Noiseless tie point `a*` (0.5 neutral,
+above 0.5 favours the reading), selected rows of the 144:
+
+| Grid | `d` = -1.75 | -1.0 | -0.75 | +0.75 | +1.0 | +1.75 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `level` (design §3) | 0.653 | 0.562 | 0.539 | 0.513 | 0.527 | 0.582 |
+| `reading` | 0.418 | 0.473 | 0.487 | 0.461 | 0.438 | 0.347 |
+| `union` (seven delays) | 0.526 | 0.515 | 0.512 | 0.488 | 0.485 | 0.474 |
+| `midpoint` | 0.526 | 0.516 | 0.512 | 0.488 | 0.484 | 0.474 |
+
+- A grid centred on one predictor favours the other one, at both signs. The design's grid
+  favours the reading everywhere, so sign balancing does not cancel it.
+- The union and midpoint grids lean toward whichever predictor has the shorter `T1`, by at most
+  0.03 at `|d| = 2`, with the opposite sign above and below the level; the two agree within
+  0.0003 everywhere.
+- 2,048-shot noise moves no `a*` by more than 0.000004; every row has exactly one crossing.
+- The scratch figures of section 3.4 are consistent with these (the scratch used `|d|` = 0.58,
+  1.04, 1.71, which the committed grid of `d` brackets).
+
+### 4.2 Measurement 1, the check-up floor (NC-088 to NC-090)
+
+Record run of `measure_checkup_floor.py` at `b6852203`, outputs committed at `dfaf0cd7`. The
+guard of section 2.1 passed (2,249 files, 924 states, nothing skipped, qubit 72's 29, the same
+eight and the same four). Every output except the summary's timings is identical to the scratch
+runs' of sections 6.1 and 6.2.
+
+- **Window counts are bimodal.** At the guard instant 153 of 156 qubits have 28 to 31 distinct
+  `T1` values in the window; qubit 11 has 3, qubit 72 has 6, qubit 108 has 13 (modal shares 0.58,
+  0.44 and 0.53). The whole-archive count the design's floor reads is 29 for qubit 72, 52 for qubit
+  11, 89 for qubit 17 and 130 to 152 for the rest.
+- **Exclusions per day** over 132 instants, median (range): the design's floor 1 (0 to 3); window
+  floors 10, 15, 20: 2 (1 to 3), 2 (1 to 3), 2 (2 to 7). Qubit 72 admitted on 55, 14, 0 and 0
+  days. The top eight overlaps the design rule's in a median of 8 under every window floor
+  (minimum 7, 6, 6).
+- **Controls** at the guard instant: 105, 112, 48, 140 under the design's floor in either order;
+  48, 112, 54, 105 under a window floor of 15 in either order (ranked differently). The six
+  qubits nearest the median scatter (0.2937) lie between 0.2921 and 0.2944.
+- **Sign composition** (NC-089): all eight below the level on 53 days, seven on 40, six on 17,
+  five on 13, four on 5, three on 1, two on 2, one on 1; the share of admitted qubits below the
+  level has a median of 0.43 (0.22 to 0.75). Fourth-largest `|d|` above the level median 0.44
+  (0.28 to 0.60), below 0.75 (0.35 to 1.35); eighth-largest overall 0.57 (0.44 to 0.85); every
+  day has at least four admitted qubits on each side.
+- **Union-grid span** over the design rule's eight (NC-090): shortest non-zero delay median 15
+  µs (0.84 to 35.6), longest median 420 µs (256 to 799); the extremes are qubit 49 on 2026-09-18
+  (reading 1.68 µs, level 115.5 µs) and qubit 15 on 2026-06-14 (reading 399.7 µs, level 240.4 µs).
+
+None of this is a decision. The proposals that use it are in
+`docs/roadmap/2026-10-24-issue-125-preregistration.md` §3.
 
 ## 5. Reproduction
 
