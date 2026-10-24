@@ -1,0 +1,61 @@
+{
+  "ref": "5828b4a2",
+  "files": 2249,
+  "distinct_states": 924,
+  "cut": "2026-09-01T00:00:00+00:00",
+  "fit_cut": "2026-08-10T00:00:00+00:00",
+  "feature": "readout",
+  "floors": {
+    "readout_error": 0.004150390625,
+    "prob_meas1_prep0": 0.0009765625
+  },
+  "chipwide_t1_recalibrations": 151,
+  "readout_error_rows_excluded_by_floor": 19851,
+  "readout_error_H24h": {
+    "rows_fit": 55063,
+    "rows_cal": 11900,
+    "rows_test_change": 51659,
+    "rows_test_all": 52638,
+    "effective_training_window": [
+      "2026-05-13T21:57:06+00:00",
+      "2026-08-06T08:47:40+00:00"
+    ]
+  },
+  "readout_error_H168h": {
+    "rows_fit": 51013,
+    "rows_cal": 8364,
+    "rows_test_change": 47171,
+    "rows_test_all": 47840,
+    "effective_training_window": [
+      "2026-05-13T21:57:06+00:00",
+      "2026-08-07T03:21:59+00:00"
+    ]
+  },
+  "prob_meas1_prep0_rows_excluded_by_floor": 16215,
+  "prob_meas1_prep0_H24h": {
+    "rows_fit": 54307,
+    "rows_cal": 11969,
+    "rows_test_change": 50589,
+    "rows_test_all": 52180,
+    "effective_training_window": [
+      "2026-05-13T21:57:06+00:00",
+      "2026-08-06T08:47:40+00:00"
+    ]
+  },
+  "prob_meas1_prep0_H168h": {
+    "rows_fit": 50397,
+    "rows_cal": 8393,
+    "rows_test_change": 46089,
+    "rows_test_all": 47427,
+    "effective_training_window": [
+      "2026-05-13T21:57:06+00:00",
+      "2026-08-07T03:21:59+00:00"
+    ]
+  },
+  "results_rows": 146,
+  "test_rows_written": 195508,
+  "python": "3.12.10",
+  "numpy": "2.4.4",
+  "rows_tsv_gz_sha256": "aea93fe51d706eea97d5ba3d24f288e09eb69036ccbd2f81379477fb2e173640",
+  "rows_tsv_note": "rows.tsv of the readout run is committed gzip-compressed as rows-readout.tsv.gz"
+}
