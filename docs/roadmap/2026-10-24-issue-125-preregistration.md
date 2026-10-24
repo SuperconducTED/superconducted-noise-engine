@@ -42,8 +42,8 @@ draft stays unfrozen until the rest of section 6 is done.
 **Question.** The design admits a qubit to the discriminating stratum when it has "at least 20
 re-measurement events in the archive"; PR #126 implements that as at least 20 distinct `T1` values
 over all states up to `t_s`. At the dry run's instant qubit 72 passes that floor with 29;
-qubits 11 and 17 have 52 and 89, and the other 153 between 130 and 152 (NC-088; PR #126's
-record gives "130 to 150 for the others", which leaves out qubits 11 and 17). Qubit 72's `T1` has
+qubits 11 and 17 have 52 and 89, and the other 153 between 130 and 152 (NC-088). PR #126's
+record first gave "130 to 150 for the others"; a dated correction on its branch fixes that. Qubit 72's `T1` has
 a history of omission from IBM's published calibration (ADR-017, NC-014) and has been published
 again inside the dry run's window.
 

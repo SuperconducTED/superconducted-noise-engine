@@ -156,7 +156,10 @@ backend's `dt` and circuit-duration limits (the offline half's construction, not
 **A finding about PR #126's record.** Its Verification section gives the whole-archive distinct
 counts as "130 to 150 for the others" beside qubit 72's 29; at the same instant qubit 11 has 52
 and qubit 17 has 89 (`checkup-floor-qubits.tsv`). That record is a dated document on another
-branch and is not edited here; the pre-registration draft cites the measured figures.
+branch and is not edited here; the pre-registration draft cites the measured figures. On the
+lead's word the same day, a dated correction note was appended to that record on PR #126's own
+branch (`6f458867`, local, not pushed), covering this count, qubit 155's rounding (-0.7647, so
+-0.76, not -0.77) and the reversed delay-grid premise; it is merged into this branch.
 
 ## Related docs
 
