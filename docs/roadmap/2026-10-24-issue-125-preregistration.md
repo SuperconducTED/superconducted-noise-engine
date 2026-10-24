@@ -31,7 +31,7 @@ draft stays unfrozen until the rest of section 6 is done.
 | Discriminating stratum | **proposals A and B**: eight qubits, re-selected at every job's `t_s` (section 3.1, 3.2) | NC-088, NC-089 | **accepted by the lead 2026-10-24** (section 3.5); amends design §3 |
 | Control stratum | **proposal D**: four qubits chosen once, before job 1, excluding only qubits below the floor and nothing that depends on a reading; never eligible for the discriminating stratum (section 3.4) | design §3's text; NC-088's control check | **accepted by the lead 2026-10-24** (section 3.5); changes PR #126's order |
 | Arm B | six connected triples spanning `level`'s predicted fidelity, `ghz_state_circuit(3)` plus an idle block of `0.5 x` the layout's median `T1_level`, 4,096 shots | design §4 | unchanged |
-| Schedule | one job per day for 14 consecutive days at a fixed UTC hour (**the lead names the hour**); job 1 is Arm A only | design §5 | unchanged |
+| Schedule | one job per day for 14 consecutive days, submitted at **03:45 UTC (06:45 Istanbul)**; job 1 is Arm A only | design §5; section 3.6, NC-091 | hour **set by the lead 2026-10-24** (section 3.6) |
 | Budget | not a constraint (the lead, 2026-10-24); QPU time and queue delay are still logged per job | section 4 | replaces design §5's 25-second gate |
 | Decision rule | design §7, verbatim: on Arm A's discriminating rows `level` beats both `reading` and `reading_at_execution` on mean absolute error, each with a paired bootstrap 90% interval excluding zero, the ordering holds in sign on the control stratum, and `band` covers its nominal 80% within a one-binomial-standard-error widening; Arm B passes if `level` or `band` ranks layouts at least as well as `reading` (Spearman) and picks the measured best at least as often | design §7 | unchanged; **under Bengisu's review** (section 6) |
 
@@ -184,10 +184,34 @@ union grid, controls first)." Recorded as given:
 | C | the union grid, `{0} ∪ {0.5, 1, 2} x T1_level ∪ {0.5, 1, 2} x T1_reading`, seven delays per qubit (section 3.3) |
 | D | the four controls frozen first at the freezing ref, excluding only qubits below the floor, and never eligible for the discriminating stratum (section 3.4) |
 
-Accepting them does not freeze anything. The submission hour is still open, and the freezing
-commit still waits on the rest of section 6. If Bengisu's review or Burak's dry run finds a
+Accepting them does not freeze anything. The submission hour was set afterwards (section 3.6),
+and the freezing commit still waits on the rest of section 6. If Bengisu's review or Burak's dry run finds a
 problem with any of the four, the change is recorded here as a dated note beside this one, not
 by editing this table.
+
+### 3.6 The submission hour, 2026-10-24
+
+The lead asked, on 2026-10-24 in this session, for a submission hour between 00:00 and 07:00
+Istanbul time. Turkey keeps UTC+3 all year, so that window is 21:00 to 04:00 UTC every day of the
+run. The jobs go out at minute :45, after the hourly poll at :37 (NC-008). Over the 162 days of
+NC-091 (`recal-hours.tsv`), the seven hours in the window:
+
+| Submit (Istanbul) | Submit (UTC) | Median hours since the last sweep | Sweep within 1 h | Within 3 h | Within 6 h |
+| --- | --- | --- | --- | --- | --- |
+| 00:45 | 21:45 | 14.6 | 8.6% | 18.5% | 30.9% |
+| 01:45 | 22:45 | 12.8 | 6.2% | 13.6% | 25.3% |
+| 02:45 | 23:45 | 12.9 | 3.7% | 12.3% | 22.2% |
+| 03:45 | 00:45 | 13.0 | 3.7% | 12.3% | 21.6% |
+| 04:45 | 01:45 | 12.6 | 4.9% | 11.7% | 20.4% |
+| 05:45 | 02:45 | 10.7 | 3.7% | 9.9% | 16.7% |
+| **06:45** | **03:45** | **10.0** | **3.1%** | **9.3%** | **16.7%** |
+
+06:45 Istanbul is the best of the seven in every column (tied with 05:45 within 6 h), so the
+draft records **03:45 UTC (06:45
+Istanbul)** as the submission hour. In October most sweeps were published between 21:00 and 03:00
+UTC (NC-091), which puts 03:45 UTC just after the usual sweep, if November keeps that pattern. It
+is not guaranteed to: the sweep time moved between months. A queued job that runs after a new
+sweep is still scored, and the `reading_at_execution` control shows how much that mattered.
 
 ## 4. The budget
 
@@ -199,12 +223,7 @@ the result needs to know what the measurement cost.
 
 ## 5. What is not decided here
 
-- The fixed UTC submission hour (the lead). The evidence is NC-091 (evidence README §7.5):
-  IBM's chip-wide `T1` sweeps come about daily but do not hold a clock time, so no hour gives a
-  reading younger than about ten hours on a typical day. Early-morning UTC (04:45 to 05:45 UTC,
-  07:45 to 08:45 Istanbul) gives the freshest readings, a median of 9.8 to 10.3 hours since the
-  last sweep, with a 6.8% to 8.6% chance of a sweep within three hours; mid-afternoon UTC gives the
-  least sweep risk (5.6%) with older readings; 19:45 to 20:45 UTC is worst on both.
+- The submission hour is set: 03:45 UTC, 06:45 Istanbul (section 3.6).
 - The second account named as the fallback for the daily cadence (design §8: a team member other
   than Mert, before job 2).
 - Whether the S5 readout result changes the readout source of §2 (design §8, not blocking).
@@ -214,7 +233,7 @@ the result needs to know what the measurement cost.
 | Item | Owner | State on 2026-10-24 |
 | --- | --- | --- |
 | Answers on proposals A, B, C and D | Mert | **done 2026-10-24**: all four accepted as drafted (section 3.5) |
-| The fixed UTC submission hour | Mert | open; evidence measured (NC-091, section 5) |
+| The fixed UTC submission hour | Mert | **done 2026-10-24**: 03:45 UTC, 06:45 Istanbul (section 3.6) |
 | Statistics review of the decision rule (design §7) and of this draft; in particular the null-model value of each threshold (lesson L-029: derive what a no-information predictor scores before trusting a threshold), and the bootstrap's resampling unit (by job, since the qubits of one job share one device state, or by row) | Bengisu | open; review requested on PR #124 |
 | The offline half of `scripts/hardware_reading_vs_level.py` (selection, circuits for both arms, scoring) and its dry run against Aer, committed | Burak | open; no branch yet |
 | PR #120 merged | Bengisu or Burak to review | open, no review yet |
