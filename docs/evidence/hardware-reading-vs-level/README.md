@@ -186,3 +186,22 @@ rule's admitted set:
 The summary gains their median, minimum and maximum over days. Nothing in sections 2.1 to 2.4
 changes; the record run is the committed script end to end, and its other outputs must match the
 scratch run's.
+
+### 6.2 2026-10-24, before the record run of measurement 1, after a scratch probe
+
+A scratch probe over the same cached collection named two facts the draft needed but the script
+did not write: the scatter values behind the control proposals (the six qubits nearest the median
+lie within about 0.002 of one another, so which four come out depends on who is eligible), and
+the qubit behind the shortest union delay. Added, **after seeing that probe and therefore not
+blind**, so every figure the draft cites comes from the committed script:
+
+- `checkup-floor-controls.json`: per rule, `scatter_first` (the whole-archive `log T1` scatter of
+  each control chosen first); and `nearest_median_ten`, the ten qubits nearest the median with
+  nothing excluded, with their scatter and the median;
+- `checkup-floor-days.tsv`: `union_shortest_qubit`, `union_longest_qubit` and their reading and
+  level in microseconds;
+- `checkup-floor-summary.json`: `union_shortest_extreme` and `union_longest_extreme`, the day,
+  qubit, reading and level behind the extremes over all days.
+
+The record run, of the committed script end to end, has not yet been made; section 6.1's
+statement about it stands.

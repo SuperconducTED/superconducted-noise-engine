@@ -195,12 +195,18 @@ def day_row(collected: Collected, at: datetime, n_qubits: int) -> dict[str, Any]
         else ""
     )
     if current_top:
-        lo = min(0.5 * min(t1[q].reading, t1[q].level) for q in current_top)
-        hi = max(2.0 * max(t1[q].reading, t1[q].level) for q in current_top)
-        out["union_shortest_us"] = round(lo * 1e6, 3)
-        out["union_longest_us"] = round(hi * 1e6, 3)
+        q_lo = min(current_top, key=lambda q: min(t1[q].reading, t1[q].level))
+        q_hi = max(current_top, key=lambda q: max(t1[q].reading, t1[q].level))
+        out["union_shortest_us"] = round(0.5 * min(t1[q_lo].reading, t1[q_lo].level) * 1e6, 3)
+        out["union_longest_us"] = round(2.0 * max(t1[q_hi].reading, t1[q_hi].level) * 1e6, 3)
+        for tag, q in (("shortest", q_lo), ("longest", q_hi)):
+            out[f"union_{tag}_qubit"] = q
+            out[f"union_{tag}_reading_us"] = round(t1[q].reading * 1e6, 3)
+            out[f"union_{tag}_level_us"] = round(t1[q].level * 1e6, 3)
     else:
-        out["union_shortest_us"] = out["union_longest_us"] = ""
+        for tag in ("shortest", "longest"):
+            for col in ("us", "qubit", "reading_us", "level_us"):
+                out[f"union_{tag}_{col}"] = ""
     out["top8_current"] = " ".join(str(q) for q in current_top)
     return out
 
@@ -248,7 +254,14 @@ def controls(collected: Collected, n_qubits: int) -> dict[str, Any]:
             "top8": top,
             "controls_after_selection": [c["qubit"] for c in after],
             "controls_first": [c["qubit"] for c in first],
+            "scatter_first": [round(c["log_t1_scatter"], 4) for c in first],
         }
+    nearest = propose_controls(sub, k=10, exclude=set())
+    out["nearest_median_ten"] = {
+        "median_scatter": round(nearest[0]["median_scatter"], 4) if nearest else None,
+        "qubits": [c["qubit"] for c in nearest],
+        "scatter": [round(c["log_t1_scatter"], 4) for c in nearest],
+    }
     return out
 
 
@@ -299,6 +312,16 @@ def summarise(days: list[dict[str, Any]]) -> dict[str, Any]:
         }
     out["union_longest_us"] = spread("union_longest_us")
     out["union_shortest_us"] = spread("union_shortest_us")
+    spans = [d for d in days if d["union_shortest_us"] != ""]
+    for tag, pick in (("shortest", min), ("longest", max)):
+        day = pick(spans, key=lambda d: float(d[f"union_{tag}_us"]))
+        out[f"union_{tag}_extreme"] = {
+            "at": day["at"],
+            "us": day[f"union_{tag}_us"],
+            "qubit": day[f"union_{tag}_qubit"],
+            "reading_us": day[f"union_{tag}_reading_us"],
+            "level_us": day[f"union_{tag}_level_us"],
+        }
     return out
 
 
