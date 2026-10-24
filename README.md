@@ -161,7 +161,10 @@ Lane 2 rows carry the plan's "resumes at L1" note, so someone idle on lane 1 sti
 - **Plan freshness.** `plan.json` records the commit it was quoted from (`plan_sha`) and the
   ref (`plan_ref`). Each run reads the latest commit touching the plan document on that ref,
   then on `main` (the ref may be deleted once PR #124 merges), and warns if it is not
-  `plan_sha`. It also reads whether the plan is on `main` yet, and says so in the header.
+  `plan_sha`. It also reads whether the plan is on `main` yet, and says so in the header. A
+  merge commit does not trip it: on 2026-10-24 the files PR #113 brought to `main` through
+  merge commit `88fa6a40` reported their branch commit `1f5c3c16` (one parent) as their latest
+  on `main`. A squash merge would trip it once, correctly, and `plan_sha` is then re-pinned.
 - **Owners against assignees.** A ticket whose `plan.json` owner is not among its GitHub
   assignees is a plan warning. That is how a stale owner surfaces before anyone reads it.
 - **Priorities are live.** The `priority:*` label is read from the issue on every run.
