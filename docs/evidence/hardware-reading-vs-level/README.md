@@ -258,3 +258,62 @@ blind**, so every figure the draft cites comes from the committed script:
 
 The record run, of the committed script end to end, has not yet been made; section 6.1's
 statement about it stands.
+
+### 6.3 2026-10-24, a third measurement added before it was run
+
+The lead asked for the hour of day of `ibm_fez`'s chip-wide `T1` recalibrations, as the input
+to the submission hour the pre-registration still leaves open. Its protocol is section 7,
+committed before `measure_recal_hours.py` existed. No figure of it had been seen when section 7
+was written; the only prior number is the persistence run's count of 151 events, which section
+7.1 uses as its guard.
+
+## 7. Measurement 3: when the chip-wide `T1` recalibrations land
+
+### 7.1 Definition, and the guard run first
+
+A **chip-wide `T1` recalibration** is exactly the persistence run's (persistence README §2,
+`recal`; `measure_persistence_band.py::recal_times`, imported and run unchanged): over
+consecutive archive **files** in time order, a pair in which at least 20% of the qubits with a
+`T1` `date` in both files have a different `T1` `date` in the later one. The event is dated two
+ways:
+
+- **published**: the later file's `properties.last_update_date`, the time IBM's published
+  properties carried the new values. A missed poll can only make this later than the true
+  publication, never earlier;
+- **measured**: the median, over the qubits whose `T1` `date` changed, of the new `date`, the
+  time IBM measured them. This is unaffected by our poll cadence.
+
+Guard, before any figure is read: at `calibration-data` @ `5828b4a29fabc245aa096e530852249a3496dc5b`
+the script reproduces the persistence run's 2,249 files and 151 events, and its own event list is
+identical to `recal_times`'s. If either differs, it stops and writes what differed.
+
+### 7.2 What is computed
+
+- Per event: both times, their UTC hours, the share of comparable qubits that changed, the
+  number comparable, and the hours since the previous event.
+- Per UTC hour 0 to 23: the number of events **published** in that hour and the number
+  **measured** in it.
+- The contiguous four-hour window, wrapping past midnight, that holds the most published events,
+  and its share of all events; the same for measured.
+- A daily submission at minute :45 of each UTC hour `h`, on every whole day from the first day
+  after the first event to the last day with a file at or after 23:45 UTC: the median hours since
+  the last **published** event at that instant, and the share of those days on which an event is
+  published within the next 1, 3 and 6 hours (the risk that a queued job executes after a sweep
+  and that the reading it was predicted from is replaced in the queue).
+- Per calendar month: published events per UTC hour, so a sweep time that moved during the
+  archive is visible.
+
+### 7.3 Outputs
+
+`recal-events.tsv`, `recal-hours.tsv`, `recal-by-month.tsv`, `recal-summary.json`.
+
+### 7.4 What this does not do
+
+It does not pick the hour. Hour of day was already shown to carry nothing about the size of
+drift (NC-082); this measures only when new readings appear, which decides how fresh the
+`reading` predictor is at submission and how likely it is to go stale in the queue. It reads no
+hardware outcome. Laptop, provisional.
+
+### 7.5 Results
+
+To be appended with the commit that produced them.
