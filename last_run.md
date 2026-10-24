@@ -1,23 +1,18 @@
-run-token: 2026-10-24T05:37:32Z-1301
-outcome: ok: chore: phase-3 dashboard: state moved (2026-10-24)
+run-token: 2026-10-24T13:49:12Z-1924
+outcome: ok: chore: phase-4 dashboard: state moved (2026-10-24)
 
-**12/28 milestone gates met** · 7 days to 2026-10-31 · calendar 88% burned against 43% of gates, 45 points behind.
+**Phase 4: Design-time predictor** · starts 2026-11-01 (in 8 days) · milestone 2 due 2027-02-27 (126 days), 10 open and 0 closed.
+**0/5 gates met** (0/7 conditions). Next: L1 (lane 1), L3 (lane 2), L5 (lane 3).
 
-**Since 2026-10-23:** #63 Training-set builder (training/dataset.py): in review to ready to start; main moved to 88fa6a40.
+**Day by day:** 1 record so far, so there is nothing to compare against yet.
 
-**Needs attention**
-- M0 (Queue clear) is 49 days past its 2026-09-05 target at 7/8
-- M1 (Contracts and instruments) is 43 days past its 2026-09-11 target at 3/5
-- M2 (First measurements) is 36 days past its 2026-09-18 target at 2/5
-- M3 (Decisions) is 29 days past its 2026-09-25 target at 0/6
-- M4 (ANFIS results) is 24 days past its 2026-09-30 target at 0/4
-- #63 is ready and holds up #60 (Baha Jarad)
+**Needs attention:** nothing.
 
 **Next action per person**
-- Mert Efe Şensoy: Unstick PR #120 for #84: Close the #57 advisor loop
-- Burak Öztekin: Finish #60: ADR-014 hybrid ANFIS trainer
-- Bengisu Cıvdı: Unstick PR #79 for #58: Certify the benchmark instruments
-- Baha Jarad: Finish #63: Training-set builder (training/dataset.py)
+- Mert Efe Şensoy: Unstick PR #126 for #125: Hardware test: reading versus level on ibm_fez (QPU side)
+- Burak Öztekin: #125 offline half: selection rules, circuits for both arms, scoring, the dry run against Aer (#125)
+- Bengisu Cıvdı: Review PR #121: it holds #122
+- Baha Jarad: Review PR #121: it holds #122
 
 **Waiting on an answer**
 - Mert Efe Şensoy: 3, oldest: has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (46 days); has posted there since, on 2026-10-21

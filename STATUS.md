@@ -1,94 +1,107 @@
-# Phase 3: Results from ANFIS
+# Phase 4: Design-time predictor
 
-_Generated 2026-10-24 05:37 UTC · main at `88fa6a40` (2026-10-23) · 7 days to 2026-10-31_
+_Generated 2026-10-24 13:49 UTC · main at `88fa6a40` (2026-10-23) · starts 2026-11-01 (in 8 days) · milestone 2 due 2027-02-27 (126 days), 10 open and 0 closed_
+
+_Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, PR #124 open, not on main yet. Gates are ordered, not dated (plan §6)._
 
 
-## Milestones
+## Lanes and gates
 
 
-### 🟡 M0 · Queue clear, target 2026-09-05 (7/8)
+### Lane 1 · The quantum-venue result: level beats reading, per qubit, on hardware
 
-- ✅ #51 merged (aer_factory ADR references)
-- ✅ #52 merged (Aug 7-17 polling gaps)
-- ✅ #55 merged (sub-hourly backfill step)
-- ⬜ #55 post-merge owner read + ADR-025 sign-off collected
-  - _Owner read is on Baha (poller.py is his). No recorded sign-off found on main; tracked inside #56 FR-2._
-- ✅ #53 dispatched with ledger rows
-  - _Four workflow_dispatch runs executed; snapshots/2026-08/ibm_fez 277 -> 304 docs at 7139138. Record is PR #78, still unmerged._
-- ✅ #53's record merged
-- ✅ #45 closed (dataset-yield finding)
-- ✅ #25 closed by the cycle-2 close record
+_Everyone starts on lane 1 (plan §5.1)._
 
-### 🟡 M1 · Contracts and instruments, target 2026-09-11 (3/5)
+- ❌ **L1** Job 1 reported: #125's job 1 report, with the measured QPU cost and the budget gate decision. (0/1) · **next**
+  - ❌ Job 1's usage report read, QPU cost measured, budget gate decided
+    - _Unticked on #125's body._
+- 🟡 **L2** Hardware test complete: #125 complete, decision rule applied, the hardware numbers registered. (0/2)
+  - 🟡 #125 closed
+  - ⬜ The hardware numbers registered as NC rows, one per conclusion
+    - _No machine-checkable source: the register carries no per-ticket marker. Read docs/numerical-claims.md on main when #125 closes._
 
-- ❌ Target ADR sent to Dr. Akba with a decision-by date
-  - _ADR-027 merged with Status: Open. docs/advisor/ holds only the unanswered 2026-05-25 questions file. Issue #84 owns the brief; its own decision-by date was 2026-09-08._
-- ✅ TSKTrainer ABC and training value types merged
-- 🟡 Benchmark harness certified (#58)
-- ✅ Premise parameterization for seven shapes merged (#59)
-- ✅ Feature-survey TSV committed
-  - _Exists as docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv inside PR #68; not on main until #68 merges._
+1. 🟡 #125 Hardware test: reading versus level on ibm_fez (@mertefesensoy): in review, PR #126
+2. ✅ #63 Training-set builder (training/dataset.py) (@BahaJarad): delivered by PR #113 on 2026-10-23; the issue is still open with 1 unticked ask (Burak Öztekin)
+3. ❌ #122 Public archive as a second training-set source (ADR-029) (@BahaJarad): waits on PR #121
+4. ⬜ new: Per-qubit extractor and channel (ADR-013) (@BahaJarad, @BurakOztekin): opens after L1, not met yet. Opened after #125's job 1, because its centre (level or range) depends on the hardware answer (plan §2 lane 1 item 4, A.3).
+5. ⬜ new: Cross-device dynamics tables (strategy audit S4), optional (@BahaJarad): no issue yet. Optional, if Baha has room after #122 (plan §2 lane 1 item 5).
 
-### 🟡 M2 · First measurements, target 2026-09-18 (2/5)
+### Lane 2 · The fuzzy-systems paper, which exists whatever lane 1 says
 
-- ❌ ADR-019 ablation executed with its table (#62)
-- ❌ Gradient derivations and training/gradients.py (#61)
-- ✅ Pipeline-health dashboard live (#48)
-- ✅ Scheduled sweep live (#49)
-- ❌ Trainer LSE stage passing on synthetic + anchored-baseline data
-  - _#60 has no branch or PR yet. Its contract dependency (#57) merged 2026-09-08, so it is startable._
+_Resumes at gate L1, job 1's report, or earlier for whoever is idle on lane 1 (plan §5.1)._
 
-### ❌ M3 · Decisions, target 2026-09-25 (0/6)
+- ❌ **L3** PR-A1 and the first fit: PR-A1 and the first fit merged. (0/2) · **next**
+  - ⬜ #64's PR-A1 merged (mechanism, seeding, band, coverage; no harness)
+    - _PR-A1 has no number yet. When it opens, this condition becomes a pr_merged check on that number._
+  - ❌ #60's first archive fit merged, so ADR-014 moves off Deferred
+    - _Ledger on main reads: Deferred._
+- ⬜ **L4** The ladder on the fuzzy band: The ladder table with the fuzzy band's row, registered. The paper's draft starts at L4 regardless of lane 1. (0/1)
+  - ⬜ The ladder (persistence, shrinkage, rolling band, IT2 band, scored on change events) with the fuzzy band's row, registered
+    - _No ticket yet (lane 2 item 6), so there is nothing on GitHub to read._
 
-- ❌ ADR-019 closed with a winner
-  - _Ledger on main reads: Open._
-- ❌ ADR-009 decided (T1 vs IT2)
-  - _Ledger on main reads: Open._
-- ❌ ADR-011 follows
-  - _Ledger on main reads: Open (effectively chosen for each path)._
-- ❌ training/dataset.py merged with its evidence TSV (#63)
-- ❌ Floor derived from the actual parameter count and registered
-  - _Replaces the reconstructed 126 behind NC-012. Owned by #56._
-- ❌ Trainer full loop merged, first archive fit, time-split metrics
+1. ❌ #64 ADR-015 / ADR-016 ensemble and intervals (PR-A) (@bengisucvd): ready to start
+2. 🟡 #58 Certify the benchmark instruments (PR #79) (@bengisucvd): in review, PR #79
+3. ❌ #60 ADR-014 trainer: the first archive fit (@BurakOztekin): ready to finish
+4. ❌ #62 ADR-019 ablation table, both modes (@BahaJarad): waits on #58
+5. ❌ #61 Nie-Tan versus Karnik-Mendel, premise gradients (@bengisucvd): ready to start
+6. ⬜ new: The ladder on the fuzzy band (@mertefesensoy, @bengisucvd): no issue yet. Persistence, shrinkage, rolling band and IT2 band scored on change events on pairs.tsv and rows.tsv.gz; gate L4 (plan §2 lane 2 item 6).
 
-### ❌ M4 · ANFIS results, target 2026-09-30 (0/4)
+### Lane 3 · Housekeeping, one batched week, then closed
 
-- ❌ Trained vs anchored baseline vs reference, four circuits, four metrics, in docs/findings/ with NC rows
-  - _The phase-3 exit artifact. Produced by #62's script re-run at M4._
-- ❌ ADR-014 Accepted
-  - _Ledger on main reads: Deferred._
-- ❌ ADR-015 interim and ADR-016 interval aggregation merged (#64)
-- ❌ Phase-3 close record written
-  - _Owned by #56, mirrors the cycle-2 close record convention._
+_The lead's closing week, run beside lane 1 (plan §5.1)._
+
+- ❌ **L5** Phase 3 closed: The phase-3 milestone closed with every item either done or moved to the phase-4 milestone with a reason. (0/1) · **next**
+  - ❌ Milestone 1 (Phase 3) closed
+    - _Milestone 1 (Phase 3 · ANFIS results) is open: 13 open and 21 closed issues._
+
+1. 🟡 #57 Training contract: ADR-027 accepted (PR #120) (@mertefesensoy): in review, PR #120
+2. 🟡 #84 Close the #57 advisor loop (@mertefesensoy): in review, PR #120
+3. ❌ #109 Phase-3 close record (@mertefesensoy): ready to start
+4. ❌ #92 Rule 7 for the NC register (@bengisucvd): ready to start
+5. ❌ #104 Decide the sweep step (@mertefesensoy): ready to start
+6. ❌ #108 Owner read of PR #55's poller change (@BahaJarad): ready to start
+7. ❌ #75 Decide the LOCKED Kraus projector boundary (@bengisucvd): ready to start
 
 ## Work on this right now
 
 
-**Baha Jarad** (@BahaJarad)
+**Mert Efe Şensoy** (@mertefesensoy)
 
-1. Finish #63: Training-set builder (training/dataset.py)
-   - The reader-and-dedup half has no hard dependency the plan recognises and W2 is where it starts; #60's first archive fit is waiting on it.
-
-**Bengisu Cıvdı** (@bengisucvd)
-
-1. Unstick PR #79 for #58: Certify the benchmark instruments
-   - Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
-1. Start #61: ADR-011 evidence + premise gradients
-   - Part B is unblocked (#57 merged) and the plan schedules it in W2 because the trainer's verification depends on it.
-1. Start #75: Decide the LOCKED Kraus projector boundary
-   - All stated upstream dependencies are met.
+1. Unstick PR #126 for #125: Hardware test: reading versus level on ibm_fez (QPU side)
+   - No approving review yet: main's ruleset requires one.
+1. Unstick PR #120 for #57: Training contract: ADR-027 accepted (PR #120)
+   - No approving review yet: main's ruleset requires one.
+1. Unstick PR #120 for #84: Close the #57 advisor loop
+   - No approving review yet: main's ruleset requires one.
+1. Start #109: Phase-3 close record
+   - The phase-3 close record is its deliverable, with the ADR-025 amendments answered or explicitly carried (plan §2 lane 3).
 
 **Burak Öztekin** (@BurakOztekin)
 
-1. Finish #60: ADR-014 hybrid ANFIS trainer
-   - The plan's named long pole: four weeks of one person's time, LSE stage due by M2 (Sep 16-18). Its contract dependency merged on 2026-09-08, so nothing stands between it and a first commit. Start the rest now: the archive fit part waits on #63.
+1. #125 offline half: selection rules, circuits for both arms, scoring, the dry run against Aer (#125)
+   - The dry run gates the pre-registration commit, and job 1 cannot be submitted before that commit (plan §5.1).
+1. Decide #75's allowlist and clipping with Bengisu (#75)
+   - It touches the per-qubit channel of lane 1 item 4, so it is decided before that opens (plan §2 lane 3, §5.1).
+1. Finish #60: ADR-014 trainer: the first archive fit
+   - A fitted model at a pinned ref with the snapshot-boundary split, so ADR-014 moves off Deferred (plan §2 lane 2 item 3). Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
 
-**Mert Efe Şensoy** (@mertefesensoy)
+**Bengisu Cıvdı** (@bengisucvd)
 
-1. Unstick PR #120 for #84: Close the #57 advisor loop
-   - No approving review yet: main's ruleset requires one.
-1. Unstick PR #120 for #57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py
-   - No approving review yet: main's ruleset requires one.
+1. Review PR #121: it holds #122
+   - Requested since 2026-10-23. #122 (Public archive as a second training-set source (ADR-029)) waits on it for the ADR-029 draft, which lands with PR #121 (plan §5.1; #122's own Depends on row names only #63 and #92).
+1. Review #125's decision rule and statistics before the pre-registration freezes them (#125)
+   - The pre-registration commit waits on this review (plan §5.1).
+1. Start #92: Rule 7 for the NC register
+   - Adopt as written: nine rows already use its form (plan §2 lane 3).
+1. Start #75: Decide the LOCKED Kraus projector boundary
+   - Decide the allowlist and the clipping before the per-qubit channel opens (plan §2 lane 3).
+
+**Baha Jarad** (@BahaJarad)
+
+1. Review PR #121: it holds #122
+   - Requested since 2026-10-23. #122 (Public archive as a second training-set source (ADR-029)) waits on it for the ADR-029 draft, which lands with PR #121 (plan §5.1; #122's own Depends on row names only #63 and #92).
+1. Start #108: Owner read of PR #55's poller change
+   - The read, then close (plan §2 lane 3).
 
 ## Waiting on an answer
 
@@ -128,92 +141,57 @@ _Review requests not yet answered with a review, and unticked checkboxes that st
 ## Not blocked by anything upstream, so what is holding them?
 
 
-**#84: Close the #57 advisor loop** (@mertefesensoy)
+**#125: Hardware test: reading versus level on ibm_fez** (@mertefesensoy)
 
-- [critical] Dr. Akba must answer four ADR-027 questions. He has no GitHub account; FR-15 routes all contact through the lead.
-- [critical] The FR-15 decision-by date was 2026-09-08 and has passed with the brief unsent.
 - [high] No approving review yet: main's ruleset requires one.
 
-**#58: Certify the benchmark instruments** (@bengisucvd)
+**#57: Training contract: ADR-027 accepted (PR #120)** (@mertefesensoy)
 
-- [medium] Section 7 lists decisions needing sign-off before building, incl. the Aer version pin (@yigit-arda depends on the answer for reproducible ablation runs).
+- [high] No approving review yet: main's ruleset requires one.
 
-**#61: ADR-011 evidence + premise gradients** (@bengisucvd)
+**#84: Close the #57 advisor loop** (@mertefesensoy)
 
-- [low] FR-4's consequent convention and the raw-space vs logit-space choice both depend on #57's decision.
+- [high] No approving review yet: main's ruleset requires one.
 
 **#75: Decide the LOCKED Kraus projector boundary** (@bengisucvd)
 
 - [medium] Touches LOCKED src/superconducted/channels/kraus.py: needs a decision, not just a patch.
 
-**#57: Training contract: ADR-027, TSKTrainer ABC, training/targets.py** (@mertefesensoy)
-
-- [critical] Code landed in PR #69, but the ticket's own definition of done requires the ADR to be sent to Dr. Akba with a decision-by date inside W1. That has not happened; #84 owns it.
-- [high] No approving review yet: main's ruleset requires one.
-
 ## Blocked upstream
 
-- **#62** Run the ADR-019 ablation, publish the table (@BahaJarad), waiting on #58 (certified harness (basis_gates, mode, seed, transpile-then-prepare, no silent NaN) and benchmarks/reference.py::build_reference)
-- **#64** ADR-015 / ADR-016 ensemble + intervals (@bengisucvd), waiting on #58 (density-matrix mode, transpile-then-prepare, no silent NaN, build_reference, simulate_engine signature); M3 gate (gated on the ADR-009 decision and #60's first archive fit)
-- **#65** ADR-007 pre/between-gates fuzzification (@BurakOztekin), waiting on #58 (certified harness and build_reference); M3 gate (phase 4; the M3 gate is the earliest conceivable start, not a promise)
-- **#76** Promote diagonal Hellinger to a certified metric (@bengisucvd), waiting on #58 (certified density-matrix harness); #62 (the helper and evidence format must stabilise first)
+- **#122** Public archive as a second training-set source (ADR-029) (@BahaJarad), waiting on PR #121 (the ADR-029 draft, which lands with PR #121 (plan §5.1; #122's own Depends on row names only #63 and #92))
+- **#62** ADR-019 ablation table, both modes (@BahaJarad), waiting on #58 (certified harness (basis_gates, mode, seed, transpile-then-prepare, no silent NaN) and benchmarks/reference.py::build_reference)
+
+## Parked
+
+- **#110** Deep-learning engine: plan and build the third engine mode (two-stage NumPy model, conformal band) (open, milestone Phase 4 · Design-time predictor): The pre-registered rule for deep-model work failed for T1, T2 and readout (NC-085, NC-086); the one remaining target is the chip-level readout series, a small model after #125, not a lane (plan §3).
+- **#65** ADR-007: implement the pre-gate and between-gates fuzzification stubs and decide placement on a measurement instead of an Aer default (stretch, starts after M3) (open, no milestone): A phase-4 stretch in the phase-3 plan already; nothing today moves it up (plan §3).
+- **#76** Phase 4: promote shot-free diagonal Hellinger to a certified benchmark metric (open, no milestone): A phase-4 stretch; useful after L4, not before (plan §3).
+- **#93** file_snapshots.sh prescribes a rebuild after a sweep that pipeline_health.py says is not owed (open, milestone Phase 3 · ANFIS results): Only if #122's ingest needs the rebuild; otherwise parked (plan §2 lane 3, §3).
 
 ## Day by day
 
 
-| Date | Gates | Ready | In review | Blocked | What moved |
-| --- | ---: | ---: | ---: | ---: | --- |
-| 2026-10-24 | 12/28 | 4 | 3 | 4 | #63 Training-set builder (training/dataset.py): in review to ready to start; main moved to 88fa6a40 |
-| 2026-10-23 | 12/28 | 3 | 4 | 4 | #57 Training contract: ADR-027, TSKTrainer ABC, training/targets.py: ready to start to in review; #84 Close the #57 advisor loop: ready to start to in review |
-| 2026-10-21 | 12/28 | 5 | 2 | 4 | nothing moved |
-| 2026-10-19 | 12/28 | 5 | 2 | 4 | nothing moved |
-| 2026-10-18 | 12/28 | 5 | 2 | 4 | nothing moved |
-| 2026-10-17 | 12/28 | 5 | 2 | 4 | main moved to 6cf008da |
-| 2026-10-16 | 12/28 | 5 | 2 | 4 | #60 ADR-014 hybrid ANFIS trainer: in review to ready to start; main moved to fec055c1 |
-| 2026-10-15 | 12/28 | 4 | 3 | 4 | nothing moved |
-| 2026-10-14 | 12/28 | 4 | 3 | 4 | nothing moved |
-| 2026-10-13 | 12/28 | 4 | 3 | 4 | main moved to c33e438e |
-| 2026-10-12 | 12/28 | 4 | 3 | 4 | #60 ADR-014 hybrid ANFIS trainer: ready to start to in review; #63 Training-set builder (training/dataset.py): ready to start to in review; main moved to 9b52fe66 |
-| 2026-10-11 | 12/28 | 6 | 1 | 4 | nothing moved |
-| 2026-10-10 | 12/28 | 6 | 1 | 4 | nothing moved |
-| 2026-10-09 | 12/28 | 6 | 1 | 4 | nothing moved |
-| 2026-10-08 | 12/28 | 6 | 1 | 4 | nothing moved |
-| 2026-10-07 | 12/28 | 6 | 1 | 4 | nothing moved |
-| 2026-10-06 | 12/28 | 6 | 1 | 4 | #54 Capture rate ~70% during normal operation: in review to closed; #74 first_ensemble_run must transpile before prepare: in review to closed; main moved to e39af506 |
-| 2026-10-05 | 12/28 | 6 | 3 | 4 | nothing moved |
-| 2026-10-04 | 12/28 | 6 | 3 | 4 | nothing moved |
-| 2026-10-03 | 12/28 | 6 | 3 | 4 | #56 Clear the queue, keep the records honest: in review to closed |
-| 2026-10-02 | 12/28 | 6 | 4 | 4 | nothing moved |
-| 2026-10-01 | 12/28 | 6 | 4 | 4 | nothing moved |
-| 2026-09-30 | 12/28 | 6 | 4 | 4 | nothing moved |
-| 2026-09-29 | 12/28 | 6 | 4 | 4 | #54 Capture rate ~70% during normal operation: ready to start to in review |
-| 2026-09-28 | 12/28 | 7 | 3 | 4 | main moved to 110cfad8 |
-| 2026-09-27 | 12/28 | 7 | 3 | 4 | nothing moved |
-| 2026-09-26 | 12/28 | 7 | 3 | 4 | nothing moved |
-| 2026-09-25 | 12/28 | 7 | 3 | 4 | nothing moved |
-| 2026-09-24 | 12/28 | 7 | 3 | 4 | +1 milestone gate (11 to 12 of 28); M1 2/5 to 3/5 |
-| 2026-09-23 | 11/28 | 7 | 3 | 4 | -1 milestone gate (12 to 11 of 28); M1 3/5 to 2/5; #74 first_ensemble_run must transpile before prepare: ready to start to in review |
-| 2026-09-22 | 12/28 | 8 | 2 | 4 | nothing moved |
-| 2026-09-21 | 12/28 | 8 | 2 | 4 | #66 Vectorizer returns µs where the repo assumes s: in review to closed; #73 Filter noise by physical gate semantics: in review to closed; main moved to 1fa5bef7 |
-| 2026-09-19 | 12/28 | 8 | 4 | 4 | nothing moved |
-| 2026-09-18 | 12/28 | 8 | 4 | 4 | nothing moved |
-| 2026-09-17 | 12/28 | 8 | 4 | 4 | nothing moved |
-| 2026-09-16 | 12/28 | 8 | 4 | 4 | +2 milestone gates (10 to 12 of 28); M1 1/5 to 3/5; #59 Manual MF parameterization from the archive: in review to closed; main moved to 125b7962 |
-| 2026-09-15 | 10/28 | 8 | 5 | 4 | #56 Clear the queue, keep the records honest: ready to start to in review; #66 Vectorizer returns µs where the repo assumes s: ready to start to in review |
-| 2026-09-14 | 10/28 | 10 | 3 | 4 | nothing moved |
-| 2026-09-13 | 10/28 | 10 | 3 | 4 | #73 Filter noise by physical gate semantics: ready to start to in review |
-| 2026-09-12 | 10/28 | 11 | 2 | 4 | +1 milestone gate (9 to 10 of 28); M2 1/5 to 2/5; #48 Pipeline-health dashboard: in review to closed; #63 Training-set builder (training/dataset.py): blocked upstream to ready to start; main moved to 004e14ed |
-| 2026-09-11 | 9/28 | 10 | 3 | 5 | +1 milestone gate (8 to 9 of 28); M2 0/5 to 1/5; #48 Pipeline-health dashboard: ready to start to in review; #49 Scheduled backfill sweep: in review to closed; main moved to 75dfdae3 |
-| 2026-09-10 | 8/28 | 11 | 3 | 5 | +1 milestone gate (7 to 8 of 28); M0 6/8 to 7/8; #45 Polling cadence no longer limits the dataset: ready to start to closed; #48 Pipeline-health dashboard: in review to ready to start; #49 Scheduled backfill sweep: ready to start to in review; main moved to d0d0b073 |
-| 2026-09-09 | 7/28 | 12 | 3 | 5 | +1 milestone gate (6 to 7 of 28); M0 5/8 to 6/8; #53 Backfill 14 recoverable documents: in review to closed; #57 Training contract: ADR-027, TSKTrainer ABC, training/targets.py: in review to ready to start; main moved to 5f935ea1 |
-| 2026-09-08 | 6/28 | 11 | 5 | 5 | first record |
+Only 1 day recorded so far. The routine adds one per day.
+
 
 ## ADR ledger
 
-- ❌ **ADR-027** Calibration training target, on main: _Open_ · needs: Dr. Akba's four answers (#84)
-- ❌ **ADR-014** TSK trainer architecture, on main: _Deferred_ · needs: #60 + the derived floor; revisited 2026-09-07, still Deferred
-- ❌ **ADR-019** MF ablation methodology, on main: _Open_ · needs: #62's table; prerequisite (b) cleared only when #59 merges
-- ❌ **ADR-009** T1 vs Interval Type-2, on main: _Open_ · needs: ADR-019's evidence + the M3 memo to Dr. Akba
-- ❌ **ADR-011** Defuzzification method, on main: _Open (effectively chosen for each path)_ · needs: Follows ADR-009; #61 supplies the number
-- ❌ **ADR-015** Ensemble sampling mechanism, on main: _Deferred_ · needs: #64, after the M3 gate
-- ❌ **ADR-016** Benchmark aggregation across members, on main: _Deferred_ · needs: #64, after the M3 gate
+- ❌ **ADR-027** Calibration training target, on main: _Open_ · needs: PR #120, the lane 3 closing ritual (#57, #84)
+- ❌ **ADR-029** Public calibration archive as a training source, on main: _not in the ledger_ · needs: #122; the draft lands with PR #121
+- ❌ **ADR-013** Calibration feature engineering, on main: _Open / Deferred_ · needs: the per-qubit extractor and channel, opened after L1
+- ❌ **ADR-014** TSK trainer architecture, on main: _Deferred_ · needs: #60's first fit moves it off Deferred (L3)
+- ❌ **ADR-019** Membership function ablation methodology, on main: _Open_ · needs: #62's table
+- ❌ **ADR-009** T1 vs Interval Type-2, on main: _Open_ · needs: #109 flips it, on ADR-019's evidence (plan §4)
+- ❌ **ADR-011** Defuzzification method, on main: _Open (effectively chosen for each path)_ · needs: #61 supplies the number; #109 flips it (plan §4)
+- ❌ **ADR-015** Ensemble sampling mechanism, on main: _Deferred_ · needs: #64 (PR-A)
+- ❌ **ADR-016** Benchmark aggregation across ensemble members, on main: _Deferred_ · needs: #64 (PR-A)
+- ❌ **ADR-021** Aer integration constraint and Factory/Ensemble pattern, on main: _Accepted on the constraint · Open on variance-injection design_ · needs: #109 flips it (plan §4)
+
+## Risks the plan named
+
+- The daily cadence of #125 rests on one account; a second is to be named before job 2.
+- Baha carries #63, #122 and #62; #62 slips if the first two take the month. The alternative is Burak taking #62 after #60, which moves the ablation behind the first fit.
+- PR #79 has been in review since September; lane 2's bands are invisible without it. _Now: PR #79 is open, created 2026-09-06 (48 days)._
+- Every number this plan rests on is a laptop measurement; Burak's desktop batch is owed before any figure leaves the provisional state.
+- Dr. Akba's double-check of the direction change (A7, the paper's focus) has not been sought; the decisions register's 2026-10-03 arrangement makes the lead the approver, and the lead should say in the register that this plan is covered by it, or ask.
