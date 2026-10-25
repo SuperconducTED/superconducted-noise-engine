@@ -1,6 +1,6 @@
 # Phase 4: Design-time predictor
 
-_Generated 2026-10-24 13:51 UTC · main at `88fa6a40` (2026-10-23) · starts 2026-11-01 (in 8 days) · milestone 2 due 2027-02-27 (126 days), 10 open and 0 closed_
+_Generated 2026-10-25 05:44 UTC · main at `a0ea1161` (2026-10-24) · starts 2026-11-01 (in 7 days) · milestone 2 due 2027-02-27 (125 days), 10 open and 1 closed_
 
 _Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, PR #124 open, not on main yet. Gates are ordered, not dated (plan §6)._
 
@@ -40,9 +40,9 @@ _Resumes at gate L1, job 1's report, or earlier for whoever is idle on lane 1 (p
     - _No ticket yet (lane 2 item 6), so there is nothing on GitHub to read._
 
 1. ❌ #64 ADR-015 / ADR-016 ensemble and intervals (PR-A) (@bengisucvd): ready to start
-2. 🟡 #58 Certify the benchmark instruments (PR #79) (@bengisucvd): in review, PR #79
+2. ✅ #58 Certify the benchmark instruments (PR #79) (@bengisucvd): closed
 3. ❌ #60 ADR-014 trainer: the first archive fit (@BurakOztekin): ready to finish
-4. ❌ #62 ADR-019 ablation table, both modes (@BahaJarad): waits on #58
+4. ❌ #62 ADR-019 ablation table, both modes (@BahaJarad): ready to start
 5. ❌ #61 Nie-Tan versus Karnik-Mendel, premise gradients (@bengisucvd): ready to start
 6. ⬜ new: The ladder on the fuzzy band (@mertefesensoy, @bengisucvd): no issue yet. Persistence, shrinkage, rolling band and IT2 band scored on change events on pairs.tsv and rows.tsv.gz; gate L4 (plan §2 lane 2 item 6).
 
@@ -52,7 +52,7 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 
 - ❌ **L5** Phase 3 closed: The phase-3 milestone closed with every item either done or moved to the phase-4 milestone with a reason. (0/1) · **next**
   - ❌ Milestone 1 (Phase 3) closed
-    - _Milestone 1 (Phase 3 · ANFIS results) is open: 13 open and 21 closed issues._
+    - _Milestone 1 (Phase 3 · ANFIS results) is open: 12 open and 22 closed issues._
 
 1. 🟡 #57 Training contract: ADR-027 accepted (PR #120) (@mertefesensoy): in review, PR #120
 2. 🟡 #84 Close the #57 advisor loop (@mertefesensoy): in review, PR #120
@@ -102,41 +102,41 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
    - Requested since 2026-10-23. #122 (Public archive as a second training-set source (ADR-029)) waits on it for the ADR-029 draft, which lands with PR #121 (plan §5.1; #122's own Depends on row names only #63 and #92).
 1. Start #108: Owner read of PR #55's poller change
    - The read, then close (plan §2 lane 3).
+1. Start #62: ADR-019 ablation table, both modes
+   - Behind #63 and #122 for Baha, said out loud (plan §5). Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
 
 ## Waiting on an answer
 
 _Review requests not yet answered with a review, and unticked checkboxes that start with the person (`- [ ] @login does X`), on every open issue and PR. Oldest first; "or earlier" marks a post edited after it was written, so the wait shown is the shortest it can be._
 
 
-**Mert Efe Şensoy** (@mertefesensoy), 3 owed
+**Mert Efe Şensoy** (@mertefesensoy), 2 owed
 
-- has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (46 days); has posted there since, on 2026-10-21
-- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (21 days); no post there since
-- Review PR #79: self-requested, since 2026-10-21 (3 days); no post there since
+- has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (47 days); has posted there since, on 2026-10-21
+- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (22 days); no post there since
 
-**Burak Öztekin** (@BurakOztekin), 8 owed
+**Burak Öztekin** (@BurakOztekin), 6 owed
 
-- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (51 days); no post there since
-- Re-review PR #111: you approved on 2026-10-04 and were asked again: requested by @mertefesensoy, since 2026-10-05 (19 days); no post there since
-- runs the desktop runbook (comment 6314664069, dry-run from GitHub on 2026-10-21); its results go into the next batched desktop record, which become... (PR #79): asked by @bengisucvd, since 2026-10-23 or earlier (1 day or more); no post there since
-- re-reviews `a25140d`. (PR #79): asked by @bengisucvd, since 2026-10-23 or earlier (1 day or more); no post there since
-- Review PR #120: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
-- Review PR #123: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
-- Review PR #124: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
-- Review PR #126: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
+- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (52 days); no post there since
+- Re-review PR #111: you approved on 2026-10-04 and were asked again: requested by @mertefesensoy, since 2026-10-05 (20 days); no post there since
+- Review PR #120: requested by @mertefesensoy, since 2026-10-23 (2 days); no post there since
+- Review PR #123: requested by @mertefesensoy, since 2026-10-23 (2 days); no post there since
+- Review PR #124: requested by @mertefesensoy, since 2026-10-23 (2 days); no post there since
+- Review PR #126: requested by @mertefesensoy, since 2026-10-23 (2 days); no post there since
 
 **Bengisu Cıvdı** (@bengisucvd), 5 owed
 
-- Review PR #120: requested by @mertefesensoy, since 2026-10-21 (3 days); no post there since
-- Review PR #121: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
-- Review PR #123: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
-- Review PR #124: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
-- Review PR #126: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
+- Review PR #120: requested by @mertefesensoy, since 2026-10-21 (4 days); no post there since
+- Review PR #121: requested by @mertefesensoy, since 2026-10-23 (2 days); no post there since
+- Review PR #123: requested by @mertefesensoy, since 2026-10-23 (2 days); no post there since
+- Review PR #124: requested by @mertefesensoy, since 2026-10-23 (2 days); no post there since
+- Review PR #126: requested by @mertefesensoy, since 2026-10-23 (2 days); no post there since
 
-**Baha Jarad** (@BahaJarad), 2 owed
+**Baha Jarad** (@BahaJarad), 3 owed
 
-- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (21 days); no post there since
-- Review PR #121: requested by @mertefesensoy, since 2026-10-23 (1 day); no post there since
+- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (22 days); no post there since
+- Review PR #121: requested by @mertefesensoy, since 2026-10-23 (2 days); no post there since
+- Review PR #127: requested by @mertefesensoy, since 2026-10-24 (1 day); no post there since
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -160,7 +160,6 @@ _Review requests not yet answered with a review, and unticked checkboxes that st
 ## Blocked upstream
 
 - **#122** Public archive as a second training-set source (ADR-029) (@BahaJarad), waiting on PR #121 (the ADR-029 draft, which lands with PR #121 (plan §5.1; #122's own Depends on row names only #63 and #92))
-- **#62** ADR-019 ablation table, both modes (@BahaJarad), waiting on #58 (certified harness (basis_gates, mode, seed, transpile-then-prepare, no silent NaN) and benchmarks/reference.py::build_reference)
 
 ## Parked
 
@@ -172,8 +171,10 @@ _Review requests not yet answered with a review, and unticked checkboxes that st
 ## Day by day
 
 
-Only 1 day recorded so far. The routine adds one per day.
-
+| Date | Gates | Conditions | Ready | In review | Blocked | What moved |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 2026-10-25 | 0/5 | 0/7 | 9 | 3 | 1 | milestone 2: 10 open and 1 closed (was 10 and 0); #58 Certify the benchmark instruments (PR #79): in review to done; #62 ADR-019 ablation table, both modes: blocked upstream to ready to start; Baha Jarad owes 3 answers (was 2); Burak Öztekin owes 6 answers (was 8); Mert Efe Şensoy owes 2 answers (was 3); main moved to a0ea1161 |
+| 2026-10-24 | 0/5 | 0/7 | 8 | 4 | 2 | first record |
 
 ## ADR ledger
 
@@ -192,6 +193,6 @@ Only 1 day recorded so far. The routine adds one per day.
 
 - The daily cadence of #125 rests on one account; a second is to be named before job 2.
 - Baha carries #63, #122 and #62; #62 slips if the first two take the month. The alternative is Burak taking #62 after #60, which moves the ablation behind the first fit.
-- PR #79 has been in review since September; lane 2's bands are invisible without it. _Now: PR #79 is open, created 2026-09-06 (48 days)._
+- PR #79 has been in review since September; lane 2's bands are invisible without it. _Now: PR #79 merged on 2026-10-24._
 - Every number this plan rests on is a laptop measurement; Burak's desktop batch is owed before any figure leaves the provisional state.
 - Dr. Akba's double-check of the direction change (A7, the paper's focus) has not been sought; the decisions register's 2026-10-03 arrangement makes the lead the approver, and the lead should say in the register that this plan is covered by it, or ask.
