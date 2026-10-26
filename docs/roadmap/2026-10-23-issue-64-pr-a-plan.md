@@ -200,3 +200,50 @@ reported (D2 fixes `alpha` and `r` as one pair on that object). PR-A2's test sui
 containment at `alpha = 0`; at `alpha = 0.1`, the counterexample above as a case where the
 aggregate is outside and the band is unchanged. The IT2 arm's four-corner band is min/max by
 construction and keeps the invariant. This amendment changes no decision D1 to D5.
+
+## 12. Review amendment, 2026-10-26: separate baselines and fix alpha before fitting
+
+This amendment supersedes the identification of the persistence band with novelty-check
+section 4 item 2 in section 4 above, and the alpha-scale relationship stated in D2. The
+original dated text is retained under the repository's append-only convention.
+
+**PR-A' implements two separate non-fuzzy comparators.** Neither replaces the other:
+
+| Comparator | Target-space interval for coordinate `j` at forecast origin `t` | Selection |
+| --- | --- | --- |
+| Relative persistence | `y_j(t) +/- r_P * abs(y_j(t))` | Fit the non-negative scale `r_P` on training rows to the stated coverage target. |
+| Rolling empirical percentiles | `[Q_a(h_j(t)), Q_(1-a)(h_j(t))]`, where `h_j(t)` contains the coordinate's values in the last `k` eligible snapshots available at or before `t` | Select `k` and fix the tail probability `a` using the training period only; record the quantile method and history eligibility/deduplication rule. |
+
+The empirical interval can be asymmetric about the latest target and need not contain it.
+Changing a symmetric persistence scale cannot in general reproduce that interval. Beating
+relative persistence therefore does not discharge the empirical-percentile comparison in
+novelty-check section 4 item 2. Both comparators are required in PR-A' and in the gating
+evaluation; the provisional persistence result in the gates record is evidence for relative
+persistence alone.
+
+Fix horizon `H`, the snapshot-boundary split and the scoring-row rule before the held-out
+evaluation. Select `k`, `a`, persistence scale and any other fitted settings using training
+data only, and freeze them before test scoring. A test-origin rolling history may advance
+using observations already available at that origin; it must never include the future target
+at `t + H` or any observation unavailable at `t`. Report the same scored origins for both
+baselines and the fuzzy arm: use a common history-ready mask, and report exclusions and row
+counts separately for change events and distinct device states. No method may choose its own
+easier scoring subset.
+
+The evidence rows identify the comparator, horizon, split, scoring-row rule, history rule,
+`k` (or not applicable), tail probability, quantile method, fitted scale (or not applicable),
+training coverage, test coverage, mean width and interval score. Use the same target
+coordinates, interval-score level and metric definitions across methods. Raw empirical
+percentiles do not acquire nominal coverage merely from their quantile labels: report their
+observed coverage with width and score. If a scale-adjusted empirical interval is added for a
+matched-coverage comparison, record its transformation and training-only fit as a separate
+variant and retain the raw empirical comparator. Outcome-space comparisons later use the
+same channel projection, circuits, reference and simulator mode for every arm.
+
+**D2 correction.** Fix `alpha` before fitting `r`; changing `alpha` requires refitting and
+re-evaluating the band using training data, followed by scoring on the untouched test period.
+For fixed members, increasing `alpha` narrows the central `1 - 2*alpha` interval. In a linear
+location-scale model a larger scale is generally needed to compensate; through the nonlinear
+TSK map, no simple compensating relationship is guaranteed. The sentence saying that a
+wider `alpha` simply yields a smaller fitted `r` is withdrawn. This corrects the reasoning
+without choosing an answer to D2; the choices in D1 to D5 still require the recorded sign-off.

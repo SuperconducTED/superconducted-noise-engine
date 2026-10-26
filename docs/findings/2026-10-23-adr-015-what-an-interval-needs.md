@@ -171,3 +171,29 @@ derivation logs `2026-10-03-q1-ensemble-vs-per-shot.md`,
 `docs/advisor/2026-09-03-decisions-from-akba.md` (2026-10-03 entry);
 `src/superconducted/integration/aer_factory.py`, `src/superconducted/training/anfis.py`,
 `src/superconducted/types.py`; PR #79, PR #113, PR #114; Issues #59, #60, #61, #63, #109.
+
+## 9. Review amendment, 2026-10-26: the two baseline gates
+
+Section 3 incorrectly equates the relative-persistence band `y(t) +/- r*abs(y(t))` with
+novelty-check section 4 item 2's rolling empirical-percentile interval. That identification
+is withdrawn. The persistence band is symmetric about the current target; a rolling
+percentile interval is determined by the recent target history and can have a different
+centre and unequal distances from the current target. A fitted persistence scale does not
+make these the same estimator.
+
+The provisional persistence measurement in section 3 remains evidence for relative
+persistence only. It establishes no result for the empirical-percentile comparator. Gate 2
+and the order of work in section 7 now require both baselines: PR-A' implements each, and the
+fuzzy arm is evaluated against each on the same horizon, split and held-out scoring rows.
+All history-window choices, tail probabilities and fitted scales are fixed using training
+data only; histories at test origins may use observations already available at the origin,
+never the future target. Apply one common history-ready scoring mask and report excluded
+origins, so coverage and width are compared on the same examples. Coverage and width alone
+must not be described as matched-coverage results unless the training calibration for that
+comparison is explicitly defined and recorded.
+
+The authoritative amendment to the implementation plan is
+[`2026-10-23-issue-64-pr-a-plan.md`, section 12](../roadmap/2026-10-23-issue-64-pr-a-plan.md#12-review-amendment-2026-10-26-separate-baselines-and-fix-alpha-before-fitting).
+The required empirical-percentile comparator remains in the novelty record, section 4 item 2;
+its section 10 now names relative persistence as an additional comparator. No baseline has
+been measured by this amendment.

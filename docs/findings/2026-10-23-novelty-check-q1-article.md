@@ -351,3 +351,28 @@ NC-025, NC-045, NC-047, NC-069), `src/superconducted/integration/aer_factory.py`
 `docs/advisor/2026-05-25-questions-for-akba.md`,
 `docs/advisor/2026-09-09-akba-brief/05-yayin-stratejisi.html`,
 `docs/state-of-the-project/2026-09-09-cycle-2-close.md`.
+
+## 10. Review amendment, 2026-10-26: retain both non-fuzzy baselines
+
+The empirical-percentile interval in section 4 item 2 remains a required comparator. The
+PR-A' implementation plan and the ADR-015 gates record incorrectly identified it with a
+relative-persistence band centred on the current target. The two estimators are distinct:
+rolling percentiles depend on the recent target history, whereas a symmetric persistence
+band is centred on the latest target regardless of that history. Neither is a substitute
+for the other, and no performance ordering is assumed.
+
+Relative persistence is an additional comparator for the gating test. The fuzzy arm must
+therefore be compared with both methods. Fix the forecast horizon and split before the
+held-out evaluation; select the empirical window `k`, tail probabilities and any fitted
+scales using training data only. Test-origin histories may advance with observations already
+available at the origin, never with a future target. Use one common history-ready scoring
+mask for both baselines and the fuzzy arm, report excluded origins and scoring-row counts,
+and apply the same coverage, width and interval-score definitions. For outcome-space results,
+keep the channel projection, circuits, reference and simulator mode the same across arms.
+An empirical quantile label alone is not a calibrated coverage claim; any scale-adjusted
+variant used to match coverage must have its own recorded training fit and result row.
+
+The detailed protocol is the
+[`PR-A plan`, section 12](../roadmap/2026-10-23-issue-64-pr-a-plan.md#12-review-amendment-2026-10-26-separate-baselines-and-fix-alpha-before-fitting).
+The gates record's section 9 withdraws the false equivalence. This amendment changes the
+planned comparison set, not the novelty verdict or the archive measurements.
