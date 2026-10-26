@@ -255,6 +255,33 @@ show why the null matters; they are no longer the null. Section 6's floors stand
 room, section 8); only their rationale's base-rate sentence was wrong. Bengisu's review covers this
 amendment with the rest; Dr. Akba's brief describes the null in these terms.
 
+**Amendment 3, 2026-10-26, before N1 ran; implementation choices the protocol left open, decided
+without looking at any score.** The lead asked for N1 (baselines and the amended null, nothing
+deep) on 2026-10-26.
+
+1. **Indicator columns.** Features 3, 7 and 8 say "0 with an indicator if none". The indicators are
+   three extra columns of the design matrix, so the logistic model has 17 inputs (14 features, 3
+   indicators) and 18 parameters; section 6's ten-per-parameter floor is 180 training positives,
+   still met (714).
+2. **Missing gate errors.** A row whose `sx` error or every touching `cz` error is absent or
+   non-positive at `t` is excluded, with the count reported; a `cz` error recorded as 1 (a failed
+   calibration) is a value, not missing, and enters the minimum as 1.
+3. **Hours since the last sweep** when no sweep precedes `t`: the hours since the first file of the
+   archive.
+4. **The scale fallback.** A qubit without a robust `sigma_q` (fewer than 20 training increments)
+   takes the median `sigma_q` over qubits for its null forecast; the count is reported.
+5. **The null's bins** are over `|d|`, 0.05 log units wide from `delta` upward, the last bin
+   open-ended at 1.5; the pooled-over-qubits bin is the replicate-weighted pool.
+6. **The logistic bar.** Features standardised on training rows; L2 penalty `lambda` chosen on
+   the inner slice (the last 20% of training rows in time order; fit on the first 80%) from the
+   grid `{0.001, 0.01, 0.1, 1, 10}` by log loss, then refit on all training rows; Newton
+   iterations to convergence.
+7. **Rows at `t` where the qubit has no `T2` or readout level** keep their indicator; the
+   chip-wide readout excursion (feature 9) is the median over the qubits that have one, and
+   `same_sign_share` (feature 10) is over the qubits that have a `T1` level at `t`.
+8. **The reproduction guard of N1** is the N0 record: the rows N1 rebuilds from the field
+   collection must equal `rows.tsv.gz` (qubit, time, `d`, `y`) or the script stops.
+
 ## 8. Counts, at the ref of the record run
 
 Appended 2026-10-26 from `count_events.py` (committed at `8db25e37`; the JSON writer's line ending
