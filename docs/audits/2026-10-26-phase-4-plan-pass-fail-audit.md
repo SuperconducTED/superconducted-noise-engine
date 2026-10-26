@@ -395,8 +395,12 @@ with no training before L1." Recorded as given:
 | §4 amended | the plan's first stop rule reads, from this date: no deep-model **training** before gate L1; the pattern detector's protocol commit (N0) may be written now. The amendment is a dated subsection appended to the plan on PR #124's branch, append-only, the rule's original text untouched |
 | still open | the §4 stop rule's change is the lead's; the success rule's ratification is Dr. Akba's and goes through the advisor brief (section 4.6 item 3, drafting started on the lead's word 2026-10-26); the training owner is named at N0 |
 
-**The post for #110, drafted, not posted** (English, the ticket's language, with the Türkçe özet
-the ticket uses):
+**Done on the lead's word, later on 2026-10-26:** the §4.1 amendment was pushed as a fast-forward
+onto PR #124's branch `mert/predictability` (`951258da..bf4c54e2`, the remote tip re-checked first),
+and the post below went onto #110 as comment 6412965244 with the branch and commit named.
+
+**The post for #110** (English, the ticket's language, with the Türkçe özet the ticket uses;
+posted as drafted, plus the PR #124 commit reference):
 
 > ## Pattern detector adopted as gated tasks N0 to N6 (2026-10-26)
 >

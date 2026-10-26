@@ -213,6 +213,11 @@ what its reviewers see, so it waits for the lead's word. The #110 post is likewi
 not posted. A session drafting the advisor brief for Dr. Akba's ratification was started on the
 lead's word the same day.
 
+**Later on 2026-10-26, on the lead's explicit word:** `bf4c54e2` was pushed as a fast-forward
+onto `mert/predictability` (PR #124's head is now `bf4c54e2`), and the #110 post went out as
+comment 6412965244. The throwaway worktree `C:/t124p` and its local branch were removed after
+the push.
+
 ## Related docs
 
 - `docs/audits/2026-10-26-phase-4-plan-pass-fail-audit.md` (this change's deliverable)
