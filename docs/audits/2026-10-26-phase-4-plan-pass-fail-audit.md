@@ -383,6 +383,73 @@ why the brief must be triaged.
 4. **Who trains.** The plan's §7 already names Baha as overloaded and Burak owns the critical
    path; the audit proposes naming the owner at N0, not now.
 
+### 4.7 The lead's decision, 2026-10-26
+
+Mert Efe Şensoy, as the lead, in the session that produced this audit, after reading sections 1
+to 4.6: "Yes, adopt tasks N0 to N6 on #110 and amend §4 so the protocol commit may be written now
+with no training before L1." Recorded as given:
+
+| Decision | Effect |
+| --- | --- |
+| N0 to N6 adopted as gated tasks on #110 | the pattern detector lands on #110 beside T0 to T14; #110 stays `priority:low` and parked for everything else; the post below carries the tasks to the ticket |
+| §4 amended | the plan's first stop rule reads, from this date: no deep-model **training** before gate L1; the pattern detector's protocol commit (N0) may be written now. The amendment is a dated subsection appended to the plan on PR #124's branch, append-only, the rule's original text untouched |
+| still open | the §4 stop rule's change is the lead's; the success rule's ratification is Dr. Akba's and goes through the advisor brief (section 4.6 item 3, drafting started on the lead's word 2026-10-26); the training owner is named at N0 |
+
+**The post for #110, drafted, not posted** (English, the ticket's language, with the Türkçe özet
+the ticket uses):
+
+> ## Pattern detector adopted as gated tasks N0 to N6 (2026-10-26)
+>
+> The phase-4 audit of 2026-10-26 (`docs/audits/2026-10-26-phase-4-plan-pass-fail-audit.md`,
+> section 4) turns Dr. Akba's suggestion of a neural network for pattern detection into a
+> pre-registrable item on this ticket. It is **not** the own-history forecaster of A7: that route
+> is closed by NC-084 to NC-086 (PR #124). The target is "dip or shift": when a qubit's latest
+> `T1` reading departs from its 30-day level by at least `delta`, do the next `k` re-measured
+> values follow the reading or return to the level, and do calibration patterns at that moment
+> say which. NumPy MLP (A4) against a per-event conditional null, the "always level" rule and a
+> logistic regression on the same inputs; split `2026-09-01`; block bootstrap over days; two
+> clauses written before any row is counted; the outcome table is in the audit.
+>
+> The lead's decisions, 2026-10-26: tasks adopted here; phase-4 plan §4 amended to "no
+> deep-model training before gate L1; the protocol commit may be written now". The success rule
+> goes to Dr. Akba for ratification (the deep-learning model is his under the 2026-10-13
+> delegation).
+>
+> - [ ] **N0** protocol README in `docs/evidence/pattern-detector/` (rows, `delta`, `k`, own-state
+>   exclusion in the level, features, per-event null forecast, both clauses, outcome table),
+>   committed before any model output; the row and `y = 1` counts per split, with the minimum
+>   stated first; statistics review by @bengisucvd (null value of each threshold, bootstrap
+>   unit); Dr. Akba's ratification of the rule through the advisor brief. Owner: @mertefesensoy
+> - [ ] **N1** baselines on the same rows and features: conditional null, constant `p_0`,
+>   "always level", logistic; results and rows committed. Owner named at N0. Gate: N0
+> - [ ] **N2** the network, five seeds, early stopping on the inner time slice. Gate: N1, and
+>   **not before L1**
+> - [ ] **N3** the rule applied; permutation importance and scenario cells; one NC row per
+>   conclusion, Rule 7 form, laptop provisional. Gate: N2
+> - [ ] **N4** the chip-level readout series under the same protocol, if N0 found rows and the
+>   lead says so. Gate: N3
+> - [ ] **N5** hardware sign check on #125's discriminating rows, descriptive only. Owner:
+>   @BurakOztekin. Gate: L2
+> - [ ] **N6** desktop reproduction of N1 to N3. Owner: @BurakOztekin. Gate: N3
+>
+> T14 (supervised contrastive learning) reuses N0's rows and split if N0 passes clause 1; if
+> clause 1 fails there is no class structure for it to contrast.
+>
+> <details>
+> <summary>Türkçe özet</summary>
+>
+> Dr. Akba'nın örüntü tespiti için sinir ağı önerisi, 2026-10-26 denetiminin 4. bölümünde
+> ön-kayıtlı bir maddeye dönüştü ve bu bilete N0'dan N6'ya kadar kapılı görevler olarak eklendi.
+> A7'nin kendi geçmişinden tahmin yolu değil (NC-084'ten NC-086'ya kapandı); hedef "düşüş mü,
+> kayma mı": okuma seviyeden `delta` kadar ayrıldığında sonraki `k` ölçüm okumayı mı izliyor,
+> seviyeye mi dönüyor, ve kalibrasyon örüntüleri bunu o anda söylüyor mu. NumPy MLP; olay
+> başına koşullu boş model, "hep seviye" kuralı ve aynı girdilerle lojistik regresyon; bölme
+> `2026-09-01`; gün blokları ile bootstrap; iki madde satırlar sayılmadan önce yazıldı. Liderin
+> kararları: görevler kabul; plan §4 "L1'den önce eğitim yok, protokol commit'i şimdi yazılabilir"
+> olarak değiştirildi. Başarı kuralının onayı Dr. Akba'nın.
+>
+> </details>
+
 ## 5. What this audit did not do
 
 - No new measurement on the archive, no new NC row, no edit to the plan or the pre-registration.

@@ -201,6 +201,18 @@ ratification; any change is recorded in the protocol README before the run, date
 - CI runs no documentation check (`.github/workflows/ci.yml` has no markdown or link step), so
   there is nothing further to run.
 
+## As of 2026-10-26, later: the lead's decision and what it changed
+
+The lead adopted tasks N0 to N6 on #110 and amended the plan's §4 ("no deep-model training before
+gate L1; the protocol commit may be written now"). Recorded in the audit's §4.7 with the drafted
+#110 post. The §4 amendment is a dated subsection appended to
+`docs/roadmap/2026-10-23-phase-4-plan.md` on PR #124's branch (`mert/predictability`), prepared as
+a commit on the local branch `claude/phase-4-plan-s4-amendment` cut from `951258da` in the
+throwaway worktree `C:/t124p`, **not pushed**: the branch is under review and a push changes
+what its reviewers see, so it waits for the lead's word. The #110 post is likewise drafted and
+not posted. A session drafting the advisor brief for Dr. Akba's ratification was started on the
+lead's word the same day.
+
 ## Related docs
 
 - `docs/audits/2026-10-26-phase-4-plan-pass-fail-audit.md` (this change's deliverable)
