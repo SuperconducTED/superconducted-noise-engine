@@ -454,6 +454,26 @@ posted as drafted, plus the PR #124 commit reference):
 >
 > </details>
 
+### 4.8 The lead's direction after the adoption, 2026-10-26
+
+Given in the same session, after the §4.1 push and the #110 post, recorded as given: "to speed up
+things I will do the tests that Burak needs to do first as well. We will start the neural model
+and the fuzzy system later today. Then the rest of the team will do the housekeeping and make sure
+everything I did is reproduced and reproducible at the end. Next session we will start building
+so we are on builder mode."
+
+What this changes in the tables above:
+
+| Item | Before | After the lead's word |
+| --- | --- | --- |
+| #125 offline half (section 2.1 row 1, section 2.6 Burak) | Burak, NOT STARTED, the critical path | **Mert first**; Burak's part becomes the reproduction at the end. The design's ownership table (hardware test design §8) and the pre-registration's §6 row name Burak; both are owed a dated note when the lead's half lands |
+| lane 3 housekeeping (section 2.3) | owners as planned | the team, after the lead's build; the 2026-10-31 date is unchanged and still AT RISK |
+| the pattern detector (section 4.5) | N0 now; N1 and the network's code allowed by §4.1 | starts "later today": read as N0 (done 2026-10-26, protocol then counts), N1 and the network's code with synthetic checks; **N2 on the archive still waits for L1 under §4.1** unless the lead amends that line |
+| the fuzzy system (lane 2) | resumes at L1 | starts "later today": PR-A1's mechanism can be built now (its plan is approved); its scoring row on the ladder still needs #64's D1 to D5 from Bengisu |
+| verification | Burak's desktop batch owed (section 2.7) | the team reproduces everything the lead built, at the end; the same laptop-provisional rule applies until then |
+
+The audit's headline 2 (the offline half is the critical path) stands; its owner changed.
+
 ## 5. What this audit did not do
 
 - No new measurement on the archive, no new NC row, no edit to the plan or the pre-registration.
