@@ -11,6 +11,17 @@
     ]
   ],
   "seconds_mislabel_max": 0.01,
+  "completeness": {
+    "required_properties": [
+      "T1",
+      "T2",
+      "readout_error",
+      "prob_meas0_prep1",
+      "prob_meas1_prep0"
+    ],
+    "qubits": 156,
+    "required_keys": 778
+  },
   "ours": {
     "files": 2249,
     "window": [
@@ -379,51 +390,115 @@
     "last_seconds_row_observed": "2026-05-07T08:27:06+00:00"
   },
   "their_qubit_scope_events_after_exclusion": 939954,
+  "their_first_event_per_required_property": {
+    "T1": "2025-05-16T13:33:16+00:00",
+    "T2": "2025-05-16T16:51:14+00:00",
+    "readout_error": "2026-01-31T13:19:17+00:00",
+    "prob_meas0_prep1": "2026-01-31T13:18:13+00:00",
+    "prob_meas1_prep0": "2026-01-31T13:18:44+00:00"
+  },
   "all7": {
     "ours_distinct": 924,
     "validation_docs_equal": 2145,
     "validation_docs_total": 2249,
     "mismatch_causes": {
-      "readout_error:value": 6879,
-      "prob_meas1_prep0:value": 6761,
-      "prob_meas0_prep1:value": 6437,
-      "init_error:value": 2622,
-      "readout_length:value": 624,
-      "init_error:only_theirs": 59,
-      "T1:value": 4
+      "readout_error:ours_lacks_event": 6463,
+      "prob_meas1_prep0:ours_lacks_event": 6372,
+      "prob_meas0_prep1:ours_lacks_event": 6052,
+      "init_error:ours_lacks_event": 2055,
+      "readout_length:same_stamp_conflict": 624,
+      "init_error:public_lacks_event": 567,
+      "readout_error:public_lacks_event": 416,
+      "prob_meas1_prep0:public_lacks_event": 389,
+      "prob_meas0_prep1:public_lacks_event": 385,
+      "init_error:ours_lacks_key": 59,
+      "T1:ours_lacks_event": 4
+    },
+    "mismatch_docs_by_kind_set": {
+      "ours_lacks_event": 67,
+      "ours_lacks_key": 24,
+      "ours_lacks_event+public_lacks_event": 6,
+      "same_stamp_conflict": 4,
+      "public_lacks_event": 2,
+      "ours_lacks_event+ours_lacks_key": 1
+    },
+    "mismatch_docs_with_same_stamp_conflict": [
+      "20260608T185628000000Z.json",
+      "20260730T210917000000Z.json",
+      "20260731T001407000000Z.json",
+      "20260731T034603000000Z.json"
+    ],
+    "pre_window_hourly": {
+      "marks": 2461,
+      "marks_incomplete_excluded": 14,
+      "first_complete_mark": "2026-01-31T14:00:00+00:00"
+    },
+    "pre_window_half_hourly": {
+      "marks": 4921,
+      "marks_incomplete_excluded": 28,
+      "first_complete_mark": "2026-01-31T14:00:00+00:00"
+    },
+    "in_window_half_hourly": {
+      "marks": 7819,
+      "marks_incomplete_excluded": 0,
+      "first_complete_mark": "2026-05-13T12:13:22+00:00"
     },
     "pre_window_hourly_marks": 2461,
-    "pre_window_distinct_hourly": 626,
-    "pre_window_distinct_half_hourly": 666,
+    "pre_window_distinct_hourly": 625,
+    "pre_window_distinct_half_hourly": 664,
     "pre_window_already_in_ours": 1,
-    "union_ours_plus_pre_window_hourly": 1549,
-    "union_ours_plus_pre_window_half_hourly": 1589,
+    "union_ours_plus_pre_window_hourly": 1548,
+    "union_ours_plus_pre_window_half_hourly": 1587,
     "in_window_distinct_half_hourly": 1221,
     "in_window_shared_with_ours": 843,
     "in_window_not_in_ours": 378,
     "ours_not_on_half_hour_marks": 81,
-    "union_ours_plus_all_half_hourly": 1967
+    "union_ours_plus_all_half_hourly": 1965
   },
   "core5": {
     "ours_distinct": 781,
     "validation_docs_equal": 2200,
     "validation_docs_total": 2249,
     "mismatch_causes": {
-      "readout_error:value": 6879,
-      "prob_meas1_prep0:value": 6761,
-      "prob_meas0_prep1:value": 6437,
-      "T1:value": 4
+      "readout_error:ours_lacks_event": 6463,
+      "prob_meas1_prep0:ours_lacks_event": 6372,
+      "prob_meas0_prep1:ours_lacks_event": 6052,
+      "readout_error:public_lacks_event": 416,
+      "prob_meas1_prep0:public_lacks_event": 389,
+      "prob_meas0_prep1:public_lacks_event": 385,
+      "T1:ours_lacks_event": 4
+    },
+    "mismatch_docs_by_kind_set": {
+      "ours_lacks_event": 45,
+      "ours_lacks_event+public_lacks_event": 2,
+      "public_lacks_event": 2
+    },
+    "mismatch_docs_with_same_stamp_conflict": [],
+    "pre_window_hourly": {
+      "marks": 2461,
+      "marks_incomplete_excluded": 14,
+      "first_complete_mark": "2026-01-31T14:00:00+00:00"
+    },
+    "pre_window_half_hourly": {
+      "marks": 4921,
+      "marks_incomplete_excluded": 28,
+      "first_complete_mark": "2026-01-31T14:00:00+00:00"
+    },
+    "in_window_half_hourly": {
+      "marks": 7819,
+      "marks_incomplete_excluded": 0,
+      "first_complete_mark": "2026-05-13T12:13:22+00:00"
     },
     "pre_window_hourly_marks": 2461,
-    "pre_window_distinct_hourly": 626,
-    "pre_window_distinct_half_hourly": 666,
+    "pre_window_distinct_hourly": 625,
+    "pre_window_distinct_half_hourly": 664,
     "pre_window_already_in_ours": 1,
-    "union_ours_plus_pre_window_hourly": 1406,
-    "union_ours_plus_pre_window_half_hourly": 1446,
+    "union_ours_plus_pre_window_hourly": 1405,
+    "union_ours_plus_pre_window_half_hourly": 1444,
     "in_window_distinct_half_hourly": 954,
     "in_window_shared_with_ours": 759,
     "in_window_not_in_ours": 195,
     "ours_not_on_half_hour_marks": 22,
-    "union_ours_plus_all_half_hourly": 1641
+    "union_ours_plus_all_half_hourly": 1639
   }
 }
