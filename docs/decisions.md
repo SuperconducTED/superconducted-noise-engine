@@ -1830,13 +1830,16 @@ recorded mechanism of its own. NC-028 is cited above for the split rule.
 > 2026-10-24 (`a0ea1161`) and Issue #58 closed. `benchmarks/reference.py`
 > applies this entry's per-qubit reasons in its order (`t1_missing`,
 > `t2_missing`, `nonpositive`, `t2_exceeds_2t1`), with two exceptions that
-> @mertefesensoy accepts, scoped as follows (PR #120 review 5651296140):
-> (1) a missing gate duration rejects only that `(gate, qubits)` entry, so a
-> qubit without an `sx` length is excluded from the training target but keeps
-> its other timed gates in the reference; (2) with no usable qubit the
-> reference raises `ValueError`, where `snapshot_target` returns `None`. The
-> two modules therefore reject the same qubits only where every qubit has an
-> `sx` length (`tests/test_reference.py`:
+> @mertefesensoy accepts, scoped as follows (PR #120 reviews 5651296140 and
+> 5651466405): (1) a missing or negative gate duration rejects only that
+> `(gate, qubits)` entry, so a qubit whose `sx` duration is missing or
+> negative is excluded from the training target but keeps its other timed
+> gates in the reference; a zero duration stays permitted on both sides;
+> (2) with no usable qubit the reference raises `ValueError`, where
+> `snapshot_target` returns `None`. The two modules therefore reject the same
+> qubits only where every qubit has a finite, nonnegative recorded `sx`
+> duration, the reference is built on the same qubit selection, and no
+> duration overrides are passed (`tests/test_reference.py`:
 > `test_reference_matches_training_targets_per_qubit` and
 > `test_sx_length_gaps_are_qubit_level_in_targets_and_gate_level_here`).
 > The obligation is met on these terms; no implementation changes.
