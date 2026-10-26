@@ -18,7 +18,8 @@ leaves a target open for a network or it does not, and the audit had to say whic
 | `docs/audits/2026-10-26-phase-4-plan-pass-fail-audit.md` | New: every plan item (lanes 1 to 3, parked table, §4 stop rules, §5 and §5.1 assignments, §7 risks, gates L1 to L5, the pre-registration's freeze preconditions) judged against GitHub and branch state read on 2026-10-26, with a fixed verdict vocabulary; section 4 adds the neural-network pattern detector as a pre-registrable proposal with a two-clause pass/fail rule and an outcome table. |
 | `docs/implementations/2026-10-26-phase-4-pass-fail-audit-and-nn-amendment.md` | This record. |
 
-No source, test, plan, pre-registration or register file was touched. No new NC row.
+No source, test, plan, pre-registration or register file was touched. No new NC row. Landed as
+two commits: the audit, then the correction of clause 1's null after the advisor's review.
 
 ## Implementation approach
 
@@ -52,26 +53,41 @@ else `y = 0`. Events, not files, are the unit, so the repeated no-change files o
 cannot inflate either class (lesson L-027 in the skill's `LESSONS.md`).
 
 **Null model.** Each reading is the level plus independent scatter with no memory, the model the
-measured lag-1 autocorrelation of increments (-0.49, NC-084) supports. Then the next `k` readings
-are the level plus fresh scatter and no feature observable at `t` carries information about `y`.
-Under that null the expected out-of-sample Brier skill score of any model against the constant
-forecast is zero (slightly negative in a finite sample, from estimation noise) and the expected
-AUC is 0.5. These are the values every threshold is set as a gap above.
+measured lag-1 autocorrelation of increments (-0.49, NC-084) supports. After a disagreement of
+size `|d|` the next `k` readings are the level plus fresh scatter `e_j ~ (0, sigma_q^2)`, and
+`y = 1` only if their median `m` lands past the midpoint, `m > |d| / 2` in `d`'s direction. The
+median of `k` draws has a standard deviation of about `1.2 sigma_q / sqrt(k)` for Gaussian
+scatter, so under the null
 
-**Brier scores.** With base rate `p_0 = P(y = 1)` on the training events:
+`p_null(d) = P(y = 1 | d) ≈ 1 - Phi( |d| / (2 · 1.2 sigma_q / sqrt(k)) )`,
 
-- constant forecast `p_0`: `BS_null = p_0 (1 - p_0)`;
-- the "always level" rule (`p = 0` for every row): `BS = p_0`, which is never below `BS_null`,
-  so the constant forecast is the stricter null and is the one used;
+a steeply decreasing function of `|d|`. The null is therefore **not** a constant: `|d|` is a
+feature and predicts `y` with no device pattern at all. The first draft of the rule used the
+constant forecast `p_0` as the null and asserted that no feature carries information under the
+null; the advisor's review caught the error and a synthetic check confirmed it (Verification).
+The corrected null is the per-event conditional forecast `p_null,i = p_null(d_i)` with
+`sigma_q` estimated from the qubit's own training-period increments, by Monte Carlo (or the
+closed form above; the protocol records which).
+
+**Brier scores.** With `y_i` the labels of the test events and `p_0` the training base rate:
+
 - a model with forecasts `p_i`: `BS = mean_i (p_i - y_i)^2`;
-- Brier skill score `BSS = 1 - BS / BS_null`, zero for no skill, one for perfect.
+- the conditional null: `BS_null = mean_i (p_null,i - y_i)^2`; its expected skill against itself
+  is zero by construction;
+- reference rows, not nulls: the constant forecast `p_0`, `BS = p_0 (1 - p_0)`; the "always
+  level" rule (`p = 0` for every row), `BS = p_0`, never below the constant's;
+- Brier skill score against the conditional null, `BSS_1 = 1 - BS / BS_null`.
 
-**Clause 1 (a pattern exists).** `BSS_logistic >= 0.10` on the test events, the paired 90% block
-bootstrap interval of `BS_null - BS_logistic` excluding zero, and the 90% interval of the
-logistic AUC excluding 0.5.
+Under the null `y = 1` is rare (a few percent of events at the archive's scatter), so the test
+period's count of `y = 1` events bounds what the bootstrap can resolve; step N0 counts it and
+states the minimum first.
 
-**Clause 2 (the network is needed).** `BSS_network - BSS_logistic >= 0.05` for the seed median,
-the paired 90% block bootstrap interval of the difference excluding zero.
+**Clause 1 (a pattern exists).** `BSS_1(logistic) >= 0.10` on the test events, with the paired
+90% block bootstrap interval of `BS_null - BS_logistic` excluding zero. AUC is reported as
+description only, because the conditional null's own AUC exceeds 0.5 through `|d|`.
+
+**Clause 2 (the network is needed).** `BSS_1(network) - BSS_1(logistic) >= 0.05` for the seed
+median, the paired 90% block bootstrap interval of the difference excluding zero.
 
 **Bootstrap.** Blocks are calendar days, because the 156 qubits of one `t` share the device
 state and row resampling understates the uncertainty (the same argument as the predictability
@@ -100,6 +116,15 @@ ratification; any change is recorded in the protocol README before the run, date
 - **Logistic regression as the bar, not the null.** Lesson L-028: the pre-registered baseline
   must be the strongest cheap model the protocol produces. A network that only beats a constant
   forecast has not shown it is needed.
+- **A per-event conditional null, not a constant.** The label's own arithmetic makes `|d|`
+  predictive under pure noise around a level, so a constant null is clearable with no pattern
+  (lesson L-029). The null forecast is computed per event from the qubit's own scatter; the
+  constant and the "always level" rule are kept as reference rows. Corrected before anyone
+  outside the session saw the rule, in a second commit rather than an amend, so the record
+  shows the first draft was wrong and how.
+- **The level excludes the event's own state.** The pre-registration's window is inclusive at
+  `t_s`, right for a predictor; for a label about whether the reading moved the level, the
+  reading under test must not enter its own reference.
 - **Hardware rows as a check, never a training set.** #125 yields eight discriminating rows a
   job; a sign-agreement count is all they can support.
 - **Gated tasks on #110, not a fourth lane.** The plan's §3 reframed #110 and parked it with its
@@ -134,6 +159,36 @@ ratification; any change is recorded in the protocol README before the run, date
 - The Brier identities in the mathematical section are checked by hand: for the constant
   forecast `p_0`, `p_0 (1 - p_0)^2 + (1 - p_0) p_0^2 = p_0 (1 - p_0)`; for the zero forecast,
   `p_0 * 1 + (1 - p_0) * 0 = p_0`; and `p_0 >= p_0 (1 - p_0)` for all `p_0` in `[0, 1]`.
+
+- **Mutation check of clause 1's null** (synthetic, no archive data; its figures are not
+  register claims). Run with any interpreter that has NumPy (the exact-pin venv was used):
+
+  ```python
+  import numpy as np
+  rng = np.random.default_rng(84); k = 5
+  for sigma in (0.20, 0.29):
+      rows = []
+      for d in (0.4, 0.6, 0.8, 1.0, 1.5):
+          m = np.median(rng.normal(0.0, sigma, size=(200_000, k)), axis=1)
+          rows.append((d, float(np.mean(np.abs(m - d) < np.abs(m)))))
+      print(sigma, rows)
+      y, pc = [], []
+      for d, p in rows:
+          m = np.median(rng.normal(0.0, sigma, size=(40_000, k)), axis=1)
+          y.append((np.abs(m - d) < np.abs(m)).astype(float)); pc.append(np.full(40_000, p))
+      y, pc = np.concatenate(y), np.concatenate(pc); p0 = y.mean()
+      print("BSS of a |d|-only model vs the constant:", 1 - np.mean((pc - y) ** 2) / np.mean((p0 - y) ** 2))
+  ```
+
+  Expected shape of the output: `P(y = 1 | d)` falls by roughly an order of magnitude from
+  `|d| = 0.4` to `|d| = 0.8` at both scatters (the run on 2026-10-26 gave about 0.03 to 0.0001
+  at `sigma = 0.20` and 0.10 to 0.005 at `sigma = 0.29`), the base rate is a few percent, and the
+  `|d|`-only model's skill against the constant is positive (about 0.02 and 0.05). A null that
+  passed this check unchanged would be the constant; it does not, so the rule uses the
+  conditional null. Two `sigma` values are used because the registered 0.37 log units (NC-084) is
+  an 80% scatter of increments, and converting it to a per-reading standard deviation depends on
+  whether the level is treated as known; the protocol's step N0 estimates `sigma_q` per qubit
+  from the data and the check only needs the shape to hold at both.
 
 - No em dash in the two new files:
 

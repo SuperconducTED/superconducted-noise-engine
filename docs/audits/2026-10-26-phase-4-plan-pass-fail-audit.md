@@ -43,7 +43,8 @@ current values).
 ## 1. Headline findings
 
 1. **Nothing has moved on GitHub since the evening of 2026-10-24.** All six open PRs (#120,
-   #121, #123, #124, #126, #127) have zero reviews and zero comments; `main` is unchanged. Every
+   #121, #123, #124, #126, #127) have zero reviews, and no comment since 2026-10-24 (the one
+   comment on #123 is the lead's own review note of 2026-10-23); `main` is unchanged. Every
    precondition of the pre-registration freeze (its section 6) is therefore where it was.
 2. **The critical path is Burak's offline half, and it is NOT STARTED.** No branch exists for
    `scripts/hardware_reading_vs_level.py`'s selection, circuits, scoring or the dry run against
@@ -69,7 +70,7 @@ current values).
 | Order | Item | Criterion (plan's text) | Evidence checked | Verdict |
 | --- | --- | --- | --- | --- |
 | 1 | #125 hardware test | job 1 usage report read; 14 daily jobs; pre-registered decision applied; NC rows | design approved 2026-10-23; proposals A to D and the hour decided 2026-10-24 (pre-registration §3.5, §3.6); draft **not frozen**; PR #126 (archive side) open, unreviewed; offline half: no branch; no job submitted | IN PROGRESS (QPU side); NOT STARTED (offline half); BLOCKED on the freeze for job 1 |
-| 2 | #63 training-set builder | PR #113 merged | merged 2026-10-23 as `88fa6a40`; #63 kept open by the lead for its remaining decisions (dashboard: done) | PASS |
+| 2 | #63 training-set builder | PR #113 merged | merged 2026-10-23 as `88fa6a40`; #63 still open with its decisions 1 to 6 recorded by the lead on 2026-10-21; whether it closes is the lead's call (dashboard: done) | PASS |
 | 3 | #122 public archive, ADR-029 | ADR-029 accepted or rejected; builder reads the pinned revision; NC-078's 626 reproduced | Issue open, 0 comments; the ADR draft is on PR #121, unreviewed; Baha is #121's requested reviewer | BLOCKED on PR #121 (Baha's own review) |
 | 4 | per-qubit extractor and channel (ADR-013) | opened after #125's job 1 | not opened, by design | NOT STARTED, correctly: waits on gate L1 |
 | 5 | cross-device tables (S4), optional | NC-080 to NC-086 on two more backends under ADR-029 | nothing | NOT STARTED; optional, behind item 3 |
@@ -246,7 +247,10 @@ output). The label is
 
 `k` is fixed in step 0; the candidate is `k = 5` (about five days of daily rounds, NC-091's
 median gap 24.7 h), and the label uses re-measurement events, never files, so no-change rows
-cannot inflate it (lesson L-027, in the skill's `LESSONS.md`).
+cannot inflate it (lesson L-027, in the skill's `LESSONS.md`). The level in `d(t)` is computed
+from the window's states **excluding the event's own state**: the pre-registration's window
+`(t_s - 30 d, t_s]` is inclusive at `t_s`, which is right for a predictor but would let the
+reading under test pull its own reference; step 0 records this choice.
 
 **Inputs** (all computable at `t` from the archive and nothing after): `d(t)` and its sign;
 `|d(t)|` relative to the qubit's 30-day band width; the previous event's `d`; the qubit's
@@ -265,8 +269,9 @@ the same inner slice and recorded; nothing is tuned on the test period.
 
 **Baselines**, all on the same rows and features:
 
-- the **null**: the constant forecast `p_0`, the training base rate of `y = 1`;
-- the **"always level" rule**: `p = 0` for every row, the current design's implicit answer;
+- the **null**: the per-event conditional forecast under noise-around-a-level (section 4.4);
+- two reference rows: the constant forecast `p_0` (the training base rate of `y = 1`) and the
+  **"always level" rule**, `p = 0` for every row, the current design's implicit answer;
 - **logistic regression** on the same `d` features, the strongest cheap baseline (lesson L-028:
   the bar is the best non-deep model the protocol produces, not the first one written down).
 
@@ -293,23 +298,40 @@ The rule has the shape the predictability README used, two clauses, both derived
 null first (lesson L-029: a threshold a no-information model clears endorses the wrong
 conclusion).
 
-**Null value of every statistic.** Under the model the archive supports so far, each reading is
-the level plus independent scatter with no memory (lag-1 autocorrelation of increments -0.49,
-NC-084). Then after a disagreement the next `k` readings are the level plus fresh scatter, their
-median is nearer the level than the reading whenever `|d|` exceeds the scatter's median
-excursion, so `y = 0` dominates, and **no feature carries information about `y`**: the
-out-of-sample Brier skill score of every model against the constant `p_0` is zero in
-expectation and slightly negative in practice (estimation noise), and the AUC is 0.5. The
-"always level" rule has Brier score `p_0`; the constant forecast has `p_0 (1 - p_0)`, lower, so
-the null for clause 1 is the constant forecast, not the design's rule.
+**The null, and why it is not a constant.** Under the model the archive supports so far, each
+reading is the level plus independent scatter with no memory (lag-1 autocorrelation of
+increments -0.49, NC-084). After a disagreement of size `|d|` the next `k` readings are the level
+plus fresh scatter, and `y = 1` happens only when their median lands past the midpoint between
+level and reading. That probability **falls with `|d|`**: with the qubit's scatter `sigma_q`, the
+median of `k` draws has a spread of about `1.2 sigma_q / sqrt(k)`, so
+`P(y = 1 | d) ≈ P(Z > |d| / (2 · 1.2 sigma_q / sqrt(k)))`. Two consequences the rule has to
+absorb. First, `y = 1` is **rare under the null** (a few percent of events at the scatter the
+archive shows), so the classes are heavily imbalanced and step 0 must count the `y = 1` events in
+the test period before anything is scored. Second, and this is the trap, **`|d|` is on the feature
+list and predicts `y` under the pure null**: a logistic model that knows only `|d|` posts a
+positive Brier skill score against the constant forecast `p_0` with no pattern in the device at
+all. A synthetic mutation check of the rule (no archive data; implementation doc, Verification)
+confirmed both: the conditional probability drops by an order of magnitude between `|d| = 0.4`
+and `|d| = 0.8`, and the `|d|`-only model's skill against the constant is positive. A constant
+null would therefore have endorsed a "pattern" that is the label's own arithmetic (lesson L-029,
+the exact failure the predictability rule's first draft had).
 
-**Clause 1, a pattern exists.** The logistic model's Brier skill score on the test events,
-`BSS = 1 - BS_logistic / (p_0 (1 - p_0))`, is at least **0.10**, with the paired 90% block
-bootstrap interval of `BS_null - BS_logistic` excluding zero; and its AUC's 90% interval
-excludes 0.5. The 0.10 is a gap above a null of exactly zero, the same 10% margin the
-predictability rule used; Bengisu's review may move it and the move is recorded before the run.
+**The null forecast is per event.** For every event `i`, `p_null,i = P(y_i = 1 | d_i, sigma_q, k)`
+under noise-around-a-level, by Monte Carlo from the qubit's own scatter `sigma_q` estimated on
+its training-period increments (or the closed form above if Bengisu prefers it; both are
+recorded). Its Brier score `BS_null = mean_i (p_null,i - y_i)^2` is what a model must beat. The
+constant forecast `p_0` (Brier `p_0 (1 - p_0)`) and the "always level" rule (`p = 0`, Brier
+`p_0`) are reported as reference rows, not as the null.
 
-**Clause 2, the network is needed.** The network's `BSS` exceeds the logistic model's by at
+**Clause 1, a pattern exists.** The logistic model's Brier skill score against the conditional
+null, `BSS_1 = 1 - BS_logistic / BS_null`, is at least **0.10** on the test events, with the paired
+90% block bootstrap interval of `BS_null - BS_logistic` excluding zero. The 0.10 is a gap above a
+null whose expected skill is exactly zero by construction, the same 10% margin the predictability
+rule used; Bengisu's review may move it and the move is recorded before the run. (AUC is reported
+beside it as description; it is not a clause, because the conditional null itself has an AUC
+above 0.5 through `|d|`.)
+
+**Clause 2, the network is needed.** The network's `BSS_1` exceeds the logistic model's by at
 least **0.05**, with the paired 90% block bootstrap interval of the difference excluding zero,
 for the seed median.
 
@@ -331,7 +353,7 @@ as a result the paper reports.
 
 | Step | What | Owner (proposed) | Gate |
 | --- | --- | --- | --- |
-| N0 | protocol README in `docs/evidence/pattern-detector/`: rows, `delta`, `k`, features, split, null derivation, both clauses, outcome table; committed before any model output; **count the rows** (events per split, base rate, events per qubit) and stop if the test period holds too few events for the bootstrap to resolve a 0.10 gap (the README states the number before counting) | Mert (protocol); Bengisu (statistics review, the same two questions as #125's: null value of each threshold, bootstrap unit) | the lead's go; Dr. Akba's ratification of the success rule through the advisor brief |
+| N0 | protocol README in `docs/evidence/pattern-detector/`: rows, `delta`, `k`, the own-state exclusion in the level, features, split, the per-event null forecast and how `sigma_q` is estimated, both clauses, outcome table; committed before any model output; **count the rows** (events per split, `y = 1` events per split, base rate, events per qubit) and stop if the test period holds too few `y = 1` events for the bootstrap to resolve a 0.10 gap (the README states the minimum before counting) | Mert (protocol); Bengisu (statistics review, the same two questions as #125's: null value of each threshold, bootstrap unit) | the lead's go; Dr. Akba's ratification of the success rule through the advisor brief |
 | N1 | baselines: null, "always level", logistic; results and rows committed | owner named at N0 | N0 |
 | N2 | the network, five seeds, early stopping on the inner slice; results committed | same | N1 |
 | N3 | the rule applied; permutation importance and scenario cells; one NC row per conclusion, Rule 7 form, laptop provisional | same | N2 |
@@ -363,7 +385,9 @@ why the brief must be triaged.
 
 ## 5. What this audit did not do
 
-- No new measurement, no new NC row, no edit to the plan or the pre-registration.
+- No new measurement on the archive, no new NC row, no edit to the plan or the pre-registration.
+  The only computation run was the synthetic mutation check of clause 1's null (section 4.4),
+  which touched no archive data and whose figures are not register claims.
 - No post to GitHub, no push; this file and its implementation doc are on the session branch
   `claude/phase-4-audit-neural-network-526358` for the lead to review.
 - The advisor brief of section 4.6 item 3 is not drafted.
