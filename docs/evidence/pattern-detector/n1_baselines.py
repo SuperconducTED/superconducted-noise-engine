@@ -26,7 +26,7 @@ import json
 import math
 import pickle
 import sys
-from bisect import bisect_right
+from bisect import bisect_left
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -232,7 +232,10 @@ def build_features(data: Data) -> Built:
                 prev_d, prev_missing = prev.value - lvl[0], 0.0
         if not math.isfinite(hours_since_prev):
             hours_since_prev = (r.time - data.files[0].time) / HOUR
-        j = bisect_right(data.sweeps, r.time - 1e-9)
+        # amendment 6: the last sweep STRICTLY before t. An event's own file is usually a sweep
+        # (IBM re-measures T1 chip-wide), and t - 1e-9 == t in float64, so the first run's
+        # bisect_right(..., t - 1e-9) returned the event's own file and the column was all zeros.
+        j = bisect_left(data.sweeps, r.time)
         hours_since_sweep = (r.time - (data.sweeps[j - 1] if j > 0 else data.files[0].time)) / HOUR
         d_t2 = data.file_vals[f, q, F_T2] - lv_t2[q]
         d_t2, t2_missing = (float(d_t2), 0.0) if math.isfinite(d_t2) else (0.0, 1.0)
@@ -642,6 +645,11 @@ def run(fields: list[Any], ref: str, out: Path, rows_record: Path | None) -> dic
                     float(p_null[name][m].mean()) if m.any() else math.nan
                 )
             calib.append(row)
+    calib_masks = [
+        (mask & smask)
+        for _, mask in (("train", train), ("test", test))
+        for _, smask in (("below", built.X[:, 0] < 0), ("above", built.X[:, 0] > 0))
+    ]
     summary["calibration"] = calib
     # the logistic bar
     X = built.X.copy()
@@ -662,6 +670,8 @@ def run(fields: list[Any], ref: str, out: Path, rows_record: Path | None) -> dic
     lam_best = min(losses, key=losses.get)
     beta = fit_logistic(Xs[train], built.y[train], lam_best)
     p_log = predict_logistic(Xs, beta)
+    for row, m in zip(calib, calib_masks, strict=True):
+        row["logistic_mean_forecast"] = float(p_log[m].mean()) if m.any() else math.nan
     summary["logistic"] = {
         "dropped_constant_columns": dropped,
         "inner_cut": inner_cut,
@@ -691,6 +701,13 @@ def run(fields: list[Any], ref: str, out: Path, rows_record: Path | None) -> dic
             "mean_forecast": float(p[test].mean()),
         }
         for name, p in preds.items()
+    }
+    p0_test = float(yt.mean())
+    scores["oracle_constant_test_rate"] = {
+        "brier": p0_test * (1 - p0_test),
+        "log_loss": math.nan,
+        "auc": 0.5,
+        "mean_forecast": p0_test,
     }
     primary = (
         "empirical_null"
