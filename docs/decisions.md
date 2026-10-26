@@ -1826,6 +1826,21 @@ recorded mechanism of its own. NC-028 is cited above for the split rule.
 > `e15c0479` on 2026-10-23); whether it meets Issue #58's obligation above is
 > decided in #58's review.
 
+> Revisited · 2026-10-26 · D3's reference half. PR #79 merged on
+> 2026-10-24 (`a0ea1161`) and Issue #58 closed. `benchmarks/reference.py`
+> applies this entry's per-qubit reasons in its order (`t1_missing`,
+> `t2_missing`, `nonpositive`, `t2_exceeds_2t1`), with two exceptions that
+> @mertefesensoy accepts, scoped as follows (PR #120 review 5651296140):
+> (1) a missing gate duration rejects only that `(gate, qubits)` entry, so a
+> qubit without an `sx` length is excluded from the training target but keeps
+> its other timed gates in the reference; (2) with no usable qubit the
+> reference raises `ValueError`, where `snapshot_target` returns `None`. The
+> two modules therefore reject the same qubits only where every qubit has an
+> `sx` length (`tests/test_reference.py`:
+> `test_reference_matches_training_targets_per_qubit` and
+> `test_sx_length_gaps_are_qubit_level_in_targets_and_gate_level_here`).
+> The obligation is met on these terms; no implementation changes.
+
 ---
 
 ## ADR-028 — Physical-gate eligibility as an injected policy
