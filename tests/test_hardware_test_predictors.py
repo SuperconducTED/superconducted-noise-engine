@@ -16,19 +16,21 @@ from typing import Any
 
 import numpy as np
 import pytest
-import scripts.hardware_test_predictors as htp
 from scripts.hardware_test_predictors import (
     MIN_WINDOW_STATES,
     Collected,
     LiveDocumentError,
     collect,
     execution_rows,
+    main,
     normalise_live,
     predictor_rows,
     propose_controls,
     select_discriminating,
     write_outputs,
 )
+
+from superconducted.training.dataset import qubit_block_digest
 
 T0 = datetime(2026, 10, 1, 12, 0, tzinfo=UTC)
 N_QUBITS = 4
@@ -221,7 +223,7 @@ def test_raw_and_envelope_live_documents_digest_identically() -> None:
     raw = copy.deepcopy(envelope["properties"])
     wrapped = normalise_live(raw, backend="ibm_fez")
     assert wrapped["properties"] is raw
-    assert htp.qubit_block_digest(wrapped) == htp.qubit_block_digest(envelope)
+    assert qubit_block_digest(wrapped) == qubit_block_digest(envelope)
 
 
 @pytest.mark.parametrize("mode", ["submission", "execution"])
@@ -396,12 +398,16 @@ def _run_cli(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, live_bytes: bytes, mode: str
 ) -> tuple[int, Path, Path]:
     """Run ``main`` against a synthetic archive, with the git reader monkeypatched out."""
-    monkeypatch.setattr(htp, "resolve_archive_ref", lambda repo, ref: "f" * 40)
-    monkeypatch.setattr(htp, "iter_archive", lambda repo, sha: iter(_archive(8)))
+    monkeypatch.setattr(
+        "scripts.hardware_test_predictors.resolve_archive_ref", lambda repo, ref: "f" * 40
+    )
+    monkeypatch.setattr(
+        "scripts.hardware_test_predictors.iter_archive", lambda repo, sha: iter(_archive(8))
+    )
     live_path = tmp_path / "live.json"
     live_path.write_bytes(live_bytes)
     out = tmp_path / f"out-{mode}"
-    code = htp.main(
+    code = main(
         [
             "--ref",
             "pinned",
