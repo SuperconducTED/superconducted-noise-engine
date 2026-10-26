@@ -8,7 +8,7 @@
 | Mert Efe Şensoy | `@mertefesensoy` | CS senior | `interfaces.py`, `types.py`, CI / pyproject, ADR ledger, `fuzzy/squashing.py` |
 | Burak Öztekin | `@BurakOztekin` | CS&EE senior | `fuzzy/tsk.py` (LOCKED), `fuzzy/fuzzification.py`, `integration/aer_factory.py`, `benchmarks/harness.py`, `benchmarks/circuits.py` |
 | Baha Jarad | `@BahaJarad` | CS&EE senior | `calibration/poller.py`, `calibration/storage.py`, `calibration/features.py`, `fuzzy/parameterization.py` |
-| Bengisu | `@bengisucvd` | Math senior | `fuzzy/defuzzification.py`, `channels/kraus.py` (LOCKED, co-owned), `benchmarks/metrics.py`, `fuzzy/membership.py` |
+| Bengisu | `@bengisucvd` | Math senior | `fuzzy/defuzzification.py`, `channels/kraus.py` (LOCKED, co-owned), `benchmarks/metrics.py`, `benchmarks/reference.py`, `fuzzy/membership.py` |
 
 Handles are from `gh api repos/SuperconducTED/superconducted-noise-engine/collaborators`,
 run 2026-09-07. A blank cell would be ambiguous, so an absent account is stated
@@ -29,6 +29,9 @@ collaborator — see "Reviews from outside GitHub" below.
 | `calibration/poller.py` | Baha Jarad | Mert Efe Şensoy |
 | `calibration/storage.py` | Baha Jarad | Mert Efe Şensoy |
 | `calibration/features.py` | Baha Jarad | Bengisu |
+| `calibration/loader.py` | Baha Jarad | Mert Efe Şensoy |
+| `training/dataset.py` | Baha Jarad | Mert Efe Şensoy |
+| `scripts/build_training_set.py` | Baha Jarad | Mert Efe Şensoy |
 | `training/` (`__init__.py`, `parameters.py`, `targets.py`) | Mert Efe Şensoy | Burak Öztekin |
 | `training/anfis.py` | Burak Öztekin | Bengisu |
 | `fuzzy/membership.py` | Bengisu | Burak Öztekin |
@@ -42,6 +45,7 @@ collaborator — see "Reviews from outside GitHub" below.
 | `benchmarks/circuits.py` | Burak Öztekin | Bengisu |
 | `benchmarks/metrics.py` | Bengisu | Mert Efe Şensoy |
 | `benchmarks/harness.py` | Burak Öztekin | Mert Efe Şensoy |
+| `benchmarks/reference.py` | Bengisu | Burak Öztekin |
 | `tests/*` | Owner of the implementation under test | — |
 | `docs/architecture.md` | Dr. Fırat Akba | Mert Efe Şensoy |
 | `docs/decisions.md` (ADR ledger) | Dr. Fırat Akba | Mert Efe Şensoy |

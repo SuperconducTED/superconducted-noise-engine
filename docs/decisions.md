@@ -435,6 +435,28 @@ Richer extractors implement `CalibrationFeatureExtractor`.
 > and reconciliation of missing/non-finite-value policies. The dated audit
 > `docs/audits/2026-05-25-followup-issues.md` remains unchanged.
 
+> Revisited · 2026-10-21 · Baha Jarad's issue #63 implementation, prepared by
+> Codex, reads a pinned archive with one row per distinct state, still through
+> this ADR's bootstrap mean extractor. The distinct-state training set exists at
+> `calibration-data` @ `f0930b9b54975470a4a87866cbc691f7897295cb` with 504 rows
+> (NC-073) and @ `e5688d2f6a333e98bb01f1c1d81b694ff69574f5` with 797 rows
+> (NC-070), each committed as an evidence TSV under
+> `docs/evidence/training-set/`. UC-6 dashboard
+> agreement requires the bare-qubit digest to match
+> `scripts/canonical_snapshot_digest.py::qubit_digest`: parameter dates are
+> normalized away while names, units and values remain. This follows Baha
+> Jarad's explicit request to implement digest alignment and supersedes the
+> issue's date-inclusive recommendation; Mert Efe Şensoy confirmed it on issue
+> #63 on 2026-10-21, and the date-inclusive count is kept as a measured, unused
+> number (NC-076).
+> ADR-010 still governs the SI vectorizer. ArchiveUnitFeatureExtractor explicitly
+> converts X back to archive microseconds for the survey/quantile stack; spread
+> columns use the same units. ADR-027 owns dimensionless Y. Richer-extractor
+> comparison stays deferred. The advisor read is Mert Efe Şensoy's sign-off as
+> lead in the advisor role, recorded on 2026-10-21 in
+> `docs/advisor/2026-09-03-decisions-from-akba.md`. It covers this note as
+> written and changes no `**Status**` line.
+
 ---
 
 ## ADR-014 — TSK trainer architecture
@@ -455,6 +477,15 @@ zero. A model trained from scratch will need the trainer.
 > target definition, so the second deferral condition is satisfied. The first
 > remains unmet: NC-025 records 504 distinct states, below the 630-state floor.
 > ADR-014 remains Deferred; no trainer implementation is accepted by this note.
+
+> Revisited · 2026-10-21 · ADR-027 is now Accepted (see its `> Advisor
+> decision` line), so the target definition that met the second deferral
+> condition is accepted, no longer only proposed. The 2026-09-07 note above
+> stands as written; its floor figure is stale, and NC-012 is the row to cite.
+> The first condition is still unmet: NC-069, the registered count of distinct
+> device states at the latest archive ref (the unit NC-012 counts; NC-025,
+> NC-047 and NC-070 measure it at earlier refs), is below the floor NC-012
+> records. ADR-014 remains Deferred; this note flips nothing else.
 
 ---
 
@@ -521,6 +552,20 @@ non-trivial.
 > not the 161 recorded above. This aligns the DESCRIPTION only; the
 > mean-to-interval upgrade stays gated on ADR-015 and Status remains
 > Deferred.
+
+> Density mode · 2026-10-21 · Issue #58, PR #79. The second of the three
+> phase-3 notes Issue #58 FR-9 orders under this entry: below the 2026-09-07
+> alignment note, above the place #64's status block will go. The certified
+> harness gains a density-matrix mode (commit `d646e07`) that aggregates
+> members by the mixture mean, `rho_ens = (1/N) sum_m rho_m`. A convex
+> combination of density matrices is a density matrix, and its diagonal is
+> the mean of the members' outcome probabilities, which is what the
+> counts-mode sum converges to once normalized; it is not a sum of states
+> with a total. The aggregate's `shots` is `1`, never `1 * N`, because
+> nothing is sampled (#58 decision 4). This defines the point estimate
+> only: the interval mode stays gated on ADR-015 and Status remains
+> Deferred. Advisor read: pending the lead's approval under the register's
+> 2026-10-03 reshape (`docs/advisor/2026-09-03-decisions-from-akba.md`).
 
 ---
 
@@ -1002,6 +1047,24 @@ gates, 6 errors. Measured at `dd1ad56` (2026-10-03), the PR #103 review-fix
 commit, so after the heading's date; see
 `docs/implementations/2026-10-03-pr103-review-fixes.md`.
 
+### ADR-021 amendment as of 2026-10-23: harness conforms
+
+`benchmarks/harness.py` now compiles each circuit once to an explicit basis
+(`run_benchmark` defaults it to the reference model's device basis), calls
+`prepare()` on the compiled circuit, and runs the returned circuit without
+another transpilation (Issue #58, PR #79). With that, both callers in the
+2026-09-18 table conform. This is a fact record only; the amendment remains
+Open and awaits the advisor sign-off recorded above.
+
+In the table's own measure, against the same
+`tests/fixtures/calibration/ibm_fez_20260513T121322Z_with_gates.json` and the
+#58 test engine (`tests/conftest.py`, first viable seed), with `prepare()`'s
+"installed no error" warning promoted to an error: `ghz_state_circuit(3)` installs
+`['sx']`, 3 errors; `qft_circuit(3)` installs `['rx', 'sx']`, 6 errors;
+`vqe_ansatz_circuit(3, rng=default_rng(0))` installs `['rx', 'sx']`, 4 errors; none
+warns. Measured 2026-10-23 on PR #79's branch (code at `e7218d3`; the review-round
+edits on top do not touch the compile or `prepare()` path).
+
 ---
 
 ## ADR-022 — Benchmark validation criteria
@@ -1064,6 +1127,26 @@ before merge.
 > authoring record; this ledger entry is canonical.
 > See ADR-023 for how the reject-don't-clip convention applies to
 > `TanhMF`, the one MF that is a documented exemption from it.
+
+> As of 2026-09-06, issue #58 extends this standing property set through the
+> certified density-matrix harness path (commit `d646e07`) and adds explicit
+> wrong-mode rejection pins for all four metrics (commit `bb38152`). Metric
+> data errors now raise by default or carry a non-empty failure record when
+> the caller explicitly requests partial results; they are never silent NaN.
+> Status remains Accepted. Dr. Akba's out-of-band read is pending in the
+> single W1 advisor batch owned by #56.
+
+> As of 2026-10-21, issue #58 / PR #79 merges `main` @ `6cf008d`. The nine
+> `*_adr022_*` property tests in `tests/test_harness.py` run on hand-built
+> `NoiseModel`s with `depolarizing_error`, so the merge did not affect them.
+> The harness certification tests that do build a fuzzy engine had run it
+> noise-free after the merge, because the slim fixture has no
+> `properties.gates` and ADR-028 then admits nothing; from commit `218475c`
+> they use #57's gates-bearing fixture and an engine that installs noise.
+> The note above's last sentence is overtaken: the W1 batch was never sent,
+> and the read is now the lead's approval under the register's 2026-10-03
+> reshape (`docs/advisor/2026-09-03-decisions-from-akba.md`), pending.
+> Status remains Accepted.
 
 ---
 
@@ -1630,14 +1713,14 @@ became vacuous.
 
 ## ADR-027 — Calibration training target
 
-**Status**: Open.
+**Status**: Accepted.
 
 **Context**: The single-qubit amplitude-plus-phase-damping channel needs one
 supervised target derived from archived IBM calibration data. Without an
 explicit derivation, training, anchored consequents, and the thermal reference
 can disagree on formulas, missing data, or gate duration.
 
-**Decision (proposed)**: For gate duration $t$ and a qubit's $T_1$, $T_2$, use
+**Decision**: For gate duration $t$ and a qubit's $T_1$, $T_2$, use
 
 $$
 \gamma = 1 - \exp(-t/T_1), \qquad
@@ -1693,15 +1776,27 @@ decision here. `HybridANFISTrainer`, its synthetic CLI, and synthetic smoke
 records are Issue #60 work: they must not land under this ADR while ADR-014 is
 Deferred and the NC-025 state-count gate is unmet.
 
-**Evidence**: `tests/test_aer_pin.py` matches Qiskit Aer's zero-temperature
+**Evidence**: `tests/training/test_aer_pin.py` matches Qiskit Aer's zero-temperature
 `thermal_relaxation_error` under `SuperOp` comparison across both Aer branches
 at 24 ns and 60 ns. NC-036 records maximum error below $10^{-12}$; NC-035 and
 NC-038 record the fixture's 24 ns gate duration and usable-row count. NC-039
 records the nonzero mean-of-targets versus target-at-mean-features gap.
 
-**Pending decisions**: Advisor/reviewer sign-off is required for raw-space
-training, raw gate-envelope parsing, the ordered skip policy, and mean of
-per-qubit targets. This entry remains Open until those decisions are recorded.
+**Pending decisions**: None remain for this entry. D1 (the raw-space target),
+D3 (the ordered skip rule above, with `snapshot_target` returning `None` rather
+than raising when no qubit is usable) and D4 (the mean of per-qubit targets)
+are recorded in `docs/advisor/2026-09-03-decisions-from-akba.md` as the
+2026-10-21 item 1 entry, approved by @mertefesensoy under Dr. Akba's
+fuzzy-engine delegation, which is the entry directly before it. D2, the raw
+`properties.gates` parsing, was withdrawn from the advisor ask as register
+item 1b, an internal ownership question between @mertefesensoy and
+@BahaJarad, so it has no entry. One obligation stays outside this ADR's
+status: Issue #58's `benchmarks/reference.py` must apply the same ordered rule,
+so that the target and the reference model agree on which qubits exist. At
+PR #79's head `5400702` it does not: it has two skip reasons and raises
+`ValueError` on a non-positive $T_1$ or $T_2$ and on a missing `gate_length`,
+where `training/targets.py` counts `nonpositive` and `gate_length_missing`.
+That stays Issue #58's obligation whatever happens to PR #79.
 
 **Source**: Issue #57; `docs/decisions/drafts/ADR-027-calibration-training-target.md`;
 `src/superconducted/training/targets.py`; `tests/training/test_targets.py`;
@@ -1709,6 +1804,45 @@ per-qubit targets. This entry remains Open until those decisions are recorded.
 ADR-020, and ADR-024 clause 5 — the warm-start obligation the `TSKTrainer`
 docstring carries, which a trainer must either satisfy or replace with a
 recorded mechanism of its own. NC-028 is cited above for the split rule.
+
+> Advisor decision · 2026-10-13 · D1, D3 and D4 accepted by @mertefesensoy
+> under Dr. Akba's fuzzy-engine delegation, announced on Issue #57 (comment
+> 6140571135, decision C and step 3). Recorded on 2026-10-21 in
+> `docs/advisor/2026-09-03-decisions-from-akba.md` as the item 1 entry, after
+> the delegation entry it rests on, and posted first on Issue #84 (comment
+> 6312713600). D2 was withdrawn from the ask (register item 1b). The Status
+> moved from Open to Accepted on that record.
+
+> Editorial · 2026-10-21 · With the Status flip, the decision label here was
+> normalized to **Decision**; it had carried the provisional form reserved for
+> Open and Deferred entries. The Evidence line's test path was corrected from
+> `tests/test_aer_pin.py` to `tests/training/test_aer_pin.py`: PR #69 moved the
+> file there (`6daa8897`) before merging, and the Source line already gave the
+> new path. The decision text itself is unchanged; this records the two fixes
+> only, not a revisit. See Issue #84.
+
+> Revisited · 2026-10-23 · PR #79 added a skip-rule alignment to
+> `benchmarks/reference.py` on 2026-10-21 (`6b39bcdf`, unchanged at its head
+> `e15c0479` on 2026-10-23); whether it meets Issue #58's obligation above is
+> decided in #58's review.
+
+> Revisited · 2026-10-26 · D3's reference half. PR #79 merged on
+> 2026-10-24 (`a0ea1161`) and Issue #58 closed. `benchmarks/reference.py`
+> applies this entry's per-qubit reasons in its order (`t1_missing`,
+> `t2_missing`, `nonpositive`, `t2_exceeds_2t1`), with two exceptions that
+> @mertefesensoy accepts, scoped as follows (PR #120 reviews 5651296140 and
+> 5651466405): (1) a missing or negative gate duration rejects only that
+> `(gate, qubits)` entry, so a qubit whose `sx` duration is missing or
+> negative is excluded from the training target but keeps its other timed
+> gates in the reference; a zero duration stays permitted on both sides;
+> (2) with no usable qubit the reference raises `ValueError`, where
+> `snapshot_target` returns `None`. The two modules therefore reject the same
+> qubits only where every qubit has a finite, nonnegative recorded `sx`
+> duration, the reference is built on the same qubit selection, and no
+> duration overrides are passed (`tests/test_reference.py`:
+> `test_reference_matches_training_targets_per_qubit` and
+> `test_sx_length_gaps_are_qubit_level_in_targets_and_gate_level_here`).
+> The obligation is met on these terms; no implementation changes.
 
 ---
 

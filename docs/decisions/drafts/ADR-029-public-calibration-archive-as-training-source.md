@@ -4,7 +4,10 @@
 lands with the pull request that adopts or rejects this. On 2026-10-23 the lead accepted the
 three provenance rules of decision 3 as the basis for this draft, chose `ibm_fez` only, and
 chose evaluate-then-adopt over adopt-now; the data-track owner's read (open question 1) and
-the plausibility-box factor (open question 2) are still owed.
+the plausibility-box factor (open question 2) are still owed. Revised 2026-10-26 on Bengisu's
+review of PR #121: the document-reproduction sentence, the pre-window state count (now under a
+stated completeness rule), rule 3 of the decision and the builder's second acceptance test;
+each change is marked in place.
 
 **Deciders**: Mert Efe Şensoy (lead; advisor role since 2026-10-03), Baha Jarad (data track,
 owner of `calibration/` and of Issue #63's builder), Bengisu Cıvdı (reviewer who reproduced
@@ -32,11 +35,18 @@ NC-079) established:
   and three `measure*_threshold` properties and are explained by the public table keeping the
   first value seen per stamp.
 - **Documents reproduce.** Replaying the public table as of `calibrated_time` reproduces our
-  qubit block bit for bit at 2,145 of 2,249 document timestamps; every mismatch is a round their
-  poller missed, never a value conflict.
-- **The gap closes.** For `ibm_fez` from 2026-01-31 to 2026-05-13, the replay yields 626 distinct
-  device states at hourly marks (666 at half-hourly), one already in ours. The union with our
-  924 is 1,549 (1,589), above the 1,170 floor. NC-078. Distinct is not independent (NC-012).
+  qubit block bit for bit at 2,145 of 2,249 document timestamps. (Revised 2026-10-26.) Of the
+  104 mismatching documents, 4 carry a same-stamp value conflict in `readout_length` (the June
+  and July republications NC-077 counts among its 780 differing events; the evidence README
+  names the four), and the other 100 differ by events one side holds at that time and the
+  other does not, most often the public table being minutes ahead of the served document (88%
+  of those events appear verbatim in a later document of ours). No training field is in
+  conflict on any shared event.
+- **The gap closes.** For `ibm_fez` from 2026-01-31 to 2026-05-13, the replay yields 625 distinct
+  device states at hourly marks (664 at half-hourly), one already in ours, counting only marks
+  where every non-excluded qubit holds T1, T2 and the three readout quantities (14 hourly and
+  28 half-hourly startup marks excluded; revised 2026-10-26 from 626 and 666). The union with
+  our 924 is 1,548 (1,587), above the 1,170 floor. NC-078. Distinct is not independent (NC-012).
 - **Three defects, each handled by a stated rule.** (1) T1 and T2 rows observed live before
   2026-05-07 hold seconds under the label `us`: 14,609 T1 and 14,947 T2 rows, none in the
   ambiguous zone between 0.01 and 1, no key with two representations. The dataset's own
@@ -62,9 +72,16 @@ NC-079) established:
    source tag on every row so a fit can be reported with and without it. Inside our own window
    our documents are authoritative; the public table is not merged into them.
 3. **Three rules travel with the source and are recorded in the builder, the evidence README and
-   the results doc:** scale T1/T2 below 0.01 `us` by 1e6; drop qubit 72's T1 and T2; where a
-   stamp carries two values prefer ours (none occur in T1, T2, readout error, gate error or gate
-   length).
+   the results doc:** scale T1/T2 below 0.01 `us` by 1e6; drop qubit 72's T1 and T2; take the
+   public table's value where IBM republished a stamp, since the table keeps the first value
+   seen and the replay is not modified (revised 2026-10-26: the earlier "prefer ours" wording
+   named a preference that is never exercised, because under decision 2 the public rows are
+   read only before 2026-05-13, where we hold nothing; the 312 republished events inside our
+   window are all `readout_length`, which the builder does not read, and none occur in T1,
+   T2, readout error, gate error or gate length). A fourth rule, the completeness rule of the
+   evidence script: a replayed state enters the training set only when every non-excluded
+   qubit holds T1, T2, `readout_error`, `prob_meas0_prep1` and `prob_meas1_prep0`; this is an
+   initialisation check and not the admissibility check of decision 4.
 4. **A plausibility guard on T1 and T2 enters the loader path** before any public row is fit:
    values outside NC-041's `[p1, p99]` box, widened by a stated factor, are rejected with their
    own skip reason in `training/targets.py`, so defect 1 is defended against rather than merely
@@ -86,7 +103,10 @@ NC-079) established:
   check names (`docs/findings/2026-10-23-novelty-check-q1-article.md` §4).
 - #63's builder gains a second reader and a source column; its acceptance test (reproduce
   NC-025 at `f0930b9`) is unchanged and a second acceptance test is added: reproduce NC-078's
-  626 at the pinned revision.
+  hourly count at the pinned revision under the same completeness rule, reporting the excluded
+  marks (revised 2026-10-26: the earlier text named 626, a count that included one incomplete
+  startup state; the builder is not asked to reproduce admissible rows until the plausibility
+  guard of decision 4 is specified, which is a separate check).
 - The feature distribution the 27-rule grid was partitioned on (NC-041, measured on our files
   from 2026-05-13) widens by three and a half months of the same device; the quantile survey is
   re-run with the source tag before training, and ADR-010's grid is re-derived only if the box

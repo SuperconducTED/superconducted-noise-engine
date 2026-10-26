@@ -19,7 +19,7 @@ to be less honest than the README.
 | --- | --- | --- | --- |
 | 1 | A TSK / ANFIS fuzzy regression from calibration features (mean T1, T2, readout error) to amplitude- and phase-damping channel parameters, exported as Aer `NoiseModel`s | Hassan & Kaabouch 2026 (ANFIS on ibm_fez, but for error *attribution*, not noise synthesis); Müller et al. 2025 and Bautra et al. 2026 (calibration to channels, but crisp) | **Novel combination, textbook parts.** No published work uses a fuzzy inference system as the calibration-to-noise-model map. The fuzzy machinery itself (first-order TSK, Gaussian or IT2 sets, Nie-Tan reduction, hybrid LSE + gradient ANFIS) is standard Mendel/Jang material and must be presented as such. |
 | 2 | An Interval Type-2 footprint, or an ensemble of fuzzy models, yields an *interval* over simulation output | IT2-ANFIS for prediction intervals in other domains (e.g. arXiv 2601.18897, wastewater energy) | **Method not novel, application is.** IT2 systems producing lower and upper outputs are established. The quantum-noise application has no precedent found. |
-| 3 | That interval *brackets real hardware across calibration cycles* better than a single calibration-frozen model | **QuBound** (Li, Dasgupta, Humble, Jiang et al., arXiv 2507.17043, 2025): predicts fidelity *bounds* under unstable noise from calibration-derived noisy simulation, 700 days of data, bound-compliance rate and bound width as metrics. Also the Dasgupta & Humble stability line (2021-2024). | **This is the scientific claim and it is unverified.** The ensemble is degenerate (N identical members), no interval has ever been produced, no hardware comparison exists. Today the novelty is architectural, and a close competitor already publishes bounds. The article does not exist as a result yet. |
+| 3 | That interval *brackets real hardware across calibration cycles* better than a single calibration-frozen model | **QuBound** (Li, Dasgupta, Humble, Jiang et al., arXiv 2507.17043, 2025): predicts fidelity *bounds* under unstable noise from calibration-derived noisy simulation, 700 days of data, bound-compliance rate and bound width as metrics [corrected 2026-10-26: bounds on per-circuit outcome probabilities and observable expectations, not on fidelity alone; §9 item 2]. Also the Dasgupta & Humble stability line (2021-2024). | **This is the scientific claim and it is unverified.** The ensemble is degenerate (N identical members), no interval has ever been produced, no hardware comparison exists. Today the novelty is architectural, and a close competitor already publishes bounds. The article does not exist as a result yet. |
 | 4 | The hourly `calibration-data` archive is a research asset | `phanerozoic/qiskit-calibration-drift` (Hugging Face, CC-BY-4.0): polls `backend.properties()` on every Heron device every 30 minutes with historical backfill, four backends including `ibm_fez`, per-qubit T1, T2, readout and per-gate error and length, continuous from 2026-01-31, 28.9 million rows, plus environmental covariates. Also QuBound's own 700-day, 4-per-day dataset. | **Not a differentiator.** A single-backend archive at 868 distinct states against a 1,170 floor (NC-069 at `calibration-data` @ `d62f2cd`, 2026-10-16) is smaller and narrower than public alternatives. Flagged as a blind spot: the team's planning documents treat the archive as the scarce input. |
 | 5 | The Factory / Ensemble pattern around Aer's one-shot `to_dict()` serialisation | Engineering practice | **Not a contribution.** One paragraph of methods, not a claim. |
 
@@ -53,7 +53,8 @@ comparison below is fair to the engine:
 - **Output is a simulator-ready noise model, not a fidelity number.** QuBound and the
   reliability-analysis line predict a scalar (fidelity) with bounds. The engine emits something
   Aer can run any circuit through. This is the engine's strongest structural difference from
-  QuBound and should be the centre of the framing.
+  QuBound and should be the centre of the framing. [Corrected 2026-10-26 on review: QuBound's
+  outputs are not one fidelity number; see §9 item 2.]
 - **Uncertainty is realised across ensemble members, not per shot.** Forced by Aer
   (ADR-002, ADR-021). QuBound's "NoisySim" baseline, repeated noisy simulation with min and max as
   bounds, is the nearest analogue and is the baseline QuBound beats.
@@ -80,7 +81,7 @@ reported as the source states them and were not checked against the body.
 
 | Work | What it does | Same as engine | Different from engine | Ver. |
 | --- | --- | --- | --- | --- |
-| **QuBound**, Li, Dasgupta, Song, Yang, Humble, Jiang, arXiv 2507.17043 (Jul 2025); IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems per Semantic Scholar (the arXiv body carries an IEEE copyright notice and no venue) | Predicts a circuit's fidelity as a *bound*, not a point. Per-qubit 5-tuples (gate type, gate parameter, T1, T2, gate error) per circuit stage feed an LSTM. Training traces come from noisy Aer simulation driven by IBM backend properties; 700 days at 4 samples a day (2,800 samples); devices named include ibmq_kolkata (T1 profiled at 7-minute intervals over two months), ibm_nairobi, ibmq_mumbai, ibm_hanoi. Bounds come from a trend plus a z-score interval on the residual. Quality is bound-compliance rate and bound width. Baselines: repeated noisy simulation, an analytical Hellinger approach, a graph-transformer predictor, linear regression. | Calibration data in, a *range* out, motivated by temporal instability of the same device, Aer-from-calibration as the data generator, Hellinger in the comparison set. | Predicts a scalar per circuit, not a noise model; a learned black box (LSTM), no interpretable rule base; bounds from a normality assumption on residuals, not from a fuzzy footprint; no interval type-2 or ensemble of simulators. | F (partial) |
+| **QuBound**, Li, Dasgupta, Song, Yang, Humble, Jiang, arXiv 2507.17043 (Jul 2025); IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems per Semantic Scholar (the arXiv body carries an IEEE copyright notice and no venue) | Predicts a circuit's fidelity as a *bound*, not a point. Per-qubit 5-tuples (gate type, gate parameter, T1, T2, gate error) per circuit stage feed an LSTM. Training traces come from noisy Aer simulation driven by IBM backend properties; 700 days at 4 samples a day (2,800 samples); devices named include ibmq_kolkata (T1 profiled at 7-minute intervals over two months), ibm_nairobi, ibmq_mumbai, ibm_hanoi. Bounds come from a trend plus a z-score interval on the residual. Quality is bound-compliance rate and bound width. Baselines: repeated noisy simulation, an analytical Hellinger approach, a graph-transformer predictor, linear regression. | Calibration data in, a *range* out, motivated by temporal instability of the same device, Aer-from-calibration as the data generator, Hellinger in the comparison set. | Predicts a scalar per circuit, not a noise model [corrected 2026-10-26: per-circuit outcome probabilities and observable expectations with bounds, not one scalar; §9 item 2]; a learned black box (LSTM), no interpretable rule base; bounds from a normality assumption on residuals, not from a fuzzy footprint; no interval type-2 or ensemble of simulators. | F (partial) |
 | Dasgupta & Humble, "Stability of noisy quantum computing devices", arXiv 2105.09472 (2021); "Characterizing the reproducibility of noisy quantum circuits", Entropy 24, 244 (2022); "Impact of unreliable devices on stability of quantum computations", ACM TQC (2023) | Hellinger-distance characterisation of fluctuation over 22 months; ε-reliability; an analytic upper bound on run-to-run Hellinger from readout and gate error rates. | Hellinger as the drift metric; the thesis that a single calibration is not representative. | Characterises and bounds, does not build a simulator; no learned map from calibration to channels. | A |
 | Dasgupta & Humble, "Improving PEC in the presence of non-stationary noise", arXiv 2404.13269 (2024); "Adaptive channel estimation", arXiv 2208.10263 (QCE 2022 poster) | Bayesian / adaptive estimation of channel parameters from circuit outputs because characterisation data goes stale. Reports 42% accuracy and 60% stability gains for PEC on ibm_kolkata. | Explicit premise that calibration data is stale at run time. | Infers from live outputs, not from calibration history; mitigation, not simulation. | A |
 | "Staleness-aware noise modeling" (course project, GitHub `RealAradhyaGupta/staleness-project`, Aug-Oct 2026) | Merges consecutive identical calibration cards into *distinct calibration states*; simulates queue delays of 1 to 48 h with Aer from published calibration numbers; six qubit-selection strategies; Hellinger fidelity vs ideal; 120 days of history on three machines; no hardware runs; no paper. | The distinct-state deduplication is the same idea as ADR-025's ledger; Aer from archived calibration; Hellinger. | A layout-selection study, not a noise-model learner; unpublished. A reviewer who searches GitHub finds it in one query, so it belongs in related work as grey literature. | R |
@@ -145,11 +146,14 @@ cut, test after; ADR-027's snapshot-boundary rule), on coverage *and* width toge
    type-1 point model, so that the interval's value is separated from the regression's value.
 4. **A QuBound-style bound** if the comparison is on fidelity rather than distributions; at
    minimum, repeated noisy simulation with min/max bounds, which is QuBound's own weakest
-   baseline.
+   baseline. [Corrected 2026-10-26 on review: the condition is dropped, the baseline applies
+   to distributions and observables too; see §9 item 2.]
 
 Metrics: empirical coverage of the held-out reference at a nominal level, mean interval width
 (or Hellinger between the band's edges), and the Hellinger / fidelity of the band's centre.
 Both halves are needed: coverage alone rewards a wide band, width alone rewards a point.
+[Corrected 2026-10-26 on review: "Hellinger between the band's edges" is withdrawn; see §9
+item 1.]
 
 Reference to be covered: for a fuzzy-systems venue, simulator-vs-simulator against Aer run on
 the *actual later* snapshot is acceptable and is what the harness already does. For a quantum
@@ -239,6 +243,8 @@ record does not choose. It does say that §5.2 cannot be started until §4 is me
    omitted T1/T2 that an event table cannot express, and first-value-per-stamp. Our loader
    would not have caught the first. The archive-is-scarce assumption in the planning documents
    is therefore wrong, and the gate is met only when #63's builder reproduces the count.
+   [Corrected 2026-10-26 on review: the counts and the mismatch attribution in this paragraph;
+   see §9 item 3.]
 2. **QuBound as the named competitor.** None of the project's planning documents mention it.
    The phase-3 plan's "paper track" row and the advisor File 05 should name it before venue
    is chosen.
@@ -290,6 +296,54 @@ Grey literature: [qiskit-calibration-drift](https://github.com/CharlesCNorton/qi
 
 Citing-paper lists: Semantic Scholar Graph API, 2026-10-23.
 
+---
+
+## 9. Review amendments, 2026-10-26 (Bengisu's review of PR #121)
+
+The record above is dated 2026-10-23 and is not rewritten; each correction is marked at its
+original location and stated here in full.
+
+1. **Width metric (§4).** "Hellinger between the band's edges" is withdrawn. Componentwise
+   quantile endpoints are not probability distributions: for two members `(0.2, 0.8)` and
+   `(0.8, 0.2)` the central 80% band has lower edge `(0.26, 0.26)` and upper edge
+   `(0.74, 0.74)`, summing to 0.52 and 1.48; normalising both gives `(0.5, 0.5)` twice and a
+   Hellinger distance of zero for a band of substantial width. The width metrics for the
+   gating test are the explicitly defined ones the PR-A plan already names: mean band width
+   per bin (mean over bins of upper minus lower, in probability) and the interval score
+   (Gneiting and Raftery eq. 43 at the band's nominal level), which penalise width and
+   miscoverage together. A distribution-space diameter would need an optimisation over valid
+   distributions inside the band and is not proposed. The centre's Hellinger and fidelity
+   stand.
+2. **QuBound's output scope (§1 row 3, §2 second property, §3.1, §4 item 4).** The record
+   described QuBound as predicting one fidelity number per circuit with bounds. Its evaluation
+   (arXiv 2507.17043v1, Sections VI-A to VI-C, read 2026-10-26) predicts, for a fixed circuit
+   and shot count, bounds and a central value on computational-basis outcome probabilities
+   (per bitstring, output layer sized to the number of states, GHZ-3 states shown
+   individually) and on observable expectations (`Z` tensor products, VQE Pauli terms
+   bounded and summed); its Section III states that fidelity itself is not the predicted
+   quantity. The paper frames the model as targeting one fixed circuit and leaves unseen
+   circuits to future work; nothing it outputs can be loaded into a simulator. The defensible
+   distinction is therefore **a reusable, simulator-ready channel model (this engine) versus
+   circuit-conditioned performance prediction (QuBound)**, not "noise model versus fidelity
+   scalar". Consequently the QuBound-style baseline of §4 item 4 applies whenever the gating
+   test scores distributions or observables, which is every case in §4, not only a fidelity
+   comparison; the item's condition is dropped. §1 row 3's verdict is unchanged: the
+   bracketing claim still has a published competitor on bound compliance and width.
+3. **Evidence figures (§6 item 1).** The comparison script was re-run at the same two refs
+   after two faults the review found. (a) The pre-window replay started at
+   2026-01-31T00:00Z with a state holding T1 and T2 only (the table's first readout events are
+   at 13:18 to 13:19Z); a completeness rule now counts a mark only when every non-excluded
+   qubit holds T1, T2 and the three readout quantities. The pre-window count is 625 hourly
+   (664 half-hourly), 14 (28) marks excluded, union with our 924 1,548 (1,587); the floor
+   comparison and the conclusion do not change. (b) "The rest being rounds their poller
+   missed" was wrong: classified by stamp, 4 of the 104 mismatching documents carry a
+   same-stamp `readout_length` conflict (IBM's June and July republications, the source of
+   NC-077's 312 differing `readout_length` events) and most of the others differ because the
+   public table is minutes ahead of the served document. The stated "ours wins" rule was never
+   applied by the replay and is withdrawn; the replay is unmodified and the conflicts are
+   named. Details and the old-to-new table: the evidence README's "Corrections on review"
+   section; rows NC-077 to NC-079 carry the same corrections.
+
 Project documents: `README.md`, `docs/architecture.md`, `docs/decisions.md` (ADR-002, -008,
 -009, -013, -014, -015, -016, -019, -021, -025, -027), `docs/numerical-claims.md` (NC-012,
 NC-025, NC-045, NC-047, NC-069), `src/superconducted/integration/aer_factory.py`,
@@ -297,3 +351,28 @@ NC-025, NC-045, NC-047, NC-069), `src/superconducted/integration/aer_factory.py`
 `docs/advisor/2026-05-25-questions-for-akba.md`,
 `docs/advisor/2026-09-09-akba-brief/05-yayin-stratejisi.html`,
 `docs/state-of-the-project/2026-09-09-cycle-2-close.md`.
+
+## 10. Review amendment, 2026-10-26: retain both non-fuzzy baselines
+
+The empirical-percentile interval in section 4 item 2 remains a required comparator. The
+PR-A' implementation plan and the ADR-015 gates record incorrectly identified it with a
+relative-persistence band centred on the current target. The two estimators are distinct:
+rolling percentiles depend on the recent target history, whereas a symmetric persistence
+band is centred on the latest target regardless of that history. Neither is a substitute
+for the other, and no performance ordering is assumed.
+
+Relative persistence is an additional comparator for the gating test. The fuzzy arm must
+therefore be compared with both methods. Fix the forecast horizon and split before the
+held-out evaluation; select the empirical window `k`, tail probabilities and any fitted
+scales using training data only. Test-origin histories may advance with observations already
+available at the origin, never with a future target. Use one common history-ready scoring
+mask for both baselines and the fuzzy arm, report excluded origins and scoring-row counts,
+and apply the same coverage, width and interval-score definitions. For outcome-space results,
+keep the channel projection, circuits, reference and simulator mode the same across arms.
+An empirical quantile label alone is not a calibrated coverage claim; any scale-adjusted
+variant used to match coverage must have its own recorded training fit and result row.
+
+The detailed protocol is the
+[`PR-A plan`, section 12](../roadmap/2026-10-23-issue-64-pr-a-plan.md#12-review-amendment-2026-10-26-separate-baselines-and-fix-alpha-before-fitting).
+The gates record's section 9 withdraws the false equivalence. This amendment changes the
+planned comparison set, not the novelty verdict or the archive measurements.
