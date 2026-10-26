@@ -49,6 +49,7 @@ SEED_PERM = 86
 SEED_BOOT = 87
 MIN_CELL_ROWS = 20
 TOP_GROUPS = 3
+GUARD_TOLERANCE = 1e-5  # features.tsv.gz holds six significant digits (amendment 7 note 8)
 GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("d", ("d",)),
     ("abs_d_rel", ("abs_d_rel",)),
@@ -215,7 +216,7 @@ def run(features: Path, summary_path: Path, out: Path) -> dict[str, Any]:
     beta, keep, mean, std = refit(data, lam)
     p_fit = predict(data, data["X"], beta, keep, mean, std)
     max_dev = float(np.max(np.abs(p_fit - data["p_logistic"])))
-    if max_dev > 1e-6:
+    if max_dev > GUARD_TOLERANCE:
         raise SystemExit(
             f"reproduction guard: refitted forecasts deviate from the record by {max_dev}"
         )

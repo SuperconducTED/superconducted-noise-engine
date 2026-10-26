@@ -399,6 +399,10 @@ cells without fixing their details; fixed here before the run.
 7. **Reading rule.** A group that ranks high on Brier and low or negative on AUC moved the forecast
    level (calibration); one that ranks high on both ordered the rows (discrimination). The
    decomposition of amendment 6 is read group by group.
+8. *Note, same day, before any importance was read:* item 1's guard tolerance of 1e-6 stopped the
+   first run at a deviation of 1.4e-6, because `features.tsv.gz` stores the features to six
+   significant digits and the forecasts to six decimals; the tolerance is 1e-5, a reading of the
+   stored precision and nothing about the model.
 
 ## 8. Counts, at the ref of the record run
 
