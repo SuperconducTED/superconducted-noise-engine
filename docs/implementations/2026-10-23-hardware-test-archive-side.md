@@ -132,6 +132,36 @@ recorded. Three statements in it are wrong:
   lands, that branch is the source. The pre-registration's delay-grid decision was taken on the
   corrected reading.
 
+### Review fixes, 2026-10-26
+
+Bengisu's review of the branch at `6f458867` (review 5652945518) requested four code changes
+and one correction to the mathematics; each finding was reproduced on the unchanged script
+before any edit, with her inputs.
+
+| File | Change |
+| --- | --- |
+| `scripts/hardware_test_predictors.py` | (1) New `normalise_live`: a live document may be the archive envelope or the raw `BackendProperties.to_dict()` body (`backend_name`, `last_update_date`, `qubits` at the top level, which made the loader raise `CalibrationParseError` in both modes); the raw body is wrapped as `{backend, timestamp, properties}` in memory, and the CLI still hashes and copies the original bytes. (2) Every backend identity the live payload carries must equal the backend the archive was filtered on, now recorded on `Collected.backend`; a payload naming another device, naming two, or naming none raises the new `LiveDocumentError` and the CLI exits 2. (3) The live state is deduplicated against every state up to `t_s`, not only the window: an already-seen block overrides the reading and keeps its original time for window membership. (4) `_check_qubit_shapes` rejects a `properties.qubits[q]` that is not a list of objects as `CalibrationParseError` before the loader and the digest run, so a JSON `null` entry is counted under `parse_error` instead of aborting the run with `AttributeError`. |
+| `tests/test_hardware_test_predictors.py` | 11 tests become 39 collected (parametrised cases included): raw-shape live documents in both modes and with a space-separated timestamp; raw and envelope forms digesting identically; five rejection variants in both modes; a live document that does not parse; her window-boundary reproduction (`n_window` stays 4, level stays undefined, reading overridden); four malformed-entry shapes and a non-list qubit entry counted and skipped; two CLI runs through `main` with the git reader monkeypatched (original bytes hashed and copied byte for byte; another backend exits 2); her 100-value sample pinned with the level above the band; the bracketing assertion replaced by checks against the definitions. |
+| `docs/roadmap/2026-10-23-hardware-test-archive-side-plan.md` | Dated correction under §6: the "geometric mean lies between the percentiles" sentence is false; check (2) is an observation, never enforced. |
+
+Mathematical correction: as the plan's correction states, a geometric mean need not lie inside
+a central quantile band; the "Mathematical / Statistical details" section above defines both
+quantities correctly and is unchanged, and the dry run's "zero violations" is an observation.
+
+Design choice: finding 4 is handled at the script boundary rather than in
+`calibration/loader.py`, because this PR's contract leaves `src/` untouched and the loader is
+the data track's module. The loader itself still raises `AttributeError` on such an entry for
+any other caller; that is named for its owner as a follow-up, not changed here.
+
+Verification: mutation check, each fix reverted in turn inside the fixed script: no raw
+wrapping fails 6 of 6 selected tests; no backend check fails 10 of 12 (the two that pass are
+the wrong-shape variant, rejected for its own reason); dedup against the window only fails the
+boundary test (its in-window companion passes by design); no shape check fails 4 of 5 (the
+non-list entry is also caught by the loader's `TypeError`). The script was restored from its
+backup copy, byte-identical. `ruff check .`, `ruff format --check .` (ruff 0.15.12) and
+`mypy --strict` (46 source files) pass on the pinned stack; 39 passed on Python 3.12.10.
+Reproduction guard: the fixed script rerun against `calibration-data` @ `5828b4a2` at `--at 2026-10-23T09:34:56Z` (2,249 files, 924 states, nothing skipped) writes `predictors.tsv` and `selection.json` byte-identical to the 2026-10-23 dry run, so the archive-only path and every figure in the dry-run section are unchanged. NC-021 is re-measured at the merge commit, not here.
+
 ## Related docs
 
 - `docs/roadmap/2026-10-23-hardware-test-archive-side-plan.md`
