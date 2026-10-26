@@ -285,6 +285,14 @@ def bin_index(abs_d: np.ndarray) -> np.ndarray:
     return np.clip(idx, 0, len(BIN_EDGES) - 1)
 
 
+def signed_bin(d: np.ndarray) -> np.ndarray:
+    """Amendment 5: bins by signed d; the first len(BIN_EDGES) bins are below the level."""
+    return bin_index(np.abs(d)) + len(BIN_EDGES) * (d > 0).astype(int)
+
+
+N_SIGNED_BINS = 2 * len(BIN_EDGES)
+
+
 @dataclass
 class NullTables:
     name: str
@@ -294,8 +302,8 @@ class NullTables:
     sign_positives: np.ndarray
     fallback_qubits: int
 
-    def forecast(self, qubits: np.ndarray, abs_d: np.ndarray) -> tuple[np.ndarray, int]:
-        b = bin_index(abs_d)
+    def forecast(self, qubits: np.ndarray, d: np.ndarray) -> tuple[np.ndarray, int]:
+        b = signed_bin(d)
         pooled_pairs = self.pairs.sum(axis=0)
         pooled_pos = self.positives.sum(axis=0)
         p = np.empty(len(qubits))
@@ -334,10 +342,20 @@ def simulate_null(
     residuals: list[np.ndarray],
     pooled_std_res: np.ndarray,
     rng: np.random.Generator,
+    t_start: float | None = None,
+    t_end: float | None = None,
+    count_from: float | None = None,
 ) -> NullTables:
-    """Amendment 2 and 4: the protocol's own label on simulated series at the real event times."""
+    """Amendments 2, 4 and 5: the protocol's own label on simulated series at the real event times.
+
+    Events in ``[t_start, t_end)`` are simulated; only those at or after ``count_from`` enter the
+    tables, so the test-timing diagnostic can fill its windows from the 30 days before the cut.
+    """
+    t_start = -math.inf if t_start is None else t_start
+    t_end = data.cut if t_end is None else t_end
+    count_from = -math.inf if count_from is None else count_from
     n_q = len(events)
-    n_bins = len(BIN_EDGES)
+    n_bins = N_SIGNED_BINS
     pairs = np.zeros((n_q, n_bins))
     positives = np.zeros((n_q, n_bins))
     sign_pairs = np.zeros((n_q, 2))
@@ -345,10 +363,11 @@ def simulate_null(
     fallback = 0
     t0 = data.files[0].time
     for q in range(n_q):
-        ev = [e for e in events[q] if e.time < data.cut]
+        ev = [e for e in events[q] if t_start <= e.time < t_end]
         if len(ev) < K + 2:
             continue
-        times = np.array([t0] + [e.time for e in ev])  # pseudo-event 0: the initial value
+        # pseudo-event 0: the initial value, at the archive start or at the window's start
+        times = np.array([t0 if t_start == -math.inf else t_start] + [e.time for e in ev])
         E = len(times)
         sig = sigma_q[q]
         # noise draws
@@ -374,6 +393,8 @@ def simulate_null(
             if i + K >= E:
                 break
             t = times[i]
+            if t < count_from:
+                continue
             lo, hi = window_bounds(data, t)
             idx = state_ev[lo:hi]
             idx = idx[idx >= 0]
@@ -387,7 +408,7 @@ def simulate_null(
             sel = np.abs(d) >= DELTA
             if not sel.any():
                 continue
-            b = bin_index(np.abs(d[sel]))
+            b = signed_bin(d[sel])
             np.add.at(pairs[q], b, 1.0)
             np.add.at(positives[q], b, y[sel].astype(float))
             below = d[sel] < 0
@@ -559,10 +580,10 @@ def run(fields: list[Any], ref: str, out: Path, rows_record: Path | None) -> dic
             data, built.events, sigma_filled, q_drift, "gaussian", residuals, pooled_std, rng
         ),
     }
-    abs_d = np.abs(built.X[:, 0])
+    d_obs = built.X[:, 0]
     p_null: dict[str, np.ndarray] = {}
     for name, tab in nulls.items():
-        p, fb = tab.forecast(built.qubits, abs_d)
+        p, fb = tab.forecast(built.qubits, d_obs)
         p_null[name] = p
         summary[f"null_{name}"] = {
             "simulated_pairs": float(tab.pairs.sum()),
@@ -574,6 +595,36 @@ def run(fields: list[Any], ref: str, out: Path, rows_record: Path | None) -> dic
             "sim_rate_above": float(
                 tab.sign_positives[:, 1].sum() / max(tab.sign_pairs[:, 1].sum(), 1)
             ),
+        }
+    # amendment 4 item 5 and amendment 5 item 2: the nulls at the test period's own event times
+    tt_start = data.cut - WINDOW_D * DAY
+    tt_end = data.files[-1].time + 1.0
+    for name in ("empirical", "gaussian"):
+        tab = simulate_null(
+            data,
+            built.events,
+            sigma_filled,
+            q_drift,
+            name,
+            residuals,
+            pooled_std,
+            rng,
+            t_start=tt_start,
+            t_end=tt_end,
+            count_from=data.cut,
+        )
+        p_tt, fb_tt = tab.forecast(built.qubits[test], d_obs[test])
+        summary[f"null_{name}_test_timing"] = {
+            "simulated_pairs": float(tab.pairs.sum()),
+            "bin_fallback_rows": fb_tt,
+            "sim_rate_below": float(
+                tab.sign_positives[:, 0].sum() / max(tab.sign_pairs[:, 0].sum(), 1)
+            ),
+            "sim_rate_above": float(
+                tab.sign_positives[:, 1].sum() / max(tab.sign_pairs[:, 1].sum(), 1)
+            ),
+            "mean_forecast_on_test_rows": float(p_tt.mean()),
+            "brier_on_test_rows": brier(p_tt, built.y[test]),
         }
     # calibration diagnostic (amendment 4 item 4)
     calib = []
@@ -662,11 +713,19 @@ def run(fields: list[Any], ref: str, out: Path, rows_record: Path | None) -> dic
     )
     diff = boot[primary] - boot["logistic"]
     bss_boot = 1 - boot["logistic"] / boot[primary]
+    for name in scores:
+        scores[name]["bss_vs_always_level"] = (
+            1 - scores[name]["brier"] / scores["always_level"]["brier"]
+        )
     summary["bootstrap"] = {
         "test_days": int(np.unique(days).size),
         "resamples": BOOTSTRAP,
         "bs_null_minus_bs_logistic_90": interval(diff),
         "bss_logistic_90": interval(bss_boot),
+        "bs_always_level_minus_bs_logistic_90": interval(boot["always_level"] - boot["logistic"]),
+        "bss_logistic_vs_always_level_90": interval(1 - boot["logistic"] / boot["always_level"]),
+        "bs_constant_minus_bs_logistic_90": interval(boot["constant_p0"] - boot["logistic"]),
+        "bs_always_level_minus_bs_null_90": interval(boot["always_level"] - boot[primary]),
         "bs_gaussian_minus_bs_empirical_90": interval(
             boot["gaussian_null"] - boot["empirical_null"]
         ),
@@ -710,19 +769,16 @@ def run(fields: list[Any], ref: str, out: Path, rows_record: Path | None) -> dic
             )
     with (out / "null_bins.tsv").open("w", encoding="utf-8", newline="") as fh:
         w = csv.writer(fh, delimiter="\t", lineterminator="\n")
-        w.writerow(["null", "bin_lo", "pooled_pairs", "pooled_positives", "pooled_rate"])
+        w.writerow(
+            ["null", "sign", "abs_bin_lo", "pooled_pairs", "pooled_positives", "pooled_rate"]
+        )
         for name, tab in nulls.items():
             pp, pq = tab.pairs.sum(axis=0), tab.positives.sum(axis=0)
-            for bi, edge in enumerate(BIN_EDGES):
-                w.writerow(
-                    [
-                        name,
-                        f"{edge:.2f}",
-                        int(pp[bi]),
-                        int(pq[bi]),
-                        f"{pq[bi] / pp[bi]:.4f}" if pp[bi] else "",
-                    ]
-                )
+            for bi in range(N_SIGNED_BINS):
+                sign = "below" if bi < len(BIN_EDGES) else "above"
+                edge = BIN_EDGES[bi % len(BIN_EDGES)]
+                rate = f"{pq[bi] / pp[bi]:.4f}" if pp[bi] else ""
+                w.writerow([name, sign, f"{edge:.2f}", int(pp[bi]), int(pq[bi]), rate])
     with (out / "calibration.tsv").open("w", encoding="utf-8", newline="") as fh:
         w = csv.DictWriter(
             fh, fieldnames=list(calib[0].keys()), delimiter="\t", lineterminator="\n"

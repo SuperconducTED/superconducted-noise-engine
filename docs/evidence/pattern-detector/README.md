@@ -318,6 +318,37 @@ Lesson L-029, caught before the run.
    not, the write-up says that the logistic model and the nulls are both miscalibrated on the test
    period and the skill gap is a statement about who is less wrong.
 
+**Amendment 5, 2026-10-26, after the first N1 run's calibration table was read and before clause 1
+was read or recorded; made on seeing data, not blind.** The first run of the committed
+`n1_baselines.py` (`c9b4b612`) produced the amendment 4 diagnostic and, in the same output, a
+clause-1 figure. Both are disclosed here so that nothing is hidden by the amendment: the
+empirical null's own simulation gave `y = 1` rates of 0.216 below the level and 0.411 above
+(the Gaussian null 0.318 and 0.319), the sign asymmetry amendment 4 expected; but amendment 2's
+bins pool over the sign of `d` "because the null is sign-symmetric", which the empirical null no
+longer is, so its forecast (0.264 below, 0.336 above on training rows, against observed 0.162 and
+0.389) discarded the very asymmetry it was introduced to carry. The first run's clause-1 figure
+was a logistic Brier skill of 0.258 against the sign-pooled empirical null (90% interval 0.200 to
+0.324); it is **not the record**, because the null it was measured against was mis-specified by
+the protocol's own text.
+
+1. **Bins are by signed `d`** for both nulls: `len(bins)` bins below the level and the same above,
+   0.05 log units wide in `|d|` from `delta`, last bin open-ended; the pooled fallback is per
+   signed bin. The Gaussian null is symmetric, so this changes only its sampling noise.
+2. **The test-timing diagnostic of amendment 4 item 5 is made concrete:** each null is also
+   simulated at the **test period's own event times** (events from 30 days before the cut, so the
+   windows fill, counted from the cut), with the training-period `q`, `sigma_q` and residual shape;
+   its per-sign simulated rates, its mean forecast on the test rows and its Brier score there are
+   reported beside the training-timing null. If this null also forecasts far above the observed
+   test rate, the drop is not cadence and the nulls are miscalibrated on the test period for a
+   reason the archive's own statistics do not carry.
+3. **Reference-row intervals.** The paired day bootstrap also reports the logistic model's Brier
+   difference and skill against the "always level" rule and against the constant forecast, and the
+   "always level" rule against the primary null, because the first run showed the "always level"
+   rule scoring better than both nulls on the test period (Brier 0.118 against 0.134); lesson
+   L-028 says the write-up must show the comparison against the strongest baseline the protocol
+   produced even where the pre-registered clause names a different one. **Clause 1's rule is not
+   changed** (lower-Brier null, 0.10, interval excluding zero); the extra rows are read beside it.
+
 ## 8. Counts, at the ref of the record run
 
 Appended 2026-10-26 from `count_events.py` (committed at `8db25e37`; the JSON writer's line ending
