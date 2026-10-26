@@ -10,7 +10,7 @@ minutes and `calibration-data` every hour.
 | --- | --- | --- |
 | Ours | `calibration-data` @ `5828b4a2` | 2,249 `ibm_fez` snapshot documents, 2026-05-13T12:13:22Z to 2026-10-23T09:34:56Z, plus `health/state-index.tsv` (924 distinct `qubit_digest` values) |
 | Theirs | Hugging Face `phanerozoic/qiskit-calibration-drift`, revision `0c298c2ba07f9b230a81a0e5fa8d993dcd2cf37d` (last modified 2026-10-23T11:42:05Z) | `data/train-00000-of-00001.parquet`, 98,141,114 bytes, SHA-256 `dbb53131a6c2c96732e5be070c6ad1621b7d90cb052298975d78d6bbd86fcc73`, 28,945,985 rows; `ibm_fez` rows only were read (9,898,149) |
-| Script | `compare_public_archive.py` in this folder, at PR #121 commit `PENDING-PIN` (see Corrections below; the 2026-10-23 row named `main` @ `6cf008da`, which is the base the digest module was imported from and holds no copy of the script) | Read-only; writes `summary.json` and `overlap-by-property.tsv` here |
+| Script | `compare_public_archive.py` in this folder, at PR #121 commit `11e2b471` (see Corrections below; the 2026-10-23 row named `main` @ `6cf008da`, which is the base the digest module was imported from and holds no copy of the script) | Read-only; writes `summary.json` and `overlap-by-property.tsv` here |
 | Digest | `scripts/canonical_snapshot_digest.py`, unchanged since `b4043e69` (2026-09-10), identical at `main` @ `6cf008da` and on this branch | `qubit_digest`, the NC-012 unit |
 
 The dataset is CC-BY-4.0 except its `SN` column (CC-BY-NC-4.0, WDC-SILSO), which this script
@@ -159,7 +159,7 @@ in-window figure, and `overlap-by-property.tsv` byte for byte.
 | Union of ours with every half-hourly mark, `all7` / `core5` | 1,967 / 1,641 | 1,965 / 1,639 |
 | Mismatch attribution | "the public table lacks the event we hold; not one value conflict" | four kinds by stamp, four documents with a same-stamp `readout_length` conflict (table above) |
 | Defect 3 rule | "ours wins" (not implemented) | replay unmodified, conflicts classified and named |
-| Script revision in the source cells | `main` @ `6cf008da` (a base with no copy of the script) | PR #121 commit `PENDING-PIN`; digest module unchanged since `b4043e69` |
+| Script revision in the source cells | `main` @ `6cf008da` (a base with no copy of the script) | PR #121 commit `11e2b471`; digest module unchanged since `b4043e69` |
 
 Register rows NC-077 to NC-079 carry the same corrections; the hourly count in Issue #122's
 body and checklist (626) is owed a correcting comment by the lead.
