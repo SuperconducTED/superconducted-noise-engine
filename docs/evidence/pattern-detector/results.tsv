@@ -50,50 +50,55 @@ calibration[0].rows	1374
 calibration[0].observed_rate	0.16229985443959244
 calibration[0].empirical_mean_forecast	0.1982983019824875
 calibration[0].gaussian_mean_forecast	0.2922663780161158
+calibration[0].logistic_mean_forecast	0.16748040628733663
 calibration[1].split	train
 calibration[1].sign	above
 calibration[1].rows	1262
 calibration[1].observed_rate	0.3890649762282092
 calibration[1].empirical_mean_forecast	0.4130590104643606
 calibration[1].gaussian_mean_forecast	0.31979146739047676
+calibration[1].logistic_mean_forecast	0.3834246606665606
 calibration[2].split	test
 calibration[2].sign	below
 calibration[2].rows	779
 calibration[2].observed_rate	0.044929396662387676
 calibration[2].empirical_mean_forecast	0.1883443011886375
 calibration[2].gaussian_mean_forecast	0.2874519612081756
+calibration[2].logistic_mean_forecast	0.04888525754222184
 calibration[3].split	test
 calibration[3].sign	above
 calibration[3].rows	515
 calibration[3].observed_rate	0.229126213592233
 calibration[3].empirical_mean_forecast	0.41775463031091714
 calibration[3].gaussian_mean_forecast	0.3232321602815955
-logistic.dropped_constant_columns	['hours_since_sweep', 'd_readout_missing']
+calibration[3].logistic_mean_forecast	0.18728451511843086
+logistic.dropped_constant_columns	['d_readout_missing']
 logistic.inner_cut	2026-08-12T05:59:18+00:00
 logistic.inner_fit_rows	2108
 logistic.inner_val_rows	528
-logistic.lambda_losses.0.001	0.3863129514287518
-logistic.lambda_losses.0.01	0.3863113903873937
-logistic.lambda_losses.0.1	0.3862958706786703
-logistic.lambda_losses.1.0	0.3861494091235108
-logistic.lambda_losses.10.0	0.38531700025974214
+logistic.lambda_losses.0.001	0.38719827136795865
+logistic.lambda_losses.0.01	0.3871965873827265
+logistic.lambda_losses.0.1	0.3871798434788344
+logistic.lambda_losses.1.0	0.3870216454314091
+logistic.lambda_losses.10.0	0.3861088744952783
 logistic.lambda	10.0
-logistic.coefficients_standardised.d	0.573753441035821
-logistic.coefficients_standardised.abs_d_rel	-0.1315353306741089
-logistic.coefficients_standardised.prev_d	-0.06011288876528416
-logistic.coefficients_standardised.n_distinct	-0.8185760704011739
-logistic.coefficients_standardised.hours_since_prev	-0.006521520223782487
-logistic.coefficients_standardised.d_t2	-0.022313690902718213
-logistic.coefficients_standardised.d_readout	-0.02905483562519309
-logistic.coefficients_standardised.chip_readout	-0.25319182901456333
-logistic.coefficients_standardised.same_sign_share	0.5588998057575154
-logistic.coefficients_standardised.sx_log	0.08630197148346928
-logistic.coefficients_standardised.cz_best_log	0.19597898393013308
-logistic.coefficients_standardised.hour_sin	0.033954724332324465
-logistic.coefficients_standardised.hour_cos	0.06330839360880354
-logistic.coefficients_standardised.prev_d_missing	0.3065150052792879
-logistic.coefficients_standardised.d_t2_missing	-0.29045586945934754
-logistic.intercept	-1.3225045391101773
+logistic.coefficients_standardised.d	0.5756889050148088
+logistic.coefficients_standardised.abs_d_rel	-0.1317343513163645
+logistic.coefficients_standardised.prev_d	-0.05998386447269018
+logistic.coefficients_standardised.n_distinct	-0.8199315194010044
+logistic.coefficients_standardised.hours_since_prev	-0.017481077479365562
+logistic.coefficients_standardised.hours_since_sweep	0.015300735035408589
+logistic.coefficients_standardised.d_t2	-0.02192070279664692
+logistic.coefficients_standardised.d_readout	-0.029243620494230963
+logistic.coefficients_standardised.chip_readout	-0.2537115408723422
+logistic.coefficients_standardised.same_sign_share	0.5582517861805029
+logistic.coefficients_standardised.sx_log	0.08652521952733323
+logistic.coefficients_standardised.cz_best_log	0.1961760768280745
+logistic.coefficients_standardised.hour_sin	0.0342409950181126
+logistic.coefficients_standardised.hour_cos	0.06522565708698047
+logistic.coefficients_standardised.prev_d_missing	0.30679216597598963
+logistic.coefficients_standardised.d_t2_missing	-0.2869743810724247
+logistic.intercept	-1.323204536171972
 test_scores.empirical_null.brier	0.12898438127770762
 test_scores.empirical_null.log_loss	0.41669467627608503
 test_scores.empirical_null.auc	0.7367891942052894
@@ -122,24 +127,31 @@ test_scores.always_level.mean_forecast	0.0
 test_scores.always_level.bss_vs_primary_null	0.0833152009020347
 test_scores.always_level.bss_vs_constant	0.07302662683687156
 test_scores.always_level.bss_vs_always_level	0.0
-test_scores.logistic.brier	0.09984886825696755
-test_scores.logistic.log_loss	0.3461329876170218
-test_scores.logistic.auc	0.7108487566805863
-test_scores.logistic.mean_forecast	0.10414254888392108
-test_scores.logistic.bss_vs_primary_null	0.22588403907609822
-test_scores.logistic.bss_vs_constant	0.2171956115960879
-test_scores.logistic.bss_vs_always_level	0.1555265651992418
+test_scores.logistic.brier	0.09985147798601611
+test_scores.logistic.log_loss	0.3462076840796514
+test_scores.logistic.auc	0.7106654522749796
+test_scores.logistic.mean_forecast	0.10396687860230502
+test_scores.logistic.bss_vs_primary_null	0.22586380616865076
+test_scores.logistic.bss_vs_constant	0.2171751516010232
+test_scores.logistic.bss_vs_always_level	0.15550449337317096
+test_scores.oracle_constant_test_rate.brier	0.10425779187738439
+test_scores.oracle_constant_test_rate.log_loss	nan
+test_scores.oracle_constant_test_rate.auc	0.5
+test_scores.oracle_constant_test_rate.mean_forecast	0.11823802163833076
+test_scores.oracle_constant_test_rate.bss_vs_primary_null	0.1917021980133088
+test_scores.oracle_constant_test_rate.bss_vs_constant	0.18263012459108996
+test_scores.oracle_constant_test_rate.bss_vs_always_level	0.11823802163833075
 primary_null	empirical_null
 bootstrap.test_days	46
 bootstrap.resamples	1000
-bootstrap.bs_null_minus_bs_logistic_90	(0.020492771878100523, 0.03771366107199019)
-bootstrap.bss_logistic_90	(0.15673599454440051, 0.2989643022032237)
-bootstrap.bs_always_level_minus_bs_logistic_90	(0.012920715064208908, 0.023620538799504976)
-bootstrap.bss_logistic_vs_always_level_90	(0.12585830653317368, 0.1780532351971629)
-bootstrap.bs_constant_minus_bs_logistic_90	(0.022759053607950754, 0.03281244685501943)
+bootstrap.bs_null_minus_bs_logistic_90	(0.02047215749831511, 0.03771563770800347)
+bootstrap.bss_logistic_90	(0.15671330859167837, 0.2990791805222218)
+bootstrap.bs_always_level_minus_bs_logistic_90	(0.01291308741618839, 0.023609768270394776)
+bootstrap.bss_logistic_vs_always_level_90	(0.12586381168275185, 0.17790028134611055)
+bootstrap.bs_constant_minus_bs_logistic_90	(0.02275624183291378, 0.03281271901442735)
 bootstrap.bs_always_level_minus_bs_null_90	(-0.024393110396669727, 0.0023207932668610053)
 bootstrap.bs_gaussian_minus_bs_empirical_90	(0.0013723556236831622, 0.010458394412812886)
-clause_1.bss_logistic_vs_primary_null	0.22588403907609822
+clause_1.bss_logistic_vs_primary_null	0.22586380616865076
 clause_1.threshold	0.1
 clause_1.interval_excludes_zero	True
 clause_1.holds	True

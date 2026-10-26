@@ -349,6 +349,29 @@ the protocol's own text.
    produced even where the pre-registered clause names a different one. **Clause 1's rule is not
    changed** (lower-Brier null, 0.10, interval excluding zero); the extra rows are read beside it.
 
+**Amendment 6, 2026-10-26, after the second N1 run and before section 10 was written; a feature
+defect and the rule for reading clause 2.**
+
+1. **A frozen feature was dead in the first two runs.** `hours_since_sweep` was zero on every row:
+   the code took the last sweep at or before `t` with a float epsilon that vanishes at epoch scale,
+   and an event's own file is usually a chip-wide sweep (IBM re-measures `T1` chip-wide), so the
+   column was constant and the constant-column guard dropped it silently. Fixed to the last sweep
+   **strictly before** `t` (`77e5a7d8`); the column now runs from 4.1 to 100.6 hours, median 24.7.
+   The second run's figures (`6aa5b8d5`, signed bins, dead feature) were a clause-1 skill of 0.226
+   (0.157 to 0.299) and are superseded by the record run of section 10, which differs from them
+   in the fourth decimal: the feature carries no weight. `d_readout_missing` is constant because
+   every row's qubit has a readout level; it is dropped with this sentence.
+2. **A skill clause is decomposed before it is read as a pattern.** A Brier skill score can be
+   earned by predicting the period's shift rate (calibration) or by ordering which disagreements
+   shift (discrimination). Section 10 reports both, and **clause 2 (task N2) is read the same
+   way**: the network's skill over the logistic bar must be accompanied by its AUC against the
+   logistic model's and by the oracle row below, so that clause 2 cannot pass on base-rate
+   anticipation alone; N3's permutation importance is scored on Brier and on AUC separately.
+3. **An oracle diagnostic row**, the constant forecast at the test period's own observed base
+   rate, is reported beside the scores. It is not a pre-registered baseline (it uses the test
+   labels) and no clause is read against it; it bounds how much of a model's skill is the
+   period's rate.
+
 ## 8. Counts, at the ref of the record run
 
 Appended 2026-10-26 from `count_events.py` (committed at `8db25e37`; the JSON writer's line ending
@@ -401,6 +424,100 @@ or below what the amended null of section 7 produces under no pattern (about 0.3
 check), so the base rate is not a finding and must not be quoted as one. The difference between
 the two signs of `d` in the table is a count, reported because section 6 asked for it; what it
 means is N3's permutation table, not this section.
+
+## 10. N1 results: the nulls, the reference rows and the logistic bar
+
+Record run of `n1_baselines.py` at `77e5a7d8` on the field collection at `calibration-data`
+`cf960389` (same ref as section 8; `collect_fields.py`, walk about 20 minutes, the run 14 s), the
+lead's go of 2026-10-26 ("baselines and the amended null, nothing deep"). Reproduction guard: the
+3,932 labelled rows rebuilt from the field collection equal `rows.tsv.gz`. **Laptop, provisional
+until N6; nothing registered until N3 mints the NC rows.** Outputs: `summary.json`, `results.tsv`,
+`features.tsv.gz` (design matrix, labels, both null forecasts, the logistic forecast),
+`null_bins.tsv`, `calibration.tsv`. Three runs happened, each from a committed script; the first
+two are disclosed in amendments 5 and 6 and are not the record.
+
+**Rows.** 2,636 training rows (2 excluded for a zero band width, none for missing gate errors),
+1,294 test rows; positives 714 and 153 as in section 8. Design matrix 17 columns; `d_readout_missing`
+constant and dropped (amendment 6). Logistic `lambda = 10`, the top of the pre-registered grid
+(inner losses 0.3863 to 0.3853, monotone), inner cut `2026-08-12T05:59:18Z`.
+
+**The nulls, as simulated** (training increments and residuals only; `rho = -0.488`, `q = 0.050`,
+one qubit on the median `sigma_q`, one on the pooled residual shape; pooled standardised residual
+skew -1.49, 5th and 95th percentiles -2.02 and +1.49). Simulated `y = 1` rates at training timing:
+empirical null 0.216 below the level, 0.411 above; Gaussian null 0.318 and 0.319. At the test
+period's own event times: empirical 0.226 and 0.418, Gaussian 0.330 and 0.329. Bin fallbacks to the
+pooled bin: 322 rows (empirical), 592 (Gaussian) of 3,930.
+
+**Calibration diagnostic (amendment 4 item 4), read first.**
+
+| Split | Sign of `d` | Rows | Observed `y = 1` | Empirical null | Gaussian null | Logistic |
+| --- | --- | --- | --- | --- | --- | --- |
+| train | below | 1,374 | 0.162 | 0.198 | 0.292 | 0.167 |
+| train | above | 1,262 | 0.389 | 0.413 | 0.320 | 0.383 |
+| test | below | 779 | 0.045 | 0.188 | 0.287 | 0.049 |
+| test | above | 515 | 0.229 | 0.418 | 0.323 | 0.187 |
+
+Two readings the protocol fixed in advance. First, **the sign asymmetry is the tail shape**: the
+empirical null reproduces it on the training rows to within 0.04 and 0.02; the Gaussian null does
+not; amendment 4 was right. Second, **the nulls are miscalibrated on the test period**: both
+forecast 0.28 to 0.30 where 0.118 is observed, at training timing and at the test period's own
+timing (mean forecast 0.287, Brier 0.130), with 0.86 against 0.95 events per qubit per day. Cadence
+does not explain the drop; the archive's May-to-August statistics do not carry whatever reduced
+the shift rate in September and October. Amendment 4 item 5's sentence applies: the logistic model
+and the nulls are calibrated on different things, and the skill gap against the nulls is a
+statement about who is less wrong about the period's rate.
+
+**Scores on the 1,294 test rows.**
+
+| Forecast | Brier | Log loss | AUC | Mean forecast | Skill vs empirical null | Skill vs always-level |
+| --- | --- | --- | --- | --- | --- | --- |
+| empirical null (primary, lower Brier) | 0.1290 | 0.417 | 0.737 | 0.280 | 0 | -0.091 |
+| Gaussian null (reference) | 0.1349 | 0.449 | 0.663 | 0.302 | -0.046 | -0.141 |
+| constant `p_0` (reference) | 0.1276 | 0.433 | 0.500 | 0.271 | +0.011 | -0.079 |
+| always level, `p = 0` (reference) | 0.1182 | 1.634 | 0.500 | 0 | +0.083 | 0 |
+| **logistic (the bar)** | **0.0999** | **0.346** | **0.711** | **0.104** | **+0.226** | **+0.156** |
+| oracle: constant at the test rate (diagnostic, amendment 6) | 0.1043 | | 0.500 | 0.118 | +0.192 | +0.118 |
+
+Paired day-block bootstrap, 46 test days, 1,000 resamples, 90% intervals: empirical-null Brier
+minus logistic Brier 0.0205 to 0.0377; logistic skill against the empirical null **0.157 to 0.299**;
+against the always-level rule 0.126 to 0.178 (Brier difference 0.0129 to 0.0236); against the
+constant, Brier difference 0.0228 to 0.0328. The always-level rule against the primary null:
+-0.024 to +0.002, including zero. Gaussian minus empirical null: 0.0014 to 0.0105, the empirical
+null is the better one, as amendment 4 predicted.
+
+**Clause 1, as pre-registered: holds.** The logistic model's Brier skill against the lower-Brier
+null is 0.226, above 0.10, with the paired interval excluding zero (and excluding 0.10). It also
+clears 0.10 against the strongest reference row the protocol produced, the always-level rule
+(0.156, interval 0.126 to 0.178), and against the constant (0.217).
+
+**What the skill is, decomposed (amendment 6 item 2).** It is calibration, not discrimination.
+The logistic model's mean forecast on the test rows is 0.104 against an observed 0.118, and
+0.049 and 0.187 per sign against 0.045 and 0.229: it anticipated the lower shift rate of the test
+period from features observable at submission time. Against the oracle constant at the test
+period's own rate its skill is 0.042, below the margin. Its AUC, 0.711, is **below the empirical
+null's 0.737**: which disagreements become shifts is not ordered better than signed `d` and the
+qubit's own tail shape already order it. By standardised coefficient the anticipation runs
+through `n_distinct` (-0.82: more distinct `T1` values in the window, fewer shifts), the sign of
+`d` (+0.58), `same_sign_share` (+0.56: a disagreement shared by many qubits is more often a shift),
+the indicators `prev_d_missing` (+0.31) and `d_t2_missing` (-0.29), `chip_readout` (-0.25) and
+`cz_best_log` (+0.20); `hours_since_sweep` carries no weight. These are descriptions; what the
+pattern is, and whether `n_distinct` is a cadence effect, is N3's permutation table, scored on
+Brier and on AUC separately.
+
+**The outcome table's row.** Clause 1 yes; clause 2 not scored (N2 waits for gate L1 under plan
+§4.1). The pre-registered reading is "a pattern exists and a linear rule prices it", **with the
+decomposition attached**: the pattern found is that the rate at which a departed reading becomes
+the level fell in the test period and was predictable from the calibration table's own state,
+not that individual shifts are identifiable. The engineer's rule "carry the level" is unchanged;
+what the archive adds is a calibrated estimate of how often that rule will be wrong for a given
+chip state.
+
+**Limitations.** One test regime: the 46 test days form one period, the day bootstrap resamples
+inside it, and the intervals do not carry the uncertainty of the regime change that produced most
+of the skill. `lambda` sits at the top of its grid. The 175 training rows whose successors cross
+the cut are in the training set (section 2). The nulls' residual shape and scale are from the
+training period alone. Laptop; Burak's desktop reproduction (N6) is owed before any figure leaves
+the provisional state.
 
 ## 9. Related
 

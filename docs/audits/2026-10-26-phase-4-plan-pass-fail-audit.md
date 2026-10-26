@@ -490,6 +490,18 @@ What this changes in the tables above:
 
 The audit's headline 2 (the offline half is the critical path) stands; its owner changed.
 
+### 4.9 N0 and N1 done the same day
+
+On the lead's word, N0 (protocol, counts) and N1 (the nulls, the reference rows, the logistic bar)
+were completed on 2026-10-26 in `docs/evidence/pattern-detector/` (README sections 7 to 10). Six
+dated amendments were needed before any score was read, three of them nulls that a no-information
+model would have cleared (lesson L-029, three times in one day). Clause 1 holds as pre-registered
+(logistic Brier skill 0.226 against the empirical null, interval 0.157 to 0.299; 0.156 against the
+always-level rule) and its decomposition says the skill is calibration, not discrimination: the
+model anticipated the lower shift rate of the test period, it does not order which disagreements
+shift better than the null. Nothing registered; N3 mints the rows; N2 waits for L1; Burak's
+reproduction (N6) and Bengisu's review of amendments 2 to 6 are owed.
+
 ## 5. What this audit did not do
 
 - No new measurement on the archive, no new NC row, no edit to the plan or the pre-registration.
