@@ -358,7 +358,9 @@ def summarise(
 
 def write_outputs(out: Path, summary: dict[str, Any], rows: list[Row]) -> None:
     out.mkdir(parents=True, exist_ok=True)
-    (out / "counts.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    (out / "counts.json").write_text(
+        json.dumps(summary, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     flat: list[tuple[str, Any]] = []
 
     def walk(prefix: str, node: Any) -> None:

@@ -78,9 +78,12 @@ closed form above; the protocol records which).
   level" rule (`p = 0` for every row), `BS = p_0`, never below the constant's;
 - Brier skill score against the conditional null, `BSS_1 = 1 - BS / BS_null`.
 
-Under the null `y = 1` is rare (a few percent of events at the archive's scatter), so the test
-period's count of `y = 1` events bounds what the bootstrap can resolve; step N0 counts it and
-states the minimum first.
+Under a fixed-level null `y = 1` is rare (a few percent of events at the archive's scatter); N0's
+counts and its second synthetic check showed that the protocol's window-mean reference lags a
+drifting level and makes `y = 1` common under the null (about 0.35), so the null is now the
+protocol's own label on simulated series (N0 README §7 amendment 2). The test period's count of
+`y = 1` events still bounds what the bootstrap can resolve; N0 counted it with the minimum stated
+first.
 
 **Clause 1 (a pattern exists).** `BSS_1(logistic) >= 0.10` on the test events, with the paired
 90% block bootstrap interval of `BS_null - BS_logistic` excluding zero. AUC is reported as

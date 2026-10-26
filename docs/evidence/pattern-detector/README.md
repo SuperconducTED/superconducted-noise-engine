@@ -1,9 +1,10 @@
 # Pattern detector: does the archive say when a reading has become the level? (task N0)
 
 **Date**: 2026-10-26 · **Author**: Mert Efe Şensoy (lead) · **Status**: **protocol, committed
-before any row was counted.** Section 8 is empty at this commit; the counts are appended in a later,
-dated commit from the committed script, and nothing is scored against the labels before tasks N1
-to N3 · **Ticket**: #110, tasks N0 to N6 (comment 6412965244) · **Decision that allows it**: phase-4
+before any row was counted** (`49256efe`, section 8 empty there); section 8 holds the counts of the
+record run, appended in a later dated commit from the committed script; **amendment 2 in section 7
+replaces the null of section 4 before N1 runs**; nothing is scored against the labels before tasks
+N1 to N3 · **Ticket**: #110, tasks N0 to N6 (comment 6412965244) · **Decision that allows it**: phase-4
 plan §4.1 (PR #124 at `bf4c54e2`): no deep-model **training** before gate L1, the protocol commit
 may be written now · **Source of the design**: `docs/audits/2026-10-26-phase-4-plan-pass-fail-audit.md`
 §4.3 to §4.5 · **Reviewers**: @bengisucvd (statistics: the null's value, the thresholds, the
@@ -213,15 +214,99 @@ branch), whose register row is **NC-085** (the cell quotes the rolling band's ha
 0.34 log units). Found by the session drafting the advisor brief, which checked every figure
 against its row. `delta` stays 0.37; the count run already in progress used it.
 
+**Amendment 2, 2026-10-26, after the counts of section 8 were read and before N1; it changes the
+null, not the label, the features, the clauses or the floors.** Section 4's Monte Carlo starts the
+simulated level at the window mean (`mu_0 = 0`) and lets it drift only over the `k` successors. That
+omits the **lag of a 30-day window mean behind a drifting level**: under the local-level model with
+the archive's own `q` (0.050, section 8) the reference the protocol computes is itself stale by the
+drift accumulated inside the window, and the next readings are often nearer the new reading than
+that stale mean with no device pattern at all. A synthetic check (implementation doc, Verification;
+synthetic figures, not register claims) gives `P(y = 1 | |d| >= 0.37)` of about 0.35 under
+`q = 0.05` with a 30-event window mean as the reference, against about 0.04 with a fixed level, and
+the same on both signs of `d`. Section 4's sentence "`y = 1` is rare under the null (a few percent
+of events ...)" and section 6's "with a few percent base rate under the null" are therefore
+**superseded**: under the null as the protocol actually computes its reference, `y = 1` is common.
+The observed base rates (section 8) sit at or below that figure, so **the base rate is not a
+finding**. Caught before any scoring, as lesson L-029 requires.
+
+**The null forecast, as N1 computes it.** The null is *the protocol's own label computed on
+simulated series*:
+
+- per qubit, simulate the local-level process `L_j = mu_j + e_j`, `mu_j = mu_{j-1} + eta_j`
+  (`Var(e) = sigma_q^2`, `Var(eta) = q sigma_q^2`, the shared `q` of section 8 and the qubit's robust
+  `sigma_q`) **at the qubit's actual re-measurement times**, over the training period plus the
+  30 days before its first training event, for 2,000 replicates, `SeedSequence(84)`;
+- map simulated values onto the **real states**: every state in a window takes the simulated value
+  of the qubit's latest event at or before that state's time, which is exactly how the archive maps
+  events to states, so the state weights come from the real state timing, not from an event-level
+  approximation;
+- compute the level, `d_sim` and `y_sim` for every simulated event with the protocol's own rules
+  (strictly-before window, 5 states, 3 distinct values, `delta`, `k`), keeping every `(d_sim, y_sim)`
+  pair with `|d_sim| >= delta`;
+- estimate `p_null(d)` per qubit by binning `d_sim` in **0.05 log-unit bins**, pooled over the sign of
+  `d` because the null is sign-symmetric by construction (the check gives 0.35 on both sides, so the
+  **sign of `d` is a legitimate feature**, not something the null absorbs); a bin with fewer than
+  200 simulated pairs borrows the pooled-over-qubits bin value;
+- `p_null,i` is the bin value at the observed `d_i` for the event's qubit. `BS_null` is its Brier
+  score on the test rows, as section 5 defines.
+
+Section 4's fixed-level closed form and its `mu_0 = 0` Monte Carlo become **reference rows** that
+show why the null matters; they are no longer the null. Section 6's floors stand (all are met with
+room, section 8); only their rationale's base-rate sentence was wrong. Bengisu's review covers this
+amendment with the rest; Dr. Akba's brief describes the null in these terms.
+
 ## 8. Counts, at the ref of the record run
 
-To be appended by the committed script `count_events.py` in a later commit: the pinned
-`calibration-data` ref and its distinct-state count; events, rows (`|d| >= delta`), positives,
-distinct days with a row, per split and per sign of `d`; censored events per split; training
-events whose successors cross the cut; per-qubit row counts (min, median, max); the null's
-parameters (`rho`, `q`, the distribution of `sigma_q`); the §6 branch taken. Laptop, provisional
-until Burak's desktop reproduces it (N6). No figure here is a register row until N3 registers the
-conclusions in Rule 7 form.
+Appended 2026-10-26 from `count_events.py` (committed at `8db25e37`; the JSON writer's line ending
+was fixed afterwards and the run reproduced from the pickled collection with identical content, so
+the reproduction compares content, the committed blob being LF-normalised). Laptop, pinned
+interpreter `C:/t/pin125` (numpy only beyond the project's code), `PYTHONPATH=src;.`. The archive
+walk (2,330 `git show` calls on a OneDrive path) took about 21 minutes; the count itself seconds.
+**Provisional until Burak's desktop reproduces it (N6). No figure here is a register row until N3
+registers the conclusions in Rule 7 form.** Outputs: `counts.json`, `counts.tsv`, `rows.tsv.gz` (the
+4,061 labelled-or-censored rows at `delta = 0.37`, N1's input).
+
+**Ref and guard.** `calibration-data` `cf960389c672208a3952cbdf08bfd7e338ace40c`; 2,330 `ibm_fez`
+files from `2026-05-13T12:13:22Z` to `2026-10-26T06:02:39Z`; **944 distinct states**, equal to the
+`is_new_state` rows of `health/state-index.tsv` at that ref (guard passed); 154 chip-wide `T1`
+sweeps by the date rule.
+
+**Events.** 23,036 re-measurement events of `log T1` over 156 qubits: 14,837 before the cut,
+8,199 after.
+
+**Rows at `delta = 0.37`** (the protocol's value):
+
+| | Train (before 2026-09-01) | Test |
+| --- | --- | --- |
+| rows incl. censored | 2,638 | 1,423 |
+| censored (fewer than `k` successors) | 0 | 129 |
+| rows | 2,638 | 1,294 |
+| positives (`y = 1`) | 714 | 153 |
+| base rate | 0.271 | 0.118 |
+| rows below the level / positives | 1,376 / 223 | 779 / 35 |
+| rows above the level / positives | 1,262 / 491 | 515 / 118 |
+| distinct days with a row / with a positive | 85 / 80 | 46 / 43 |
+| qubits with a row | 156 | 154 |
+| rows per qubit, min / median / max | 1 / 17 / 42 | 1 / 8 / 20 |
+| training rows whose `k` successors cross the cut | 175 | |
+
+**Rows at the fallback `delta = 0.25`** (counted in the same run, not used): train 5,274 rows,
+1,774 positives, 90 days; test 2,667 rows (257 censored), 462 positives, 46 days.
+
+**The null's parameters** (training increments only, no label touched): pooled lag-1
+autocorrelation `rho = -0.488` over 14,681 pairs (NC-084 gave -0.486 on `5828b4a2`), so
+`q = 0.050`; robust `sigma_q` for 155 qubits: min 0.076, p10 0.160, median 0.205, p90 0.259,
+max 0.341 log units.
+
+**Section 6's branch: 1, the full 14-feature list at `delta = 0.37`** (714 training positives
+against the floor of 150; 153 test positives against 30; 46 test days against 30). The fallback
+was not needed.
+
+**Two sentences of reading, and no more.** The observed base rates (0.27 train, 0.12 test) sit at
+or below what the amended null of section 7 produces under no pattern (about 0.35 in the synthetic
+check), so the base rate is not a finding and must not be quoted as one. The difference between
+the two signs of `d` in the table is a count, reported because section 6 asked for it; what it
+means is N3's permutation table, not this section.
 
 ## 9. Related
 
@@ -233,5 +318,7 @@ conclusions in Rule 7 form.
 - `scripts/hardware_test_predictors.py` (PR #126's branch; the state-weighted level)
 - `scripts/canonical_snapshot_digest.py`, `scripts/init_error_analysis.py` (`main`; the digest and
   the `git show` helpers this folder's script uses)
-- NC-084, NC-086, NC-091 (`docs/numerical-claims.md` on PR #124's and the pre-registration branch)
+- NC-084, NC-085, NC-086, NC-091 (`docs/numerical-claims.md` on PR #124's and the pre-registration
+  branch)
+- `docs/implementations/2026-10-26-pattern-detector-protocol-n0.md` (the two synthetic checks)
 - Issue #110 comment 6412965244; Issue #125

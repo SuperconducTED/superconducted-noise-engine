@@ -169,6 +169,9 @@ Seven items, zero moved in two days, matching the dashboard's "conditions 0 of 7
   submission yet; the realistic clock starts at the freezing commit, which starts at Burak's dry
   run. The audit records the dependency chain once, plainly: *dry run → Bengisu's review →
   freeze → job 1 → L1 → lane 2 resumes and the per-qubit extractor opens.*
+- **Owed on PR #124's branch, found 2026-10-26:** the hardware test design §1 cites the 0.37
+  log-unit scatter to "NC-084, NC-085" (its row is NC-085, section 4.3's correction) and frames the
+  scatter around a fixed level; a dated note there once the N0 counts are reviewed. Lead.
 - **Three posts drafted on 2026-10-24 are still not posted** (A.4): the A7 note on #110, the
   review note to Bengisu on PR #124, the register line on whether the 2026-10-03 arrangement
   covers the direction change. The lead's word is still required for each; section 4 makes the
@@ -320,6 +323,14 @@ confirmed both: the conditional probability drops by an order of magnitude betwe
 and `|d| = 0.8`, and the `|d|`-only model's skill against the constant is positive. A constant
 null would therefore have endorsed a "pattern" that is the label's own arithmetic (lesson L-029,
 the exact failure the predictability rule's first draft had).
+
+*Correction, 2026-10-26, from N0's counts and a second synthetic check (N0 README §7 amendment 2):
+the sentence above that `y = 1` is rare under the null holds only for a level known exactly. The
+protocol's reference is a 30-day window mean, which lags a drifting level (`q` about 0.05 on the
+archive), and under that null `y = 1` is common (about 0.35 of rows in the check). The null
+forecast is therefore the protocol's own label computed on simulated series, as the README's
+amendment 2 specifies; the per-event Monte Carlo below, which starts the level at the window mean,
+is a reference row, not the null.*
 
 **The null forecast is per event.** For every event `i`, `p_null,i = P(y_i = 1 | d_i, sigma_q, k)`
 under noise-around-a-level, by Monte Carlo from the qubit's own scatter `sigma_q` estimated on

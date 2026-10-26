@@ -75,6 +75,45 @@ shrinkage-band half-width, not NC-084, after the advisor-brief session's check):
   about 30 blocks to give a 90% interval shape that does not depend on two or three days; 30 test
   positives keep a 0.10 skill gap from being decided by a handful of events.
 
+## As of 2026-10-26, later: the counts, amendment 2, and the line-ending fix
+
+The record run at `calibration-data` `cf960389` (2,330 files, 944 distinct states, guard passed;
+walk about 21 minutes on the OneDrive path) gave 2,638 training rows with 714 positives and 1,294
+test rows with 153 positives over 46 days at `delta = 0.37`: README §6's branch 1. Reading the
+counts showed base rates of 0.27 and 0.12 where the README's fixed-level reasoning had said "a few
+percent", which prompted a second synthetic check, below. It showed the §4 null omits the lag of
+the window mean behind a drifting level and under-states the null by about a factor of nine, so
+README §7 **amendment 2** redefines the null as the protocol's own label computed on simulated
+local-level series mapped onto the real state timing, before N1 runs. The label, features, clauses
+and floors are unchanged. `counts.json` was first written with CRLF; the writer now passes
+`newline="
+"`, the run was reproduced from the pickled collection, and the content was identical
+(the committed blob is LF-normalised either way).
+
+**Synthetic check 2** (no archive data; figures are not register claims). Local-level series of
+`W + 1 + k` events with `sigma = 0.205` (the archive's median robust scale), `k = 5`, `W = 30`; the
+"level" is the mean of the first `W` events, the reading is event `W + 1`, rows are `|d| >= 0.37`:
+
+```python
+import numpy as np
+rng = np.random.default_rng(84); sigma, k, W, delta = 0.205, 5, 30, 0.37
+for q in (0.0, 0.05):
+    n = 400_000
+    mu = np.cumsum(rng.normal(0, np.sqrt(q) * sigma, size=(n, W + 1 + k)), axis=1)
+    L = mu + rng.normal(0, sigma, size=mu.shape)
+    level, reading = L[:, :W].mean(axis=1), L[:, W]
+    d = reading - level; sel = np.abs(d) >= delta
+    m = np.median(L[:, W + 1:], axis=1)
+    y = np.abs(m - reading) < np.abs(m - level)
+    print(q, y[sel].mean(), y[sel & (d < 0)].mean(), y[sel & (d > 0)].mean(),
+          (np.abs(m - reading) < np.abs(m - mu[:, W]))[sel].mean())
+```
+
+Run on 2026-10-26: `q = 0`: 0.038 overall (0.037 below, 0.039 above; 0.029 against the true
+level); `q = 0.05`: **0.350** (0.352 below, 0.347 above; 0.144 against the true level). The rows'
+share of events in the check (0.149 at `q = 0.05`) is close to the archive's (0.178 train, 0.174
+test), a consistency check and nothing more.
+
 ## Design decisions
 
 - **Replicate, do not import, the PR #123 helpers.** This branch must run from `main` plus its own
@@ -109,6 +148,9 @@ shrinkage-band half-width, not NC-084, after the advisor-brief session's check):
   ```
 
   then `diff <dir>/counts.tsv docs/evidence/pattern-detector/counts.tsv` is empty.
+
+- Synthetic check 2 above: expected shape, `P(y = 1)` about 0.04 at `q = 0` and about 0.35 at
+  `q = 0.05`, equal on both signs.
 
 - Lint: `C:/t/ruffpin/Scripts/ruff.exe check docs/evidence/pattern-detector/count_events.py` and
   `ruff format --check` on the same file report nothing.
