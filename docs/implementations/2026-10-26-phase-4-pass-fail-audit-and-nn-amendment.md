@@ -190,13 +190,14 @@ ratification; any change is recorded in the protocol README before the run, date
   whether the level is treated as known; the protocol's step N0 estimates `sigma_q` per qubit
   from the data and the check only needs the shape to hold at both.
 
-- No em dash in the two new files:
+- No em dash in the two new files (checked in Python, because Git Bash leaves the bash escape
+  for U+2014 as six literal characters and a `grep` with it tests nothing):
 
   ```bash
-  grep -c $'—' docs/audits/2026-10-26-phase-4-plan-pass-fail-audit.md docs/implementations/2026-10-26-phase-4-pass-fail-audit-and-nn-amendment.md
+  python -c "import pathlib,sys; print(sum(pathlib.Path(f).read_text(encoding='utf-8').count(chr(0x2014)) for f in sys.argv[1:]))" docs/audits/2026-10-26-phase-4-plan-pass-fail-audit.md docs/implementations/2026-10-26-phase-4-pass-fail-audit-and-nn-amendment.md
   ```
 
-  expected `0` for both.
+  expected `0`.
 
 - CI runs no documentation check (`.github/workflows/ci.yml` has no markdown or link step), so
   there is nothing further to run.
