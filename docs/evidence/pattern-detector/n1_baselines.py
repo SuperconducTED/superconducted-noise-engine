@@ -825,6 +825,21 @@ def selftest() -> None:
     print("selftest ok")
 
 
+class _FieldsUnpickler(pickle.Unpickler):
+    """The collector pickles ``Fields`` under ``__main__`` when run as a script; map it back."""
+
+    def find_class(self, module: str, name: str) -> Any:
+        if name == "Fields" and module in ("__main__", "collect_fields"):
+            return cf.Fields
+        return super().find_class(module, name)
+
+
+def load_fields(path: Path) -> list[Any]:
+    with path.open("rb") as fh:
+        fields: list[Any] = _FieldsUnpickler(fh).load()
+    return fields
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -841,7 +856,7 @@ def main() -> None:
         return
     if not args.fields or not args.out:
         ap.error("--fields and --out are required")
-    fields = pickle.loads(args.fields.read_bytes())
+    fields = load_fields(args.fields)
     summary = run(fields, args.ref, args.out, None if args.no_guard else args.rows_record)
     print(
         json.dumps(
