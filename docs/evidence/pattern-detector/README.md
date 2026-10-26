@@ -372,6 +372,34 @@ defect and the rule for reading clause 2.**
    labels) and no clause is read against it; it bounds how much of a model's skill is the
    period's rate.
 
+**Amendment 7, 2026-10-26, before N3 ran; the permutation protocol's open details.** The lead
+asked for N3 on 2026-10-26 ("permutation importance on the logistic model, scored on Brier and on
+AUC separately, archive only, nothing deep"). Section 4 names permutation importance and scenario
+cells without fixing their details; fixed here before the run.
+
+1. **Model and rows.** The record logistic model of section 10 (`lambda = 10`), refitted from the
+   committed `features.tsv.gz` and checked against the recorded forecasts to 1e-6 (the N3
+   reproduction guard); importance is measured on the **test rows only**, the model untouched.
+2. **Groups.** A feature and its indicator are permuted together (`prev_d` with `prev_d_missing`,
+   `d_t2` with `d_t2_missing`); `d_readout_missing` is constant and absent. 15 groups.
+3. **Importance.** For each group, the group's test-row values are permuted jointly 20 times
+   (`SeedSequence(86)`); Brier importance is the mean permuted Brier minus the record Brier
+   (positive: the group helps calibration-weighted accuracy); AUC importance is the record AUC
+   minus the mean permuted AUC (positive: the group helps ordering). The two are reported side by
+   side and ranked separately, never combined.
+4. **Intervals.** 90% from the paired day-block bootstrap of section 5 (1,000 resamples of the 46
+   test days, `SeedSequence(87)`), the 20 permutations fixed inside each resample.
+5. **Scenario cells.** The three groups with the largest Brier importance (features, not
+   indicators), each cut at its training-row terciles; 27 cells; per cell the training and test row
+   counts, the observed `y = 1` rate in each, the logistic model's and the empirical null's mean
+   forecast on the test rows; cells with fewer than 20 rows in a split are flagged and not read.
+6. **Registration.** N3 mints one NC row per conclusion in Rule 7 form (dated anchor at
+   `calibration-data` `cf960389`, the live artifact named, not a current value), on this branch,
+   from the next free id after every open branch's register (NC-092 at the time of writing).
+7. **Reading rule.** A group that ranks high on Brier and low or negative on AUC moved the forecast
+   level (calibration); one that ranks high on both ordered the rows (discrimination). The
+   decomposition of amendment 6 is read group by group.
+
 ## 8. Counts, at the ref of the record run
 
 Appended 2026-10-26 from `count_events.py` (committed at `8db25e37`; the JSON writer's line ending
