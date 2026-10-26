@@ -551,6 +551,82 @@ the cut are in the training set (section 2). The nulls' residual shape and scale
 training period alone. Laptop; Burak's desktop reproduction (N6) is owed before any figure leaves
 the provisional state.
 
+## 11. N3 results: what the logistic bar's skill is made of
+
+Record run of `n3_importance.py` at `eb9753cb` on the committed `features.tsv.gz` and `summary.json`
+of section 10 (the refit reproduces the recorded forecasts to 1.4e-6; 1,294 test rows; record
+Brier 0.0999, record AUC 0.711; 20 permutations per group, 1,000 day-block resamples; about four
+minutes). **Laptop, provisional until N6.** Outputs: `importance.tsv`, `cells.tsv`, `n3_summary.json`.
+The NC rows this task mints are NC-092 to NC-094 in `docs/numerical-claims.md` on this branch.
+
+**First sentence.** Within the test period, the model orders the rows the way the null does: the
+group that carries almost all of the importance on both metrics is `d`, the signed disagreement,
+which is exactly what the empirical null's signed bins carry. Its importance is not a pattern beyond
+the null.
+
+**Permutation importance on the test rows** (Brier: permuted minus record, positive helps; AUC:
+record minus permuted, positive helps; 90% paired day-block intervals; ranked by Brier).
+
+| Group | Brier importance | 90% | AUC importance | 90% | AUC rank |
+| --- | --- | --- | --- | --- | --- |
+| `d` | +0.00570 | +0.00373 to +0.00765 | +0.129 | +0.104 to +0.156 | 1 |
+| `same_sign_share` | +0.00114 | +0.00008 to +0.00212 | +0.011 | +0.002 to +0.021 | 2 |
+| `abs_d_rel` | +0.00049 | +0.00025 to +0.00070 | +0.006 | +0.004 to +0.008 | 3 |
+| `prev_d` (with indicator) | +0.00024 | -0.00004 to +0.00052 | +0.003 | -0.001 to +0.007 | 5 |
+| `hour` (sin, cos) | +0.00024 | -0.00018 to +0.00067 | +0.001 | -0.004 to +0.006 | 6 |
+| `hours_since_prev` | +0.00004 | +0.00001 to +0.00007 | +0.000 | -0.000 to +0.001 | 7 |
+| `d_readout` | +0.00003 | -0.00007 to +0.00014 | -0.000 | -0.002 to +0.002 | 8 |
+| `d_t2` (with indicator) | -0.00002 | -0.00012 to +0.00008 | -0.000 | -0.001 to +0.001 | 9 |
+| `hours_since_sweep` | -0.00003 | -0.00004 to -0.00001 | -0.000 | -0.001 to -0.000 | 10 |
+| `chip_readout` | -0.00008 | -0.00125 to +0.00080 | -0.001 | -0.024 to +0.017 | 12 |
+| `sx_log` | -0.00025 | -0.00054 to +0.00003 | -0.001 | -0.004 to +0.003 | 11 |
+| `cz_best_log` | -0.00044 | -0.00114 to +0.00022 | +0.005 | -0.001 to +0.013 | 4 |
+| `n_distinct` | -0.00063 | -0.00206 to +0.00068 | -0.002 | -0.017 to +0.013 | 13 |
+
+**Two small signals survive beyond the null**, both with intervals excluding zero on both metrics
+and both a few percent of the record Brier of 0.0999: `same_sign_share` (a disagreement shared in
+sign by many qubits at the same time becomes the level slightly more often) and `abs_d_rel` (a
+disagreement small relative to the qubit's own 30-day band reverts slightly more often). That is the
+whole within-period pattern. The co-movement effect is the candidate fuzzy rule of decision A6,
+named with its size: a Brier gain of about 0.001 and an AUC gain of about 0.01.
+
+**The between-period anticipation is invisible to permutation, by construction.** `n_distinct` had
+the largest standardised coefficient in section 10 (-0.82) and has zero or negative importance here.
+The reason is in the per-period distributions: on the test rows `n_distinct` is 27.7 ± 2.1 against
+23.3 ± 6.0 on the training rows, and `same_sign_share` has **no test row in its training "high"
+tercile** (test 90th percentile 0.647 against the tercile cut at 0.699; test mean 0.51 ± 0.10
+against 0.62 ± 0.20). Permuting a feature within a period cannot credit it for having moved the
+whole period's forecast level. The rule: **coefficients carry between-period information,
+permutation importance carries within-period information**, and the two features that moved the
+forecast level are the two whose distributions shifted between the periods. The test period
+re-measured `T1` more often and had no chip-wide co-moving episodes, and its shift rate was lower;
+with one regime change over 46 days, that is a hypothesis for the next regime, not a registered
+pattern.
+
+**Scenario cells** (`d`, `same_sign_share`, `abs_d_rel` at training terciles; `cells.tsv`). Two
+caveats before any reading: the `d` "mid" tercile is `[-0.474, 0.409]`, which with `|d| >= 0.37`
+**straddles the sign** and holds small dips and small rises together, so the three `d` cells are not
+a monotone step; and 15 of the 27 cells are unreadable because the test period never reaches the
+`same_sign_share` "high" tercile, not because the training data are thin. In the 12 readable cells
+the test `y = 1` rate runs from 0.00 to 0.25, lowest where `d` is low (dips) and `abs_d_rel` high,
+highest where `d` is high and the share is mid; the logistic model's mean forecast sits within a few
+points of the observed rate in most cells, and the empirical null over-forecasts every cell by two
+to four times. The latter is section 10's test-period miscalibration seen cell by cell, not cell
+structure.
+
+**The outcome table's row, with the decomposition attached.** Clause 1 yes; clause 2 not scored
+(N2 waits for gate L1 under plan §4.1); the reading "a pattern exists and a linear rule prices it"
+holds in this form: *within a period, nothing beyond the signed disagreement and the qubit's own
+tail shape orders which departed readings become the level, plus a small chip-co-movement effect;
+across the two periods the shift rate moved, and the calibration table's own state (re-measurement
+count, co-movement) tracked it.* The engineer's rule "carry the level" is unchanged. What this adds
+for the design-time predictor is a calibrated estimate of how often that rule will be wrong for a
+given chip state, and one interpretable candidate rule for the fuzzy base.
+
+**What N3 did not do.** No network (N2), no second target (N4), no hardware rows (N5), no desktop
+reproduction (N6). Nothing in sections 8 to 11 is a current value: every figure is the state at
+`calibration-data` `cf960389`, and the same scripts re-run at a later ref are the live artifact.
+
 ## 9. Related
 
 - `docs/audits/2026-10-26-phase-4-plan-pass-fail-audit.md` §4 (the design and the lead's decision)
