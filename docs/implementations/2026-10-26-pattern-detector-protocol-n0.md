@@ -112,7 +112,7 @@ details). What N0 adds:
 - Lint: `C:/t/ruffpin/Scripts/ruff.exe check docs/evidence/pattern-detector/count_events.py` and
   `ruff format --check` on the same file report nothing.
 
-- No em dash in the new files: `grep -c $'\u2014'` on each returns 0.
+- No em dash in the new files: count `chr(0x2014)` in Python (a Git Bash grep with the bash escape for U+2014 tests the literal text, not the character) and expect 0.
 
 ## Related docs
 
