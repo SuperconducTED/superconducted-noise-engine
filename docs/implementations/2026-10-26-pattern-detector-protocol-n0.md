@@ -56,7 +56,8 @@ itself and every Brier score belong to N1.
 
 The label, the null and the clauses are stated in the README (§2, §4, §5) and in the audit's
 implementation doc (`2026-10-26-phase-4-pass-fail-audit-and-nn-amendment.md`, Mathematical
-details). What N0 adds:
+details). What N0 adds (and one correction: README §7 amendment 1 re-cites `delta`'s 0.37 to NC-085's
+shrinkage-band half-width, not NC-084, after the advisor-brief session's check):
 
 - **The local-level drift term in the null.** With `L_j = mu_j + e_j`, `mu_j = mu_{j-1} + eta_j`,
   `Var(e) = sigma_q^2`, `Var(eta) = q sigma_q^2`, the lag-1 autocorrelation of increments is

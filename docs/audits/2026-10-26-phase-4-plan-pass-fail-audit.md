@@ -239,7 +239,12 @@ a rule (decision A6's neuro-fuzzy direction, kept as future work).
 30-day geometric mean over distinct states (the pre-registration's definition) and `delta` is
 fixed in step 0 from the archive's own scatter (the natural candidate is the 80% scatter already
 registered, 0.37 log units, NC-084; step 0 records the choice and its row count before any model
-output). The label is
+output). *Correction, 2026-10-26, found by the advisor-brief session: the 0.37 in NC-084 is the
+lambda forecasting cap, not a scatter. The 0.37 log-unit scatter is the 80% conformal half-width
+of the shrinkage band on test change rows, 0.375 in the predictability README's ladder table, whose
+register row is NC-085 (its cell quotes the rolling band's half-width, about 0.34). The hardware
+test design §1 carries the same loose "NC-084, NC-085" citation and is owed the same note. The
+value is unchanged; N0's README records the corrected source in its §7.* The label is
 
 `y = 1` if the median of the next `k` re-measured values of `log T1_q` lies nearer
 `log T1_reading(t)` than `log T1_level(t)` ("the reading became the level", a shift);

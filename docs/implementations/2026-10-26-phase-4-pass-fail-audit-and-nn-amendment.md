@@ -185,8 +185,9 @@ ratification; any change is recorded in the protocol README before the run, date
   at `sigma = 0.20` and 0.10 to 0.005 at `sigma = 0.29`), the base rate is a few percent, and the
   `|d|`-only model's skill against the constant is positive (about 0.02 and 0.05). A null that
   passed this check unchanged would be the constant; it does not, so the rule uses the
-  conditional null. Two `sigma` values are used because the registered 0.37 log units (NC-084) is
-  an 80% scatter of increments, and converting it to a per-reading standard deviation depends on
+  conditional null. Two `sigma` values are used because the 0.37 log units (the shrinkage band's 80% conformal
+  half-width, NC-085's ladder; the audit's NC-084 citation was corrected on 2026-10-26) is
+  an 80% scatter, and converting it to a per-reading standard deviation depends on
   whether the level is treated as known; the protocol's step N0 estimates `sigma_q` per qubit
   from the data and the check only needs the shape to hold at both.
 

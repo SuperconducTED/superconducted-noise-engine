@@ -205,7 +205,13 @@ labels. The branch taken is recorded in §8 with the counts.
 
 ## 7. Amendments (dated, append-only, each before the run it affects)
 
-None at this commit.
+**Amendment 1, 2026-10-26, before section 8 was read; citation only, no value changed.** §2 cites
+`delta = 0.37` as "NC-084's 80% scatter". NC-084's 0.37 is the lambda forecasting cap (`R^2`), a
+coincidence of digits. The 0.37 log-unit scatter is the **80% conformal half-width of the
+shrinkage band on test change rows**, 0.375 in the predictability README's ladder table (PR #124's
+branch), whose register row is **NC-085** (the cell quotes the rolling band's half-width, about
+0.34 log units). Found by the session drafting the advisor brief, which checked every figure
+against its row. `delta` stays 0.37; the count run already in progress used it.
 
 ## 8. Counts, at the ref of the record run
 
