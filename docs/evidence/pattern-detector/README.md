@@ -282,6 +282,42 @@ deep) on 2026-10-26.
 8. **The reproduction guard of N1** is the N0 record: the rows N1 rebuilds from the field
    collection must equal `rows.tsv.gz` (qubit, time, `d`, `y`) or the script stops.
 
+**Amendment 4, 2026-10-26, before N1 scored anything; the null's noise shape.** A row is
+`|d| >= delta` by construction, the tail of the scatter, and NC-089 already records that the
+large disagreements are dips: real `log T1` scatter is heavy-tailed on the low side. The
+local-level null of amendment 2 draws Gaussian noise, which has no tails: under it a large `|d|`
+is mostly drift and `P(y = 1)` stays high, whereas under heavy-tailed noise a large `|d|` is mostly
+an excursion that reverts, and more so on the dip side. Section 8's per-sign counts already have
+that shape (positives 0.39 of rows above the level, 0.16 below, against a sign-symmetric Gaussian
+null near 0.35). A logistic model with signed `d` would clear clause 1 against the Gaussian null on
+the known shape of the scatter alone, which is not a pattern an engineer learns from calibration.
+Lesson L-029, caught before the run.
+
+1. **The primary null draws the noise from the qubit's own residual shape.** For each qubit, the
+   training-period residuals `r = v - level` of every event that has a level (all events, not
+   only rows) are centred on their median and rescaled so that their robust scale
+   (`1.4826 · MAD`) equals the qubit's `sigma_q` of section 8 (the shape comes from the
+   residuals, the scale from the increments, so the drift term is not counted twice); `e_j` is
+   resampled with replacement from that set, sign preserved, so the dip skew is in the null.
+   Everything else of amendment 2 is unchanged: the drift term `eta_j`, the real event times, the
+   real state mapping, 2,000 replicates, the `|d|` bins. A qubit with fewer than 20 residuals
+   borrows the pooled standardised residuals of all qubits.
+2. **The Gaussian local-level null of amendment 2 becomes a reference row**, reported beside the
+   empirical one.
+3. **Clause 1 is read against whichever of the two nulls has the lower Brier score on the test
+   rows** (lesson L-028, the strongest baseline the protocol produces); both are reported, and the
+   pre-registered margin and interval rule are unchanged.
+4. **A calibration diagnostic precedes any reading of clause 1:** for each null, its mean forecast
+   on the training rows per sign of `d` beside the observed `y = 1` rate per sign, and the same on
+   the test rows. If the empirical null reproduces the 0.39 and 0.16 of section 8, the sign
+   asymmetry is the tail shape and the protocol says so itself.
+5. **The train-to-test drop in the base rate** (0.27 to 0.12, section 8) is not explained by
+   censoring alone; `k` counts events, not hours, so a change in re-measurement cadence changes how
+   much drift five events span. N1 reports events per qubit per day for each period and each
+   null's mean forecast on the test rows. If the nulls predict the drop, the comparison stands; if
+   not, the write-up says that the logistic model and the nulls are both miscalibrated on the test
+   period and the skill gap is a statement about who is less wrong.
+
 ## 8. Counts, at the ref of the record run
 
 Appended 2026-10-26 from `count_events.py` (committed at `8db25e37`; the JSON writer's line ending
