@@ -24,8 +24,8 @@ import importlib.util
 import json
 import math
 import sys
-from itertools import pairwise
 from datetime import UTC, datetime
+from itertools import pairwise
 from pathlib import Path
 from types import ModuleType
 from typing import Any
