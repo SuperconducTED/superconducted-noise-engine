@@ -4,7 +4,8 @@
 before any row was counted** (`49256efe`, section 8 empty there); section 8 holds the counts of the
 record run, appended in a later dated commit from the committed script; **amendment 2 in section 7
 replaces the null of section 4 before N1 runs**; nothing is scored against the labels before tasks
-N1 to N3 · **Ticket**: #110, tasks N0 to N6 (comment 6412965244) · **Decision that allows it**: phase-4
+N1 to N3; **section 12 (2026-10-27) is the amended analysis after @bengisucvd's review and
+supersedes the readings of sections 10 and 11, which stay as the record** · **Ticket**: #110, tasks N0 to N6 (comment 6412965244) · **Decision that allows it**: phase-4
 plan §4.1 (PR #124 at `bf4c54e2`): no deep-model **training** before gate L1, the protocol commit
 may be written now · **Source of the design**: `docs/audits/2026-10-26-phase-4-plan-pass-fail-audit.md`
 §4.3 to §4.5 · **Reviewers**: @bengisucvd (statistics: the null's value, the thresholds, the
@@ -682,6 +683,170 @@ given chip state, and one interpretable candidate rule for the fuzzy base.
 **What N3 did not do.** No network (N2), no second target (N4), no hardware rows (N5), no desktop
 reproduction (N6). Nothing in sections 8 to 11 is a current value: every figure is the state at
 `calibration-data` `cf960389`, and the same scripts re-run at a later ref are the live artifact.
+
+## 12. Amended analysis after the statistics review (2026-10-27)
+
+Analysis after the test outputs were examined, under amendment 8; **not a confirmatory test**.
+Pipeline frozen at `b1d182db` (N1) and `138ed72d` (N3); outputs in `amended-2026-10-27/`
+(`summary.json`, `results.tsv`, `features.tsv.gz` with a `label_time` column and the purge labels
+in `split`, `calibration.tsv`, `null_bins.tsv`, `importance.tsv`, `cells.tsv`, `n3_summary.json`).
+Same archive ref `cf960389`; the N0 reproduction guard passed (3,932 rows). Laptop, provisional
+until N6. The 2026-10-26 figures of sections 8, 10 and 11 stand as the historical record and are
+quoted beside the amended ones.
+
+### 12.1 The warm-up finding comes first
+
+The review's aggregation reproduces: the rows whose 30-day window began before the archive did
+(event time before `2026-06-12T12:13:22Z`, the first file plus 30 days) carry a shift rate of
+**0.578** (789 rows, 456 positives, 21 days); the rows after a complete window carry **0.133** in
+training (1,672 rows after the crossing purge, 222 positives, 60 days) against **0.118** in test.
+Most of section 10's "0.27 to 0.12" drop therefore predates the test boundary and is the
+reference being undefined, not a change in the device. **The regime-change reading of sections 10
+and 11 is withdrawn.** With the warm-up rows gone, `n_distinct`, the largest standardised
+coefficient of section 10 (-0.82), falls to +0.02: a small count of distinct values in the window
+was what an incomplete window looked like, and the "between-period anticipation" was a warm-up
+proxy. The 175 crossing rows (positive rate 0.206) leave the training set and enter nothing.
+
+### 12.2 Decision tree on the purged counts
+
+16 parameters after two constant columns dropped (`prev_d_missing` now never fires on full-history
+rows, `d_readout_missing` as before), floor 160 training positives; 222 training positives, 153
+test positives, 46 test days: **branch 1, the full feature list.** The floors are screening
+heuristics, not power guarantees under dependence.
+
+### 12.3 The nulls, re-parameterised, and the recovery check
+
+`q = 0.050` from the pooled training lag-one autocorrelation `-0.488` (14,681 pairs); `sigma_e` per
+qubit from `Var(D) = sigma_e^2 (2 + q)` on training increments, median 0.261 (section 10's robust
+scale was 0.205: the heavy tails were being discounted). Residual shape from full-history training
+residuals (10,129 events, 155 qubits, skew -1.54), standardised to zero mean and unit variance.
+**Recovery:** simulated increment variance 0.1496 against observed 0.1502 (ratio 0.996), simulated
+lag-one autocorrelation -0.487 against -0.488, for both nulls; simulated residual skew -0.81
+(empirical) and +0.01 (Gaussian) against observed -1.54; simulated residual 5th and 95th percentiles
+-0.57 and +0.48 (empirical) against observed -0.59 and +0.40. The increments' second moments are
+recovered exactly; the residual shape is recovered in direction and roughly in width, with the
+simulated skew about half the observed, the lag-component limitation amendment 8 states.
+
+**Calibration diagnostic, full-history rows only.**
+
+| Split | Sign of `d` | Rows | Observed | Empirical null | Gaussian null | Logistic |
+| --- | --- | --- | --- | --- | --- | --- |
+| train (purged) | below | 1,073 | 0.083 | 0.230 | 0.335 | 0.085 |
+| train (purged) | above | 599 | 0.222 | 0.521 | 0.379 | 0.219 |
+| test | below | 779 | 0.045 | 0.247 | 0.337 | 0.079 |
+| test | above | 515 | 0.229 | 0.530 | 0.373 | 0.201 |
+
+Two readings. First, **the tail shape can reproduce the asymmetry**: the empirical null's rates
+are higher above than below by about the observed ratio (2.3 against 2.7 in training); the
+Gaussian null's are not. Second, **both nulls over-forecast by a factor of two to four on every row
+set, warm-up excluded**, at training and test timing alike. Section 10 attributed that to a test
+period the May-to-August statistics did not carry; with the warm-up rows gone the over-forecast is
+there in training too, so the explanation changes: a local-level process with the archive's own
+increment variance and lag-one autocorrelation makes a departed reading become the level about 35%
+of the time, and the device does it about 13%. The series is more persistent in its level, and
+more excursion-like in its scatter, than a Gaussian or residual-shaped local-level decomposition of
+its increments allows. That is a statement about the null's family, recorded as a limitation; no
+identification of the latent process is claimed.
+
+### 12.4 Scores on the 1,294 test rows, amended
+
+| Forecast | Brier | Log loss | AUC | Mean forecast | Skill vs Gaussian null (primary, lower Brier) | Skill vs constant on purged training |
+| --- | --- | --- | --- | --- | --- | --- |
+| empirical null | 0.1645 | 0.500 | 0.729 | 0.360 | -0.052 | -0.574 |
+| Gaussian null | 0.1563 | 0.499 | 0.645 | 0.352 | 0 | -0.496 |
+| constant on purged training, 0.1328 (the review's sensitivity) | 0.1045 | 0.364 | 0.500 | 0.133 | +0.332 | 0 |
+| constant of 2026-10-26, 0.271 | 0.1276 | 0.433 | 0.500 | 0.271 | +0.184 | -0.221 |
+| always level, `p = 0` (log loss clipped) | 0.1182 | 1.634 | 0.500 | 0 | +0.244 | -0.132 |
+| **logistic, `lambda = 0.001`** | **0.0997** | **0.340** | **0.719** | **0.127** | **+0.362** | **+0.046** |
+| oracle: constant at the test rate (diagnostic) | 0.1043 | | 0.500 | 0.118 | +0.333 | +0.002 |
+
+`lambda = 0.001`, the bottom of the grid (inner losses 0.33856 to 0.33959, nearly flat): a
+boundary optimum at the other end from section 10, a limitation, not a reason to widen the grid on
+this test set. Inner boundary `2026-08-13T06:23:00Z` (complete timestamp); 1,196 fitting rows after
+160 were purged by label time; 316 validation rows.
+
+**Dependence-preserving bootstrap.** Daily mean Brier difference (null minus logistic)
+autocorrelation at lags 1 to 4: -0.18, +0.18, -0.15, -0.10, inside two standard errors (0.29) from
+lag 1, so the floor sets the block: **6 consecutive calendar days**, circular, all qubits together.
+At that block, 90% intervals: Gaussian null minus logistic Brier **+0.051 to +0.062**; logistic
+skill against the null 0.314 to 0.413; always-level minus logistic +0.010 to +0.027; **constant on
+purged training minus logistic +0.0012 to +0.0088**; always-level minus null -0.051 to -0.024 (both
+nulls score worse than the always-level rule, now with the interval excluding zero). The intervals
+at 1, 3, 5, 7 and 10 days move in the third decimal: the sensitivity table is in
+`amended-2026-10-27/summary.json`.
+
+### 12.5 Clause 1, amended, and what the skill is
+
+**As pre-registered, clause 1 holds** (skill 0.362 against the lower-Brier null, interval excluding
+zero and the margin). **That comparison is now nearly uninformative**: the null forecasts 0.35
+where 0.12 is observed, and a constant at the purged training rate beats both nulls by a third.
+Against that constant, the strongest reference row the protocol produced and the one the review
+asked for, the logistic model gains **4.6%** (Brier 0.0997 against 0.1045; interval +0.0012 to
++0.0088, excluding zero), **below the 0.10 margin**; against the oracle constant at the test rate
+4.4%; against the always-level rule 15.7%. Its AUC, 0.719, is again **below the empirical null's
+0.729**.
+
+The amended reading of the outcome table's row: by the registered rule, "a pattern exists and a
+linear rule prices it"; by the strongest baseline, a small, statistically resolvable but
+practically marginal gain over knowing the full-history shift rate, with no ordering of which
+disagreements shift beyond signed `d` and the tail shape. The engineer's rule "carry the level" is
+unchanged and, if anything, better supported: a departed reading became the level in 13% of
+full-history rows, far below what a local-level model of the archive's own increments would
+predict. The outcome is persistence of **reported `T1` estimates**; it says nothing about a
+physical relaxation-rate transition or about quantum-channel prediction, which only the hardware
+test (#125) can address.
+
+**Pre-registered for the next genuinely unseen evaluation** (rows with event time after
+`2026-10-26T06:02:39Z`, the current archive tip, once enough of them exist for the floors): the
+frozen pipeline of this amendment; clause 1 read against **the better of the primary null and the
+constant at the full-history training rate**, margin 0.10, 6-day circular block interval excluding
+zero; clause 2 under amendment 8 item 6. A design choice for @bengisucvd's review before that
+evaluation runs.
+
+### 12.6 N3, amended: model reliance, exploratory
+
+`n3_importance.py` at `138ed72d` on the amended design matrix (refit reproduces the recorded
+forecasts; 20 permutations per group; 1,000 day-block resamples as in section 11, single days, the
+pointwise intervals a description only). Permutation importance here is **what the fitted model
+uses on the test rows**, exploratory, pointwise 90% intervals across 13 groups after feature
+selection; it is not evidence beyond the null, which would need a null-based or reduced predictor
+against an augmented one on untouched time.
+
+| Group | Brier importance | 90% | AUC importance | 90% |
+| --- | --- | --- | --- | --- |
+| `abs_d_rel` | +0.00607 | +0.00383 to +0.00820 | +0.101 | +0.079 to +0.123 |
+| `d` | +0.00406 | +0.00244 to +0.00563 | +0.074 | +0.062 to +0.085 |
+| `hour` | +0.00037 | -0.00024 to +0.00098 | +0.000 | -0.007 to +0.008 |
+| `hours_since_prev` | +0.00012 | +0.00002 to +0.00023 | +0.001 | -0.001 to +0.002 |
+| `d_t2` | +0.00010 | -0.00007 to +0.00027 | +0.002 | +0.000 to +0.004 |
+| `prev_d` | +0.00009 | -0.00005 to +0.00023 | +0.001 | -0.000 to +0.003 |
+| `same_sign_share` | +0.00008 | -0.00004 to +0.00020 | +0.001 | +0.000 to +0.003 |
+| `n_distinct` | +0.00003 | -0.00003 to +0.00008 | -0.000 | -0.001 to +0.001 |
+| `d_readout` | -0.00001 | -0.00009 to +0.00007 | -0.001 | -0.002 to +0.001 |
+| `hours_since_sweep` | -0.00018 | -0.00041 to +0.00003 | -0.002 | -0.006 to +0.002 |
+| `chip_readout` | -0.00027 | -0.00130 to +0.00042 | -0.003 | -0.019 to +0.008 |
+| `cz_best_log` | -0.00064 | -0.00225 to +0.00090 | +0.002 | -0.008 to +0.013 |
+| `sx_log` | -0.00141 | -0.00272 to -0.00018 | -0.007 | -0.016 to +0.003 |
+
+The model relies on two groups, both functions of the disagreement itself: `abs_d_rel` (the
+disagreement relative to the qubit's own 30-day band) and signed `d`. Everything else is within
+noise of zero or slightly negative (`sx_log`, the gate error the model also weights, costs it on the
+test rows). Section 11's small `same_sign_share` and `abs_d_rel` effects do not survive in that form:
+`same_sign_share` is now within noise, and `abs_d_rel` is the main input. Direction corrected from
+section 11: the negative `abs_d_rel` coefficient (now the largest, -0.92) means a **larger**
+disagreement relative to the qubit's own band lowers the fitted shift probability, holding the
+other inputs fixed; readings far outside their band revert. "Between-period mechanism" is
+withdrawn with the warm-up finding; the between-period reading of section 11 was an association
+produced by incomplete windows.
+
+**Scenario cells** (`abs_d_rel`, `d`, `hour` at training terciles; the `d` middle tercile still
+straddles the sign): 20 of 27 readable. The test shift rate runs from 0.00 to 0.41 and is ordered by
+the two disagreement features alone: lowest where `abs_d_rel` is high and `d` low (readings far
+below their band, 0.00 to 0.04), highest where `abs_d_rel` is low and `d` high (small rises inside
+the band, 0.22 to 0.41); the logistic forecast tracks each cell within a few points; the empirical
+null over-forecasts every cell by two to four times. The `hour` tercile adds nothing readable.
+
+## 9. Related
 
 ## 9. Related
 

@@ -502,6 +502,14 @@ model anticipated the lower shift rate of the test period, it does not order whi
 shift better than the null. Nothing registered; N3 mints the rows; N2 waits for L1; Burak's
 reproduction (N6) and Bengisu's review of amendments 2 to 6 are owed.
 
+*As of 2026-10-27:* PR #128 carries this audit and the N0 to N3 record (NC-092 to NC-094 minted).
+Bengisu's statistics review (changes requested, review 5667003181) found that most of the "regime
+change" the model anticipated was the archive's first 30 days, where the trailing-window level is
+undefined; after a warm-up purge and a label-leak purge, the model's gain over a constant at the
+full-history shift rate is 4.6%, below the margin, while clause 1 still holds against a null that
+is itself miscalibrated. The reading above is superseded by the N0 README's section 12; the
+documents cited "on PR #124's branch" are on `main` since 2026-10-26.
+
 ## 5. What this audit did not do
 
 - No new measurement on the archive, no new NC row, no edit to the plan or the pre-registration.
