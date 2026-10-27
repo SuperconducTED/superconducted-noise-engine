@@ -179,7 +179,8 @@ def bootstrap_importances(
 def scenario_cells(data: dict[str, Any], top: list[str], p_log: np.ndarray) -> list[dict[str, Any]]:
     X, y, train = data["X"], data["y"], data["train"]
     col_idx = {c: i for i, c in enumerate(data["cols"])}
-    feats = [col_idx[g] for g in top]
+    members = dict(GROUPS)
+    feats = [col_idx[members[g][0]] for g in top]  # a multi-column group is cut on its first column
     edges = [np.quantile(X[train, j], [1 / 3, 2 / 3]) for j in feats]
     code = np.zeros((X.shape[0], len(feats)), dtype=int)
     for k, j in enumerate(feats):
