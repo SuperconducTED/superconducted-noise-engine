@@ -73,7 +73,7 @@ def _day(stamp: str) -> str:
 
 def load_features(path: Path) -> dict[str, Any]:
     with gzip.open(path, "rt", encoding="utf-8") as fh:
-        rows = list(csv.DictReader(fh, delimiter="\t"))
+        rows = [r for r in csv.DictReader(fh, delimiter="\t") if r["split"] in ("train", "test")]
     cols = list(n1.COLUMNS)
     X = np.array([[float(r[c]) for c in cols] for r in rows])
     return {

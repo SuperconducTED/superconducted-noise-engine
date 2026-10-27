@@ -404,6 +404,62 @@ cells without fixing their details; fixed here before the run.
    significant digits and the forecasts to six decimals; the tolerance is 1e-5, a reading of the
    stored precision and nothing about the model.
 
+**Amendment 8, 2026-10-27, after @bengisucvd's statistics review of PR #128 (review 5667003181 at
+`6f1f4bc8`). This is analysis after the test outputs were examined, not a confirmatory test.**
+Sections 8, 10 and 11 and their output files stay as the historical record of 2026-10-26; the
+amended run writes to `amended-2026-10-27/` and is read in section 12. The committed pipeline of
+this amendment (`n1_amended.py`, the patched `n1_baselines.py` and `n3_importance.py`) is the frozen
+corrected pipeline for the next genuinely unseen temporal evaluation, which can use only rows after
+the current archive tip; re-running at a later ref over the already-examined test rows is not it.
+
+1. **Warm-up purge** (review item 2). A trailing-window reference is undefined until the window is
+   complete. Rows whose event time precedes the first archived file plus 30 days
+   (`2026-06-12T12:13:22Z`) leave every table: the design matrix, the null simulation's counted
+   pairs (the series is still simulated from the archive start so the windows fill), and the
+   residuals that give the noise shape. The review's finding that the rows before that boundary
+   carry a shift rate near 0.6 against 0.14 after it, so that most of section 10's "27% to 12%" drop
+   predates the test boundary, is reproduced in section 12; the regime-change reading of sections
+   10 and 11 is withdrawn there.
+2. **Crossing-row purge** (review item 1). Training rows whose fifth successor falls at or after
+   the cut leave the training set and do not enter the test set. The inner tuning boundary falls
+   on a complete timestamp (every row at one time on one side); a fitting row is kept only when its
+   fifth successor precedes that boundary; standardisation is fitted on the fitting slice for the
+   tuning and refitted on the purged outer training set for the final model. `lambda` is re-chosen
+   on the same grid; a boundary optimum stays a limitation.
+3. **Null scales made consistent** (review item 3). The residual shape is standardised to zero
+   mean and unit variance, so `Var(e_sim) = sigma_e^2` exactly; `sigma_e` per qubit comes from
+   training increments under the stated model, `Var(D) = sigma_e^2 (2 + q)`, with the pooled `q`;
+   the Gaussian null uses the same `sigma_e`. A recovery check reports the simulated increment
+   variance and lag-one autocorrelation against the observed training values, and the simulated
+   signed residual quantiles and per-sign label rates against the observed full-history training
+   rows. Limitation stated, not resolved: a trailing-window residual contains measurement scatter
+   and the level's lag inside the window, and the simulation adds its own random walk to a shape
+   that already carries some lag; no identification of the latent process is claimed. The
+   empirical null stays primary and the Gaussian null a sensitivity reference; the wording is "the
+   tail shape can reproduce the asymmetry", not "the asymmetry is the tail shape".
+4. **Dependence-preserving bootstrap** (review item 4). Circular blocks of consecutive calendar
+   days, all qubits of a day kept together; the block length is the smallest lag at which the
+   autocorrelation of the daily mean Brier difference stays inside two standard errors, floored at
+   six days (five successor events at about one a day, plus the event); results at 1, 3, 5, 7 and
+   10 days are reported beside the chosen length.
+5. **N3's claim narrowed** (review item 5). Permutation importance is model reliance: what the
+   fitted model uses, exploratory, pointwise intervals across 13 groups after feature selection; it
+   does not establish information beyond the null, which would need a null-based or reduced
+   predictor against an augmented one on untouched time. Section 11's sentence on `abs_d_rel` is
+   reversed and corrected in section 12: a negative coefficient means a larger disagreement
+   relative to the qubit's band lowers the fitted shift probability. "Between-period mechanism"
+   becomes "between-period association".
+6. **Clause 2's discrimination requirement**, defined before N2 (review note on thresholds): the
+   network passes clause 2 only if its Brier skill gain over the logistic model is at least 0.05
+   **and** its AUC gain over the logistic model has a block-bootstrap 90% interval excluding zero;
+   the AUC magnitude is left at zero as a design choice flagged for review.
+7. **Wording.** The 0.10 and 0.05 margins are practical design choices, not detection limits; the
+   minimum rule's floors are screening heuristics, not power guarantees under dependence (Riley et
+   al. 2019 on events per parameter); the always-level rule's log loss is clipped at 1e-6, a literal
+   `p = 0` forecast has infinite log loss; the always-level comparison stays descriptive; the
+   outcome is persistence of **reported `T1` estimates**, not a physical relaxation-rate transition
+   or an improved quantum-channel prediction, and the hardware check (#125) remains the arbiter.
+
 ## 8. Counts, at the ref of the record run
 
 Appended 2026-10-26 from `count_events.py` (committed at `8db25e37`; the JSON writer's line ending

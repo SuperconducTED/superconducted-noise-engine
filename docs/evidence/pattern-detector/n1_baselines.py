@@ -181,6 +181,8 @@ class Built:
     times: np.ndarray
     qubits: np.ndarray
     excluded: dict[str, int]
+    label_times: np.ndarray  # time of the K-th successor event (the label's last observation)
+    crosses: np.ndarray  # True when a training row's label uses events at or after the cut
 
 
 def build_features(data: Data) -> Built:
@@ -193,6 +195,7 @@ def build_features(data: Data) -> Built:
             ev_index[(q, e.time)] = i
     file_of_time = {f.time: i for i, f in enumerate(data.files)}
     X_rows: list[list[float]] = []
+    label_time_rows: list[float] = []
     kept: list[Any] = []
     excluded = {"band_width_zero": 0, "sx_missing": 0, "cz_missing": 0}
     for r in rows:
@@ -270,11 +273,22 @@ def build_features(data: Data) -> Built:
             ]
         )
         kept.append(r)
+        label_time_rows.append(ev[i + K].time)
     X = np.array(X_rows)
     y = np.array([r.y for r in kept], dtype=float)
     times = np.array([r.time for r in kept])
     qubits = np.array([r.qubit for r in kept])
-    return Built(kept, events, X, y, times, qubits, excluded)
+    return Built(
+        kept,
+        events,
+        X,
+        y,
+        times,
+        qubits,
+        excluded,
+        np.array(label_time_rows),
+        np.array([r.crosses_cut for r in kept], dtype=bool),
+    )
 
 
 # ------------------------------------------------------------------------------- the nulls
@@ -348,6 +362,8 @@ def simulate_null(
     t_start: float | None = None,
     t_end: float | None = None,
     count_from: float | None = None,
+    standardise: str = "mad",
+    diag: dict[str, Any] | None = None,
 ) -> NullTables:
     """Amendments 2, 4 and 5: the protocol's own label on simulated series at the real event times.
 
@@ -381,6 +397,11 @@ def simulate_null(
             if res.size < MIN_RESIDUALS:
                 std_res = pooled_std_res
                 fallback += 1
+            elif standardise == "variance":
+                # amendment 8: zero mean, unit variance, so Var(e_sim) = sigma_q^2 exactly
+                c = res - np.mean(res)
+                scale = float(np.std(c))
+                std_res = c / scale if scale > 0 else c
             else:
                 c = res - np.median(res)
                 scale = 1.4826 * np.median(np.abs(c))
@@ -390,6 +411,23 @@ def simulate_null(
         eta[:, 0] = 0.0
         mu = np.cumsum(eta, axis=1)
         sim = mu + e_draw  # (R, E)
+        if diag is not None:
+            # amendment 8 recovery check: increments between consecutive simulated events
+            # (pseudo-event 0 excluded), first 50 replicates; lag-one pairs for rho
+            inc = np.diff(sim[:50, 1:], axis=1)
+            diag["inc_sum"] = diag.get("inc_sum", 0.0) + float(inc.sum())
+            diag["inc_sum2"] = diag.get("inc_sum2", 0.0) + float((inc**2).sum())
+            diag["inc_n"] = diag.get("inc_n", 0) + int(inc.size)
+            a, b = inc[:, :-1].ravel(), inc[:, 1:].ravel()
+            for key, val in (
+                ("xy", float((a * b).sum())),
+                ("x", float(a.sum())),
+                ("y", float(b.sum())),
+                ("x2", float((a * a).sum())),
+                ("y2", float((b * b).sum())),
+                ("n", int(a.size)),
+            ):
+                diag[f"pair_{key}"] = diag.get(f"pair_{key}", 0) + val
         # state -> latest simulated event at or before the state's time
         state_ev = np.searchsorted(times, data.state_times, side="right") - 1  # -1 if before t0
         for i in range(1, E):
@@ -406,6 +444,8 @@ def simulate_null(
             w = np.bincount(idx, minlength=E).astype(float) / idx.size
             level = sim @ w
             d = sim[:, i] - level
+            if diag is not None:
+                diag.setdefault("d_sample", []).extend(d[:20].tolist())
             m = np.median(sim[:, i + 1 : i + 1 + K], axis=1)
             y = np.abs(m - sim[:, i]) < np.abs(m - level)
             sel = np.abs(d) >= DELTA
