@@ -171,14 +171,10 @@ def daily_difference_acf(
 def choose_block(acf: list[float], n_days: int) -> int:
     """Smallest lag at which the acf stays inside two standard errors, floored at the horizon."""
     bound = 2.0 / math.sqrt(n_days)
-    chosen = HORIZON_FLOOR_DAYS
     for lag in range(1, len(acf) + 1):
         if all(abs(x) < bound for x in acf[lag - 1 :]):
-            chosen = max(HORIZON_FLOOR_DAYS, lag)
-            break
-    else:
-        chosen = max(HORIZON_FLOOR_DAYS, len(acf))
-    return chosen
+            return max(HORIZON_FLOOR_DAYS, lag)
+    return max(HORIZON_FLOOR_DAYS, len(acf))
 
 
 # ------------------------------------------------------------------------------- main run
