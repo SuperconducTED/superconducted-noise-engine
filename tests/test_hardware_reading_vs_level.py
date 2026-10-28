@@ -9,6 +9,7 @@ from __future__ import annotations
 import copy
 import math
 from datetime import UTC, date, datetime, timedelta
+from itertools import pairwise
 from typing import Any
 
 import numpy as np
@@ -438,8 +439,12 @@ def test_calendar_block_bootstrap_redraws_empty_draws() -> None:
 
 
 def test_every_simulated_circuit_gets_its_own_seed() -> None:
-    from scripts.hardware_reading_vs_level import circuit_seeds
+    from scripts.hardware_reading_vs_level import SEED_GAP, circuit_seeds
 
     seeds_a, seeds_b = circuit_seeds(125, 7, 6)
-    assert seeds_a == list(range(125, 132)) and seeds_b == list(range(225, 231))
-    assert len(set(seeds_a + seeds_b)) == 13
+    assert (len(seeds_a), len(seeds_b)) == (7, 6)
+    ordered = sorted(seeds_a + seeds_b)
+    # Aer seeds shot j as seed + j: neighbouring seeds would replay each other's shots
+    assert min(b - a for a, b in pairwise(ordered)) >= SEED_GAP
+    assert circuit_seeds(125, 7, 6) == (seeds_a, seeds_b)  # reproducible from the one seed
+    assert circuit_seeds(126, 7, 6) != (seeds_a, seeds_b)

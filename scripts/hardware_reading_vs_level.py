@@ -34,7 +34,7 @@ import sys
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
-from itertools import combinations
+from itertools import combinations, pairwise
 from pathlib import Path
 from typing import Any
 
@@ -860,20 +860,31 @@ def score_arm_b(
 # Dry run
 
 
+SEED_GAP = 10 * max(ARM_A_SHOTS, ARM_B_SHOTS)
+
+
 def circuit_seeds(seed: int, n_arm_a: int, n_arm_b: int) -> tuple[list[int], list[int]]:
-    """Distinct simulator seeds: ``seed + i`` for Arm A's circuits, ``seed + 100 + i`` for
-    Arm B's."""
-    if n_arm_a > 100:
-        raise ValueError("Arm A's seeds would run into Arm B's")
-    return [seed + i for i in range(n_arm_a)], [seed + 100 + i for i in range(n_arm_b)]
+    """One simulator seed per circuit, drawn from ``numpy``'s ``SeedSequence(seed)``.
+
+    Aer 0.17.2, running shots in parallel, seeds shot ``j`` of a run with seed ``s`` as
+    ``s + j``: seeds ``500`` and ``501`` give the same shots shifted by one (checked
+    2026-10-28 on an Arm A circuit). Seeds closer than the shot count therefore share most of
+    their draws. These are spread over 32 bits and checked to lie at least ``SEED_GAP`` apart.
+    """
+    drawn = np.random.SeedSequence(seed).generate_state(n_arm_a + n_arm_b, dtype=np.uint32)
+    seeds = [int(v) for v in drawn]
+    ordered = sorted(seeds)
+    if any(b - a < SEED_GAP for a, b in pairwise(ordered)):
+        raise ValueError(f"seed {seed} draws two circuit seeds closer than {SEED_GAP}")
+    return seeds[:n_arm_a], seeds[n_arm_a:]
 
 
 def simulate_truth(job: Job, truth: NoiseModel, *, seed: int = SEED) -> dict[str, Any]:
     """Counts for every circuit from the truth model, and the truth's shot-free probabilities
     with its own readout applied analytically (criterion 1).
 
-    Every circuit gets its own seed (``circuit_seeds``): one seed for all of them would replay
-    the same random stream in each circuit, so a qubit's sampling errors would repeat across its
+    Every circuit gets its own seed, far from every other (``circuit_seeds``): seeds that are
+    equal or close replay the same shots, so a qubit's sampling errors would repeat across its
     slots and the rows would not be independent draws.
     """
     sim = AerSimulator(noise_model=truth)
