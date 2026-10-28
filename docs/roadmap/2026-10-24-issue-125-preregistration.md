@@ -330,6 +330,46 @@ the rule against. A condition whose null value is near 1 (A4 and B1, B2 under (i
 itself support a claim, and the rule is changed only by the lead after her review, as a dated
 amendment here, before the freezing commit.
 
+#### 3.8.1 The values, 2026-10-28
+
+Appended after one run of `null_values.py` at `aa5dca1f` (exit 0; the Monte Carlo check of the
+exact Arm B figures passed, every `|z|` under 4); output `null-values.json` committed at
+`2b7c98f7`. Laptop, NumPy from the project's pins.
+
+**A1, the share of no-information runs whose 90% interval clears zero on `level`'s side** (nominal
+5%; Monte Carlo standard error 0.006 to 0.009):
+
+| Day effects | Day share of variance `rho` | Block 1 (by job) | Block 3 |
+| --- | --- | --- | --- |
+| none | 0 | 0.068 (0.072 in the `phi` 0.5 case, the same model) | 0.088 (0.089) |
+| independent days (`phi` 0) | 0.3 | 0.074 | 0.099 |
+| independent days (`phi` 0) | 0.7 | 0.066 | 0.095 |
+| AR(1), `phi` 0.5 | 0.3 | 0.186 | 0.156 |
+| AR(1), `phi` 0.5 | 0.7 | 0.193 | 0.164 |
+
+With 14 days the percentile interval is too narrow: a predictor with no edge clears it in 7% to
+10% of runs when days are independent, and in 16% to 19% when consecutive days are correlated,
+which consecutive 30-day levels make likely. Blocks of 3 cost size when days are independent
+(fewer blocks) and help when they are correlated, without reaching 5%. So A1's real bar is about
+two to four times looser than "90%" reads. A correction to section 3.8's A2 row: its 0.25% assumed
+the nominal 5%; with A1's actual rate `r`, two independent comparisons both pass at about `r^2`
+(0.4% to 3.7%), identical ones at `r`.
+
+**Arm B under null (i), independent random rankings over 13 jobs:**
+
+| Condition | `level` alone | `level` or `band` |
+| --- | --- | --- |
+| B1, mean Spearman at least `reading`'s | 0.505 (tie 0.010) | 0.672 |
+| B2, best-pick at least as often | 0.606 (tie 0.212) | 0.758 |
+| B1 and B2, one predictor meets both | 0.375 | 0.536 |
+| B1 and B2, each by either | | 0.560 |
+
+Under null (ii), identical rankings, every row is 1. A predictor with no information passes Arm
+B's condition as written more often than not, mostly because "at least as often" passes on ties
+and best-pick counts over 13 jobs tie about one time in five. As written, Arm B cannot support a
+claim on its own; with A4 (a wide band passes by construction), this is what Bengisu's review is
+asked to rule on. The rule is not changed here.
+
 ## 4. The budget
 
 The lead stated on 2026-10-24 that the QPU budget is covered. The design's usage-page check of
