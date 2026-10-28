@@ -97,6 +97,9 @@ probabilities. `reading_at_execution` comes from `--mode execution` rows at `t_e
 - **A `T2 > 2 T1` source** (possible for the level, a geometric mean taken per quantity) is
   rejected by ADR-027's rule: that predictor gets no prediction for a triple containing the qubit,
   logged, and the triple is never silently repaired.
+- **Omissions in the Arm B builder**, identical across predictors and second order: no
+  single-qubit depolarizing error (`from_backend` installs one), no relaxation during `cz`, no
+  relaxation during `measure`, no thermal excited-state population.
 - **Figure of merit.** Hellinger fidelity to the ideal GHZ distribution
   (`qiskit.quantum_info.hellinger_fidelity`, `(1 - H^2)^2` with `H` as in
   `benchmarks/metrics.py`), for predictions and for measured counts alike.
@@ -128,6 +131,10 @@ are step 1d's; this script never imports the token and the dry run reads only th
   preparing `1` is `(1 - e_10) s + e_01 (1 - s)`. Omitted, identical across predictors: thermal
   excited-state population, the `x` gate's own error and relaxation during it, relaxation during
   measurement, readout-induced transitions (design §3).
+- **Aer and `T2 > 2 T1`.** Checked 2026-10-28 on the pinned Aer 0.17.2: a target qubit with
+  `T2 = 3 T1` passes through `from_backend` without an error or a warning, and its
+  `RelaxationNoisePass` carries `T2 = 2 T1`, a silent cap. The predictor side does not cap; it
+  rejects (ADR-027).
 - **Why the dry-run truth and the matching predictor differ by a known offset.** Aer's
   `from_backend` (checked 2026-10-28 on the snapshot of 2026-10-23T09:34:56Z, qubit 0, density
   matrix, no shots) applies a **symmetric** readout error `r = readout_error`, which IBM reports as
@@ -135,10 +142,9 @@ are step 1d's; this script never imports the token and the dry run reads only th
   `measure`, and its `RelaxationNoisePass` damps the `delay`. So the truth is about
   `(1 - r) s' + r (1 - s')` with `s'` slightly below `s`, where the predictor is
   `(1 - e_10) s + e_01 (1 - s)`. The difference is `(e_10 - r) s - (e_01 - r)(1 - s)` plus the
-  gate term: on qubit 0 (`e_10 = 0.0356`, `e_01 = 0.0073`, `r = 0.0215`) about `+0.012` at
-  `tau = 0` and `+0.014` at `tau = 2 T1` on the shot-free probabilities, of which the `x` gate's
-  error is about 0.0015. These are checks of the
-  simulator, not figures; the dry run derives the offset per row from the truth model itself.
+  gate term. A scratch probe on one qubit put this at about one percentage point, mostly the
+  readout term; those digits are not quoted and are superseded by the dry run's committed
+  per-row offset table, which derives the offset from the truth model itself.
 - **Hellinger fidelity.** `F = (sum_i sqrt(p_i q_i))^2 = (1 - H^2)^2`.
 - **Binomial standard error** at `n` shots: `sqrt(p (1 - p) / n)`, 0.011 at `p = 0.5` and
   `n = 2048`, 0.0078 at `n = 4096`.
@@ -148,9 +154,13 @@ are step 1d's; this script never imports the token and the dry run reads only th
 
 - **Instant and ref.** `calibration-data` `5828b4a29fabc245aa096e530852249a3496dc5b`,
   `t_s = 2026-10-23T09:34:56Z`, the instant NC-088 and PR #132's reproduction used. Controls from
-  `--mode controls` there (48, 112, 54, 105, reproduced in PR #132). `t_execute = t_s + 2 h` for
-  the `reading_at_execution` row, read from the same ref (a nominal queue delay; in the dry run it
-  may equal the reading).
+  `--mode controls` there (48, 112, 54, 105, reproduced in PR #132). The `reading_at_execution`
+  row is read at `t_execute = t_s + 2 h` (a nominal queue delay) from a separate
+  `--execution-ref`, `calibration-data` `84ba0230738c9ee2773616b4e4c7142ba91180e3` (the branch tip
+  on 2026-10-28), as the real analysis will read it after the fact. At `5828b4a2` the latest file
+  is the one at `t_s` itself, so the same ref would make the control identical to `reading` by
+  construction; `84ba0230` holds later files at 10:26:53 and 11:18:49 UTC that day, so the
+  control is exercised with a different reading. The flag is also what step 1d needs.
 - **Shots and seeds.** 2,048 per Arm A circuit, 4,096 per Arm B circuit (design §3, §4).
   `seed_simulator = 125`, transpiler `seed = 125`, both in the manifest.
 - **Two truths** (Mert, 2026-10-28), both `NoiseModel.from_backend` on a `BackendV2` rebuilt from
@@ -160,12 +170,24 @@ are step 1d's; this script never imports the token and the dry run reads only th
   - **Truth 1, "the device is the reading":** the reading's snapshot (the latest file at or before
     `t_s`) as is.
   - **Truth 2, "the device is the level":** the same snapshot with every qubit's `T1`, `T2`,
-    `prob_meas0_prep1`, `prob_meas1_prep0` and `readout_error` replaced by that instant's level; a
-    qubit with no level keeps its reading and is listed.
+    `prob_meas0_prep1` and `prob_meas1_prep0` replaced by that instant's level, and
+    `readout_error` set to `(level e_10 + level e_01) / 2`, IBM's own definition, so truth 2 is
+    the exact mirror of truth 1 and criterion 2's offset has the same closed form under both. A
+    qubit with no level keeps its reading and is listed. Values are written back in the Nduv
+    entries' own units (`T1`, `T2` in `us`); a test reads a substituted value back through
+    `BackendProperties.t1` and checks it equals the level. Where the level's `T2` exceeds twice its
+    `T1`, Aer caps it silently (above): the manifest counts those qubits, Arm A is unaffected
+    (population decay does not read `T2`), and in Arm B a triple containing one has a truth but no
+    `level` prediction, which is logged and reported under criterion 4.
 - **Acceptance criteria**, each pass or fail, all written now:
   1. **Sampling.** Every Arm A row's `p_hat` lies within 4 binomial standard errors of the truth
      model's own shot-free probability (density matrix, no shots); every Arm B outcome frequency
-     likewise. Expected failures at 4 sigma over about 84 Arm A rows: well under one.
+     likewise. Aer's density matrix is taken before `measure`, so the truth's shot-free
+     distribution gets the truth's own symmetric readout applied analytically, through the same
+     assignment-matrix function the predictors use. A zero shot-free probability would make its
+     standard error zero; with depolarizing `cz` and readout none should be, so the code asserts
+     every one is positive and the manifest reports the minimum. Expected failures at 4 sigma
+     over about 84 Arm A rows: well under one.
   2. **Offset.** Under each truth, the matching predictor's (truth 1: `reading`; truth 2:
      `level`) mean signed error equals the mean of the derived per-row offsets (truth's shot-free
      probability minus the predictor's closed form) within 3 standard errors of the mean.
