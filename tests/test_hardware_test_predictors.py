@@ -741,3 +741,23 @@ def test_odd_discriminating_count_is_refused(
     args = ["--no-frozen-controls", "--select-discriminating", "7", "--out", str(job)]
     assert _cli(monkeypatch, args) == 2
     assert not job.exists()
+
+
+def test_json_outputs_are_written_with_lf_on_every_platform(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    # A recorded file hash must be the hash every checkout sees; the repository stores LF, so a
+    # CRLF write on Windows would record a hash no clone reproduces.
+    freeze = tmp_path / "freeze"
+    assert (
+        _cli(monkeypatch, ["--mode", "controls", "--propose-controls", "1", "--out", str(freeze)])
+        == 0
+    )
+    job = tmp_path / "job"
+    controls = freeze / "controls.json"
+    args = ["--controls", str(controls), "--select-discriminating", "2", "--out", str(job)]
+    assert _cli(monkeypatch, args) == 0
+    written = [controls, freeze / "manifest.json", job / "selection.json", job / "manifest.json"]
+    for path in written:
+        data = path.read_bytes()
+        assert b"\n" in data and b"\r" not in data, path.name
