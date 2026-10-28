@@ -866,10 +866,14 @@ SEED_GAP = 10 * max(ARM_A_SHOTS, ARM_B_SHOTS)
 def circuit_seeds(seed: int, n_arm_a: int, n_arm_b: int) -> tuple[list[int], list[int]]:
     """One simulator seed per circuit, drawn from ``numpy``'s ``SeedSequence(seed)``.
 
-    Aer 0.17.2, running shots in parallel, seeds shot ``j`` of a run with seed ``s`` as
-    ``s + j``: seeds ``500`` and ``501`` give the same shots shifted by one (checked
-    2026-10-28 on an Arm A circuit). Seeds closer than the shot count therefore share most of
-    their draws. These are spread over 32 bits and checked to lie at least ``SEED_GAP`` apart.
+    When Aer 0.17.2 simulates shots one by one (no measure sampling, as with per-shot noise on
+    Arm A's circuits), it seeds shot ``j`` of a run with seed ``s`` as ``s + j``
+    (``circuit_executor.hpp``, ``rng.set_seed(circ.seed + shot_index)``; Qiskit/qiskit-aer#1916),
+    whatever the thread count: seeds ``500`` and ``501`` give the same shots shifted by one
+    (checked 2026-10-28 on an Arm A circuit). Seeds closer than the shot count therefore share
+    most of their draws. These are spread over 32 bits and checked to lie at least ``SEED_GAP``
+    apart. Each circuit is a run of its own, so Aer's ``seed + 2113 k`` offset between circuits
+    of one run never applies here.
     """
     drawn = np.random.SeedSequence(seed).generate_state(n_arm_a + n_arm_b, dtype=np.uint32)
     seeds = [int(v) for v in drawn]
