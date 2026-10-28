@@ -120,9 +120,40 @@ horizon plus the event); results at 1, 3, 5, 7 and 10 days reported beside the c
   22/14.
 - `ruff check .` and `ruff format --check .` clean; em dashes counted in Python: 0 in the new text.
 
+## As of 2026-10-28: the re-review's two follow-ups (amendment 9)
+
+@bengisucvd's re-review (5681736384 at `c436d222`) confirmed the amendment 8 corrections and
+reproduced the amended figures (1,672 / 222 training, 1,294 / 153 test, 1,196 / 316 inner,
+`lambda = 0.001`, Brier 0.099715, AUC 0.71916, skill 4.55% against the purged-training constant).
+Two follow-ups remained.
+
+1. **Calendar axis.** `circular_block_bootstrap` indexed the sorted *observed* days (46), so a
+   six-index block spanned more than six calendar days across the four empty dates (2026-09-10,
+   09-16, 10-02, 10-08; span 2026-09-01 to 10-20, 50 calendar days). Rewritten on the complete
+   calendar axis: `calendar_axis` enumerates every date, `daily_sums` stores per-date loss sums and
+   row counts (zero on empty dates), a resample's score is the sampled loss sums over the sampled
+   counts (row-weighted), and `daily_difference_acf` works at calendar lags with pairwise deletion
+   of empty dates. N3's `bootstrap_importances` uses the same axis at the chosen block length read
+   from the amended summary. Regression check with an internal calendar gap added to the
+   self-test. Result: the constant-minus-logistic interval moved from +0.0012 to +0.0088 to
+   **+0.0010 to +0.0085** at six calendar days; the reviewer's independent +0.0010 to +0.0087
+   agrees; the point result is unchanged.
+2. **Association, not cause.** Sections 12.1 and 12.6, the register notes and this record now say
+   that most of the rate contrast predates the test boundary and is consistent with archive-start
+   and window effects, and that these observations do not identify its physical cause; the
+   `n_distinct` collapse does not resolve the time confounding. The sentence in the Mathematical
+   details above ("which is why the first 30 days show a shift rate of 0.578") is to be read with
+   that qualification: it describes a mechanism the window arithmetic permits, not one the data
+   identify.
+
+The PR description was refreshed to lead with the amended result and mark the 2026-10-26 figures as
+historical. The pipeline for the next unseen evaluation is frozen at `d7087e69` (README section
+12.7), with the paired positive Brier-difference requirement kept beside the AUC requirement for
+clause 2.
+
 ## Related docs
 
-- `docs/evidence/pattern-detector/README.md` sections 7 (amendment 8) and 12
+- `docs/evidence/pattern-detector/README.md` sections 7 (amendments 8 and 9) and 12
 - `docs/implementations/2026-10-26-pattern-detector-n1-baselines.md`,
   `2026-10-26-pattern-detector-n3-importance.md`
 - `docs/numerical-claims.md` NC-092 to NC-094

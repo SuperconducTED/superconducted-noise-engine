@@ -723,12 +723,16 @@ The review's aggregation reproduces: the rows whose 30-day window began before t
 (event time before `2026-06-12T12:13:22Z`, the first file plus 30 days) carry a shift rate of
 **0.578** (789 rows, 456 positives, 21 days); the rows after a complete window carry **0.133** in
 training (1,672 rows after the crossing purge, 222 positives, 60 days) against **0.118** in test.
-Most of section 10's "0.27 to 0.12" drop therefore predates the test boundary and is the
-reference being undefined, not a change in the device. **The regime-change reading of sections 10
-and 11 is withdrawn.** With the warm-up rows gone, `n_distinct`, the largest standardised
-coefficient of section 10 (-0.82), falls to +0.02: a small count of distinct values in the window
-was what an incomplete window looked like, and the "between-period anticipation" was a warm-up
-proxy. The 175 crossing rows (positive rate 0.206) leave the training set and enter nothing.
+Most of section 10's "0.27 to 0.12" drop therefore predates the test boundary and is consistent
+with archive-start and window effects; **these observations do not identify its physical cause**
+(amendment 9): the purge does not separate window-start effects from a contemporaneous change in
+the reported calibration process or in the device. **The regime-change reading of sections 10
+and 11 is withdrawn** as a claim about the test period. With the warm-up rows gone, `n_distinct`,
+the largest standardised coefficient of section 10 (-0.82), falls to +0.02: a small count of
+distinct values in the window is what an incomplete window looks like, so the "between-period
+anticipation" is consistent with a warm-up proxy; the collapse of the coefficient does not by
+itself resolve the time confounding. The 175 crossing rows (positive rate 0.206) leave the
+training set and enter nothing.
 
 ### 12.2 Decision tree on the purged counts
 
@@ -788,15 +792,21 @@ boundary optimum at the other end from section 10, a limitation, not a reason to
 this test set. Inner boundary `2026-08-13T06:23:00Z` (complete timestamp); 1,196 fitting rows after
 160 were purged by label time; 316 validation rows.
 
-**Dependence-preserving bootstrap.** Daily mean Brier difference (null minus logistic)
-autocorrelation at lags 1 to 4: -0.18, +0.18, -0.15, -0.10, inside two standard errors (0.29) from
-lag 1, so the floor sets the block: **6 consecutive calendar days**, circular, all qubits together.
-At that block, 90% intervals: Gaussian null minus logistic Brier **+0.051 to +0.062**; logistic
-skill against the null 0.314 to 0.413; always-level minus logistic +0.010 to +0.027; **constant on
-purged training minus logistic +0.0012 to +0.0088**; always-level minus null -0.051 to -0.024 (both
-nulls score worse than the always-level rule, now with the interval excluding zero). The intervals
-at 1, 3, 5, 7 and 10 days move in the third decimal: the sensitivity table is in
-`amended-2026-10-27/summary.json`.
+**Dependence-preserving bootstrap** (amendment 9: on the complete calendar axis). The test span
+is 2026-09-01 to 2026-10-20, **50 calendar days, 46 with rows**; 2026-09-10, 2026-09-16,
+2026-10-02 and 2026-10-08 are empty and stay on the axis with zero rows. Daily mean Brier
+difference (null minus logistic) autocorrelation at calendar lags 1 to 5, empty dates deleted
+pairwise: -0.18, +0.26, -0.23, +0.04, -0.22, all inside two standard errors (0.29, from the 46
+observed days), so the floor sets the block: **6 consecutive calendar days**, circular, all qubits
+of a day together, scores row-weighted. At that block, 90% intervals: Gaussian null minus logistic
+Brier **+0.051 to +0.063**; logistic skill against the null 0.316 to 0.417; always-level minus
+logistic +0.010 to +0.027; **constant on purged training minus logistic +0.0010 to +0.0085**;
+always-level minus null -0.052 to -0.025 (both nulls score worse than the always-level rule, the
+interval excluding zero). The intervals at 1, 3, 5, 7 and 10 calendar days move in the third
+decimal; the sensitivity table is in `amended-2026-10-27/summary.json`. The 2026-10-27
+observed-day intervals (+0.0012 to +0.0088 for the constant comparison) are superseded and
+differed from these in the fourth decimal; the reviewer's independent six-calendar-day interval,
++0.0010 to +0.0087, agrees.
 
 ### 12.5 Clause 1, amended, and what the skill is
 
@@ -828,28 +838,33 @@ evaluation runs.
 
 ### 12.6 N3, amended: model reliance, exploratory
 
-`n3_importance.py` at `138ed72d` on the amended design matrix (refit reproduces the recorded
-forecasts; 20 permutations per group; 1,000 day-block resamples as in section 11, single days, the
-pointwise intervals a description only). Permutation importance here is **what the fitted model
+`n3_importance.py` on the amended design matrix (refit reproduces the recorded forecasts; 20
+permutations per group; 1,000 resamples). Permutation importance here is **what the fitted model
 uses on the test rows**, exploratory, pointwise 90% intervals across 13 groups after feature
 selection; it is not evidence beyond the null, which would need a null-based or reduced predictor
-against an augmented one on untouched time.
+against an augmented one on untouched time. *Amendment 9:* the table below carries the intervals
+from the **6-calendar-day circular block bootstrap** (run at the commit named in section 12.7); the
+2026-10-27 single-day intervals were never dependence-adjusted evidence and are superseded; the
+point importances are unchanged by the resampling unit.
 
 | Group | Brier importance | 90% | AUC importance | 90% |
 | --- | --- | --- | --- | --- |
-| `abs_d_rel` | +0.00607 | +0.00383 to +0.00820 | +0.101 | +0.079 to +0.123 |
-| `d` | +0.00406 | +0.00244 to +0.00563 | +0.074 | +0.062 to +0.085 |
-| `hour` | +0.00037 | -0.00024 to +0.00098 | +0.000 | -0.007 to +0.008 |
-| `hours_since_prev` | +0.00012 | +0.00002 to +0.00023 | +0.001 | -0.001 to +0.002 |
-| `d_t2` | +0.00010 | -0.00007 to +0.00027 | +0.002 | +0.000 to +0.004 |
-| `prev_d` | +0.00009 | -0.00005 to +0.00023 | +0.001 | -0.000 to +0.003 |
-| `same_sign_share` | +0.00008 | -0.00004 to +0.00020 | +0.001 | +0.000 to +0.003 |
-| `n_distinct` | +0.00003 | -0.00003 to +0.00008 | -0.000 | -0.001 to +0.001 |
-| `d_readout` | -0.00001 | -0.00009 to +0.00007 | -0.001 | -0.002 to +0.001 |
-| `hours_since_sweep` | -0.00018 | -0.00041 to +0.00003 | -0.002 | -0.006 to +0.002 |
-| `chip_readout` | -0.00027 | -0.00130 to +0.00042 | -0.003 | -0.019 to +0.008 |
-| `cz_best_log` | -0.00064 | -0.00225 to +0.00090 | +0.002 | -0.008 to +0.013 |
-| `sx_log` | -0.00141 | -0.00272 to -0.00018 | -0.007 | -0.016 to +0.003 |
+| `abs_d_rel` | +0.00607 | +0.00422 to +0.00792 | +0.101 | +0.079 to +0.124 |
+| `d` | +0.00406 | +0.00245 to +0.00576 | +0.074 | +0.060 to +0.088 |
+| `hour` | +0.00037 | -0.00029 to +0.00101 | +0.000 | -0.007 to +0.008 |
+| `hours_since_prev` | +0.00012 | +0.00004 to +0.00020 | +0.001 | -0.001 to +0.002 |
+| `d_t2` | +0.00010 | -0.00006 to +0.00029 | +0.002 | +0.001 to +0.003 |
+| `prev_d` | +0.00009 | -0.00002 to +0.00019 | +0.001 | +0.000 to +0.003 |
+| `same_sign_share` | +0.00008 | -0.00005 to +0.00022 | +0.001 | +0.001 to +0.002 |
+| `n_distinct` | +0.00003 | -0.00002 to +0.00008 | -0.000 | -0.001 to +0.000 |
+| `d_readout` | -0.00001 | -0.00008 to +0.00006 | -0.001 | -0.002 to +0.001 |
+| `hours_since_sweep` | -0.00018 | -0.00039 to +0.00003 | -0.002 | -0.006 to +0.002 |
+| `chip_readout` | -0.00027 | -0.00122 to +0.00044 | -0.003 | -0.016 to +0.009 |
+| `cz_best_log` | -0.00064 | -0.00220 to +0.00106 | +0.002 | -0.010 to +0.015 |
+| `sx_log` | -0.00141 | -0.00265 to +0.00005 | -0.007 | -0.019 to +0.005 |
+
+(6-calendar-day circular blocks, 1,000 resamples; the 2026-10-27 single-day intervals differed in
+the fourth decimal and are in the historical `n3_summary.json` of commit `e90fdec7`.)
 
 The model relies on two groups, both functions of the disagreement itself: `abs_d_rel` (the
 disagreement relative to the qubit's own 30-day band) and signed `d`. Everything else is within
@@ -859,8 +874,8 @@ test rows). Section 11's small `same_sign_share` and `abs_d_rel` effects do not 
 section 11: the negative `abs_d_rel` coefficient (now the largest, -0.92) means a **larger**
 disagreement relative to the qubit's own band lowers the fitted shift probability, holding the
 other inputs fixed; readings far outside their band revert. "Between-period mechanism" is
-withdrawn with the warm-up finding; the between-period reading of section 11 was an association
-produced by incomplete windows.
+withdrawn with the warm-up finding; the between-period reading of section 11 is an association
+consistent with incomplete windows, whose cause these observations do not identify (amendment 9).
 
 **Scenario cells** (`abs_d_rel`, `d`, `hour` at training terciles; the `d` middle tercile still
 straddles the sign): 20 of 27 readable. The test shift rate runs from 0.00 to 0.41 and is ordered by
@@ -868,6 +883,21 @@ the two disagreement features alone: lowest where `abs_d_rel` is high and `d` lo
 below their band, 0.00 to 0.04), highest where `abs_d_rel` is low and `d` high (small rises inside
 the band, 0.22 to 0.41); the logistic forecast tracks each cell within a few points; the empirical
 null over-forecasts every cell by two to four times. The `hour` tercile adds nothing readable.
+
+### 12.7 Run record of the amended analysis
+
+| Run | Script commit | Outputs commit | Note |
+| --- | --- | --- | --- |
+| amended N1, observed-day blocks (2026-10-27) | `b1d182db` | `e90fdec7` | superseded by the calendar-axis run below; its intervals differed in the fourth decimal |
+| amended N3, single-day intervals (2026-10-27) | `138ed72d` | `e90fdec7` | point importances stand; intervals superseded |
+| amended N1, calendar-axis blocks (2026-10-28, amendment 9) | `d7087e69` | `02f86e58` | the record of sections 12.4 and 12.5 |
+| amended N3, 6-calendar-day block intervals (2026-10-28) | `d7087e69` | the commit that landed this row (`git log -1 -- docs/evidence/pattern-detector/amended-2026-10-27/importance.tsv`) | the record of section 12.6 |
+
+Frozen for the next genuinely unseen evaluation: the scripts at `d7087e69`; rows with event time
+after `2026-10-26T06:02:39Z` only; clause 1 against the better of the primary null and the constant
+at the full-history training rate, margin 0.10, with the paired Brier difference's 6-calendar-day
+block interval excluding zero; clause 2 under amendment 8 item 6 with the paired positive Brier
+difference kept beside the AUC requirement. Any change before that run is a dated amendment here.
 
 ## 9. Related
 
