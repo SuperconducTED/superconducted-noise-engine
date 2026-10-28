@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phase 4 build order</title>
+<meta name="description" content="SuperconducTED phase 4 in builder mode: the order of work from the evidence stack to the hardware test, the per-qubit channel, the fuzzy system and the paper, as of 2026-10-28.">
+<style>
+  :root {
+    --bg: #f7f6f2; --fg: #1d1f24; --muted: #5b6170; --line: #d9d7cf; --card: #ffffff;
+    --accent: #1f5f8b; --accent-soft: #e3eef7; --now: #b7791f; --now-soft: #fbf1dc;
+    --gate: #3c6e47; --gate-soft: #e4f0e6; --wait: #8a8f9c;
+    --mert: #1f5f8b; --burak: #6b4c9a; --baha: #b05a2b; --bengisu: #2e7d6b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15171c; --fg: #e8e6df; --muted: #a0a6b3; --line: #2d313a; --card: #1d2026;
+      --accent: #7fb3dc; --accent-soft: #1d2e3c; --now: #e0b35a; --now-soft: #3a3020;
+      --gate: #8fc79b; --gate-soft: #1f3324; --wait: #7c818d;
+      --mert: #7fb3dc; --burak: #b79ad8; --baha: #e0905f; --bengisu: #7fc9b5;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #15171c; --fg: #e8e6df; --muted: #a0a6b3; --line: #2d313a; --card: #1d2026;
+    --accent: #7fb3dc; --accent-soft: #1d2e3c; --now: #e0b35a; --now-soft: #3a3020;
+    --gate: #8fc79b; --gate-soft: #1f3324; --wait: #7c818d;
+    --mert: #7fb3dc; --burak: #b79ad8; --baha: #e0905f; --bengisu: #7fc9b5;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 Georgia, "Times New Roman", serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 1.7rem; margin: 0 0 4px; }
+  h2 { font-size: 1.15rem; margin: 40px 0 12px; letter-spacing: .01em; }
+  p.lead { color: var(--muted); margin: 0 0 24px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .9rem; color: var(--muted); margin-bottom: 8px; }
+  .chip { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .78rem; font-family: ui-sans-serif, system-ui, sans-serif; color: #fff; }
+  .chip.mert { background: var(--mert); } .chip.burak { background: var(--burak); }
+  .chip.baha { background: var(--baha); } .chip.bengisu { background: var(--bengisu); }
+  .block { border-left: 3px solid var(--line); margin: 0 0 8px; padding: 0 0 0 20px; position: relative; }
+  .block.now { border-left-color: var(--now); }
+  .step { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 10px 0; position: relative; }
+  .step::before { content: ""; position: absolute; left: -28px; top: 18px; width: 11px; height: 11px; border-radius: 50%; background: var(--wait); border: 2px solid var(--bg); }
+  .step.now::before { background: var(--now); }
+  .step.gate { border-color: var(--gate); background: var(--gate-soft); }
+  .step.gate::before { background: var(--gate); }
+  .step h3 { margin: 0 0 4px; font-size: 1rem; }
+  .step .why { color: var(--muted); font-size: .92rem; margin: 4px 0 0; }
+  .step .done { font-size: .92rem; margin: 6px 0 0; }
+  .step .done b { font-weight: 600; }
+  .tag { display: inline-block; font-family: ui-sans-serif, system-ui, sans-serif; font-size: .74rem; padding: 1px 7px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
+  .tag.now { background: var(--now-soft); color: var(--now); } .tag.wait { background: var(--accent-soft); color: var(--accent); }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: var(--accent-soft); }
+  .note { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: .95rem; }
+  details { margin-top: 24px; } summary { cursor: pointer; font-weight: 600; }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .88em; background: var(--accent-soft); padding: 0 4px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Phase 4, builder mode: the order of work</h1>
+  <p class="lead">As of 2026-10-28. The evidence stack is on <code>main</code> (PRs #120 to #128). Nothing has run on the QPU yet and the engine's noise channel is still the same for every qubit. The next weeks turn the evidence into three things: a hardware answer, a per-qubit channel, a fitted fuzzy model with a paper behind it. Source of record: <code>docs/roadmap/2026-10-23-phase-4-plan.md</code> section 8.</p>
+
+  <div class="legend">
+    <span><span class="chip mert">Mert</span> lead, QPU side</span>
+    <span><span class="chip burak">Burak</span> offline half, channel, desktop</span>
+    <span><span class="chip baha">Baha</span> data and extractor</span>
+    <span><span class="chip bengisu">Bengisu</span> statistics and the band</span>
+    <span><span class="tag now">now</span> can start today</span>
+    <span><span class="tag wait">waits</span> blocked on an earlier step</span>
+  </div>
+
+  <h2>Block 1. The hardware test: does the device follow the latest reading or the 30-day level?</h2>
+  <p class="why">Everything in lane 1 waits on this. Think of it as a drug trial: the protocol is written and frozen before the first dose, then fourteen daily doses, then one pre-agreed verdict.</p>
+  <div class="block now">
+    <div class="step now"><h3>1a. Selection rules <span class="chip mert">Mert</span> <span class="tag now">now</span></h3>
+      <p class="why">Which eight qubits are measured each day and which four are fixed controls. Decided on 2026-10-24 (A, B, D); not yet in code.</p>
+      <p class="done"><b>Done:</b> PR merged into <code>scripts/hardware_test_predictors.py</code>; Burak reviews; the dry run at the freezing ref names the four controls.</p></div>
+    <div class="step now"><h3>1b. The offline half <span class="chip mert">Mert</span> then <span class="chip burak">Burak</span> <span class="tag now">now</span></h3>
+      <p class="why">The circuits (decay on seven delays, GHZ-3 with an idle block on six layouts), the scoring, and a dry run against Aer so the pipeline is proven at zero cost before any QPU time is spent.</p>
+      <p class="done"><b>Done:</b> <code>scripts/hardware_reading_vs_level.py</code> with its dry-run output committed; Burak reproduces it on the desktop.</p></div>
+    <div class="step"><h3>1c. Pre-registration PR <span class="chip mert">Mert</span> <span class="chip bengisu">Bengisu</span> <span class="tag wait">waits on 1a, 1b</span></h3>
+      <p class="why">The frozen rule book: what counts as pass or fail, written before any hardware number exists. Bengisu's two lessons from the pattern-detector review go in beforehand (purge labels across the horizon, resample consecutive calendar days).</p>
+      <p class="done"><b>Done:</b> the branch rebuilt onto <code>main</code>, controls re-run, PR approved by Bengisu.</p></div>
+    <div class="step gate"><h3>1d. Freeze, then job 1 at 06:45 Istanbul <span class="chip mert">Mert</span> <span class="tag wait">waits on 1c</span></h3>
+      <p class="why">Arm A only on the first day; a second account named before day 2; fourteen daily jobs; calibration properties archived at submission and at execution.</p>
+      <p class="done"><b>Gate L1:</b> job 1's report with the measured QPU cost. <b>Gate L2:</b> fourteen jobs, the decision rule applied, the rows registered.</p></div>
+  </div>
+
+  <h2>Block 2. The product: a per-qubit channel centred on the level</h2>
+  <p class="why">Today every qubit in the engine gets the same noise. The evidence says a week-stale per-qubit channel beats a fresh uniform one. This block builds it; it opens when job 1 reports, because the centre (level or range) depends on the hardware answer.</p>
+  <div class="block">
+    <div class="step"><h3>2a. Per-qubit extractor (ADR-013) <span class="chip baha">Baha</span> <span class="tag wait">opens at L1</span></h3><p class="done"><b>Done:</b> a per-qubit training table from the #63 builder.</p></div>
+    <div class="step"><h3>2b. Per-qubit channel in <code>aer_factory.py</code> <span class="chip burak">Burak</span> <span class="tag wait">after 2a, 2e</span></h3><p class="done"><b>Done:</b> NC-083 reproduced with the engine's own channel; at L2 the design-time comparison against <code>from_backend</code> on the hardware rows.</p></div>
+    <div class="step now"><h3>2c. #122 public archive, ADR-029 <span class="chip baha">Baha</span> <span class="tag now">now</span></h3><p class="done"><b>Done:</b> accepted (the builder reads the pinned public revision under the three rules) or rejected with the reason.</p></div>
+    <div class="step now"><h3>2d. #130 loader exception <span class="chip baha">Baha</span> <span class="tag now">now</span></h3><p class="done"><b>Done:</b> <code>CalibrationParseError</code> for the two escaping shapes, pinned by a test.</p></div>
+    <div class="step now"><h3>2e. #75 projector boundary <span class="chip bengisu">Bengisu</span> <span class="chip burak">Burak</span> <span class="tag now">now</span></h3><p class="done"><b>Done:</b> allowlist and clipping decided before 2b opens.</p></div>
+  </div>
+
+  <h2>Block 3. The fuzzy system and the paper</h2>
+  <p class="why">This paper exists whatever the hardware says. It needs a fitted model, the band's row on the ladder, and the number ADR-011 has waited for.</p>
+  <div class="block now">
+    <div class="step now"><h3>3a. #64: D1 to D5, then PR-A1 <span class="chip bengisu">Bengisu</span> answers, <span class="chip mert">Mert</span> authors <span class="tag now">now</span></h3><p class="why">Five choices have waited since 2026-10-23; PR-A1 is the mechanism, the seeding, the interval band and its coverage, no harness.</p><p class="done"><b>Done:</b> PR-A1 merged (gate L3 with 3b).</p></div>
+    <div class="step now"><h3>3b. #60 first archive fit <span class="chip burak">Burak</span> <span class="tag now">now</span></h3><p class="done"><b>Done:</b> a fitted model at a pinned ref with the snapshot-boundary split; ADR-014 off Deferred (gate L3 with 3a).</p></div>
+    <div class="step now"><h3>3c. #61 Nie-Tan against Karnik-Mendel <span class="chip bengisu">Bengisu</span> <span class="tag now">now</span></h3><p class="done"><b>Done:</b> the number ADR-011 needs; the gradient check.</p></div>
+    <div class="step"><h3>3d. #62 membership-function ablation <span class="chip baha">Baha</span> <span class="tag wait">after 2c, 2d</span></h3><p class="done"><b>Done:</b> the table on the certified harness, both modes.</p></div>
+    <div class="step gate"><h3>3e. The ladder with the fuzzy band's row <span class="chip mert">Mert</span> <span class="chip bengisu">Bengisu</span> <span class="tag wait">after 3a, 3b</span></h3><p class="why">Persistence, shrinkage, rolling band, IT2 band, scored on change events on the same rows.</p><p class="done"><b>Gate L4:</b> the row registered; the paper's draft starts here.</p></div>
+  </div>
+
+  <h2>Block 4. The neural model, behind the gate and behind the data</h2>
+  <div class="note">The pattern detector's amended record (PR #128) found a 4.6% gain over the full-history base rate, below the practical margin, and no ordering beyond the disagreement itself; the reviewer's conclusion, adopted here: this establishes no need for a neural model. N2 runs only if the next genuinely unseen evaluation (rows after the current archive, about December) clears the strengthened rule frozen at <code>d7087e69</code>. The brief asking Dr. Akba to ratify that rule is drafted and unsent; sending it is the lead's call.</div>
+
+  <h2>Block 5. Housekeeping, now overdue</h2>
+  <div class="note">The phase-3 milestone passed 2026-10-31 with eight issues open (#57, #84, #92, #93, #104, #108, #109 and the close record); each closes or moves with a reason (gate L5). PR #111 is approved but conflicts on the register: merge <code>main</code> in and merge it, or close it with a record.</div>
+
+  <h2>Block 6. Verification, at the end</h2>
+  <div class="note">Every figure so far is a laptop figure, provisional. Burak's desktop batch (the pattern detector's N6, NC-080 to NC-094, the dry run of 1b) is what "reproduced and reproducible" means; the hardware rows of block 1 are the only thing that turns archive evidence into a claim about the device.</div>
+
+  <h2>Weeks, as targets</h2>
+  <table>
+    <thead><tr><th>When</th><th>Mert</th><th>Burak</th><th>Baha</th><th>Bengisu</th></tr></thead>
+    <tbody>
+      <tr><td>week of 2026-10-28</td><td>1a, 1b; #111 decision; block 5</td><td>reviews 1a; starts 3b</td><td>2d, 2c</td><td>3a's D1 to D5; reviews 1c when it opens</td></tr>
+      <tr><td>week of 2026-11-04</td><td>1c, freeze, job 1 (<b>L1</b>)</td><td>reproduces 1b</td><td>2a opens at L1</td><td>3c</td></tr>
+      <tr><td>weeks of 2026-11-11 and 11-18</td><td>daily jobs; PR-A1</td><td>2b; 3b</td><td>2a</td><td>3e with Mert</td></tr>
+      <tr><td>from 2026-11-25</td><td><b>L2</b>: decision rule, NC rows; 3e</td><td>desktop batch</td><td>3d</td><td>3e</td></tr>
+      <tr><td>December</td><td>unseen evaluation of the pattern detector; N2 only if it clears</td><td>N5, N6</td><td></td><td></td></tr>
+      <tr><td>Q1 2027</td><td>the paper's draft at <b>L4</b>, with the hardware section if L2 passes</td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <details>
+    <summary>Türkçe özet</summary>
+    <p>2026-10-28 itibarıyla kanıt yığını <code>main</code>'de (PR #120'den #128'e). Henüz QPU'da hiçbir iş koşmadı ve motorun gürültü kanalı tüm kübitler için aynı. Önümüzdeki haftalar: (1) donanım testi, kritik yol: seçim kuralları ve çevrimdışı yarı (Mert, Burak yeniden üretir), ön-kayıt PR'ı (Bengisu inceler), dondurma ve 06:45 İstanbul'da 1. iş, kapılar L1 ve L2; (2) ürün: L1'de açılan kübit başına seviye merkezli kanal (Baha çıkarıcı, Burak kanal), #122, #130, #75; (3) bulanık sistem ve makale: #64 D1-D5 ve PR-A1, #60 ilk uydurma, #61, #62, merdiven ve bulanık bandın satırı, kapı L4, makale taslağı burada başlar; (4) sinir modeli L1'in ve verinin arkasında: örüntü dedektörünün düzeltilmiş kaydı tam geçmişli taban oranına karşı %4.6 kazanç buldu, pratik payın altında; N2 yalnızca Aralık'taki görülmemiş değerlendirme kuralı geçerse; (5) ev işleri: faz-3 kilometre taşı 2026-10-31'de geçti, sekiz açık konu kapanır ya da gerekçeyle taşınır (L5), #111 kararı; (6) doğrulama: Burak'ın masaüstü toplu koşusu, donanım satırları.</p>
+  </details>
+</main>
+</body>
+</html>
