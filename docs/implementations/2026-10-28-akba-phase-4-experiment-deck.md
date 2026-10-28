@@ -26,7 +26,7 @@ approval.
 | `docs/advisor/2026-10-28-akba-phase-4-experiment-deck/chart-labels.json` | The chart's English and Turkish labels, kept out of the script so it stays ASCII. |
 | `docs/advisor/2026-10-28-akba-phase-4-experiment-deck/chart-ladder-{en,tr}.png` | The rendered charts, uploaded to the two decks as assets. |
 | `docs/advisor/2026-10-28-akba-phase-4-experiment-deck/check_numbers.py` | Checks every numeral on every slide against the cited register rows and the pinned protocol documents, plus Turkish-English parity. |
-| `docs/advisor/2026-10-28-akba-phase-4-experiment-deck/check_numbers.txt` | The committed output of that check: 294 pass, 0 fail, 0 parity differences. |
+| `docs/advisor/2026-10-28-akba-phase-4-experiment-deck/check_numbers.txt` | The committed output of that check: 296 pass, 0 fail, 0 parity differences. |
 | `docs/implementations/2026-10-28-akba-phase-4-experiment-deck.md` | This record. |
 
 ## Implementation approach
@@ -99,7 +99,7 @@ row).
 From the worktree root, with `origin` fetched:
 
 - `python docs/advisor/2026-10-28-akba-phase-4-experiment-deck/check_numbers.py`: exit 0,
-  "294 numerals pass, 0 fail; 0 parity differences" (the committed `check_numbers.txt`).
+  "296 numerals pass, 0 fail; 0 parity differences" (the committed `check_numbers.txt`).
 - `PYTHONPATH="src;." C:/t/pin125/Scripts/python.exe docs/advisor/2026-10-28-akba-phase-4-experiment-deck/render_ladder_chart.py`:
   writes both PNGs and prints the ridge rounding note.
 - `C:/t/ruffpin/Scripts/ruff.exe check .` and `ruff format --check` on the folder: clean.

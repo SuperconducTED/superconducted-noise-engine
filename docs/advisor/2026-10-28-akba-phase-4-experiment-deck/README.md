@@ -69,8 +69,8 @@ Every numeral on a slide is either a value written in a register row that the sa
 cites, or a decided protocol value written in the design, the pre-registration draft or the
 plan's §8, each read at a pinned commit. `check_numbers.py` enforces this and lists, for each
 numeral, every cited row or document that holds it, so a match on the wrong quantity is
-visible. Its output, `check_numbers.txt`: 294 numerals pass, 0 fail, and the Turkish and
-English slide bodies carry the same numerals. Ten single-digit protocol matches (job 1, job 2,
+visible. Its output, `check_numbers.txt`: 296 numerals pass, 0 fail, and the Turkish and
+English slide bodies carry the same numerals. Twelve single-digit protocol matches (job 1, job 2,
 `ghz_state_circuit(3)`, the formula's `1`) are marked weak in the output, since any long
 document contains a single digit.
 
