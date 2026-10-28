@@ -234,6 +234,36 @@ truth's shot-free probability per row from that qubit's own instructions alone
 (`_single_qubit_part`), which is exact because the truth model has no term coupling qubits in
 Arm A.
 
+### Amendment 2, 2026-10-28, correcting amendment 1's first item, before the record run
+
+Amendment 1 named the right cause and the wrong fix. A second smoke run with seeds
+`125 + i` failed criterion 2 under truth 1 again, by almost the same amount (-0.0033, 3.4
+standard errors). The diagnosis, all scratch, in this order:
+
+- At 200,000 shots the full twelve-qubit circuits agree with the per-qubit shot-free truth
+  row by row (36 rows, mean z -0.06): the truth and the circuits are right.
+- Within one shot the twelve qubits are independent (mean pairwise correlation of the bits 0.005).
+- Over 30 seed bases 1,000 apart with seeds `base + i`, criterion 2's statistic had mean z
+  +0.07 but a standard deviation of 1.63, not 1: no bias, but the rows were not independent.
+- Over 40 consecutive seeds on one circuit each row's z moved by a standard deviation of 0.07.
+  On that circuit Aer 0.17.2 runs 20 parallel shot streams and seeds shot `j` of a run with
+  seed `s` as `s + j`: seed 501's shots are seed 500's shifted by one, all 2,048 identical. A
+  one-qubit circuit does not take that path, which is why a first one-qubit check missed it.
+
+So seeds closer than the shot count replay each other's shots, and `125 + i` made the seven
+Arm A circuits share almost all of their draws. The record run draws one seed per circuit
+from `numpy`'s `SeedSequence(125)` (`circuit_seeds`), spread over 32 bits, and the code
+refuses any pair closer than ten times the largest shot count. The criterion and its limit
+are unchanged; `125` remains the one seed named in the manifest.
+
+**Check of the fix, before the record run** (scratch, truth 1, Arm A, the same rows): over 20
+seed bases `0..19`, each circuit seeded through `circuit_seeds(base, 7, 0)`, criterion 2's
+statistic had mean z +0.10 and standard deviation 0.86, none beyond 3, where the old seeding
+gave 1.63. The rows now behave as independent binomial draws.
+
+Whether Aer's per-shot seeding is documented, intended or a defect is being checked separately
+(its source, docs and issue tracker); this record does not classify it.
+
 **Results: after the run.**
 
 | Criterion | Truth 1 | Truth 2 |
