@@ -1,7 +1,7 @@
 # 2026-10-28: hardware-test selection rules (proposals A, B and D for #125)
 
-> Status at the plan commit: **plan, no code yet**. The sections below state what will be built
-> and why; the Verification section is filled in after the implementation, in a later commit.
+> Status at the plan commit (`6280ac42`): **plan, no code yet**. Implemented in `cf1425bd`; the
+> Verification section was filled in afterwards, in a later commit.
 
 ## Problem / Motivation
 
@@ -27,7 +27,7 @@ on `main`).
 | --- | --- |
 | `scripts/hardware_test_predictors.py` | Adds the in-window distinct count, the sign-balanced selection with a floor of 15, a `controls` mode that freezes the four controls first, and a submission mode that requires the frozen controls file (or an explicit dry-run override). |
 | `tests/test_hardware_test_predictors.py` | Pins every rule above on synthetic archives, including the fill, the zero-disagreement case, tie order, control exclusion and the CLI refusal. |
-| `docs/roadmap/2026-10-23-hardware-test-archive-side-plan.md` | A dated as-of note pointing at the new CLI; the original text is left as written. |
+| `docs/roadmap/2026-10-23-hardware-test-archive-side-plan.md` | A dated as-of section 8 pointing at the new CLI; sections 1 to 7 are left as written. |
 | `docs/implementations/2026-10-28-hardware-test-selection-rules.md` | This record. |
 
 ## Implementation approach
@@ -120,11 +120,50 @@ No new figure is produced. The reproduction check below re-derives registered va
 
 ## Verification
 
-To be filled after the implementation: the gates from the exact-pin interpreter, the new tests,
-and the reproduction at `calibration-data` `5828b4a2`, `at = 2026-10-23T09:34:56Z`, which must
-give controls 48, 112, 54 and 105 (NC-088, `checkup-floor-controls.json`, `w15.controls_first`),
-in-window counts 3, 6 and 13 for qubits 11, 72 and 108, and `select_discriminating` on the
-injected window counts at floor 15 equal to `w15.top8`.
+Status at the plan commit: the paragraph below was the target. Filled in on 2026-10-28 after
+the implementation, laptop, exact-pin interpreter (`C:/t/pin125`, Python 3.12.10, NumPy 2.4.4).
+
+**Gates.** From the worktree root with `PYTHONPATH=src`:
+
+- `ruff check .` and `ruff format --check .` (ruff 0.15.12): clean.
+- `mypy --strict` (the `[tool.mypy] files` set, which includes `scripts/`): no issues in 48 files.
+- `pytest tests/ -q`: 1,043 passed. `tests/test_hardware_test_predictors.py` went from 39
+  collected tests on `main` to 63; the old tests pass with one change, the shared CLI helper
+  `_run_cli` passing `--no-frozen-controls` in submission mode.
+
+**Mutation check of the new tests.** Nine mutants of the script, each on a fresh copy restored from
+a backup: dropping the control exclusion, `>=` to `>` at the floor, reversed tie order, `d == 0`
+joining the lower side, no fill of the upper side, counting NaN in the window, no exclusion in
+`freeze_controls`, no refusal without a controls file, and a live document accepted in controls
+mode. On the first pass eight failed at least one test; the upper-side fill survived, so
+`test_short_lower_side_is_filled_from_the_upper_side` was added and the mutant then failed.
+
+**Reproduction of registered values** (NC-088; no new figure). At `calibration-data`
+`5828b4a29fabc245aa096e530852249a3496dc5b`, `at = 2026-10-23T09:34:56Z`, backend `ibm_fez`, the
+walk read 2,249 files and 924 states, as the NC-088 record did. Expected values from
+`docs/evidence/hardware-reading-vs-level/checkup-floor-controls.json` on
+`mert/issue-125-preregistration`:
+
+| Check | Expected | Got |
+| --- | --- | --- |
+| `freeze_controls(k=4)` | `w15.controls_first` = 48, 112, 54, 105 | 48, 112, 54, 105 |
+| `n_window_distinct` for qubits 11, 72, 108 | 3, 6, 13 | 3, 6, 13 |
+| `select_discriminating` on window counts injected as `n_distinct`, floor 15 | `w15.top8` = 148, 132, 155, 10, 80, 77, 2, 40 | the same eight, same order |
+| `--mode controls` through the CLI | the same four | 48, 112, 54, 105; below the floor: 11, 72, 108 |
+
+Commands (the guard script lived in the session scratchpad and is not committed; its three
+checks are the table's first three rows):
+
+```bash
+python -m scripts.hardware_test_predictors --repo . --ref 5828b4a29fabc245aa096e530852249a3496dc5b --at 2026-10-23T09:34:56Z --mode controls --out <scratch>/freeze-5828
+```
+
+Each walk takes about 7 to 8 minutes on the laptop (one `git show` per file). This checkout is a
+partial clone: 970 blobs at `5828b4a2` were missing and were fetched first in batches of 200
+(`git rev-list --objects --missing=print <ref>` lists them).
+
+The sign-balanced eight at that instant is a new output of a new rule. It was not computed for
+this record and is not quoted. It belongs to the freezing ref's dry run (step 1c).
 
 ## Related docs
 
