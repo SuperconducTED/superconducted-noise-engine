@@ -34,6 +34,17 @@ draft stays unfrozen until the rest of section 6 is done.
 | Schedule | one job per day for 14 consecutive days, submitted at **03:45 UTC (06:45 Istanbul)**; job 1 is Arm A only | design §5; section 3.6, NC-091 | hour **set by the lead 2026-10-24** (section 3.6) |
 | Budget | not a constraint (the lead, 2026-10-24); QPU time and queue delay are still logged per job | section 4 | replaces design §5's 25-second gate |
 | Decision rule | design §7, verbatim: on Arm A's discriminating rows `level` beats both `reading` and `reading_at_execution` on mean absolute error, each with a paired bootstrap 90% interval excluding zero, the ordering holds in sign on the control stratum, and `band` covers its nominal 80% within a one-binomial-standard-error widening; Arm B passes if `level` or `band` ranks layouts at least as well as `reading` (Spearman) and picks the measured best at least as often | design §7 | unchanged; **under Bengisu's review** (section 6) |
+| Predictor implementation | the predictors' code at PR #132's merge commit (selection rules A, B and D added beside PR #126's functions, which are unchanged); the commit is named in the freezing commit | PR #132; section 3.7 | **amendment 13, 2026-10-28** (step 1c); replaces the `d62928fa` pin in the Predictors row, which predates #132 |
+| Arm B eligibility | a qubit enters a triple when it has at least 15 distinct `T1` values inside its 30-day window (proposal A's floor); the four controls may sit in a triple | offline-half record; section 3.7 | **amendment 1, 2026-10-28**, decided by the lead; replaces design §4's "at least 20 events" |
+| Arm B links | a coupled pair is a link only when its latest `cz` `gate_error` `r` gives `0 <= 4 r / 3 <= 1`; a dead pair (`gate_error = 1`) is not a link | offline-half record; section 3.7 | **amendment 9, 2026-10-28** |
+| Arm B triples | connected triples `a - b - c` over the links, `b` the GHZ's control; every eligible triple predicted under `level`; the six chosen at ranks `round(i (n - 1) / 5)`, `i = 0..5`, of that list sorted best to worst, ties by the sorted qubit tuple | offline-half record; section 3.7 | **amendment 5, 2026-10-28**; fills design §4's "span the predicted fidelity" |
+| Arm B prediction | per predictor, an Aer `NoiseModel`: `thermal_relaxation_error` on `sx` and `x` from that predictor's `T1`, `T2`; `RelaxationNoisePass` with the same arrays for the idle `delay`; exact probabilities from Aer's density-matrix method with final measurements removed; readout applied analytically as the product of per-qubit assignment matrices from the predictor's own `e_10`, `e_01`; no sampling in any prediction | offline-half record; section 3.7 | **amendment 2, 2026-10-28**; reads design §4's "density matrix" with "readout from the same source" |
+| Arm B `cz` channel | a two-qubit depolarizing channel with `p = 4 r / 3` from the latest snapshot's `cz` `gate_error` `r`, no relaxation during `cz`, the same object for every predictor | offline-half record; section 3.7 | **amendment 3, 2026-10-28** |
+| Band in Arm B | the fidelity interval from the band's two ends (`T1_lo` with `T2_lo`, `T1_hi` with `T2_hi`, level readout); layouts ranked by its midpoint; scored for coverage of the measured fidelity | offline-half record; section 3.7 | **amendment 4, 2026-10-28**; **under Bengisu's review** |
+| Arm A schedule | each qubit's `x` and `delay` placed immediately before the one simultaneous measurement (`ibm_fez`'s `meas_map` is one group of 156), scheduled ALAP, so no qubit idles between its delay and its measurement | offline-half record; section 3.7 | **amendment 6, 2026-10-28** |
+| Bootstrap unit | proposed: circular blocks of 3 consecutive UTC calendar days of submission, a missed job kept as an empty day (zero rows, zero loss), scores row-weighted; frozen after Bengisu's review | section 3.7 | **amendment 8, 2026-10-28, proposed, not frozen** |
+| Written files | every JSON the selection and job scripts write uses LF line endings, so a hash recorded at write time is the hash every checkout sees | PR #132 (`bbde9522`); section 3.7 | **amendment 12, 2026-10-28**, done |
+| Design §6, `rep_delay`, `init_qubits` | the `T1` characterisation on the first and last jobs, its environment and version, and the two submission options are step 1d's (the submission script), not this document's | section 3.7 | **amendment 7, 2026-10-28**, decided by the lead |
 
 ## 3. The four proposals
 
@@ -213,6 +224,112 @@ UTC (NC-091), which puts 03:45 UTC just after the usual sweep, if November keeps
 is not guaranteed to: the sweep time moved between months. A queued job that runs after a new
 sweep is still scored, and the `reading_at_execution` control shows how much that mattered.
 
+### 3.7 Amendments of 2026-10-28 (step 1c), from the offline half and the #128 review
+
+Appended 2026-10-28, before the freezing commit and before any QPU job. Building the offline half
+(`scripts/hardware_reading_vs_level.py`, branch `mert/issue-125-offline-half`, record
+`docs/implementations/2026-10-28-hardware-test-offline-half.md`) and dry-running it against Aer
+showed where this draft and the design were silent or no longer exact. Each item is numbered as
+that record numbers it; items that fix a value are also rows at the foot of section 2. The rows
+above them are not edited.
+
+1. **Arm B eligibility** (the lead, 2026-10-28). The design's "at least 20 events" was the
+   whole-archive count NC-088 showed admits qubit 72 on stale values. Arm B uses proposal A's floor
+   instead: at least 15 distinct `T1` values inside the 30-day window. The controls may sit in a
+   triple, because Arm B is not selected on disagreement.
+2. **Arm B readout.** The design says "density matrix" and "readout from the same source". The
+   offline half reads both together: exact outcome probabilities from Aer's density-matrix method
+   with the final measurements removed, then the predictor's own assignment matrices (`e_10 =
+   prob_meas0_prep1`, `e_01 = prob_meas1_prep0`, per qubit) applied analytically. No prediction
+   samples shots.
+3. **The `cz` channel.** Two-qubit depolarizing with `p = 4 r / 3` from the latest snapshot's `cz`
+   `gate_error` `r` (a two-qubit depolarizing channel's average gate infidelity is `3p/4`), no
+   relaxation during the gate, the same object for every predictor, because the two-qubit gates are
+   not under test (design §4).
+4. **The band in Arm B.** The design scores the band in Arm A only. In Arm B it gets the fidelity
+   interval from its two ends, is ranked by the interval's midpoint and is scored for coverage of
+   the measured fidelity. For Bengisu's review.
+5. **The triple rule.** "Span the predicted fidelity" is made exact: ranks `round(i (n - 1) / 5)`,
+   `i = 0..5`, of all eligible triples sorted by `level`'s predicted fidelity, best to worst, ties
+   by the sorted qubit tuple. One circuit per triple, so triples may share qubits.
+6. **Arm A scheduling.** `ibm_fez` measures all 156 qubits in one group, so every measurement in an
+   Arm A circuit is simultaneous. Each qubit's `x` and `delay` sit immediately before it, scheduled
+   ALAP, so no qubit idles between its delay and its measurement; a test checks every scheduled
+   interval equals the rounded `tau`.
+7. **Design §6 moves to step 1d** (the lead, 2026-10-28): the `T1` characterisation on the first
+   and last jobs, with its separate environment and version, belongs to the submission script, as
+   do `rep_delay` and `init_qubits`. They are fixed in the freezing commit, not here.
+8. **The bootstrap's resampling unit.** Section 6 left "by job or by row" open. Rows are not
+   independent: the qubits of one job share one device state, and the levels of consecutive days
+   share 29 of their 30 window days. Proposed, following Bengisu's lesson from PR #128 (resample
+   blocks of consecutive calendar days, with empty dates kept): circular blocks of 3 consecutive
+   UTC calendar days of submission; a missed or failed job is an empty day with zero rows and zero
+   loss, never dropped; scores row-weighted. The block length 3 is a judgment, not derived; 1 (by
+   job) is the alternative. Section 3.8 states what each choice does under a no-information null.
+   Frozen after her review.
+9. **Dead `cz` pairs.** Some couplings report `gate_error = 1.0`, which makes `4 r / 3` exceed 1. A
+   pair is a link only when `0 <= 4 r / 3 <= 1`.
+10. **Exercising the `reading_at_execution` control.** In the dry run the file at `t_execute` held
+    the same calibration as the one at `t_s` (no sweep between 09:34 and 11:18 UTC), so the control
+    equalled `reading` by fact and was not exercised. On hardware the control is what it is; a dry
+    run meant to test it needs a `t_execute` after a sweep.
+11. **Arm B's best-pick near-tie.** Under truth 2 the top three measured layouts were within 0.008
+    of each other in fidelity, so the best-pick outcome turned on shot noise. For Bengisu's review
+    of how Arm B is scored; section 3.8 states the null value of the best-pick condition.
+12. **LF writes.** Every JSON the two scripts write uses `newline="\n"`, so a recorded hash is the
+    hash every checkout sees (PR #132 `bbde9522`; the offline half's `write_json_lf`). Done.
+13. **The predictor implementation pin.** Section 2's Predictors row names `d62928fa` (PR #126).
+    The freezing commit names PR #132's merge commit instead, which adds proposals A, B and D beside
+    PR #126's functions and leaves those unchanged.
+
+**Bengisu's first #128 lesson, an open question for her.** On PR #128 she required that training
+labels whose horizon crosses a split boundary be purged. This test fits nothing and has no split:
+every prediction is computed from the archive at `t_s`, and the outcome is measured after it. What
+it has in that lesson's place: the level's 30-day window must be complete at every `t_s` (the
+`ibm_fez` archive starts 2026-05-13, so it is, by five months), and `reading_at_execution` is read after the fact and used
+only as a comparison, never as an input. Whether that is a full answer is hers to rule on; it is
+asked in the PR and not decided here.
+
+### 3.8 What a no-information predictor scores on each threshold (protocol, 2026-10-28)
+
+Written 2026-10-28 before any computation of it, as plan §8 requires for step 1c and as lesson
+L-029 requires of any threshold: a threshold is read against what a predictor with no information
+scores on it. The decision rule (section 2, design §7) has seven conditions. For each, the null
+model and how its value is obtained:
+
+| Condition | Null model | Value from |
+| --- | --- | --- |
+| A1: `level` beats `reading` on mean absolute error, discriminating rows, paired bootstrap 90% interval of the difference excluding zero | the two predictors equally accurate: the per-row error difference has mean zero | nominal 5% (one side of a 90% interval); the actual rate of the percentile bootstrap with 14 days in blocks is computed (below) |
+| A2: the same against `reading_at_execution` | as A1 | the joint rate with A1 lies between 0.25% (independent) and the A1 rate (identical, when no sweep falls between `t_s` and `t_execute`); closed form |
+| A3: the ordering holds in sign on the control stratum | `level` and each reading equally accurate on the controls | one half per comparison, between one quarter and one half for both; closed form |
+| A4: `band` covers its nominal 80% within a one-binomial-standard-error widening | a band carrying no information about where `p_1` is | a band wide enough covers every row, so a no-information band passes with probability 1; coverage alone does not test the band, and the width scored beside it is not part of the condition; closed form, raised for Bengisu's review |
+| B1: `level` or `band` ranks layouts at least as well as `reading` (mean Spearman over the 13 Arm B jobs) | (i) each predictor's ranking of the six layouts an independent uniform random permutation; (ii) all three rankings identical | (i) computed exactly (below); (ii) passes with probability 1, because "at least as well" passes on a tie |
+| B2: picks the measured best at least as often | (i) each predictor's top layout right with probability 1/6, independently; (ii) identical picks | (i) computed exactly; (ii) probability 1 |
+| B1 and B2 together | as B1 and B2 | computed exactly under (i), under both readings of "level or band": one predictor meeting both conditions, or each condition met by either |
+
+**Computation.** A script, `docs/evidence/hardware-reading-vs-level/null_values.py`, committed
+after this section and run once; output committed beside it.
+
+- **B1, B2 and their joint, exactly.** For six layouts, enumerate all 720 rankings against a fixed
+  measured order: each gives the sum of squared rank differences (`Spearman = 1 - 6 sum d^2 / 210`)
+  and whether its top layout is the measured best. Convolve that joint distribution over 13
+  independent jobs. A higher mean Spearman is a lower total `sum d^2`, so "at least as well" is
+  `total_level <= total_reading`. With `reading`, `level` and `band` independent under (i), the
+  pass probability is a sum over `reading`'s joint outcome. Reported: B1, B2 and the joint under
+  both readings, for `level` alone and for "`level` or `band`".
+- **A1's actual rate, by simulation.** Per-row error differences `D = u_day + e_row`, mean zero,
+  with `u_day` an AR(1) series over 14 days (lag-one correlation `phi` in {0, 0.5}) and a share
+  `rho` in {0, 0.3, 0.7} of the variance at day level; 56 discriminating rows a day (eight qubits,
+  seven delays). For each case, 2,000 simulated runs, each with 2,000 circular block bootstrap
+  resamples at block length 1 and at 3; reported: the share of runs whose 90% percentile interval
+  lies wholly on `level`'s side, with its Monte Carlo standard error. Seeds from
+  `numpy.random.SeedSequence(1251028)`, one child per case.
+
+**What these values change.** Nothing by themselves: they are the reference Bengisu's review reads
+the rule against. A condition whose null value is near 1 (A4 and B1, B2 under (ii)) cannot by
+itself support a claim, and the rule is changed only by the lead after her review, as a dated
+amendment here, before the freezing commit.
+
 ## 4. The budget
 
 The lead stated on 2026-10-24 that the QPU budget is covered. The design's usage-page check of
@@ -239,6 +356,23 @@ the result needs to know what the measurement cost.
 | PR #120 merged | Bengisu or Burak to review | open, no review yet |
 | PR #124 and PR #126 merged, so this document and its evidence land on `main` | reviews | open, no review yet |
 | The controls re-run at the freezing ref (proposal D) | Mert | after the above |
+
+### 6.1 As of 2026-10-28 (step 1c)
+
+Appended; the table above is the 2026-10-24 state and is not edited.
+
+| Item | Owner | State on 2026-10-28 |
+| --- | --- | --- |
+| Proposals A to D, the submission hour | Mert | done 2026-10-24 (unchanged) |
+| PR #120, #124, #126 merged; this document on a branch rebuilt onto `main` | reviews | **done**: all three merged; `main` (`695c90ca`) merged into this branch 2026-10-28 |
+| Selection rules A, B and D in code (PR #132) | Mert; Burak reviews | open, CI green, not reviewed; merged into this branch so the controls command exists here (stacked); the freezing commit names #132's merge commit (amendment 13) |
+| The offline half and its Aer dry run | Mert (the lead took it over on 2026-10-26, plan §8.2); Burak reproduces on his desktop | built on `mert/issue-125-offline-half`; dry run passes its five criteria under both truths; PR after #132 merges; desktop reproduction owed |
+| The twelve offline-half amendments and the pin | Mert | written in section 3.7 and section 2's foot |
+| Null-model value of every threshold | Mert computes; Bengisu reviews | protocol in section 3.8; values after its script runs |
+| Statistics review of the decision rule, the amendments, the bootstrap unit (amendment 8) and the open label-horizon question | Bengisu | to be requested on this branch's PR |
+| The controls re-run at the freezing ref (proposal D) | Mert | a rehearsal at the current `calibration-data` tip on this branch (not frozen); the frozen run is in the freezing commit |
+| The submission script: `build` and `score` modes, `rep_delay`, `init_qubits`, design §6's `T1` characterisation | Mert | step 1d (amendment 7) |
+| The second account for the daily cadence | Mert names it | before job 2 (section 5) |
 
 ## 7. Related
 
