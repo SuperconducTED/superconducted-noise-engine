@@ -370,6 +370,22 @@ and best-pick counts over 13 jobs tie about one time in five. As written, Arm B 
 claim on its own; with A4 (a wide band passes by construction), this is what Bengisu's review is
 asked to rule on. The rule is not changed here.
 
+### 3.9 The controls rehearsal, 2026-10-28 (not the frozen controls)
+
+Proposal D freezes the four controls at the freezing commit's `calibration-data` ref, which does
+not exist yet. To show the command works on this branch, `scripts/hardware_test_predictors.py
+--mode controls` (PR #132's code, merged here) ran at `calibration-data` `7adda803` (the tip on
+2026-10-28, 19:09 UTC) with `--at 2026-10-28T18:40:46Z`, the latest `ibm_fez` file there: 958
+states, exit 0. Output in `docs/evidence/hardware-reading-vs-level/controls-rehearsal-2026-10-28/`
+(`controls.json` blob `b75a92f7`, SHA-256 prefix `a48a8c99`).
+
+It names **144, 110, 140 and 77**, with qubits 11, 72 and 108 below the window floor. At NC-088's
+instant on `5828b4a2` the same rule named 48, 112, 54 and 105. That the four move is what section
+3.4 expected: the candidates nearest the median scatter lie within a few thousandths of each other
+(here 0.2909 to 0.2917 around a median of 0.2913), so any change in the archive reorders them. It
+is why the controls are frozen once, at the freezing ref, and never re-chosen. These four are not
+frozen and are not used by any job.
+
 ## 4. The budget
 
 The lead stated on 2026-10-24 that the QPU budget is covered. The design's usage-page check of
