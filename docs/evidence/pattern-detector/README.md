@@ -461,6 +461,29 @@ the current archive tip; re-running at a later ref over the already-examined tes
    outcome is persistence of **reported `T1` estimates**, not a physical relaxation-rate transition
    or an improved quantum-channel prediction, and the hardware check (#125) remains the arbiter.
 
+**Amendment 9, 2026-10-28, after @bengisucvd's re-review (review 5681736384 at `c436d222`); two
+follow-ups, before the pipeline is frozen for the next unseen evaluation.**
+
+1. **The bootstrap's time axis is the calendar.** Amendment 8's block bootstrap indexed the days
+   that held test rows (46 of them) and so drew blocks of six consecutive *observed* days, not six
+   calendar days; the test span is 2026-09-01 to 2026-10-20, 50 calendar days, with 2026-09-10,
+   2026-09-16, 2026-10-02 and 2026-10-08 empty. Blocks are now drawn on the complete calendar axis,
+   empty dates kept with zero rows and zero loss, and a resample's score is the row-weighted mean
+   (sampled loss sums over sampled row counts). The dependence diagnostic runs at calendar lags
+   with empty dates treated as missing: the lag-`k` sum uses pairs of observed dates `k` calendar
+   days apart, normalised by the variance over the observed dates (pairwise deletion); the
+   standard-error bound keeps the observed-day count. A regression check with an internal calendar
+   gap is in the self-test. N3's intervals use the same helper at the chosen block length; its
+   2026-10-27 single-day intervals are historical and were never dependence-adjusted evidence.
+2. **The warm-up explanation is an association, not an identified cause.** The purge establishes
+   that most of the rate contrast predates the test boundary and is consistent with
+   archive-start and window effects; it does not separate those from a contemporaneous change in
+   the reported calibration process or in the device, and the collapse of the `n_distinct`
+   coefficient does not resolve that confounding. Sections 12.1 and 12.6 and the implementation
+   note are reworded accordingly; the purge stands without a causal claim.
+3. **The next unseen evaluation's rule** keeps the paired positive Brier-difference requirement
+   beside the added AUC requirement for clause 2; all choices are frozen at this amendment's commit.
+
 ## 8. Counts, at the ref of the record run
 
 Appended 2026-10-26 from `count_events.py` (committed at `8db25e37`; the JSON writer's line ending

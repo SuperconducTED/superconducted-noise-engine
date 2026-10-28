@@ -24,7 +24,7 @@ import importlib.util
 import json
 import math
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from itertools import pairwise
 from pathlib import Path
 from types import ModuleType
@@ -128,6 +128,28 @@ def diag_summary(diag: dict[str, Any], observed: dict[str, float]) -> dict[str, 
 # ------------------------------------------------------------------------------- block bootstrap
 
 
+def calendar_axis(days: np.ndarray) -> list[str]:
+    """Every calendar date from the first to the last observed day, empty dates included."""
+    first = datetime.fromisoformat(min(days)).date()
+    last = datetime.fromisoformat(max(days)).date()
+    return [(first + timedelta(days=i)).isoformat() for i in range((last - first).days + 1)]
+
+
+def daily_sums(
+    days: np.ndarray, y: np.ndarray, preds: dict[str, np.ndarray], axis: list[str]
+) -> tuple[dict[str, np.ndarray], np.ndarray]:
+    """Per calendar date: squared-error sums per model and the row count (zero on empty dates)."""
+    pos = {d: i for i, d in enumerate(axis)}
+    counts = np.zeros(len(axis))
+    sums = {k: np.zeros(len(axis)) for k in preds}
+    for d in np.unique(days):
+        m = days == d
+        counts[pos[d]] = m.sum()
+        for k, p in preds.items():
+            sums[k][pos[d]] = float(np.sum((p[m] - y[m]) ** 2))
+    return sums, counts
+
+
 def circular_block_bootstrap(
     days: np.ndarray,
     y: np.ndarray,
@@ -135,37 +157,47 @@ def circular_block_bootstrap(
     block: int,
     rng: np.random.Generator,
 ) -> dict[str, np.ndarray]:
-    """Resample consecutive calendar days in circular blocks of `block` days, qubits together."""
-    uniq = np.array(sorted(np.unique(days)))
-    groups = {d: np.where(days == d)[0] for d in uniq}
-    n_days = uniq.size
+    """Amendment 9: circular blocks of `block` consecutive CALENDAR days on the complete axis.
+
+    Empty dates stay on the axis with zero rows and zero loss; a resample's score is the
+    row-weighted mean, the sampled loss sums over the sampled row counts.
+    """
+    axis = calendar_axis(days)
+    sums, counts = daily_sums(days, y, preds, axis)
+    n = len(axis)
     out = {k: np.empty(n1.BOOTSTRAP) for k in preds}
     for b in range(n1.BOOTSTRAP):
-        drawn: list[str] = []
-        while len(drawn) < n_days:
-            start = int(rng.integers(0, n_days))
-            drawn.extend(uniq[(start + j) % n_days] for j in range(block))
-        drawn = drawn[:n_days]
-        idx = np.concatenate([groups[d] for d in drawn])
-        for k, p in preds.items():
-            out[k][b] = n1.brier(p[idx], y[idx])
+        idx: list[int] = []
+        while len(idx) < n:
+            start = int(rng.integers(0, n))
+            idx.extend((start + j) % n for j in range(block))
+        sel = np.array(idx[:n])
+        total = counts[sel].sum()
+        for k in preds:
+            out[k][b] = sums[k][sel].sum() / total
     return out
 
 
 def daily_difference_acf(
     days: np.ndarray, y: np.ndarray, p_a: np.ndarray, p_b: np.ndarray, max_lag: int = 12
 ) -> list[float]:
-    """Autocorrelation of the daily mean Brier difference (a minus b) over consecutive test days."""
-    uniq = np.array(sorted(np.unique(days)))
-    daily = np.array(
-        [
-            np.mean((p_a[days == d] - y[days == d]) ** 2 - (p_b[days == d] - y[days == d]) ** 2)
-            for d in uniq
-        ]
-    )
-    daily = daily - daily.mean()
-    denom = float(np.sum(daily**2))
-    return [float(np.sum(daily[:-lag] * daily[lag:]) / denom) for lag in range(1, max_lag + 1)]
+    """Autocorrelation of the daily mean Brier difference (a minus b) at CALENDAR lags.
+
+    Empty dates are missing values: the lag-k sum runs over pairs of observed dates k calendar
+    days apart, normalised by the variance over the observed dates (pairwise deletion).
+    """
+    axis = calendar_axis(days)
+    sums, counts = daily_sums(days, y, {"a": p_a, "b": p_b}, axis)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        daily = (sums["a"] - sums["b"]) / counts
+    obs = counts > 0
+    centred = np.where(obs, daily - np.nanmean(daily[obs]), 0.0)
+    denom = float(np.sum(centred[obs] ** 2))
+    acf = []
+    for lag in range(1, max_lag + 1):
+        both = obs[:-lag] & obs[lag:]
+        acf.append(float(np.sum(centred[:-lag][both] * centred[lag:][both]) / denom))
+    return acf
 
 
 def choose_block(acf: list[float], n_days: int) -> int:
@@ -437,7 +469,7 @@ def run(fields: list[Any], ref: str, out: Path, rows_record: Path) -> dict[str, 
     # block bootstrap over consecutive test days
     days = np.array([_day(t) for t in built.times[test]])
     acf = daily_difference_acf(days, yt, preds[primary][test], p_log[test])
-    block = choose_block(acf, int(np.unique(days).size))
+    block = choose_block(acf, int(np.unique(days).size))  # standard error from observed days
     boot_tables = {}
     for L in sorted(set(BLOCK_LENGTHS) | {block}):
         boot = circular_block_bootstrap(
@@ -458,12 +490,15 @@ def run(fields: list[Any], ref: str, out: Path, rows_record: Path) -> dict[str, 
             ),
             "bs_always_level_minus_bs_null_90": n1.interval(boot["always_level"] - boot[primary]),
         }
+    axis = calendar_axis(days)
     summary["bootstrap"] = {
-        "test_days": int(np.unique(days).size),
+        "test_days_with_rows": int(np.unique(days).size),
+        "calendar_days": len(axis),
+        "empty_calendar_days": [d for d in axis if d not in set(days)],
         "resamples": n1.BOOTSTRAP,
-        "daily_difference_acf": acf,
+        "daily_difference_acf_calendar_lags": acf,
         "two_se_bound": 2.0 / math.sqrt(int(np.unique(days).size)),
-        "block_length_chosen": block,
+        "block_length_chosen_calendar_days": block,
         "by_block_length": boot_tables,
     }
     chosen = boot_tables[str(block)]
@@ -477,6 +512,9 @@ def run(fields: list[Any], ref: str, out: Path, rows_record: Path) -> dict[str, 
         "holds": bool(bss >= 0.10 and chosen["bs_null_minus_bs_logistic_90"][0] > 0),
         "bss_vs_always_level": scores["logistic"]["bss_vs_always_level"],
         "bss_vs_constant_purged": scores["logistic"]["bss_vs_constant_purged"],
+        "constant_purged_minus_logistic_90_at_chosen_block": chosen[
+            "bs_constant_purged_minus_bs_logistic_90"
+        ],
         "bss_vs_oracle": 1
         - scores["logistic"]["brier"] / scores["oracle_constant_test_rate"]["brier"],
     }
@@ -564,7 +602,7 @@ def run(fields: list[Any], ref: str, out: Path, rows_record: Path) -> dict[str, 
 def selftest() -> None:
     rng = np.random.default_rng(11)
     # the block bootstrap keeps all rows of a day together and the chosen block respects the floor
-    days = np.repeat([f"d{i:02d}" for i in range(40)], 3)
+    days = np.repeat([(date(2026, 9, 1) + timedelta(days=i)).isoformat() for i in range(40)], 3)
     y = (rng.uniform(size=days.size) < 0.3).astype(float)
     preds = {"a": np.full(days.size, 0.3), "b": np.clip(y * 0.6 + 0.2, 0, 1)}
     boot = circular_block_bootstrap(days, y, preds, 5, rng)
@@ -572,6 +610,20 @@ def selftest() -> None:
     acf = daily_difference_acf(days, y, preds["a"], preds["b"])
     assert len(acf) == 12 and all(abs(a) <= 1.0 for a in acf)
     assert choose_block(acf, 40) >= HORIZON_FLOOR_DAYS
+    # amendment 9 regression check: an internal calendar gap stays on the axis as empty dates
+    gap_days = np.array([f"2026-09-{d:02d}" for d in (1, 2, 3, 6, 7, 8, 9, 10) for _ in range(4)])
+    axis = calendar_axis(gap_days)
+    assert len(axis) == 10 and "2026-09-04" in axis and "2026-09-05" in axis
+    sums, counts = daily_sums(
+        gap_days, np.zeros(gap_days.size), {"z": np.zeros(gap_days.size)}, axis
+    )
+    assert counts[3] == 0 and counts[4] == 0 and sums["z"][3] == 0.0
+    yg = (rng.uniform(size=gap_days.size) < 0.4).astype(float)
+    pg = {"c": np.full(gap_days.size, 0.4), "m": np.clip(yg * 0.5 + 0.2, 0, 1)}
+    bg = circular_block_bootstrap(gap_days, yg, pg, 3, rng)
+    assert np.all(np.isfinite(bg["c"])) and np.all(bg["m"] < bg["c"])
+    acf_gap = daily_difference_acf(gap_days, yg, pg["c"], pg["m"], max_lag=4)
+    assert len(acf_gap) == 4 and all(math.isfinite(a) for a in acf_gap)
     # increment sigma recovers sigma_e on a synthetic local-level series
     sigma_e, q = 0.2, 0.05
     mu = np.cumsum(rng.normal(0, math.sqrt(q) * sigma_e, 20000))

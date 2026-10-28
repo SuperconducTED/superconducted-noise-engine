@@ -42,6 +42,7 @@ def _load(name: str) -> ModuleType:
 
 
 n1 = _load("n1_baselines")
+n1a = _load("n1_amended")
 
 PERMUTATIONS = 20
 BOOTSTRAP = 1000
@@ -159,13 +160,20 @@ def bootstrap_importances(
     perm_preds: dict[str, np.ndarray],
     days: np.ndarray,
     rng: np.random.Generator,
+    block: int = 1,
 ) -> dict[str, dict[str, tuple[float, float]]]:
-    uniq = np.unique(days)
-    groups = {d: np.where(days == d)[0] for d in uniq}
+    """Amendment 9: circular blocks of `block` consecutive calendar days (block 1 = single days)."""
+    axis = n1a.calendar_axis(days)
+    pos = {d: i for i, d in enumerate(axis)}
+    groups = {i: np.where(days == d)[0] for d, i in pos.items()}
+    n = len(axis)
     acc: dict[str, list[list[float]]] = {name: [[], []] for name in perm_preds}
     for _ in range(BOOTSTRAP):
-        drawn = rng.choice(uniq, size=uniq.size, replace=True)
-        idx = np.concatenate([groups[d] for d in drawn])
+        drawn: list[int] = []
+        while len(drawn) < n:
+            start = int(rng.integers(0, n))
+            drawn.extend((start + j) % n for j in range(block))
+        idx = np.concatenate([groups[i] for i in drawn[:n]])
         imp = importances(y, p_rec, perm_preds, idx)
         for name, (b, a) in imp.items():
             acc[name][0].append(b)
@@ -227,8 +235,14 @@ def run(features: Path, summary_path: Path, out: Path) -> dict[str, Any]:
         data, beta, keep, mean, std, np.random.default_rng(np.random.SeedSequence(SEED_PERM))
     )
     point = importances(y_t, p_t, perm_preds)
+    block = int(rec.get("bootstrap", {}).get("block_length_chosen_calendar_days", 1))
     boots = bootstrap_importances(
-        y_t, p_t, perm_preds, days_t, np.random.default_rng(np.random.SeedSequence(SEED_BOOT))
+        y_t,
+        p_t,
+        perm_preds,
+        days_t,
+        np.random.default_rng(np.random.SeedSequence(SEED_BOOT)),
+        block,
     )
     table = []
     for name, (b, a) in point.items():
@@ -250,6 +264,7 @@ def run(features: Path, summary_path: Path, out: Path) -> dict[str, Any]:
         "record_auc": n1.auc(p_t, y_t),
         "permutations": PERMUTATIONS,
         "bootstrap": BOOTSTRAP,
+        "bootstrap_block_calendar_days": block,
         "groups": table,
         "top_by_brier": top,
         "top_by_auc": [r["group"] for r in by_auc[:TOP_GROUPS]],
