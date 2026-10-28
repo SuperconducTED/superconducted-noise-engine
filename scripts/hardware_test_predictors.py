@@ -585,8 +585,18 @@ def write_outputs(
         for row in rows:
             writer.writerow(asdict(row))
     if selection is not None:
-        (out / "selection.json").write_text(json.dumps(selection, indent=2), encoding="utf-8")
-    (out / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+        _write_json(out / "selection.json", selection)
+    _write_json(out / "manifest.json", manifest)
+
+
+def _write_json(path: Path, payload: Any) -> None:
+    """Write JSON with LF line endings on every platform.
+
+    The repository stores these files with LF, so a hash recorded at write time (the controls
+    file's, in the submission manifest) is the hash every checkout reproduces; Python's default
+    newline translation would write CRLF on Windows.
+    """
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8", newline="\n")
 
 
 def _parse_at(value: str | None) -> datetime:
@@ -734,9 +744,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "min_distinct_values": MIN_DISTINCT_VALUES,
             **frozen,
         }
-        (args.out / "controls.json").write_text(
-            json.dumps(controls_out, indent=2), encoding="utf-8"
-        )
+        _write_json(args.out / "controls.json", controls_out)
     if args.live_properties is not None:
         shutil.copyfile(
             args.live_properties, args.out / f"live-properties-{at:%Y%m%dT%H%M%SZ}.json"
