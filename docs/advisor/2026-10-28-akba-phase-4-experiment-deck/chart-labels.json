@@ -1,0 +1,16 @@
+{
+  "en": {
+    "persistence": "persistence\n(latest reading)",
+    "shrinkage": "shrinkage\n(to the 30-day level)",
+    "linear": "ridge\n(history features)",
+    "rolling_band": "rolling 30-day\n10th to 90th band",
+    "source": "NC-085 · calibration-data 5828b4a2 · laptop, provisional"
+  },
+  "tr": {
+    "persistence": "persistence\n(son okuma)",
+    "shrinkage": "shrinkage\n(30 günlük seviyeye)",
+    "linear": "ridge\n(geçmiş özellikleri)",
+    "rolling_band": "kayan 30 günlük\n10. ile 90. yüzdelik bant",
+    "source": "NC-085 · calibration-data 5828b4a2 · dizüstü ölçüm, geçici"
+  }
+}
