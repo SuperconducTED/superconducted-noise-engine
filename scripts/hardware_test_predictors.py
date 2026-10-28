@@ -10,20 +10,29 @@ For each qubit and each of ``T1``, ``T2``, ``readout_error``, ``prob_meas0_prep1
   finite positive values only, at least five states;
 - ``band_lo``, ``band_hi``: the 10th and 90th percentiles of the same window (NumPy's default
   linear interpolation, NC-081's rolling-band object);
-- ``n_window``, ``n_distinct`` and ``log_disagreement = log(reading) - log(level)``.
+- ``n_window``, ``n_distinct`` (whole archive up to ``t_s``), ``log_disagreement =
+  log(reading) - log(level)`` and ``n_window_distinct`` (distinct values inside the window).
 
-``--mode execution`` emits only ``reading`` as of a later time: the ``reading_at_execution``
-control of the design. Units are SI seconds for ``T1`` and ``T2`` and dimensionless for the
-readout quantities, exactly as ``calibration/loader.py`` parses them.
+``--mode controls`` freezes the four control qubits once, at the freezing ref, before any job
+(proposal D of the #125 pre-registration). ``--mode submission`` then takes that file, keeps its
+qubits out of the discriminating stratum, and selects the eight discriminating qubits by sign
+(proposals A and B). ``--mode execution`` emits only ``reading`` as of a later time: the
+``reading_at_execution`` control of the design. Units are SI seconds for ``T1`` and ``T2`` and
+dimensionless for the readout quantities, exactly as ``calibration/loader.py`` parses them.
 
 This half builds no channel and submits nothing. Design:
 ``docs/roadmap/2026-10-23-hardware-reading-vs-level-test.md``; plan:
-``docs/roadmap/2026-10-23-hardware-test-archive-side-plan.md``.
+``docs/roadmap/2026-10-23-hardware-test-archive-side-plan.md``; selection rules:
+``docs/implementations/2026-10-28-hardware-test-selection-rules.md``.
 
 Usage::
 
-    python -m scripts.hardware_test_predictors --repo . --ref <sha> --at 2026-11-03T08:00:00Z \\
-        [--live-properties live.json] [--mode submission|execution] --out <dir>
+    python -m scripts.hardware_test_predictors --repo . --ref <sha> --at <freezing instant> \\
+        --mode controls --out <dir>
+    python -m scripts.hardware_test_predictors --repo . --ref <sha> --at 2026-11-03T03:45:00Z \\
+        --controls <dir>/controls.json [--live-properties live.json] --out <job dir>
+    python -m scripts.hardware_test_predictors --repo . --ref <sha> --at <t> \\
+        --mode execution [--live-properties live.json] --out <dir>
 """
 
 from __future__ import annotations
@@ -74,6 +83,8 @@ _FIELDS: dict[str, str] = {
 WINDOW_DAYS = 30.0
 MIN_WINDOW_STATES = 5
 MIN_DISTINCT_VALUES = 20
+# Proposal A: the discriminating stratum's floor, counted inside the window (NC-088).
+MIN_WINDOW_DISTINCT = 15
 BAND_QUANTILES = (0.10, 0.90)
 TSV_COLUMNS: tuple[str, ...] = (
     "qubit",
@@ -86,6 +97,7 @@ TSV_COLUMNS: tuple[str, ...] = (
     "n_distinct",
     "log_disagreement",
     "reading_time",
+    "n_window_distinct",
 )
 
 
@@ -134,6 +146,12 @@ class PredictorRow:
     n_distinct: int
     log_disagreement: float
     reading_time: str
+    # Last, with a default, so positional constructors written before it keep working.
+    n_window_distinct: int = 0
+
+
+class ControlsFileError(ValueError):
+    """A ``--controls`` file that cannot be used: unreadable, wrong shape or wrong backend."""
 
 
 def _timestamp(doc: dict[str, Any]) -> datetime:
@@ -312,6 +330,9 @@ def predictor_rows(
             window_vals = np.array([s.values[q, j] for s in window if q < s.values.shape[0]])
             logs = _log_positive(window_vals) if window_vals.size else np.array([])
             n_window = int(logs.size)
+            n_window_distinct = len(
+                {float(v) for v in window_vals if math.isfinite(float(v)) and v > 0.0}
+            )
             level = band_lo = band_hi = math.nan
             if n_window >= min_states:
                 level = float(math.exp(float(np.mean(logs))))
@@ -337,6 +358,7 @@ def predictor_rows(
                     len(distinct),
                     disagreement,
                     reading_time,
+                    n_window_distinct,
                 )
             )
     return rows
@@ -423,6 +445,132 @@ def propose_controls(
     ]
 
 
+def _below_window_floor(rows: Sequence[PredictorRow], min_window_distinct: int) -> list[int]:
+    """Qubits whose in-window distinct ``T1`` count is below the floor (no ``T1`` row: below)."""
+    t1 = {r.qubit: r for r in rows if r.quantity == "T1"}
+    n_qubits = max((r.qubit + 1 for r in rows), default=0)
+    return [
+        q for q in range(n_qubits) if q not in t1 or t1[q].n_window_distinct < min_window_distinct
+    ]
+
+
+def freeze_controls(
+    collected: Collected,
+    rows: Sequence[PredictorRow],
+    *,
+    k: int,
+    min_window_distinct: int = MIN_WINDOW_DISTINCT,
+) -> dict[str, Any]:
+    """Proposal D: the ``k`` controls, chosen before any discriminating selection.
+
+    The only exclusion is the discriminating stratum's window floor; ``propose_controls`` keeps
+    its own whole-archive floor underneath. No reading enters: ``rows`` supply only the window
+    counts, so the caller passes rows built without a live document.
+    """
+    below = _below_window_floor(rows, min_window_distinct)
+    return {
+        "below_window_floor": below,
+        "controls": propose_controls(collected, k=k, exclude=set(below)),
+    }
+
+
+def select_balanced(
+    rows: Sequence[PredictorRow],
+    *,
+    k: int,
+    controls: set[int],
+    min_window_distinct: int = MIN_WINDOW_DISTINCT,
+) -> dict[str, Any]:
+    """Proposals A and B: ``k/2`` qubits below their level and ``k/2`` above, by ``|d|``.
+
+    Candidates are ``T1`` rows with a finite disagreement ``d``, at least
+    ``min_window_distinct`` distinct values inside the window, and a qubit outside ``controls``.
+    Each side is ranked by ``|d|`` descending, ties by qubit index. A side with fewer than
+    ``k/2`` candidates leaves its places to the other side's next-largest ``|d|``; ``d == 0``
+    belongs to neither side and is never selected. Fewer than ``k`` qubits come out when fewer
+    are admitted. The returned log names every such event.
+    """
+    if k <= 0 or k % 2:
+        raise ValueError(f"k must be a positive even number, got {k}")
+    half = k // 2
+    candidates = [
+        r
+        for r in rows
+        if r.quantity == "T1"
+        and math.isfinite(r.log_disagreement)
+        and r.n_window_distinct >= min_window_distinct
+        and r.qubit not in controls
+    ]
+
+    def ranked(side: list[PredictorRow]) -> list[PredictorRow]:
+        return sorted(side, key=lambda r: (-abs(r.log_disagreement), r.qubit))
+
+    below = ranked([r for r in candidates if r.log_disagreement < 0.0])
+    above = ranked([r for r in candidates if r.log_disagreement > 0.0])
+    zero = sorted(r.qubit for r in candidates if r.log_disagreement == 0.0)
+    take_below, take_above = below[:half], above[:half]
+    short_side: str | None = None
+    filled_from: str | None = None
+    n_filled = 0
+    if len(take_below) < half and len(take_above) == half:
+        short_side, filled_from = "below", "above"
+        extra = above[half : half + half - len(take_below)]
+        n_filled = len(extra)
+        take_above = take_above + extra
+    elif len(take_above) < half and len(take_below) == half:
+        short_side, filled_from = "above", "below"
+        extra = below[half : half + half - len(take_above)]
+        n_filled = len(extra)
+        take_below = take_below + extra
+    elif len(take_below) < half and len(take_above) < half:
+        short_side = "both"
+
+    def entry(r: PredictorRow, side: str, filled: bool) -> dict[str, Any]:
+        return {
+            "qubit": r.qubit,
+            "side": side,
+            "filled": filled,
+            "log_disagreement": r.log_disagreement,
+            "abs_log_disagreement": abs(r.log_disagreement),
+            "n_window_distinct": r.n_window_distinct,
+            "n_distinct": r.n_distinct,
+            "n_window": r.n_window,
+        }
+
+    picked = [entry(r, "below", i >= half) for i, r in enumerate(take_below)]
+    picked += [entry(r, "above", i >= half) for i, r in enumerate(take_above)]
+    return {
+        "discriminating": picked,
+        "n_selected": len(picked),
+        "admitted": {"below": len(below), "above": len(above), "zero": len(zero)},
+        "zero_disagreement": zero,
+        "below_window_floor": _below_window_floor(rows, min_window_distinct),
+        "excluded_controls": sorted(controls),
+        "short_side": short_side,
+        "filled_from": filled_from,
+        "n_filled": n_filled,
+    }
+
+
+def load_controls(path: Path, *, backend: str) -> tuple[dict[str, Any], str]:
+    """Read a ``controls.json`` written by ``--mode controls``; return it and its SHA-256."""
+    try:
+        raw = path.read_bytes()
+        loaded = json.loads(raw)
+    except (OSError, ValueError) as exc:
+        raise ControlsFileError(f"cannot read controls file {path}: {exc}") from exc
+    if not isinstance(loaded, dict) or not isinstance(loaded.get("controls"), list):
+        raise ControlsFileError("controls file must be an object with a 'controls' list")
+    if loaded.get("backend") != backend:
+        raise ControlsFileError(
+            f"controls file names backend {loaded.get('backend')!r}; expected {backend!r}"
+        )
+    qubits = [c.get("qubit") if isinstance(c, dict) else None for c in loaded["controls"]]
+    if not qubits or not all(isinstance(q, int) and not isinstance(q, bool) for q in qubits):
+        raise ControlsFileError("every control must be an object with an integer 'qubit'")
+    return loaded, hashlib.sha256(raw).hexdigest()
+
+
 def write_outputs(
     out: Path,
     *,
@@ -437,8 +585,18 @@ def write_outputs(
         for row in rows:
             writer.writerow(asdict(row))
     if selection is not None:
-        (out / "selection.json").write_text(json.dumps(selection, indent=2), encoding="utf-8")
-    (out / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+        _write_json(out / "selection.json", selection)
+    _write_json(out / "manifest.json", manifest)
+
+
+def _write_json(path: Path, payload: Any) -> None:
+    """Write JSON with LF line endings on every platform.
+
+    The repository stores these files with LF, so a hash recorded at write time (the controls
+    file's, in the submission manifest) is the hash every checkout reproduces; Python's default
+    newline translation would write CRLF on Windows.
+    """
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8", newline="\n")
 
 
 def _parse_at(value: str | None) -> datetime:
@@ -463,14 +621,50 @@ def main(argv: Sequence[str] | None = None) -> int:
         default=None,
         help="submission (or execution) time, ISO 8601 with zone",
     )
-    parser.add_argument("--mode", choices=("submission", "execution"), default="submission")
+    parser.add_argument(
+        "--mode", choices=("submission", "execution", "controls"), default="submission"
+    )
     parser.add_argument("--live-properties", type=Path, default=None)
     parser.add_argument("--window-days", type=float, default=WINDOW_DAYS)
     parser.add_argument("--select-discriminating", type=int, default=8)
-    parser.add_argument("--propose-controls", type=int, default=4)
+    parser.add_argument("--propose-controls", type=int, default=4, help="controls mode: how many")
+    parser.add_argument(
+        "--controls", type=Path, default=None, help="submission: controls.json from controls mode"
+    )
+    parser.add_argument(
+        "--no-frozen-controls",
+        action="store_true",
+        help="submission without frozen controls; archive dry runs only, recorded as null",
+    )
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     at: datetime = args.at if args.at is not None else _parse_at(None)
+
+    if args.mode == "controls" and args.live_properties is not None:
+        print("error: controls are frozen from the archive; no --live-properties", file=sys.stderr)
+        return 2
+    if args.mode == "submission":
+        if args.select_discriminating <= 0 or args.select_discriminating % 2:
+            print("error: --select-discriminating must be a positive even number", file=sys.stderr)
+            return 2
+        if args.controls is not None and args.no_frozen_controls:
+            print("error: --controls and --no-frozen-controls exclude each other", file=sys.stderr)
+            return 2
+        if args.controls is None and not args.no_frozen_controls:
+            print(
+                "error: submission needs the frozen controls (--controls controls.json from "
+                "--mode controls); --no-frozen-controls is for archive dry runs only",
+                file=sys.stderr,
+            )
+            return 2
+    controls_doc: dict[str, Any] | None = None
+    controls_sha: str | None = None
+    if args.mode == "submission" and args.controls is not None:
+        try:
+            controls_doc, controls_sha = load_controls(args.controls, backend=args.backend)
+        except ControlsFileError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
 
     try:
         sha = resolve_archive_ref(args.repo, args.ref)
@@ -490,14 +684,27 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     collected = collect(iter_archive(args.repo, sha), backend=args.backend, until=at)
     selection: dict[str, Any] | None = None
+    frozen: dict[str, Any] | None = None
+    control_qubits: list[int] | None = None
     try:
         if args.mode == "submission":
             rows = predictor_rows(collected, at=at, live=live, window_days=args.window_days)
-            picked = select_discriminating(rows, k=args.select_discriminating)
-            controls = propose_controls(
-                collected, k=args.propose_controls, exclude={p["qubit"] for p in picked}
+            if controls_doc is not None:
+                control_qubits = [int(c["qubit"]) for c in controls_doc["controls"]]
+            selection = select_balanced(
+                rows, k=args.select_discriminating, controls=set(control_qubits or [])
             )
-            selection = {"discriminating": picked, "proposed_controls": controls}
+            selection["controls"] = control_qubits
+            if selection["short_side"] is not None:
+                print(
+                    f"note: short side {selection['short_side']}, {selection['n_filled']} "
+                    f"place(s) filled from {selection['filled_from']}, "
+                    f"{selection['n_selected']} selected",
+                    file=sys.stderr,
+                )
+        elif args.mode == "controls":
+            rows = predictor_rows(collected, at=at, live=None, window_days=args.window_days)
+            frozen = freeze_controls(collected, rows, k=args.propose_controls)
         else:
             rows = execution_rows(collected, at=at, live=live)
     except LiveDocumentError as exc:
@@ -513,6 +720,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "window_days": args.window_days,
         "min_window_states": MIN_WINDOW_STATES,
         "min_distinct_values": MIN_DISTINCT_VALUES,
+        "min_window_distinct": MIN_WINDOW_DISTINCT,
         "files_used": len(collected.files),
         "states_used": len(collected.states),
         "skipped": dict(collected.skipped),
@@ -520,7 +728,23 @@ def main(argv: Sequence[str] | None = None) -> int:
         "python": sys.version.split()[0],
         "numpy": np.__version__,
     }
+    if args.mode == "submission":
+        manifest["controls"] = control_qubits
+        manifest["controls_file_sha256"] = controls_sha
+        manifest["controls_ref_sha"] = (controls_doc or {}).get("ref_sha")
+        manifest["controls_at"] = (controls_doc or {}).get("at")
     write_outputs(args.out, rows=rows, selection=selection, manifest=manifest)
+    if frozen is not None:
+        controls_out = {
+            "backend": args.backend,
+            "ref": args.ref,
+            "ref_sha": sha,
+            "at": at.isoformat(),
+            "min_window_distinct": MIN_WINDOW_DISTINCT,
+            "min_distinct_values": MIN_DISTINCT_VALUES,
+            **frozen,
+        }
+        _write_json(args.out / "controls.json", controls_out)
     if args.live_properties is not None:
         shutil.copyfile(
             args.live_properties, args.out / f"live-properties-{at:%Y%m%dT%H%M%SZ}.json"
