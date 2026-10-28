@@ -17,12 +17,13 @@ Burak, who reproduces it on the desktop.
 
 ## What changed
 
-Planned; the table is completed after the implementation.
+Planned at the plan commit; completed after the implementation (the CLI ships the dry run only,
+amendment 1).
 
 | File | One-sentence description |
 | --- | --- |
-| `scripts/hardware_reading_vs_level.py` | Circuits for Arm A and Arm B, the predictions of every predictor, the scoring, and a `dry-run` mode that runs the whole pipeline against an Aer truth built from an archived snapshot. |
-| `tests/test_hardware_reading_vs_level.py` | Pins each piece on synthetic inputs, mutation-checked. |
+| `scripts/hardware_reading_vs_level.py` | Circuits for Arm A and Arm B, the predictions of every predictor, the scoring, the per-circuit seeds, and a CLI that runs the whole pipeline against two Aer truths built from an archived snapshot. |
+| `tests/test_hardware_reading_vs_level.py` | 41 tests pinning each piece on synthetic inputs and `FakeFez`'s bundled `ibm_fez` documents, mutation-checked. |
 | `docs/evidence/hardware-reading-vs-level/dry-run-2026-10-28/` | The dry run's committed output and manifest; pipeline acceptance on Aer, not a measurement. |
 | `docs/implementations/2026-10-28-hardware-test-offline-half.md` | This record. |
 
@@ -275,15 +276,48 @@ also offsets the circuits of one `run()` by `seed + 2113 k`, so circuits in one 
 once shots exceed 2,113; this script runs every circuit on its own, so that never applies here.
 The fix and its check stand unchanged.
 
-**Results: after the run.**
+**Results: after the run.** Record run 2026-10-28 from commit `8b244bb7` (code as at
+`23fd2f4b`; later commits change only comments and this document), laptop, exact-pin interpreter,
+41.5 minutes. Output: `docs/evidence/hardware-reading-vs-level/dry-run-2026-10-28/`
+(`manifest.json`, `criteria.json`, `selection.json`, `controls.json`, `arm-a-truth{1,2}.tsv`,
+`arm-b-truth{1,2}.tsv`). Pipeline acceptance on Aer, not a measurement: no NC row, no sentence
+about `ibm_fez`. All five criteria pass under both truths; no run failed and none was repeated.
 
-| Criterion | Truth 1 | Truth 2 |
+| Criterion | Truth 1 (device = reading) | Truth 2 (device = level) |
 | --- | --- | --- |
-| 1. Sampling | | |
-| 2. Offset | | |
-| 3. Direction | | |
-| 4. Arm B end to end | | |
-| 5. Circuit timing | | |
+| 1. Sampling | pass: 84 Arm A rows, max z 2.87; 48 Arm B outcomes, max z 2.68; smallest shot-free probability 0.0113 | pass: max z 2.52 and 2.67; smallest 0.0214 |
+| 2. Offset | pass: mean signed error of `reading` 0.01095 against a mean derived offset of 0.01084, difference +0.00011, standard error 0.00099 | pass: `level` 0.00344 against 0.00498, difference -0.00154, standard error 0.00098 |
+| 3. Direction | pass: 56 discriminating rows; mean absolute error `reading` 0.0182, `level` 0.1594; `level - reading` 90% interval +0.123 to +0.159 (row unit) | pass: `level` 0.0092, `reading` 0.1673; `reading - level` +0.134 to +0.183 |
+| 4. Arm B end to end | pass: six triples, every predictor scored, none unpredictable | pass: same six, none unpredictable |
+| 5. Circuit timing | pass: 84 of 84 intervals equal their rounded `tau` | pass: the same circuits |
+
+Inputs as logged: discriminating 148, 132, 155, 10 (below their level) and 39, 147, 35, 44
+(above), no short side (admitted 62 below, 87 above); controls 48, 112, 54, 105; reading file
+`20261023T093456`; longest delay 442.8 µs; 152 qubits eligible for Arm B, 221 connected triples
+over usable `cz` pairs, six chosen: 85-77-86, 15-14-19, 128-127-129, 67-57-66, 135-134-139,
+1-0-2.
+
+Read with these notes:
+
+- **The `reading_at_execution` row equals `reading` in this run, by fact, not by construction.**
+  The plan expected the execution ref to carry a different reading. It did not: the latest file
+  at `t_execute` (`20261023T111849`, from `84ba0230`) has the same qubit-block digest as the
+  reading's file, because IBM did not recalibrate between 09:34 and 11:18 that day. The control's
+  code path ran (its own ref and archive walk), but its values were not exercised against a
+  different reading. A dry run that must exercise them needs a `t_execute` after a sweep.
+- **Arm B is reported, not judged** (criterion 4). Spearman over the six layouts and best-pick:
+  truth 1, `reading` 1.000 and hit, `level` 0.371 and miss; truth 2, `level` 0.829 and miss,
+  `reading` 0.714 and hit. Mean absolute fidelity error of the matching predictor 0.010 (truth 1)
+  and 0.009 (truth 2). Under truth 2 the matching predictor did not pick the measured best: the
+  three best measured layouts (85-77-86, 15-14-19, 128-127-129) lie within 0.008 of each other
+  (0.549, 0.557, 0.553), a gap of the size of the terms the one builder omits (single-qubit
+  depolarizing, relaxation during `cz`) and of the shot noise, so best-pick among six spanning
+  layouts can turn on near-ties even for the right `T1`. `level`'s six predictions span 0.42 to
+  0.57. This is a property of the design's Arm B scoring worth Bengisu's attention at 1c, not a
+  pipeline fault.
+- **Flagged qubits.** Truth 2 kept qubit 72 at its reading (no level); it is in no scored row.
+  Aer capped `T2` at `2 T1` for qubit 148 in both truths; it is a discriminating qubit, but Arm A's
+  population decay does not read `T2`, so the cap cannot move its rows.
 
 ## Amendments owed to the pre-registration at step 1c
 
@@ -319,8 +353,28 @@ Each is a dated line in the frozen table, so none is decided only in code:
 
 ## Verification
 
-After the implementation: gates from the exact-pin interpreter, the new tests with a mutation
-check, and the dry run's five criteria above.
+Planned: gates from the exact-pin interpreter, the new tests with a mutation check, and the dry
+run's five criteria above. Done 2026-10-28, laptop, provisional until Burak's desktop rerun:
+
+- `ruff check .`, `ruff format --check .`, `mypy --strict` (49 files): clean.
+- `tests/test_hardware_reading_vs_level.py`: 41 tests, offline (synthetic inputs and the
+  `ibm_fez` configuration and properties bundled with `qiskit_ibm_runtime`'s `FakeFez`). Full
+  suite: 1,084 passed (1,043 on the #132 branch plus these 41).
+- Mutation check: 20 deliberate breaks of the script (the minimum-length rule, duplicate slots,
+  the lead delay, the closed form, the readout matrix and its axis, triple enumeration, the
+  layout rounding, the delay relaxation, the `cz` parameter, the `T2 <= 2 T1` rule, dead pairs,
+  truth 2's readout error, the clbit order, the band widening, the group weighting, the calendar
+  axis, tie averaging, the best pick, the band's readout source); every one fails at least one
+  test, and the file was restored from a backup copy. Two of my own fixtures were wrong at first
+  (a tie order and a coverage value) and were corrected; the code was right both times.
+- The dry run: the table above. To reproduce, from the worktree root with `PYTHONPATH=.;src`:
+
+```bash
+python -m scripts.hardware_reading_vs_level --repo . --ref 5828b4a29fabc245aa096e530852249a3496dc5b --at 2026-10-23T09:34:56Z --execution-ref 84ba0230738c9ee2773616b4e4c7142ba91180e3 --controls docs/evidence/hardware-reading-vs-level/dry-run-2026-10-28/controls.json --out <scratch>
+```
+
+  The outputs should match the committed ones file for file (fixed seeds; Aer's per-shot seeding
+  is deterministic in the seed and independent of the thread count).
 
 ## Related docs
 
