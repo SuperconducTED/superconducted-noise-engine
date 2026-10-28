@@ -188,6 +188,27 @@ partial clone: 970 blobs at `5828b4a2` were missing and were fetched first in ba
 The sign-balanced eight at that instant is a new output of a new rule. It was not computed for
 this record and is not quoted. It belongs to the freezing ref's dry run (step 1c).
 
+## Fix, 2026-10-28 (later): JSON written with LF on every platform
+
+Found while building the offline half on top of this branch
+(`docs/implementations/2026-10-28-hardware-test-offline-half.md`, on
+`mert/issue-125-offline-half`, its owed item 12). The script wrote `controls.json`,
+`selection.json` and `manifest.json` with Python's default newline translation, so on Windows
+they carried CRLF. The repository stores them with LF (`.gitattributes`), so the controls file's
+SHA-256 that `--mode submission` records in a job's manifest would be the hash of the CRLF bytes
+as written on the laptop, a value no checkout reproduces (the offline half's dry run recorded
+`03c199e0...` for a file whose stored blob hashes to `33682e65...`). That would make the frozen
+controls file's provenance look broken on the desktop or in CI.
+
+The fix: one helper, `_write_json`, writes every JSON output with `newline="\n"`.
+`predictors.tsv` is unchanged: `csv` writes its own `\r\n` on every platform, so it is the same
+bytes everywhere and no hash depends on it. The new test,
+`test_json_outputs_are_written_with_lf_on_every_platform`, failed on the unfixed code on this
+laptop (`controls.json` began `{\r\n`) and passes with the fix. On Linux, where Python does not
+translate newlines, it passes either way: it guards against a Windows regression, which is where
+the freezing run will happen. Gates after the fix: ruff, ruff format and `mypy --strict` clean;
+the file's tests 64 passed; full suite 1,044 passed (1,043 before, plus this test).
+
 ## Related docs
 
 - `docs/roadmap/2026-10-23-hardware-reading-vs-level-test.md` (the design, sections 3 and 5)
