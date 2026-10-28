@@ -1,7 +1,7 @@
 # 2026-10-28: the #125 pre-registration rebuilt onto `main` (step 1c)
 
-**Status**: PLAN, written before any merge, edit or run on this branch. The sections after
-"Implementation approach" are filled in as the steps land; nothing below "Plan" is a result yet.
+**Status**: plan written first (`73dd87ae`); steps 2 to 9 done on 2026-10-28, step 10 (the PR) waits on the lead.
+The "Plan" section is as committed before any step; the sections after it record what happened.
 
 ## Problem / Motivation
 
@@ -91,15 +91,96 @@ Steps, in order, each its own commit:
 
 ## What changed
 
-Filled in as the steps land.
+Commits on `mert/issue-125-preregistration` after `821f6781`, 2026-10-28:
+
+| Commit | What |
+| --- | --- |
+| `73dd87ae` | this plan |
+| `c6550787` | merge of `main` `695c90ca`; register keeps both sides, the phase-4 plan takes `main`'s version |
+| `f352889a` | merge of PR #132's tip `4746be56` (stacked) |
+| `7217966a` | the pre-registration's amendments and the null-value protocol, before its script |
+| `aa5dca1f` | the null-value script, before its run |
+| `2b7c98f7` | the null-value output, one run |
+| `fc904655` | the pre-registration's section 3.8.1, the values |
+| later | the controls rehearsal, the NC-087 to NC-091 notes, this record |
+
+| File | One-sentence description |
+| --- | --- |
+| `docs/roadmap/2026-10-24-issue-125-preregistration.md` | Gains twelve dated rows at the foot of section 2, sections 3.7 (the amendments and the open label-horizon question), 3.8 (the null-value protocol), 3.8.1 (the values) and 6.1 (state as of 2026-10-28); no earlier row is edited. |
+| `docs/evidence/hardware-reading-vs-level/null_values.py` | New: what a no-information predictor scores on each decision-rule threshold, Arm B exactly and A1 by simulation. |
+| `docs/evidence/hardware-reading-vs-level/null-values.json` | New: that script's one run. |
+| `docs/evidence/hardware-reading-vs-level/controls-rehearsal-2026-10-28/` | New: `--mode controls` at the current archive tip, a rehearsal, not the frozen controls. |
+| `docs/numerical-claims.md` | NC-087 to NC-091 enter `main`'s register order (after NC-086, before NC-092) and each gains a dated reproduction note; no value changes. |
+| `docs/implementations/2026-10-28-issue-125-preregistration-rebuild.md` | This record. |
 
 ## Implementation approach
 
-Filled in as the steps land.
+**Rebuild by merge.** `main` and then #132's tip were merged in with merge commits. Before the
+first merge a `git merge-tree` trial named the two conflicts; after it `git diff --stat origin/main`
+showed 20 files, 3,191 insertions and no deletion, so nothing on `main` was dropped. After #132's
+merge the only deletions are #132's own edits (15 lines in `scripts/hardware_test_predictors.py`
+and the archive-side plan).
+
+**Amendments, append-only.** The draft's own rule (section 3.5: changes are dated notes beside the
+old ones) and the repository's rule for dated documents both forbid editing the 2026-10-24 rows.
+Each value an amendment fixes became a new row at the foot of section 2 with its amendment number
+and date; the reasons are in section 3.7, numbered as the offline-half record numbers them, plus
+amendment 13 (the predictor-code pin). Section 6's 2026-10-24 table stays; section 6.1 below it
+gives the 2026-10-28 state.
+
+**Null values, protocol first.** Section 3.8 (committed `7217966a`) named every threshold, its null
+model and how its value would be obtained before the script existed; the script (`aa5dca1f`) was
+committed before it ran; it ran once (`2b7c98f7`); section 3.8.1 reports all of it.
+
+**Re-pin by reproduction, not by re-registration.** The rows cite commits on this branch, which the
+merge keeps reachable; at this PR's merge they become ancestors of `main`. The three committed
+scripts were re-run on the merged tree at the rows' own inputs and every output compared by blob
+hash. All five rows reproduce: every output has its committed blob hash except
+`checkup-floor-summary.json`, which differs only in `collect_seconds` and `total_seconds`
+(wall-clock). Each row got a dated note; no value changed. The first floor re-run crashed writing
+`checkup-floor-controls.json` into the session scratchpad: the path was 261 characters, past
+Windows' 260 limit (the two shorter outputs written before it matched). It was re-run into
+`C:/t/r1c/floor` and completed. A path-length crash, not a code change, and disclosed here.
+
+**Controls rehearsal.** `--mode controls` at `calibration-data` `7adda803` with
+`--at 2026-10-28T18:40:46Z` (the latest `ibm_fez` file) names 144, 110, 140 and 77; NC-088's
+instant on `5828b4a2` named 48, 112, 54 and 105. Recorded as a rehearsal in the pre-registration's
+section 3.9, output committed. 213 blobs of the new archive tip were missing from this partial
+clone and were fetched in one batch before the run. `predictors.tsv` is written by the script with
+CRLF on Windows (amendment 12 covers JSON only); it was stored with LF, and no hash of it is
+recorded anywhere.
 
 ## Mathematical / Statistical details
 
-Filled in at step 6 (the null values) and step 8 (the reproduction).
+**Arm B, exact.** Six layouts; the measured order fixed as `0..5`. A ranking `p` (a permutation)
+has `sum d^2 = sum_i (p_i - i)^2`, always even, from 0 to 70, and Spearman's
+`rho_S = 1 - 6 sum d^2 / (6 (36 - 1)) = 1 - sum d^2 / 35`; its top pick is right when `p_0 = 0`.
+Enumerating the 720 permutations gives the one-job joint pmf of `(sum d^2 / 2, hit)`; a 2-D
+convolution over the 13 Arm B jobs gives the pmf `P(S, H)` of the totals. "At least as well on mean
+Spearman" is `S_pred <= S_reading`; "at least as often" is `H_pred >= H_reading`. With the three
+predictors independent and identically distributed under null (i), conditioning on `reading`'s
+outcome `(s, h)`: `q1 = P(S <= s)`, `q2 = P(H >= h)`, `qj = P(S <= s, H >= h)`; `level` alone passes
+with `E[q1]`, `E[q2]`, `E[qj]`; "`level` or `band`" with `E[1 - (1 - q)^2]`; "each condition by
+either" with `E[1 - (1 - q1)^2 - (1 - q2)^2 + (1 - q1 - q2 + qj)^2]`. A 200,000-draw Monte Carlo
+agreed with every exact figure (largest `|z|` 1.40).
+
+**A1, simulated.** Per-row difference in absolute error `D = u_t + e`, `t` the day, mean zero
+(no edge either way). `u_t` stationary AR(1): `u_0 ~ N(0, rho)`,
+`u_t = phi u_{t-1} + sqrt(rho (1 - phi^2)) z_t`; `e ~ N(0, 1 - rho)` per row, 56 rows a day, so the
+day mean is `u_t + N(0, (1 - rho) / 56)`. With equal rows per day the row-weighted mean is the mean
+of the 14 day means. Circular block bootstrap: `ceil(14 / L)` blocks of `L` consecutive days, start
+days uniform, wrapped, truncated to 14; 2,000 resamples; the 90% percentile interval is the 5th to
+95th percentile of the resampled means; a run "passes" when the 95th lies below zero. Rate over
+2,000 runs per case, standard error `sqrt(r (1 - r) / 2000)`. Seeds: `SeedSequence(1251028)`
+spawned, one child per `(phi, rho)` case and one for the Arm B check; both block lengths read the
+same simulated runs, so they are compared on paired data.
+
+**Why the percentile interval is too narrow here.** With `n` independent blocks the bootstrap
+variance of a mean is the plug-in `(n - 1) / n` of the sample variance, and the percentile
+interval uses normal-like quantiles where a `t` with `n - 1` degrees of freedom would be right;
+both shrink the interval when `n` is 14 or, at block 3, about 5. Correlated days add the usual
+effect of a block shorter than the dependence. The simulation measures the sum; it does not
+separate them.
 
 ## Design decisions
 
@@ -116,7 +197,24 @@ Filled in at step 6 (the null values) and step 8 (the reproduction).
 
 ## Verification
 
-Filled in as the steps land.
+Run on this laptop, 2026-10-28, `C:/t/pin125/Scripts/python.exe` (the exact pins), `PYTHONPATH=src`:
+
+- `ruff check .` and `ruff format --check .` (ruff 0.15.12): clean, 101 files formatted.
+- `mypy --strict` (the `[tool.mypy]` file set, `scripts/` included): no issues in 49 files.
+- `pytest -q`: **1,100 passed** at `fc904655`. Not a register value: NC-021 is measured at this
+  PR's merge commit.
+- `git diff --stat origin/main` after the `main` merge: 20 files, 3,191 insertions, 0 deletions.
+- The null values: `python docs/evidence/hardware-reading-vs-level/null_values.py --out <dir>`,
+  about 10 s; its built-in Monte Carlo check exits 1 if any exact Arm B figure is off by more
+  than 4 standard errors.
+- The re-pin, from the repository root (outputs compared by `git hash-object` against
+  `git rev-parse HEAD:<path>`):
+  - `python -m scripts.hardware_test_grid_bias --out <dir>`
+  - `python docs/evidence/hardware-reading-vs-level/measure_checkup_floor.py --repo . --ref 5828b4a29fabc245aa096e530852249a3496dc5b --out <short dir>`
+  - `python docs/evidence/hardware-reading-vs-level/measure_recal_hours.py --repo . --ref 5828b4a29fabc245aa096e530852249a3496dc5b --out <dir>`
+- The rehearsal: `python scripts/hardware_test_predictors.py --repo . --ref 7adda8035a5a76b93147ffc3171975a7684d239d --mode controls --at 2026-10-28T18:40:46Z --out <dir>`.
+
+Not checked: any of this on Linux or Burak's desktop; Bengisu's review.
 
 ## Related docs
 
