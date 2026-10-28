@@ -1,11 +1,13 @@
 """Tests for the archive side of the #125 hardware test (scripts/hardware_test_predictors.py).
 
 Synthetic archive documents in the real schema; no git, no network, no filesystem beyond
-``tmp_path`` for the CLI writer.
+``tmp_path`` for the CLI writer and the CLI run (whose archive reader is monkeypatched).
 """
 
 from __future__ import annotations
 
+import copy
+import hashlib
 import json
 import math
 from datetime import UTC, datetime, timedelta
@@ -16,13 +18,19 @@ import numpy as np
 import pytest
 from scripts.hardware_test_predictors import (
     MIN_WINDOW_STATES,
+    Collected,
+    LiveDocumentError,
     collect,
     execution_rows,
+    main,
+    normalise_live,
     predictor_rows,
     propose_controls,
     select_discriminating,
     write_outputs,
 )
+
+from superconducted.training.dataset import qubit_block_digest
 
 T0 = datetime(2026, 10, 1, 12, 0, tzinfo=UTC)
 N_QUBITS = 4
@@ -76,17 +84,43 @@ def _archive(days: int, t1_by_day: dict[int, dict[int, float | None]] | None = N
     return docs
 
 
-def test_level_is_the_geometric_mean_and_band_brackets_it() -> None:
+def _t1(rows: list[Any], q: int = 0) -> Any:
+    return next(r for r in rows if r.qubit == q and r.quantity == "T1")
+
+
+def test_level_and_band_match_their_definitions() -> None:
     docs = _archive(8)  # qubit 0: T1 = 100..107 us, one state per day
     col = collect(docs, backend="ibm_fez", until=T0)
     rows = predictor_rows(col, at=T0, live=None)
     row = next(r for r in rows if r.qubit == 0 and r.quantity == "T1")
-    expected = math.exp(np.mean(np.log(np.arange(100, 108) * 1e-6)))
+    logs = np.log(np.arange(100, 108) * 1e-6)
+    expected = math.exp(np.mean(logs))
+    lo, hi = np.quantile(logs, (0.10, 0.90))
     assert row.n_window == 8
     assert row.level == pytest.approx(expected, rel=1e-12)
-    assert row.band_lo <= row.level <= row.band_hi
+    assert row.band_lo == pytest.approx(math.exp(lo), rel=1e-12)
+    assert row.band_hi == pytest.approx(math.exp(hi), rel=1e-12)
     assert row.reading == pytest.approx(107e-6, rel=1e-12)
     assert row.log_disagreement == pytest.approx(math.log(107e-6) - math.log(expected), rel=1e-9)
+
+
+def test_level_may_lie_outside_the_band_and_neither_is_adjusted() -> None:
+    """Bengisu's counterexample (PR #126 review, 2026-10-26): no bracketing is enforced.
+
+    91 distinct values evenly spaced over 100 to 100.9 us and 9 over 1000 to 1008 us: the
+    geometric mean is about 123.57 us, above the 90th log-space percentile (about 100.89 us).
+    """
+    t1 = np.concatenate([np.linspace(100.0, 100.9, 91), np.linspace(1000.0, 1008.0, 9)])
+    docs = [_doc(T0 - timedelta(hours=len(t1) - 1 - i), {0: float(v)}) for i, v in enumerate(t1)]
+    col = collect(docs, backend="ibm_fez", until=T0)
+    row = _t1(predictor_rows(col, at=T0, live=None))
+    logs = np.log(t1 * 1e-6)
+    lo, hi = np.quantile(logs, (0.10, 0.90))
+    assert row.n_window == 100
+    assert row.level == pytest.approx(math.exp(np.mean(logs)), rel=1e-12)
+    assert row.band_lo == pytest.approx(math.exp(lo), rel=1e-12)
+    assert row.band_hi == pytest.approx(math.exp(hi), rel=1e-12)
+    assert row.level > row.band_hi
 
 
 def test_window_excludes_older_states_and_includes_the_state_at_t_s() -> None:
@@ -155,6 +189,107 @@ def test_live_document_overrides_the_reading_and_joins_the_window() -> None:
     assert row.reading_time == (T0 + timedelta(minutes=5)).isoformat()
 
 
+def _raw_properties(stamp: datetime, t1_us: dict[int, float | None], **kw: Any) -> dict[str, Any]:
+    """The raw ``BackendProperties.to_dict()`` body: no envelope, fields at the top level."""
+    _, envelope = _doc(stamp, t1_us, **kw)
+    raw: dict[str, Any] = copy.deepcopy(envelope["properties"])
+    return raw
+
+
+@pytest.mark.parametrize("mode", ["submission", "execution"])
+def test_raw_to_dict_live_document_is_accepted_in_both_modes(mode: str) -> None:
+    col = collect(_archive(8), backend="ibm_fez", until=T0)
+    raw = _raw_properties(T0, {0: 150.0})
+    before = copy.deepcopy(raw)
+    if mode == "submission":
+        row = _t1(predictor_rows(col, at=T0, live=raw))
+        assert row.n_window == 9
+    else:
+        row = _t1(execution_rows(col, at=T0, live=raw))
+    assert row.reading == pytest.approx(150e-6, rel=1e-12)
+    assert raw == before  # normalisation never mutates the caller's document
+
+
+def test_raw_to_dict_with_space_separated_timestamp_is_accepted() -> None:
+    """``json.dump(props.to_dict(), default=str)`` writes datetimes with a space separator."""
+    col = collect(_archive(8), backend="ibm_fez", until=T0)
+    raw = _raw_properties(T0, {0: 150.0})
+    raw["last_update_date"] = str(T0)  # '2026-10-01 12:00:00+00:00'
+    assert _t1(execution_rows(col, at=T0, live=raw)).reading == pytest.approx(150e-6)
+
+
+def test_raw_and_envelope_live_documents_digest_identically() -> None:
+    _, envelope = _doc(T0, {0: 150.0})
+    raw = copy.deepcopy(envelope["properties"])
+    wrapped = normalise_live(raw, backend="ibm_fez")
+    assert wrapped["properties"] is raw
+    assert qubit_block_digest(wrapped) == qubit_block_digest(envelope)
+
+
+@pytest.mark.parametrize("mode", ["submission", "execution"])
+@pytest.mark.parametrize(
+    "variant", ["envelope_other", "raw_other", "envelope_inconsistent", "no_identity", "shape"]
+)
+def test_live_document_from_another_backend_is_rejected(mode: str, variant: str) -> None:
+    col = collect(_archive(8), backend="ibm_fez", until=T0)
+    live: dict[str, Any]
+    if variant == "envelope_other":
+        live = _doc(T0, {0: 999.0}, backend="ibm_other")[1]
+    elif variant == "raw_other":
+        live = _raw_properties(T0, {0: 999.0}, backend="ibm_other")
+    elif variant == "envelope_inconsistent":
+        live = _doc(T0, {0: 999.0})[1]
+        live["properties"]["backend_name"] = "ibm_other"
+    elif variant == "no_identity":
+        live = _doc(T0, {0: 999.0})[1]
+        del live["backend"]
+        del live["properties"]["backend_name"]
+    else:
+        live = {"backend": "ibm_fez", "qubits": []}  # neither shape
+    with pytest.raises(LiveDocumentError):
+        if mode == "submission":
+            predictor_rows(col, at=T0, live=live)
+        else:
+            execution_rows(col, at=T0, live=live)
+
+
+def test_live_document_that_does_not_parse_raises_live_document_error() -> None:
+    col = collect(_archive(8), backend="ibm_fez", until=T0)
+    live = _doc(T0, {0: 150.0})[1]
+    live["properties"]["qubits"][0].append(None)
+    with pytest.raises(LiveDocumentError):
+        predictor_rows(col, at=T0, live=live)
+
+
+def test_live_state_first_seen_before_the_window_adds_no_state() -> None:
+    """Bengisu's reproduction (PR #126 review): an old state republished as the latest file.
+
+    Archive-only extraction gives four window states and no level; supplying that same latest
+    snapshot as live must give the same, with the live document overriding only the reading.
+    """
+    docs = [_doc(T0 - timedelta(days=40), {0: 50.0})]
+    docs += [_doc(T0 - timedelta(days=4 - d), {0: 100.0 + d}) for d in range(4)]
+    docs.append(_doc(T0 - timedelta(hours=1), {0: 50.0}))  # same qubit block as day -40
+    col = collect(docs, backend="ibm_fez", until=T0)
+    archive_only = _t1(predictor_rows(col, at=T0, live=None))
+    assert archive_only.n_window == 4 and math.isnan(archive_only.level)
+
+    live = copy.deepcopy(docs[-1][1])
+    with_live = _t1(predictor_rows(col, at=T0, live=live))
+    assert with_live.n_window == 4
+    assert math.isnan(with_live.level)
+    assert with_live.n_distinct == archive_only.n_distinct
+    assert with_live.reading == pytest.approx(50e-6, rel=1e-12)
+    assert with_live.reading_time == T0.isoformat()
+
+
+def test_live_state_seen_inside_the_window_keeps_its_original_time() -> None:
+    col = collect(_archive(8), backend="ibm_fez", until=T0)
+    live = copy.deepcopy(_archive(8)[-1][1])  # same block as the state at T0
+    row = _t1(predictor_rows(col, at=T0, live=live))
+    assert row.n_window == 8
+
+
 def test_execution_mode_emits_only_the_reading() -> None:
     docs = _archive(8)
     col = collect(docs, backend="ibm_fez", until=T0)
@@ -185,6 +320,34 @@ def test_malformed_document_is_counted_and_skipped() -> None:
     col = collect(docs, backend="ibm_fez", until=T0)
     assert len(col.states) == 8
     assert col.skipped["parse_error"] == 1
+
+
+@pytest.mark.parametrize("bad", [None, 3, "T1", ["nested"]])
+def test_malformed_nduv_entry_is_counted_and_collection_continues(bad: Any) -> None:
+    docs = _archive(8)
+    path, doc = docs[3]
+    broken = copy.deepcopy(doc)
+    broken["properties"]["qubits"][0].append(bad)
+    docs[3] = (path, broken)
+    col = collect(docs, backend="ibm_fez", until=T0)
+    assert col.skipped["parse_error"] == 1
+    assert len(col.files) == 7 and len(col.states) == 7
+
+
+def test_non_list_qubit_entry_is_counted_and_collection_continues() -> None:
+    docs = _archive(8)
+    path, doc = docs[2]
+    broken = copy.deepcopy(doc)
+    broken["properties"]["qubits"][1] = None
+    docs[2] = (path, broken)
+    col = collect(docs, backend="ibm_fez", until=T0)
+    assert col.skipped["parse_error"] == 1
+    assert len(col.states) == 7
+
+
+def test_collect_records_the_backend_it_filtered_on() -> None:
+    assert collect(_archive(2), backend="ibm_fez", until=T0).backend == "ibm_fez"
+    assert Collected().backend == ""
 
 
 def test_selection_respects_the_distinct_value_floor_and_orders_by_disagreement() -> None:
@@ -229,3 +392,62 @@ def test_cli_writer_emits_tsv_selection_and_manifest(tmp_path: Path) -> None:
         json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))["ref_sha"]
         == "deadbeef"
     )
+
+
+def _run_cli(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, live_bytes: bytes, mode: str
+) -> tuple[int, Path, Path]:
+    """Run ``main`` against a synthetic archive, with the git reader monkeypatched out."""
+    monkeypatch.setattr(
+        "scripts.hardware_test_predictors.resolve_archive_ref", lambda repo, ref: "f" * 40
+    )
+    monkeypatch.setattr(
+        "scripts.hardware_test_predictors.iter_archive", lambda repo, sha: iter(_archive(8))
+    )
+    live_path = tmp_path / "live.json"
+    live_path.write_bytes(live_bytes)
+    out = tmp_path / f"out-{mode}"
+    code = main(
+        [
+            "--ref",
+            "pinned",
+            "--at",
+            T0.isoformat(),
+            "--mode",
+            mode,
+            "--live-properties",
+            str(live_path),
+            "--out",
+            str(out),
+        ]
+    )
+    return code, live_path, out
+
+
+@pytest.mark.parametrize("mode", ["submission", "execution"])
+def test_cli_accepts_raw_to_dict_and_keeps_the_original_bytes(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, mode: str
+) -> None:
+    raw = _raw_properties(T0, {0: 150.0})
+    live_bytes = json.dumps(raw, indent=1).encode("utf-8")  # any byte layout must survive
+    code, live_path, out = _run_cli(monkeypatch, tmp_path, live_bytes, mode)
+    assert code == 0
+    manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["live_properties_sha256"] == hashlib.sha256(live_bytes).hexdigest()
+    copies = list(out.glob("live-properties-*.json"))
+    assert len(copies) == 1 and copies[0].read_bytes() == live_path.read_bytes() == live_bytes
+    tsv = (out / "predictors.tsv").read_text(encoding="utf-8").splitlines()
+    header = tsv[0].split("\t")
+    first = dict(zip(header, tsv[1].split("\t"), strict=True))
+    assert (first["qubit"], first["quantity"]) == ("0", "T1")
+    assert float(first["reading"]) == pytest.approx(150e-6, rel=1e-12)
+
+
+@pytest.mark.parametrize("mode", ["submission", "execution"])
+def test_cli_rejects_a_live_document_from_another_backend(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, mode: str
+) -> None:
+    raw = _raw_properties(T0, {0: 999.0}, backend="ibm_other")
+    code, _, out = _run_cli(monkeypatch, tmp_path, json.dumps(raw).encode("utf-8"), mode)
+    assert code == 2
+    assert not (out / "predictors.tsv").exists()

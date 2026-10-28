@@ -69,6 +69,8 @@ reader should be able to audit without the code:
   (b) reproducing our document's qubit block at 2,145 of 2,249 of our own timestamps. Distinct
   states are then counted over hourly marks (comparable to our document-sampled ledger) and
   half-hourly marks (upper bound). Distinct is an upper bound on independent, per NC-012.
+  [Amended 2026-10-26: a mark counts only when the replayed state is complete, and each
+  mismatching key is classified by stamp; see "Review corrections" below.]
 - **Unit rule.** No physical T1 or T2 lies below 0.01 microseconds, so a coherence value below
   0.01 under the label `us` is seconds and is multiplied by 1e6. The script reports how many rows
   the rule touched (14,609 T1, 14,947 T2), how many fall in the ambiguous zone between 0.01 and 1
@@ -120,3 +122,28 @@ table's three other backends were not measured.
 - `docs/advisor/2026-09-09-akba-brief/05-yayin-stratejisi.html` (venue questions)
 - `docs/decisions.md` ADR-009, ADR-013, ADR-015, ADR-016, ADR-027
 - `docs/numerical-claims.md` NC-012, NC-045, NC-069
+
+## Review corrections, 2026-10-26
+
+Bengisu's review of PR #121 (review 5651478555 at `04361fe6`) requested six changes. Applied
+on the PR branch, each marked in place in the dated documents and stated in full in a dated
+amendment section:
+
+| File | Change |
+| --- | --- |
+| `docs/evidence/public-archive-overlap-2026-10/compare_public_archive.py` | Completeness rule: a replayed state is counted only when every non-excluded qubit holds T1, T2, `readout_error`, `prob_meas0_prep1` and `prob_meas1_prep0` (778 keys); excluded marks and the first complete mark reported per grid. Mismatch attribution: the replay carries each key's `calibrated_time`, and a differing key is classified as same-stamp conflict, public table lacks our event, we lack theirs, or key held on one side only; documents with a same-stamp conflict are named. The replay itself is unchanged. |
+| `summary.json` | Regenerated at the same refs. Identical blocks: `ours`, `overlap_totals`, `overlap_by_property`, `unit_defect`, `theirs_only_in_window_training_fields`, `validation_docs_equal`, every in-window figure. Changed: pre-window hourly 626 to 625, half-hourly 666 to 664, unions 1,549 to 1,548 and 1,589 to 1,587; new `completeness`, `mismatch_docs_by_kind_set`, `mismatch_docs_with_same_stamp_conflict`, per-grid mark counts. `overlap-by-property.tsv` byte-identical. |
+| `README.md` (evidence) | Document-reproduction paragraph rewritten with the four-kind attribution and the four conflicting documents; NC-078 table under the completeness rule; defect 3's "ours wins" replaced by the unmodified-replay policy; script and digest revisions pinned; a "Corrections on review" table. |
+| `docs/numerical-claims.md` | NC-077 source cell names the commit that holds the script (not `main` @ `6cf008da`, the digest's base); NC-078 value and notes corrected; NC-079 marked unchanged. |
+| `docs/decisions/drafts/ADR-029-...` | Reproduction sentence, pre-window counts, rule 3 (no preference exercised; completeness rule added) and the builder's second acceptance test revised, marked in the status line. |
+| `docs/findings/2026-10-23-novelty-check-q1-article.md` | §9 added: width metric (no Hellinger between band edges), QuBound's output scope (per-circuit outcome probabilities and observables with bounds; distinction is reusable channel model versus circuit-conditioned prediction; §4 item 4 unconditional), evidence corrections. |
+| `docs/roadmap/2026-10-23-issue-64-pr-a-plan.md` | §11 added: the aggregate-inside-band invariant holds for `alpha = 0` only; central quantile bands are not widened to include the aggregate. |
+
+Verification of the re-run: parquet SHA-256 re-checked before the run; same interpreter
+(Python 3.13.14, isolated) and the same out-of-pins readers (DuckDB 2.0.0, PyArrow 26.0.0,
+pytz 2026.5); the committed `summary.json` and TSV equal the run's output; the two review
+findings were reproduced independently before the script changed (state at 00:00Z holds T1 and
+T2 only, first `readout_error` event 13:19:17Z; the four documents and their 624 same-stamp
+`readout_length` rows). Ruff 0.15.12 `check` and `format --check` pass on the script; no em or
+en dash in any edited file. Owed by the lead: a correcting comment on Issue #122, whose body
+and checklist cite 626.

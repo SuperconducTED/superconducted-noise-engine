@@ -101,11 +101,25 @@ class FileRecord:
 
 @dataclass
 class Collected:
-    """Every usable document up to ``until`` (``files``) and the first file per state."""
+    """Every usable document up to ``until`` (``files``) and the first file per state.
 
+    ``backend`` is the backend the archive was filtered on; a live document must name the same
+    one (``LiveDocumentError`` otherwise), so two physical devices never share a window.
+    """
+
+    backend: str = ""
     files: list[FileRecord] = field(default_factory=list)
     states: list[FileRecord] = field(default_factory=list)
     skipped: Counter[str] = field(default_factory=Counter)
+
+
+class LiveDocumentError(ValueError):
+    """A ``--live-properties`` payload that cannot be used: wrong shape or wrong backend.
+
+    Distinct from ``CalibrationParseError`` on purpose: an archive document that fails to parse
+    is counted and skipped, while a bad live document stops the run, because it would otherwise
+    replace every reading.
+    """
 
 
 @dataclass(frozen=True)
@@ -141,7 +155,28 @@ def _values(parsed: ParsedCalibrationSnapshot) -> npt.NDArray[np.float64]:
     return out
 
 
+def _check_qubit_shapes(doc: dict[str, Any], source: str) -> None:
+    """Raise ``CalibrationParseError`` unless every ``properties.qubits[q]`` is a list of objects.
+
+    The loader and the digest both call ``.get`` on each Nduv entry, so a JSON ``null`` (or any
+    non-object) there raises ``AttributeError``, which is not a parse error and would abort the
+    run. Checked here, at the script boundary, so ``src/`` stays untouched by this PR.
+    """
+    properties = doc.get("properties")
+    if not isinstance(properties, dict):
+        return  # the loader reports a missing or non-dict ``properties`` itself
+    qubits = properties.get("qubits")
+    if not isinstance(qubits, list):
+        return  # likewise for a non-list ``qubits``
+    for index, entries in enumerate(qubits):
+        if not isinstance(entries, list) or not all(isinstance(e, dict) for e in entries):
+            raise CalibrationParseError(
+                f"{source}: properties.qubits[{index}] must be a list of objects"
+            )
+
+
 def _record(path: str, doc: dict[str, Any]) -> FileRecord:
+    _check_qubit_shapes(doc, path)
     parsed = parse_snapshot(doc, source=path)
     return FileRecord(path, _timestamp(doc), qubit_block_digest(doc), _values(parsed))
 
@@ -150,7 +185,7 @@ def collect(
     docs: Iterable[tuple[str, dict[str, Any]]], *, backend: str, until: datetime
 ) -> Collected:
     """Filter on backend and time, parse, sort by (time, path), and dedup into states."""
-    out = Collected()
+    out = Collected(backend=backend)
     records: list[FileRecord] = []
     for path, doc in docs:
         if not doc or doc.get("backend") != backend:
@@ -175,9 +210,58 @@ def collect(
     return out
 
 
-def _live_record(live: dict[str, Any], at: datetime) -> FileRecord:
-    parsed = parse_snapshot(live, source="<live>")
-    return FileRecord("<live>", at, qubit_block_digest(live), _values(parsed))
+def normalise_live(live: dict[str, Any], *, backend: str) -> dict[str, Any]:
+    """Return ``live`` in the archive envelope, after checking it names ``backend`` only.
+
+    Two input shapes are accepted:
+
+    - the archive envelope ``{backend, timestamp, properties: {backend_name, ...}}``, returned
+      as is;
+    - the raw ``BackendProperties.to_dict()`` body, with ``backend_name``, ``last_update_date``
+      and ``qubits`` at the top level (what ``json.dump(props.to_dict(), default=str)`` writes),
+      wrapped as ``{backend, timestamp, properties: live}``. The archive stores exactly that
+      body under ``properties``, so the wrapped document digests the way an archived one does.
+
+    Every backend identity present (top-level ``backend``, ``properties.backend_name``, raw
+    ``backend_name``) must equal ``backend``; none present is also rejected, since the device
+    cannot then be verified. The input is not mutated, and the caller keeps the original bytes
+    for the provenance hash and the copied document.
+    """
+    properties = live.get("properties")
+    if isinstance(properties, dict):
+        doc = live
+        identities = [live.get("backend"), properties.get("backend_name")]
+    elif "qubits" in live and "last_update_date" in live:
+        doc = {
+            "backend": live.get("backend_name"),
+            "timestamp": live.get("last_update_date"),
+            "properties": live,
+        }
+        identities = [live.get("backend_name")]
+    else:
+        raise LiveDocumentError(
+            "live properties must be the archive envelope (with 'properties') or a "
+            "BackendProperties.to_dict() body (with 'qubits' and 'last_update_date')"
+        )
+    named = {str(i) for i in identities if i is not None}
+    if not named:
+        raise LiveDocumentError(f"live properties name no backend; expected {backend!r}")
+    if named != {backend}:
+        raise LiveDocumentError(
+            f"live properties name {sorted(named)}; the archive was filtered on {backend!r}"
+        )
+    return doc
+
+
+def _live_record(live: dict[str, Any], at: datetime, backend: str) -> FileRecord:
+    doc = normalise_live(live, backend=backend)
+    try:
+        _check_qubit_shapes(doc, "<live>")
+        parsed = parse_snapshot(doc, source="<live>")
+        digest = qubit_block_digest(doc)
+    except (CalibrationParseError, KeyError, TypeError, ValueError) as exc:
+        raise LiveDocumentError(f"live properties do not parse: {exc}") from exc
+    return FileRecord("<live>", at, digest, _values(parsed))
 
 
 def _latest_file(files: Sequence[FileRecord], at: datetime) -> FileRecord | None:
@@ -206,9 +290,12 @@ def predictor_rows(
     window = [s for s in collected.states if at - timedelta(days=window_days) < s.time <= at]
     all_states = [s for s in collected.states if s.time <= at]
     if live is not None:
-        live_rec = _live_record(live, at)
+        live_rec = _live_record(live, at, collected.backend)
         reading_rec = live_rec
-        if live_rec.digest not in {s.digest for s in window}:
+        # A state is its first occurrence (``collect``). A live document whose qubit block was
+        # already seen at any time up to ``at`` adds no state: it overrides the reading, and the
+        # original state's time alone decides window membership.
+        if live_rec.digest not in {s.digest for s in all_states}:
             window.append(live_rec)
             all_states.append(live_rec)
     n_qubits = max((r.values.shape[0] for r in collected.files), default=0)
@@ -259,7 +346,11 @@ def execution_rows(
     collected: Collected, *, at: datetime, live: dict[str, Any] | None
 ) -> list[PredictorRow]:
     """The ``reading_at_execution`` control: readings only, window and level left empty."""
-    reading_rec = _live_record(live, at) if live is not None else _latest_file(collected.files, at)
+    reading_rec = (
+        _live_record(live, at, collected.backend)
+        if live is not None
+        else _latest_file(collected.files, at)
+    )
     rows: list[PredictorRow] = []
     if reading_rec is None:
         return rows
@@ -399,15 +490,19 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     collected = collect(iter_archive(args.repo, sha), backend=args.backend, until=at)
     selection: dict[str, Any] | None = None
-    if args.mode == "submission":
-        rows = predictor_rows(collected, at=at, live=live, window_days=args.window_days)
-        picked = select_discriminating(rows, k=args.select_discriminating)
-        controls = propose_controls(
-            collected, k=args.propose_controls, exclude={p["qubit"] for p in picked}
-        )
-        selection = {"discriminating": picked, "proposed_controls": controls}
-    else:
-        rows = execution_rows(collected, at=at, live=live)
+    try:
+        if args.mode == "submission":
+            rows = predictor_rows(collected, at=at, live=live, window_days=args.window_days)
+            picked = select_discriminating(rows, k=args.select_discriminating)
+            controls = propose_controls(
+                collected, k=args.propose_controls, exclude={p["qubit"] for p in picked}
+            )
+            selection = {"discriminating": picked, "proposed_controls": controls}
+        else:
+            rows = execution_rows(collected, at=at, live=live)
+    except LiveDocumentError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
 
     manifest: dict[str, Any] = {
         "mode": args.mode,

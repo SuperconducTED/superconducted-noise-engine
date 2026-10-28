@@ -95,7 +95,8 @@ causes it is. That check is the point of the step.
 ## 3. PR-A2: harness interval mode, after PR #79 merges
 
 `EnsembleSimulation(members, aggregate, member_metadata)`, `simulate_engine_members`,
-`run_benchmark(..., aggregation="interval")`, the aggregate-inside-band invariant, the
+`run_benchmark(..., aggregation="interval")`, the aggregate-inside-band invariant [restricted
+to `alpha = 0` on 2026-10-26, see §11], the
 shot-noise flag (#64 FR-7, FR-10, FR-11), built on #79's signature and modes. The default-path
 regression pin is captured on the tree with #79 merged and PR-A2 not yet applied, as #64 NFR-2
 says. Not planned in detail here, because its base does not exist on `main` yet.
@@ -184,3 +185,65 @@ Issue #64 (body and sections 9 to 12 in its first comment), #84 comment 59703000
 decision 3, #61, #79, #109; ADR-002, ADR-012, ADR-015, ADR-016, ADR-021, ADR-022, ADR-024,
 ADR-027; `docs/findings/2026-10-23-adr-015-what-an-interval-needs.md`;
 `docs/findings/2026-10-23-novelty-check-q1-article.md` §4.
+
+## 11. Review amendment, 2026-10-26 (Bengisu's review of PR #121)
+
+**§3, the aggregate-inside-band invariant.** As written, PR-A2 keeps the invariant "the
+aggregate lies inside the band" while D2 recommends `alpha = 0.1`. The two are incompatible: a
+member mean need not lie inside a central quantile band. Her counterexample, 32 members on one
+bin, 31 at probability 0.1 and one at 0.9: the 10th and 90th percentiles are both 0.1, the
+aggregate is 0.125, outside the band. The invariant is therefore **asserted for `alpha = 0`
+(the min/max band) only**, where it holds by construction for any mean aggregate. For
+`alpha > 0` the band is reported as the central quantile band it is and is **not widened to
+include the aggregate**, because widening would change the object being calibrated and
+reported (D2 fixes `alpha` and `r` as one pair on that object). PR-A2's test suite pins:
+containment at `alpha = 0`; at `alpha = 0.1`, the counterexample above as a case where the
+aggregate is outside and the band is unchanged. The IT2 arm's four-corner band is min/max by
+construction and keeps the invariant. This amendment changes no decision D1 to D5.
+
+## 12. Review amendment, 2026-10-26: separate baselines and fix alpha before fitting
+
+This amendment supersedes the identification of the persistence band with novelty-check
+section 4 item 2 in section 4 above, and the alpha-scale relationship stated in D2. The
+original dated text is retained under the repository's append-only convention.
+
+**PR-A' implements two separate non-fuzzy comparators.** Neither replaces the other:
+
+| Comparator | Target-space interval for coordinate `j` at forecast origin `t` | Selection |
+| --- | --- | --- |
+| Relative persistence | `y_j(t) +/- r_P * abs(y_j(t))` | Fit the non-negative scale `r_P` on training rows to the stated coverage target. |
+| Rolling empirical percentiles | `[Q_a(h_j(t)), Q_(1-a)(h_j(t))]`, where `h_j(t)` contains the coordinate's values in the last `k` eligible snapshots available at or before `t` | Select `k` and fix the tail probability `a` using the training period only; record the quantile method and history eligibility/deduplication rule. |
+
+The empirical interval can be asymmetric about the latest target and need not contain it.
+Changing a symmetric persistence scale cannot in general reproduce that interval. Beating
+relative persistence therefore does not discharge the empirical-percentile comparison in
+novelty-check section 4 item 2. Both comparators are required in PR-A' and in the gating
+evaluation; the provisional persistence result in the gates record is evidence for relative
+persistence alone.
+
+Fix horizon `H`, the snapshot-boundary split and the scoring-row rule before the held-out
+evaluation. Select `k`, `a`, persistence scale and any other fitted settings using training
+data only, and freeze them before test scoring. A test-origin rolling history may advance
+using observations already available at that origin; it must never include the future target
+at `t + H` or any observation unavailable at `t`. Report the same scored origins for both
+baselines and the fuzzy arm: use a common history-ready mask, and report exclusions and row
+counts separately for change events and distinct device states. No method may choose its own
+easier scoring subset.
+
+The evidence rows identify the comparator, horizon, split, scoring-row rule, history rule,
+`k` (or not applicable), tail probability, quantile method, fitted scale (or not applicable),
+training coverage, test coverage, mean width and interval score. Use the same target
+coordinates, interval-score level and metric definitions across methods. Raw empirical
+percentiles do not acquire nominal coverage merely from their quantile labels: report their
+observed coverage with width and score. If a scale-adjusted empirical interval is added for a
+matched-coverage comparison, record its transformation and training-only fit as a separate
+variant and retain the raw empirical comparator. Outcome-space comparisons later use the
+same channel projection, circuits, reference and simulator mode for every arm.
+
+**D2 correction.** Fix `alpha` before fitting `r`; changing `alpha` requires refitting and
+re-evaluating the band using training data, followed by scoring on the untouched test period.
+For fixed members, increasing `alpha` narrows the central `1 - 2*alpha` interval. In a linear
+location-scale model a larger scale is generally needed to compensate; through the nonlinear
+TSK map, no simple compensating relationship is guaranteed. The sentence saying that a
+wider `alpha` simply yields a smaller fitted `r` is withdrawn. This corrects the reasoning
+without choosing an answer to D2; the choices in D1 to D5 still require the recorded sign-off.

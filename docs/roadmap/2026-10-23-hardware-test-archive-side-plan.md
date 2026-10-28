@@ -112,6 +112,21 @@ archive, has been published again throughout the last 30 days; the design's §3 
 IBM omits it needs that correction. No number is registered from this half alone; the dry
 output is not committed.
 
+**Correction, 2026-10-26 (Bengisu's review of PR #126).** The parenthesis in check (2), "the
+geometric mean of a sample lies between its 10th and 90th percentiles unless the sample is
+tiny or degenerate", is false. Her counterexample: 91 distinct values evenly spaced from 100
+to 100.9 µs and 9 distinct values from 1000 to 1008 µs, 100 positive distinct values in all.
+The geometric mean is 123.57 µs and the log-space 10th to 90th percentile band is 100.10 to
+100.89 µs, so the mean lies above the band (reproduced on 2026-10-26; pinned as
+`test_level_may_lie_outside_the_band_and_neither_is_adjusted`). A mean can leave a central
+quantile band whenever a minority of values is far enough out, whatever the sample size. Check
+(2) is therefore **an observation about this archive on this day**, not a property the code
+must satisfy: a qubit whose level falls outside its band is a valid outcome, is reported as
+computed, and neither quantity is ever clamped or widened to force bracketing. The dry run's
+"zero violations over 156 qubits" stands as that observation. The level and band are validated
+against their definitions instead (`test_level_and_band_match_their_definitions`: the geometric
+mean and NumPy's linear-interpolation quantiles of the window's log values).
+
 ## 7. What this plan does not decide
 
 The decay model, the layouts, the shots and the scoring (offline half); the thresholds and the
