@@ -315,6 +315,14 @@ Read with these notes:
   layouts can turn on near-ties even for the right `T1`. `level`'s six predictions span 0.42 to
   0.57. This is a property of the design's Arm B scoring worth Bengisu's attention at 1c, not a
   pipeline fault.
+- **Line endings and the controls hash.** `manifest.json`'s `controls_file_sha256`
+  (`03c199e0...`) is the hash of `controls.json` as Python wrote it on Windows, with CRLF line
+  endings. The repository stores and checks it out with LF (`.gitattributes`, `eol: lf`), and the
+  stored blob hashes to `33682e65ea8708728bb1c34ff11b55b3fc6008a7bf7ef119bf8ba1e701f88748`; a
+  desktop reproduction will see that value. Both name the same content. The cause is that the
+  scripts write JSON with Python's default newline translation; the fix (write with `newline="\n"`)
+  touches PR #132's `--mode controls` too and is owed before the freezing run, so that the frozen
+  file's recorded hash is the hash every checkout sees.
 - **Flagged qubits.** Truth 2 kept qubit 72 at its reading (no level); it is in no scored row.
   Aer capped `T2` at `2 T1` for qubit 148 in both truths; it is a discriminating qubit, but Arm A's
   population decay does not read `T2`, so the cap cannot move its rows.
