@@ -1,0 +1,129 @@
+# 2026-10-28: the #125 pre-registration rebuilt onto `main` (step 1c)
+
+**Status**: PLAN, written before any merge, edit or run on this branch. The sections after
+"Implementation approach" are filled in as the steps land; nothing below "Plan" is a result yet.
+
+## Problem / Motivation
+
+The #125 pre-registration (`docs/roadmap/2026-10-24-issue-125-preregistration.md`) was drafted on
+2026-10-24 on a branch that merged PR #121's, #124's and #126's branches locally. All three have
+since merged into `main`, along with #127 and #128, so the branch is 93 commits behind `main` and
+its register rows NC-087 to NC-091 still say "measured outside the merge graph, re-pinned when this
+branch is rebuilt onto `main`". The offline half (step 1b, branch `mert/issue-125-offline-half`)
+found twelve places where the draft is silent or now wrong; its record lists them as amendments
+owed here. Bengisu's review of PR #128 left two statistics lessons the draft should apply before
+she reviews it. Plan §8 (PR #131) names this step 1c: rebuild, re-pin, re-run the controls, write
+the amendments, open the PR for her statistics review. Nothing goes to the QPU until the freezing
+commit, which is step 1d and is not part of this change.
+
+## Plan
+
+The lead chose on 2026-10-28 (this session) to **stack this branch on PR #132** (the selection
+rules, head `4746be56`, not yet reviewed), as step 1b is stacked, so that `--mode controls` exists
+on the branch and the controls can be run now. Bengisu's review will therefore show #132's diff
+until #132 merges. He also chose to put Bengisu's first lesson (labels whose horizon crosses a
+boundary) to her as an open question in the PR rather than decide it here.
+
+Steps, in order, each its own commit:
+
+1. **This plan**, first commit.
+2. **Merge `origin/main`** (`695c90ca`) into the branch with a merge commit, never a rebase, so the
+   commits NC-087 to NC-091 cite (`d6ed7885`, `d75de42d`, `b6852203`, `dfaf0cd7` and the NC-091
+   run) stay reachable and become ancestors of `main` when this PR merges. A trial `git merge-tree`
+   shows two conflicts:
+   - `docs/numerical-claims.md`: keep both sides; NC-087 to NC-091 sit between NC-086 and NC-092.
+   - `docs/roadmap/2026-10-23-phase-4-plan.md` (add/add): `main`'s version wins. Checked before
+     this plan: the branch has zero lines that `main` lacks in this file.
+   Sanity check after the merge: `git diff --stat origin/main` shows only additions (the evidence
+   folder, the two roadmap docs, the support record, the grid-bias script and its test, the five
+   register rows). Any deletion means the merge dropped content and stops the work.
+3. **Merge PR #132's tip** (`4746be56`) with a merge commit. The branch keeps its own upstream
+   (`origin/mert/issue-125-preregistration`), never #132's.
+4. **The amendments**, in the pre-registration, append-only:
+   - New rows at the foot of section 2's table, each dated, for the twelve items the offline-half
+     record owes (listed below), and a row that replaces the `d62928fa` source pin with "#132's
+     merge commit, named at the freezing commit". Existing rows are not edited.
+   - A new section 3.7 with each amendment's text and reason.
+   - Section 6 gets a dated "as of 2026-10-28" table below the 2026-10-24 one (the old rows stay).
+   - The twelve: (1) Arm B eligibility, window floor 15, controls allowed in triples; (2) Arm B
+     readout, exact density-matrix probabilities then each predictor's own assignment matrices
+     applied analytically; (3) the `cz` channel, depolarizing from the latest `gate_error`, no
+     relaxation, identical across predictors; (4) the band in Arm B, interval from its two ends,
+     ranked by midpoint, scored for coverage; (5) the triple rule, ranks `round(i (n - 1) / 5)`
+     under `level`; (6) Arm A scheduled ALAP against one simultaneous measurement; (7) design §6's
+     `T1` characterisation, `rep_delay` and `init_qubits` move to step 1d; (8) the bootstrap's
+     resampling unit, proposed below, frozen after Bengisu's review; (9) dead `cz` pairs
+     (`gate_error = 1`) are not links; (10) a dry run meant to exercise `reading_at_execution`
+     needs a `t_execute` after a sweep; (11) Arm B's best-pick near-tie, for her review of how Arm B
+     is scored; (12) every JSON either script writes uses LF (done on #132 as `bbde9522`; recorded
+     here).
+5. **Bengisu's lessons.** Second lesson (resampling in blocks of consecutive calendar days, with
+   empty dates kept at zero rows): proposed as amendment 8's unit, a day being the job's
+   submission date in UTC, so a missed job is an empty block, not a dropped one. First lesson
+   (purge labels whose horizon crosses a boundary): stated in section 3.7 as an open question for
+   her, with what this test has in its place (nothing is fitted; the level's 30-day window must be
+   complete at every `t_s`; `reading_at_execution` is read after the fact).
+6. **The null-model value of every threshold** (plan §8's done line for 1c, lesson L-029). A new
+   section in the pre-registration, written before any computation, naming each threshold in the
+   decision rule and how its value under a no-information predictor is obtained: the paired
+   bootstrap interval excluding zero (about 5% one-sided per comparison when the two predictors are
+   equally good, before the multiple comparisons the rule chains); the control stratum's sign
+   condition (about one half); the band's coverage within one binomial standard error; and Arm B's
+   "at least as well" and "at least as often", which pass on ties, so their null value is above
+   one half. Where a value is not closed-form it comes from a small committed script under its own
+   protocol paragraph, run after that paragraph is committed.
+7. **The controls run**: `python scripts/hardware_test_predictors.py --mode controls` at the current
+   `calibration-data` tip, recorded as a **rehearsal at that ref, not the frozen controls**. The
+   frozen four come from the same command at the freezing commit's ref (step 1d); this run shows the
+   command works on the stacked tree and names what it would choose today. Output written with LF,
+   blob hash recorded.
+8. **The re-pin of NC-087 to NC-091**: re-run the three committed scripts (`hardware_test_grid_bias.py`,
+   `measure_checkup_floor.py`, `measure_recal_hours.py`) on the merged tree at the rows' own inputs
+   (`calibration-data` `5828b4a2`, already local), and compare every output by blob hash with the
+   committed one. Identical: a dated note on each row naming the merged-tree commit it reproduced
+   at and saying the cited commits are now in the merge graph. Different: stop and report; nothing
+   is re-registered without the lead's word. Two archive walks, about 10 minutes each.
+9. **Gates** with `C:/t/pin125/Scripts/python.exe`, `PYTHONPATH=src`: ruff, mypy (including
+   `scripts/`), the full suite. This PR adds `tests/test_hardware_test_grid_bias.py`, so NC-021 is
+   re-measured at its merge commit, in a docs-only commit after the merge.
+10. **PR body drafted**, Turkish with a collapsed English summary, reviewer @bengisucvd, #125's
+    labels, the Phase 4 milestone, no closing keywords; push and PR only on the lead's word.
+
+## What changed
+
+Filled in as the steps land.
+
+## Implementation approach
+
+Filled in as the steps land.
+
+## Mathematical / Statistical details
+
+Filled in at step 6 (the null values) and step 8 (the reproduction).
+
+## Design decisions
+
+- **Merge, not rebase.** The register cites commits on this branch; a rebase would orphan them and
+  turn five rows' sources into dead SHAs. A merge keeps them and puts them on `main` at this PR's
+  merge.
+- **Stacked on #132** (the lead, 2026-10-28): the controls command exists only there. Cost:
+  Bengisu's review shows #132's diff until it merges, and a change on #132 is merged in again here.
+- **Controls as a rehearsal.** Proposal D freezes the controls "at the freezing ref"; the freezing
+  ref does not exist yet. Running the command now and calling it frozen would freeze controls a
+  week or more before job 1, at a ref the freezing commit does not name.
+- **Append-only edits.** The draft's own rule (section 3.5) and the repository's rule for dated
+  docs: changes go in as dated rows and sections; earlier rows stay as written.
+
+## Verification
+
+Filled in as the steps land.
+
+## Related docs
+
+- `docs/roadmap/2026-10-24-issue-125-preregistration.md` (the draft this changes)
+- `docs/roadmap/2026-10-23-hardware-reading-vs-level-test.md` (the design)
+- `docs/implementations/2026-10-28-hardware-test-offline-half.md` on `mert/issue-125-offline-half`
+  (the twelve owed amendments)
+- `docs/roadmap/2026-10-23-phase-4-plan.md` §8 on PR #131 (step 1c)
+- PR #132 (selection rules, step 1a); PR #128's review (Bengisu's lessons)
+- Issue #125
