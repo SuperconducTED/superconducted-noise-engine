@@ -1,0 +1,39 @@
+{
+  "backend": "ibm_fez",
+  "ref": "5828b4a29fabc245aa096e530852249a3496dc5b",
+  "ref_sha": "5828b4a29fabc245aa096e530852249a3496dc5b",
+  "at": "2026-10-23T09:34:56+00:00",
+  "min_window_distinct": 15,
+  "min_distinct_values": 20,
+  "below_window_floor": [
+    11,
+    72,
+    108
+  ],
+  "controls": [
+    {
+      "qubit": 48,
+      "log_t1_scatter": 0.29312786055389195,
+      "median_scatter": 0.29312786055389195,
+      "n_distinct": 150
+    },
+    {
+      "qubit": 112,
+      "log_t1_scatter": 0.2932023403107855,
+      "median_scatter": 0.29312786055389195,
+      "n_distinct": 148
+    },
+    {
+      "qubit": 54,
+      "log_t1_scatter": 0.2921334456418231,
+      "median_scatter": 0.29312786055389195,
+      "n_distinct": 147
+    },
+    {
+      "qubit": 105,
+      "log_t1_scatter": 0.2942294181760398,
+      "median_scatter": 0.29312786055389195,
+      "n_distinct": 147
+    }
+  ]
+}
