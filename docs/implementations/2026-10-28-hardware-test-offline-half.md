@@ -162,7 +162,8 @@ are step 1d's; this script never imports the token and the dry run reads only th
   construction; `84ba0230` holds later files at 10:26:53 and 11:18:49 UTC that day, so the
   control is exercised with a different reading. The flag is also what step 1d needs.
 - **Shots and seeds.** 2,048 per Arm A circuit, 4,096 per Arm B circuit (design §3, §4).
-  `seed_simulator = 125`, transpiler `seed = 125`, both in the manifest.
+  `seed_simulator = 125`, transpiler `seed = 125`, both in the manifest (per-circuit seeds
+  from it: amendment 1 below).
 - **Two truths** (Mert, 2026-10-28), both `NoiseModel.from_backend` on a `BackendV2` rebuilt from
   the archived `configuration` and `properties` through `qiskit_ibm_runtime`'s
   `convert_to_target` (the archived snapshots carry no qubit `frequency`, so
@@ -206,6 +207,33 @@ are step 1d's; this script never imports the token and the dry run reads only th
 - **What the output is.** Pipeline acceptance on Aer: not a measurement of the device, no NC row,
   no sentence about `ibm_fez`. The next free register id stays NC-095.
 
+### Amendment 1, 2026-10-28, after a scratch smoke run (not blind), before the record run
+
+The code was smoke-run in the session scratchpad on predictor rows rebuilt from PR #132's
+`predictors.tsv` at `5828b4a2` (no archive walk; the execution rows were the same rows, so
+`reading_at_execution` equalled `reading`). Disclosed here because it changed three things:
+
+1. **One seed per circuit.** With `seed_simulator = 125` on every circuit, Aer replays the same
+   random stream in each one, so a qubit's sampling errors repeat across its seven slots and the
+   84 rows are not independent draws. Criterion 2 assumes they are. In that run truth 1 failed
+   criterion 2 (mean signed error minus mean derived offset -0.0033 against a standard error of
+   the mean of 0.00099, 3.3 of them; truth 2: -0.0009, 0.9). The record run gives Arm A's
+   circuits seeds `125 + i` and Arm B's `225 + i` (`circuit_seeds`). The criterion and its
+   limit are unchanged. The smoke figures are scratch and are not results.
+2. **Dead `cz` pairs.** `ibm_fez` reports `gate_error = 1.0` on some pairs (32-33 in that
+   snapshot), which the depolarizing form cannot carry (`4 r / 3 > 1`). A triple is formed only
+   over coupled pairs whose `cz` error satisfies `0 <= 4 r / 3 <= 1`; the builder refuses any
+   other. Owed at 1c as amendment 9 below.
+3. **CLI scope.** This change ships the `dry-run` command only. `build_job`, `score_arm_a` and
+   `score_arm_b` are the functions the `build` and `score` modes will wrap; those modes, with
+   circuit serialization, land with step 1d's submission script, which is where a job directory
+   first needs writing and reading back.
+
+Also stated, not changed: Arm A's counts come from the full twelve-qubit circuits, and the
+truth's shot-free probability per row from that qubit's own instructions alone
+(`_single_qubit_part`), which is exact because the truth model has no term coupling qubits in
+Arm A.
+
 **Results: after the run.**
 
 | Criterion | Truth 1 | Truth 2 |
@@ -231,6 +259,8 @@ Each is a dated line in the frozen table, so none is decided only in code:
 7. Design §6's `T1` characterisation moves to step 1d (Mert, 2026-10-28), with its environment
    and version logged there; `rep_delay` and `init_qubits` are also 1d's.
 8. The bootstrap's resampling unit, after Bengisu's review.
+9. Arm B links: only coupled pairs whose `cz` error satisfies `0 <= 4 r / 3 <= 1` (a dead pair,
+   `gate_error = 1`, is not a link); amendment 1, 2026-10-28.
 
 ## Design decisions
 
