@@ -1,0 +1,37 @@
+<section id="grid" style="background:#EEF3F5;color:#2E3E46;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<p style="font-family:'Space Mono', 'Courier New', monospace;font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#0A6C7C">Method · the delay grid</p>
+<h2 style="font-size:56px;font-weight:600;line-height:1.2;color:#0A1B24">The Grid Must Not Pick the Winner</h2>
+<p style="font-size:28px;font-weight:700;line-height:1.35;color:#0A1B24;border-left:6px solid #0A6C7C;padding-left:20px">A grid centred on one predictor favours the other; the union of both grids removes that lean (NC-087).</p>
+<div style="display:flex;gap:40px">
+<div style="width:620px;display:flex;flex-direction:column;gap:8px">
+<svg aria-label="Schematic, not data: an exponential decay curve with level-centred delays marked by solid teal lines and reading-centred delays marked by dashed orange lines; the union grid uses both" width="620" height="340" viewBox="0 0 620 340" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="620" height="340" fill="#F8FAFB"/>
+<line x1="40" y1="320" x2="600" y2="320" stroke="#45535A" stroke-width="2"/>
+<line x1="40" y1="40" x2="40" y2="320" stroke="#45535A" stroke-width="2"/>
+<line x1="130" y1="40" x2="130" y2="320" stroke="#0A6C7C" stroke-width="5"/>
+<line x1="220" y1="40" x2="220" y2="320" stroke="#0A6C7C" stroke-width="5"/>
+<line x1="400" y1="40" x2="400" y2="320" stroke="#0A6C7C" stroke-width="5"/>
+<line x1="94" y1="40" x2="94" y2="320" stroke="#A34A12" stroke-width="5" stroke-dasharray="10 8"/>
+<line x1="148" y1="40" x2="148" y2="320" stroke="#A34A12" stroke-width="5" stroke-dasharray="10 8"/>
+<line x1="256" y1="40" x2="256" y2="320" stroke="#A34A12" stroke-width="5" stroke-dasharray="10 8"/>
+<polyline points="40,60 85,117 130,162 175,197 220,224 310,262 400,285 490,299 580,307" fill="none" stroke="#0A1B24" stroke-width="5"/>
+</svg>
+<p style="font-size:24px;line-height:1.35;color:#45535A">Schematic, not data. Black: decay of the excited state. Solid teal: delays at multiples of T1_level. Dashed orange: multiples of T1_reading.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<table style="width:1004px;font-size:24px;line-height:1.35;color:#2E3E46;border:1px solid #C9D3D8">
+<tr style="background:#DCE6EA"><th style="width:40%;text-align:left;color:#0A1B24">Tie point a* (above 0.5 favours the reading)</th><th style="width:30%;text-align:left;color:#0A1B24">Reading below level by 0.75 · 1.0 · 1.75</th><th style="width:30%;text-align:left;color:#0A1B24">Reading above level by 0.75 · 1.0 · 1.75</th></tr>
+<tr style="background:#F8FAFB"><td>Design’s grid, {0, 0.5, 1, 2} × T1_level</td><td>0.539 · 0.562 · 0.653</td><td>0.513 · 0.527 · 0.582</td></tr>
+<tr style="background:#F8FAFB"><td>Union grid, seven delays (accepted)</td><td>0.512 · 0.515 · 0.526</td><td>0.488 · 0.485 · 0.474</td></tr>
+</table>
+<ul style="font-size:24px;line-height:1.45;padding-left:28px">
+<li>The design’s grid leaned to the reading on both signs: a bias against S1</li>
+<li>Union grid: {0} ∪ {0.5, 1, 2} × T1_level ∪ {0.5, 1, 2} × T1_reading</li>
+<li>2,048-shot noise moves no tie point by more than 0.000004</li>
+<li>A computation, not a measurement: no archive, no hardware</li>
+</ul>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#45535A">10 · NC-087 (pre-registration branch, scripts/hardware_test_grid_bias.py) · pre-registration §3.3</p>
+<aside>This was a surprise. PR #126’s record said the design’s grid favoured the level. Computed, it favours the reading, on both sides, because the prediction the grid is centred on sits on the steepest part of the curve and pays the most for the same error. The union of both grids, teal and orange in the picture, removes that bias, and with the budget not a constraint the three extra delays buy each predictor its own most sensitive points.</aside>
+</section>

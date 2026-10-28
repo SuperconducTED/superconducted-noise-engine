@@ -1,0 +1,33 @@
+<section id="armb" style="background:#EEF3F5;color:#2E3E46;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<p style="font-family:'Space Mono', 'Courier New', monospace;font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#0A6C7C">Method · Arm B, layouts</p>
+<h2 style="font-size:56px;font-weight:600;line-height:1.2;color:#0A1B24">Arm B: the Engineer’s Layout Question</h2>
+<p style="font-size:28px;font-weight:700;line-height:1.35;color:#0A1B24;border-left:6px solid #0A6C7C;padding-left:20px">For one small circuit, which layout will measure best, and does the predictor rank the layouts right?</p>
+<div style="display:flex;gap:16px;align-items:center">
+<div style="width:380px;background:#0A1B24;border-radius:12px;padding:16px 20px"><p style="font-size:24px;font-weight:700;color:#EEF3F5">ghz_state_circuit(3)</p></div>
+<x-shape kind="arrow-right" style="width:48px;height:28px;background:#45535A"></x-shape>
+<div style="flex:1;background:#0A1B24;border-radius:12px;padding:16px 20px"><p style="font-size:24px;font-weight:700;color:#EEF3F5">idle block: 0.5 × the layout’s median T1_level</p></div>
+<x-shape kind="arrow-right" style="width:48px;height:28px;background:#45535A"></x-shape>
+<div style="width:420px;background:#0A1B24;border-radius:12px;padding:16px 20px"><p style="font-size:24px;font-weight:700;color:#EEF3F5">measure, 4,096 shots</p></div>
+</div>
+<div style="background:#F8FAFB;border:1px solid #C9D3D8;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:28px;font-weight:700;line-height:1.25;color:#0A1B24">Six connected triples per job, from level’s predicted best to worst</h3>
+<div style="display:flex;gap:12px;align-items:center">
+<p style="font-size:24px;font-weight:700;color:#0A6C7C">best</p>
+<p style="flex:1;font-size:24px;text-align:center;color:#EEF3F5;background:#0A6C7C;border-radius:8px;padding:10px">triple</p>
+<p style="flex:1;font-size:24px;text-align:center;color:#EEF3F5;background:#1D7A88;border-radius:8px;padding:10px">triple</p>
+<p style="flex:1;font-size:24px;text-align:center;color:#EEF3F5;background:#30808C;border-radius:8px;padding:10px">triple</p>
+<p style="flex:1;font-size:24px;text-align:center;color:#EEF3F5;background:#456F78;border-radius:8px;padding:10px">triple</p>
+<p style="flex:1;font-size:24px;text-align:center;color:#EEF3F5;background:#4F5F66;border-radius:8px;padding:10px">triple</p>
+<p style="flex:1;font-size:24px;text-align:center;color:#EEF3F5;background:#45535A;border-radius:8px;padding:10px">triple</p>
+<p style="font-size:24px;font-weight:700;color:#45535A">worst</p>
+</div>
+<p style="font-size:24px;line-height:1.35;color:#45535A">Each predictor ranks the six; the hardware measures all six</p>
+</div>
+<ul style="font-size:24px;line-height:1.45;padding-left:28px">
+<li>Prediction: per-qubit noise model through ADR-027, Aer density-matrix mode, Hellinger fidelity to the ideal GHZ distribution</li>
+<li>Scored per job: Spearman rank correlation, how often the top pick is the measured best, mean absolute fidelity error</li>
+<li>The cz error is the latest reading for every predictor, so any level advantage here is a lower bound</li>
+</ul>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#45535A">8 · design §4 · pre-registration §2</p>
+<aside>Arm B asks the engineer’s question directly: for one small circuit, which layout will measure best? Each predictor ranks six candidate layouts, the hardware measures all six, and we score the ranking. The idle block is what makes each layout’s coherence matter. The two-qubit gate error is the same latest reading for every predictor, so whatever the level gains here understates a fully level-based model.</aside>
+</section>

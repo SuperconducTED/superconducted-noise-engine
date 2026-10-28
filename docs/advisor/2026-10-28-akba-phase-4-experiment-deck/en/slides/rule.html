@@ -1,0 +1,31 @@
+<section id="rule" style="background:#EEF3F5;color:#2E3E46;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<p style="font-family:'Space Mono', 'Courier New', monospace;font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#0A6C7C">Hypothesis and the pass/fail rule</p>
+<h2 style="font-size:56px;font-weight:600;line-height:1.2;color:#0A1B24">S1: Carry the Level, Not the Latest Reading</h2>
+<p style="font-size:28px;font-weight:700;line-height:1.35;color:#0A1B24;border-left:6px solid #0A6C7C;padding-left:20px">Beating the reading at submission is not enough: the level must beat the reading taken when the job runs.</p>
+<div style="display:flex;gap:24px;align-items:center">
+<div style="width:380px;background:#0A1B24;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:28px;font-weight:700;line-height:1.25;color:#EEF3F5">Arm A, discriminating rows</h3>
+<p style="font-size:24px;line-height:1.35;color:#9CA5AA">Mean absolute error per predictor; paired bootstrap 90% intervals</p>
+</div>
+<x-shape kind="arrow-right" style="width:56px;height:32px;background:#45535A"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:16px;align-items:center;background:#F8FAFB;border:1px solid #C9D3D8;border-left:8px solid #0A6C7C;border-radius:12px;padding:14px 20px">
+<p style="flex:1;font-size:24px;line-height:1.35">level beats reading and reading_at_execution, same sign on the controls, band covers its 80%</p>
+<p style="width:330px;font-size:24px;font-weight:700;line-height:1.35;color:#0A6C7C">S1 passes: carry the level</p>
+</div>
+<div style="display:flex;gap:16px;align-items:center;background:#F8FAFB;border:1px solid #C9D3D8;border-left:8px solid #45535A;border-radius:12px;padding:14px 20px">
+<p style="flex:1;font-size:24px;line-height:1.35">level beats reading, but not reading_at_execution</p>
+<p style="width:330px;font-size:24px;font-weight:700;line-height:1.35;color:#45535A">Staleness: level or band plus a staleness model</p>
+</div>
+<div style="display:flex;gap:16px;align-items:center;background:#F8FAFB;border:1px solid #C9D3D8;border-left:8px solid #A34A12;border-radius:12px;padding:14px 20px">
+<p style="flex:1;font-size:24px;line-height:1.35">reading_at_execution at least as good as level</p>
+<p style="width:330px;font-size:24px;font-weight:700;line-height:1.35;color:#A34A12">S1 fails: the range is the product</p>
+</div>
+</div>
+</div>
+<div style="background:#DCE6EA;border-radius:12px;padding:16px 24px">
+<p style="font-size:24px;line-height:1.4;color:#0A1B24"><b>Arm B, the engineer’s purpose:</b> passes if level or band ranks layouts at least as well as reading (Spearman) and picks the measured best at least as often.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#45535A">6 · design §7 governs, condensed here · pre-registration §2: unchanged, frozen before job 1, under @bengisucvd’s review</p>
+<aside>The rule is the design’s §7, condensed into its three outcomes; the full wording governs. The pre-registration keeps it unchanged and freezes it before the first job, after Bengisu’s statistics review. The key point: beating the submission-time reading is not enough, because that could be staleness in the queue. If the level beats the reading taken when the job actually runs, S1 passes; if it does not, the range is the product and the paper is the fuzzy-systems one with this run as its hardware section.</aside>
+</section>
