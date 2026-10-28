@@ -264,6 +264,17 @@ gave 1.63. The rows now behave as independent binomial draws.
 Whether Aer's per-shot seeding is documented, intended or a defect is being checked separately
 (its source, docs and issue tracker); this record does not classify it.
 
+**Correction to amendment 2's mechanism, 2026-10-28, same day, from that check.** Parallel shots
+are not the cause. Aer seeds shot `j` as `seed + j` whenever it simulates shots one by one, that
+is whenever measure sampling is off, with any thread count (`max_parallel_threads=1` shows the
+same shift): Aer 0.17.2's `src/simulators/circuit_executor.hpp` sets
+`rng.set_seed(circ.seed + shot_index)`, and a maintainer describes the scheme in the open issue
+Qiskit/qiskit-aer#1916 (label `bug`). The one-qubit check missed it because Aer's `automatic`
+method ran that circuit as a density matrix with measure sampling, not because it was small. Aer
+also offsets the circuits of one `run()` by `seed + 2113 k`, so circuits in one run share streams
+once shots exceed 2,113; this script runs every circuit on its own, so that never applies here.
+The fix and its check stand unchanged.
+
 **Results: after the run.**
 
 | Criterion | Truth 1 | Truth 2 |
