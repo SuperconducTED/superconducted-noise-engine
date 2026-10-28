@@ -1,8 +1,9 @@
 # 2026-10-28: the #125 hardware test, offline half (`scripts/hardware_reading_vs_level.py`)
 
-> Status at the plan commit: **plan, no code and no dry-run number yet**. Every acceptance
-> criterion of the dry run is written here before the first run. Sections marked "after the run"
-> stay empty until then.
+> Status at the plan commit (`fab1fe5f`, amended `3c3277b2`): **plan, no code and no dry-run
+> number yet**; every acceptance criterion was written before the first run. Code `ce111cb8`,
+> seeding fix `23fd2f4b`; amendments 1 and 2 before the record run; record run from `8b244bb7`,
+> output `c3f8c22c`; results filled in afterwards.
 
 ## Problem / Motivation
 
@@ -344,6 +345,13 @@ Each is a dated line in the frozen table, so none is decided only in code:
 8. The bootstrap's resampling unit, after Bengisu's review.
 9. Arm B links: only coupled pairs whose `cz` error satisfies `0 <= 4 r / 3 <= 1` (a dead pair,
    `gate_error = 1`, is not a link); amendment 1, 2026-10-28.
+10. A dry run meant to exercise the `reading_at_execution` control needs a `t_execute` after a
+    recalibration sweep; in this one the execution file held the same calibration (results).
+11. Arm B's best-pick turned on a near-tie under the matching predictor (the top three measured
+    layouts within 0.008 under truth 2), for Bengisu's statistics review of how Arm B is scored.
+12. Every JSON the two scripts write is written with `newline="\n"`, so a recorded file hash is
+    the hash every checkout sees; owed before the freezing run writes the real `controls.json`
+    (it changes PR #132's `--mode controls`).
 
 ## Design decisions
 
@@ -381,8 +389,13 @@ run's five criteria above. Done 2026-10-28, laptop, provisional until Burak's de
 python -m scripts.hardware_reading_vs_level --repo . --ref 5828b4a29fabc245aa096e530852249a3496dc5b --at 2026-10-23T09:34:56Z --execution-ref 84ba0230738c9ee2773616b4e4c7142ba91180e3 --controls docs/evidence/hardware-reading-vs-level/dry-run-2026-10-28/controls.json --out <scratch>
 ```
 
-  The outputs should match the committed ones file for file (fixed seeds; Aer's per-shot seeding
-  is deterministic in the seed and independent of the thread count).
+  What a reproduction must match: in `manifest.json`, `discriminating`, `controls`, `slots_dt`,
+  `layouts` and `selection_log`; in `criteria.json`, the five verdicts under each truth. The
+  counts are expected to be identical only if Aer samples identically across platforms, which
+  has not been checked (Aer's per-shot seeding is deterministic in the seed and independent of
+  the thread count, but the laptop is Windows and the desktop WSL2), so the reproduction reports
+  whether they are. `manifest.json` cannot match byte for byte: it records the interpreter
+  version and the controls file's hash as written (CRLF on this laptop; see the notes above).
 
 ## Related docs
 
