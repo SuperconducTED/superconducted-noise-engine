@@ -151,12 +151,35 @@ walk read 2,249 files and 924 states, as the NC-088 record did. Expected values 
 | `select_discriminating` on window counts injected as `n_distinct`, floor 15 | `w15.top8` = 148, 132, 155, 10, 80, 77, 2, 40 | the same eight, same order |
 | `--mode controls` through the CLI | the same four | 48, 112, 54, 105; below the floor: 11, 72, 108 |
 
-Commands (the guard script lived in the session scratchpad and is not committed; its three
-checks are the table's first three rows):
+Commands. Rows 1, 2 and 4 come from the committed CLI: `controls.json` names the four, and the
+`n_window_distinct` column of the `predictors.tsv` it writes beside it carries the counts for
+qubits 11, 72 and 108 (`T1` rows).
 
 ```bash
 python -m scripts.hardware_test_predictors --repo . --ref 5828b4a29fabc245aa096e530852249a3496dc5b --at 2026-10-23T09:34:56Z --mode controls --out <scratch>/freeze-5828
 ```
+
+Row 3, from the worktree root with `PYTHONPATH=.;src` (Windows) or `.:src`:
+
+```python
+from dataclasses import replace
+from datetime import UTC, datetime
+from pathlib import Path
+
+from scripts.hardware_test_predictors import collect, predictor_rows, select_discriminating
+from superconducted.training.dataset import iter_archive
+
+at = datetime(2026, 10, 23, 9, 34, 56, tzinfo=UTC)
+ref = "5828b4a29fabc245aa096e530852249a3496dc5b"
+col = collect(iter_archive(Path("."), ref), backend="ibm_fez", until=at)
+rows = [r for r in predictor_rows(col, at=at, live=None) if r.quantity == "T1"]
+injected = [replace(r, n_distinct=r.n_window_distinct) for r in rows]
+print([p["qubit"] for p in select_discriminating(injected, k=8, min_distinct=15)])
+# expected: [148, 132, 155, 10, 80, 77, 2, 40]
+```
+
+This is the same injection NC-088's `measure_checkup_floor.py` makes, with the window count now
+computed by `predictor_rows` instead of by that script.
 
 Each walk takes about 7 to 8 minutes on the laptop (one `git show` per file). This checkout is a
 partial clone: 970 blobs at `5828b4a2` were missing and were fetched first in batches of 200
