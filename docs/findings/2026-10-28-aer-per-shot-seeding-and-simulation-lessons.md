@@ -1,6 +1,6 @@
 # Aer per-shot seeding, and what else building the #125 offline half taught us
 
-**Date**: 2026-10-28 · **Author**: Mert Efe Şensoy (with Claude) · **Status**: findings, laptop,
+**Date**: 2026-10-28 · **Author**: Mert Efe Şensoy · **Status**: findings, laptop,
 provisional until a desktop rerun · **Register**: NC-095, NC-096 · **Evidence**:
 `docs/evidence/aer-per-shot-seeding/`
 
@@ -12,8 +12,10 @@ the run's seed plus the shot's index, so two runs with nearby seeds replay each 
 and the circuits of one job replay each other once shots pass 2,113. Each run's own
 distribution is right; independence between runs, or between circuits of one job, is not.
 Aer's maintainers know the per-run part (an open issue since 2023, labelled `bug`) and have not
-documented it; we found no report of the within-job part. Nothing registered in this project is
-affected. The rest of this note records the other simulator and pipeline facts the same work
+documented it; we found no report of the within-job part. No code on `main` runs more than one
+circuit per Aer job, so the within-job part reaches nothing here; whether any registered row
+rests on a replayed run is answered "no" by an audit not yet committed (section 2). The rest of
+this note records the other simulator and pipeline facts the same work
 turned up, because each one would cost the next person a day.
 
 ## 2. The finding: Aer reuses random streams across nearby seeds
@@ -95,10 +97,15 @@ committed before the record run.
 
 ### Exposure in this repository
 
-A side session audited every seeded Aer counts run on `main` on 2026-10-28 (report uncommitted,
-branch `claude/suspicious-newton-b361ca`): **no registered row rests on a replayed sample.** The
-benchmark harness has no production caller, and every seeded call that exists, in tests and in
-`scripts/resolution_measurement.py`, runs on the measure-sampling path. It is latently exposed:
+Checked here: no code on `main` submits more than one circuit to one Aer run (a search of `src/`
+and `scripts/` for `run([` on 2026-10-28 finds only `subprocess.run` calls), so the within-job
+overlap reaches nothing in this repository.
+
+Reported, not yet verified here: a side session audited every seeded Aer counts run on `main` on
+2026-10-28 and reports that **no registered row rests on a replayed sample** (report uncommitted,
+branch `claude/suspicious-newton-b361ca`; this claim stands unverified until that report lands).
+It found that the benchmark harness has no production caller, and that every seeded call that
+exists, in tests and in `scripts/resolution_measurement.py`, runs on the measure-sampling path. It is latently exposed:
 `benchmarks/harness.py` seeds ensemble member `i` at `seed + i`, which would replay at 12 qubits
 and the default 4,096 shots, at very small shot counts, or with a mid-circuit measurement. The
 same audit reports a separate design point: the harness runs the reference at the same seed as
@@ -127,9 +134,10 @@ Each is recorded with its check in the offline-half record (branch
 - **`ibm_fez` measures all 156 qubits at once** (one `meas_map` group) and its `dt` is 4 ns.
   Circuits that end several delays at one measurement must align them so no qubit idles after
   its delay; Arm A's circuits do, and a test checks every interval on the scheduled circuit.
-- **Some `ibm_fez` couplings report `cz` `gate_error = 1.0`** (dead pairs, for example 32 to 33
-  in the snapshot of 2026-10-23). A depolarizing channel cannot carry them; Arm B forms its
-  triples only over usable pairs.
+- **Some `ibm_fez` couplings report `cz` `gate_error = 1.0`** (dead pairs: 32-33, 71-72 and
+  72-73 in the snapshot of 2026-10-23T09:34:56Z at `calibration-data` `5828b4a2`, every `cz`
+  entry with a gate error of at least 0.75). A depolarizing channel cannot carry them; Arm B
+  forms its triples only over usable pairs.
 
 ## 4. Pipeline lessons from the same session
 
