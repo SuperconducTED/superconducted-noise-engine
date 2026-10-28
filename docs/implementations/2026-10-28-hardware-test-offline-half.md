@@ -397,6 +397,13 @@ python -m scripts.hardware_reading_vs_level --repo . --ref 5828b4a29fabc245aa096
   whether they are. `manifest.json` cannot match byte for byte: it records the interpreter
   version and the controls file's hash as written (CRLF on this laptop; see the notes above).
 
+- **Same-machine determinism, checked 2026-10-28 (later).** The record run was repeated from
+  `7e157211` (the same code; later commits change only comments and documents) into a scratch
+  folder, same laptop, same interpreter, 30.3 minutes. All seven output files (`arm-a-truth1`,
+  `arm-a-truth2`, `arm-b-truth1`, `arm-b-truth2`, `criteria.json`, `selection.json`,
+  `manifest.json`) are identical to the committed ones once line endings are normalised. Across
+  platforms (the desktop's WSL2) it remains unchecked.
+
 ## Related docs
 
 - `docs/roadmap/2026-10-23-hardware-reading-vs-level-test.md` (the design, §2 to §7)
