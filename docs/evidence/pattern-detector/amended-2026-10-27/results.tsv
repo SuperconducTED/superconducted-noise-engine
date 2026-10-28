@@ -195,45 +195,48 @@ calibration[3].observed_rate	0.229126213592233
 calibration[3].empirical_mean_forecast	0.5304119943794938
 calibration[3].gaussian_mean_forecast	0.37323677847804393
 calibration[3].logistic_mean_forecast	0.20058213156580015
-bootstrap.test_days	46
+bootstrap.test_days_with_rows	46
+bootstrap.calendar_days	50
+bootstrap.empty_calendar_days	['2026-09-10', '2026-09-16', '2026-10-02', '2026-10-08']
 bootstrap.resamples	1000
-bootstrap.daily_difference_acf	[-0.18416765398768659, 0.17825039714150187, -0.15418340465218705, -0.10242062487195376, 0.025063432251167674, 0.05969127198010958, -0.024565632841144307, 0.10154968345283334, -0.05951056166473578, 0.024123920738848295, -0.13533995883459699, -0.05399834345678411]
+bootstrap.daily_difference_acf_calendar_lags	[-0.17564447161358865, 0.2572267519367966, -0.23245532466521754, 0.04229012827606458, -0.2198825807747111, 0.1047790808360003, 0.0890149924686794, 0.009265322732124017, 0.08138868040170176, 0.03669986363632824, 0.01197330011833449, -0.2220556517123797]
 bootstrap.two_se_bound	0.29488391230979427
-bootstrap.block_length_chosen	6
-bootstrap.by_block_length.1.bs_null_minus_bs_logistic_90	(0.04915036059510065, 0.06322359712729213)
-bootstrap.by_block_length.1.bss_logistic_vs_null_90	(0.30556725052151723, 0.4176446369418188)
-bootstrap.by_block_length.1.bs_always_level_minus_bs_logistic_90	(0.011009004750091107, 0.025719554714579287)
-bootstrap.by_block_length.1.bs_constant_purged_minus_bs_logistic_90	(0.0009027223674816045, 0.008226961496799856)
-bootstrap.by_block_length.1.bs_always_level_minus_bs_null_90	(-0.05098889890524829, -0.02474931926517885)
-bootstrap.by_block_length.3.bs_null_minus_bs_logistic_90	(0.05008494017826304, 0.06337852352490402)
-bootstrap.by_block_length.3.bss_logistic_vs_null_90	(0.31084014790467396, 0.418395098774347)
-bootstrap.by_block_length.3.bs_always_level_minus_bs_logistic_90	(0.01085381006776852, 0.0271159671394877)
-bootstrap.by_block_length.3.bs_constant_purged_minus_bs_logistic_90	(0.0012339516533899843, 0.008956680350298453)
-bootstrap.by_block_length.3.bs_always_level_minus_bs_null_90	(-0.05134865405290972, -0.024541261344321892)
-bootstrap.by_block_length.5.bs_null_minus_bs_logistic_90	(0.05061815577458018, 0.0627299552638207)
-bootstrap.by_block_length.5.bss_logistic_vs_null_90	(0.31309926543140615, 0.41796563844729473)
-bootstrap.by_block_length.5.bs_always_level_minus_bs_logistic_90	(0.009887968549800903, 0.02635627106085371)
-bootstrap.by_block_length.5.bs_constant_purged_minus_bs_logistic_90	(0.001112691303364171, 0.008230277116151237)
-bootstrap.by_block_length.5.bs_always_level_minus_bs_null_90	(-0.05237119252848374, -0.025174049424940382)
-bootstrap.by_block_length.6.bs_null_minus_bs_logistic_90	(0.05096572559258525, 0.06227933645941291)
-bootstrap.by_block_length.6.bss_logistic_vs_null_90	(0.31415309294459204, 0.41297458351128674)
-bootstrap.by_block_length.6.bs_always_level_minus_bs_logistic_90	(0.009821382442706705, 0.027426589826057713)
-bootstrap.by_block_length.6.bs_constant_purged_minus_bs_logistic_90	(0.0011503694543396664, 0.00876200044368743)
-bootstrap.by_block_length.6.bs_always_level_minus_bs_null_90	(-0.05091903220718204, -0.024410838391227)
-bootstrap.by_block_length.7.bs_null_minus_bs_logistic_90	(0.05054474527408352, 0.062051548777399546)
-bootstrap.by_block_length.7.bss_logistic_vs_null_90	(0.30946315820668024, 0.4097896637951785)
-bootstrap.by_block_length.7.bs_always_level_minus_bs_logistic_90	(0.010153376925699882, 0.02774155790360826)
-bootstrap.by_block_length.7.bs_constant_purged_minus_bs_logistic_90	(0.0012278546663392197, 0.008617519799121304)
-bootstrap.by_block_length.7.bs_always_level_minus_bs_null_90	(-0.051034388877570114, -0.023620319897061762)
-bootstrap.by_block_length.10.bs_null_minus_bs_logistic_90	(0.050741500792344824, 0.06216486372904168)
-bootstrap.by_block_length.10.bss_logistic_vs_null_90	(0.31208458766681924, 0.4131657480047743)
-bootstrap.by_block_length.10.bs_always_level_minus_bs_logistic_90	(0.01002614568752869, 0.027177152064325746)
-bootstrap.by_block_length.10.bs_constant_purged_minus_bs_logistic_90	(0.0012185962223783065, 0.008283929625022118)
-bootstrap.by_block_length.10.bs_always_level_minus_bs_null_90	(-0.051542279241682636, -0.024054881865730078)
+bootstrap.block_length_chosen_calendar_days	6
+bootstrap.by_block_length.1.bs_null_minus_bs_logistic_90	(0.04956306397038197, 0.06363056721205042)
+bootstrap.by_block_length.1.bss_logistic_vs_null_90	(0.3083765216940072, 0.41899882230560753)
+bootstrap.by_block_length.1.bs_always_level_minus_bs_logistic_90	(0.011034612712164573, 0.025817076385302874)
+bootstrap.by_block_length.1.bs_constant_purged_minus_bs_logistic_90	(0.001130017223501037, 0.008422886674523676)
+bootstrap.by_block_length.1.bs_always_level_minus_bs_null_90	(-0.05133358981530935, -0.025134521026751115)
+bootstrap.by_block_length.3.bs_null_minus_bs_logistic_90	(0.049902973905364925, 0.06292966492403676)
+bootstrap.by_block_length.3.bss_logistic_vs_null_90	(0.3102567437190515, 0.4156091709654427)
+bootstrap.by_block_length.3.bs_always_level_minus_bs_logistic_90	(0.010990570572524864, 0.02698917814567147)
+bootstrap.by_block_length.3.bs_constant_purged_minus_bs_logistic_90	(0.0012911559948323215, 0.008823953178070647)
+bootstrap.by_block_length.3.bs_always_level_minus_bs_null_90	(-0.05123587593240809, -0.024348913447944057)
+bootstrap.by_block_length.5.bs_null_minus_bs_logistic_90	(0.05014551347054743, 0.06327677602721499)
+bootstrap.by_block_length.5.bss_logistic_vs_null_90	(0.3100435511541748, 0.4197126663579864)
+bootstrap.by_block_length.5.bs_always_level_minus_bs_logistic_90	(0.009975843189364985, 0.02701469409450278)
+bootstrap.by_block_length.5.bs_constant_purged_minus_bs_logistic_90	(0.001118914737723352, 0.008370575581252334)
+bootstrap.by_block_length.5.bs_always_level_minus_bs_null_90	(-0.052708048169654284, -0.0242519103673336)
+bootstrap.by_block_length.6.bs_null_minus_bs_logistic_90	(0.05090242534890839, 0.06258104743443951)
+bootstrap.by_block_length.6.bss_logistic_vs_null_90	(0.315752032754958, 0.4167832149269031)
+bootstrap.by_block_length.6.bs_always_level_minus_bs_logistic_90	(0.00988412852473194, 0.026933471402697164)
+bootstrap.by_block_length.6.bs_constant_purged_minus_bs_logistic_90	(0.0009987311997449269, 0.00849001252586417)
+bootstrap.by_block_length.6.bs_always_level_minus_bs_null_90	(-0.051983222251946196, -0.025089071282398397)
+bootstrap.by_block_length.7.bs_null_minus_bs_logistic_90	(0.050166161401971825, 0.0620193521218551)
+bootstrap.by_block_length.7.bss_logistic_vs_null_90	(0.3105769095550172, 0.40779404783128775)
+bootstrap.by_block_length.7.bs_always_level_minus_bs_logistic_90	(0.010813868831560916, 0.02690284761198454)
+bootstrap.by_block_length.7.bs_constant_purged_minus_bs_logistic_90	(0.0013901574499579912, 0.008371036478209998)
+bootstrap.by_block_length.7.bs_always_level_minus_bs_null_90	(-0.05066737471606643, -0.024153115972246883)
+bootstrap.by_block_length.10.bs_null_minus_bs_logistic_90	(0.0505425535507432, 0.062360699514446276)
+bootstrap.by_block_length.10.bss_logistic_vs_null_90	(0.3100168847227324, 0.41495918143881466)
+bootstrap.by_block_length.10.bs_always_level_minus_bs_logistic_90	(0.009831554001176033, 0.027666156474326783)
+bootstrap.by_block_length.10.bs_constant_purged_minus_bs_logistic_90	(0.001288905755996011, 0.008292791122479354)
+bootstrap.by_block_length.10.bs_always_level_minus_bs_null_90	(-0.05217672706292361, -0.023564692565062332)
 clause_1_amended.bss_logistic_vs_primary_null	0.36203653946112346
 clause_1_amended.threshold	0.1
 clause_1_amended.interval_excludes_zero_at_chosen_block	True
 clause_1_amended.holds	True
 clause_1_amended.bss_vs_always_level	0.15665828131911597
 clause_1_amended.bss_vs_constant_purged	0.04550687087550076
+clause_1_amended.constant_purged_minus_logistic_90_at_chosen_block	(0.0009987311997449269, 0.00849001252586417)
 clause_1_amended.bss_vs_oracle	0.04357214375717444

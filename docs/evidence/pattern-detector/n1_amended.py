@@ -675,10 +675,12 @@ def main() -> None:
                         "dropped_constant_columns",
                     )
                 },
-                "block": summary["bootstrap"]["block_length_chosen"],
-                "acf": [round(a, 3) for a in summary["bootstrap"]["daily_difference_acf"]],
+                "block": summary["bootstrap"]["block_length_chosen_calendar_days"],
+                "acf": [
+                    round(a, 3) for a in summary["bootstrap"]["daily_difference_acf_calendar_lags"]
+                ],
                 "chosen_intervals": summary["bootstrap"]["by_block_length"][
-                    str(summary["bootstrap"]["block_length_chosen"])
+                    str(summary["bootstrap"]["block_length_chosen_calendar_days"])
                 ],
             },
             indent=2,
