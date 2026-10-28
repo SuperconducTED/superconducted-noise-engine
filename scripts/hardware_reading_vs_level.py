@@ -1032,6 +1032,13 @@ def evaluate_criteria(
     return out
 
 
+def write_json_lf(path: Path, payload: Any) -> None:
+    """Write JSON with LF line endings on every platform, as the repository stores it, so a hash
+    taken at write time is the hash every checkout reproduces (the same rule as PR #132's
+    ``_write_json``)."""
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8", newline="\n")
+
+
 def _write_tsv(path: Path, rows: Sequence[Mapping[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=list(rows[0]), delimiter="\t", lineterminator="\n")
@@ -1160,9 +1167,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             json.dumps(snapshot, sort_keys=True).encode("utf-8")
         ).hexdigest(),
     }
-    (args.out / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-    (args.out / "criteria.json").write_text(json.dumps(criteria, indent=2), encoding="utf-8")
-    (args.out / "selection.json").write_text(json.dumps(selection, indent=2), encoding="utf-8")
+    for name, payload in (("manifest", manifest), ("criteria", criteria), ("selection", selection)):
+        write_json_lf(args.out / f"{name}.json", payload)
     print(json.dumps({k: v["all_pass"] for k, v in criteria.items()}, indent=2))
     return 0 if all(v["all_pass"] for v in criteria.values()) else 1
 

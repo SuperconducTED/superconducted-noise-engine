@@ -10,6 +10,7 @@ import copy
 import math
 from datetime import UTC, date, datetime, timedelta
 from itertools import pairwise
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -436,6 +437,15 @@ def test_calendar_block_bootstrap_redraws_empty_draws() -> None:
         [1.0, 3.0], [d0, d0 + timedelta(days=20)], block_days=1, n_boot=200
     )
     assert 1.0 <= lo <= hi <= 3.0 and math.isfinite(lo)
+
+
+def test_json_is_written_with_lf(tmp_path: Path) -> None:
+    from scripts.hardware_reading_vs_level import write_json_lf
+
+    path = tmp_path / "criteria.json"
+    write_json_lf(path, {"truth1": {"all_pass": True}})
+    data = path.read_bytes()
+    assert b"\n" in data and b"\r" not in data  # guards Windows; Linux never translates
 
 
 def test_every_simulated_circuit_gets_its_own_seed() -> None:
