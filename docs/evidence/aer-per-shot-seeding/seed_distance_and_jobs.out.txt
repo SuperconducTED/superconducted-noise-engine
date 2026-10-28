@@ -1,0 +1,25 @@
+== 1. seed s vs s+d, 512 shots, 8 qubits
+d=1    b[j]==a[j+d]: 1.000 over 511 shots (shared fraction of a run = 511/512 = 0.998)
+d=100  b[j]==a[j+d]: 1.000 over 412 shots (shared fraction of a run = 412/512 = 0.805)
+d=511  b[j]==a[j+d]: 1.000 over 1 shots (shared fraction of a run = 1/512 = 0.002)
+d=600  no overlap possible; aligned agreement 0.010 (2^-8 = 0.004 expected)
+== 2. two identical circuits in one job, seed 7000, 2500 shots
+reported seeds: 7000 9113
+circuit1 shot j == circuit0 shot j+2113: 1.000 over 387 shots of 2500
+aligned agreement c0 vs c1: 0.004
+== 2b. same two circuits, max_job_size=1, seed 7000, 512 shots
+reported seeds: 7000 9113
+aligned agreement c0 vs c1: 0.006
+== 3. two unseeded runs, 512 shots
+reported seeds: 4162832484 3083783261 difference: 1079049223
+aligned agreement 0.002; best shifted match over d in 0..49: 0.014
+== 4. same seed, default threads vs max_parallel_threads=1 vs max_parallel_shots=3
+default parallel_shots = 20
+threads=1 parallel_shots = 1
+shots=3 parallel_shots = 3
+memory identical default vs threads=1: True
+memory identical default vs shots=3:   True
+== 5. counts across 20 seeds, 4 qubits, 2048 shots: SD of per-qubit z-scores
+consecutive 500..519   per-qubit SD: [0.052 0.063 0.027 0.056]
+spaced by 2049         per-qubit SD: [1.017 1.203 0.977 1.065]
+SeedSequence-drawn     per-qubit SD: [0.705 0.84  1.112 1.071]

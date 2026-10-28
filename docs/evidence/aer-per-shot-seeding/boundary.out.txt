@@ -1,0 +1,6 @@
+h + depol, automatic                       shift=0.522 aligned=0.519 P(1)=0.500 {'method': 'density_matrix', 'noise': 'superop', 'measure_sampling': True, 'parallel_shots': 1}
+h + depol, statevector                     shift=1.000 aligned=0.530 P(1)=0.513 {'method': 'statevector', 'noise': 'circuit', 'measure_sampling': False, 'parallel_shots': 20}
+h, no noise, statevector                   shift=0.522 aligned=0.519 P(1)=0.500 {'method': 'statevector', 'noise': 'ideal', 'measure_sampling': True, 'parallel_shots': 1}
+x + thermal (user case 3), automatic       shift=0.523 aligned=0.521 P(1)=0.498 {'method': 'density_matrix', 'noise': 'superop', 'measure_sampling': True, 'parallel_shots': 1}
+x + thermal (user case 3), statevector     shift=1.000 aligned=0.510 P(1)=0.503 {'method': 'statevector', 'noise': 'circuit', 'measure_sampling': False, 'parallel_shots': 20}
+x + thermal, density_matrix                shift=0.523 aligned=0.521 P(1)=0.498 {'method': 'density_matrix', 'noise': 'superop', 'measure_sampling': True, 'parallel_shots': 1}
