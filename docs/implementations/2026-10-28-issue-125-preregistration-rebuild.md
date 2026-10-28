@@ -102,7 +102,8 @@ Commits on `mert/issue-125-preregistration` after `821f6781`, 2026-10-28:
 | `aa5dca1f` | the null-value script, before its run |
 | `2b7c98f7` | the null-value output, one run |
 | `fc904655` | the pre-registration's section 3.8.1, the values |
-| later | the controls rehearsal, the NC-087 to NC-091 notes, this record |
+| `5e8b4354` | the controls rehearsal (pre-registration 3.9), the NC-087 to NC-091 notes |
+| later | this record, and the review-point fixes (band-independence caveat in 3.8.1, TSV note in amendment 12) |
 
 | File | One-sentence description |
 | --- | --- |

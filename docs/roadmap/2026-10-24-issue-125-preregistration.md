@@ -278,6 +278,8 @@ above them are not edited.
     of how Arm B is scored; section 3.8 states the null value of the best-pick condition.
 12. **LF writes.** Every JSON the two scripts write uses `newline="\n"`, so a recorded hash is the
     hash every checkout sees (PR #132 `bbde9522`; the offline half's `write_json_lf`). Done.
+    TSV outputs (`predictors.tsv`, the grid-bias files) are not covered and are written with CRLF
+    on Windows; no hash of any of them is recorded.
 13. **The predictor implementation pin.** Section 2's Predictors row names `d62928fa` (PR #126).
     The freezing commit names PR #132's merge commit instead, which adds proposals A, B and D beside
     PR #126's functions and leaves those unchanged.
@@ -364,7 +366,10 @@ the nominal 5%; with A1's actual rate `r`, two independent comparisons both pass
 | B1 and B2, one predictor meets both | 0.375 | 0.536 |
 | B1 and B2, each by either | | 0.560 |
 
-Under null (ii), identical rankings, every row is 1. A predictor with no information passes Arm
+The "`level` or `band`" column treats `band` as independent of `level`; the band's midpoint comes
+from the same 30-day window, so for that pair the realistic value lies between the `level`-alone
+column and null (ii), not in the independent column. Under null (ii), identical rankings, every
+row is 1. A predictor with no information passes Arm
 B's condition as written more often than not, mostly because "at least as often" passes on ties
 and best-pick counts over 13 jobs tie about one time in five. As written, Arm B cannot support a
 claim on its own; with A4 (a wide band passes by construction), this is what Bengisu's review is
