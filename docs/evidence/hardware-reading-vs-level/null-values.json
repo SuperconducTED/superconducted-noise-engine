@@ -1,0 +1,139 @@
+{
+  "arm_a_a1": {
+    "cases": [
+      {
+        "block_1": {
+          "false_pass_rate": 0.0675,
+          "mc_standard_error": 0.005609979946488223
+        },
+        "block_3": {
+          "false_pass_rate": 0.0875,
+          "mc_standard_error": 0.006318375978050055
+        },
+        "phi": 0.0,
+        "rho": 0.0
+      },
+      {
+        "block_1": {
+          "false_pass_rate": 0.074,
+          "mc_standard_error": 0.005853375094763704
+        },
+        "block_3": {
+          "false_pass_rate": 0.099,
+          "mc_standard_error": 0.006678285708173917
+        },
+        "phi": 0.0,
+        "rho": 0.3
+      },
+      {
+        "block_1": {
+          "false_pass_rate": 0.066,
+          "mc_standard_error": 0.005551756478809206
+        },
+        "block_3": {
+          "false_pass_rate": 0.0945,
+          "mc_standard_error": 0.0065410148295199574
+        },
+        "phi": 0.0,
+        "rho": 0.7
+      },
+      {
+        "block_1": {
+          "false_pass_rate": 0.072,
+          "mc_standard_error": 0.005779965397820302
+        },
+        "block_3": {
+          "false_pass_rate": 0.089,
+          "mc_standard_error": 0.006367063687446514
+        },
+        "phi": 0.5,
+        "rho": 0.0
+      },
+      {
+        "block_1": {
+          "false_pass_rate": 0.1855,
+          "mc_standard_error": 0.008691655480977141
+        },
+        "block_3": {
+          "false_pass_rate": 0.156,
+          "mc_standard_error": 0.00811369213120636
+        },
+        "phi": 0.5,
+        "rho": 0.3
+      },
+      {
+        "block_1": {
+          "false_pass_rate": 0.193,
+          "mc_standard_error": 0.008824709626950906
+        },
+        "block_3": {
+          "false_pass_rate": 0.164,
+          "mc_standard_error": 0.0082796135175502
+        },
+        "phi": 0.5,
+        "rho": 0.7
+      }
+    ],
+    "interval": "90% percentile, pass when the upper end is below zero",
+    "n_days": 14,
+    "n_resamples": 2000,
+    "n_runs": 2000,
+    "null": "row error differences u_day + e_row, mean zero, u_day stationary AR(1)",
+    "rows_per_day": 56
+  },
+  "arm_b": {
+    "exact": {
+      "b1_and_b2_level": 0.37452652003688097,
+      "b1_level": 0.5049798179891096,
+      "b1_level_or_band": 0.6716274429971706,
+      "b2_level": 0.6057879433059583,
+      "b2_level_or_band": 0.7576664637589636,
+      "joint_each_condition_by_either": 0.5600559255949155,
+      "joint_one_predictor_meets_both": 0.5356725130769584,
+      "p_tie_b1_level": 0.009959635978219684,
+      "p_tie_b2_level": 0.21157588661191729
+    },
+    "monte_carlo_check": {
+      "draws": 200000,
+      "per_key": {
+        "b1_and_b2_level": {
+          "monte_carlo": 0.37491,
+          "z": 0.35433327387902674
+        },
+        "b1_level": {
+          "monte_carlo": 0.5055,
+          "z": 0.4652880123523243
+        },
+        "b1_level_or_band": {
+          "monte_carlo": 0.673095,
+          "z": 1.3975338405590343
+        },
+        "b2_level": {
+          "monte_carlo": 0.605845,
+          "z": 0.05221512692317921
+        },
+        "b2_level_or_band": {
+          "monte_carlo": 0.758095,
+          "z": 0.44725660350539204
+        },
+        "joint_each_condition_by_either": {
+          "monte_carlo": 0.56127,
+          "z": 1.0938200169937806
+        },
+        "joint_one_predictor_meets_both": {
+          "monte_carlo": 0.536525,
+          "z": 0.7644354974435918
+        }
+      }
+    },
+    "n_jobs": 13,
+    "n_layouts": 6,
+    "null": "(i) independent uniform random rankings of six layouts"
+  },
+  "numpy": "2.4.4",
+  "protocol": "docs/roadmap/2026-10-24-issue-125-preregistration.md section 3.8",
+  "seed": {
+    "root": 1251028,
+    "spawn": "one child per (phi, rho) case, last for the Arm B check"
+  }
+}
