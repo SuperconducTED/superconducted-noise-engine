@@ -351,7 +351,12 @@ Each is a dated line in the frozen table, so none is decided only in code:
     layouts within 0.008 under truth 2), for Bengisu's statistics review of how Arm B is scored.
 12. Every JSON the two scripts write is written with `newline="\n"`, so a recorded file hash is
     the hash every checkout sees; owed before the freezing run writes the real `controls.json`
-    (it changes PR #132's `--mode controls`).
+    (it changes PR #132's `--mode controls`). **Done 2026-10-28 (later), on Mert's word:** on PR
+    #132 as `bbde9522` (fast-forward, fix-to-finding comment 6476680472), merged into this
+    branch, and here as `write_json_lf` for `manifest.json`, `criteria.json` and
+    `selection.json`; each writer has a test that fails when `newline="\n"` is removed (checked
+    on this laptop; on Linux the tests pass either way). The committed dry-run outputs predate
+    the fix and are unchanged: as stored they are LF already.
 
 ## Design decisions
 
