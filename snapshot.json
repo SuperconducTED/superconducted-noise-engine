@@ -1,9 +1,9 @@
 {
-  "generated": "2026-10-27 06:56 UTC",
+  "generated": "2026-10-29 05:44 UTC",
   "main": {
-    "sha": "5ea5a94a",
-    "date": "2026-10-26",
-    "msg": "Merge pull request #124 from SuperconducTED/mert/predictability",
+    "sha": "695c90ca",
+    "date": "2026-10-28",
+    "msg": "Merge pull request #128 from SuperconducTED/claude/phase-4-audit-neural-network-526358",
     "adr": {
       "ADR-001": "Accepted",
       "ADR-002": "Accepted",
@@ -78,15 +78,15 @@
         "title": "Phase 4 · Design-time predictor",
         "state": "open",
         "due": "2027-02-27",
-        "open": 12,
-        "closed": 1,
+        "open": 10,
+        "closed": 3,
         "url": "https://github.com/SuperconducTED/superconducted-noise-engine/milestone/2"
       }
     },
     "plan_doc": {
       "sha": "57b0c7895ec8c1df0aa5834a64b00e1c1a16befc",
       "date": "2026-10-26",
-      "ref": "mert/predictability"
+      "ref": "main"
     }
   },
   "tickets": [
@@ -129,63 +129,117 @@
             "name": "Mert Efe Şensoy"
           },
           "closingIssuesReferences": [],
-          "createdAt": "2026-10-23T19:59:14Z",
-          "headRefName": "mert/issue-125-archive-side",
+          "createdAt": "2026-10-28T21:27:44Z",
+          "headRefName": "mert/issue-125-preregistration",
           "isDraft": false,
           "mergeable": "MERGEABLE",
           "mergedAt": null,
-          "number": 126,
-          "reviewDecision": "CHANGES_REQUESTED",
+          "number": 135,
+          "reviewDecision": "REVIEW_REQUIRED",
           "state": "OPEN",
-          "title": "feat(scripts): archive-side predictors for the #125 hardware test (reading, level, band, selection)",
-          "updatedAt": "2026-10-26T14:05:02Z",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/126",
-          "headRefOid": "90af737fe9f4005e3f6fabb766106da5b44abc5f",
-          "additions": 1293,
-          "deletions": 0,
-          "file_count": 4,
-          "latest_reviews": [
-            {
-              "who": "bengisucvd",
-              "state": "CHANGES_REQUESTED",
-              "at": "2026-10-26",
-              "last_activity": "2026-10-26"
-            }
-          ],
+          "title": "docs(roadmap): #125 step 1c, the pre-registration rebuilt onto main: twelve amendments, the null value of every threshold, a controls rehearsal (stacked on #132)",
+          "updatedAt": "2026-10-28T21:27:48Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/135",
+          "headRefOid": "ce288895a35c3ebb7e48446a23900d038eb40ce7",
+          "additions": 5509,
+          "deletions": 15,
+          "file_count": 29,
+          "latest_reviews": [],
           "looked_since": [],
           "checks": [
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-26T14:05"
+              "started": "2026-10-28T21:27"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-26T14:04"
+              "started": "2026-10-28T21:27"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-26T14:04"
+              "started": "2026-10-28T21:27"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-26T14:05"
+              "started": "2026-10-28T21:27"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-10-26T14:04"
+              "started": "2026-10-28T21:27"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-10-26T14:05"
+              "started": "2026-10-28T21:28"
             }
           ],
-          "checks_newest": "2026-10-26T14:05",
+          "checks_newest": "2026-10-28T21:28",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        },
+        {
+          "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-10-28T12:34:28Z",
+          "headRefName": "mert/issue-125-selection-rules",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 132,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "feat(scripts): #125 selection rules A, B and D (window floor 15, four below plus four above, controls frozen first)",
+          "updatedAt": "2026-10-28T18:01:29Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/132",
+          "headRefOid": "4746be568bb28a75442d1ccaf0853a66087e0d99",
+          "additions": 789,
+          "deletions": 15,
+          "file_count": 4,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-28T18:01"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-28T18:01"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-28T18:01"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-28T18:01"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-28T18:01"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-10-28T18:01"
+            }
+          ],
+          "checks_newest": "2026-10-28T18:01",
           "checks_failing": [],
           "checks_stale_vs_main": false
         }
@@ -196,14 +250,14 @@
       "unmet_soft": [],
       "blockers": [
         {
-          "severity": "critical",
-          "text": "CHANGES_REQUESTED standing from @bengisucvd (2026-10-26). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
+          "severity": "high",
+          "text": "No approving review yet: main's ruleset requires one."
         }
       ],
       "declared_unblocks": [],
       "notes_info": [],
       "unblocks": [],
-      "pr": 126
+      "pr": 135
     },
     {
       "id": 63,
@@ -962,7 +1016,7 @@
     }
   ],
   "warnings": [
-    "The plan document changed at 57b0c789 (2026-10-26) on mert/predictability, after the 951258da plan.json was quoted from. Re-read it and update plan.json."
+    "The plan document changed at 57b0c789 (2026-10-26) on main, after the 951258da plan.json was quoted from. Re-read it and update plan.json."
   ],
   "owed": {
     "asks": [
@@ -975,7 +1029,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/84"
         },
         "former": false,
-        "days": 49,
+        "days": 51,
         "last_here": "2026-10-21",
         "kind": "checkbox",
         "text": "has sent it to Dr. Akba",
@@ -995,7 +1049,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/108"
         },
         "former": false,
-        "days": 24,
+        "days": 26,
         "last_here": "2026-10-03",
         "kind": "checkbox",
         "text": "links the verdict from PR #55's thread so the PR record is complete.",
@@ -1015,7 +1069,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/63"
         },
         "former": false,
-        "days": 54,
+        "days": 56,
         "last_here": "",
         "kind": "checkbox",
         "text": "confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit`",
@@ -1035,7 +1089,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/111"
         },
         "former": false,
-        "days": 22,
+        "days": 24,
         "last_here": "2026-10-04",
         "kind": "re-review",
         "text": "Re-review PR #111: you approved on 2026-10-04 and were asked again",
@@ -1050,19 +1104,79 @@
         "who": "BurakOztekin",
         "thread": {
           "kind": "PR",
-          "number": 126,
-          "title": "feat(scripts): archive-side predictors for the #125 hardware test (reading, level, band, selection)",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/126"
+          "number": 131,
+          "title": "docs(roadmap): phase-4 plan §8, the builder-mode order of 2026-10-28, with the team timeline",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/131"
         },
         "former": false,
-        "days": 4,
+        "days": 1,
         "last_here": "",
         "kind": "review",
-        "text": "Review PR #126",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/126",
+        "text": "Review PR #131",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/131",
         "by": "mertefesensoy",
-        "since": "2026-10-23",
-        "posted": "2026-10-23",
+        "since": "2026-10-28",
+        "posted": "2026-10-28",
+        "lower_bound": false,
+        "others": []
+      },
+      {
+        "who": "BurakOztekin",
+        "thread": {
+          "kind": "PR",
+          "number": 132,
+          "title": "feat(scripts): #125 selection rules A, B and D (window floor 15, four below plus four above, controls frozen first)",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/132"
+        },
+        "former": false,
+        "days": 1,
+        "last_here": "",
+        "kind": "review",
+        "text": "Review PR #132",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/132",
+        "by": "mertefesensoy",
+        "since": "2026-10-28",
+        "posted": "2026-10-28",
+        "lower_bound": false,
+        "others": []
+      },
+      {
+        "who": "BurakOztekin",
+        "thread": {
+          "kind": "PR",
+          "number": 133,
+          "title": "docs(advisor): phase-4 experiment deck for Dr. Akba, Turkish and English, with number check and speaker notes",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/133"
+        },
+        "former": false,
+        "days": 1,
+        "last_here": "",
+        "kind": "review",
+        "text": "Review PR #133",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/133",
+        "by": "mertefesensoy",
+        "since": "2026-10-28",
+        "posted": "2026-10-28",
+        "lower_bound": false,
+        "others": []
+      },
+      {
+        "who": "BurakOztekin",
+        "thread": {
+          "kind": "PR",
+          "number": 134,
+          "title": "docs(findings): Aer reuses per-shot random streams across nearby seeds and across circuits of one job (NC-095, NC-096)",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/134"
+        },
+        "former": false,
+        "days": 1,
+        "last_here": "",
+        "kind": "review",
+        "text": "Review PR #134",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/134",
+        "by": "mertefesensoy",
+        "since": "2026-10-28",
+        "posted": "2026-10-28",
         "lower_bound": false,
         "others": []
       },
@@ -1070,19 +1184,19 @@
         "who": "bengisucvd",
         "thread": {
           "kind": "PR",
-          "number": 126,
-          "title": "feat(scripts): archive-side predictors for the #125 hardware test (reading, level, band, selection)",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/126"
+          "number": 131,
+          "title": "docs(roadmap): phase-4 plan §8, the builder-mode order of 2026-10-28, with the team timeline",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/131"
         },
         "former": false,
         "days": 1,
-        "last_here": "2026-10-26",
-        "kind": "re-review",
-        "text": "Re-review PR #126: your CHANGES_REQUESTED from 2026-10-26 still stands",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/126",
+        "last_here": "",
+        "kind": "review",
+        "text": "Review PR #131",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/131",
         "by": "mertefesensoy",
-        "since": "2026-10-26",
-        "posted": "2026-10-26",
+        "since": "2026-10-28",
+        "posted": "2026-10-28",
         "lower_bound": false,
         "others": []
       },
@@ -1090,19 +1204,39 @@
         "who": "bengisucvd",
         "thread": {
           "kind": "PR",
-          "number": 128,
-          "title": "docs: phase-4 pass/fail audit, the pattern detector's protocol and N0 to N3 record (NC-092 to NC-094)",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/128"
+          "number": 133,
+          "title": "docs(advisor): phase-4 experiment deck for Dr. Akba, Turkish and English, with number check and speaker notes",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/133"
         },
         "former": false,
         "days": 1,
         "last_here": "",
         "kind": "review",
-        "text": "Review PR #128",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/128",
+        "text": "Review PR #133",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/133",
         "by": "mertefesensoy",
-        "since": "2026-10-26",
-        "posted": "2026-10-26",
+        "since": "2026-10-28",
+        "posted": "2026-10-28",
+        "lower_bound": false,
+        "others": []
+      },
+      {
+        "who": "bengisucvd",
+        "thread": {
+          "kind": "PR",
+          "number": 135,
+          "title": "docs(roadmap): #125 step 1c, the pre-registration rebuilt onto main: twelve amendments, the null value of every threshold, a controls rehearsal (stacked on #132)",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/135"
+        },
+        "former": false,
+        "days": 1,
+        "last_here": "",
+        "kind": "review",
+        "text": "Review PR #135",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/135",
+        "by": "mertefesensoy",
+        "since": "2026-10-28",
+        "posted": "2026-10-28",
         "lower_bound": false,
         "others": []
       },
@@ -1115,7 +1249,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/108"
         },
         "former": false,
-        "days": 24,
+        "days": 26,
         "last_here": "",
         "kind": "checkbox",
         "text": "posts a verdict on this issue: approve, or the defects he finds.",
@@ -1123,6 +1257,46 @@
         "by": "mertefesensoy",
         "since": "2026-10-03",
         "posted": "2026-10-03",
+        "lower_bound": false,
+        "others": []
+      },
+      {
+        "who": "BahaJarad",
+        "thread": {
+          "kind": "PR",
+          "number": 131,
+          "title": "docs(roadmap): phase-4 plan §8, the builder-mode order of 2026-10-28, with the team timeline",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/131"
+        },
+        "former": false,
+        "days": 1,
+        "last_here": "",
+        "kind": "review",
+        "text": "Review PR #131",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/131",
+        "by": "mertefesensoy",
+        "since": "2026-10-28",
+        "posted": "2026-10-28",
+        "lower_bound": false,
+        "others": []
+      },
+      {
+        "who": "BahaJarad",
+        "thread": {
+          "kind": "PR",
+          "number": 133,
+          "title": "docs(advisor): phase-4 experiment deck for Dr. Akba, Turkish and English, with number check and speaker notes",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/133"
+        },
+        "former": false,
+        "days": 1,
+        "last_here": "",
+        "kind": "review",
+        "text": "Review PR #133",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/133",
+        "by": "mertefesensoy",
+        "since": "2026-10-28",
+        "posted": "2026-10-28",
         "lower_bound": false,
         "others": []
       }

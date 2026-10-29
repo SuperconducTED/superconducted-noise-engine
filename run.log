@@ -122,3 +122,7 @@
 2026-10-26T05:44:57Z  --- run begins (pid 38855) ---
 2026-10-26T05:44:57Z  ok: chore: phase-4 dashboard: state moved (2026-10-26)
 2026-10-27T06:56:45Z  --- run begins (pid 625) ---
+2026-10-27T06:56:45Z  ok: chore: phase-4 dashboard: state moved (2026-10-27)
+2026-10-28T10:13:45Z  --- run begins (pid 991) ---
+2026-10-28T10:13:45Z  FAILED (exit 1)
+2026-10-29T05:44:14Z  --- run begins (pid 1464) ---

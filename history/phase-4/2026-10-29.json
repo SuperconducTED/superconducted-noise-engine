@@ -1,0 +1,99 @@
+{
+  "adr": {
+    "ADR-001": "Accepted",
+    "ADR-002": "Accepted",
+    "ADR-003": "Accepted",
+    "ADR-004": "Accepted",
+    "ADR-005": "Accepted",
+    "ADR-006": "Accepted",
+    "ADR-007": "Open",
+    "ADR-008": "Open / Deferred",
+    "ADR-009": "Open",
+    "ADR-010": "Accepted",
+    "ADR-011": "Open (effectively chosen for each path)",
+    "ADR-012": "Accepted",
+    "ADR-013": "Open / Deferred",
+    "ADR-014": "Deferred",
+    "ADR-015": "Deferred",
+    "ADR-016": "Deferred",
+    "ADR-017": "Accepted",
+    "ADR-018": "Accepted",
+    "ADR-019": "Open",
+    "ADR-020": "Accepted",
+    "ADR-021": "Accepted on the constraint · Open on variance-injection design",
+    "ADR-022": "Accepted",
+    "ADR-023": "Accepted",
+    "ADR-024": "Open",
+    "ADR-025": "Accepted",
+    "ADR-027": "Accepted",
+    "ADR-028": "Open"
+  },
+  "conditions_done": 0,
+  "conditions_total": 7,
+  "counts": {
+    "done": 2,
+    "in_review": 1,
+    "ready": 12
+  },
+  "date": "2026-10-29",
+  "gates": {
+    "L1": {
+      "done": 0,
+      "status": "not_done",
+      "total": 1
+    },
+    "L2": {
+      "done": 0,
+      "status": "partial",
+      "total": 2
+    },
+    "L3": {
+      "done": 0,
+      "status": "not_done",
+      "total": 2
+    },
+    "L4": {
+      "done": 0,
+      "status": "unknown",
+      "total": 1
+    },
+    "L5": {
+      "done": 0,
+      "status": "not_done",
+      "total": 1
+    }
+  },
+  "gates_done": 0,
+  "gates_total": 5,
+  "generated": "2026-10-29 05:44 UTC",
+  "main_sha": "695c90ca",
+  "milestone": {
+    "closed": 3,
+    "open": 10,
+    "state": "open"
+  },
+  "owed": {
+    "BahaJarad": 3,
+    "BurakOztekin": 6,
+    "bengisucvd": 3,
+    "mertefesensoy": 2
+  },
+  "phase": "Phase 4",
+  "tickets": {
+    "104": "ready",
+    "108": "ready",
+    "109": "ready",
+    "122": "ready",
+    "125": "in_review",
+    "57": "ready",
+    "58": "done",
+    "60": "ready",
+    "61": "ready",
+    "62": "ready",
+    "63": "done",
+    "64": "ready",
+    "75": "ready",
+    "84": "ready",
+    "92": "ready"
+  }
+}
