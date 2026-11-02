@@ -21,13 +21,19 @@ from superconducted.fuzzy.tsk import TSKRule, TSKRuleBase
 from superconducted.integration.aer_factory import is_identity_damping
 from superconducted.training import HybridANFISTrainer, TrainingSet, evaluate_rmse
 from superconducted.training.anfis import (
+    _ConsequentSolver,
     _effective_weights,
     _ensure_finite_model,
+    _finite_difference_gradient,
+    _log_space_mask,
     _predict,
+    _premise_step,
+    _PremiseObjective,
+    _standardization,
     _to_raw_rule_base,
     _to_standardized_rule_base,
 )
-from superconducted.training.parameters import count_trainable_parameters
+from superconducted.training.parameters import count_trainable_parameters, premise_layout
 
 
 def _data(
@@ -131,10 +137,15 @@ def test_trainer_identity_predicate_agrees_with_channel_predicate(
         HybridANFISTrainer().fit(rule_base, data)
 
 
-def test_lse_core_reserves_positive_epochs_for_the_premise_stage() -> None:
+def test_analytic_gradient_is_reserved_for_issue_61() -> None:
     data = _data(np.array([[-1.0], [1.0]]), np.array([[0.1], [0.2]]))
-    with pytest.raises(NotImplementedError, match="M2 trainer core"):
-        HybridANFISTrainer(epochs=1).fit(_rule_base(False, fitted=False), data)
+    with pytest.raises(NotImplementedError, match="Issue #61"):
+        HybridANFISTrainer(epochs=1, gradient="analytic").fit(_rule_base(False, fitted=False), data)
+    # With no premise epochs no gradient is taken, so the LSE-only fit still runs.
+    result = HybridANFISTrainer(epochs=0, gradient="analytic").fit(
+        _rule_base(False, fitted=False), data
+    )
+    assert result.diagnostics.epochs_run == 0
 
 
 def test_lse_core_drops_zero_firing_rows_from_fit_and_metrics() -> None:
@@ -672,3 +683,479 @@ def test_nonfinite_prediction_guard_raises_before_result_construction() -> None:
             rule_base,
             ((np.array([[np.nan]]), np.array([True])),),
         )
+
+
+# --- M3: premise stage, alternation and early stopping (Issue #60 FR-5, FR-6) ---
+
+_LINE_CENTERS = (-1.0, 0.0, 1.0)
+_LINE_WIDTHS = (0.45, 0.45, 0.45)
+# The warm start shifts each centre by (0.12, -0.10, 0.08) and scales each width by
+# (1.2, 0.85, 1.15): the perturbation pattern of Issue #60 step 6(b).
+_LINE_WARM_CENTERS = (-0.88, -0.10, 1.08)
+_LINE_WARM_WIDTHS = (0.54, 0.3825, 0.5175)
+_LINE_CONSEQUENTS = (((0.6, -0.4),), ((-0.8, 0.3),), ((0.5, 0.9),))
+
+
+def _line(
+    interval: bool,
+    centers: tuple[float, ...],
+    widths: tuple[float, ...],
+    consequents: tuple[tuple[tuple[float, float]], ...],
+) -> TSKRuleBase:
+    """Three rules on one input; an IT2 lower width is 0.65 of the upper, as in _planted_grid."""
+    return TSKRuleBase(
+        [
+            TSKRule(
+                (IntervalGaussianMF(c, 0.65 * w, w) if interval else GaussianMF(c, w),),
+                np.array(consequent, dtype=np.float64),
+            )
+            for c, w, consequent in zip(centers, widths, consequents, strict=True)
+        ],
+        input_dim=1,
+        output_dim=1,
+    )
+
+
+def _planted_line(interval: bool) -> TSKRuleBase:
+    return _line(interval, _LINE_CENTERS, _LINE_WIDTHS, _LINE_CONSEQUENTS)
+
+
+def _warm_line(interval: bool) -> TSKRuleBase:
+    return _line(interval, _LINE_WARM_CENTERS, _LINE_WARM_WIDTHS, (((0.1, 0.1),),) * 3)
+
+
+def _targets_of(rule_base: TSKRuleBase, features: np.ndarray) -> np.ndarray:
+    defuzzifier = (
+        NieTanDefuzzifier() if rule_base.is_interval_type2 else WeightedAverageDefuzzifier()
+    )
+    return np.array([defuzzifier.defuzzify(rule_base.evaluate(row)) for row in features])
+
+
+def _line_data(rule_base: TSKRuleBase, rows: int = 41, span: float = 1.5) -> TrainingSet:
+    features = np.linspace(-span, span, rows, dtype=np.float64)[:, None]
+    return _data(features, _targets_of(rule_base, features))
+
+
+def _standardized_premise(result_rule_base: object, standardization: tuple) -> np.ndarray:
+    assert isinstance(result_rule_base, TSKRuleBase)
+    return premise_layout(_to_standardized_rule_base(result_rule_base, *standardization)).flatten()
+
+
+def _consequents(rule_base: object) -> np.ndarray:
+    assert isinstance(rule_base, TSKRuleBase)
+    return np.stack([rule.consequent_params for rule in rule_base.rules])
+
+
+def test_log_space_mask_marks_exactly_each_shapes_positive_entries() -> None:
+    rule_base = TSKRuleBase(
+        [
+            TSKRule(
+                (
+                    GaussianMF(0.0, 1.0),
+                    TriangularMF(-2.0, 0.0, 2.0),
+                    TrapezoidalMF(-2.0, -1.0, 1.0, 2.0),
+                    TanhMF(-1.0, 1.0, 1.0, 1.0),
+                    IntervalGaussianMF(0.0, 0.5, 1.0),
+                    TanhSigmoidMF(0.0, 1.0),
+                    TanhBellMF(-1.0, 1.0, 1.0),
+                ),
+                np.full((1, 8), 0.1),
+            )
+        ],
+        input_dim=7,
+        output_dim=1,
+    )
+
+    mask = _log_space_mask(premise_layout(rule_base))
+
+    expected = [
+        *(False, True),  # Gaussian: sigma
+        *(False, False, False),  # Triangular: ordering only
+        *(False, False, False, False),  # Trapezoidal: ordering only
+        *(False, False, True, True),  # Tanh: both slopes
+        *(False, True, True),  # Interval Gaussian: both sigmas
+        *(False, True),  # Tanh sigmoid: slope
+        *(False, False, True),  # Tanh bell: slope
+    ]
+    assert mask.tolist() == expected
+
+
+@pytest.mark.parametrize("interval", [False, True], ids=("t1", "it2"))
+@pytest.mark.parametrize("weighted_ridge", [False, True], ids=("plain", "weighted-ridge"))
+def test_premise_gradient_is_the_gradient_of_the_resolved_loss(
+    interval: bool, weighted_ridge: bool
+) -> None:
+    """The fixed-consequent gradient equals the re-solved loss's gradient (envelope theorem).
+
+    The reference differentiates in raw parameter space, re-solving the consequents at
+    every point, and applies the log-space chain rule itself, so it checks the
+    reparameterization as well as the difference quotient. The ridge penalty does not
+    depend on the premise, so the identity holds with row weights and ridge as well.
+    """
+    data = _line_data(_planted_line(interval))
+    feature_mean, feature_scale = _standardization(data.features)
+    target_mean, target_scale = _standardization(data.targets)
+    standardized = _to_standardized_rule_base(
+        _warm_line(interval), feature_mean, feature_scale, target_mean, target_scale
+    )
+    features = (data.features - feature_mean) / feature_scale
+    targets = (data.targets - target_mean) / target_scale
+    layout = premise_layout(standardized)
+    weights = (
+        np.random.default_rng(3).uniform(0.2, 3.0, size=features.shape[0])
+        if weighted_ridge
+        else None
+    )
+    ridge = 0.3 if weighted_ridge else 0.0
+    solve = _ConsequentSolver(standardized, layout, features, targets, weights, ridge)
+    solved = solve(layout.flatten())
+    assert solved is not None
+    current, _ = solved
+    log_mask = _log_space_mask(layout)
+    objective = _PremiseObjective(
+        layout,
+        features,
+        targets,
+        np.ones(features.shape[0]) if weights is None else weights / weights.mean(),
+    )
+
+    gradient = _finite_difference_gradient(
+        objective, current.rule_base, current.premise, log_mask, 6e-6
+    )
+    # The perturbations are undone: the live MFs hold the premise again, exactly.
+    assert np.array_equal(layout.flatten(), current.premise)
+
+    def resolved_loss(premise: np.ndarray) -> float:
+        result = solve(premise)
+        assert result is not None
+        # The score sums over rows where the objective averages, hence the division.
+        return result[1] / features.shape[0]
+
+    expected = np.empty_like(gradient)
+    for index, value in enumerate(current.premise):
+        step = 1e-6 * max(1.0, abs(value))
+        plus, minus = current.premise.copy(), current.premise.copy()
+        plus[index] += step
+        minus[index] -= step
+        slope = (resolved_loss(plus) - resolved_loss(minus)) / (plus[index] - minus[index])
+        expected[index] = slope * value if log_mask[index] else slope
+    assert np.all(expected != 0.0)
+    # Measured on 2026-10-18: 4.1e-9 (T1) and 8.3e-10 (IT2) of max|grad|.
+    assert np.max(np.abs(gradient - expected)) <= 1e-6 * np.max(np.abs(expected))
+
+
+def test_consequent_solver_score_is_the_ridge_objective_it_minimizes() -> None:
+    data = _line_data(_planted_line(False))
+    weights = np.random.default_rng(5).uniform(0.2, 3.0, size=data.features.shape[0])
+    standardized = _warm_line(False)
+    layout = premise_layout(standardized)
+    ridge = 0.7
+
+    solved = _ConsequentSolver(standardized, layout, data.features, data.targets, weights, ridge)(
+        layout.flatten()
+    )
+
+    assert solved is not None
+    candidate, score = solved
+    design = _standardized_design(standardized, data.features)
+    theta = np.concatenate([rule.consequent_params.T for rule in candidate.rule_base.rules])
+    prior = np.concatenate([rule.consequent_params.T for rule in standardized.rules])
+    normalized = weights / weights.mean()
+    expected = float(
+        np.sum(normalized * np.sum((design @ theta - data.targets) ** 2, axis=1))
+        + ridge * np.sum((theta - prior) ** 2)
+    )
+    assert score == pytest.approx(expected, rel=1e-12)
+    assert np.array_equal(candidate.premise, layout.flatten())
+
+
+def test_premise_step_halves_past_an_ordering_constraint_and_counts_exhaustion() -> None:
+    membership = TriangularMF(0.0, 1.0, 2.0)
+    attempts: list[np.ndarray] = []
+
+    def solve(candidate: np.ndarray) -> tuple[str, float] | None:
+        attempts.append(candidate.copy())
+        try:
+            membership.set_parameters(candidate[:3])
+        except ValueError:
+            return None
+        return "solved", -float(candidate[1])  # every valid move of b to the right descends
+
+    # The fourth entry is a log-space parameter with a zero gradient. exp(log(0.1)) is
+    # not exactly 0.1 in float64, so it also shows the entry skips the round trip.
+    premise = np.array([0.0, 1.0, 2.0, 0.1])
+    gradient = np.array([0.0, -1.0, 0.0, 0.0])
+    log_mask = np.array([False, False, False, True])
+    assert np.exp(np.log(0.1)) != 0.1
+
+    step = _premise_step(solve, premise, -1.0, gradient, log_mask, 2.0, 2)  # type: ignore[arg-type]
+
+    # b = 3 and b = 2 break a < b < c; the second halving lands inside the domain.
+    assert [float(attempt[1]) for attempt in attempts] == [3.0, 2.0, 1.5]
+    assert step is not None
+    assert step[1] == -1.5
+    # Entries with a zero gradient keep their exact values on every attempt.
+    assert all(
+        attempt[0] == 0.0 and attempt[2] == 2.0 and attempt[3] == 0.1 for attempt in attempts
+    )
+
+    attempts.clear()
+    assert _premise_step(solve, premise, -1.0, gradient, log_mask, 2.0, 1) is None  # type: ignore[arg-type]
+    assert [float(attempt[1]) for attempt in attempts] == [3.0, 2.0]
+
+
+def test_premise_step_rejects_a_step_that_does_not_lower_the_resolved_loss() -> None:
+    attempts: list[float] = []
+
+    def solve(candidate: np.ndarray) -> tuple[str, float]:
+        attempts.append(float(candidate[0]))
+        return "solved", 1.0  # valid, but never below the current score
+
+    step = _premise_step(
+        solve,  # type: ignore[arg-type]
+        np.array([0.0]),
+        1.0,
+        np.array([-1.0]),
+        np.zeros(1, dtype=np.bool_),
+        4.0,
+        3,
+    )
+
+    assert step is None
+    assert attempts == [4.0, 2.0, 1.0, 0.5]
+
+
+def test_consequent_solver_refuses_premises_outside_the_losss_domain() -> None:
+    rule_base = TSKRuleBase(
+        [
+            TSKRule((TriangularMF(-1.0, 0.0, 1.0),), np.array([[0.1, 0.2]])),
+            TSKRule((TriangularMF(0.0, 1.0, 2.0),), np.array([[0.0, 0.3]])),
+        ],
+        input_dim=1,
+        output_dim=1,
+    )
+    layout = premise_layout(rule_base)
+    features = np.array([[-0.5], [0.5], [1.5]])
+    solve = _ConsequentSolver(
+        rule_base, layout, features, np.array([[0.1], [0.3], [0.2]]), None, 0.0
+    )
+    premise = layout.flatten()
+    assert solve(premise) is not None
+
+    unfired = premise.copy()
+    unfired[3:] = [0.0, 1.0, 1.2]  # the row at 1.5 now lies outside both supports
+    misordered = premise.copy()
+    misordered[:3] = [0.0, 2.0, 1.0]
+    nonfinite = premise.copy()
+    nonfinite[1] = np.nan
+    for candidate in (unfired, misordered, nonfinite):
+        assert solve(candidate) is None
+
+
+@pytest.mark.parametrize("interval", [False, True], ids=("t1", "it2"))
+def test_planted_line_premise_training_descends_and_improves_out_of_sample(
+    interval: bool,
+) -> None:
+    """Issue #60 step 6(b) on one input: what plain gradient descent recovers in 60 epochs.
+
+    The planted premise is identifiable but ill-conditioned (normalized Gaussian weights
+    let the consequents absorb most premise error), so the soft directions move slowly;
+    the 3x3x3 recorded run in the implementation doc measures the same effect.
+    """
+    planted = _planted_line(interval)
+    warm = _warm_line(interval)
+    data = _line_data(planted)
+    held_out = np.linspace(-1.45, 1.45, 30)[:, None]
+    held_out_targets = _targets_of(planted, held_out)
+
+    lse_only = HybridANFISTrainer(ridge=0.0).fit(warm, data)
+    result = HybridANFISTrainer(epochs=60, premise_lr=50.0, ridge=0.0).fit(warm, data)
+
+    history = np.array(result.loss_history)
+    assert history.shape == (61,)
+    assert history[0] == lse_only.loss_history[0]
+    assert np.all(np.diff(history) < 0.0)
+    assert result.diagnostics.epochs_run == 60
+    assert not result.diagnostics.early_stopped
+    assert result.diagnostics.premise_steps_rejected == 0
+    standardization = result.diagnostics.standardization
+    truth = _standardized_premise(planted, standardization)
+    start = _standardized_premise(warm, standardization)
+    trained = _standardized_premise(result.rule_base, standardization)
+    assert isinstance(lse_only.rule_base, TSKRuleBase)
+    assert isinstance(result.rule_base, TSKRuleBase)
+    lse_error = np.max(np.abs(_predict(lse_only.rule_base, held_out) - held_out_targets))
+    trained_error = np.max(np.abs(_predict(result.rule_base, held_out) - held_out_targets))
+    # Measured on 2026-10-18 (T1 / IT2): final over initial loss 4.9e-3 / 1.9e-3; premise
+    # distance to the planted one 0.65 / 0.75 of the warm start's (standardized units);
+    # held-out max error 0.060 / 0.033 of the LSE-only fit's. Single soft entries can
+    # still drift away (one T1 width goes from 0.076 to 0.112), so only the norm is pinned.
+    assert history[-1] <= 1e-2 * history[0]
+    assert np.linalg.norm(trained - truth) <= 0.9 * np.linalg.norm(start - truth)
+    assert trained_error <= 0.2 * lse_error
+
+
+@pytest.mark.parametrize("interval", [False, True], ids=("t1", "it2"))
+@pytest.mark.parametrize("validation_premise", ["halfway", "warm"])
+def test_early_stopping_returns_the_best_validation_state(
+    interval: bool, validation_premise: str
+) -> None:
+    """The returned state is the one ``patience`` epochs before the stop, bit for bit.
+
+    The validation targets come from a model whose premise is halfway between the warm
+    start and the planted one (best epoch mid-run) or equal to the warm start (best
+    epoch 0); in both cases training on planted targets eventually moves away from it.
+    """
+    if validation_premise == "halfway":
+        centers = tuple(
+            0.5 * (a + b) for a, b in zip(_LINE_CENTERS, _LINE_WARM_CENTERS, strict=True)
+        )
+        widths = tuple(0.5 * (a + b) for a, b in zip(_LINE_WIDTHS, _LINE_WARM_WIDTHS, strict=True))
+    else:
+        centers, widths = _LINE_WARM_CENTERS, _LINE_WARM_WIDTHS
+    validation = _line_data(_line(interval, centers, widths, _LINE_CONSEQUENTS), rows=15, span=1.4)
+    data = _line_data(_planted_line(interval))
+    warm = _warm_line(interval)
+    patience = 3
+
+    result = HybridANFISTrainer(
+        epochs=60, premise_lr=50.0, ridge=0.0, validation=validation, patience=patience
+    ).fit(warm, data)
+
+    assert result.diagnostics.early_stopped
+    best_epoch = result.diagnostics.epochs_run - patience
+    assert len(result.loss_history) == result.diagnostics.epochs_run + 1
+    if validation_premise == "halfway":
+        assert best_epoch > 0
+    else:
+        assert best_epoch == 0
+    replay = HybridANFISTrainer(epochs=best_epoch, premise_lr=50.0, ridge=0.0).fit(warm, data)
+    standardization = result.diagnostics.standardization
+    assert np.array_equal(
+        _standardized_premise(result.rule_base, standardization),
+        _standardized_premise(replay.rule_base, standardization),
+    )
+    assert np.array_equal(_consequents(result.rule_base), _consequents(replay.rule_base))
+    assert np.array_equal(result.train_rmse, replay.train_rmse)
+    assert result.loss_history[: best_epoch + 1] == replay.loss_history
+    assert result.validation_rmse is not None
+    assert result.validation_rmse == pytest.approx(
+        evaluate_rmse(result.rule_base, validation), rel=1e-12
+    )
+
+
+def test_training_without_validation_runs_every_epoch_deterministically() -> None:
+    data = _line_data(_planted_line(False))
+    warm = _warm_line(False)
+
+    three = HybridANFISTrainer(epochs=3, premise_lr=50.0).fit(warm, data)
+    three_again = HybridANFISTrainer(epochs=3, premise_lr=50.0).fit(warm, data)
+    five = HybridANFISTrainer(epochs=5, premise_lr=50.0).fit(warm, data)
+
+    assert three.diagnostics.epochs_run == 3
+    assert not three.diagnostics.early_stopped
+    assert len(three.loss_history) == 4
+    # FR-14: bit-identical, so exact equality throughout.
+    assert three.loss_history == three_again.loss_history
+    assert np.array_equal(_consequents(three.rule_base), _consequents(three_again.rule_base))
+    assert np.array_equal(
+        premise_layout(three.rule_base).flatten(),  # type: ignore[arg-type]
+        premise_layout(three_again.rule_base).flatten(),  # type: ignore[arg-type]
+    )
+    # The loop is a deterministic sequence, so a shorter run is a prefix of a longer one.
+    assert five.loss_history[:4] == three.loss_history
+
+
+def test_premise_training_keeps_grid_sharing_and_the_callers_values() -> None:
+    planted = _planted_grid(False, warm=False)
+    warm = _planted_grid(False, warm=True)
+    coordinates = np.meshgrid(
+        np.linspace(98.8, 154.4, 3),
+        np.linspace(67.4, 110.5, 3),
+        np.linspace(0.0171, 0.0374, 3),
+        indexing="ij",
+    )
+    features = np.column_stack([axis.ravel() for axis in coordinates])
+    data = _data(features, _targets_of(planted, features))
+    before_mfs = [mf.parameters().copy() for mf in premise_layout(warm).mfs]
+    before_consequents = _consequents(warm).copy()
+
+    result = HybridANFISTrainer(epochs=1, premise_lr=1.0).fit(warm, data)
+
+    assert isinstance(result.rule_base, TSKRuleBase)
+    for mf, original in zip(premise_layout(warm).mfs, before_mfs, strict=True):
+        assert np.array_equal(mf.parameters(), original)
+    assert np.array_equal(_consequents(warm), before_consequents)
+    layout = premise_layout(result.rule_base)
+    assert len(layout.mfs) == 9
+    assert result.parameter_count == count_trainable_parameters(result.rule_base)
+    assert result.parameter_count.premise == layout.size == 18
+    assert not {id(mf) for mf in layout.mfs} & {id(mf) for mf in premise_layout(warm).mfs}
+    standardization = result.diagnostics.standardization
+    assert not np.array_equal(
+        _standardized_premise(result.rule_base, standardization),
+        _standardized_premise(warm, standardization),
+    )
+
+
+def test_premise_free_rule_base_takes_no_step_and_counts_no_rejection() -> None:
+    # With one rule the normalized weight is exactly 1, so the loss does not depend on
+    # the premise and every finite difference is exactly zero.
+    rule_base = TSKRuleBase(
+        [TSKRule((GaussianMF(0.0, 1.0),), np.array([[0.1, 0.2]]))], input_dim=1, output_dim=1
+    )
+    data = _data(np.linspace(-1.0, 1.0, 5)[:, None], np.linspace(0.1, 0.3, 5)[:, None] ** 2)
+
+    result = HybridANFISTrainer(epochs=3, premise_lr=1.0).fit(rule_base, data)
+
+    assert result.diagnostics.premise_steps_rejected == 0
+    assert result.diagnostics.epochs_run == 3
+    assert len(set(result.loss_history)) == 1
+    assert isinstance(result.rule_base, TSKRuleBase)
+    assert result.rule_base.rules[0].antecedent_mfs[0].parameters() == pytest.approx(
+        [0.0, 1.0], abs=1e-15
+    )
+
+
+def test_oversized_learning_rate_is_halved_or_counted_never_diverges() -> None:
+    data = _line_data(_planted_line(False))
+    warm = _warm_line(False)
+
+    lse_only = HybridANFISTrainer().fit(warm, data)
+    exhausted = HybridANFISTrainer(epochs=2, premise_lr=1e9, max_halvings=2).fit(warm, data)
+    uphill = HybridANFISTrainer(epochs=1, premise_lr=1e3, max_halvings=0).fit(warm, data)
+    halved = HybridANFISTrainer(epochs=2, premise_lr=1e9, max_halvings=40).fit(warm, data)
+
+    # Two halvings leave the rate near 2.5e8: every attempt is rejected, the state stays
+    # at the LSE-only fit, and the exhaustion is counted rather than raised.
+    assert exhausted.diagnostics.premise_steps_rejected == 2
+    assert exhausted.loss_history == (lse_only.loss_history[0],) * 3
+    # At 1e3 the trial premise is valid but raises the re-solved loss, so the step is
+    # rejected after the trial was written into the MFs; the state must still be the
+    # LSE-only fit, bit for bit.
+    assert uphill.diagnostics.premise_steps_rejected == 1
+    assert uphill.loss_history == (lse_only.loss_history[0],) * 2
+    assert np.array_equal(_consequents(uphill.rule_base), _consequents(lse_only.rule_base))
+    assert halved.diagnostics.premise_steps_rejected == 0
+    assert halved.loss_history[2] < halved.loss_history[1] < halved.loss_history[0]
+
+
+def test_rows_dropped_at_the_warm_start_stay_dropped_through_premise_epochs() -> None:
+    rule_base = TSKRuleBase(
+        [
+            TSKRule((TriangularMF(-1.0, 0.0, 1.0),), np.array([[0.1, 0.2]])),
+            TSKRule((TriangularMF(-0.2, 0.6, 1.4),), np.array([[0.05, 0.25]])),
+        ],
+        input_dim=1,
+        output_dim=1,
+    )
+    features = np.array([[-0.6], [-0.3], [0.0], [0.3], [0.6], [0.9], [3.0]])
+    data = _data(features, 0.2 + 0.1 * np.sin(2.0 * features))
+
+    result = HybridANFISTrainer(epochs=3, premise_lr=0.1).fit(rule_base, data)
+
+    assert result.diagnostics.zero_firing_rows_dropped == 1
+    assert result.diagnostics.epochs_run == 3
+    assert result.train_rmse == pytest.approx(
+        evaluate_rmse(result.rule_base, _data(features[:-1], data.targets[:-1])), rel=1e-12
+    )

@@ -1,14 +1,18 @@
-"""Hybrid ANFIS trainer core.
+"""Hybrid ANFIS trainer.
 
-The M2 core fits consequent parameters with batch ridge least squares while
-leaving premise membership functions fixed. It standardizes internally and
-returns a rule base that evaluates raw feature vectors.
+Consequent parameters are fitted with batch ridge least squares at fixed
+premise membership functions (the M2 core). With ``epochs > 0`` the trainer
+alternates that solve with finite-difference gradient steps on the premise
+parameters and stops early on validation loss (Issue #60, FR-5 and FR-6). It
+standardizes internally and returns a rule base that evaluates raw feature
+vectors.
 """
 
 from __future__ import annotations
 
 import copy
 import math
+from dataclasses import dataclass
 from typing import Literal
 
 import numpy as np
@@ -26,7 +30,7 @@ from ..fuzzy.membership import (
 from ..fuzzy.tsk import TSKRule, TSKRuleBase
 from ..interfaces import MembershipFunction, RuleBase, TSKTrainer
 from ..types import RuleFiringResult, TrainingDiagnostics, TrainingResult, TrainingSet
-from .parameters import count_trainable_parameters, premise_layout
+from .parameters import PremiseLayout, count_trainable_parameters, premise_layout
 
 _MF_TYPES = (
     GaussianMF,
@@ -36,6 +40,20 @@ _MF_TYPES = (
     IntervalGaussianMF,
     TanhSigmoidMF,
     TanhBellMF,
+)
+
+# Positions of the strictly positive entries in each shape's parameter vector.
+# The premise stage optimizes these in log space (ADR-018); every other entry is
+# optimized as is, and ordering constraints are left to each shape's own
+# ``set_parameters`` validation (reject-and-halve, never clamp).
+_LOG_SPACE_ENTRIES: tuple[tuple[type[MembershipFunction], tuple[int, ...]], ...] = (
+    (GaussianMF, (1,)),
+    (TriangularMF, ()),
+    (TrapezoidalMF, ()),
+    (TanhMF, (2, 3)),
+    (IntervalGaussianMF, (1, 2)),
+    (TanhSigmoidMF, (1,)),
+    (TanhBellMF, (2,)),
 )
 
 
@@ -51,32 +69,41 @@ def evaluate_rmse(rule_base: TSKRuleBase, data: TrainingSet) -> npt.NDArray[np.f
 
 
 class HybridANFISTrainer(TSKTrainer):
-    """Fit a ``TSKRuleBase`` with batch ridge least squares in standardized space.
+    """Fit a ``TSKRuleBase`` by hybrid ANFIS training in standardized space.
 
     Args:
-        epochs: Must be zero in the M2 core; positive values reserve the
-            finite-difference premise stage.
-        premise_lr: Positive future premise-step learning rate.
+        epochs: Number of premise epochs. Zero fits consequents only (the M2
+            core). Each epoch takes one premise gradient step and then
+            re-solves the consequents at the new premise.
+        premise_lr: Positive premise-step learning rate, in standardized
+            units with positive-only parameters in log space.
         ridge: Non-negative L2 penalty around the mapped warm-start
             consequents.
-        seed: Recorded in the result for reproducibility.
-        gradient: Reserved premise-gradient strategy.
-        validation: Optional compatible raw-unit validation set.
-        fd_step: Positive future finite-difference step.
-        patience: Positive future early-stopping patience.
-        max_halvings: Non-negative future premise-step retry count.
+        seed: Recorded in the result for reproducibility; the default
+            full-batch, finite-difference configuration is deterministic.
+        gradient: Premise-gradient strategy. ``"analytic"`` needs Issue #61's
+            ``training/gradients.py`` and raises ``NotImplementedError`` when
+            ``epochs > 0`` until it merges.
+        validation: Optional compatible raw-unit validation set. When given,
+            training stops after ``patience`` epochs without a validation
+            improvement and returns the best-validation state.
+        fd_step: Positive relative central-difference step.
+        patience: Positive number of non-improving epochs before stopping.
+        max_halvings: Non-negative number of learning-rate halvings tried
+            when a premise step leaves a shape's valid domain, stops a kept
+            training row from firing, or does not lower the training loss.
 
     ``fit`` returns a new rule base, never mutates caller-owned membership
     functions or consequent arrays, and excludes zero-firing training rows
     from the solve and reported training metrics. ``TypeError`` is raised for
     another ``RuleBase`` implementation, ``ValueError`` for incompatible data,
     invalid warm starts, or non-finite fitted outputs, and
-    ``NotImplementedError`` for a positive ``epochs`` value.
+    ``NotImplementedError`` for ``gradient="analytic"`` with ``epochs > 0``.
 
-    The standardization and exact raw-unit map-back implement the M2 portion
-    of ADR-014 while it remains Deferred; T1 and IT2 weights respectively
-    match ADR-011's shipped weighted-average and Nie-Tan paths without
-    deciding ADR-009.
+    The standardization and exact raw-unit map-back implement ADR-014's
+    trainer while it remains Deferred; T1 and IT2 weights respectively match
+    ADR-011's shipped weighted-average and Nie-Tan paths without deciding
+    ADR-009.
     """
 
     def __init__(
@@ -129,9 +156,10 @@ class HybridANFISTrainer(TSKTrainer):
         """
         if not isinstance(rule_base, TSKRuleBase):
             raise TypeError("HybridANFISTrainer requires a TSKRuleBase")
-        if self._epochs != 0:
+        if self._epochs > 0 and self._gradient == "analytic":
             raise NotImplementedError(
-                "premise optimization is not part of the M2 trainer core; use epochs=0"
+                "gradient='analytic' needs training/gradients.py from Issue #61, which has "
+                "not merged; use gradient='finite-difference'"
             )
         if data.input_dim != rule_base.input_dim:
             raise ValueError(
@@ -159,13 +187,32 @@ class HybridANFISTrainer(TSKTrainer):
         if not np.any(kept):
             raise ValueError("all training rows have zero firing strength")
 
+        kept_weights = None if data.weights is None else data.weights[kept]
         fitted, condition_number = _fit_consequents(
             standardized,
             design,
             targets[kept],
-            None if data.weights is None else data.weights[kept],
+            kept_weights,
             self._ridge,
         )
+        standardized_validation: tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]] | None = (
+            None
+        )
+        if self._validation is not None:
+            standardized_validation = (
+                (self._validation.features - feature_mean) / feature_scale,
+                (self._validation.targets - target_mean) / target_scale,
+            )
+        outcome = self._alternate(
+            standardized,
+            _Candidate(fitted, premise_layout(standardized).flatten(), condition_number),
+            features[kept],
+            targets[kept],
+            kept_weights,
+            standardized_validation,
+        )
+        fitted = outcome.best.rule_base
+        condition_number = outcome.best.condition_number
         raw_rule_base = _to_raw_rule_base(
             fitted, feature_mean, feature_scale, target_mean, target_scale
         )
@@ -186,8 +233,6 @@ class HybridANFISTrainer(TSKTrainer):
             ),
         )
 
-        fitted_predictions = _predict(fitted, features[kept])
-        train_loss = float(np.mean(np.sum((fitted_predictions - targets[kept]) ** 2, axis=1)))
         validation_rmse = None
         if self._validation is not None:
             assert validation_predictions is not None
@@ -201,20 +246,359 @@ class HybridANFISTrainer(TSKTrainer):
             zero_firing_rows_dropped=int(np.count_nonzero(~kept)),
             nonfinite_rows_rejected=0,
             lse_condition_number=condition_number,
-            premise_steps_rejected=0,
-            epochs_run=0,
-            early_stopped=False,
+            premise_steps_rejected=outcome.premise_steps_rejected,
+            epochs_run=outcome.epochs_run,
+            early_stopped=outcome.early_stopped,
             standardization=(feature_mean, feature_scale, target_mean, target_scale),
         )
         return TrainingResult(
             rule_base=raw_rule_base,
             train_rmse=_rmse(raw_predictions, data.targets[kept]),
             validation_rmse=validation_rmse,
-            loss_history=(train_loss,),
+            loss_history=outcome.loss_history,
             diagnostics=diagnostics,
             parameter_count=count_trainable_parameters(raw_rule_base),
             seed=self._seed,
         )
+
+    def _alternate(
+        self,
+        standardized: TSKRuleBase,
+        initial: _Candidate,
+        features: npt.NDArray[np.float64],
+        targets: npt.NDArray[np.float64],
+        weights: npt.NDArray[np.float64] | None,
+        validation: tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]] | None,
+    ) -> _Alternation:
+        """Alternate premise steps and consequent solves; return the selected state.
+
+        ``standardized`` holds the deep-copied membership functions the premise
+        stage moves and the warm-start consequents the ridge shrinks toward.
+        ``features``, ``targets`` and ``weights`` are the standardized training
+        rows kept at the warm start (FR-12), and they stay fixed for the whole
+        run. Every candidate state has consequents solved at its own premise.
+        """
+        history = [_training_loss(initial.rule_base, features, targets)]
+        if self._epochs == 0:
+            return _Alternation(initial, tuple(history), 0, False, 0)
+        layout = premise_layout(standardized)
+        log_mask = _log_space_mask(layout)
+        objective = _PremiseObjective(
+            layout,
+            features,
+            targets,
+            np.ones(features.shape[0], dtype=np.float64)
+            if weights is None
+            else np.asarray(weights / np.mean(weights), dtype=np.float64),
+        )
+        solve = _ConsequentSolver(standardized, layout, features, targets, weights, self._ridge)
+        start = solve(initial.premise)
+        if start is None:
+            raise RuntimeError("the warm-start premise is outside the loss's domain")
+        current, score = start
+        best = current
+        best_validation = (
+            math.inf if validation is None else _validation_loss(current.rule_base, *validation)
+        )
+        stale = 0
+        rejected = 0
+        epochs_run = 0
+        for epoch in range(1, self._epochs + 1):
+            gradient = _finite_difference_gradient(
+                objective, current.rule_base, current.premise, log_mask, self._fd_step
+            )
+            if np.any(gradient != 0.0):
+                step = _premise_step(
+                    solve,
+                    current.premise,
+                    score,
+                    gradient,
+                    log_mask,
+                    self._premise_lr,
+                    self._max_halvings,
+                )
+                if step is None:
+                    rejected += 1
+                else:
+                    current, score = step
+            # Trial steps leave their premise in the live MFs; restore the current one.
+            layout.set_flat(current.premise)
+            history.append(_training_loss(current.rule_base, features, targets))
+            epochs_run = epoch
+            if validation is None:
+                best = current
+                continue
+            validation_loss = _validation_loss(current.rule_base, *validation)
+            if validation_loss < best_validation:
+                best = current
+                best_validation = validation_loss
+                stale = 0
+            else:
+                stale += 1
+                if stale >= self._patience:
+                    break
+        # Candidates share the live membership objects, so the selected state's
+        # premise is written back before its rule base is read.
+        layout.set_flat(best.premise)
+        return _Alternation(best, tuple(history), epochs_run, epochs_run < self._epochs, rejected)
+
+
+@dataclass(frozen=True, slots=True, eq=False)
+class _Candidate:
+    """A premise vector with the consequents solved at it."""
+
+    rule_base: TSKRuleBase
+    premise: npt.NDArray[np.float64]
+    condition_number: float
+
+
+@dataclass(frozen=True, slots=True, eq=False)
+class _Alternation:
+    """The selected candidate and the run's history and counters."""
+
+    best: _Candidate
+    loss_history: tuple[float, ...]
+    epochs_run: int
+    early_stopped: bool
+    premise_steps_rejected: int
+
+
+@dataclass(frozen=True, slots=True, eq=False)
+class _PremiseObjective:
+    """Training loss as a function of the premise vector at fixed consequents.
+
+    The loss is the row-weighted mean squared error norm in standardized units,
+    the data term the ridge solve minimizes, so the alternation descends one
+    objective. Without row weights it is the section 6.4 loss exactly. At the
+    consequents solved for the current premise, its gradient is the gradient of
+    the profiled objective of ``_ConsequentSolver`` up to a positive factor,
+    because the ridge penalty does not depend on the premise.
+    """
+
+    layout: PremiseLayout
+    features: npt.NDArray[np.float64]
+    targets: npt.NDArray[np.float64]
+    weights: npt.NDArray[np.float64]
+
+    def __call__(self, rule_base: TSKRuleBase, premise: npt.NDArray[np.float64]) -> float | None:
+        """Write ``premise`` into the live MFs and return the loss, or ``None``.
+
+        ``None`` marks a premise outside the loss's domain: a non-finite entry,
+        a vector a shape's ``set_parameters`` rejects, a kept row that no longer
+        fires, or a non-finite loss. On a ``set_parameters`` rejection the MFs
+        keep their previous values; otherwise they hold ``premise`` on return.
+        """
+        if not np.all(np.isfinite(premise)):
+            return None
+        try:
+            self.layout.set_flat(premise)
+        except ValueError:
+            return None
+        predictions, fired = _predictions_with_mask(rule_base, self.features)
+        if not np.all(fired):
+            return None
+        loss = float(np.mean(self.weights * np.sum((predictions - self.targets) ** 2, axis=1)))
+        return loss if math.isfinite(loss) else None
+
+
+@dataclass(frozen=True, slots=True, eq=False)
+class _ConsequentSolver:
+    """Solve the consequents at a premise vector and score the solution.
+
+    The score is the objective the ridge solve minimizes,
+    ``sum_i w_i ||yhat_i - yt_i||^2 + ridge ||theta - theta0||^2`` with mean-one
+    row weights, so that comparing scores across premises compares the profiled
+    objective the alternation descends.
+    """
+
+    standardized: TSKRuleBase
+    layout: PremiseLayout
+    features: npt.NDArray[np.float64]
+    targets: npt.NDArray[np.float64]
+    weights: npt.NDArray[np.float64] | None
+    ridge: float
+
+    def __call__(self, premise: npt.NDArray[np.float64]) -> tuple[_Candidate, float] | None:
+        """Return the solved candidate and its score, or ``None`` off the domain.
+
+        The domain is the one ``_PremiseObjective`` checks. The live MFs hold
+        ``premise`` on return unless a shape's ``set_parameters`` rejected it.
+        """
+        if not np.all(np.isfinite(premise)):
+            return None
+        try:
+            self.layout.set_flat(premise)
+        except ValueError:
+            return None
+        design, fired = _design_matrix(self.standardized, self.features)
+        if not np.all(fired):
+            return None
+        fitted, condition_number = _fit_consequents(
+            self.standardized, design, self.targets, self.weights, self.ridge
+        )
+        theta = _stacked_consequents(fitted)
+        row_weights = (
+            np.ones(design.shape[0], dtype=np.float64)
+            if self.weights is None
+            else self.weights / np.mean(self.weights)
+        )
+        residual = design @ theta - self.targets
+        score = float(
+            np.sum(row_weights * np.sum(residual**2, axis=1))
+            + self.ridge * np.sum((theta - _stacked_consequents(self.standardized)) ** 2)
+        )
+        if not math.isfinite(score):
+            return None
+        return _Candidate(fitted, premise.copy(), condition_number), score
+
+
+def _stacked_consequents(rule_base: TSKRuleBase) -> npt.NDArray[np.float64]:
+    """Stack consequents as the ``(R * (d + 1), k)`` unknowns of the LSE solve."""
+    return np.transpose(
+        np.stack([rule.consequent_params for rule in rule_base.rules]),
+        (0, 2, 1),
+    ).reshape(rule_base.n_rules * (rule_base.input_dim + 1), rule_base.output_dim)
+
+
+def _log_space_mask(layout: PremiseLayout) -> npt.NDArray[np.bool_]:
+    """Mark the premise entries the premise stage optimizes in log space."""
+    mask = np.zeros(layout.size, dtype=np.bool_)
+    for membership, offset in zip(layout.mfs, layout.offsets, strict=True):
+        for kind, entries in _LOG_SPACE_ENTRIES:
+            if isinstance(membership, kind):
+                mask[[offset + entry for entry in entries]] = True
+                break
+        else:
+            raise TypeError(f"unsupported membership function {type(membership).__name__}")
+    return mask
+
+
+def _to_search(
+    premise: npt.NDArray[np.float64], log_mask: npt.NDArray[np.bool_]
+) -> npt.NDArray[np.float64]:
+    search = premise.copy()
+    search[log_mask] = np.log(premise[log_mask])
+    return search
+
+
+def _from_search_entry(
+    premise: npt.NDArray[np.float64],
+    search: npt.NDArray[np.float64],
+    index: int,
+    log_mask: npt.NDArray[np.bool_],
+) -> npt.NDArray[np.float64]:
+    """Return ``premise`` with only entry ``index`` replaced from search space."""
+    candidate = premise.copy()
+    if log_mask[index]:
+        # An overflow to inf is rejected by the objective's finiteness check.
+        with np.errstate(over="ignore"):
+            candidate[index] = np.exp(search[index])
+    else:
+        candidate[index] = search[index]
+    return candidate
+
+
+def _finite_difference_gradient(
+    objective: _PremiseObjective,
+    rule_base: TSKRuleBase,
+    premise: npt.NDArray[np.float64],
+    log_mask: npt.NDArray[np.bool_],
+    fd_step: float,
+) -> npt.NDArray[np.float64]:
+    """Central-difference gradient of the loss in search space (section 6.4).
+
+    The step is ``fd_step * max(1, |phi_p|)``, with the difference divided by
+    the step actually represented in floating point. Only the perturbed entry
+    leaves ``premise``, so log-space round trips never touch the others. When
+    one side leaves the loss's domain, the one-sided difference on the other
+    side is used; when both do, the component is zero.
+    """
+    search = _to_search(premise, log_mask)
+    gradient = np.zeros_like(search)
+    centre: float | None = None
+    for index in range(search.size):
+        step = fd_step * max(1.0, abs(float(search[index])))
+        plus = search.copy()
+        plus[index] += step
+        minus = search.copy()
+        minus[index] -= step
+        loss_plus = objective(rule_base, _from_search_entry(premise, plus, index, log_mask))
+        loss_minus = objective(rule_base, _from_search_entry(premise, minus, index, log_mask))
+        if loss_plus is not None and loss_minus is not None:
+            gradient[index] = (loss_plus - loss_minus) / (plus[index] - minus[index])
+            continue
+        if loss_plus is None and loss_minus is None:
+            continue
+        if centre is None:
+            centre = objective(rule_base, premise)
+            if centre is None:
+                raise RuntimeError("the current premise is outside the loss's domain")
+        if loss_plus is not None:
+            gradient[index] = (loss_plus - centre) / (plus[index] - search[index])
+        else:
+            assert loss_minus is not None
+            gradient[index] = (centre - loss_minus) / (search[index] - minus[index])
+    objective.layout.set_flat(premise)
+    return gradient
+
+
+def _premise_step(
+    solve: _ConsequentSolver,
+    premise: npt.NDArray[np.float64],
+    score: float,
+    gradient: npt.NDArray[np.float64],
+    log_mask: npt.NDArray[np.bool_],
+    premise_lr: float,
+    max_halvings: int,
+) -> tuple[_Candidate, float] | None:
+    """Take one gradient step in search space with reject-and-halve.
+
+    Each trial premise gets its own consequent solve. A trial is rejected when
+    it is outside the loss's domain or when its solved score is not below
+    ``score``, the current state's; a rejected trial is retried at half the
+    rate, up to ``max_halvings`` times, and ``None`` means every trial was
+    rejected. The accepted trial's solve is the epoch's consequent stage, so the
+    descent condition costs a solve only for rejected trials. Entries with a
+    zero gradient keep their exact value. The live MFs may hold a rejected trial
+    on return; the caller writes the current premise back.
+    """
+    moving = gradient != 0.0
+    search = _to_search(premise, log_mask)
+    rate = premise_lr
+    for _ in range(max_halvings + 1):
+        trial = search - rate * gradient
+        # An overflow to inf is rejected by the solver's finiteness check.
+        with np.errstate(over="ignore"):
+            trial[log_mask] = np.exp(trial[log_mask])
+        candidate = premise.copy()
+        candidate[moving] = trial[moving]
+        solved = solve(candidate)
+        if solved is not None and solved[1] < score:
+            return solved
+        rate *= 0.5
+    return None
+
+
+def _training_loss(
+    rule_base: TSKRuleBase,
+    features: npt.NDArray[np.float64],
+    targets: npt.NDArray[np.float64],
+) -> float:
+    """Unweighted section 6.4 loss over rows that are all known to fire."""
+    predictions = _predict(rule_base, features)
+    return float(np.mean(np.sum((predictions - targets) ** 2, axis=1)))
+
+
+def _validation_loss(
+    rule_base: TSKRuleBase,
+    features: npt.NDArray[np.float64],
+    targets: npt.NDArray[np.float64],
+) -> float:
+    """Standardized validation loss over firing rows; ``inf`` if none fire."""
+    predictions, fired = _predictions_with_mask(rule_base, features)
+    if not np.any(fired):
+        return math.inf
+    return float(np.mean(np.sum((predictions[fired] - targets[fired]) ** 2, axis=1)))
 
 
 def _validate_validation(validation: TrainingSet, training: TrainingSet) -> None:
@@ -308,10 +692,7 @@ def _fit_consequents(
     weights: npt.NDArray[np.float64] | None,
     ridge: float,
 ) -> tuple[TSKRuleBase, float]:
-    prior = np.transpose(
-        np.stack([rule.consequent_params for rule in rule_base.rules]),
-        (0, 2, 1),
-    ).reshape(rule_base.n_rules * (rule_base.input_dim + 1), rule_base.output_dim)
+    prior = _stacked_consequents(rule_base)
     row_scale = np.ones(design.shape[0], dtype=np.float64)
     if weights is not None:
         normalized_weights = weights / np.mean(weights)
