@@ -729,10 +729,9 @@ class ClampingFeatureExtractor(CalibrationFeatureExtractor):
         sits outside the model's stated domain, and a NaN is not a measurement.
         Letting it through would be worse than crashing -- ``np.clip`` preserves
         NaN, every firing strength then goes NaN, the defuzzifier does not raise
-        (the sum is NaN, not zero), ``KrausChannelProjector`` maps NaN to 1.0 and
-        installs maximal damping, and ``is_identity_damping`` reports that vector
-        as the identity channel. The run would be wrong in both directions at
-        once and every viability check would stay green (NFR-5).
+        (the sum is NaN, not zero), ``KrausChannelProjector`` rejects it (#75), but
+        ``is_identity_damping`` reports that vector as the identity channel, so
+        the failure would surface late and at the wrong layer (NFR-5).
         ``BasicCalibrationVectorizer`` cannot produce one -- it drops non-finite
         Nduv values and raises when nothing is usable -- so this guard is for the
         wrappers that compose with this one, ``OffsetFeatureExtractor`` (#64)
