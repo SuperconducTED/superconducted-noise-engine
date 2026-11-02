@@ -55,12 +55,13 @@ onto `main`. Changing those functions' semantics would silently change a registe
    with that set as its only exclusion. `propose_controls` keeps its own whole-archive floor of 20
    underneath, as proposal D's accepted text says. Nothing in it depends on a reading.
 4. **CLI.** A third mode, `--mode controls`, writes `controls.json` (ref, ref SHA, backend, `at`,
-   both floors, the qubits below the window floor, the four controls with their scatter) plus the
-   manifest. It refuses `--live-properties`, since the controls come from the archive at the
-   freezing ref only. `--mode submission` now needs `--controls <controls.json>`; it checks that
-   the file names the same backend, excludes its qubits from the discriminating stratum, and
-   records the file's SHA-256, its ref and its qubits in the manifest. Without the file it exits
-   with code 2 unless `--no-frozen-controls` is passed, which is for archive dry runs only and
+   both floors, the requested control count, the qubits below the window floor, and the controls
+   with their scatter) plus the manifest. It refuses `--live-properties` and fails if fewer than
+   the requested number of controls are eligible. `--mode submission` now needs `--controls
+   <controls.json>`; it checks the backend, declared count, unique non-negative indices, and that
+   each index exists in the pinned archive before excluding the controls from the discriminating
+  stratum. It records the file's SHA-256, its ref and its qubits in the manifest. Without the file
+  it exits with code 2 unless `--no-frozen-controls` is passed, which is for archive dry runs only and
    records `controls: null` in the manifest and the selection (Mert's choice, 2026-10-28). Passing
    both is an error. `selection.json` no longer carries `proposed_controls`; the controls come
    from the frozen file.
