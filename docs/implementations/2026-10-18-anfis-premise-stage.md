@@ -254,10 +254,12 @@ desktop figure, which step 9 records.
    there. The archive fit sets `premise_lr` from its validation split, and the
    default is part of decision 4.
 7. **One-sided differences and zero gradients are not reported.**
-   `TrainingDiagnostics` has no field for them (#57 fixed the list). The M3
-   findings doc wants "how many parameters had identically-zero gradient at
-   the returned epoch" (section 6.4), so step 9 needs a way to get it, either
-   a public helper here or a field through #57. This is left open.
+   `TrainingDiagnostics` has no field for them, and its field list is fixed by
+   #57 (FR-11), which this slice does not reopen. The M3 findings doc wants
+   "how many parameters had identically-zero gradient at the returned epoch"
+   (section 6.4). The proposal on #60 is a small public helper here, added in
+   step 9, that evaluates the premise gradient of a returned model for
+   `scripts/train_anfis.py` to write into the metrics JSON.
 8. **IT2 differentiates the Nie-Tan output (decision 6).** The finite
    differences go through the trainer's forward pass, whose IT2 weights use
    both firing bounds, so `gradients.py` and this stage differentiate the
