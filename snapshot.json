@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-01 05:45 UTC",
+  "generated": "2026-11-03 06:39 UTC",
   "main": {
     "sha": "695c90ca",
     "date": "2026-10-28",
@@ -129,6 +129,74 @@
             "name": "Mert Efe Şensoy"
           },
           "closingIssuesReferences": [],
+          "createdAt": "2026-10-28T12:34:28Z",
+          "headRefName": "mert/issue-125-selection-rules",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 132,
+          "reviewDecision": "APPROVED",
+          "state": "OPEN",
+          "title": "feat(scripts): #125 selection rules A, B and D (window floor 15, four below plus four above, controls frozen first)",
+          "updatedAt": "2026-11-02T20:41:26Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/132",
+          "headRefOid": "3ed0728dcdc90d4dfc30c116dbe39f71fbc00692",
+          "additions": 875,
+          "deletions": 15,
+          "file_count": 4,
+          "latest_reviews": [
+            {
+              "who": "BurakOztekin",
+              "state": "APPROVED",
+              "at": "2026-11-02",
+              "last_activity": "2026-11-02"
+            }
+          ],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T20:38"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T20:38"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T20:38"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T20:38"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T20:38"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T20:39"
+            }
+          ],
+          "checks_newest": "2026-11-02T20:39",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        },
+        {
+          "author": {
+            "id": "U_kgDOCJLpDw",
+            "is_bot": false,
+            "login": "mertefesensoy",
+            "name": "Mert Efe Şensoy"
+          },
+          "closingIssuesReferences": [],
           "createdAt": "2026-10-28T21:27:44Z",
           "headRefName": "mert/issue-125-preregistration",
           "isDraft": false,
@@ -181,83 +249,17 @@
           "checks_newest": "2026-10-28T21:28",
           "checks_failing": [],
           "checks_stale_vs_main": false
-        },
-        {
-          "author": {
-            "id": "U_kgDOCJLpDw",
-            "is_bot": false,
-            "login": "mertefesensoy",
-            "name": "Mert Efe Şensoy"
-          },
-          "closingIssuesReferences": [],
-          "createdAt": "2026-10-28T12:34:28Z",
-          "headRefName": "mert/issue-125-selection-rules",
-          "isDraft": false,
-          "mergeable": "MERGEABLE",
-          "mergedAt": null,
-          "number": 132,
-          "reviewDecision": "REVIEW_REQUIRED",
-          "state": "OPEN",
-          "title": "feat(scripts): #125 selection rules A, B and D (window floor 15, four below plus four above, controls frozen first)",
-          "updatedAt": "2026-10-28T18:01:29Z",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/132",
-          "headRefOid": "4746be568bb28a75442d1ccaf0853a66087e0d99",
-          "additions": 789,
-          "deletions": 15,
-          "file_count": 4,
-          "latest_reviews": [],
-          "looked_since": [],
-          "checks": [
-            {
-              "name": "test (3.11)",
-              "conclusion": "SUCCESS",
-              "started": "2026-10-28T18:01"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-10-28T18:01"
-            },
-            {
-              "name": "Analyze (actions)",
-              "conclusion": "SUCCESS",
-              "started": "2026-10-28T18:01"
-            },
-            {
-              "name": "test (3.12)",
-              "conclusion": "SUCCESS",
-              "started": "2026-10-28T18:01"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-10-28T18:01"
-            },
-            {
-              "name": "CodeQL",
-              "conclusion": "SUCCESS",
-              "started": "2026-10-28T18:01"
-            }
-          ],
-          "checks_newest": "2026-10-28T18:01",
-          "checks_failing": [],
-          "checks_stale_vs_main": false
         }
       ],
       "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
-      "blockers": [
-        {
-          "severity": "high",
-          "text": "No approving review yet: main's ruleset requires one."
-        }
-      ],
+      "blockers": [],
       "declared_unblocks": [],
       "notes_info": [],
       "unblocks": [],
-      "pr": 135
+      "pr": 132
     },
     {
       "id": 63,
@@ -515,36 +517,84 @@
       "priority": "high",
       "delivered_open": false,
       "delivered_pr": null,
-      "state": "ready",
-      "all_prs": [],
-      "merged_pr": {
-        "author": {
-          "id": "U_kgDOENjDJQ",
-          "is_bot": false,
-          "login": "BurakOztekin",
-          "name": ""
-        },
-        "closingIssuesReferences": [],
-        "createdAt": "2026-10-11T15:13:25Z",
-        "headRefName": "feature/issue-60-anfis-core",
-        "isDraft": false,
-        "mergeable": "UNKNOWN",
-        "mergedAt": "2026-10-15T13:07:38Z",
-        "number": 114,
-        "reviewDecision": "APPROVED",
-        "state": "MERGED",
-        "title": "feat(training): add ANFIS ridge LSE core (Issue #60)",
-        "updatedAt": "2026-10-15T14:34:03Z",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/114"
-      },
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOENjDJQ",
+            "is_bot": false,
+            "login": "BurakOztekin",
+            "name": ""
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-11-02T19:37:23Z",
+          "headRefName": "feature/issue-60-anfis-premise-stage-v2",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 137,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "feat(training): ANFIS premise stage and early stopping (Issue #60)",
+          "updatedAt": "2026-11-02T19:43:19Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/137",
+          "headRefOid": "25d7d5e750d63880e26f8297518d54c57eea67ec",
+          "additions": 1876,
+          "deletions": 38,
+          "file_count": 11,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:40"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:40"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:40"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:40"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:40"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:40"
+            }
+          ],
+          "checks_newest": "2026-11-02T19:40",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
+      "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
-      "blockers": [],
+      "blockers": [
+        {
+          "severity": "high",
+          "text": "No approving review yet: main's ruleset requires one."
+        }
+      ],
       "declared_unblocks": [],
       "notes_info": [],
       "unblocks": [],
-      "pr": null
+      "pr": 137
     },
     {
       "id": 62,
@@ -627,36 +677,98 @@
       "priority": "critical",
       "delivered_open": false,
       "delivered_pr": null,
-      "state": "ready",
-      "all_prs": [],
-      "merged_pr": {
-        "author": {
-          "id": "U_kgDOCJLpDw",
-          "is_bot": false,
-          "login": "mertefesensoy",
-          "name": "Mert Efe Şensoy"
-        },
-        "closingIssuesReferences": [],
-        "createdAt": "2026-10-21T09:39:40Z",
-        "headRefName": "docs/adr-027-accepted",
-        "isDraft": false,
-        "mergeable": "UNKNOWN",
-        "mergedAt": "2026-10-26T12:20:56Z",
-        "number": 120,
-        "reviewDecision": "APPROVED",
-        "state": "MERGED",
-        "title": "docs: accept ADR-027 and record its register entries (#84, #57 step 4)",
-        "updatedAt": "2026-10-26T12:21:01Z",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/120"
-      },
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOENjDJQ",
+            "is_bot": false,
+            "login": "BurakOztekin",
+            "name": ""
+          },
+          "closingIssuesReferences": [
+            {
+              "id": "I_kwDOSW8yNc8AAAABPh_1OQ",
+              "number": 57,
+              "repository": {
+                "id": "R_kgDOSW8yNQ",
+                "name": "superconducted-noise-engine",
+                "owner": {
+                  "id": "O_kgDOENg1ug",
+                  "login": "SuperconducTED"
+                }
+              },
+              "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/57"
+            }
+          ],
+          "createdAt": "2026-11-02T19:52:30Z",
+          "headRefName": "docs/issue-57-retroactive-read",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 138,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "docs(verification): retroactive read of #57 contracts (close plan step 1)",
+          "updatedAt": "2026-11-02T19:54:21Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/138",
+          "headRefOid": "6d39c53e651321c78ec0c5a761c72261eb106988",
+          "additions": 41,
+          "deletions": 0,
+          "file_count": 1,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:52"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:52"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:52"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:52"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:52"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:53"
+            }
+          ],
+          "checks_newest": "2026-11-02T19:53",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
+      "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
-      "blockers": [],
+      "blockers": [
+        {
+          "severity": "high",
+          "text": "No approving review yet: main's ruleset requires one."
+        }
+      ],
       "declared_unblocks": [],
       "notes_info": [],
       "unblocks": [],
-      "pr": null
+      "pr": 138
     },
     {
       "id": 84,
@@ -849,13 +961,93 @@
       "priority": "unset",
       "delivered_open": false,
       "delivered_pr": null,
-      "state": "ready",
-      "all_prs": [],
+      "state": "in_review",
+      "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOENjDJQ",
+            "is_bot": false,
+            "login": "BurakOztekin",
+            "name": ""
+          },
+          "closingIssuesReferences": [
+            {
+              "id": "I_kwDOSW8yNc8AAAABP-gmzw",
+              "number": 75,
+              "repository": {
+                "id": "R_kgDOSW8yNQ",
+                "name": "superconducted-noise-engine",
+                "owner": {
+                  "id": "O_kgDOENg1ug",
+                  "login": "SuperconducTED"
+                }
+              },
+              "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/75"
+            }
+          ],
+          "createdAt": "2026-11-02T19:20:53Z",
+          "headRefName": "feature/issue-75-kraus-boundary",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 136,
+          "reviewDecision": "REVIEW_REQUIRED",
+          "state": "OPEN",
+          "title": "fix(channels): decide Kraus projector boundary — reject invalid parameters, drop unused gate allowlist (#75)",
+          "updatedAt": "2026-11-02T19:21:54Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/136",
+          "headRefOid": "a5d74612a0a28c9ca35822048a09c7da17688351",
+          "additions": 132,
+          "deletions": 30,
+          "file_count": 4,
+          "latest_reviews": [],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:20"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:20"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:20"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:21"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:20"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-02T19:21"
+            }
+          ],
+          "checks_newest": "2026-11-02T19:21",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        }
+      ],
       "merged_pr": null,
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
       "blockers": [
+        {
+          "severity": "high",
+          "text": "No approving review yet: main's ruleset requires one."
+        },
         {
           "kind": "policy",
           "text": "Touches LOCKED src/superconducted/channels/kraus.py: needs a decision, not just a patch.",
@@ -865,7 +1057,7 @@
       "declared_unblocks": [],
       "notes_info": [],
       "unblocks": [],
-      "pr": null
+      "pr": 136
     }
   ],
   "gates": [
@@ -1029,7 +1221,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/84"
         },
         "former": false,
-        "days": 54,
+        "days": 56,
         "last_here": "2026-10-21",
         "kind": "checkbox",
         "text": "has sent it to Dr. Akba",
@@ -1049,7 +1241,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/108"
         },
         "former": false,
-        "days": 29,
+        "days": 31,
         "last_here": "2026-10-03",
         "kind": "checkbox",
         "text": "links the verdict from PR #55's thread so the PR record is complete.",
@@ -1057,6 +1249,66 @@
         "by": "mertefesensoy",
         "since": "2026-10-03",
         "posted": "2026-10-03",
+        "lower_bound": false,
+        "others": []
+      },
+      {
+        "who": "mertefesensoy",
+        "thread": {
+          "kind": "PR",
+          "number": 136,
+          "title": "fix(channels): decide Kraus projector boundary — reject invalid parameters, drop unused gate allowlist (#75)",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/136"
+        },
+        "former": false,
+        "days": 1,
+        "last_here": "",
+        "kind": "review",
+        "text": "Review PR #136",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/136",
+        "by": "BurakOztekin",
+        "since": "2026-11-02",
+        "posted": "2026-11-02",
+        "lower_bound": false,
+        "others": []
+      },
+      {
+        "who": "mertefesensoy",
+        "thread": {
+          "kind": "PR",
+          "number": 137,
+          "title": "feat(training): ANFIS premise stage and early stopping (Issue #60)",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/137"
+        },
+        "former": false,
+        "days": 1,
+        "last_here": "",
+        "kind": "review",
+        "text": "Review PR #137",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/137",
+        "by": "BurakOztekin",
+        "since": "2026-11-02",
+        "posted": "2026-11-02",
+        "lower_bound": false,
+        "others": []
+      },
+      {
+        "who": "mertefesensoy",
+        "thread": {
+          "kind": "PR",
+          "number": 138,
+          "title": "docs(verification): retroactive read of #57 contracts (close plan step 1)",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/138"
+        },
+        "former": false,
+        "days": 1,
+        "last_here": "",
+        "kind": "review",
+        "text": "Review PR #138",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/138",
+        "by": "BurakOztekin",
+        "since": "2026-11-02",
+        "posted": "2026-11-02",
         "lower_bound": false,
         "others": []
       },
@@ -1069,7 +1321,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/63"
         },
         "former": false,
-        "days": 59,
+        "days": 61,
         "last_here": "",
         "kind": "checkbox",
         "text": "confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit`",
@@ -1081,106 +1333,6 @@
         "others": []
       },
       {
-        "who": "BurakOztekin",
-        "thread": {
-          "kind": "PR",
-          "number": 111,
-          "title": "docs: plan the three engines and the two-stage deep model (#110)",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/111"
-        },
-        "former": false,
-        "days": 27,
-        "last_here": "2026-10-04",
-        "kind": "re-review",
-        "text": "Re-review PR #111: you approved on 2026-10-04 and were asked again",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/111",
-        "by": "mertefesensoy",
-        "since": "2026-10-05",
-        "posted": "2026-10-05",
-        "lower_bound": false,
-        "others": []
-      },
-      {
-        "who": "BurakOztekin",
-        "thread": {
-          "kind": "PR",
-          "number": 131,
-          "title": "docs(roadmap): phase-4 plan §8, the builder-mode order of 2026-10-28, with the team timeline",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/131"
-        },
-        "former": false,
-        "days": 4,
-        "last_here": "",
-        "kind": "review",
-        "text": "Review PR #131",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/131",
-        "by": "mertefesensoy",
-        "since": "2026-10-28",
-        "posted": "2026-10-28",
-        "lower_bound": false,
-        "others": []
-      },
-      {
-        "who": "BurakOztekin",
-        "thread": {
-          "kind": "PR",
-          "number": 132,
-          "title": "feat(scripts): #125 selection rules A, B and D (window floor 15, four below plus four above, controls frozen first)",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/132"
-        },
-        "former": false,
-        "days": 4,
-        "last_here": "",
-        "kind": "review",
-        "text": "Review PR #132",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/132",
-        "by": "mertefesensoy",
-        "since": "2026-10-28",
-        "posted": "2026-10-28",
-        "lower_bound": false,
-        "others": []
-      },
-      {
-        "who": "BurakOztekin",
-        "thread": {
-          "kind": "PR",
-          "number": 133,
-          "title": "docs(advisor): phase-4 experiment deck for Dr. Akba, Turkish and English, with number check and speaker notes",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/133"
-        },
-        "former": false,
-        "days": 4,
-        "last_here": "",
-        "kind": "review",
-        "text": "Review PR #133",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/133",
-        "by": "mertefesensoy",
-        "since": "2026-10-28",
-        "posted": "2026-10-28",
-        "lower_bound": false,
-        "others": []
-      },
-      {
-        "who": "BurakOztekin",
-        "thread": {
-          "kind": "PR",
-          "number": 134,
-          "title": "docs(findings): Aer reuses per-shot random streams across nearby seeds and across circuits of one job (NC-095, NC-096)",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/134"
-        },
-        "former": false,
-        "days": 4,
-        "last_here": "",
-        "kind": "review",
-        "text": "Review PR #134",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/134",
-        "by": "mertefesensoy",
-        "since": "2026-10-28",
-        "posted": "2026-10-28",
-        "lower_bound": false,
-        "others": []
-      },
-      {
         "who": "bengisucvd",
         "thread": {
           "kind": "PR",
@@ -1189,7 +1341,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/131"
         },
         "former": false,
-        "days": 4,
+        "days": 6,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #131",
@@ -1209,7 +1361,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/133"
         },
         "former": false,
-        "days": 4,
+        "days": 6,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #133",
@@ -1229,7 +1381,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/135"
         },
         "former": false,
-        "days": 4,
+        "days": 6,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #135",
@@ -1237,6 +1389,46 @@
         "by": "mertefesensoy",
         "since": "2026-10-28",
         "posted": "2026-10-28",
+        "lower_bound": false,
+        "others": []
+      },
+      {
+        "who": "bengisucvd",
+        "thread": {
+          "kind": "PR",
+          "number": 136,
+          "title": "fix(channels): decide Kraus projector boundary — reject invalid parameters, drop unused gate allowlist (#75)",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/136"
+        },
+        "former": false,
+        "days": 1,
+        "last_here": "",
+        "kind": "review",
+        "text": "Review PR #136",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/136",
+        "by": "BurakOztekin",
+        "since": "2026-11-02",
+        "posted": "2026-11-02",
+        "lower_bound": false,
+        "others": []
+      },
+      {
+        "who": "bengisucvd",
+        "thread": {
+          "kind": "PR",
+          "number": 137,
+          "title": "feat(training): ANFIS premise stage and early stopping (Issue #60)",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/137"
+        },
+        "former": false,
+        "days": 1,
+        "last_here": "",
+        "kind": "review",
+        "text": "Review PR #137",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/137",
+        "by": "BurakOztekin",
+        "since": "2026-11-02",
+        "posted": "2026-11-02",
         "lower_bound": false,
         "others": []
       },
@@ -1249,7 +1441,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/108"
         },
         "former": false,
-        "days": 29,
+        "days": 31,
         "last_here": "",
         "kind": "checkbox",
         "text": "posts a verdict on this issue: approve, or the defects he finds.",
