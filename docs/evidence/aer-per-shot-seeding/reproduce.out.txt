@@ -1,0 +1,3 @@
+metadata: {'method': 'statevector', 'noise': 'circuit', 'measure_sampling': False, 'parallel_shots': 20}
+shot j of 501 == shot j+1 of 500: 511 / 511
+shot j of 501 == shot j   of 500: 282 / 512
