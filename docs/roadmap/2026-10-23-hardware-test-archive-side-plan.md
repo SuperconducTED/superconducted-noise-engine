@@ -133,3 +133,22 @@ The decay model, the layouts, the shots and the scoring (offline half); the thre
 four control qubits (the pre-registration commit); the budget (job 1's usage report); whether
 readout's `level` should be corrected by the chip's current excursion (predictability README
 §3.6a, a refinement noted for the design and not adopted here).
+
+## 8. As of 2026-10-28: section 3's selection rules superseded
+
+Sections 1 to 7 stand as written for PR #126. The lead accepted proposals A, B and D of the #125
+pre-registration on 2026-10-24 (its section 3.5, on branch `mert/issue-125-preregistration`), and
+`docs/implementations/2026-10-28-hardware-test-selection-rules.md` records the code that applies
+them. What changes against section 3:
+
+- The discriminating stratum admits a qubit on at least 15 distinct `T1` values inside the
+  30-day window (new column `n_window_distinct`), not 20 over the whole archive.
+- `--select-discriminating K` takes `K/2` qubits below their level and `K/2` above it by
+  `|log_disagreement|`, a short side filled from the other and logged in `selection.json`.
+- The controls are frozen first by `--mode controls` at the freezing ref, excluding only qubits
+  below the window floor, and written to `controls.json`. `--mode submission` requires that file
+  through `--controls` (or `--no-frozen-controls` for an archive dry run) and never selects a
+  control as discriminating. `selection.json` no longer carries `proposed_controls`.
+
+`select_discriminating` and `propose_controls` keep their section-3 behaviour so the
+pre-registration's measurements (NC-087 to NC-091) reproduce against `main`.
