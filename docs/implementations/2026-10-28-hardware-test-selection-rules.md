@@ -210,6 +210,44 @@ translate newlines, it passes either way: it guards against a Windows regression
 the freezing run will happen. Gates after the fix: ruff, ruff format and `mypy --strict` clean;
 the file's tests 64 passed; full suite 1,044 passed (1,043 before, plus this test).
 
+## Fix, 2026-11-02: frozen controls file validated (Burak's review), pinned 2026-11-04
+
+Burak's review commit `3ed0728d` tightened what the controls file may contain. That file decides
+the hardware test's control stratum, and before the commit a short, duplicated or out-of-range
+list reached a job without an error. The commit rewrote item 4 of "Implementation approach" in
+place, so that item describes the code after this fix. The counts and the mutation check under
+"Verification" stay as measured on 2026-10-28.
+
+- `load_controls` now refuses duplicate or negative qubit indices, a missing or non-positive
+  `requested_controls`, and a file whose number of controls differs from it.
+- `--mode submission` refuses a control outside the pinned archive's qubit range.
+- `--mode controls` refuses a non-positive `--propose-controls`, refuses to freeze fewer controls
+  than requested, and writes `requested_controls` into the file.
+
+**Consequence.** A controls file written before this commit has no `requested_controls` and is
+refused. That includes `docs/evidence/hardware-reading-vs-level/dry-run-2026-10-28/controls.json`
+on `mert/issue-125-offline-half`: through the CLI it exits 2 and writes nothing. It is regenerated
+when that branch takes this one.
+
+**Verification, 2026-11-04** (laptop, the exact-pin interpreter above):
+
+- Against the script as it was before the commit (`4746be56`), 8 of the file's then 71 tests fail,
+  so the commit's tests catch behaviour the old code had.
+- Twelve mutants of the commit, each restored from a backup and each pattern asserted found: ten
+  failed a test. Two survived, on behaviour that was right but unpinned: tolerating a missing
+  `requested_controls`, and accepting a boolean for it. Two rows added to
+  `test_unusable_controls_file_is_refused` pin both, and both mutants now fail a test.
+- On the real archive at `calibration-data` `5828b4a29fabc245aa096e530852249a3496dc5b`,
+  `at = 2026-10-23T09:34:56Z`: `--mode controls` exits 0 and names 48, 112, 54, 105, with 11, 72,
+  108 below the floor. Against the file committed for the same ref and instant, the only difference
+  is the new field, `requested_controls: 4`. The output has LF line endings only.
+- On the same ref, `--mode submission` exits 0 and selects eight discriminating qubits, none of
+  them a control. Its input was the committed file with that one field added by hand, because the
+  two walks ran side by side. The eight are not quoted, for the reason given under "Verification".
+- Gates: ruff, ruff format and `mypy --strict` clean (48 files); the file's tests 73; the suite
+  collects 1,053 and passes 1,053. NC-021 is still measured at this PR's merge commit, not taken
+  from here.
+
 ## Related docs
 
 - `docs/roadmap/2026-10-23-hardware-reading-vs-level-test.md` (the design, sections 3 and 5)

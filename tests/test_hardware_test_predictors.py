@@ -725,6 +725,8 @@ def test_dry_run_without_controls_records_null(
         {"backend": "ibm_fez", "controls": [{"qubit": 1}, {"qubit": 1}], "requested_controls": 2},
         {"backend": "ibm_fez", "controls": [{"qubit": -1}], "requested_controls": 1},
         {"backend": "ibm_fez", "controls": [{"qubit": 1}], "requested_controls": 2},
+        {"backend": "ibm_fez", "controls": [{"qubit": 1}]},
+        {"backend": "ibm_fez", "controls": [{"qubit": 1}], "requested_controls": True},
         {"backend": "ibm_fez"},
     ],
 )
