@@ -1,0 +1,254 @@
+{
+  "truth1": {
+    "matched": "reading",
+    "other": "level",
+    "1_sampling": {
+      "pass": true,
+      "arm_a_rows": 84,
+      "arm_a_max_z": 2.8658613748384574,
+      "arm_b_outcomes": 48,
+      "arm_b_max_z": 2.682505763104636,
+      "min_shot_free_probability": 0.011347267090258992
+    },
+    "2_offset": {
+      "pass": true,
+      "mean_signed_error": 0.010950906966012518,
+      "mean_derived_offset": 0.01084417591816574,
+      "difference": 0.00010673104784677742,
+      "se_of_mean": 0.0009934644491783526
+    },
+    "3_direction": {
+      "pass": true,
+      "rows": 56,
+      "mae": {
+        "reading": 0.01824762628716229,
+        "level": 0.15937336697752408,
+        "reading_at_execution": 0.01824762628716229
+      },
+      "level_minus_reading_90": [
+        0.1230014558678685,
+        0.15902938142283585
+      ],
+      "bootstrap_unit": "row (smoke test of the code, not the decision rule's unit)"
+    },
+    "4_arm_b": {
+      "pass": true,
+      "layouts": [
+        [
+          85,
+          77,
+          86
+        ],
+        [
+          15,
+          14,
+          19
+        ],
+        [
+          128,
+          127,
+          129
+        ],
+        [
+          67,
+          57,
+          66
+        ],
+        [
+          135,
+          134,
+          139
+        ],
+        [
+          1,
+          0,
+          2
+        ]
+      ],
+      "measured": [
+        0.4877580314153932,
+        0.5861061763766962,
+        0.5475060346101298,
+        0.5476486369466523,
+        0.5316940489651892,
+        0.41877921688989117
+      ],
+      "per_predictor": {
+        "reading": {
+          "n_predicted": 6,
+          "spearman": 1.0,
+          "best_pick_hit": 1,
+          "mean_abs_error": 0.010234712281432959
+        },
+        "level": {
+          "n_predicted": 6,
+          "spearman": 0.3714285714285715,
+          "best_pick_hit": 0,
+          "mean_abs_error": 0.02721619560409712
+        },
+        "reading_at_execution": {
+          "n_predicted": 6,
+          "spearman": 1.0,
+          "best_pick_hit": 1,
+          "mean_abs_error": 0.010234712281432959
+        },
+        "band_lo": {
+          "n_predicted": 6,
+          "spearman": 0.2571428571428572,
+          "best_pick_hit": 0,
+          "mean_abs_error": 0.059275997575400786
+        },
+        "band_hi": {
+          "n_predicted": 6,
+          "spearman": 0.3714285714285715,
+          "best_pick_hit": 0,
+          "mean_abs_error": 0.0550246010310772
+        }
+      },
+      "unpredictable": {
+        "reading": [],
+        "level": [],
+        "reading_at_execution": [],
+        "band_lo": [],
+        "band_hi": []
+      }
+    },
+    "5_timing": {
+      "pass": true,
+      "checked": 84,
+      "mismatches": []
+    },
+    "all_pass": true,
+    "qubits_kept_at_reading": [],
+    "t2_above_2t1_capped_by_aer": [
+      148
+    ]
+  },
+  "truth2": {
+    "matched": "level",
+    "other": "reading",
+    "1_sampling": {
+      "pass": true,
+      "arm_a_rows": 84,
+      "arm_a_max_z": 2.5183478590236463,
+      "arm_b_outcomes": 48,
+      "arm_b_max_z": 2.6715287957204072,
+      "min_shot_free_probability": 0.021417531110602538
+    },
+    "2_offset": {
+      "pass": true,
+      "mean_signed_error": 0.003435218484377003,
+      "mean_derived_offset": 0.004978479306998642,
+      "difference": -0.0015432608226216386,
+      "se_of_mean": 0.000978493064743171
+    },
+    "3_direction": {
+      "pass": true,
+      "rows": 56,
+      "mae": {
+        "reading": 0.16730010910220813,
+        "level": 0.00919776864661801,
+        "reading_at_execution": 0.16730010910220813
+      },
+      "reading_minus_level_90": [
+        0.1338823746978616,
+        0.1830025386492834
+      ],
+      "bootstrap_unit": "row (smoke test of the code, not the decision rule's unit)"
+    },
+    "4_arm_b": {
+      "pass": true,
+      "layouts": [
+        [
+          85,
+          77,
+          86
+        ],
+        [
+          15,
+          14,
+          19
+        ],
+        [
+          128,
+          127,
+          129
+        ],
+        [
+          67,
+          57,
+          66
+        ],
+        [
+          135,
+          134,
+          139
+        ],
+        [
+          1,
+          0,
+          2
+        ]
+      ],
+      "measured": [
+        0.5492940573425412,
+        0.5568531065704954,
+        0.5532496150424966,
+        0.5236024558097441,
+        0.5207806245056391,
+        0.42779821529299034
+      ],
+      "per_predictor": {
+        "reading": {
+          "n_predicted": 6,
+          "spearman": 0.7142857142857143,
+          "best_pick_hit": 1,
+          "mean_abs_error": 0.01974700528230545
+        },
+        "level": {
+          "n_predicted": 6,
+          "spearman": 0.8285714285714287,
+          "best_pick_hit": 0,
+          "mean_abs_error": 0.009395790683853896
+        },
+        "reading_at_execution": {
+          "n_predicted": 6,
+          "spearman": 0.7142857142857143,
+          "best_pick_hit": 1,
+          "mean_abs_error": 0.01974700528230545
+        },
+        "band_lo": {
+          "n_predicted": 6,
+          "spearman": 0.7714285714285715,
+          "best_pick_hit": 0,
+          "mean_abs_error": 0.05622325833155858
+        },
+        "band_hi": {
+          "n_predicted": 6,
+          "spearman": 0.8285714285714287,
+          "best_pick_hit": 0,
+          "mean_abs_error": 0.05301027947108474
+        }
+      },
+      "unpredictable": {
+        "reading": [],
+        "level": [],
+        "reading_at_execution": [],
+        "band_lo": [],
+        "band_hi": []
+      }
+    },
+    "5_timing": {
+      "pass": true,
+      "checked": 84,
+      "mismatches": []
+    },
+    "all_pass": true,
+    "qubits_kept_at_reading": [
+      72
+    ],
+    "t2_above_2t1_capped_by_aer": [
+      148
+    ]
+  }
+}
