@@ -273,6 +273,19 @@ restated as a new measurement: the ratio of the sum after Arm A to the sum alone
 exactly `2^k`. `bridge_arm_b.py` now prints that ratio and twelve decimals; no prediction in section 3
 is edited. The cause of the `3e-9` was not looked into.
 
+### Amendment 2, 2026-11-05: two scripts added, after seeing data, not blind
+
+Added after the first run of the sweep and of the spy over the suite, before writing the findings.
+
+- `spy_positive_control.py`. The spy reported no execution with more than one circuit, and a zero is
+  only worth something if the spy can see one. The control runs two circuits through
+  `AerSimulator.run`, `BackendSamplerV2` and `qiskit_aer.primitives.SamplerV2`, and checks that a
+  mixed-shot PUB list splits into two single-circuit executions.
+- `compare_source.py`. Section 2 says the same lines are unchanged on tag `0.18.2` and on `main`. When
+  that was written, only `quantum_error.hpp` had been read on `main`, so the sentence claimed more than
+  had been checked. This script compares every function the reading names, on all three refs. Section
+  2 stays as written and section 9 records what the comparison found.
+
 ## 9. Runs
 
 None yet.
