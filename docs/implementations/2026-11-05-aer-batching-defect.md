@@ -23,6 +23,7 @@ project code.
 | `docs/evidence/aer-batching-defect/spy_positive_control.py` | Shows the spy sees a two-circuit execution by each route, so its zero means something. |
 | `docs/evidence/aer-batching-defect/compare_source.py` | Compares the functions the mechanism reading names across Aer `0.17.2`, `0.18.2` and `main`. |
 | `docs/evidence/aer-batching-defect/*.out.txt` | The output of each script above, from the committed copies. |
+| `docs/evidence/aer-batching-defect/from-issue-125-submission/` | Verbatim copies of `probe_batching` and `probe_build_time` with their outputs, because the commit holding the originals is not pushed. |
 | `docs/findings/2026-11-05-aer-batching-defect.md` | The finding: the defect, its smallest trigger, what is and is not established, and the exposure audit. |
 | `docs/numerical-claims.md` | Adds NC-097 (the defect's shape) and NC-098 (the audit's counts). |
 
@@ -100,8 +101,11 @@ far more than 4 standard errors of about 0.0048 each.
   protecting nothing today, and step 1d's plan already holds its own batching test (its criterion 7).
   Reporting is the lead's call, so nothing was posted.
 - **The other branch was left alone.** The 1d plan's sentence about reach, and the affected probe output,
-  sit on `mert/issue-125-submission`, which belongs to other work; the finding names them and leaves the
-  edit to that branch.
+  sit on `mert/issue-125-submission`, which belongs to other work. The finding names them, and that branch
+  made its own dated correction, `3dd79d7f`, without amending `e91239fd`.
+- **Copy the cited probes, do not point at a local commit.** A register row must have a source a reader
+  can open, and a pin on a commit nobody else has fails that. Pushing the 1d branch early was not this
+  work's decision, so verbatim copies with their blob ids carry the citation (amendment 3).
 - **No run on Aer 0.18.x.** No venv on this machine has it, and installing one was not part of the brief.
   `compare_source.py` gives what reading can.
 
@@ -138,6 +142,10 @@ python -I docs/evidence/aer-batching-defect/audit_aer_runs.py
 ```
 
 Expected: 0 unreadable and 0 unparsed; section 3 lists the probes' known batches.
+
+`bridge_arm_b.py` and `from-issue-125-submission/probe_batching.py` also need PR #140's branch at
+`2aea1e18` and the `calibration-data` ref; from that checkout, with `PYTHONPATH=.;src` (`:` on Linux), run
+each with `python -W ignore <path>`. The probe should match its copied output to the digit.
 
 The scan sees calls, not a method kept in a name for later, so this complements it. A first version of the
 pattern, `\.run\b[^(]`, could not match a line ending in `.run`, and so missed the one real alias.

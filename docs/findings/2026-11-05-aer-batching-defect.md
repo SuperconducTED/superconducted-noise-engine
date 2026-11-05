@@ -18,9 +18,9 @@ another circuit, with its probabilities summing to exactly 2. It needs only `qis
 `qiskit-aer`, and a public fake backend reaches it too.
 
 **Nothing registered is affected and no code on `main` is exposed.** One committed output on the
-local, unpushed branch `mert/issue-125-submission` is wrong because of it: the Arm B lines of
-`probe_build_time.out.txt`. No document quotes them. The QPU runs no Aer, so hardware results cannot
-have it. Section 5 gives the audit.
+branch `mert/issue-125-submission`, not pushed as of 2026-11-05, is wrong because of it: the Arm B lines
+of `probe_build_time.out.txt`, copied in the evidence folder. No document relies on them. The QPU runs
+no Aer, so hardware results cannot have it. Section 5 gives the audit.
 
 All 72 rows of the sweep, predicted in advance from Aer's source, were met. That makes the reading
 below strong, and it is still a reading: nobody has rebuilt Aer with the suspected lines changed.
@@ -153,7 +153,8 @@ Whether to report it upstream is the lead's decision; nothing has been posted.
 
 ## 4. How we found it
 
-A local rehearsal while planning #125 step 1d showed it. `probe_batching.py` isolated it: the batched
+A local rehearsal while planning #125 step 1d showed it, first in the Arm B lines of
+`probe_build_time.out.txt`. `probe_batching.py` isolated it: the batched
 Arm B had `000` at 0.931 where alone it had 0.493, while the fidelity barely moved.
 `probe_batch_scope.py` showed that the two circuits' methods differed. From there, reading Aer's source
 gave the hypothesis, and the protocol in `docs/evidence/aer-batching-defect/README.md` was committed
@@ -224,12 +225,14 @@ statistical null simulated without Aer (NC-093).
 the four conditions read off the probe's code and from the output's signature. The probe was not re-run:
 its archive walk is slow, and `probe_batching.py` already measures an Arm A and an Arm B through the same
 route. The probe printed those lines to show that local mode runs and what its
-registers are called, and that part stands. Its timings and job metrics are unaffected. A search of
-every ref finds the figures only in that probe and its output, so no document or register row quotes
-them.
+registers are called, and that part stands. Its timings and job metrics are unaffected. When this audit
+searched every ref, it found the figures only in that probe and its output, so no document or register
+row relies on them.
 
-It does overtake one sentence. The 1d plan on that branch says no committed result is affected "as far
-as that search reaches", and its search covered `src/` and `scripts/` only, not `docs/evidence/`.
+It overtook one sentence. The 1d plan on that branch said no committed result is affected "as far as that
+search reaches", and that search covered `src/` and `scripts/` only, not `docs/evidence/`. The plan now
+carries a dated correction at `3dd79d7f`, which names the two figures to say they are wrong, and keeps
+the file as run.
 
 ### What the audit cannot see
 

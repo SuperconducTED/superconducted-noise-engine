@@ -286,6 +286,30 @@ Added after the first run of the sweep and of the spy over the suite, before wri
   had been checked. This script compares every function the reading names, on all three refs. Section
   2 stays as written and section 9 records what the comparison found.
 
+### Amendment 3, 2026-11-05: verbatim copies of two probes, before pushing
+
+The figures and the affected output this work cites sit at `e91239fd` on `mert/issue-125-submission`,
+which is not pushed, so nobody else could check them. `from-issue-125-submission/` holds verbatim copies
+of `probe_batching.py`, `probe_build_time.py` and their outputs, with the same blob ids:
+
+| File | Blob |
+| --- | --- |
+| `probe_batching.py` | `c53a0da48fe0` |
+| `probe_batching.out.txt` | `1d02f89744a8` |
+| `probe_build_time.py` | `6a7ca1c80154` |
+| `probe_build_time.out.txt` | `c2c4f61c248e` |
+
+No number changes and nothing was re-run for this. They are copies so that the originals can land on
+their own branch unchanged, and lines 21 and 22 of `probe_build_time.out.txt` stay wrong on purpose: that
+is the output the audit reports, and the 1d plan keeps its copy as run, with a dated correction at
+`3dd79d7f`.
+
+`bridge_arm_b.py` and `probe_batching.py` need `scripts/hardware_reading_vs_level.py` and the dry run's
+manifest, which are on PR #140's branch. Its pushed head `2aea1e18` is `e91239fd`'s parent, and
+`scripts/`, `src/`, `tests/` and `dry-run-2026-11-05/` do not differ between the two, so section 9's rows
+marked `e91239fd` and the bridge can be rerun from `2aea1e18`. They also read `calibration-data` objects,
+so a clone needs that ref.
+
 ## 9. Runs
 
 Interpreter as in section 7, laptop, provisional, 2026-11-05. Outputs beside each script as
