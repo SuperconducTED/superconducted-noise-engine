@@ -565,9 +565,27 @@ def load_controls(path: Path, *, backend: str) -> tuple[dict[str, Any], str]:
         raise ControlsFileError(
             f"controls file names backend {loaded.get('backend')!r}; expected {backend!r}"
         )
-    qubits = [c.get("qubit") if isinstance(c, dict) else None for c in loaded["controls"]]
-    if not qubits or not all(isinstance(q, int) and not isinstance(q, bool) for q in qubits):
-        raise ControlsFileError("every control must be an object with an integer 'qubit'")
+    qubits: list[int] = []
+    for control in loaded["controls"]:
+        if not isinstance(control, dict):
+            raise ControlsFileError("every control must be an object with an integer 'qubit'")
+        qubit = control.get("qubit")
+        if not isinstance(qubit, int) or isinstance(qubit, bool):
+            raise ControlsFileError("every control must be an object with an integer 'qubit'")
+        qubits.append(qubit)
+    if not qubits:
+        raise ControlsFileError("controls file must contain at least one control")
+    if any(q < 0 for q in qubits):
+        raise ControlsFileError("control qubit indices must be non-negative")
+    if len(set(qubits)) != len(qubits):
+        raise ControlsFileError("control qubit indices must be unique")
+    requested = loaded.get("requested_controls")
+    if not isinstance(requested, int) or isinstance(requested, bool) or requested <= 0:
+        raise ControlsFileError("controls file must declare a positive 'requested_controls'")
+    if len(qubits) != requested:
+        raise ControlsFileError(
+            f"controls file requests {requested} controls but contains {len(qubits)}"
+        )
     return loaded, hashlib.sha256(raw).hexdigest()
 
 
@@ -643,6 +661,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.mode == "controls" and args.live_properties is not None:
         print("error: controls are frozen from the archive; no --live-properties", file=sys.stderr)
         return 2
+    if args.mode == "controls" and args.propose_controls <= 0:
+        print("error: --propose-controls must be positive", file=sys.stderr)
+        return 2
     if args.mode == "submission":
         if args.select_discriminating <= 0 or args.select_discriminating % 2:
             print("error: --select-discriminating must be a positive even number", file=sys.stderr)
@@ -683,6 +704,20 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 2
 
     collected = collect(iter_archive(args.repo, sha), backend=args.backend, until=at)
+    if controls_doc is not None:
+        n_qubits = max((state.values.shape[0] for state in collected.states), default=0)
+        invalid = [
+            int(control["qubit"])
+            for control in controls_doc["controls"]
+            if control["qubit"] >= n_qubits
+        ]
+        if invalid:
+            print(
+                "error: controls contain qubits outside this archive's "
+                f"range [0, {n_qubits}): {invalid}",
+                file=sys.stderr,
+            )
+            return 2
     selection: dict[str, Any] | None = None
     frozen: dict[str, Any] | None = None
     control_qubits: list[int] | None = None
@@ -705,6 +740,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         elif args.mode == "controls":
             rows = predictor_rows(collected, at=at, live=None, window_days=args.window_days)
             frozen = freeze_controls(collected, rows, k=args.propose_controls)
+            if len(frozen["controls"]) != args.propose_controls:
+                print(
+                    f"error: requested {args.propose_controls} controls but only "
+                    f"{len(frozen['controls'])} eligible controls are available",
+                    file=sys.stderr,
+                )
+                return 2
         else:
             rows = execution_rows(collected, at=at, live=live)
     except LiveDocumentError as exc:
@@ -742,6 +784,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "at": at.isoformat(),
             "min_window_distinct": MIN_WINDOW_DISTINCT,
             "min_distinct_values": MIN_DISTINCT_VALUES,
+            "requested_controls": args.propose_controls,
             **frozen,
         }
         _write_json(args.out / "controls.json", controls_out)
