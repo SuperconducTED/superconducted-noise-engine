@@ -266,6 +266,47 @@ from the same tree, with its `predictors.tsv` compared to the merged tree's.
 **If any of these fails.** Nothing is pushed. The difference is shown to the lead and its cause found
 first, and the failed run is disclosed here.
 
+### Result, 2026-11-05
+
+Laptop, `C:/t/pin125`, from `0df7af14`, provisional. All five expectations held, on the first
+attempt.
+
+| # | Expected | Found |
+| --- | --- | --- |
+| 1 | Exit 0; 144, 110, 140, 77; below the floor 11, 72, 108 | Held, in 7 min 50 s |
+| 2 | `controls.json` gains one line | Held: `requested_controls: 4`, and the file has no CR bytes |
+| 3 | `predictors.tsv` and `manifest.json` identical once line endings are normalised | Held for both |
+| 4 | Gates clean, every collected test passes | Held: `ruff check .`, `ruff format --check .` (105 files), `mypy --strict` (49 files) and `check_ids` clean; 1,109 collected and passed in 4 min 36 s, nothing skipped because the archive is present here |
+| 5 | The ten columns of `d62928fa`'s script identical row for row | Held: 780 rows, none differing, on the same 2,398 files and 958 states by both manifests; `n_window_distinct` exists only in the new one |
+
+Expectation 5 supports amendment 14's sentence at this ref and instant, with no live document. It
+does not exercise the live path, where the two scripts differ in the rare case that amendment names.
+
+Commits:
+
+| Commit | What |
+| --- | --- |
+| `a433e66b` | merge of `main` `5c98f264` |
+| `0df7af14` | amendments 14 and 15, section 6.2, and the protocol above, before the run |
+| later | this result |
+
+| File | One-sentence description |
+| --- | --- |
+| `docs/roadmap/2026-10-24-issue-125-preregistration.md` | Gains two rows at the foot of section 2, section 3.10 (amendments 14 and 15) and section 6.2; no earlier row is edited. |
+| `docs/implementations/2026-10-28-issue-125-preregistration-rebuild.md` | This update. |
+
+To reproduce, from the repository root:
+
+```bash
+python -m scripts.hardware_test_predictors --repo . --ref 7adda8035a5a76b93147ffc3171975a7684d239d --mode controls --at 2026-10-28T18:40:46Z --out <new>
+git show d62928fa:scripts/hardware_test_predictors.py > <scratch>/old_predictors.py
+python <scratch>/old_predictors.py --repo . --ref 7adda8035a5a76b93147ffc3171975a7684d239d --mode submission --at 2026-10-28T18:40:46Z --out <old>
+```
+
+Then compare `<new>/controls.json` with the committed rehearsal file, and the ten columns the two
+`predictors.tsv` files share as exact strings. Not checked: any of this on Linux or Burak's desktop;
+Bengisu's review.
+
 ## Related docs
 
 - `docs/roadmap/2026-10-24-issue-125-preregistration.md` (the draft this changes)
