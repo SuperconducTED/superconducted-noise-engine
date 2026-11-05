@@ -24,6 +24,7 @@ simulator built from that document: the rehearsal, which needs no token and no g
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import math
@@ -33,7 +34,7 @@ import sys
 import uuid
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
-from datetime import UTC, datetime, time, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -59,9 +60,11 @@ from scripts.hardware_reading_vs_level import (
     _write_tsv,
     archived_backend,
     build_job,
+    calendar_block_bootstrap,
     circuit_seeds,
     score_arm_a,
     score_arm_b,
+    spearman,
     with_execution,
     write_json_lf,
 )
@@ -82,6 +85,9 @@ REP_DELAY_S = 500e-6
 SUBMISSION_TIME = time(3, 45, tzinfo=UTC)
 SUBMISSION_WINDOW = timedelta(hours=1)
 N_DISCRIMINATING = 8
+N_JOBS = 14
+BLOCK_DAYS = 3  # amendment 8: proposed; frozen after Bengisu's statistics review on PR #135
+BAND_NOMINAL = 0.80
 ARCHIVE_REF = "refs/remotes/origin/calibration-data"
 FROZEN_STATUS = re.compile(r"\*\*Status\*\*:\s*\*\*Frozen\b")
 CONTROLS_SHA = re.compile(r"\*\*Controls SHA-256\*\*:\s*`([0-9a-f]{64})`")
@@ -711,6 +717,227 @@ def run_score(
 
 
 # ---------------------------------------------------------------------------------------------
+# report: the decision rule over every day so far
+
+
+def _day_status(job_dir: Path) -> str:
+    if (job_dir / "arm-a.tsv").exists():
+        return "scored"
+    if (job_dir / "failed.json").exists():
+        return "failed"
+    if (job_dir / "missed.json").exists():
+        return "missed"
+    if (job_dir / "job_id.txt").exists():
+        return "submitted, not scored"
+    return "empty"
+
+
+def _read_rows(path: Path, day: date) -> list[dict[str, Any]]:
+    with path.open(encoding="utf-8", newline="") as handle:
+        return [{**row, "date": day} for row in csv.DictReader(handle, delimiter="\t")]
+
+
+def _errors(rows: Sequence[Mapping[str, Any]], name: str) -> list[float]:
+    return [float(r[f"abs_err_{name}"]) for r in rows]
+
+
+def _mean(values: Iterable[float]) -> float | None:
+    finite = [v for v in values if math.isfinite(v)]
+    return float(np.mean(finite)) if finite else None
+
+
+def _gaps(rows: Sequence[Mapping[str, Any]], other: str) -> list[tuple[float, date]]:
+    """Per-row error of ``other`` minus that of ``level``, on the rows where both predicted.
+
+    Positive means ``level`` is closer. Pairing keeps each comparison on one set of rows when a
+    predictor has no value for some of them.
+    """
+    return [
+        (float(r[f"abs_err_{other}"]) - float(r["abs_err_level"]), r["date"])
+        for r in rows
+        if math.isfinite(float(r[f"abs_err_{other}"])) and math.isfinite(float(r["abs_err_level"]))
+    ]
+
+
+def _beats(
+    rows: Sequence[Mapping[str, Any]],
+    other: str,
+    *,
+    span: tuple[date, date],
+    seed: int,
+) -> dict[str, Any]:
+    """``level`` against ``other`` on one set of rows.
+
+    Passes when the block bootstrap's 90% interval of the mean difference lies above zero.
+    """
+    pairs = _gaps(rows, other)
+    if not pairs:
+        return {"rows": 0, "mean_difference": None, "interval": None, "passes": False}
+    diffs, dates = zip(*pairs, strict=True)
+    low, high = calendar_block_bootstrap(
+        list(diffs), list(dates), block_days=BLOCK_DAYS, seed=seed, span=span
+    )
+    return {
+        "rows": len(pairs),
+        "mean_difference": float(np.mean(diffs)),
+        "interval": [low, high],
+        "passes": low > 0.0,
+    }
+
+
+def _arm_b_report(jobs: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Arm B over its jobs. The band is ranked by the midpoint of its two ends (amendment 4).
+
+    The rule's "``level`` or ``band``" has two readings, and the pre-registration's null values give
+    both, so both are reported until the freeze settles one.
+    """
+    rho: dict[str, list[float]] = {"reading": [], "level": [], "band": []}
+    hits: dict[str, int] = {"reading": 0, "level": 0, "band": 0}
+    for job in jobs:
+        measured = [float(m) for m in job["measured"]]
+        best = int(np.argmax(measured))
+        lows, highs = job["band_lo"]["predicted"], job["band_hi"]["predicted"]
+        predicted = {
+            "reading": job["reading"]["predicted"],
+            "level": job["level"]["predicted"],
+            "band": [
+                None if a is None or b is None else (float(a) + float(b)) / 2.0
+                for a, b in zip(lows, highs, strict=True)
+            ],
+        }
+        for name, values in predicted.items():
+            usable = [i for i, v in enumerate(values) if v is not None]
+            if not usable:
+                continue
+            value = spearman([float(values[i]) for i in usable], [measured[i] for i in usable])
+            if math.isfinite(value):
+                rho[name].append(value)
+            hits[name] += int(max(usable, key=lambda i: float(values[i])) == best)
+    mean_rho = {name: _mean(values) for name, values in rho.items()}
+
+    def ranks(name: str) -> bool:
+        ours, theirs = mean_rho[name], mean_rho["reading"]
+        return ours is not None and theirs is not None and ours >= theirs
+
+    def picks(name: str) -> bool:
+        return hits[name] >= hits["reading"]
+
+    return {
+        "jobs": len(jobs),
+        "mean_spearman": mean_rho,
+        "best_pick_hits": hits,
+        "one_predictor_meets_both": any(ranks(n) and picks(n) for n in ("level", "band")),
+        "each_condition_by_either": any(ranks(n) for n in ("level", "band"))
+        and any(picks(n) for n in ("level", "band")),
+    }
+
+
+def run_report(jobs_dir: Path, *, first_day: date, today: date) -> dict[str, Any]:
+    """The decision rule (design section 7) over every day so far.
+
+    Every calendar day from ``first_day`` on is on the axis, and a day with no rows stays there as
+    an empty day. ``first_day`` is declared, not read from the folders, so a first day the laptop
+    slept through cannot move the calendar. A job folder outside the run's 14 days is refused: the
+    run is never extended, and a stray folder must not be dropped or scored in silence. Until the
+    14 days have passed the result is marked interim: it is not the decision, and it must not stop
+    or extend the run.
+    """
+    if not jobs_dir.is_dir():
+        raise RefusedError(f"{jobs_dir} is not a folder")
+    if today < first_day:
+        raise RefusedError(f"the run starts on {first_day}, after {today}")
+    final = first_day + timedelta(days=N_JOBS - 1)
+    complete = today > final
+    last = min(today, final)
+    named = {
+        date.fromisoformat(p.name): p
+        for p in jobs_dir.iterdir()
+        if p.is_dir() and re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.name)
+    }
+    outside = sorted(d.isoformat() for d in named if not first_day <= d <= last)
+    if outside:
+        raise RefusedError(f"job folders outside {first_day} to {last}: {outside}")
+    calendar = [first_day + timedelta(days=i) for i in range((last - first_day).days + 1)]
+    days = [
+        {"date": d.isoformat(), "status": _day_status(named[d]) if d in named else "empty"}
+        for d in calendar
+    ]
+    span = (first_day, last)
+
+    rows: list[dict[str, Any]] = []
+    arm_b_jobs: list[dict[str, Any]] = []
+    for day, folder in sorted(named.items()):
+        if (folder / "arm-a.tsv").exists():
+            rows.extend(_read_rows(folder / "arm-a.tsv", day))
+        if (folder / "arm-b.json").exists():
+            arm_b_jobs.append(_read_json(folder / "arm-b.json"))
+    discriminating = [r for r in rows if r["stratum"] == "discriminating"]
+    control = [r for r in rows if r["stratum"] == "control"]
+
+    state = np.random.SeedSequence(SEED).generate_state(2, dtype=np.uint32)
+    a1 = _beats(discriminating, "reading", span=span, seed=int(state[0]))
+    a2 = _beats(discriminating, "reading_at_execution", span=span, seed=int(state[1]))
+    mae = {
+        stratum: {
+            name: _mean(_errors(subset, name))
+            for name in ("reading", "level", "reading_at_execution")
+        }
+        for stratum, subset in (("discriminating", discriminating), ("control", control))
+    }
+    a3 = all(
+        (gap := _mean(g for g, _ in _gaps(control, name))) is not None and gap > 0.0
+        for name in ("reading", "reading_at_execution")
+    )
+    covered = [int(r["band_covered"]) for r in discriminating if int(r["band_covered"]) >= 0]
+    widened = [
+        int(r["band_covered_widened"])
+        for r in discriminating
+        if int(r["band_covered_widened"]) >= 0
+    ]
+    coverage = float(np.mean(covered)) if covered else None
+    coverage_widened = float(np.mean(widened)) if widened else None
+    a4 = coverage_widened is not None and coverage_widened >= BAND_NOMINAL
+
+    execution_gap = a2["mean_difference"]
+    if not discriminating:
+        reading = "no scored rows"
+    elif a1["passes"] and a2["passes"] and a3 and a4:
+        reading = "S1 passes"
+    elif execution_gap is not None and execution_gap <= 0.0:
+        reading = "S1 fails: reading_at_execution is at least as good as level"
+    elif a1["passes"] and not a2["passes"]:
+        reading = "level beats reading but not reading_at_execution: a finding about staleness"
+    else:
+        reading = "none of the design's named outcomes"
+
+    return {
+        "complete": complete,
+        "interim_note": None
+        if complete
+        else "interim: not the decision, and it must not stop or extend the run",
+        "first_day": first_day.isoformat(),
+        "last_day": last.isoformat(),
+        "days": days,
+        "block_days": BLOCK_DAYS,
+        "arm_a": {
+            "rows": {"discriminating": len(discriminating), "control": len(control)},
+            "mean_abs_error": mae,
+            "A1_level_beats_reading": a1,
+            "A2_level_beats_reading_at_execution": a2,
+            "A3_sign_holds_on_controls": a3,
+            "A4_band_covers_nominal_within_widening": {
+                "nominal": BAND_NOMINAL,
+                "coverage": coverage,
+                "coverage_widened": coverage_widened,
+                "passes": a4,
+            },
+        },
+        "arm_b": _arm_b_report(arm_b_jobs),
+        "reading": reading,
+    }
+
+
+# ---------------------------------------------------------------------------------------------
 # Command line
 
 
@@ -746,6 +973,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     build.add_argument("--prereg", type=Path, default=None)
     score = modes.add_parser("score", help="fetch one job's results and score them")
     score.add_argument("--job-dir", type=Path, required=True)
+    report = modes.add_parser("report", help="the decision rule over every day so far")
+    report.add_argument("--jobs-dir", type=Path, required=True)
+    report.add_argument("--first-day", type=date.fromisoformat, required=True)
+    report.add_argument("--today", type=date.fromisoformat, default=None, help="rehearsal only")
     for mode in (build, score):
         mode.add_argument("--repo", type=Path, default=Path("."))
         mode.add_argument(
@@ -758,6 +989,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         mode.add_argument("--at", type=_parse_at, default=None, help="rehearsal: the current time")
         mode.add_argument("--local-execute-at", type=_parse_at, default=None)
     args = parser.parse_args(argv)
+    if args.mode == "report":
+        try:
+            outcome = run_report(
+                args.jobs_dir, first_day=args.first_day, today=args.today or _utc_now().date()
+            )
+        except RefusedError as exc:
+            print(f"refused: {exc}", file=sys.stderr)
+            return EXIT_REFUSED
+        write_json_lf(args.jobs_dir / "report.json", outcome)
+        print(json.dumps(outcome, indent=2))
+        return 0
     local = args.local_live is not None
     if not local and args.at is not None:
         parser.error("--at is for rehearsals: a real run uses the clock")

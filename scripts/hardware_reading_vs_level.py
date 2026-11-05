@@ -503,18 +503,20 @@ def calendar_block_bootstrap(
     n_boot: int = 10_000,
     seed: int = SEED,
     level: float = 0.90,
+    span: tuple[date, date] | None = None,
 ) -> tuple[float, float]:
     """Circular block bootstrap on the complete calendar axis, empty dates kept at zero rows.
 
     The axis runs from the first to the last date, every day included, so a block of
     ``block_days`` is that many calendar days, not that many observed days (Bengisu's PR #128
-    lesson). Each draw takes ``ceil(n_days / block_days)`` blocks and averages over all rows
-    in them (row-weighted); a draw with no rows is redrawn.
+    lesson). ``span`` fixes the axis's two ends, so a missed first or last day stays on it. Each
+    draw takes ``ceil(n_days / block_days)`` blocks and averages over all rows in them
+    (row-weighted); a draw with no rows is redrawn.
     """
     values = np.asarray(diffs, dtype=np.float64)
     if values.size == 0 or len(dates) != values.size:
         raise ValueError("one date per row, at least one row")
-    first, n_days = _calendar_axis(dates)
+    first, n_days = _calendar_axis(dates if span is None else [*dates, *span])
     day_sum = np.zeros(n_days)
     day_count = np.zeros(n_days)
     for v, d in zip(values, dates, strict=True):
