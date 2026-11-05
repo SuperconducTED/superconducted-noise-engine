@@ -2,10 +2,10 @@
 
 Run from the repository root:  python -I audit_aer_runs.py [--refs ref ...]
 
-Standard library only. Reads tracked `.py` and `.ipynb` blobs from git, so it covers branches without
-checking them out, and lists every call to a `run`, `execute` or `_run_circuits` attribute except
-`subprocess.run`, with its first argument and whether the file imports a Qiskit package. It classifies
-nothing: every site is read by hand in the findings doc.
+Standard library only. Reads tracked `.py` and `.ipynb` blobs from git, so it covers branches
+without checking them out, and lists every call to a `run`, `execute` or `_run_circuits` attribute
+except `subprocess.run`, with its first argument and whether the file imports a Qiskit package. It
+classifies nothing: every site is read by hand in the findings doc.
 
 With no --refs it scans `main` and every other local and origin branch, except `calibration-data`.
 """
@@ -69,7 +69,7 @@ def tracked_blobs(ref: str) -> dict[str, str]:
 
 
 def read_blobs(blob_ids: set[str]) -> tuple[dict[str, str], set[str]]:
-    """Blob id to text, through one `git cat-file --batch`; ids that cannot be read come back apart."""
+    """Blob id to text, through one `git cat-file --batch`; unreadable ids come back apart."""
     ordered = sorted(blob_ids)
     process = subprocess.run(
         ["git", "cat-file", "--batch"],

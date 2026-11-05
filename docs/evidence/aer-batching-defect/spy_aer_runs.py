@@ -5,9 +5,9 @@ Run from the repository root, with this folder and `src` on the path:
     python -m pytest tests -q -p spy_aer_runs
 
 Wraps `AerBackend._execute_circuits_job`, which every Aer execution passes whether it came from
-`AerSimulator.run`, `BackendSamplerV2` or `qiskit_aer.primitives`. It changes nothing about the run.
-Prints a summary at the end, including every execution that held more than one circuit. It cannot see
-a subprocess a test starts; the static audit lists those.
+`AerSimulator.run`, `BackendSamplerV2` or `qiskit_aer.primitives`. It changes nothing about the
+run. Prints a summary at the end, including every execution that held more than one circuit. It
+cannot see a subprocess a test starts; the static audit lists those.
 """
 
 from __future__ import annotations

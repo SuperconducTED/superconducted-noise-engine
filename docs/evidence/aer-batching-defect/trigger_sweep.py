@@ -2,15 +2,14 @@
 
 Run with:  python -W ignore -I trigger_sweep.py
 
-Uses only qiskit and qiskit-aer. Prints each row's measured value and method beside `met` or `MISSED`.
-Exits 1 if any row misses, so a rerun on another machine that differs is visible.
+Uses only qiskit and qiskit-aer. Prints each row's measured value and method beside `met` or
+`MISSED`. Exits 1 if any row misses, so a rerun on another machine that differs is visible.
 """
 
 from __future__ import annotations
 
 import math
 import sys
-from collections.abc import Callable
 
 import numpy as np
 import qiskit
@@ -403,12 +402,17 @@ def part_f() -> None:
     print("F. Primitives")
     noise = model()
     sim = AerSimulator(noise_model=noise)
-    backend_sampler: Callable = lambda: BackendSamplerV2(
-        backend=sim, options={"default_shots": SHOTS, "seed_simulator": SEED}
-    )
-    aer_sampler: Callable = lambda: AerSamplerV2(
-        default_shots=SHOTS, seed=SEED, options={"backend_options": {"noise_model": noise}}
-    )
+
+    def backend_sampler() -> BackendSamplerV2:
+        return BackendSamplerV2(
+            backend=sim, options={"default_shots": SHOTS, "seed_simulator": SEED}
+        )
+
+    def aer_sampler() -> AerSamplerV2:
+        return AerSamplerV2(
+            default_shots=SHOTS, seed=SEED, options={"backend_options": {"noise_model": noise}}
+        )
+
     same = [f_n(11), s_m()]
     apart = [(f_n(11), None, SHOTS), (s_m(), None, 2 * SHOTS)]
     rows = [

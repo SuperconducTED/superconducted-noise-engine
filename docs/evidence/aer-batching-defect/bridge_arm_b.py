@@ -5,7 +5,8 @@ The one script in this folder that uses project code. Run from the root of a che
 
     python -W ignore <this file>
 
-Row H1 is a separate rerun of `probe_batching.py` against its committed output; see README section 9.
+Row H1 is a separate rerun of `probe_batching.py` against its committed output; see README
+section 9.
 """
 
 from __future__ import annotations
@@ -74,10 +75,9 @@ def line(label: str, result, index: int) -> None:
 
 
 def counts_line(label: str, counts: dict[str, int], shots: int) -> None:
-    print(
-        f"  {label:28s} 000 {counts.get('000', 0) / shots:.3f}  111 {counts.get('111', 0) / shots:.3f}",
-        flush=True,
-    )
+    zeros = counts.get("000", 0) / shots
+    ones = counts.get("111", 0) / shots
+    print(f"  {label:28s} 000 {zeros:.3f}  111 {ones:.3f}", flush=True)
 
 
 def h2() -> None:
