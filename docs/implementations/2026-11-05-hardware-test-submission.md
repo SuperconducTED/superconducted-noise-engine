@@ -179,6 +179,14 @@ at 2,048 and Arm B at 4,096 was correct, apparently because those go to separate
 not rely on that. The mechanism inside Aer is not established, and no minimal reproduction outside this
 project's circuits exists yet.
 
+**Correction, later on 2026-11-05.** "No committed result is affected" above was too wide, and so was
+the same claim in `e91239fd`'s message. Lines 21 and 22 of `probe_build_time.out.txt`, committed with this
+plan, are the defect's own output: that probe sends `job.arm_a[2]` and `job.arm_b[0]` to one local job at
+one shot count, so its `000` 242 of 256 and fidelity 0.473 are wrong. The file stays as run, because it is
+how the defect was first seen, and this plan quotes neither figure. A separate session has since reduced
+the defect to a small script and traced the code path. Its finding is on branch
+`claude/recursing-northcutt-28be4c`, not pushed as of this note, and it supersedes the last sentence above.
+
 ## Verification
 
 Written before the code. Step 1d is ready for the freezing commit when all of these hold. Laptop
