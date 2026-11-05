@@ -32,7 +32,7 @@ import math
 import subprocess
 import sys
 from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import UTC, date, datetime, timedelta
 from itertools import combinations, pairwise
 from pathlib import Path
@@ -117,15 +117,33 @@ class QubitSource:
         return self.usable_for_decay() and math.isfinite(self.t2) and 0.0 < self.t2 <= 2.0 * self.t1
 
 
+def _execution_sources(
+    qubits: Iterable[int], execution: Sequence[PredictorRow]
+) -> dict[int, QubitSource]:
+    """The ``reading_at_execution`` control's values per qubit, from the rows at ``t_execute``."""
+    later: dict[tuple[int, str], PredictorRow] = {(r.qubit, r.quantity): r for r in execution}
+
+    def get(q: int, quantity: str) -> float:
+        row = later.get((q, quantity))
+        return float(row.reading) if row is not None else math.nan
+
+    return {
+        q: QubitSource(
+            get(q, "T1"), get(q, "T2"), get(q, "prob_meas0_prep1"), get(q, "prob_meas1_prep0")
+        )
+        for q in qubits
+    }
+
+
 def sources_from_rows(
-    rows: Sequence[PredictorRow], execution: Sequence[PredictorRow]
+    rows: Sequence[PredictorRow], execution: Sequence[PredictorRow] | None
 ) -> dict[str, dict[int, QubitSource]]:
     """Per predictor, per qubit: the values each predictor carries (design section 2).
 
-    The band's two ends take ``T1`` and ``T2`` from the band and readout from the level.
+    The band's two ends take ``T1`` and ``T2`` from the band and readout from the level. With
+    ``execution`` None, as at ``t_s`` on hardware, the control stays empty until ``with_execution``.
     """
     table: dict[tuple[int, str], PredictorRow] = {(r.qubit, r.quantity): r for r in rows}
-    later: dict[tuple[int, str], PredictorRow] = {(r.qubit, r.quantity): r for r in execution}
     qubits = sorted({r.qubit for r in rows})
     out: dict[str, dict[int, QubitSource]] = {name: {} for name in SOURCES}
     nan = math.nan
@@ -148,12 +166,8 @@ def sources_from_rows(
             out[name][q] = QubitSource(
                 get(table, q, "T1", attr), get(table, q, "T2", attr), e10, e01
             )
-        out["reading_at_execution"][q] = QubitSource(
-            get(later, q, "T1", "reading"),
-            get(later, q, "T2", "reading"),
-            get(later, q, "prob_meas0_prep1", "reading"),
-            get(later, q, "prob_meas1_prep0", "reading"),
-        )
+    if execution is not None:
+        out["reading_at_execution"] = _execution_sources(qubits, execution)
     return out
 
 
@@ -657,27 +671,49 @@ class Job:
     arm_b: list[QuantumCircuit]
     arm_b_predicted: dict[str, list[float | None]]
     layout_log: dict[str, Any] = field(default_factory=dict)
+    gates: GateTable = field(default_factory=lambda: GateTable({}, {}))
+
+
+def _operational_qubit(target: Target, qubit: int) -> bool:
+    return all((qubit,) in target[name] for name in ("x", "sx", "measure"))
+
+
+def _operational_pair(target: Target, pair: frozenset[int]) -> bool:
+    a, b = sorted(pair)
+    return "cz" in target and ((a, b) in target["cz"] or (b, a) in target["cz"])
 
 
 def build_job(
     *,
     rows: Sequence[PredictorRow],
-    execution: Sequence[PredictorRow],
+    execution: Sequence[PredictorRow] | None,
     selection: Mapping[str, Any],
     controls: Sequence[int],
     snapshot: Mapping[str, Any],
     t_s: datetime,
     seed: int = SEED,
+    target: Target | None = None,
 ) -> Job:
-    """Arm A and Arm B circuits and predictions for one job, from the archive side's outputs."""
-    backend = archived_backend(snapshot, "reading_snapshot")
-    target = backend.target
-    dt = float(backend.dt)
-    n_qubits = int(backend.num_qubits)
+    """Arm A and Arm B circuits and predictions for one job, from the archive side's outputs.
+
+    On hardware ``execution`` is None, because those rows do not exist before the job runs, and
+    ``with_execution`` adds the control afterwards. ``target`` is the device's live target there:
+    circuits are built against it, so a qubit or coupler taken out overnight is not used. A selected
+    qubit it lacks raises ``ValueError``, because the pre-registration has no rule to replace one.
+    Without it the target comes from ``snapshot``, as in the dry run.
+    """
+    live_target = target
+    target = live_target if live_target is not None else archived_backend(snapshot).target
+    dt = float(target.dt)
+    n_qubits = int(target.num_qubits)
     min_length = int(snapshot["configuration"].get("timing_constraints", {}).get("min_length", 2))
     sources = sources_from_rows(rows, execution)
     discriminating = [int(p["qubit"]) for p in selection["discriminating"]]
     arm_a_qubits = sorted(set(discriminating) | set(controls))
+    if live_target is not None:
+        missing = [q for q in arm_a_qubits if not _operational_qubit(live_target, q)]
+        if missing:
+            raise ValueError(f"selected qubits are not operational on the live target: {missing}")
     slots = {
         q: delay_slots(
             sources["level"][q].t1, sources["reading"][q].t1, dt=dt, min_length=min_length
@@ -695,13 +731,16 @@ def build_job(
     eligible = {
         q
         for q, w in window.items()
-        if w >= MIN_WINDOW_DISTINCT and sources["level"][q].usable_for_relaxation()
+        if w >= MIN_WINDOW_DISTINCT
+        and sources["level"][q].usable_for_relaxation()
+        and (live_target is None or _operational_qubit(live_target, q))
     }
     # A pair whose cz has no usable error (gate_error 1 marks a dead pair) is not a link.
     pairs = {
         pair
         for pair in coupled_pairs(snapshot["configuration"]["coupling_map"])
         if usable_cz_error(gates.cz_error.get(pair))
+        and (live_target is None or _operational_pair(live_target, pair))
     }
     triples = connected_triples(pairs, eligible)
     level_fidelity: list[tuple[tuple[int, int, int], float]] = []
@@ -722,16 +761,11 @@ def build_job(
         circuit.name = f"arm_b_{'_'.join(map(str, triple))}"
         circuit.metadata = {"arm": "B", "layout": list(triple)}
         arm_b.append(circuit)
-    predicted: dict[str, list[float | None]] = {}
-    for name in SOURCES:
-        predicted[name] = []
-        for triple, circuit in zip(layouts, arm_b, strict=True):
-            try:
-                predicted[name].append(
-                    _predict_layout(circuit, triple, sources[name], gates, dt, n_qubits)
-                )
-            except UnusableSourceError:
-                predicted[name].append(None)
+    predicted = {
+        name: _predict_source(layouts, arm_b, sources[name], gates, dt, n_qubits)
+        for name in SOURCES
+        if name != "reading_at_execution" or execution is not None
+    }
     return Job(
         t_s=t_s,
         n_qubits=n_qubits,
@@ -745,7 +779,40 @@ def build_job(
         arm_b=arm_b,
         arm_b_predicted=predicted,
         layout_log={"eligible_qubits": len(eligible), "triples": len(triples)},
+        gates=gates,
     )
+
+
+def with_execution(job: Job, execution: Sequence[PredictorRow]) -> Job:
+    """The job with the ``reading_at_execution`` control added, once its rows exist.
+
+    Nothing already sealed in ``job`` changes: only this one source and its Arm B predictions.
+    """
+    control = _execution_sources(job.sources["reading"], execution)
+    predictions = _predict_source(job.layouts, job.arm_b, control, job.gates, job.dt, job.n_qubits)
+    return replace(
+        job,
+        sources={**job.sources, "reading_at_execution": control},
+        arm_b_predicted={**job.arm_b_predicted, "reading_at_execution": predictions},
+    )
+
+
+def _predict_source(
+    layouts: Sequence[tuple[int, int, int]],
+    circuits: Sequence[QuantumCircuit],
+    sources: Mapping[int, QubitSource],
+    gates: GateTable,
+    dt: float,
+    n_qubits: int,
+) -> list[float | None]:
+    """One predictor's Arm B fidelity per layout; None where its values are unusable."""
+    out: list[float | None] = []
+    for triple, circuit in zip(layouts, circuits, strict=True):
+        try:
+            out.append(_predict_layout(circuit, triple, sources, gates, dt, n_qubits))
+        except UnusableSourceError:
+            out.append(None)
+    return out
 
 
 def _predict_layout(
