@@ -4,6 +4,10 @@
 > number yet**; every acceptance criterion was written before the first run. Code `ce111cb8`,
 > seeding fix `23fd2f4b`; amendments 1 and 2 before the record run; record run from `8b244bb7`,
 > output `c3f8c22c`; results filled in afterwards.
+>
+> As of 2026-11-05: the 2026-10-28 run stays below as run, but PR #132's merge changed what the CLI
+> accepts, so its reproduction command no longer runs. The current run and command are in "Re-run
+> after PR #132's merge, 2026-11-05" near the end.
 
 ## Problem / Motivation
 
@@ -408,6 +412,45 @@ python -m scripts.hardware_reading_vs_level --repo . --ref 5828b4a29fabc245aa096
   `arm-a-truth2`, `arm-b-truth1`, `arm-b-truth2`, `criteria.json`, `selection.json`,
   `manifest.json`) are identical to the committed ones once line endings are normalised. Across
   platforms (the desktop's WSL2) it remains unchecked.
+
+## Re-run after PR #132's merge, 2026-11-05
+
+### Protocol, written before the run
+
+**Why.** PR #132 merged as `5c98f264`, carrying Burak's review fix `3ed0728d`, whose `load_controls`
+requires `requested_controls`. The `controls.json` committed on 2026-10-28 has no such field, and
+the CLI refuses it (checked 2026-11-04: exit 2, nothing written). So the 2026-10-28 run describes a
+tree that will not merge, and the freeze needs a dry run of the code that lands.
+
+**What runs.** `main` was merged into this branch first (`7f3f402f`). Among the code, that merge
+changes only `scripts/hardware_test_predictors.py` and its tests;
+`scripts/hardware_reading_vs_level.py` is untouched. The inputs are the ones the 2026-10-28 protocol
+names: the same two refs, `t_s`, `t_execute`, seed 125 and interpreter. Only the controls file is
+regenerated, by `--mode controls` at the same ref and instant. The output goes to
+`dry-run-2026-11-05/`, and `dry-run-2026-10-28/` stays as committed. `compare_dry_run.py`, beside
+them, does the comparison.
+
+**Not blind.** `--mode controls` was already seen on 2026-11-04, on a merge of `3ed0728d` and PR
+#134, in the checks recorded in `docs/implementations/2026-10-28-hardware-test-selection-rules.md`.
+It named the same four controls, and its only difference from the committed file was the new
+field. No dry-run output has been produced since 2026-10-28.
+
+**Expected.** All of it is written now:
+
+1. `controls.json` holds what the 2026-10-28 file holds, plus `requested_controls: 4`.
+2. All five acceptance criteria pass under both truths. Their definitions and limits are unchanged.
+3. `arm-a-truth1.tsv`, `arm-a-truth2.tsv`, `arm-b-truth1.tsv`, `arm-b-truth2.tsv`, `criteria.json`
+   and `selection.json` are identical to 2026-10-28 once line endings are normalised, because the
+   predictor and simulation code, seeds and interpreter are the same and the same-machine check
+   above found them identical.
+4. `manifest.json` differs in one key only, `controls_file_sha256`, which becomes the SHA-256 of the
+   new `controls.json` as stored.
+
+**If any of these fails.** The output is not committed as a result. The difference is shown to the
+lead and its cause found first, and the failed run is disclosed here.
+
+**What the output is.** As before: pipeline acceptance on Aer, not a measurement of the device, no
+NC row and no sentence about `ibm_fez`.
 
 ## Related docs
 
