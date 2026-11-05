@@ -288,4 +288,34 @@ Added after the first run of the sweep and of the spy over the suite, before wri
 
 ## 9. Runs
 
-None yet.
+Interpreter as in section 7, laptop, provisional, 2026-11-05. Outputs beside each script as
+`<script>.out.txt`, committed at `8dd15327`. Each row below ran from the commit named, and all exited 0.
+
+| Script | From | Command | Result | Register |
+| --- | --- | --- | --- | --- |
+| `minimal_reproduction.py` | `cd7d9650` | section 7 | `P(0)` 0.104 alone, 0.197 after either first circuit, 0.104 before; sum 1 and 2 to the same pattern | NC-097 |
+| `trigger_sweep.py` | `cd7d9650` | section 7 | 72 rows, 72 met, 0 missed | NC-097 |
+| `probe_batching.py` | `e91239fd` | `PYTHONPATH=.;src python -W ignore <probe>`, from a throwaway worktree at that commit | H1: identical to its committed output | NC-097 |
+| `bridge_arm_b.py` | `617c7954` | `PYTHONPATH=.;src python -W ignore <script>`, from the same worktree | H2: ratio to alone 1024.000000000000 on six of six layouts, 7 noisy gates and 3 delay channels each; before Arm A ratio 1. H3: same defect from `from_backend` and `FakeFez().run` | NC-097 |
+| `audit_aer_runs.py` | `617c7954` | `python -I <script>` | 214 other refs, 385 distinct files, 0 unreadable, 0 unparsed | NC-098 |
+| `spy_aer_runs.py` over `tests/` | `617c7954` | `PYTHONPATH="src;<this folder>" python -m pytest tests -p spy_aer_runs -p no:cacheprovider -q -o addopts="--strict-markers -v"` | 1,053 passed; 1,131 executions in 45 tests; every one holds one circuit | NC-098 |
+| `spy_positive_control.py` | `e4d9720f` | `PYTHONPATH=<this folder> python -m pytest <script> -p spy_aer_runs -p no:cacheprovider -o addopts="--strict-markers"` | 4 passed; the spy sees 3 of 3 two-circuit executions; a mixed-shot PUB list splits in two | NC-098 |
+| `compare_source.py` | `e4d9720f` | `python -I <script>` | nine functions: all same on `0.18.2`; on `main`, only the two `enable_*` differ, by the exception index | none |
+
+`tests/`, `src/` and `scripts/` at `617c7954` are identical to `main` at `5c98f264`. The suite took 5
+minutes 24 seconds, with a stall watchdog running beside it that did not fire. `minimal_reproduction.py`
+and `trigger_sweep.py` were run twice, and their outputs are identical. `audit_aer_runs.py` reads the
+refs as they stood on the day, so its section 3 will list more on a later run.
+
+**Against the decision rule (section 4).** Trigger: every row in section 3 parts A to G holds as
+predicted. Mechanism: A to E hold, including the `2^k` law and B12 to B14, so the doc may say the source
+reading agrees with the behaviour; it may not say the cause is proven. H1 and H3 hold. H2's factor holds
+as restated by amendment 1, and H2's "alone sums 1" misses the literal `1e-9` by about `3e-9` on four
+layouts. That row is outside the mechanism rule's parts, and the miss stands.
+
+**Against section 2's last paragraph.** "Unchanged on tag `0.18.2` and on `main`" overstated what had
+been read when it was written (amendment 2). The comparison shows it is true of the lines the reading
+rests on, and that `main` differs in the two `enable_*` functions only by an exception index.
+
+**Audit.** The classification of each site is in the findings doc, section 5. It found one committed
+output the first search had not reached: `probe_build_time.out.txt`, on `mert/issue-125-submission`.
