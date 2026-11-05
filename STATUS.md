@@ -1,6 +1,6 @@
 # Phase 4: Design-time predictor
 
-_Generated 2026-11-04 07:21 UTC · main at `695c90ca` (2026-10-28) · day 4 since 2026-11-01 · milestone 2 due 2027-02-27 (115 days), 10 open and 3 closed_
+_Generated 2026-11-05 09:31 UTC · main at `5c98f264` (2026-11-04) · day 5 since 2026-11-01 · milestone 2 due 2027-02-27 (114 days), 13 open and 5 closed_
 
 _Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, on main. Gates are ordered, not dated (plan §6)._
 
@@ -24,7 +24,7 @@ _Everyone starts on lane 1 (plan §5.1)._
   - ⬜ The hardware numbers registered as NC rows, one per conclusion
     - _No machine-checkable source: the register carries no per-ticket marker. Read docs/numerical-claims.md on main when #125 closes._
 
-1. 🟡 #125 Hardware test: reading versus level on ibm_fez (@mertefesensoy): in review, PR #132
+1. 🟡 #125 Hardware test: reading versus level on ibm_fez (@mertefesensoy): in review, PR #135
 2. ✅ #63 Training-set builder (training/dataset.py) (@BahaJarad): delivered by PR #113 on 2026-10-23; the issue is still open with 1 unticked ask (Burak Öztekin)
 3. ❌ #122 Public archive as a second training-set source (ADR-029) (@BahaJarad): ready to start
 4. ⬜ new: Per-qubit extractor and channel (ADR-013) (@BahaJarad, @BurakOztekin): opens after L1, not met yet. Opened after #125's job 1, because its centre (level or range) depends on the hardware answer (plan §2 lane 1 item 4, A.3).
@@ -71,8 +71,8 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 
 **Mert Efe Şensoy** (@mertefesensoy)
 
-1. Unstick PR #132 for #125: Hardware test: reading versus level on ibm_fez (QPU side)
-   - Awaiting merge.
+1. Unstick PR #135 for #125: Hardware test: reading versus level on ibm_fez (QPU side)
+   - No approving review yet: main's ruleset requires one.
 1. Unstick PR #138 for #57: Training contract: ADR-027 accepted (PR #120)
    - No approving review yet: main's ruleset requires one.
 1. Finish #84: Close the #57 advisor loop
@@ -116,30 +116,35 @@ _Review requests not yet answered with a review, and unticked checkboxes that st
 
 **Mert Efe Şensoy** (@mertefesensoy), 5 owed
 
-- has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (57 days); has posted there since, on 2026-10-21
-- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (32 days); no post there since
-- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (2 days); no post there since
-- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (2 days); no post there since
-- Review PR #138: requested by @BurakOztekin, since 2026-11-02 (2 days); no post there since
+- has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (58 days); has posted there since, on 2026-10-21
+- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (33 days); no post there since
+- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (3 days); no post there since
+- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (3 days); no post there since
+- Review PR #138: requested by @BurakOztekin, since 2026-11-02 (3 days); no post there since
 
 **Burak Öztekin** (@BurakOztekin), 1 owed
 
-- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (62 days); no post there since
+- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (63 days); no post there since
 
 **Bengisu Cıvdı** (@bengisucvd), 5 owed
 
-- Review PR #131: requested by @mertefesensoy, since 2026-10-28 (7 days); no post there since
-- Review PR #133: requested by @mertefesensoy, since 2026-10-28 (7 days); no post there since
-- Review PR #135: requested by @mertefesensoy, since 2026-10-28 (7 days); no post there since
-- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (2 days); no post there since
-- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (2 days); no post there since
+- Review PR #131: requested by @mertefesensoy, since 2026-10-28 (8 days); no post there since
+- Review PR #133: requested by @mertefesensoy, since 2026-10-28 (8 days); no post there since
+- Review PR #135: requested by @mertefesensoy, since 2026-10-28 (8 days); no post there since
+- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (3 days); no post there since
+- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (3 days); no post there since
 
-**Baha Jarad** (@BahaJarad), 1 owed
+**Baha Jarad** (@BahaJarad), 2 owed
 
-- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (32 days); no post there since
+- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (33 days); no post there since
+- Review PR #139: requested by @mertefesensoy, since 2026-11-04 (1 day); no post there since
 
 ## Not blocked by anything upstream, so what is holding them?
 
+
+**#125: Hardware test: reading versus level on ibm_fez** (@mertefesensoy)
+
+- [high] No approving review yet: main's ruleset requires one.
 
 **#60: ADR-014 trainer: the first archive fit** (@BurakOztekin)
 
@@ -170,6 +175,7 @@ Nothing is blocked upstream.
 
 | Date | Gates | Conditions | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 2026-11-05 | 0/5 | 0/7 | 9 | 4 | 0 | milestone 2: 13 open and 5 closed (was 10 and 3); Baha Jarad owes 2 answers (was 1); main moved to 5c98f264 |
 | 2026-11-04 | 0/5 | 0/7 | 9 | 4 | 0 | nothing moved |
 | 2026-11-03 | 0/5 | 0/7 | 9 | 4 | 0 | #57 Training contract: ADR-027 accepted (PR #120): ready to start to in review; #60 ADR-014 trainer: the first archive fit: ready to start to in review; #75 Decide the LOCKED Kraus projector boundary: ready to start to in review; Burak Öztekin owes 1 answer (was 6); Bengisu Cıvdı owes 5 answers (was 3); Mert Efe Şensoy owes 5 answers (was 2) |
 | 2026-11-01 | 0/5 | 0/7 | 12 | 1 | 0 | Baha Jarad owes 1 answer (was 2) |
