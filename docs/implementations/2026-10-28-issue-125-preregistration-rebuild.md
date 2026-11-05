@@ -238,8 +238,8 @@ and all of #134) is documents, evidence, that script's tests and two register ro
 
 **A correction this turned up.** Checking amendment 13's "leaves those unchanged" against the code
 showed it was loose: from `d62928fa` to `5c98f264`, 10 of 24 definitions changed. Seven of them come
-from Bengisu's review fix on #126 (`22495d97`), which the pre-registration had never named and which
-can move `level` and `band` on the live path, in a rare case. The others come from #132's count
+from the fix Mert made for Bengisu's review of #126 (`22495d97`), which the pre-registration had
+never named and which can move `level` and `band` on the live path, in a rare case. The others come from #132's count
 column and LF writes; `main` and `predictor_rows` changed in both. Pre-registration amendment 14
 corrects this, and amendment 13's text stays as written. No value in any committed output changes.
 
@@ -306,6 +306,11 @@ python <scratch>/old_predictors.py --repo . --ref 7adda8035a5a76b93147ffc3171975
 Then compare `<new>/controls.json` with the committed rehearsal file, and the ten columns the two
 `predictors.tsv` files share as exact strings. Not checked: any of this on Linux or Burak's desktop;
 Bengisu's review.
+
+**Correction, the same day.** The first wording of amendment 14 and of this update called `22495d97`
+"Bengisu's review fix", and the PR body told her it was her fix. Mert wrote that commit, answering
+her review. Both documents and the body were reworded on 2026-11-05, before any review of them; this
+is the one place today's new text was edited instead of appended to. No value or rule changes.
 
 ## Related docs
 

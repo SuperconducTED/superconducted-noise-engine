@@ -410,8 +410,8 @@ edited.
     definition by definition from `d62928fa` to `5c98f264`, 14 of the 24 top-level definitions are
     unchanged and 10 changed, for two reasons this document had not named:
 
-    - **Bengisu's review fix on PR #126** (`22495d97`, on `main` through #126's merge `2e2801cd`),
-      which `d62928fa` predates. A live document must name `ibm_fez` and may arrive as a raw
+    - **The fix Mert made for Bengisu's review of PR #126** (`22495d97`, on `main` through #126's
+      merge `2e2801cd`), which `d62928fa` predates. A live document must name `ibm_fez` and may arrive as a raw
       `to_dict()` body. A snapshot whose qubit entries are not lists of objects is a parse error. A
       live document whose qubit block was already seen at any time up to `t_s` adds no state, where
       before it was checked against the window only. That last change can move `level` and `band`,
