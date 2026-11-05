@@ -217,6 +217,55 @@ Run on this laptop, 2026-10-28, `C:/t/pin125/Scripts/python.exe` (the exact pins
 
 Not checked: any of this on Linux or Burak's desktop; Bengisu's review.
 
+## Update, 2026-11-05: `main` after PR #132's merge
+
+**Why.** This branch was stacked on #132's tip `4746be56`. Burak's `3ed0728d` landed on #132 after
+that, #132 merged as `5c98f264`, and #134 merged too. Bengisu's review should show step 1c alone,
+and the pin amendment 13 promised now has a commit. The lead gave the go on 2026-11-05.
+
+**The merge.** `main` was merged in as `a433e66b`, no conflicts. Against `main` the branch is still
+25 files, 4,720 insertions and no deletions, the same as the trial before the merge, so `git diff
+--stat origin/main` is now step 1c alone. NC-087 to NC-091 are free on `main` and on every open
+branch, and both #139 and #140 trial-merge clean against this one.
+
+**What `main` changed that this branch consumes.** Compared definition by definition from
+`4746be56` to `5c98f264`, 32 of the 34 top-level definitions in `scripts/hardware_test_predictors.py`
+are unchanged; only `load_controls` and `main` changed. `measure_checkup_floor.py` imports nine
+names from that script, neither of those two, and `measure_recal_hours.py`, `null_values.py` and
+`scripts/hardware_test_grid_bias.py` do not import it. So NC-087 to NC-091 and the null values of
+section 3.8.1 cannot have moved, and they are not re-run. The rest of that delta (#132's remainder
+and all of #134) is documents, evidence, that script's tests and two register rows.
+
+**A correction this turned up.** Checking amendment 13's "leaves those unchanged" against the code
+showed it was loose: from `d62928fa` to `5c98f264`, 10 of 24 definitions changed. Seven of them come
+from Bengisu's review fix on #126 (`22495d97`), which the pre-registration had never named and which
+can move `level` and `band` on the live path, in a rare case. The others come from #132's count
+column and LF writes; `main` and `predictor_rows` changed in both. Pre-registration amendment 14
+corrects this, and amendment 13's text stays as written. No value in any committed output changes.
+
+### Protocol, written before the run
+
+The section 3.9 rehearsal is the one thing here the code change can reach. Its command runs once on
+the merged tree, at the same ref and instant, into a scratch folder that is not committed.
+Amendment 14's sentence that with no live document the values cannot differ rests on reading the
+diff, so it gets a run too: `d62928fa`'s script, `--mode submission`, at the same ref and instant,
+from the same tree, with its `predictors.tsv` compared to the merged tree's.
+
+**Expected.**
+
+1. Exit 0. `controls.json` names 144, 110, 140 and 77, with 11, 72 and 108 below the floor.
+2. `controls.json` differs from the committed rehearsal file by one added line,
+   `requested_controls: 4`.
+3. `predictors.tsv` and `manifest.json` are identical to the committed ones once line endings are
+   normalised.
+4. On the merged tree `ruff`, `ruff format`, `mypy --strict` and `check_ids` are clean and every
+   collected test passes. The count is not a register value; NC-021 is measured at this PR's merge.
+5. The ten columns `d62928fa`'s script writes are identical, row for row, to the same columns from
+   the merged tree. If they are not, amendment 14's sentence is false and is corrected first.
+
+**If any of these fails.** Nothing is pushed. The difference is shown to the lead and its cause found
+first, and the failed run is disclosed here.
+
 ## Related docs
 
 - `docs/roadmap/2026-10-24-issue-125-preregistration.md` (the draft this changes)

@@ -45,6 +45,8 @@ draft stays unfrozen until the rest of section 6 is done.
 | Bootstrap unit | proposed: circular blocks of 3 consecutive UTC calendar days of submission, a missed job kept as an empty day (zero rows, zero loss), scores row-weighted; frozen after Bengisu's review | section 3.7 | **amendment 8, 2026-10-28, proposed, not frozen** |
 | Written files | every JSON the selection and job scripts write uses LF line endings, so a hash recorded at write time is the hash every checkout sees | PR #132 (`bbde9522`); section 3.7 | **amendment 12, 2026-10-28**, done |
 | Design §6, `rep_delay`, `init_qubits` | the `T1` characterisation on the first and last jobs, its environment and version, and the two submission options are step 1d's (the submission script), not this document's | section 3.7 | **amendment 7, 2026-10-28**, decided by the lead |
+| Predictor implementation, the commit | `scripts/hardware_test_predictors.py` at `5c98f264dee8292e4b07de4e9074e833c487d9cb`, PR #132's merge commit | PR #132; section 3.10 | **amendment 14, 2026-11-05**; gives amendment 13's row its commit and corrects its "unchanged" |
+| Controls file | `--mode controls` writes `requested_controls` and refuses to freeze fewer controls than requested; `load_controls` refuses a file without it, with a different number of controls, or with a duplicate or negative qubit; `--mode submission` refuses a control outside the pinned archive's qubit range | PR #132 (`3ed0728d`); section 3.10 | **amendment 15, 2026-11-05** |
 
 ## 3. The four proposals
 
@@ -391,6 +393,47 @@ instant on `5828b4a2` the same rule named 48, 112, 54 and 105. That the four mov
 is why the controls are frozen once, at the freezing ref, and never re-chosen. These four are not
 frozen and are not used by any job.
 
+### 3.10 Amendments of 2026-11-05, after PR #132's merge
+
+Appended 2026-11-05, before the freezing commit and before any QPU job. PR #132 merged as
+`5c98f264` and `main` was merged into this branch as `a433e66b`. Neither amendment below changes a
+decision rule, a threshold or a null value of section 3.8.1. The rows and sections above are not
+edited.
+
+14. **The code pin, and a correction to amendment 13.** PR #132's merge commit, which amendment 13
+    said the freezing commit would name, is `5c98f264dee8292e4b07de4e9074e833c487d9cb`. The foot of
+    section 2 now carries it; the freezing commit restates it, and moving it takes another dated
+    amendment. The pin covers `scripts/hardware_test_predictors.py`. The offline half is not in that
+    commit, so its own commit is named at the freezing commit, after PR #140 merges.
+
+    Amendment 13 says #132 leaves PR #126's functions unchanged. That was not exact. Compared
+    definition by definition from `d62928fa` to `5c98f264`, 14 of the 24 top-level definitions are
+    unchanged and 10 changed, for two reasons this document had not named:
+
+    - **Bengisu's review fix on PR #126** (`22495d97`, on `main` through #126's merge `2e2801cd`),
+      which `d62928fa` predates. A live document must name `ibm_fez` and may arrive as a raw
+      `to_dict()` body. A snapshot whose qubit entries are not lists of objects is a parse error. A
+      live document whose qubit block was already seen at any time up to `t_s` adds no state, where
+      before it was checked against the window only. That last change can move `level` and `band`,
+      only on the live path, and only when the live block repeats a state older than the window.
+    - **PR #132 itself.** `predictor_rows` counts `n_window_distinct`, a new column that proposal A's
+      floor reads and no predictor value is computed from; `write_outputs` writes JSON with LF
+      (amendment 12); `main` gains the new modes.
+
+    The expressions that compute `reading`, `level` and `band` are the same at both commits, and
+    with no live document the values cannot differ.
+15. **The controls file.** Burak's review commit `3ed0728d`, part of #132's merge, tightens the file
+    that decides the control stratum (section 3.4). `--mode controls` writes `requested_controls`
+    and refuses to freeze fewer controls than requested. `load_controls` refuses a file with no
+    `requested_controls`, a non-positive one, a number of controls that differs from it, or a
+    duplicate or negative qubit. `--mode submission` refuses a control outside the pinned archive's
+    qubit range. So a freeze that cannot find four controls stops, where before it would have run
+    with a short stratum. The rule that chooses the controls does not change.
+
+    The section 3.9 rehearsal's `controls.json` predates that commit, has no such field and is
+    refused by today's code. It stays as committed, because it is not frozen and no job uses it. The
+    frozen file is written by the pinned code, so it has the field.
+
 ## 4. The budget
 
 The lead stated on 2026-10-24 that the QPU budget is covered. The design's usage-page check of
@@ -433,6 +476,21 @@ Appended; the table above is the 2026-10-24 state and is not edited.
 | Statistics review of the decision rule, the amendments, the bootstrap unit (amendment 8) and the open label-horizon question | Bengisu | to be requested on this branch's PR |
 | The controls re-run at the freezing ref (proposal D) | Mert | a rehearsal at the current `calibration-data` tip on this branch (not frozen); the frozen run is in the freezing commit |
 | The submission script: `build` and `score` modes, `rep_delay`, `init_qubits`, design §6's `T1` characterisation | Mert | step 1d (amendment 7) |
+| The second account for the daily cadence | Mert names it | before job 2 (section 5) |
+
+### 6.2 As of 2026-11-05
+
+Appended; the tables above are not edited.
+
+| Item | Owner | State on 2026-11-05 |
+| --- | --- | --- |
+| Selection rules A, B and D in code (PR #132) | Mert; Burak reviewed | **done**: approved by Burak, merged as `5c98f264`, on this branch through `a433e66b` |
+| The offline half and its Aer dry run (PR #140) | Mert; Burak reviews and reproduces on his desktop | the re-run after #132's merge passes its five criteria under both truths (laptop, provisional); review and desktop reproduction owed; its commit is named at the freezing commit |
+| Amendments 1 to 15 and the pin | Mert | written in sections 3.7 and 3.10 and section 2's foot |
+| Null-model value of every threshold | Mert computes; Bengisu reviews | computed (section 3.8.1); review owed |
+| Statistics review of the decision rule, the amendments, the bootstrap unit (amendment 8) and the open label-horizon question | Bengisu | requested on this branch's PR, opened 2026-10-28 UTC; no review yet |
+| The controls re-run at the freezing ref (proposal D) | Mert | the frozen run is in the freezing commit; the section 3.9 rehearsal stays a rehearsal |
+| The submission script: `build` and `score` modes, `rep_delay`, `init_qubits`, design §6's `T1` characterisation | Mert | step 1d (amendment 7), not built |
 | The second account for the daily cadence | Mert names it | before job 2 (section 5) |
 
 ## 7. Related
