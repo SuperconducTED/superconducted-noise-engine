@@ -1,0 +1,14 @@
+function                                                       0.18.2 vs 0.17.2 | main vs 0.17.2
+Controller::simulation_methods(                                same             | same
+Method Controller::automatic_simulation_method(                same             | same
+void QuantumError::compute_superoperator()                     same             | same
+void QuantumError::compute_kraus()                             same             | same
+void QuantumError::compute_circuits_superoperator()            same             | same
+void QuantumError::compute_generators_superoperator()          same             | same
+inline void matrix<T>::initialize(size_t rows, size_t cols)    same             | same
+void NoiseModel::enable_superop_method(int num_threads)        same             | DIFFERS
+    main adds: exs[omp_get_thread_num()] = std::current_exception();
+    main drops: exs[omp_get_num_threads()] = std::current_exception();
+void NoiseModel::enable_kraus_method(int num_threads)          same             | DIFFERS
+    main adds: exs[omp_get_thread_num()] = std::current_exception();
+    main drops: exs[omp_get_num_threads()] = std::current_exception();
