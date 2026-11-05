@@ -308,6 +308,12 @@ def test_guard_refuses_the_real_drafts_status_line(tmp_path: Path) -> None:
         hs.check_frozen(repo, head, prereg, "c" * 64)
 
 
+def test_guard_refuses_a_commit_without_the_pre_registration(tmp_path: Path) -> None:
+    repo, _prereg, head = _repo(tmp_path, FROZEN)
+    with pytest.raises(hs.RefusedError, match="not in the frozen commit"):
+        hs.check_frozen(repo, head, Path("elsewhere/prereg.md"), "c" * 64)
+
+
 def test_guard_refuses_a_pre_registration_without_the_hash(tmp_path: Path) -> None:
     repo, prereg, head = _repo(tmp_path, "**Status**: **Frozen**\n")
     with pytest.raises(hs.RefusedError, match="does not name"):

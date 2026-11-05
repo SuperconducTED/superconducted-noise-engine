@@ -138,6 +138,18 @@ def test_every_earlier_day_with_no_outcome_is_scored_oldest_first(tmp_path: Path
     ]
 
 
+def test_only_day_folders_are_scored(tmp_path: Path) -> None:
+    """A stray folder that sorts before today, with a job id in it, is not a day of the run."""
+    stray = tmp_path / "jobs" / "0-stray"
+    stray.mkdir(parents=True)
+    (stray / "job_id.txt").write_text("x", encoding="utf-8")
+    (stray / "t1-job_id.txt").write_text("x", encoding="utf-8")
+    runner = Runner()
+    _run(_morning(tmp_path), 3, runner)
+    assert "score" not in runner.names
+    assert "t1 score" not in runner.names
+
+
 def test_the_check_is_scored_on_a_later_morning(tmp_path: Path) -> None:
     folder = _submitted(tmp_path, 1, "job_id.txt", "arm-a.tsv", "t1-job_id.txt")
     _submitted(tmp_path, 2, "t1-job_id.txt", "t1-check.json")
@@ -278,7 +290,7 @@ def test_a_rehearsal_passes_its_clock_and_skips_the_freeze_flags(tmp_path: Path)
 
 
 def test_a_rehearsal_never_waits_for_the_window(tmp_path: Path) -> None:
-    early = datetime(2026, 11, 10, 1, 0, tzinfo=UTC)
+    early = datetime(2026, 11, 10, 3, 44, 30, tzinfo=UTC)  # a real morning would wait 30 s here
     morning = _morning(
         tmp_path, rehearsal=daily.Rehearsal(early, tmp_path / "l.json", early, "b" * 40)
     )

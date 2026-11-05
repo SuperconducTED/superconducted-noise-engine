@@ -135,7 +135,10 @@ def check_frozen(repo: Path, frozen_at: str | None, prereg: Path | None, control
         raise RefusedError(f"HEAD is {head}, not the frozen commit {frozen_at}")
     if _git(repo, "status", "--porcelain").strip():
         raise RefusedError("the tree is not clean")
-    text = _git(repo, "show", f"HEAD:{prereg.as_posix()}")
+    try:
+        text = _git(repo, "show", f"HEAD:{prereg.as_posix()}")
+    except subprocess.CalledProcessError as exc:
+        raise RefusedError(f"{prereg} is not in the frozen commit") from exc
     if not FROZEN_STATUS.search(text):
         raise RefusedError("the pre-registration's status line does not read Frozen")
     named = CONTROLS_SHA.search(text)

@@ -474,6 +474,73 @@ def test_the_token_reaches_no_file_the_check_writes(
     assert not [p.name for p in written if FAKE_TOKEN.encode() in p.read_bytes()]
 
 
+# --- the fit, with the library's objects stubbed ---------------------------------------------------
+
+
+class _Value:
+    nominal_value = 1e-4
+    std_dev = 4e-6
+
+
+class _Results:
+    def __init__(self, qubits: Sequence[int]) -> None:
+        self._qubits = qubits
+
+    def iterrows(self) -> Any:
+        for q in self._qubits:
+            yield q, {"components": [f"Q{q}"], "value": _Value(), "chisq": 1.2, "quality": "good"}
+
+
+def _stub_fit_library(monkeypatch: pytest.MonkeyPatch, fitted: Sequence[int]) -> None:
+    class Done:
+        def analysis_results(self, name: str, dataframe: bool) -> _Results:
+            assert (name, dataframe) == ("T1", True)
+            return _Results(fitted)
+
+    class Run:
+        def block_for_results(self, timeout: float) -> Done:
+            assert timeout == t1.ANALYSIS_TIMEOUT_S
+            return Done()
+
+    class Analysis:
+        def run(self, data: Any) -> Run:
+            del data
+            return Run()
+
+    class Experiment:
+        analysis = Analysis()
+
+    class Data:
+        def __init__(self, experiment: Any) -> None:
+            del experiment
+
+        def add_data(self, rows: Any) -> None:
+            del rows
+
+    class Framework:
+        ExperimentData = Data
+
+    monkeypatch.setattr(t1.importlib, "import_module", lambda name: Framework())
+    monkeypatch.setattr(t1, "_experiment", lambda backend, delays: Experiment())
+
+
+def test_a_fit_for_every_qubit_is_returned(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_fit_library(monkeypatch, [3, 5])
+    out = t1.fit_t1(None, {3: [1e-6], 5: [1e-6]}, [], [])
+    assert set(out) == {3, 5}
+    assert out[3]["t1_s"] == pytest.approx(1e-4)
+    assert out[3]["stderr_s"] == pytest.approx(4e-6)
+    assert out[3]["relative_se"] == pytest.approx(0.04)
+    assert out[3]["reduced_chi_squared"] == pytest.approx(1.2)
+    assert out[3]["quality"] == "good"
+
+
+def test_a_fit_that_lost_a_qubit_is_refused(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_fit_library(monkeypatch, [3])
+    with pytest.raises(ValueError, match="fitted"):
+        t1.fit_t1(None, {3: [1e-6], 5: [1e-6]}, [], [])
+
+
 # --- with the library itself --------------------------------------------------------------------
 
 
