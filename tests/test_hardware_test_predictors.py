@@ -685,6 +685,7 @@ def test_controls_then_submission_round_trip(
     frozen = json.loads((freeze / "controls.json").read_text(encoding="utf-8"))
     assert frozen["backend"] == "ibm_fez" and frozen["ref_sha"] == "f" * 40
     assert frozen["min_window_distinct"] == 15 and frozen["below_window_floor"] == []
+    assert frozen["requested_controls"] == 1
     (control,) = [c["qubit"] for c in frozen["controls"]]
 
     job = tmp_path / "job"
@@ -721,6 +722,11 @@ def test_dry_run_without_controls_records_null(
         {"backend": "ibm_other", "controls": [{"qubit": 1}]},
         {"backend": "ibm_fez", "controls": []},
         {"backend": "ibm_fez", "controls": [{"qubit": "1"}]},
+        {"backend": "ibm_fez", "controls": [{"qubit": 1}, {"qubit": 1}], "requested_controls": 2},
+        {"backend": "ibm_fez", "controls": [{"qubit": -1}], "requested_controls": 1},
+        {"backend": "ibm_fez", "controls": [{"qubit": 1}], "requested_controls": 2},
+        {"backend": "ibm_fez", "controls": [{"qubit": 1}]},
+        {"backend": "ibm_fez", "controls": [{"qubit": 1}], "requested_controls": True},
         {"backend": "ibm_fez"},
     ],
 )
@@ -731,6 +737,44 @@ def test_unusable_controls_file_is_refused(
     path.write_text(json.dumps(payload), encoding="utf-8")
     job = tmp_path / "job"
     assert _cli(monkeypatch, ["--controls", str(path), "--out", str(job)]) == 2
+    assert not job.exists()
+
+
+def test_submission_refuses_controls_outside_device(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    path = tmp_path / "controls.json"
+    path.write_text(
+        json.dumps(
+            {
+                "backend": "ibm_fez",
+                "controls": [{"qubit": 4}],
+                "requested_controls": 1,
+            }
+        ),
+        encoding="utf-8",
+    )
+    job = tmp_path / "job"
+    assert _cli(monkeypatch, ["--controls", str(path), "--out", str(job)]) == 2
+    assert not job.exists()
+
+
+@pytest.mark.parametrize("count", [0, -1])
+def test_controls_mode_requires_a_positive_control_count(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, count: int
+) -> None:
+    job = tmp_path / "freeze"
+    args = ["--mode", "controls", "--propose-controls", str(count), "--out", str(job)]
+    assert _cli(monkeypatch, args) == 2
+    assert not job.exists()
+
+
+def test_controls_mode_refuses_to_freeze_fewer_controls_than_requested(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    job = tmp_path / "freeze"
+    args = ["--mode", "controls", "--propose-controls", "5", "--out", str(job)]
+    assert _cli(monkeypatch, args) == 2
     assert not job.exists()
 
 

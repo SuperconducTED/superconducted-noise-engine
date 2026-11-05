@@ -1,0 +1,9 @@
+== a. unseeded job, two identical circuits, 2500 shots
+reported seeds 4261557885, 4261559998, difference 2113
+circuit1 shot j == circuit0 shot j+2113: 1.000 over 387 shots; aligned 0.005
+== b. ry(1.0) and ry(1.3) in one job, seed 11, 4000 shots
+P(1): 0.250, 0.352
+corr(c0 shot j+2113, c1 shot j) over 1887 shots: 0.741
+corr(c0 shot j, c1 shot j) over 4000 shots: -0.012
+== c. aligned agreement, 8 qubits, 512 shots, seeds 10**6*k vs 10**6*k + 600
+per pair: [0.004, 0.006, 0.004, 0.008, 0.01, 0.002, 0.0, 0.0, 0.004, 0.006] mean 0.0043 (2^-8 = 0.0039)
