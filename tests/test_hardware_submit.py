@@ -18,7 +18,8 @@ from typing import Any, ClassVar
 
 import pytest
 import scripts.hardware_submit as hs
-from qiskit import QuantumCircuit
+from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
+from qiskit.primitives.containers import BitArray, DataBin, SamplerPubResult
 from qiskit.transpiler import Target
 from qiskit_aer import AerSimulator
 from qiskit_ibm_runtime import SamplerV2
@@ -894,6 +895,76 @@ def test_an_env_file_without_a_token_is_refused(tmp_path: Path) -> None:
 # --- the rehearsal device ---------------------------------------------------------------------
 
 
+def _pub(**registers: dict[str, int]) -> SamplerPubResult:
+    bits = {
+        name: BitArray.from_counts(counts, num_bits=len(next(iter(counts))))
+        for name, counts in registers.items()
+    }
+    return SamplerPubResult(DataBin(**bits))
+
+
+def test_counts_come_from_each_circuits_own_register() -> None:
+    arm_a = QuantumCircuit(QuantumRegister(2), ClassicalRegister(2, "c"))
+    arm_b = QuantumCircuit(QuantumRegister(2), ClassicalRegister(2, "meas"))
+    result = [_pub(c={"01": 3}), _pub(meas={"10": 5})]
+    assert hs._counts_from_pubs(result, [arm_a, arm_b]) == [{"01": 3}, {"10": 5}]
+
+
+def test_counts_join_a_circuits_registers_with_the_lowest_bit_on_the_right() -> None:
+    """The ``T1`` analysis reads bit ``i`` as qubit ``i``: a swap would trade two qubits' fits."""
+    circuit = QuantumCircuit(
+        QuantumRegister(2), ClassicalRegister(1, "c0"), ClassicalRegister(1, "c8")
+    )
+    result = [_pub(c0={"1": 4}, c8={"0": 4})]
+    assert hs._counts_from_pubs(result, [circuit]) == [{"01": 4}]
+
+
+def test_a_circuit_with_no_register_is_refused() -> None:
+    with pytest.raises(ValueError, match="no classical register"):
+        hs._counts_from_pubs([_pub(c={"0": 1})], [QuantumCircuit(1, name="bare")])
+
+
+def test_a_build_that_ends_after_the_window_closed_is_missed_not_submitted(
+    tmp_path: Path,
+    controls_file: Path,
+    live_doc: dict[str, Any],
+    archive_docs: list[tuple[str, dict[str, Any]]],
+) -> None:
+    device = ScriptedDevice(live_doc)
+    closes = hs.window_for(T_S)[1]
+    clock = iter([T_S, closes])
+    with pytest.raises(hs.RefusedError, match="the window closed"):
+        hs.run_build(
+            jobs_dir=tmp_path / "jobs",
+            controls_path=controls_file,
+            job_number=2,
+            device=device,
+            archive=lambda: list(archive_docs),
+            now=lambda: next(clock),
+            ref_sha="a" * 40,
+            code_commit="b" * 40,
+            enforce_window=True,
+        )
+    assert device.submitted == []
+    job_dir = tmp_path / "jobs" / f"{T_S:%Y-%m-%d}"
+    assert (job_dir / "missed.json").exists()
+    assert not (job_dir / "job_id.txt").exists()
+
+
+def test_a_rehearsal_job_keeps_its_own_execution_time(
+    tmp_path: Path, live_doc: dict[str, Any]
+) -> None:
+    """Scored days later with another clock, the job still ran when it ran."""
+    store = tmp_path / "local"
+    circuit = QuantumCircuit(1, 1, name="one")
+    circuit.measure(0, 0)
+    device = hs.LocalDevice(live_doc, execute_at=T_EXECUTE, store=store, seed=7)
+    job_id = device.submit([circuit], [8], {})
+    later = hs.LocalDevice(live_doc, execute_at=T_EXECUTE + timedelta(days=2), store=store, seed=7)
+    fetched = later.fetch(job_id, [circuit])
+    assert fetched.metrics["timestamps"]["running"] == T_EXECUTE.isoformat()
+
+
 def test_every_local_run_gets_exactly_one_circuit(
     tmp_path: Path, live_doc: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -965,7 +1036,9 @@ def test_the_rehearsal_reports_its_metrics_in_the_real_shape(
     tmp_path: Path, live_doc: dict[str, Any]
 ) -> None:
     device = hs.LocalDevice(live_doc, execute_at=T_EXECUTE, store=tmp_path, seed=1)
-    (tmp_path / "x.json").write_text('{"counts": []}', encoding="utf-8")
+    (tmp_path / "x.json").write_text(
+        json.dumps({"counts": [], "running": T_EXECUTE.isoformat()}), encoding="utf-8"
+    )
     fetched = device.fetch("x", [])
     assert fetched.metrics["timestamps"]["running"] == T_EXECUTE.isoformat()
     assert fetched.metrics["usage"]["quantum_seconds"] == 0

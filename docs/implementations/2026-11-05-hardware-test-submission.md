@@ -25,16 +25,22 @@ Reading the code for this plan found gaps that amendment 7 did not name:
 
 ## What changed
 
-Planned. The table is completed as the work lands.
+Completed as the work landed, 2026-11-06. The last row is still owed.
 
 | File | One-sentence description |
 | --- | --- |
 | `docs/implementations/2026-11-05-hardware-test-submission.md` | This plan, then the record. |
 | `docs/evidence/hardware-reading-vs-level/planning-probes-2026-11-05/` | The five probes behind this plan and their outputs; local only, nothing about the device. |
-| `scripts/hardware_reading_vs_level.py` | Splits building a job from scoring it, so circuits and sealed forecasts exist at `t_s` and the execution control is added afterwards. |
-| `scripts/hardware_submit.py` | New: the `build` and `score` modes, the guards and the pinned options. |
+| `scripts/hardware_reading_vs_level.py` | Splits building a job from scoring it, so circuits and sealed forecasts exist at `t_s` and the execution control is added afterwards, and lets the block bootstrap's calendar reach empty days at either end. |
+| `scripts/hardware_submit.py` | New: the `build`, `score` and `report` modes, the guards and the pinned options. |
+| `scripts/hardware_t1_check.py` | New: design §6's `T1` check on the first and last jobs, run from its own environment. |
+| `scripts/hardware_daily.py` | New: one morning of the run in order, each step a process with a time limit. |
+| `scripts/hardware_schedule.ps1` | New: prints the Windows scheduled task, and registers it only when told to. |
+| `tests/test_hardware_reading_vs_level.py` | Three tests for the split. |
 | `tests/test_hardware_submit.py` | New: offline tests on `FakeFez` and synthetic documents, no token and no network. |
-| `docs/roadmap/2026-10-24-issue-125-preregistration.md` | Dated amendments for what this plan fixes, on its own PR or at the freezing commit. |
+| `tests/test_hardware_t1_check.py` | New: the check's guards and bookkeeping on the pins, and its real fits where Qiskit Experiments is installed. |
+| `tests/test_hardware_daily.py` | New: the morning's order on a scripted runner, and the watchdog on real processes. |
+| `docs/roadmap/2026-10-24-issue-125-preregistration.md` | **Owed:** the dated amendments listed under "Owed to the pre-registration", on PR #135 on the lead's word. |
 
 ## Implementation approach
 
@@ -186,6 +192,71 @@ one shot count, so its `000` 242 of 256 and fidelity 0.473 are wrong. The file s
 how the defect was first seen, and this plan quotes neither figure. A separate session has since reduced
 the defect to a small script and traced the code path. Its finding is on branch
 `claude/recursing-northcutt-28be4c`, not pushed as of this note, and it supersedes the last sentence above.
+
+## What the build added to the plan, 2026-11-06
+
+Written as the code landed. The plan above is not edited; where the two differ, this section is the
+later one.
+
+**The morning runs `build` first, not `score`.** The plan had `score` before the next `build`. `score`
+walks the archive for minutes, so that order would have pushed every capture past 03:45, and `t_s` is the
+capture instant. So `scripts/hardware_daily.py` runs `build`, then the `T1` check where one is due, then
+scores earlier days, then rewrites the report. One consequence: "still queued at the next day's 03:45" is
+acted on when the routine reaches that job, minutes after 03:45, and a job that started in those minutes
+is scored normally.
+
+**The strict missed rule is checked twice.** The rule is on submission, and a build takes minutes, so one
+that began before 04:45 and finished after it is now recorded as missed at the moment of submitting.
+
+**A `report` mode.** The plan's "the decision rule is applied once, after job 14" had no code. The first
+day is declared with `--first-day`, not read from the folders, so a first day the laptop slept through
+cannot move the calendar. A job folder outside the run's 14 days is refused, because the run is never
+extended and a stray folder must not be dropped or scored in silence. Before day 15 the output is marked
+interim. Three things stay visibly open in it: the block length is amendment 8's proposed 3 days, both
+readings of "`level` or `band`" are printed, and A3 is a comparison of paired rows, so a row one predictor
+cannot predict counts for neither side.
+
+**The `T1` check runs its circuits itself.** Qiskit Experiments builds the circuits and fits the results,
+but the job goes through the same device object and the same pinned options as the main job, in place of
+the library's own `run()`. As far as the code read here goes, that `run()` submits and waits in one
+process and writes no job id to disk, and a job can sit in a queue for hours, while this way the fit waits
+for the next morning in a new process. Each `T1` circuit
+has one classical register per qubit, so counts are joined across registers, with a test pinning the order
+because a swap would quietly trade two qubits' fits. The check takes no part in the decision rule.
+
+**The watchdog is the routine's own design.** Each step is a process with a time limit, killed with its
+children. Its output goes to a file and never to a pipe, because the hang of 2026-11-05 was a `MemoryError`
+in a pipe's reader thread. The routine also asks Windows to stay awake, because a wake timer alone does not
+keep an unattended machine from going back to sleep.
+
+### Owed to the pre-registration
+
+Not yet written there. These go in as dated amendments on PR #135, section 3.11, on the lead's word. None
+changes a threshold or a null value. Numbered from 16 because amendment 15 is the last there.
+
+16. **`rep_delay`.** 500 µs with `init_qubits` on, refused at submission if outside the live range. The
+    lead's decision, 2026-11-05.
+17. **Options fixed explicitly.** Dynamical decoupling off, gate and measurement twirling off, classified
+    measurement. Decoupling would put pulses inside Arm A's `delay`; twirling would change the circuits the
+    forecasts were computed for.
+18. **Missed and failed jobs.** Missed: not submitted by 04:45 UTC, including a build that began in time
+    and finished late. Failed: an IBM error or cancellation, or still queued when the next morning's routine
+    reaches it, when it is cancelled. No re-runs. The day stays on the calendar with no rows (amendment 8).
+    The lead's decision, 2026-11-05.
+19. **Always 14 days.** The scores are computed and visible daily (the lead's decision, 2026-11-05). The
+    run neither stops early nor extends on what they show. **Added by this plan, flagged for the lead to
+    confirm.**
+20. **A selected qubit missing from the live target.** The job is refused and the day stays empty.
+    **Open for the lead:** the pre-registration has no replacement rule, and writing one means choosing
+    between an empty day and a selection that no longer follows the frozen rule. Refusing is the one that
+    cannot bias the result.
+21. **The `T1` check's delays.** The design fixes eight delays and 1,024 shots but not their spacing: evenly
+    from 1 µs to three times the qubit's `level` `T1`.
+22. **The status line the guard reads.** Section 1 says the freezing commit writes "Frozen at `<commit>`",
+    which cannot name its own hash. The guard requires `**Status**: **Frozen` and
+    `**Controls SHA-256**: <hash>`, with the frozen commit passed as `--frozen-at`.
+23. **The first day is declared.** The run's first calendar day is written in the freezing commit and passed
+    to `report`. Job `n` runs on day `n`, whatever happened before it.
 
 ## Verification
 

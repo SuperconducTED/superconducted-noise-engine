@@ -36,7 +36,7 @@ from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, time, timedelta
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, NoReturn, Protocol
 
 import numpy as np
 import qiskit
@@ -291,14 +291,15 @@ def _plain(value: Any) -> Any:
 
 
 def _counts_from_pubs(result: Any, circuits: Sequence[QuantumCircuit]) -> list[dict[str, int]]:
-    """Each circuit's own register: Arm A's is ``c``, a transpiled Arm B's is ``meas``."""
+    """Each circuit's own registers: Arm A's is ``c``, a transpiled Arm B's ``meas``, and a ``T1``
+    circuit has one per qubit, joined with its lowest classical bit on the right of the key."""
     out: list[dict[str, int]] = []
     for pub, circuit in zip(result, circuits, strict=True):
-        if len(circuit.cregs) != 1:
-            raise ValueError(f"{circuit.name} has {len(circuit.cregs)} classical registers, not 1")
-        out.append(
-            {k: int(v) for k, v in getattr(pub.data, circuit.cregs[0].name).get_counts().items()}
-        )
+        names = [register.name for register in circuit.cregs]
+        if not names:
+            raise ValueError(f"{circuit.name} has no classical register")
+        bits = getattr(pub.data, names[0]) if len(names) == 1 else pub.join_data(names)
+        out.append({k: int(v) for k, v in bits.get_counts().items()})
     return out
 
 
@@ -310,6 +311,10 @@ class IbmDevice:
         self._sampler = sampler
         self._backend = service.backend(name)
         self.name = name
+
+    @property
+    def backend(self) -> Any:
+        return self._backend
 
     @property
     def target(self) -> Target:
@@ -393,6 +398,10 @@ class LocalDevice:
         self._archived = archived_backend(doc, f"local_{name}")
 
     @property
+    def backend(self) -> Any:
+        return self._archived
+
+    @property
     def target(self) -> Target:
         target: Target = self._archived.target
         return target
@@ -421,7 +430,10 @@ class LocalDevice:
             counts.extend(_counts_from_pubs(result, [circuit]))
         job_id = f"local-{uuid.uuid4()}"
         self._store.mkdir(parents=True, exist_ok=True)
-        write_json_lf(self._store / f"{job_id}.json", {"counts": counts})
+        write_json_lf(
+            self._store / f"{job_id}.json",
+            {"counts": counts, "running": self._execute_at.isoformat()},
+        )
         return job_id
 
     def status(self, job_id: str) -> str:
@@ -432,9 +444,10 @@ class LocalDevice:
 
     def fetch(self, job_id: str, circuits: Sequence[QuantumCircuit]) -> Fetched:
         del circuits
-        running = self._execute_at.isoformat()
+        stored = _read_json(self._store / f"{job_id}.json")
+        running = stored["running"]
         return Fetched(
-            counts=_read_json(self._store / f"{job_id}.json")["counts"],
+            counts=stored["counts"],
             metrics={
                 "timestamps": {"running": running, "finished": running},
                 "usage": {"quantum_seconds": 0},
@@ -473,6 +486,15 @@ def ibm_device(
 # build
 
 
+def _record_missed(job_dir: Path, at: datetime, closes: datetime) -> NoReturn:
+    job_dir.mkdir(parents=True, exist_ok=True)
+    write_json_lf(
+        job_dir / "missed.json",
+        {"reason": "not submitted by the window's close", "at": at.isoformat()},
+    )
+    raise RefusedError(f"the window closed at {closes:%H:%M} UTC: this day stays empty")
+
+
 def run_build(
     *,
     jobs_dir: Path,
@@ -496,15 +518,10 @@ def run_build(
     job_dir = jobs_dir / f"{t_s:%Y-%m-%d}"
     if (job_dir / "job_id.txt").exists():
         raise RefusedError(f"a job was already submitted for {t_s:%Y-%m-%d}")
+    opens, closes = window_for(t_s)
     if enforce_window:
-        opens, closes = window_for(t_s)
         if t_s >= closes:
-            job_dir.mkdir(parents=True, exist_ok=True)
-            write_json_lf(
-                job_dir / "missed.json",
-                {"reason": "not submitted by the window's close", "at": t_s.isoformat()},
-            )
-            raise RefusedError(f"the window closed at {closes:%H:%M} UTC: this day stays empty")
+            _record_missed(job_dir, t_s, closes)
         if t_s < opens:
             raise RefusedError(f"the window opens at {opens:%H:%M} UTC")
     try:
@@ -576,6 +593,9 @@ def run_build(
     }
     write_json_lf(job_dir / "submission.json", submission)
 
+    # A build that began in time can still finish late, and the rule is on submission.
+    if enforce_window and (at_submit := now()) >= closes:
+        _record_missed(job_dir, at_submit, closes)
     job_id = device.submit(circuits, shots, options)
     (job_dir / "job_id.txt").write_text(job_id + "\n", encoding="utf-8", newline="\n")
     submission["t_submit"] = now().isoformat()
