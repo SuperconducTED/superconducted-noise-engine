@@ -49,6 +49,7 @@
   .step .done b { font-weight: 600; }
   .tag { display: inline-block; font-family: ui-sans-serif, system-ui, sans-serif; font-size: .74rem; padding: 1px 7px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
   .tag.now { background: var(--now-soft); color: var(--now); } .tag.wait { background: var(--accent-soft); color: var(--accent); }
+  .table-scroll { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; font-size: .9rem; }
   th, td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
   th { background: var(--accent-soft); }
@@ -92,10 +93,10 @@
   <p class="why">Today every qubit in the engine gets the same noise. The evidence says a week-stale per-qubit channel beats a fresh uniform one. This block builds it; it opens when job 1 reports, because the centre (level or range) depends on the hardware answer.</p>
   <div class="block">
     <div class="step"><h3>2a. Per-qubit extractor (ADR-013) <span class="chip baha">Baha</span> <span class="tag wait">opens at L1</span></h3><p class="done"><b>Done:</b> a per-qubit training table from the #63 builder.</p></div>
-    <div class="step"><h3>2b. Per-qubit channel in <code>aer_factory.py</code> <span class="chip burak">Burak</span> <span class="tag wait">after 2a, 2e</span></h3><p class="done"><b>Done:</b> NC-083 reproduced with the engine's own channel; at L2 the design-time comparison against <code>from_backend</code> on the hardware rows.</p></div>
+    <div class="step"><h3>2b. Per-qubit channel in <code>aer_factory.py</code> <span class="chip burak">Burak</span> <span class="tag wait">after L1, 2a, 2e</span></h3><p class="done"><b>Done:</b> NC-083 reproduced with the engine's own channel; at L2 the design-time comparison against <code>from_backend</code> on the hardware rows.</p></div>
     <div class="step now"><h3>2c. #122 public archive, ADR-029 <span class="chip baha">Baha</span> <span class="tag now">now</span></h3><p class="done"><b>Done:</b> accepted (the builder reads the pinned public revision under the three rules) or rejected with the reason.</p></div>
     <div class="step now"><h3>2d. #130 loader exception <span class="chip baha">Baha</span> <span class="tag now">now</span></h3><p class="done"><b>Done:</b> <code>CalibrationParseError</code> for the two escaping shapes, pinned by a test.</p></div>
-    <div class="step now"><h3>2e. #75 projector boundary <span class="chip bengisu">Bengisu</span> <span class="chip burak">Burak</span> <span class="tag now">now</span></h3><p class="done"><b>Done:</b> allowlist and clipping decided before 2b opens.</p></div>
+    <div class="step now"><h3>2e. #75 projector boundary <span class="chip bengisu">Bengisu</span> <span class="chip burak">Burak</span> <span class="tag now">now</span></h3><p class="done"><b>Done:</b> allowlist and clipping decided before 2b opens. PR #136 is open; target the week of 2026-11-11.</p></div>
   </div>
 
   <h2>Block 3. The fuzzy system and the paper</h2>
@@ -109,30 +110,30 @@
   </div>
 
   <h2>Block 4. The neural model, behind the gate and behind the data</h2>
-  <div class="note">The pattern detector's amended record (PR #128) found a 4.6% gain over the full-history base rate, below the practical margin, and no ordering beyond the disagreement itself; the reviewer's conclusion, adopted here: this establishes no need for a neural model. N2 runs only if the next genuinely unseen evaluation (rows after the current archive, about December) clears the strengthened rule frozen at <code>d7087e69</code>. The brief asking Dr. Akba to ratify that rule is drafted and unsent; sending it is the lead's call.</div>
+  <div class="note">The pattern detector's amended record (PR #128) found a 4.6% gain over the full-history base rate, below the practical margin, and no ordering beyond the disagreement itself; the reviewer's conclusion, adopted here: this establishes no need for a neural model. N2's gate, in full: L1 has passed, and the next genuinely unseen evaluation (rows after the current archive, about December, pipeline frozen at <code>d7087e69</code>) clears clause 1 as the pattern detector's README section 12.7 strengthens it. Clause 2 is not part of the gate: it compares the network with the logistic model, so it cannot be scored until N2 has run, and it is the test the network then has to pass. The brief asking Dr. Akba to ratify the rule is drafted and unsent; sending it is the lead's call.</div>
 
   <h2>Block 5. Housekeeping, now overdue</h2>
-  <div class="note">The phase-3 milestone passed 2026-10-31 with eight issues open (#57, #84, #92, #93, #104, #108, #109 and the close record); each closes or moves with a reason (gate L5). PR #111 is approved but conflicts on the register: merge <code>main</code> in and merge it, or close it with a record.</div>
+  <div class="note">The phase-3 milestone passed 2026-10-31 with eight items open: seven issues (#57, #84, #92, #93, #104, #108, #109) and PR #111. Each closes or moves with a reason (gate L5). PR #111 was approved on 2026-10-04, has since had changes requested (Bengisu 2026-10-28, Burak 2026-11-02) and conflicts on the register: merge <code>main</code> in and merge it, or close it with a record.</div>
 
   <h2>Block 6. Verification, at the end</h2>
   <div class="note">Every figure so far is a laptop figure, provisional. Burak's desktop batch (the pattern detector's N6, NC-080 to NC-094, the dry run of 1b) is what "reproduced and reproducible" means; the hardware rows of block 1 are the only thing that turns archive evidence into a claim about the device.</div>
 
   <h2>Weeks, as targets</h2>
-  <table>
+  <div class="table-scroll"><table>
     <thead><tr><th>When</th><th>Mert</th><th>Burak</th><th>Baha</th><th>Bengisu</th></tr></thead>
     <tbody>
       <tr><td>week of 2026-10-28</td><td>1a, 1b; #111 decision; block 5</td><td>reviews 1a; starts 3b</td><td>2d, 2c</td><td>3a's D1 to D5; reviews 1c when it opens</td></tr>
       <tr><td>week of 2026-11-04</td><td>1c, freeze, job 1 (<b>L1</b>)</td><td>reproduces 1b</td><td>2a opens at L1</td><td>3c</td></tr>
-      <tr><td>weeks of 2026-11-11 and 11-18</td><td>daily jobs; PR-A1</td><td>2b; 3b</td><td>2a</td><td>3e with Mert</td></tr>
+      <tr><td>weeks of 2026-11-11 and 11-18</td><td>daily jobs; PR-A1</td><td>2e with Bengisu (#75, PR #136) in the week of 11-11; 2b from 11-18, after L1 and 2e; 3b</td><td>2a</td><td>2e with Burak in the week of 11-11; 3e with Mert</td></tr>
       <tr><td>from 2026-11-25</td><td><b>L2</b>: decision rule, NC rows; 3e</td><td>desktop batch</td><td>3d</td><td>3e</td></tr>
-      <tr><td>December</td><td>unseen evaluation of the pattern detector; N2 only if it clears</td><td>N5, N6</td><td></td><td></td></tr>
+      <tr><td>December</td><td>unseen evaluation of the pattern detector; N2 only if it clears clause 1 as strengthened (block 4)</td><td>N5, N6</td><td></td><td></td></tr>
       <tr><td>Q1 2027</td><td>the paper's draft at <b>L4</b>, with the hardware section if L2 passes</td><td></td><td></td><td></td></tr>
     </tbody>
-  </table>
+  </table></div>
 
   <details>
     <summary>Türkçe özet</summary>
-    <p>2026-10-28 itibarıyla kanıt yığını <code>main</code>'de (PR #120'den #128'e). Henüz QPU'da hiçbir iş koşmadı ve motorun gürültü kanalı tüm kübitler için aynı. Önümüzdeki haftalar: (1) donanım testi, kritik yol: seçim kuralları ve çevrimdışı yarı (Mert, Burak yeniden üretir), ön-kayıt PR'ı (Bengisu inceler), dondurma ve 06:45 İstanbul'da 1. iş, kapılar L1 ve L2; (2) ürün: L1'de açılan kübit başına seviye merkezli kanal (Baha çıkarıcı, Burak kanal), #122, #130, #75; (3) bulanık sistem ve makale: #64 D1-D5 ve PR-A1, #60 ilk uydurma, #61, #62, merdiven ve bulanık bandın satırı, kapı L4, makale taslağı burada başlar; (4) sinir modeli L1'in ve verinin arkasında: örüntü dedektörünün düzeltilmiş kaydı tam geçmişli taban oranına karşı %4.6 kazanç buldu, pratik payın altında; N2 yalnızca Aralık'taki görülmemiş değerlendirme kuralı geçerse; (5) ev işleri: faz-3 kilometre taşı 2026-10-31'de geçti, sekiz açık konu kapanır ya da gerekçeyle taşınır (L5), #111 kararı; (6) doğrulama: Burak'ın masaüstü toplu koşusu, donanım satırları.</p>
+    <p>2026-10-28 itibarıyla kanıt yığını <code>main</code>'de (PR #120'den #128'e). Henüz QPU'da hiçbir iş koşmadı ve motorun gürültü kanalı tüm kübitler için aynı. Önümüzdeki haftalar: (1) donanım testi, kritik yol: seçim kuralları ve çevrimdışı yarı (Mert, Burak yeniden üretir), ön-kayıt PR'ı (Bengisu inceler), dondurma ve 06:45 İstanbul'da 1. iş, kapılar L1 ve L2; (2) ürün: L1'de açılan kübit başına seviye merkezli kanal (Baha çıkarıcı, Burak kanal), #122, #130, #75; (3) bulanık sistem ve makale: #64 D1-D5 ve PR-A1, #60 ilk uydurma, #61, #62, merdiven ve bulanık bandın satırı, kapı L4, makale taslağı burada başlar; (4) sinir modeli L1'in ve verinin arkasında: örüntü dedektörünün düzeltilmiş kaydı tam geçmişli taban oranına karşı %4.6 kazanç buldu, pratik payın altında; N2 yalnızca L1'den sonra ve Aralık'taki görülmemiş değerlendirme güçlendirilmiş clause 1'i geçerse; clause 2 ağ koşulduktan sonra puanlanır; (5) ev işleri: faz-3 kilometre taşı 2026-10-31'de geçti, sekiz açık kalem (yedi konu ve PR #111) kapanır ya da gerekçeyle taşınır (L5), #111 kararı; (6) doğrulama: Burak'ın masaüstü toplu koşusu, donanım satırları.</p>
   </details>
 </main>
 </body>
