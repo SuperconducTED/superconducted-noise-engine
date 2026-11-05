@@ -1266,6 +1266,19 @@ def test_the_report_hands_the_bootstrap_the_whole_calendar_in_three_day_blocks(
     assert seen[0]["seed"] != seen[1]["seed"]
 
 
+@pytest.mark.parametrize(("today", "has_interval"), [(2, False), (3, True)])
+def test_a_calendar_no_longer_than_a_block_has_no_interval(
+    tmp_path: Path, today: int, has_interval: bool
+) -> None:
+    """With three days and three-day blocks every draw is all three days: zero width, no evidence."""
+    for i in range(today + 1):
+        _scored_day(tmp_path, _day(i), _strong_day(i, 0.01 * (i % 2)))
+    a1 = _report(tmp_path, today)["arm_a"]["A1_level_beats_reading"]
+    assert a1["mean_difference"] > 0.0
+    assert (a1["interval"] is not None) is has_interval
+    assert a1["passes"] is has_interval
+
+
 def test_the_block_length_is_amendment_8s_three_days_and_the_run_is_fourteen() -> None:
     assert hs.BLOCK_DAYS == 3
     assert hs.N_JOBS == 14

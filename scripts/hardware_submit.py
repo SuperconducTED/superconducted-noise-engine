@@ -794,6 +794,15 @@ def _beats(
     if not pairs:
         return {"rows": 0, "mean_difference": None, "interval": None, "passes": False}
     diffs, dates = zip(*pairs, strict=True)
+    if (span[1] - span[0]).days + 1 <= BLOCK_DAYS:
+        # Early in the run a block can hold the whole calendar, so every draw is the same draw and
+        # the interval has no width. That says nothing about uncertainty, so it cannot pass.
+        return {
+            "rows": len(pairs),
+            "mean_difference": float(np.mean(diffs)),
+            "interval": None,
+            "passes": False,
+        }
     low, high = calendar_block_bootstrap(
         list(diffs), list(dates), block_days=BLOCK_DAYS, seed=seed, span=span
     )
