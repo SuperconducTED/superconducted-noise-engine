@@ -452,6 +452,95 @@ lead and its cause found first, and the failed run is disclosed here.
 **What the output is.** As before: pipeline acceptance on Aer, not a measurement of the device, no
 NC row and no sentence about `ibm_fez`.
 
+### Result, 2026-11-05
+
+Laptop (Windows 11, Python 3.12.10, the exact pins), provisional until the desktop run below.
+
+**First attempt: no output, so no result.** It started at 09:36:40 UTC from `4092e6ea`. At 09:48:28
+UTC, during the archive walk of `--mode controls`, a reader thread inside `subprocess.run` raised
+`MemoryError` while taking the output of `git show` for one snapshot. On Windows `subprocess` reads
+a child's output through threads, so the exception ended only that thread: the child blocked on a
+full pipe and the parent waited for the child. That gives no exit, no output and nothing on the
+console, so it sat for two hours until the lead asked; it was then stopped and its log kept.
+
+The cause is not established. Windows logged no low-memory event, and the same step passed on
+2026-11-04 and again below. In the second attempt the machine's committed memory reached 33.2 GB
+against a limit of 34.7 GB and the page file grew, which makes a brief shortage plausible and proves
+nothing about 09:48. On POSIX `subprocess` reads with a selector on the main thread, so the same
+failure there raises instead of hanging. Nothing was changed for this: any long run on this laptop
+needs a watchdog, the first 1d run included, because a hung run looks exactly like a working one.
+
+**Second attempt: the record run.** Same commit and commands, with a watchdog beside it that sampled
+memory and CPU every two minutes (scratch, not committed).
+
+| Stage | UTC | Duration | Exit |
+| --- | --- | --- | --- |
+| `--mode controls` | 11:52:39 to 12:01:53 | 9 min 14 s | 0 |
+| The dry run | 12:01:53 to 12:36:23 | 34 min 30 s | 0 |
+
+Python's committed memory was about 3.1 GB through the archive walks and 6.9 GB once Aer started;
+the highest sample was 6.97 GB.
+
+| # | Expected | Found |
+| --- | --- | --- |
+| 1 | `controls.json` holds what the 2026-10-28 file holds, plus `requested_controls: 4` | Held: one added line. The same controls 48, 112, 54, 105 and the same floor list 11, 72, 108. |
+| 2 | All five criteria pass under both truths | Held: 10 of 10. |
+| 3 | The four TSVs, `criteria.json` and `selection.json` identical once line endings are normalised | Held for all six. |
+| 4 | `manifest.json` differs only in `controls_file_sha256`, the hash of the new file as stored | Held: `03c199e0...` became `b90a2f7a...`, the SHA-256 of the committed blob, which has no CR bytes. |
+
+Every expectation written before the run held, and no output differs from what was predicted.
+
+Gates at `4092e6ea`, before the output commit: `ruff check .`, `ruff format --check .`,
+`mypy --strict` (49 files) and `scripts/check_ids.py` clean; 1,095 tests collected, 1,095 passed in
+440 s, nothing skipped because the archive is present on this machine.
+`tests/test_hardware_reading_vs_level.py` collects 42 at this tree; the table near the top of this
+record was written at 41. NC-021 is re-measured at this PR's merge (Rule 6), not here.
+
+Added by this section:
+
+| File | One-sentence description |
+| --- | --- |
+| `docs/evidence/hardware-reading-vs-level/compare_dry_run.py` | Compares two dry-run output folders: the selection, the circuits and the verdicts decide the exit code, and sampled-output identity is reported without failing the run. |
+| `docs/evidence/hardware-reading-vs-level/dry-run-2026-11-05/` | This run's output and its controls file, and the reference a reproduction compares against. |
+
+`dry-run-2026-10-28/` stays as committed. To reproduce, from the repository root:
+
+```bash
+mkdir -p <scratch>/out
+python -m scripts.hardware_test_predictors --repo . --ref 5828b4a29fabc245aa096e530852249a3496dc5b --at 2026-10-23T09:34:56Z --mode controls --out <scratch>/freeze
+cp <scratch>/freeze/controls.json <scratch>/out/controls.json
+python -m scripts.hardware_reading_vs_level --repo . --ref 5828b4a29fabc245aa096e530852249a3496dc5b --at 2026-10-23T09:34:56Z --execution-ref 84ba0230738c9ee2773616b4e4c7142ba91180e3 --controls <scratch>/out/controls.json --out <scratch>/out
+python docs/evidence/hardware-reading-vs-level/compare_dry_run.py docs/evidence/hardware-reading-vs-level/dry-run-2026-11-05 <scratch>/out
+```
+
+The comparison exits 0 when its `MUST MATCH` rows hold. Its `REPORTED` rows do not decide anything:
+they say whether Aer samples identically across platforms, which is still unchecked.
+
+### Verification on the desktop
+
+The full runbook is this PR's second comment, in Turkish, for bash on WSL2, pinned to the tested SHA,
+and it says which of its steps the rehearsal skipped. Its steps:
+
+0. Record the git and Python versions, where `safe.bareRepository` comes from, and the available
+   memory.
+1. Clone fresh with `--single-branch` and no blob filter, so the suite cannot reach the archive and
+   the later archive fetch brings every blob at once, not one at a time.
+2. Hard stop unless `HEAD` is the pinned SHA and the merge base with `main` is `5c98f264`.
+3. New venv from the pins (`requirements.txt`, `requirements-dev.txt`, `pip install -e . --no-deps`),
+   then a pin check.
+4. Machine fingerprint.
+5. The static gates.
+6. The full suite before the archive is fetched: passed equals collected minus 1, exactly one skip,
+   the archive survey test, and nothing failed. It is not compared with NC-021, which this branch
+   does not update until the merge.
+7. Fetch `calibration-data` and confirm both commits exist.
+8. `--mode controls` and the dry run under `time`, both exiting 0.
+9. `compare_dry_run.py` against `dry-run-2026-11-05/`: every `MUST MATCH` row holds. The `REPORTED`
+   rows answer the cross-platform question and are recorded as they come.
+10. Scope: nothing under `src` differs from `main`, and the tree stays clean.
+11. The usual four-way report: the transcript as a PR comment, a committed record under
+    `docs/evidence/`, the tested SHA and the machine fingerprint.
+
 ## Related docs
 
 - `docs/roadmap/2026-10-23-hardware-reading-vs-level-test.md` (the design, §2 to §7)
