@@ -260,7 +260,18 @@ rerun.
 
 ## 8. Amendments
 
-None yet.
+### Amendment 1, 2026-11-05: H2's tolerance, after seeing data, not blind
+
+Section 3 says sums must hold to a relative `1e-9`. The first run of `bridge_arm_b.py` (from commit
+`cd7d9650`, output not kept) printed Arm B's sum alone as 0.999999997 on four of six layouts, and its
+sum after Arm A as `1024` to nine figures. Read literally, H2's "alone sums 1" therefore misses that
+tolerance by about `3e-9`, on a circuit that has no defect in it. The miss is recorded here and stands.
+
+The alone state on the archived `ibm_fez` model has a trace just below 1 in any order, which is a
+different quantity from the factor the law is about. So the law's check on project circuits is
+restated as a new measurement: the ratio of the sum after Arm A to the sum alone, which should be
+exactly `2^k`. `bridge_arm_b.py` now prints that ratio and twelve decimals; no prediction in section 3
+is edited. The cause of the `3e-9` was not looked into.
 
 ## 9. Runs
 

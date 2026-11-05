@@ -63,15 +63,18 @@ def noise_locations(circuit: QuantumCircuit, noise: NoiseModel) -> tuple[int, in
     return gates, channels
 
 
-def line(label: str, result, index: int) -> None:
+def line(label: str, result, index: int, reference: float | None = None) -> float:
+    """Print one row; `reference` adds the sum's ratio to the same circuit run alone."""
     metadata = result.results[index].metadata
     total = float(np.sum(result.data(index)["probabilities"]))
     power = math.log2(total) if total > 0 else float("nan")
+    ratio = "" if reference is None else f"  ratio to alone {total / reference:.12f}"
     print(
-        f"  {label:18s} sum of probabilities {total:.9g}  log2 {power:.9f}  "
-        f"method {metadata['method']}  noise {metadata.get('noise')}",
+        f"  {label:18s} sum of probabilities {total:.12f}  log2 {power:.9f}  "
+        f"method {metadata['method']}  noise {metadata.get('noise')}{ratio}",
         flush=True,
     )
+    return total
 
 
 def counts_line(label: str, counts: dict[str, int], shots: int) -> None:
@@ -100,9 +103,11 @@ def h2() -> None:
         saved = saved_probabilities(arm_b, list(triple))
         gates, channels = noise_locations(arm_b, noise)
         print(f" layout {triple}: noisy gates {gates}, delay channels {channels}", flush=True)
-        line("alone", sim.run(saved, shots=SHOTS, seed_simulator=SEED).result(), 0)
-        line("before Arm A", sim.run([saved, arm_a], shots=SHOTS, seed_simulator=SEED).result(), 0)
-        line("after Arm A", sim.run([arm_a, saved], shots=SHOTS, seed_simulator=SEED).result(), 1)
+        alone = line("alone", sim.run(saved, shots=SHOTS, seed_simulator=SEED).result(), 0)
+        before = sim.run([saved, arm_a], shots=SHOTS, seed_simulator=SEED).result()
+        line("before Arm A", before, 0, alone)
+        after = sim.run([arm_a, saved], shots=SHOTS, seed_simulator=SEED).result()
+        line("after Arm A", after, 1, alone)
 
 
 def h3() -> None:
