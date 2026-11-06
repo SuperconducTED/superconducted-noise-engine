@@ -1,13 +1,13 @@
 # Phase 4: Design-time predictor
 
-_Generated 2026-11-05 09:31 UTC · main at `5c98f264` (2026-11-04) · day 5 since 2026-11-01 · milestone 2 due 2027-02-27 (114 days), 13 open and 5 closed_
+_Generated 2026-11-06 05:44 UTC · main at `43a2c9b0` (2026-11-05) · day 6 since 2026-11-01 · milestone 2 due 2027-02-27 (113 days), 15 open and 6 closed_
 
 _Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, on main. Gates are ordered, not dated (plan §6)._
 
 
 ## Plan warnings
 
-- The plan document changed at 57b0c789 (2026-10-26) on main, after the 951258da plan.json was quoted from. Re-read it and update plan.json.
+- The plan document changed at 4beeb2e4 (2026-11-05) on main, after the 951258da plan.json was quoted from. Re-read it and update plan.json.
 
 ## Lanes and gates
 
@@ -24,7 +24,7 @@ _Everyone starts on lane 1 (plan §5.1)._
   - ⬜ The hardware numbers registered as NC rows, one per conclusion
     - _No machine-checkable source: the register carries no per-ticket marker. Read docs/numerical-claims.md on main when #125 closes._
 
-1. 🟡 #125 Hardware test: reading versus level on ibm_fez (@mertefesensoy): in review, PR #135
+1. 🟡 #125 Hardware test: reading versus level on ibm_fez (@mertefesensoy): in review, PR #140
 2. ✅ #63 Training-set builder (training/dataset.py) (@BahaJarad): delivered by PR #113 on 2026-10-23; the issue is still open with 1 unticked ask (Burak Öztekin)
 3. ❌ #122 Public archive as a second training-set source (ADR-029) (@BahaJarad): ready to start
 4. ⬜ new: Per-qubit extractor and channel (ADR-013) (@BahaJarad, @BurakOztekin): opens after L1, not met yet. Opened after #125's job 1, because its centre (level or range) depends on the hardware answer (plan §2 lane 1 item 4, A.3).
@@ -56,7 +56,7 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 
 - ❌ **L5** Phase 3 closed: The phase-3 milestone closed with every item either done or moved to the phase-4 milestone with a reason. (0/1) · **next**
   - ❌ Milestone 1 (Phase 3) closed
-    - _Milestone 1 (Phase 3 · ANFIS results) is open: 8 open and 27 closed issues._
+    - _Milestone 1 (Phase 3 · ANFIS results) is open: 9 open and 27 closed issues._
 
 1. 🟡 #57 Training contract: ADR-027 accepted (PR #120) (@mertefesensoy): in review, PR #138
 2. ❌ #84 Close the #57 advisor loop (@mertefesensoy): ready to finish
@@ -71,10 +71,10 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 
 **Mert Efe Şensoy** (@mertefesensoy)
 
-1. Unstick PR #135 for #125: Hardware test: reading versus level on ibm_fez (QPU side)
-   - No approving review yet: main's ruleset requires one.
+1. Unstick PR #140 for #125: Hardware test: reading versus level on ibm_fez (QPU side)
+   - CHANGES_REQUESTED standing from @BurakOztekin (2026-11-05). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 1. Unstick PR #138 for #57: Training contract: ADR-027 accepted (PR #120)
-   - No approving review yet: main's ruleset requires one.
+   - Awaiting merge.
 1. Finish #84: Close the #57 advisor loop
    - Closes with #57 in the same ritual (plan §2 lane 3).
 1. Start #109: Phase-3 close record
@@ -84,6 +84,8 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 
 1. #125 offline half: selection rules, circuits for both arms, scoring, the dry run against Aer (#125)
    - The dry run gates the pre-registration commit, and job 1 cannot be submitted before that commit (plan §5.1).
+1. Re-review PR #140 (#125: Hardware test: reading versus level on ibm_fez)
+   - Your CHANGES_REQUESTED from 2026-11-05 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Unstick PR #136 for #75: Decide #75's allowlist and clipping with Bengisu
    - No approving review yet: main's ruleset requires one.
 1. Unstick PR #137 for #60: ADR-014 trainer: the first archive fit
@@ -114,43 +116,38 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 _Review requests not yet answered with a review, and unticked checkboxes that start with the person (`- [ ] @login does X`), on every open issue and PR. Oldest first; "or earlier" marks a post edited after it was written, so the wait shown is the shortest it can be._
 
 
-**Mert Efe Şensoy** (@mertefesensoy), 5 owed
+**Mert Efe Şensoy** (@mertefesensoy), 4 owed
 
-- has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (58 days); has posted there since, on 2026-10-21
-- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (33 days); no post there since
-- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (3 days); no post there since
-- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (3 days); no post there since
-- Review PR #138: requested by @BurakOztekin, since 2026-11-02 (3 days); no post there since
+- has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (59 days); has posted there since, on 2026-10-21
+- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (34 days); no post there since
+- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (4 days); no post there since
+- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (4 days); no post there since
 
-**Burak Öztekin** (@BurakOztekin), 1 owed
+**Burak Öztekin** (@BurakOztekin), 2 owed
 
-- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (63 days); no post there since
+- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (64 days); no post there since
+- Review PR #141: requested by @mertefesensoy, since 2026-11-05 (1 day); no post there since
 
-**Bengisu Cıvdı** (@bengisucvd), 5 owed
+**Bengisu Cıvdı** (@bengisucvd), 4 owed
 
-- Review PR #131: requested by @mertefesensoy, since 2026-10-28 (8 days); no post there since
-- Review PR #133: requested by @mertefesensoy, since 2026-10-28 (8 days); no post there since
-- Review PR #135: requested by @mertefesensoy, since 2026-10-28 (8 days); no post there since
-- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (3 days); no post there since
-- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (3 days); no post there since
+- Review PR #133: requested by @mertefesensoy, since 2026-10-28 (9 days); no post there since
+- Review PR #135: requested by @mertefesensoy, since 2026-10-28 (9 days); no post there since
+- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (4 days); no post there since
+- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (4 days); no post there since
 
 **Baha Jarad** (@BahaJarad), 2 owed
 
-- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (33 days); no post there since
-- Review PR #139: requested by @mertefesensoy, since 2026-11-04 (1 day); no post there since
+- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (34 days); no post there since
+- Review PR #139: requested by @mertefesensoy, since 2026-11-04 (2 days); no post there since
 
 ## Not blocked by anything upstream, so what is holding them?
 
 
 **#125: Hardware test: reading versus level on ibm_fez** (@mertefesensoy)
 
-- [high] No approving review yet: main's ruleset requires one.
+- [critical] CHANGES_REQUESTED standing from @BurakOztekin (2026-11-05). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **#60: ADR-014 trainer: the first archive fit** (@BurakOztekin)
-
-- [high] No approving review yet: main's ruleset requires one.
-
-**#57: Training contract: ADR-027 accepted (PR #120)** (@mertefesensoy)
 
 - [high] No approving review yet: main's ruleset requires one.
 
@@ -175,6 +172,7 @@ Nothing is blocked upstream.
 
 | Date | Gates | Conditions | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 2026-11-06 | 0/5 | 0/7 | 9 | 4 | 0 | milestone 2: 15 open and 6 closed (was 13 and 5); Burak Öztekin owes 2 answers (was 1); Bengisu Cıvdı owes 4 answers (was 5); Mert Efe Şensoy owes 4 answers (was 5); main moved to 43a2c9b0 |
 | 2026-11-05 | 0/5 | 0/7 | 9 | 4 | 0 | milestone 2: 13 open and 5 closed (was 10 and 3); Baha Jarad owes 2 answers (was 1); main moved to 5c98f264 |
 | 2026-11-04 | 0/5 | 0/7 | 9 | 4 | 0 | nothing moved |
 | 2026-11-03 | 0/5 | 0/7 | 9 | 4 | 0 | #57 Training contract: ADR-027 accepted (PR #120): ready to start to in review; #60 ADR-014 trainer: the first archive fit: ready to start to in review; #75 Decide the LOCKED Kraus projector boundary: ready to start to in review; Burak Öztekin owes 1 answer (was 6); Bengisu Cıvdı owes 5 answers (was 3); Mert Efe Şensoy owes 5 answers (was 2) |
