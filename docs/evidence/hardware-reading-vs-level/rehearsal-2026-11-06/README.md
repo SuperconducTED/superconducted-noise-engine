@@ -19,6 +19,9 @@ Record: `docs/implementations/2026-11-05-hardware-test-submission.md`, "Results"
 | `mutate_submit.py`, `mutate_routine.py` | Remove each guard in turn and require a test to fail. |
 | `mutation.out.txt` | Both runs at `9745583e`, then the re-run of the four flagged and the one new mutant at `3f062d4f`. |
 
+A full re-run prints 75 and 60 mutants. The committed output shows 74 and 60, because the 75th was added
+with `3f062d4f` and is among the five re-run at its foot.
+
 To run them, from a clone that has `calibration-data` fetched:
 
     bash rehearse_1d.sh <commit> <output root> <clone> <python> <T1 python> [fetch source]

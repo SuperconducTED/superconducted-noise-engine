@@ -245,7 +245,8 @@ keep an unattended machine from going back to sleep.
 ### Owed to the pre-registration
 
 Not yet written there. These go in as dated amendments on PR #135, section 3.11, on the lead's word. None
-changes a threshold or a null value. Numbered from 16 because amendment 15 is the last there.
+changes a threshold or a null value. Numbered from 16 because amendment 15 is the last there today; if
+Bengisu's review adds one first, these numbers move, so cite them by title until they land.
 
 16. **`rep_delay`.** 500 µs with `init_qubits` on, refused at submission if outside the live range. The
     lead's decision, 2026-11-05.
@@ -350,7 +351,20 @@ battery, so the laptop must stay plugged in. On mains it never sleeps from idlin
 still put it to sleep. Its only standby is S0 low power idle ("Modern Standby"). How a wake timer behaves in
 that state is what criterion 8 tests, and it may not match the plan's picture of a sleeping laptop waking.
 The zone is Turkey Standard Time, UTC+3, with no daylight saving. No `.env` exists under the project folder
-yet, and the lead creates one before job 1, from `.env.example`, in the run's clone.
+yet, and the lead creates one before job 1, from `.env.example`, in the run's clone. That template names the
+same three variables `ibm_device` and the poller read (`IBM_QUANTUM_TOKEN`, `IBM_QUANTUM_CHANNEL`,
+`IBM_QUANTUM_INSTANCE`), and git ignores the file, so it does not trip the clean-tree guard.
+
+### Not checked by any of this
+
+- **The data branch.** `--commit-data` and `--push-data` have only run against a scripted runner, never a real
+  `git` in a real `data/hardware-125` worktree, so the plan's step of committing each job's folder there is
+  untested end to end. Turning on `--push-data` also means an unattended daily push, which is the lead's call
+  when the task is registered.
+- **Linux.** `_kill_tree`'s process-group path and the routine as a whole have run on Windows only.
+- **The guard's passing case on the real command.** It runs only against throwaway repositories in the tests,
+  because no frozen commit exists yet.
+- **Anything the plan already lists:** the QPU, `job.inputs`, the live `rep_delay_range`, overhead and queue time.
 
 ### Gates
 

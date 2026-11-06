@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 from collections.abc import Sequence
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
@@ -349,6 +350,9 @@ def test_a_steps_child_dies_with_it(tmp_path: Path) -> None:
     code = daily.run_step([sys.executable, "-c", parent], tmp_path / "log.txt", 4.0)
     assert code == daily.EXIT_TIMED_OUT
     pid = int(marker.read_text(encoding="utf-8"))
+    deadline = time.monotonic() + 10.0
+    while _alive(pid) and time.monotonic() < deadline:
+        time.sleep(0.1)
     assert not _alive(pid)
 
 
@@ -360,13 +364,12 @@ def _alive(pid: int) -> bool:
             ["tasklist", "/FI", f"PID eq {pid}"], capture_output=True, text=True, check=True
         ).stdout
         return str(pid) in listed
-    import os
-
+    # A killed process stays listed as a zombie until something reaps it, so read its state.
     try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
+        stat = Path(f"/proc/{pid}/stat").read_text(encoding="utf-8")
+    except FileNotFoundError:
         return False
-    return True
+    return stat.rsplit(")", 1)[1].split()[0] != "Z"
 
 
 def test_a_finished_step_returns_its_own_exit_code(tmp_path: Path) -> None:
