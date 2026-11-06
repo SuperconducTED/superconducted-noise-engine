@@ -1,9 +1,9 @@
 # 2026-11-05: the #125 hardware test, submission and scoring (step 1d)
 
-> Status at this commit: **plan, no script code yet.** Written before the code, as the project's rule
-> asks, with the lead's decisions of 2026-11-05 and the acceptance criteria fixed in advance. The
-> planning probes it cites are committed beside the offline half's evidence and are not results about
-> the device. Nothing here has touched the QPU or read the IBM token.
+> Status at this commit: **built, not frozen.** Criteria 1 to 7 hold on the laptop (provisional); 8 and
+> 9 are open, and "Results" below says what each rests on. The plan was written before the code, as the
+> project's rule asks, and is kept as written. The planning probes and the rehearsal are about the
+> pipeline, not the device. Nothing here has touched the QPU or read the IBM token.
 
 ## Problem / Motivation
 
@@ -224,6 +224,19 @@ for the next morning in a new process. Each `T1` circuit
 has one classical register per qubit, so counts are joined across registers, with a test pinning the order
 because a swap would quietly trade two qubits' fits. The check takes no part in the decision rule.
 
+**A short calendar gives no interval.** With three days and three-day blocks, every draw holds all three
+days, so the bootstrap's interval has zero width: the rehearsal's interim report showed exactly that. Such
+an interval says nothing about uncertainty, so A1 and A2 cannot pass on it. The first interim day with a
+real interval is day 4. The final report is not affected.
+
+**The rehearsal's live document must be a new state.** The first attempt took the first archived file after
+each `t_s`. Both repeated a state already in the archive, with no `T1` value changed, because `T1` often
+does not change until many hours after 03:45 (`20261101T050830` against `20261101T033045`, and
+`20261103T070610` against `20261103T032455`). That run passed every check it had while leaving the live path
+untested, so the check now requires `reading` and the execution reading to differ. Also, 15 of the archive
+tip's last 40 files have no `configuration` block. A real capture always has one, so only the rehearsal has
+to pick around that.
+
 **The watchdog is the routine's own design.** Each step is a process with a time limit, killed with its
 children. Its output goes to a file and never to a pipe, because the hang of 2026-11-05 was a `MemoryError`
 in a pipe's reader thread. The routine also asks Windows to stay awake, because a wake timer alone does not
@@ -289,6 +302,59 @@ The probes, from the branch root with `PYTHONPATH=.;src`, using the folder
 
 **Not checked:** anything on the QPU, what `job.inputs` holds on a real job, the live `rep_delay_range`,
 real overhead and queue time, Linux or Burak's desktop.
+
+## Results
+
+Laptop, Windows, exact pins, 2026-11-06 Istanbul time, all provisional until Burak's run. The folder is
+`docs/evidence/hardware-reading-vs-level/rehearsal-2026-11-06/`. **Every figure from the rehearsal describes
+Aer, built from the very reading it is compared to. None is a result about the device, and none takes an
+NC row.** In particular "S1 fails" in `report.json` is the expected output when the simulator's truth is the
+reading, and it shows the rule's code reaching a verdict, not the verdict.
+
+| # | Result | Rests on |
+| --- | --- | --- |
+| 1 | **Holds.** Every output file byte-identical to `dry-run-2026-11-05/`. `compare_dry_run.py` exit 0, 49 minutes. | Run at `087b9c7e`. The only later change to that script is `calendar_block_bootstrap`'s `span` parameter, which the dry run never calls; see the re-run note below. |
+| 2 | **Holds.** `build` at the dry run's instant gives the same selection, controls, slots and layouts, and names the same archive commit and controls hash. | `check.out.txt`, at `9745583e`. |
+| 3 | **Holds.** Days 2026-11-02, 03 and 04 read scored, empty and scored. The empty day holds no folder and no rows, and both other days' rows reach the report: 112 discriminating and 56 control. Job 1 has no Arm B and job 3 has. | `check.out.txt`, `report.json`, `status.txt`. |
+| 4 | **Holds.** Live documents stamped 20:18 on 11-02 and 11:29 on 11-04, against captures at 03:45. `reading` comes from them, the manifest names their hash, and `reading` differs from the execution reading on 60 and 66 of 84 rows. | `check.out.txt`. |
+| 5 | **Holds.** 74 of 74 on `hardware_submit.py` and 56 of 60 on the routine and the check at `9745583e`. The other four, a stale pattern, a test that could not fail and two missing tests, were fixed in `3f062d4f` and re-ran caught, with one new mutant for the guard that commit added. | `mutation.out.txt`. |
+| 6 | **Holds.** `test_the_token_reaches_the_service_and_no_file_a_job_writes` and its counterpart for the check. | Tests, mutation-checked. |
+| 7 | **Holds.** `test_pinned_options_are_the_decided_ones_and_the_sampler_accepts_them`, the fast one-circuit spy and the slow batching test. | Tests, mutation-checked. The mutation run uses the spy; the batching test ran in the gates. |
+| 8 | **Open.** The scheduled run has not fired. Registering a task needs the lead's word. | See "What the laptop allows". |
+| 9 | **Open.** Gates are below. Burak's desktop run and its runbook are owed. | |
+
+**The `T1` check on Aer.** All eight fits land within 1.7 standard errors of the `T1` the simulator was built
+from, across qubits from 5.9 to 272 µs, so the bits reach the right qubits. Standard errors run from 2.9% to
+10.5%. The library marked one fit `bad`, on the 5.9 µs qubit, whose fit still agreed. Whether a real fit's
+error stays this small is what the check is for.
+
+**The real path refuses.** From the full clone, with no rehearsal flags and no `.env` present: no freeze
+arguments, another commit named, and this commit named with the pre-registration absent all exit 2 with
+their reason. So does the check, and the whole morning reports `build` as exit 2 and exits 1. That covers the
+refusals, not a submission: the guard's passing case runs only against throwaway repositories in the tests.
+
+**Time and memory.** Rehearsal stages on the laptop: `build` with Aer 3 min 27 s; morning 1 (`build`, Arm A on
+Aer, the check) 4 min 14 s; morning 3 (`build`, both arms, scoring day 1, the fit) 6 min 17 s; 16.6 minutes
+whole. Committed memory peaked at 37.2 of 39.1 GB, which counts everything else on the laptop and the
+simulator. A real morning runs no simulator, but anyone rehearsing on this laptop should close other work
+first.
+
+### What the laptop allows
+
+Read from `powercfg`, 2026-11-06, with nothing changed. Wake timers are on for mains power and off for
+battery, so the laptop must stay plugged in. On mains it never sleeps from idling, though closing the lid may
+still put it to sleep. Its only standby is S0 low power idle ("Modern Standby"). How a wake timer behaves in
+that state is what criterion 8 tests, and it may not match the plan's picture of a sleeping laptop waking.
+The zone is Turkey Standard Time, UTC+3, with no daylight saving. No `.env` exists under the project folder
+yet, and the lead creates one before job 1, from `.env.example`, in the run's clone.
+
+### Gates
+
+At `3f062d4f`, on the exact pins, with `PYTHONPATH=.;src`: `ruff check .` and `ruff format --check .` clean
+(ruff 0.15.12); `check_ids.py` finds no duplicate or colliding identifier; `mypy --strict` clean on 52 files;
+`pytest tests/` 1267 passed, 2 skipped, in 6 min 58 s. The two skipped need Qiskit Experiments, so CI will skip
+them too. In the check's own environment `tests/test_hardware_t1_check.py` gives 38 passed. The batching test
+on the pins alone gives 1 passed, 87 deselected.
 
 ## Related docs
 
