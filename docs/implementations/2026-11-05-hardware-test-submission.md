@@ -313,7 +313,7 @@ reading, and it shows the rule's code reaching a verdict, not the verdict.
 
 | # | Result | Rests on |
 | --- | --- | --- |
-| 1 | **Holds.** Every output file byte-identical to `dry-run-2026-11-05/`. `compare_dry_run.py` exit 0, 49 minutes. | Run at `087b9c7e`. The only later change to that script is `calendar_block_bootstrap`'s `span` parameter, which the dry run never calls; see the re-run note below. |
+| 1 | **Holds.** Every output file byte-identical to `dry-run-2026-11-05/`, and `compare_dry_run.py` exits 0. | Run twice: at `087b9c7e` right after the split, 49 minutes in a worktree of the partial clone, and at `3f062d4f`, the final code, 15.5 minutes from the full clone. |
 | 2 | **Holds.** `build` at the dry run's instant gives the same selection, controls, slots and layouts, and names the same archive commit and controls hash. | `check.out.txt`, at `9745583e`. |
 | 3 | **Holds.** Days 2026-11-02, 03 and 04 read scored, empty and scored. The empty day holds no folder and no rows, and both other days' rows reach the report: 112 discriminating and 56 control. Job 1 has no Arm B and job 3 has. | `check.out.txt`, `report.json`, `status.txt`. |
 | 4 | **Holds.** Live documents stamped 20:18 on 11-02 and 11:29 on 11-04, against captures at 03:45. `reading` comes from them, the manifest names their hash, and `reading` differs from the execution reading on 60 and 66 of 84 rows. | `check.out.txt`. |
@@ -327,6 +327,10 @@ reading, and it shows the rule's code reaching a verdict, not the verdict.
 from, across qubits from 5.9 to 272 µs, so the bits reach the right qubits. Standard errors run from 2.9% to
 10.5%. The library marked one fit `bad`, on the 5.9 µs qubit, whose fit still agreed. Whether a real fit's
 error stays this small is what the check is for.
+
+**The Aer defect.** The separate session's finding, which the correction above places on a local branch, is
+now PR #141 (`mert/aer-batching-defect`), with Burak's runbook posted. Nothing here depends on its merging:
+the rehearsal still sends one circuit per run.
 
 **The real path refuses.** From the full clone, with no rehearsal flags and no `.env` present: no freeze
 arguments, another commit named, and this commit named with the pre-registration absent all exit 2 with
