@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-06 05:44 UTC",
+  "generated": "2026-11-07 05:44 UTC",
   "main": {
     "sha": "43a2c9b0",
     "date": "2026-11-05",
@@ -535,7 +535,7 @@
           "createdAt": "2026-11-02T19:37:23Z",
           "headRefName": "feature/issue-60-anfis-premise-stage-v2",
           "isDraft": false,
-          "mergeable": "UNKNOWN",
+          "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 137,
           "reviewDecision": "REVIEW_REQUIRED",
@@ -981,7 +981,7 @@
           "createdAt": "2026-11-02T19:20:53Z",
           "headRefName": "feature/issue-75-kraus-boundary",
           "isDraft": false,
-          "mergeable": "UNKNOWN",
+          "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 136,
           "reviewDecision": "REVIEW_REQUIRED",
@@ -1214,7 +1214,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/84"
         },
         "former": false,
-        "days": 59,
+        "days": 60,
         "last_here": "2026-10-21",
         "kind": "checkbox",
         "text": "has sent it to Dr. Akba",
@@ -1234,7 +1234,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/108"
         },
         "former": false,
-        "days": 34,
+        "days": 35,
         "last_here": "2026-10-03",
         "kind": "checkbox",
         "text": "links the verdict from PR #55's thread so the PR record is complete.",
@@ -1254,7 +1254,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/136"
         },
         "former": false,
-        "days": 4,
+        "days": 5,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #136",
@@ -1274,7 +1274,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/137"
         },
         "former": false,
-        "days": 4,
+        "days": 5,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #137",
@@ -1294,7 +1294,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/63"
         },
         "former": false,
-        "days": 64,
+        "days": 65,
         "last_here": "",
         "kind": "checkbox",
         "text": "confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit`",
@@ -1314,7 +1314,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/141"
         },
         "former": false,
-        "days": 1,
+        "days": 2,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #141",
@@ -1334,7 +1334,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/133"
         },
         "former": false,
-        "days": 9,
+        "days": 10,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #133",
@@ -1354,7 +1354,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/135"
         },
         "former": false,
-        "days": 9,
+        "days": 10,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #135",
@@ -1374,7 +1374,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/136"
         },
         "former": false,
-        "days": 4,
+        "days": 5,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #136",
@@ -1394,7 +1394,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/137"
         },
         "former": false,
-        "days": 4,
+        "days": 5,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #137",
@@ -1414,7 +1414,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/108"
         },
         "former": false,
-        "days": 34,
+        "days": 35,
         "last_here": "",
         "kind": "checkbox",
         "text": "posts a verdict on this issue: approve, or the defects he finds.",
@@ -1434,7 +1434,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/139"
         },
         "former": false,
-        "days": 2,
+        "days": 3,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #139",

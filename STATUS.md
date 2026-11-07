@@ -1,6 +1,6 @@
 # Phase 4: Design-time predictor
 
-_Generated 2026-11-06 05:44 UTC · main at `43a2c9b0` (2026-11-05) · day 6 since 2026-11-01 · milestone 2 due 2027-02-27 (113 days), 15 open and 6 closed_
+_Generated 2026-11-07 05:44 UTC · main at `43a2c9b0` (2026-11-05) · day 7 since 2026-11-01 · milestone 2 due 2027-02-27 (112 days), 15 open and 6 closed_
 
 _Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, on main. Gates are ordered, not dated (plan §6)._
 
@@ -118,27 +118,27 @@ _Review requests not yet answered with a review, and unticked checkboxes that st
 
 **Mert Efe Şensoy** (@mertefesensoy), 4 owed
 
-- has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (59 days); has posted there since, on 2026-10-21
-- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (34 days); no post there since
-- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (4 days); no post there since
-- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (4 days); no post there since
+- has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (60 days); has posted there since, on 2026-10-21
+- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (35 days); no post there since
+- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (5 days); no post there since
+- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (5 days); no post there since
 
 **Burak Öztekin** (@BurakOztekin), 2 owed
 
-- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (64 days); no post there since
-- Review PR #141: requested by @mertefesensoy, since 2026-11-05 (1 day); no post there since
+- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (65 days); no post there since
+- Review PR #141: requested by @mertefesensoy, since 2026-11-05 (2 days); no post there since
 
 **Bengisu Cıvdı** (@bengisucvd), 4 owed
 
-- Review PR #133: requested by @mertefesensoy, since 2026-10-28 (9 days); no post there since
-- Review PR #135: requested by @mertefesensoy, since 2026-10-28 (9 days); no post there since
-- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (4 days); no post there since
-- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (4 days); no post there since
+- Review PR #133: requested by @mertefesensoy, since 2026-10-28 (10 days); no post there since
+- Review PR #135: requested by @mertefesensoy, since 2026-10-28 (10 days); no post there since
+- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (5 days); no post there since
+- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (5 days); no post there since
 
 **Baha Jarad** (@BahaJarad), 2 owed
 
-- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (34 days); no post there since
-- Review PR #139: requested by @mertefesensoy, since 2026-11-04 (2 days); no post there since
+- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (35 days); no post there since
+- Review PR #139: requested by @mertefesensoy, since 2026-11-04 (3 days); no post there since
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -172,6 +172,7 @@ Nothing is blocked upstream.
 
 | Date | Gates | Conditions | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 2026-11-07 | 0/5 | 0/7 | 9 | 4 | 0 | nothing moved |
 | 2026-11-06 | 0/5 | 0/7 | 9 | 4 | 0 | milestone 2: 15 open and 6 closed (was 13 and 5); Burak Öztekin owes 2 answers (was 1); Bengisu Cıvdı owes 4 answers (was 5); Mert Efe Şensoy owes 4 answers (was 5); main moved to 43a2c9b0 |
 | 2026-11-05 | 0/5 | 0/7 | 9 | 4 | 0 | milestone 2: 13 open and 5 closed (was 10 and 3); Baha Jarad owes 2 answers (was 1); main moved to 5c98f264 |
 | 2026-11-04 | 0/5 | 0/7 | 9 | 4 | 0 | nothing moved |
