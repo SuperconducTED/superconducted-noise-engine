@@ -1,0 +1,12 @@
+layout (85, 77, 86); T1 [65.4, 124.4, 186.3] us; idle 15553 dt = 62.2 us
+ops {'rz': 10, 'sx': 5, 'delay': 3, 'measure': 3, 'cz': 2, 'barrier': 1} creg ['meas']
+delays in the circuit (duration, unit): [(15553, 'dt'), (15553, 'dt'), (15553, 'dt')]
+1 dry run's route, noise_model=from_backend      F 0.501  {'000': 2076, '101': 521, '001': 363, '111': 342, '011': 248, '100': 217, '010': 176, '110': 153}
+  from_backend sim dt: 4e-09 | options noise? True
+2 AerSimulator.from_backend, direct              F 0.501  {'000': 2076, '101': 521, '001': 363, '111': 342, '011': 248, '100': 217, '010': 176, '110': 153}
+3 SamplerV2 on from_backend sim                  F 0.501  {'000': 2076, '101': 521, '001': 363, '111': 342, '011': 248, '100': 217, '010': 176, '110': 153}
+4 SamplerV2 on the dry run's simulator           F 0.501  {'000': 2076, '101': 521, '001': 363, '111': 342, '011': 248, '100': 217, '010': 176, '110': 153}
+5 noiseless                                      F 1.000  {'000': 2074, '111': 2022}
+
+committed dry run, truth 1, measured fidelity per layout:
+['85-77-86', '0.4877580314']

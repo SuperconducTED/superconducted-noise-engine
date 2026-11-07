@@ -1,0 +1,471 @@
+# 2026-11-05: the #125 hardware test, submission and scoring (step 1d)
+
+> Status at this commit: **built, not frozen.** Criteria 1 to 7 hold on the laptop (provisional); 8 and
+> 9 are open, and "Results" below says what each rests on. The plan was written before the code, as the
+> project's rule asks, and is kept as written. The planning probes and the rehearsal are about the
+> pipeline, not the device. Nothing here has touched the QPU or read the IBM token.
+
+## Problem / Motivation
+
+The hardware test (#125) has its selection rules on `main` (PR #132), its offline half and Aer dry run
+in review (PR #140) and its pre-registration in review (PR #135). Nothing can yet send a job to
+`ibm_fez`, read the result back or score it. Pre-registration amendment 7 assigns this step the
+`build` and `score` modes, `rep_delay`, `init_qubits` and design §6's `T1` characterisation, and §6 of
+that document lists it as one of the things the freezing commit waits on.
+
+Reading the code for this plan found gaps that amendment 7 did not name:
+
+1. `build_job` needs the execution-time rows, which cannot exist before the job runs.
+2. The pre-registration never pins dynamical decoupling or twirling. Decoupling would put pulses inside
+   Arm A's `delay` if it were ever on.
+3. It scores "a missed or failed job" as an empty day and never says what one is.
+4. The live-properties path had never run end to end: the dry run passes `live=None`. A probe has now
+   run it with the latest archived state fed as the live document, and none of the 780 rows differ, but
+   that state was already in the archive, so a genuinely new state is still untested (criterion 4).
+
+## What changed
+
+Completed as the work landed, 2026-11-06. The last row is still owed.
+
+| File | One-sentence description |
+| --- | --- |
+| `docs/implementations/2026-11-05-hardware-test-submission.md` | This plan, then the record. |
+| `docs/evidence/hardware-reading-vs-level/planning-probes-2026-11-05/` | The five probes behind this plan and their outputs; local only, nothing about the device. |
+| `scripts/hardware_reading_vs_level.py` | Splits building a job from scoring it, so circuits and sealed forecasts exist at `t_s` and the execution control is added afterwards, and lets the block bootstrap's calendar reach empty days at either end. |
+| `scripts/hardware_submit.py` | New: the `build`, `score` and `report` modes, the guards and the pinned options. |
+| `scripts/hardware_t1_check.py` | New: design §6's `T1` check on the first and last jobs, run from its own environment. |
+| `scripts/hardware_daily.py` | New: one morning of the run in order, each step a process with a time limit. |
+| `scripts/hardware_schedule.ps1` | New: prints the Windows scheduled task, and registers it only when told to. |
+| `tests/test_hardware_reading_vs_level.py` | Three tests for the split. |
+| `tests/test_hardware_submit.py` | New: offline tests on `FakeFez` and synthetic documents, no token and no network. |
+| `tests/test_hardware_t1_check.py` | New: the check's guards and bookkeeping on the pins, and its real fits where Qiskit Experiments is installed. |
+| `tests/test_hardware_daily.py` | New: the morning's order on a scripted runner, and the watchdog on real processes. |
+| `docs/roadmap/2026-10-24-issue-125-preregistration.md` | **Owed:** the dated amendments listed under "Owed to the pre-registration", on PR #135 on the lead's word. |
+
+## Implementation approach
+
+**The daily routine.** Forecasts are sealed before the job runs and opened after it.
+
+`build`, at `t_s` = 03:45 UTC (06:45 Istanbul), in this order:
+
+1. Fetch the `calibration-data` tip; its commit is that job's archive ref. Run from a full clone: the
+   archive walk is about 97% of the work. It took 517 s and 533 s in two runs in a worktree of the
+   laptop's partial clone, while the whole `--mode controls` step, which walks the same archive, took
+   122 s from a full clone in the rehearsal of PR #140's runbook. Every other step together took 13 s.
+2. Capture the live `backend.properties()` and the live target, and write them to the job folder with
+   their SHA-256. This is the `reading` the pre-registration's §2 names.
+3. Run the predictors with that document, select qubits, and build circuits against the **live** target,
+   so a coupler disabled overnight cannot produce a non-ISA `cz`. Validate with the Runtime's own
+   `validate_isa_circuits`.
+4. Fix the Sampler options explicitly: decoupling off, gate and measurement twirling off,
+   `init_qubits` on, `rep_delay` 500 µs (refused if outside the live `rep_delay_range`), classified
+   measurement, a job tag. Defaults are never relied on, because they can change between versions.
+5. Submit in job mode, one job, seven PUBs on job 1 (Arm A only) and thirteen after that. Write the job
+   id to disk before anything else, then the manifest: archive ref, live document's hash, options, the
+   live `rep_delay_range`, code commit, `t_s` and `t_submit`.
+
+`score`, the next morning before the next `build`:
+
+1. Fetch the job's status, results, `metrics()` (`timestamps.running` is `t_execute`, `usage` is the QPU
+   time) and `job.inputs`, which on job 1 confirms the options IBM actually received.
+2. Fetch `calibration-data`, refuse unless its latest file is later than `t_execute`, and compute the
+   `reading_at_execution` control from the file at or before `t_execute`. Save
+   `backend.properties(datetime=t_execute)` beside it as an unscored cross-check.
+3. Score both arms with the offline half's existing functions. Arm A's register is `c` and Arm B's is
+   `meas`, so the scorer reads each circuit's own register and a test pins it.
+4. Commit the raw results and the scores to the data branch below.
+
+**Where the outputs live.** The run's worktree stays pinned at the freezing commit, because the guard
+requires it. Each job's folder is committed to a dedicated branch, `data/hardware-125`, touching nothing
+else, and merges with the PR that records L2.
+
+**Guards, in the code and not in a checklist.** Any backend other than a local simulator is refused
+unless `HEAD` is the commit passed as `--frozen-at`, the tree is clean, the pre-registration's status
+line at that commit reads Frozen, and the controls file's hash matches the one it names. A second
+submission for one UTC day is refused. The token is read from `.env` and never logged, and a test
+scans every file a job writes for a fake token's value.
+
+**The `T1` check** (design §6) is a separate job right after the main one on the first and last jobs,
+using Qiskit Experiments in its own environment with its version recorded, and the same `rep_delay`.
+
+**Rehearsal without the QPU.** IBM's local testing mode, `SamplerV2(mode=AerSimulator.from_backend(...))`
+on a backend rebuilt from an archived snapshot, runs the whole `build` and `score` cycle. A later
+archived snapshot plays the live document, so the live path sees a genuinely new state. Two limits are
+known from the probes and are designed around:
+
+- **It ignores the options.** Local mode warns that decoupling, twirling, `rep_delay` and `init_qubits`
+  have no effect there, so a rehearsal cannot prove they apply. A unit test pins what is sent, and job 1
+  reads them back from `job.inputs`.
+- **Aer can corrupt a batched run.** See "A defect in Aer" below. The rehearsal sends each PUB as its own
+  local job, keeping the rule the dry run already follows, and a test compares a batched Arm B to the
+  same circuit run alone, so a change in this behaviour is seen.
+
+**Stacking and merge order.** The branch sits on `mert/issue-125-offline-half` because it imports from
+it, takes `main` after #140 merges, and opens its PR then. The freezing commit cannot land before #140,
+this PR and #135 have merged, and those wait on Burak and Bengisu. So section 8.4 of the phase-4 plan's
+target of L1 in the week of 2026-11-04 is no longer realistic, and this plan sets the real floor.
+
+## Mathematical / Statistical details
+
+**Shot time per job.** With `dt` 4 ns, `measure` 1.56 µs and `x` 24 ns, and the delays of the committed
+dry run (longest per slot 0, 85.3, 170.6, 341.3, 110.7, 221.4 and 442.8 µs):
+`T_A = sum over the 7 slots of 2048 x (longest delay + x + measure + rep_delay)`, and
+`T_B = 6 x 4096 x (idle + gates + measure + rep_delay)`, with idle and gates taken as about 100 µs.
+
+| `rep_delay` | Arm A | Arm B | Both | 14 jobs, job 1 Arm A only |
+| --- | --- | --- | --- | --- |
+| 250 µs | 6.4 s | about 8.6 s | about 15.1 s | about 3.4 min |
+| 500 µs | 10.0 s | about 14.8 s | about 24.8 s | about 5.5 min |
+
+This is shot time only, an estimate from one day's delays. Per-circuit and per-job overhead is unknown
+until job 1 measures it. The lead has said the budget is not a constraint, so nothing gates on it, but
+the design's own figure for the Open Plan is 10 minutes per window, and overhead could make the margin
+narrow. Job 1's report states it.
+
+**Why `rep_delay` matters at all.** A shot that ends in `|1>` relaxes during `rep_delay`, then
+`init_qubits` resets it. What survives is about `exp(-rep_delay / T1)` times the reset's error. It raises
+`p_1` by the same amount for every predictor, and the zero-delay slot shows it directly. At 500 µs the
+excited fraction before the reset is at most about 8% for `T1` up to 200 µs, against up to about 29% at
+250 µs. The lead chose the cleaner start at the cost of about 65% more shot time.
+
+**Interim looks and no early stop.** The scores are computed daily (lead's decision). The decision rule
+is still applied once, after job 14, to all rows. Repeatedly testing and stopping when a result looks
+good would inflate the false-positive rate beyond the null values of the pre-registration's §3.8, so the
+run is always 14 days, with no early stop and no extension based on the scores. A change during the run
+is a dated amendment that reports both the frozen and the amended rule, as §1 of that document requires.
+
+## Design decisions
+
+**The lead's decisions, 2026-11-05.** Each goes into the pre-registration as a dated amendment.
+
+| Question | Decision | Note |
+| --- | --- | --- |
+| `rep_delay` | 500 µs, the bundled configuration's maximum, with `init_qubits` on | Checked against the live range at every `build`. |
+| Missed or failed job | Strict, no re-runs | Missed: not submitted by 04:45 UTC. Failed: an IBM error or cancellation, or still queued at the next day's 03:45, when it is cancelled. That day stays empty under amendment 8. |
+| What fires the job | The laptop, scheduled | Task Scheduler with a wake timer, a full clone and a watchdog; the token stays in `.env`. |
+| Scores during the run | Computed and visible every day | The safeguard below was added by this plan, not asked for: flagged for the lead to confirm. |
+
+**Decided by this plan, open to the lead's objection:**
+
+- **No early stop or extension,** as above. Daily scoring without it would bias the result.
+- **The control's source is the archive,** as in the dry run, with IBM's historical read saved as an
+  unscored cross-check.
+- **Decoupling and twirling are off,** because the test measures the bare decay and layout.
+- **The `T1` check stays as the design says,** separate job and separate environment. Version 0.14.2's
+  stated requirements (`qiskit>=1.3`, `qiskit-ibm-runtime>=0.34`) fit the pins; it has not been installed.
+
+**Alternatives set aside.**
+
+- *Starting `build` before 03:45 so the job leaves on the minute.* A full clone leaves about two minutes
+  between capture and submission. `t_s` is the capture instant and `t_submit` is logged.
+- *A session instead of one job.* Nothing is adaptive between circuits, so job mode is enough.
+- *GitHub Actions.* No laptop needed, and the poller already uses a repo secret there, but it breaks the
+  lead's rule on the token and gives CI the power to spend QPU time.
+
+**Risks named.** The laptop must be plugged in and reachable every morning for 14 days. A hung run looks
+exactly like a working one, which cost two hours on 2026-11-05, so the watchdog is part of the routine.
+On that day the laptop's committed memory also reached 33.2 of 34.7 GB during an Aer dry run, though
+`build` itself used about 3 GB and simulates no truth. A missed morning is an empty day by the rule above. The second account is
+still to be named, before job 2.
+
+### A defect in Aer found while planning
+
+On Aer 0.17.2, in one `run()` with noise and the default automatic method, a circuit Aer simulates by
+density matrix gives a wrong result if a circuit it simulates by statevector came first. An Arm B GHZ
+that gives `000` 0.49 and `111` 0.08 alone gives `000` 0.93 to 0.96 and `111` 0.000 after an Arm A
+circuit. The reverse order, Arm B alone, and six Arm B circuits together are all correct, and so are
+seven Arm A circuits together within shot noise. Forcing `method="statevector"` removes it, and so does
+removing the noise.
+
+**What it does not reach.** The QPU runs no Aer. The committed dry run runs one circuit per `run()`
+(`simulate_truth`). A search of `src/` and `scripts/` at `2aea1e18` finds no `run()` given a list of
+circuits, and the calls read there pass one circuit each. So no committed result is affected, as far as
+that search reaches. Local mode shows the defect when one job's PUBs share a shot count. A job with Arm A
+at 2,048 and Arm B at 4,096 was correct, apparently because those go to separate runs, and this plan does
+not rely on that. The mechanism inside Aer is not established, and no minimal reproduction outside this
+project's circuits exists yet.
+
+**Correction, later on 2026-11-05.** "No committed result is affected" above was too wide, and so was
+the same claim in `e91239fd`'s message. Lines 21 and 22 of `probe_build_time.out.txt`, committed with this
+plan, are the defect's own output: that probe sends `job.arm_a[2]` and `job.arm_b[0]` to one local job at
+one shot count, so its `000` 242 of 256 and fidelity 0.473 are wrong. The file stays as run, because it is
+how the defect was first seen, and this plan quotes neither figure. A separate session has since reduced
+the defect to a small script and traced the code path. Its finding is on branch
+`claude/recursing-northcutt-28be4c`, not pushed as of this note, and it supersedes the last sentence above.
+
+## What the build added to the plan, 2026-11-06
+
+Written as the code landed. The plan above is not edited; where the two differ, this section is the
+later one.
+
+**The morning runs `build` first, not `score`.** The plan had `score` before the next `build`. `score`
+walks the archive for minutes, so that order would have pushed every capture past 03:45, and `t_s` is the
+capture instant. So `scripts/hardware_daily.py` runs `build`, then the `T1` check where one is due, then
+scores earlier days, then rewrites the report. One consequence: "still queued at the next day's 03:45" is
+acted on when the routine reaches that job, minutes after 03:45, and a job that started in those minutes
+is scored normally.
+
+**The strict missed rule is checked twice.** The rule is on submission, and a build takes minutes, so one
+that began before 04:45 and finished after it is now recorded as missed at the moment of submitting.
+
+**A `report` mode.** The plan's "the decision rule is applied once, after job 14" had no code. The first
+day is declared with `--first-day`, not read from the folders, so a first day the laptop slept through
+cannot move the calendar. A job folder outside the run's 14 days is refused, because the run is never
+extended and a stray folder must not be dropped or scored in silence. Before day 15 the output is marked
+interim. Three things stay visibly open in it: the block length is amendment 8's proposed 3 days, both
+readings of "`level` or `band`" are printed, and A3 is a comparison of paired rows, so a row one predictor
+cannot predict counts for neither side.
+
+**The `T1` check runs its circuits itself.** Qiskit Experiments builds the circuits and fits the results,
+but the job goes through the same device object and the same pinned options as the main job, in place of
+the library's own `run()`. As far as the code read here goes, that `run()` submits and waits in one
+process and writes no job id to disk, and a job can sit in a queue for hours, while this way the fit waits
+for the next morning in a new process. Each `T1` circuit
+has one classical register per qubit, so counts are joined across registers, with a test pinning the order
+because a swap would quietly trade two qubits' fits. The check takes no part in the decision rule.
+
+**A short calendar gives no interval.** With three days and three-day blocks, every draw holds all three
+days, so the bootstrap's interval has zero width: the rehearsal's interim report showed exactly that. Such
+an interval says nothing about uncertainty, so A1 and A2 cannot pass on it. The first interim day with a
+real interval is day 4. The final report is not affected.
+
+**The rehearsal's live document must be a new state.** The first attempt took the first archived file after
+each `t_s`. Both repeated a state already in the archive, with no `T1` value changed, because `T1` often
+does not change until many hours after 03:45 (`20261101T050830` against `20261101T033045`, and
+`20261103T070610` against `20261103T032455`). That run passed every check it had while leaving the live path
+untested, so the check now requires `reading` and the execution reading to differ. Also, 15 of the archive
+tip's last 40 files have no `configuration` block. A real capture always has one, so only the rehearsal has
+to pick around that.
+
+**The watchdog is the routine's own design.** Each step is a process with a time limit, killed with its
+children. Its output goes to a file and never to a pipe, because the hang of 2026-11-05 was a `MemoryError`
+in a pipe's reader thread. The routine also asks Windows to stay awake, because a wake timer alone does not
+keep an unattended machine from going back to sleep.
+
+### Owed to the pre-registration
+
+Not yet written there. These go in as dated amendments on PR #135, section 3.11, on the lead's word. None
+changes a threshold or a null value. Numbered from 16 because amendment 15 is the last there today; if
+Bengisu's review adds one first, these numbers move, so cite them by title until they land.
+
+16. **`rep_delay`.** 500 µs with `init_qubits` on, refused at submission if outside the live range. The
+    lead's decision, 2026-11-05.
+17. **Options fixed explicitly.** Dynamical decoupling off, gate and measurement twirling off, classified
+    measurement. Decoupling would put pulses inside Arm A's `delay`; twirling would change the circuits the
+    forecasts were computed for.
+18. **Missed and failed jobs.** Missed: not submitted by 04:45 UTC, including a build that began in time
+    and finished late. Failed: an IBM error or cancellation, or still queued when the next morning's routine
+    reaches it, when it is cancelled. No re-runs. The day stays on the calendar with no rows (amendment 8).
+    The lead's decision, 2026-11-05.
+19. **Always 14 days.** The scores are computed and visible daily (the lead's decision, 2026-11-05). The
+    run neither stops early nor extends on what they show. **Added by this plan, flagged for the lead to
+    confirm.**
+20. **A selected qubit missing from the live target.** The job is refused and the day stays empty.
+    **Open for the lead:** the pre-registration has no replacement rule, and writing one means choosing
+    between an empty day and a selection that no longer follows the frozen rule. Refusing is the one that
+    cannot bias the result.
+21. **The `T1` check's delays.** The design fixes eight delays and 1,024 shots but not their spacing: evenly
+    from 1 µs to three times the qubit's `level` `T1`.
+22. **The status line the guard reads.** Section 1 says the freezing commit writes "Frozen at `<commit>`",
+    which cannot name its own hash. The guard requires `**Status**: **Frozen` and
+    `**Controls SHA-256**: <hash>`, with the frozen commit passed as `--frozen-at`.
+23. **The first day is declared.** The run's first calendar day is written in the freezing commit and passed
+    to `report`. Job `n` runs on day `n`, whatever happened before it.
+
+## Verification
+
+Written before the code. Step 1d is ready for the freezing commit when all of these hold. Laptop
+results are provisional until Burak's run.
+
+| # | Criterion |
+| --- | --- |
+| 1 | After the split, the dry run's command gives output identical to `dry-run-2026-11-05/`, checked with `compare_dry_run.py`. |
+| 2 | `build` at a past instant, in local mode, gives the same selection, slots and layouts as the dry run on the same inputs. |
+| 3 | The whole cycle runs on three consecutive archived days, one of them missing, and scoring keeps the missing day as an empty day. |
+| 4 | With a later snapshot as the live document, `reading` comes from it, and the manifest names its hash. |
+| 5 | Every guard is mutation-checked: removing each one fails a test. Includes `HEAD` not at the frozen commit, a dirty tree, the status line not reading Frozen, a second job in one day, and `rep_delay` out of range. |
+| 6 | A fake token's value appears in no file a job writes. |
+| 7 | The options sent are pinned by a test, and the batching guard fails if a batched Arm B stops matching the same circuit alone. |
+| 8 | A scheduled local-mode run fires unattended at 06:45 Istanbul with the laptop asleep, from the full clone, with its watchdog. |
+| 9 | Gates clean on the exact pins; Burak reproduces criteria 1 to 7 on the desktop with a runbook, no token needed. |
+
+On job 1, reported at L1: QPU seconds, `job.inputs` against the options sent, the zero-delay slot's
+`p_1` against the readout errors, and queue delay.
+
+The probes, from the branch root with `PYTHONPATH=.;src`, using the folder
+`docs/evidence/hardware-reading-vs-level/planning-probes-2026-11-05/`. Each `<name>.py` has its output in
+`<name>.out.txt`:
+
+- `probe_local_mode.py <manifest.json>`: Arm A through the ISA check and local mode, with the shot-time table.
+- `probe_build_time.py <controls.json>`: build timing, the live path, Arm B's ISA check, and job metrics.
+- `probe_arm_b_routes.py`: one Arm B circuit through five routes.
+- `probe_batching.py` and `probe_batch_scope.py`: the defect and how far it reaches.
+
+**Not checked:** anything on the QPU, what `job.inputs` holds on a real job, the live `rep_delay_range`,
+real overhead and queue time, Linux or Burak's desktop.
+
+## Results
+
+Laptop, Windows, exact pins, 2026-11-06 Istanbul time, all provisional until Burak's run. The folder is
+`docs/evidence/hardware-reading-vs-level/rehearsal-2026-11-06/`. **Every figure from the rehearsal describes
+Aer, built from the very reading it is compared to. None is a result about the device, and none takes an
+NC row.** In particular "S1 fails" in `report.json` is the expected output when the simulator's truth is the
+reading, and it shows the rule's code reaching a verdict, not the verdict.
+
+| # | Result | Rests on |
+| --- | --- | --- |
+| 1 | **Holds.** Every output file byte-identical to `dry-run-2026-11-05/`, and `compare_dry_run.py` exits 0. | Run twice: at `087b9c7e` right after the split, 49 minutes in a worktree of the partial clone, and at `3f062d4f`, the final code, 15.5 minutes from the full clone. |
+| 2 | **Holds.** `build` at the dry run's instant gives the same selection, controls, slots and layouts, and names the same archive commit and controls hash. | `check.out.txt`, at `9745583e`. |
+| 3 | **Holds.** Days 2026-11-02, 03 and 04 read scored, empty and scored. The empty day holds no folder and no rows, and both other days' rows reach the report: 112 discriminating and 56 control. Job 1 has no Arm B and job 3 has. | `check.out.txt`, `report.json`, `status.txt`. |
+| 4 | **Holds.** Live documents stamped 20:18 on 11-02 and 11:29 on 11-04, against captures at 03:45. `reading` comes from them, the manifest names their hash, and `reading` differs from the execution reading on 60 and 66 of 84 rows. | `check.out.txt`. |
+| 5 | **Holds.** 74 of 74 on `hardware_submit.py` and 56 of 60 on the routine and the check at `9745583e`. The other four, a stale pattern, a test that could not fail and two missing tests, were fixed in `3f062d4f` and re-ran caught, with one new mutant for the guard that commit added. | `mutation.out.txt`. |
+| 6 | **Holds.** `test_the_token_reaches_the_service_and_no_file_a_job_writes` and its counterpart for the check. | Tests, mutation-checked. |
+| 7 | **Holds.** `test_pinned_options_are_the_decided_ones_and_the_sampler_accepts_them`, the fast one-circuit spy and the slow batching test. | Tests, mutation-checked. The mutation run uses the spy; the batching test ran in the gates. |
+| 8 | **Open.** The scheduled run has not fired. Registering a task needs the lead's word. | See "What the laptop allows". |
+| 9 | **Open.** Gates are below. Burak's desktop run and its runbook are owed. | |
+
+**The `T1` check on Aer.** All eight fits land within 1.7 standard errors of the `T1` the simulator was built
+from, across qubits from 5.9 to 272 µs, so the bits reach the right qubits. Standard errors run from 2.9% to
+10.5%. The library marked one fit `bad`, on the 5.9 µs qubit, whose fit still agreed. Whether a real fit's
+error stays this small is what the check is for.
+
+**The Aer defect.** The separate session's finding, which the correction above places on a local branch, is
+now PR #141 (`mert/aer-batching-defect`), with Burak's runbook posted. Nothing here depends on its merging:
+the rehearsal still sends one circuit per run.
+
+**The real path refuses.** From the full clone, with no rehearsal flags and no `.env` present: no freeze
+arguments, another commit named, and this commit named with the pre-registration absent all exit 2 with
+their reason. So does the check, and the whole morning reports `build` as exit 2 and exits 1. That covers the
+refusals, not a submission: the guard's passing case runs only against throwaway repositories in the tests.
+
+**Time and memory.** Rehearsal stages on the laptop: `build` with Aer 3 min 27 s; morning 1 (`build`, Arm A on
+Aer, the check) 4 min 14 s; morning 3 (`build`, both arms, scoring day 1, the fit) 6 min 17 s; 16.6 minutes
+whole. Committed memory peaked at 37.2 of 39.1 GB, which counts everything else on the laptop and the
+simulator. A real morning runs no simulator, but anyone rehearsing on this laptop should close other work
+first.
+
+### What the laptop allows
+
+Read from `powercfg`, 2026-11-06, with nothing changed. Wake timers are on for mains power and off for
+battery, so the laptop must stay plugged in. On mains it never sleeps from idling, though closing the lid may
+still put it to sleep. Its only standby is S0 low power idle ("Modern Standby"). How a wake timer behaves in
+that state is what criterion 8 tests, and it may not match the plan's picture of a sleeping laptop waking.
+The zone is Turkey Standard Time, UTC+3, with no daylight saving. No `.env` exists under the project folder
+yet, and the lead creates one before job 1, from `.env.example`, in the run's clone. That template names the
+same three variables `ibm_device` and the poller read (`IBM_QUANTUM_TOKEN`, `IBM_QUANTUM_CHANNEL`,
+`IBM_QUANTUM_INSTANCE`), and git ignores the file, so it does not trip the clean-tree guard.
+
+### Not checked by any of this
+
+- **The data branch.** `--commit-data` and `--push-data` have only run against a scripted runner, never a real
+  `git` in a real `data/hardware-125` worktree, so the plan's step of committing each job's folder there is
+  untested end to end. Turning on `--push-data` also means an unattended daily push, which is the lead's call
+  when the task is registered.
+- **Linux.** `_kill_tree`'s process-group path and the routine as a whole have run on Windows only.
+- **The guard's passing case on the real command.** It runs only against throwaway repositories in the tests,
+  because no frozen commit exists yet.
+- **Anything the plan already lists:** the QPU, `job.inputs`, the live `rep_delay_range`, overhead and queue time.
+
+### Gates
+
+At `3f062d4f`, on the exact pins, with `PYTHONPATH=.;src`: `ruff check .` and `ruff format --check .` clean
+(ruff 0.15.12); `check_ids.py` finds no duplicate or colliding identifier; `mypy --strict` clean on 52 files;
+`pytest tests/` 1267 passed, 2 skipped, in 6 min 58 s. The two skipped need Qiskit Experiments, so CI will skip
+them too. In the check's own environment `tests/test_hardware_t1_check.py` gives 38 passed. The batching test
+on the pins alone gives 1 passed, 87 deselected.
+
+## Related docs
+
+- `docs/roadmap/2026-10-23-hardware-reading-vs-level-test.md` (the design, §5, §6, §8)
+- `docs/roadmap/2026-10-24-issue-125-preregistration.md` on PR #135 (amendments 7, 8, 14, 15; §6.2)
+- `docs/implementations/2026-10-28-hardware-test-offline-half.md` on PR #140
+- `docs/roadmap/2026-10-23-phase-4-plan.md` §8 on PR #131 (step 1d, gates L1 and L2)
+- `docs/findings/2026-10-28-aer-per-shot-seeding-and-simulation-lessons.md` (the one-circuit-per-run rule)
+- NC-026 (historical properties); Issue #125
+
+## Decisions of 2026-11-07, and amendment 20's rule changed: plan, before its code
+
+Appended; nothing above is edited. Where this section and "Owed to the pre-registration" differ, this one is
+the later.
+
+**Amendment 19 is accepted as drafted.** The lead confirmed it on 2026-11-07: always 14 days, nothing decided
+on what the daily scores show. Its "flagged for the lead to confirm" no longer applies.
+
+**Amendment 20 is replaced.** The draft refused the job when a selected qubit was missing from the live target,
+and said refusing is the one choice that cannot bias the result. The lead chose a different rule after seeing
+what follows.
+
+**What was found.** Read from every capture on `calibration-data` at `fafbc8f5` with scratch scripts, on the
+laptop, provisional, and to be re-run from a committed script before any figure here is cited in the
+pre-registration. 2,706 captures over 170 UTC days:
+
+- No qubit was ever absent from the `target` field's `x`, `sx` or `measure`. The draft's guard had nothing to
+  fire on.
+- `ibm_fez` marks a dead qubit by leaving it in the target with `x` and `sx` `gate_error` set to 1: qubit 72 on
+  every capture, qubit 17 on 208 (05-13 to 05-18 and 06-22 to 07-13), qubit 149 on 6 (05-13). The draft's guard
+  does not see this.
+- What keeps them out today is proposal A's window floor, indirectly. Qubit 72 is admitted on 0 of 132 days at
+  `w >= 15` (NC-088). Qubit 17's `T1` date stayed at 2026-04-13 through its dead span, so its window cannot have
+  held many distinct values; this is inferred from the date field, and its window count was not computed.
+- A qubit that dies during the run with a fresh `T1` would stay above the floor for about 15 days (about 30
+  distinct values, floor 15), and frozen controls are never re-checked. The record has no example of this, so
+  it is a gap in the rule, not a measured rate.
+
+The draft's reason also needs correcting. It said a replacement "no longer follows the frozen rule", but nothing
+is frozen yet, so a rule written now is the frozen rule. It reads only the device's status at `t_s`, never a
+result, and treats `level` and `reading` alike. Arm B already drops dead `cz` links the same way (amendment 9).
+
+**The rule, as the lead decided it.** A qubit is *not operational* at `t_s` when it is absent from the live
+target's `x`, `sx` or `measure`, or when its `x` or `sx` `gate_error` in the live properties document is at least
+1. Such a qubit gives no rows that morning, and the job is not refused on this ground:
+
+- It is not a candidate for the discriminating stratum, so the frozen ranking runs over the remaining candidates
+  and the next qubit by the same rule takes the place.
+- A frozen control that is not operational is left out that day. It is not replaced, and the frozen set still
+  stays out of the discriminating stratum. A3 uses the control rows that exist; if the whole run has none, A3 is
+  not met.
+- It is not eligible for an Arm B triple.
+- The qubits affected are logged in that job's `selection.json`.
+
+**What it does not cover.** A qubit that dies after `t_s` while the job is queued keeps its rows. A dead `measure`
+is not a signal, because the record shows none and the device's marker is on `x` and `sx`.
+
+**The change.**
+
+- `scripts/hardware_reading_vs_level.py`: a new function `not_operational_qubits(properties, target)`. Inputs: the
+  live document's `properties` and the live `Target`. Output: a sorted list of qubit indices. No side effects. A
+  missing or null `gate_error` is not a dead signal. `build_job` uses it for Arm B's eligibility and for its own
+  guard, which stays as the last check and still raises if it is handed such a qubit. With no live target, as in
+  the dry run, nothing changes.
+- `scripts/hardware_submit.py`: `run_build` removes the not-operational qubits' rows before `select_balanced`,
+  passes the frozen set as `controls` to that call, passes the running controls to `build_job`, and logs
+  `not_operational` and `controls_left_out`.
+- `tests/test_hardware_submit.py`: `test_a_selected_qubit_missing_from_the_live_target_refuses_the_job` pinned the
+  old rule, so it changes with it.
+
+**Expected, written before the code.** Laptop results stay provisional until Burak's run.
+
+| # | Criterion |
+| --- | --- |
+| 10 | The dry run's outputs stay identical to `dry-run-2026-11-05/`, checked with `compare_dry_run.py`, because the path with no live target does not change. |
+| 11 | The rehearsal's checks all hold. Criterion 2's selection, controls, slots and layouts do not change, because qubit 72 is the only not-operational qubit expected on those mornings and the floor already excludes it. |
+| 12 | A dead discriminating qubit gives way to the next by the same rule; the result equals the frozen rule applied to the remaining candidates. |
+| 13 | A dead control is left out, the job still runs, no circuit uses it, the other three stay out of the discriminating stratum, and a run with no control rows does not meet A3. |
+| 14 | Each signal is tested alone: absent from each of `x`, `sx` and `measure`, and `gate_error` 1 on each of `x` and `sx`. A `gate_error` just under 1, or a null one, is not a signal. |
+| 15 | Every new line is mutation-checked: removing it fails a test, and each mutant asserts its pattern was found. |
+| 16 | Gates clean on the exact pins. |
+
+**Results so far, 2026-11-07.** Laptop, provisional.
+
+| # | State | Evidence |
+| --- | --- | --- |
+| 10 | **Not run.** The dry run waits until the lead has freed memory: 0 to 1 GB of RAM and 5 to 9 GB of commit free today. | |
+| 11 | **Not run**, for the same reason. | |
+| 12 | **Holds.** `test_a_dead_discriminating_qubit_gives_way_to_the_next_by_the_same_rule`. | At `ea646d3d`. |
+| 13 | **Holds.** `test_a_dead_control_is_left_out_and_the_job_still_runs`, `test_a_job_with_a_control_left_out_scores_on_the_rest`, `test_a_run_with_no_control_rows_does_not_meet_a3`, `test_a3_uses_the_control_rows_that_exist`. | At `ea646d3d`. |
+| 14 | **Holds.** The tests named for each signal, including just under 1, null, missing, and another gate. | At `ea646d3d`. |
+| 15 | **Holds.** 25 of 25 caught, each mutant asserting its pattern was found once. | `docs/evidence/hardware-reading-vs-level/not-operational-2026-11-07/`. |
+| 16 | **Holds.** At `4595f3f2`: `ruff check .` and `ruff format --check .` clean, `check_ids.py` clean, `mypy --strict` clean on 52 files, `pytest tests/` 1285 passed, 2 skipped. It took 19 min 28 s against 6 min 58 s on 2026-11-06, because the laptop was also carrying other sessions' work. | |
+
+Amendments 16 to 23 are not on PR #135 yet: a session was analysing that PR at `51e9f425` today, and the lead asked to
+hold the push until it finishes. The wake test is not registered either, until the lead has freed memory.

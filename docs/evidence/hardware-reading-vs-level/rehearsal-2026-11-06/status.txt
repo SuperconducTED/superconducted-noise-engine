@@ -1,0 +1,13 @@
+22:45:30 at 9745583ef817650a34adbe5055d430f0ab3152a2, tree: [0] changed
+22:45:30 criterion 2 build start
+22:48:57 criterion 2 build exit 0
+22:48:59 rehearsal days from 2026-11-02: 1 2026-11-02T03:45:00+00:00 snapshots/2026-11/ibm_fez/20261102T201836000000Z.json;3 2026-11-04T03:45:00+00:00 snapshots/2026-11/ibm_fez/20261104T112936000000Z.json;
+22:49:00 morning of day 1 start
+22:53:14 morning of day 1 exit 0
+22:53:15 morning of day 3 start
+22:59:32 morning of day 3 exit 0
+22:59:32 score day 3 start
+23:01:51 score day 3 exit 0
+23:01:53 report exit 0
+23:01:54 tree after the run: [0] changed
+23:01:54 RUN END

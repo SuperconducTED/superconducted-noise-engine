@@ -1,0 +1,74 @@
+{
+  "complete": false,
+  "interim_note": "interim: not the decision, and it must not stop or extend the run",
+  "first_day": "2026-11-02",
+  "last_day": "2026-11-04",
+  "days": [
+    {
+      "date": "2026-11-02",
+      "status": "scored"
+    },
+    {
+      "date": "2026-11-03",
+      "status": "empty"
+    },
+    {
+      "date": "2026-11-04",
+      "status": "scored"
+    }
+  ],
+  "block_days": 3,
+  "arm_a": {
+    "rows": {
+      "discriminating": 112,
+      "control": 56
+    },
+    "mean_abs_error": {
+      "discriminating": {
+        "reading": 0.02590220374261875,
+        "level": 0.17995657397139286,
+        "reading_at_execution": 0.17198784981276785
+      },
+      "control": {
+        "reading": 0.009176882581139285,
+        "level": 0.06857961140555001,
+        "reading_at_execution": 0.05011061013233929
+      }
+    },
+    "A1_level_beats_reading": {
+      "rows": 112,
+      "mean_difference": -0.15405437022877408,
+      "interval": null,
+      "passes": false
+    },
+    "A2_level_beats_reading_at_execution": {
+      "rows": 112,
+      "mean_difference": -0.007968724158625,
+      "interval": null,
+      "passes": false
+    },
+    "A3_sign_holds_on_controls": false,
+    "A4_band_covers_nominal_within_widening": {
+      "nominal": 0.8,
+      "coverage": 0.11607142857142858,
+      "coverage_widened": 0.125,
+      "passes": false
+    }
+  },
+  "arm_b": {
+    "jobs": 1,
+    "mean_spearman": {
+      "reading": 1.0,
+      "level": 0.8285714285714287,
+      "band": 0.7714285714285715
+    },
+    "best_pick_hits": {
+      "reading": 1,
+      "level": 1,
+      "band": 1
+    },
+    "one_predictor_meets_both": false,
+    "each_condition_by_either": false
+  },
+  "reading": "S1 fails: reading_at_execution is at least as good as level"
+}

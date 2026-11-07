@@ -51,6 +51,7 @@ from scripts.hardware_reading_vs_level import (
     transpile_layout,
     truth_readout,
     usable_cz_error,
+    with_execution,
     x_to_measure_intervals,
 )
 from scripts.hardware_test_predictors import PredictorRow
@@ -330,6 +331,88 @@ def test_single_qubit_part_keeps_only_that_qubits_instructions() -> None:
 
 
 # --- scoring ---------------------------------------------------------------------------------
+
+
+def test_sources_without_execution_leave_only_the_control_empty() -> None:
+    rows = _rows(0, {"T1": (1e-4, 2e-4, 9e-5, 3e-4), "T2": (1e-4, 2e-4, 9e-5, 3e-4)})
+    src = sources_from_rows(rows, None)
+    assert src["reading_at_execution"] == {}
+    assert src["reading"][0].t1 == 1e-4
+    assert src["level"][0].t1 == 2e-4
+
+
+def test_with_execution_adds_only_the_control_and_changes_nothing_sealed(
+    fez_doc: dict[str, Any],
+) -> None:
+    target = archived_backend(fez_doc).target
+    triple = (85, 77, 86)
+    circuit = transpile_layout(ghz_idle_circuit(1000), triple, target, seed=125)
+    gates = gate_table(fez_doc["properties"])
+    level = {q: QubitSource(1e-4, 1e-4, 0.01, 0.01) for q in triple}
+    job = Job(
+        t_s=datetime(2026, 10, 23, tzinfo=UTC),
+        n_qubits=int(target.num_qubits),
+        dt=float(target.dt),
+        discriminating=[],
+        controls=[],
+        sources={"reading": level, "level": level, "reading_at_execution": {}},
+        slots={},
+        arm_a=[],
+        layouts=[triple],
+        arm_b=[circuit],
+        arm_b_predicted={"reading": [0.5], "level": [0.5]},
+        gates=gates,
+    )
+    execution = [
+        row
+        for q in triple
+        for row in _rows(
+            q,
+            {
+                "T1": (2e-4, 2e-4, 2e-4, 2e-4),
+                "T2": (2e-4, 2e-4, 2e-4, 2e-4),
+                "prob_meas0_prep1": (0.02, 0.02, 0.02, 0.02),
+                "prob_meas1_prep0": (0.01, 0.01, 0.01, 0.01),
+            },
+        )
+    ]
+
+    out = with_execution(job, execution)
+
+    expected = QubitSource(2e-4, 2e-4, 0.02, 0.01)
+    assert out.sources["reading_at_execution"] == dict.fromkeys(triple, expected)
+    prediction = out.arm_b_predicted["reading_at_execution"]
+    assert prediction[0] is not None and 0.0 < prediction[0] <= 1.0
+    # The original is untouched, and so is everything sealed before the run.
+    assert job.sources["reading_at_execution"] == {}
+    assert "reading_at_execution" not in job.arm_b_predicted
+    assert out.arm_b_predicted["reading"] == [0.5]
+    assert out.sources["level"] == level
+
+
+def test_with_execution_keeps_an_unusable_control_as_no_prediction(
+    fez_doc: dict[str, Any],
+) -> None:
+    target = archived_backend(fez_doc).target
+    triple = (85, 77, 86)
+    circuit = transpile_layout(ghz_idle_circuit(1000), triple, target, seed=125)
+    level = {q: QubitSource(1e-4, 1e-4, 0.01, 0.01) for q in triple}
+    job = Job(
+        t_s=datetime(2026, 10, 23, tzinfo=UTC),
+        n_qubits=int(target.num_qubits),
+        dt=float(target.dt),
+        discriminating=[],
+        controls=[],
+        sources={"reading": level, "level": level, "reading_at_execution": {}},
+        slots={},
+        arm_a=[],
+        layouts=[triple],
+        arm_b=[circuit],
+        arm_b_predicted={},
+        gates=gate_table(fez_doc["properties"]),
+    )
+    out = with_execution(job, [])  # no rows at all: every value is NaN
+    assert out.arm_b_predicted["reading_at_execution"] == [None]
 
 
 def _job(controls: list[int]) -> Job:
