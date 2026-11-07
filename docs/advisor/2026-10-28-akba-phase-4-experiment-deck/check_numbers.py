@@ -17,7 +17,9 @@ Structural numerals are excluded before the lookup and listed per slide: dates, 
 numbers, section references, register and decision ids, commit and asset hashes, arXiv ids,
 review ids, years, the slide's page number, and identifiers with digits (``T1``, ``p_1``,
 ``S1``, ``N0``, ``L1``, ``lag-1``). Thousands separators (comma, or the narrow no-break space of
-the Turkish deck) and a leading or trailing percent sign are normalised before matching.
+the Turkish deck) and a leading or trailing percent sign are normalised before matching. Signs
+are not: ``-0.5`` only meets ``-0.5``, and ``0.5`` does not meet a signed ``-0.5`` or ``+0.5``,
+in the lookup or in the parity check. The hyphen of a range (``0.5-1.0``) is not a sign.
 
 A second check compares, per slide, the numerals of the Turkish body with the English body;
 the two decks are meant to carry identical numbers.
@@ -182,8 +184,14 @@ def normalise(token: str) -> str:
     return core
 
 
+def parity_key(token: str) -> str:
+    """``normalise`` with the sign kept, because ``-0.5`` and ``0.5`` are different numerals."""
+    sign = token.lstrip("%")[:1]
+    return (sign if sign in "+-" else "") + normalise(token)
+
+
 def search_forms(token: str) -> list[str]:
-    """The literal forms a numeral may take in a source, a signed form first if it has one."""
+    """The literal forms a numeral may take in a source; a signed numeral keeps its sign."""
     if re.fullmatch(r"\d{2}:\d{2}", token):
         return [token]
     core = normalise(token)
@@ -192,8 +200,18 @@ def search_forms(token: str) -> list[str]:
     if len(whole) > 3:
         bare.append(f"{int(whole):,}" + (f".{frac}" if frac else ""))
     sign = token.lstrip("%")[:1]
-    signed = [sign + form for form in bare] if sign in "+-" else []
-    return signed + bare
+    return [sign + form for form in bare] if sign in "+-" else bare
+
+
+def signed_in_source(text: str, start: int) -> bool:
+    """True when the ``+`` or ``-`` right before ``start`` is that number's own sign.
+
+    A hyphen that follows a digit or a letter joins two things, as in ``0.5-1.0`` or ``mode-3``,
+    so the number after it is unsigned.
+    """
+    if start == 0 or text[start - 1] not in "+-":
+        return False
+    return start == 1 or not text[start - 2].isalnum()
 
 
 MD_HEADING_NUMBER = re.compile(r"^(#+ )\d+(?:\.\d+)*\.?", flags=re.MULTILINE)
@@ -214,13 +232,17 @@ def found_in(token: str, text: str) -> str | None:
 
     ``text`` must already have passed through ``clean_source``. A whole number only: no digit,
     letter, point, comma or colon may touch it, so ``0.5`` does not meet ``0.50`` or ``10.5``,
-    and ``14`` does not meet ``14:45``.
+    and ``14`` does not meet ``14:45``. The sign has to agree too, so ``0.5`` does not meet
+    ``-0.5``, and ``-0.5`` does not meet ``0.5`` or ``+0.5``.
     """
     for form in search_forms(token):
-        lead = r"(?<![\w.,+-])(?<!\d:)" if form[0] in "+-" else r"(?<![\w.,])(?<!\d:)"
+        signed_form = form[0] in "+-"
+        lead = r"(?<![\w.,+-])(?<!\d:)" if signed_form else r"(?<![\w.,])(?<!\d:)"
         pattern = rf"{lead}{re.escape(form)}(?![\w]|[.,:]\d)"
         snippets = []
         for match in re.finditer(pattern, text):
+            if not signed_form and signed_in_source(text, match.start()):
+                continue
             start, end = max(0, match.start() - 28), min(len(text), match.end() + 28)
             snippets.append("..." + " ".join(text[start:end].split()) + "...")
             if len(snippets) == MAX_SNIPPETS:
@@ -346,7 +368,7 @@ def main() -> int:
                         failures += 1
                     out.append(f"  [{zone}] {token}: {why}")
                     if zone == "body":
-                        body_tokens[normalise(token)] += 1
+                        body_tokens[parity_key(token)] += 1
             per_slide_body[lang][slide_id] = body_tokens
             if excluded_all:
                 out.append("  excluded as structural: " + "; ".join(excluded_all))
