@@ -454,3 +454,18 @@ is not a signal, because the record shows none and the device's marker is on `x`
 | 14 | Each signal is tested alone: absent from each of `x`, `sx` and `measure`, and `gate_error` 1 on each of `x` and `sx`. A `gate_error` just under 1, or a null one, is not a signal. |
 | 15 | Every new line is mutation-checked: removing it fails a test, and each mutant asserts its pattern was found. |
 | 16 | Gates clean on the exact pins. |
+
+**Results so far, 2026-11-07.** Laptop, provisional.
+
+| # | State | Evidence |
+| --- | --- | --- |
+| 10 | **Not run.** The dry run waits until the lead has freed memory: 0 to 1 GB of RAM and 5 to 9 GB of commit free today. | |
+| 11 | **Not run**, for the same reason. | |
+| 12 | **Holds.** `test_a_dead_discriminating_qubit_gives_way_to_the_next_by_the_same_rule`. | At `ea646d3d`. |
+| 13 | **Holds.** `test_a_dead_control_is_left_out_and_the_job_still_runs`, `test_a_job_with_a_control_left_out_scores_on_the_rest`, `test_a_run_with_no_control_rows_does_not_meet_a3`, `test_a3_uses_the_control_rows_that_exist`. | At `ea646d3d`. |
+| 14 | **Holds.** The tests named for each signal, including just under 1, null, missing, and another gate. | At `ea646d3d`. |
+| 15 | **Holds.** 25 of 25 caught, each mutant asserting its pattern was found once. | `docs/evidence/hardware-reading-vs-level/not-operational-2026-11-07/`. |
+| 16 | **Holds.** At `4595f3f2`: `ruff check .` and `ruff format --check .` clean, `check_ids.py` clean, `mypy --strict` clean on 52 files, `pytest tests/` 1285 passed, 2 skipped. It took 19 min 28 s against 6 min 58 s on 2026-11-06, because the laptop was also carrying other sessions' work. | |
+
+Amendments 16 to 23 are not on PR #135 yet: a session was analysing that PR at `51e9f425` today, and the lead asked to
+hold the push until it finishes. The wake test is not registered either, until the lead has freed memory.
