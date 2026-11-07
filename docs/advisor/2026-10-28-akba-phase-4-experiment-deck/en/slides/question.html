@@ -1,0 +1,35 @@
+<section id="question" style="background:#0A6C7C;color:#EEF3F5;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<p style="font-family:'Space Mono', 'Courier New', monospace;font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#EEF3F5">The one question only hardware can answer</p>
+<h2 style="font-size:56px;font-weight:600;line-height:1.2;color:#EEF3F5">Between calibrations, does the device follow the latest reading, or the level?</h2>
+<svg aria-label="Schematic, not data: calibration readings scattered around a flat level line inside a shaded band, with a dashed box between two readings marking the device state the archive never sees" width="1664" height="200" viewBox="0 0 1664 200" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="50" width="1664" height="100" fill="#08525E"/>
+<line x1="0" y1="100" x2="1664" y2="100" stroke="#EEF3F5" stroke-width="5"/>
+<rect x="900" y="20" width="260" height="160" fill="none" stroke="#EEF3F5" stroke-width="3" stroke-dasharray="12 8"/>
+<circle cx="90" cy="70" r="13" fill="#F0A35E"/>
+<circle cx="260" cy="128" r="13" fill="#F0A35E"/>
+<circle cx="430" cy="88" r="13" fill="#F0A35E"/>
+<circle cx="600" cy="140" r="13" fill="#F0A35E"/>
+<circle cx="770" cy="64" r="13" fill="#F0A35E"/>
+<circle cx="860" cy="120" r="13" fill="#F0A35E"/>
+<circle cx="1200" cy="80" r="13" fill="#F0A35E"/>
+<circle cx="1370" cy="132" r="13" fill="#F0A35E"/>
+<circle cx="1540" cy="94" r="13" fill="#F0A35E"/>
+</svg>
+<p style="font-size:24px;line-height:1.35;color:#D6E8EB">Schematic, not data. Orange dots: calibration readings. White line: the 30-day level. Shaded: the band. Dashed box: the device between readings, which the archive never sees.</p>
+<div style="display:flex;gap:32px">
+<div style="flex:1;background:#08525E;border-radius:16px;padding:24px 28px;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:28px;font-weight:700;line-height:1.25;color:#EEF3F5">Scatter is measurement noise</h3>
+<p style="font-size:24px;line-height:1.4;color:#EEF3F5">The device follows the level. Carry the level.</p>
+</div>
+<div style="flex:1;background:#08525E;border-radius:16px;padding:24px 28px;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:28px;font-weight:700;line-height:1.25;color:#EEF3F5">Scatter is real fluctuation</h3>
+<p style="font-size:24px;line-height:1.4;color:#EEF3F5">The device is somewhere in the band. Carry the range.</p>
+</div>
+<div style="flex:1;background:#08525E;border-radius:16px;padding:24px 28px;display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:28px;font-weight:700;line-height:1.25;color:#EEF3F5">The archive cannot tell</h3>
+<p style="font-size:24px;line-height:1.4;color:#EEF3F5">It holds readings only, and IBM gives no per-fit error bars.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#D6E8EB">4 · design 2026-10-23 §1 · strategy audit S1, S2</p>
+<aside>This is the whole experiment in one sentence. The archive shows readings scattered around a level, but it cannot say what the scatter is. If it is measurement noise, the level is the truth and the product is a level-based model. If it is real fluctuation, the honest product is the range. Only the device, measured between calibrations, can answer that.</aside>
+</section>

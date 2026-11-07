@@ -1,0 +1,26 @@
+<section id="repro" style="background:#EEF3F5;color:#2E3E46;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<p style="font-family:'Space Mono', 'Courier New', monospace;font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#0A6C7C">Nasıl yeniden üretilebilir</p>
+<h2 style="font-size:56px;font-weight:600;line-height:1.2;color:#0A1B24">Önce Protokol, Sonra Sayılar, En Son Masaüstü</h2>
+<p style="font-size:28px;font-weight:700;line-height:1.35;color:#0A1B24;border-left:6px solid #0A6C7C;padding-left:20px">Zincirin her halkası, başkasının alıp yeniden koşturabileceği bir commit; masaüstü yeniden üretmeden hiçbir şey sayılmaz.</p>
+<div style="display:flex;gap:10px;align-items:stretch">
+<div style="flex:1;background:#F8FAFB;border:2px solid #0A6C7C;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px"><p style="font-size:24px;font-weight:700;line-height:1.3;color:#0A1B24">Protokol commit edilir</p><p style="font-size:24px;line-height:1.3">hiçbir betik çalışmadan önce</p></div>
+<x-shape kind="arrow-right" style="width:36px;height:24px;background:#45535A;align-self:center"></x-shape>
+<div style="flex:1;background:#F8FAFB;border:2px solid #0A6C7C;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px"><p style="font-size:24px;font-weight:700;line-height:1.3;color:#0A1B24">Ön kayıt dondurulur</p><p style="font-size:24px;line-height:1.3">tek commit ile, ilk işten önce</p></div>
+<x-shape kind="arrow-right" style="width:36px;height:24px;background:#45535A;align-self:center"></x-shape>
+<div style="flex:1;background:#F8FAFB;border:2px solid #0A6C7C;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px"><p style="font-size:24px;font-weight:700;line-height:1.3;color:#0A1B24">Sabit girdiler</p><p style="font-size:24px;line-height:1.3">arşiv ref’i, belge SHA-256 özeti, state-index koruması</p></div>
+<x-shape kind="arrow-right" style="width:36px;height:24px;background:#45535A;align-self:center"></x-shape>
+<div style="flex:1;background:#F8FAFB;border:2px solid #0A6C7C;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px"><p style="font-size:24px;font-weight:700;line-height:1.3;color:#0A1B24">Adlı betikler</p><p style="font-size:24px;line-height:1.3">çıktılarıyla birlikte commit edilir</p></div>
+<x-shape kind="arrow-right" style="width:36px;height:24px;background:#45535A;align-self:center"></x-shape>
+<div style="flex:1;background:#F8FAFB;border:2px solid #0A6C7C;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px"><p style="font-size:24px;font-weight:700;line-height:1.3;color:#0A1B24">Günlük işler</p><p style="font-size:24px;line-height:1.3">properties gönderimde ve yürütmede arşivlenir</p></div>
+<x-shape kind="arrow-right" style="width:36px;height:24px;background:#45535A;align-self:center"></x-shape>
+<div style="flex:1;background:#0A6C7C;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px"><p style="font-size:24px;font-weight:700;line-height:1.3;color:#EEF3F5">Masaüstü yeniden üretimi</p><p style="font-size:24px;line-height:1.3;color:#EEF3F5">Burak’ın masaüstü, doğruluk kaynağı</p></div>
+</div>
+<ul style="font-size:24px;line-height:1.45;padding-left:28px">
+<li>scripts/hardware_test_predictors.py: arşiv yarısı, main’de</li>
+<li>scripts/hardware_reading_vs_level.py: çevrimdışı yarı (seçim, devreler, puanlama, Aer kuru koşusu), henüz yazılmadı</li>
+<li>Ön kayıtta sonraki bir değişiklik tarihli bir değişikliktir; iki kural da raporlanır</li>
+<li>Örüntü dedektöründe dokuz tarihli değişiklik var, her biri etkilediği koşudan önce: sistem işliyor, başarısız olmuyor</li>
+</ul>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#45535A">16 · ön kayıt §1, §2, §6 · tasarım §8 · pattern-detector README §7 · faz 4 planı §8.3</p>
+<aside>Yeniden üretilebilirlik iş sırasının içine yerleşik; zinciri soldan sağa okuyun. Protokol betik çalışmadan önce commit ediliyor, ön kayıt ilk işten önce donduruluyor, her girdi bir commit’e sabitleniyor ve her arşiv betiği önce aynı arşivi gördüğünü kanıtlıyor. Örüntü dedektörünün dokuz değişikliği bir zayıflık değil: her biri değiştirdiği koşudan önce tarihlendi. Her sayının son sözü Burak’ın masaüstü yeniden üretimi.</aside>
+</section>
