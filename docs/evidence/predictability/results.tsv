@@ -1,0 +1,145 @@
+measurement	component	period	metric	value	n	ci90_high	horizon_h	rowset	model	conformal_q	slope
+event_lag1_autocorr	gamma	train	rho_pooled	-0.48575370815375385	14652.0						
+event_lag1_autocorr	gamma	train	local_level_cap_r2	0.38149542196658526	14652.0						
+event_lag1_autocorr	gamma	test	rho_pooled	-0.5035630440865881	7718.0						
+event_lag1_autocorr	gamma	test	local_level_cap_r2	0.5	7718.0						
+event_lag1_autocorr	gamma	all	rho_per_qubit_median	-0.4941510186009487	155.0						
+event_lag1_autocorr	gamma	train	rho_ci90	-0.4958099442849066	14652.0	-0.4752610763404499					
+event_lag1_autocorr	gamma	train	local_level_cap_r2_ci90	0.344671608146749	14652.0	0.4354051151545437					
+event_reversion	gamma		b_train	-0.8293496276805824	14342.0						
+event_reversion	gamma		r2_test	0.463725125009139	7718.0						
+event_reversion	gamma		b_ci90	-0.8612181507156853	14342.0	-0.79220223669591					
+zero_width_band	gamma		coverage	0.16781127669802898	58244.0		24.0	all			
+zero_width_band	gamma		coverage	0.0	48470.0		24.0	change			
+horizon_fit	gamma		kappa	0.7477045059901597	48576.0		24.0				
+horizon_fit	gamma		kappa_ci90	0.720266063968428	48576.0	0.7750198746198582	24.0				
+horizon_fit	gamma		ridge_beta_std_dev	-0.174233588714806	48576.0		24.0				
+horizon_fit	gamma		ridge_beta_std_last_inc	-0.05929958438162104	48576.0		24.0				
+horizon_fit	gamma		ridge_beta_std_log_age	0.0052264022836842824	48576.0		24.0				
+horizon_fit	gamma		ridge_beta_std_recal_age	-0.009104085036557064	48576.0		24.0				
+horizon_fit	gamma		ridge_beta_std_standing	-0.0159868942636463	48576.0		24.0				
+horizon_fit	gamma		ridge_beta_std_hour_sin	0.003601752213984557	48576.0		24.0				
+horizon_fit	gamma		ridge_beta_std_hour_cos	-2.6004110358376185e-05	48576.0		24.0				
+horizon_point	gamma		r2_test_change	6.596899053756822e-05	48470.0		24.0		persistence		
+horizon_point	gamma		median_abs_err_log	0.23462367066433742	48470.0		24.0		persistence		
+horizon_band	gamma		coverage	0.8095110377553125	48470.0		24.0		persistence	0.4961223944136073	
+horizon_band	gamma		mean_width	0.9922447888272146	48470.0		24.0		persistence	0.4961223944136073	
+horizon_band	gamma		interval_score	1.49529651518412	48470.0		24.0		persistence	0.4961223944136073	
+horizon_point	gamma		r2_test_change	0.4383716448187648	48470.0		24.0		shrinkage		
+horizon_point	gamma		median_abs_err_log	0.18405785386662546	48470.0		24.0		shrinkage		
+horizon_band	gamma		coverage	0.827872911079018	48470.0		24.0		shrinkage	0.37519633829417043	
+horizon_band	gamma		mean_width	0.7503926765883409	48470.0		24.0		shrinkage	0.37519633829417043	
+horizon_band	gamma		interval_score	1.089735077245084	48470.0		24.0		shrinkage	0.37519633829417043	
+horizon_point	gamma		r2_test_change	0.4359837076689266	48470.0		24.0		linear		
+horizon_point	gamma		median_abs_err_log	0.18078308959376138	48470.0		24.0		linear		
+horizon_band	gamma		coverage	0.8230039199504848	48470.0		24.0		linear	0.37078982256777915	
+horizon_band	gamma		mean_width	0.7415796451355583	48470.0		24.0		linear	0.37078982256777915	
+horizon_band	gamma		interval_score	1.0944555558119604	48470.0		24.0		linear	0.37078982256777915	
+horizon_point	gamma		r2_gap	-0.002387937149838204	48470.0		24.0		linear_minus_shrinkage		
+horizon_band	gamma		coverage	0.7628223643490819	48470.0		24.0		rolling_band		
+horizon_band	gamma		mean_width	0.6804626427021719	48470.0		24.0		rolling_band		
+horizon_band	gamma		interval_score	1.0805939651540932	48470.0		24.0		rolling_band		
+common_mode	gamma		r2_leave_one_out	0.01965064048019083	48470.0		24.0				0.7897500657118243
+zero_width_band	gamma		coverage	0.004773765047737651	52998.0		168.0	all			
+zero_width_band	gamma		coverage	0.0	52745.0		168.0	change			
+horizon_fit	gamma		kappa	0.7897353769143819	55389.0		168.0				
+horizon_fit	gamma		kappa_ci90	0.7668157482979808	55389.0	0.8136342383796419	168.0				
+horizon_fit	gamma		ridge_beta_std_dev	-0.2057645370067622	55389.0		168.0				
+horizon_fit	gamma		ridge_beta_std_last_inc	-0.03484883544233141	55389.0		168.0				
+horizon_fit	gamma		ridge_beta_std_log_age	-5.518426855013883e-06	55389.0		168.0				
+horizon_fit	gamma		ridge_beta_std_recal_age	-0.010874283112471744	55389.0		168.0				
+horizon_fit	gamma		ridge_beta_std_standing	-0.016261891193411444	55389.0		168.0				
+horizon_fit	gamma		ridge_beta_std_hour_sin	0.010973373445668328	55389.0		168.0				
+horizon_fit	gamma		ridge_beta_std_hour_cos	-0.003923022106330141	55389.0		168.0				
+horizon_point	gamma		r2_test_change	0.0014015367404234258	52745.0		168.0		persistence		
+horizon_point	gamma		median_abs_err_log	0.24314492179605196	52745.0		168.0		persistence		
+horizon_band	gamma		coverage	0.82804057256612	52745.0		168.0		persistence	0.5341851660517225	
+horizon_band	gamma		mean_width	1.068370332103445	52745.0		168.0		persistence	0.5341851660517225	
+horizon_band	gamma		interval_score	1.513212141959178	52745.0		168.0		persistence	0.5341851660517225	
+horizon_point	gamma		r2_test_change	0.45068699421865666	52745.0		168.0		shrinkage		
+horizon_point	gamma		median_abs_err_log	0.18547369542831627	52745.0		168.0		shrinkage		
+horizon_band	gamma		coverage	0.8235851739501374	52745.0		168.0		shrinkage	0.37742794244431044	
+horizon_band	gamma		mean_width	0.7548558848886211	52745.0		168.0		shrinkage	0.37742794244431044	
+horizon_band	gamma		interval_score	1.0943719709579238	52745.0		168.0		shrinkage	0.37742794244431044	
+horizon_point	gamma		r2_test_change	0.4512002916942994	52745.0		168.0		linear		
+horizon_point	gamma		median_abs_err_log	0.18034350071780542	52745.0		168.0		linear		
+horizon_band	gamma		coverage	0.8245331311024742	52745.0		168.0		linear	0.3754501395607948	
+horizon_band	gamma		mean_width	0.7509002791215896	52745.0		168.0		linear	0.3754501395607948	
+horizon_band	gamma		interval_score	1.0995204256707716	52745.0		168.0		linear	0.3754501395607948	
+horizon_point	gamma		r2_gap	0.0005132974756427711	52745.0		168.0		linear_minus_shrinkage		
+horizon_band	gamma		coverage	0.7639965873542516	52745.0		168.0		rolling_band		
+horizon_band	gamma		mean_width	0.6809321341130466	52745.0		168.0		rolling_band		
+horizon_band	gamma		interval_score	1.0913755204501399	52745.0		168.0		rolling_band		
+common_mode	gamma		r2_leave_one_out	0.015289581788554885	52745.0		168.0				0.758192021191215
+event_lag1_autocorr	lambda	train	rho_pooled	-0.4833786093086524	14412.0						
+event_lag1_autocorr	lambda	train	local_level_cap_r2	0.37215196496295644	14412.0						
+event_lag1_autocorr	lambda	test	rho_pooled	-0.4996333056108737	7492.0						
+event_lag1_autocorr	lambda	test	local_level_cap_r2	0.4808542452655603	7492.0						
+event_lag1_autocorr	lambda	all	rho_per_qubit_median	-0.49129381322943566	155.0						
+event_lag1_autocorr	lambda	train	rho_ci90	-0.49527673848450005	14412.0	-0.4705322263744821					
+event_lag1_autocorr	lambda	train	local_level_cap_r2_ci90	0.330886357903707	14412.0	0.4314365088683767					
+event_reversion	lambda		b_train	-0.8353598267658721	14102.0						
+event_reversion	lambda		r2_test	0.4474258018277496	7492.0						
+event_reversion	lambda		b_ci90	-0.8873707274621919	14102.0	-0.7879592131584519					
+zero_width_band	lambda		coverage	0.14112265319736966	52465.0		24.0	all			
+zero_width_band	lambda		coverage	0.0	45061.0		24.0	change			
+horizon_fit	lambda		kappa	0.7727813938818042	46441.0		24.0				
+horizon_fit	lambda		kappa_ci90	0.7489358533455812	46441.0	0.7996814621736816	24.0				
+horizon_fit	lambda		ridge_beta_std_dev	-0.22502276202690313	46441.0		24.0				
+horizon_fit	lambda		ridge_beta_std_last_inc	-0.05763840619729973	46441.0		24.0				
+horizon_fit	lambda		ridge_beta_std_log_age	0.0034901105065724518	46441.0		24.0				
+horizon_fit	lambda		ridge_beta_std_recal_age	-0.010479440681115847	46441.0		24.0				
+horizon_fit	lambda		ridge_beta_std_standing	-0.00704132584981092	46441.0		24.0				
+horizon_fit	lambda		ridge_beta_std_hour_sin	0.003225265071492052	46441.0		24.0				
+horizon_fit	lambda		ridge_beta_std_hour_cos	-0.002224648075076776	46441.0		24.0				
+horizon_point	lambda		r2_test_change	6.290989881330145e-05	45061.0		24.0		persistence		
+horizon_point	lambda		median_abs_err_log	0.17117550604380405	45061.0		24.0		persistence		
+horizon_band	lambda		coverage	0.8066842724307051	45061.0		24.0		persistence	0.4816069395917406	
+horizon_band	lambda		mean_width	0.9632138791834813	45061.0		24.0		persistence	0.4816069395917406	
+horizon_band	lambda		interval_score	1.8520435996673035	45061.0		24.0		persistence	0.4816069395917406	
+horizon_point	lambda		r2_test_change	0.4380698349446702	45061.0		24.0		shrinkage		
+horizon_point	lambda		median_abs_err_log	0.1475016722723512	45061.0		24.0		shrinkage		
+horizon_band	lambda		coverage	0.8083930671756064	45061.0		24.0		shrinkage	0.36333805530112623	
+horizon_band	lambda		mean_width	0.7266761106022523	45061.0		24.0		shrinkage	0.36333805530112623	
+horizon_band	lambda		interval_score	1.335921161359298	45061.0		24.0		shrinkage	0.36333805530112623	
+horizon_point	lambda		r2_test_change	0.4391065102187427	45061.0		24.0		linear		
+horizon_point	lambda		median_abs_err_log	0.14538753679160343	45061.0		24.0		linear		
+horizon_band	lambda		coverage	0.799516211357937	45061.0		24.0		linear	0.3517860565368789	
+horizon_band	lambda		mean_width	0.7035721130737578	45061.0		24.0		linear	0.3517860565368789	
+horizon_band	lambda		interval_score	1.3368455824036056	45061.0		24.0		linear	0.3517860565368789	
+horizon_point	lambda		r2_gap	0.0010366752740724738	45061.0		24.0		linear_minus_shrinkage		
+horizon_band	lambda		coverage	0.7510041943143738	45061.0		24.0		rolling_band		
+horizon_band	lambda		mean_width	0.6575131492259589	45061.0		24.0		rolling_band		
+horizon_band	lambda		interval_score	1.1952690542289495	45061.0		24.0		rolling_band		
+common_mode	lambda		r2_leave_one_out	0.0013245254578393428	45061.0		24.0				0.34514724055500384
+zero_width_band	lambda		coverage	0.0	47478.0		168.0	all			
+zero_width_band	lambda		coverage	0.0	47478.0		168.0	change			
+horizon_fit	lambda		kappa	0.8280738000711305	51421.0		168.0				
+horizon_fit	lambda		kappa_ci90	0.8091865374774107	51421.0	0.8491561713821035	168.0				
+horizon_fit	lambda		ridge_beta_std_dev	-0.2673653811943134	51421.0		168.0				
+horizon_fit	lambda		ridge_beta_std_last_inc	-0.026490558596820767	51421.0		168.0				
+horizon_fit	lambda		ridge_beta_std_log_age	-0.0043834509201989315	51421.0		168.0				
+horizon_fit	lambda		ridge_beta_std_recal_age	-0.006933276229256402	51421.0		168.0				
+horizon_fit	lambda		ridge_beta_std_standing	-0.013951619870265225	51421.0		168.0				
+horizon_fit	lambda		ridge_beta_std_hour_sin	0.009054711990284623	51421.0		168.0				
+horizon_fit	lambda		ridge_beta_std_hour_cos	-0.002574907611988505	51421.0		168.0				
+horizon_point	lambda		r2_test_change	0.0002595098898550141	47478.0		168.0		persistence		
+horizon_point	lambda		median_abs_err_log	0.17704554957327545	47478.0		168.0		persistence		
+horizon_band	lambda		coverage	0.8203167782973166	47478.0		168.0		persistence	0.4929416236637909	
+horizon_band	lambda		mean_width	0.9858832473275818	47478.0		168.0		persistence	0.4929416236637909	
+horizon_band	lambda		interval_score	1.835121879598612	47478.0		168.0		persistence	0.4929416236637909	
+horizon_point	lambda		r2_test_change	0.43044394067751257	47478.0		168.0		shrinkage		
+horizon_point	lambda		median_abs_err_log	0.1475675824552823	47478.0		168.0		shrinkage		
+horizon_band	lambda		coverage	0.8088167151101563	47478.0		168.0		shrinkage	0.351798161577043	
+horizon_band	lambda		mean_width	0.7035963231540859	47478.0		168.0		shrinkage	0.351798161577043	
+horizon_band	lambda		interval_score	1.3168139904592286	47478.0		168.0		shrinkage	0.351798161577043	
+horizon_point	lambda		r2_test_change	0.43095993222810935	47478.0		168.0		linear		
+horizon_point	lambda		median_abs_err_log	0.14531970224265522	47478.0		168.0		linear		
+horizon_band	lambda		coverage	0.8057837314124436	47478.0		168.0		linear	0.34836228572164496	
+horizon_band	lambda		mean_width	0.6967245714432898	47478.0		168.0		linear	0.34836228572164496	
+horizon_band	lambda		interval_score	1.3181108560905865	47478.0		168.0		linear	0.34836228572164496	
+horizon_point	lambda		r2_gap	0.0005159915505967838	47478.0		168.0		linear_minus_shrinkage		
+horizon_band	lambda		coverage	0.7564134967774548	47478.0		168.0		rolling_band		
+horizon_band	lambda		mean_width	0.6562761984698341	47478.0		168.0		rolling_band		
+horizon_band	lambda		interval_score	1.1832014580138186	47478.0		168.0		rolling_band		
+common_mode	lambda		r2_leave_one_out	0.001114438680171137	47478.0		168.0				0.32249899874508947

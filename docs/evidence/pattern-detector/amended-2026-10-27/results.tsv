@@ -1,0 +1,242 @@
+figure	value
+amended	2026-10-27, after the statistics review of PR #128; analysis after the test outputs were examined
+ref	cf960389c672208a3952cbdf08bfd7e338ace40c
+files	2330
+distinct_states	944
+guard_rows	3932
+excluded_features.band_width_zero	2
+excluded_features.sx_missing	0
+excluded_features.cz_missing	0
+warmup_boundary	2026-06-12T12:13:22+00:00
+counts.train.rows	1672
+counts.train.positives	222
+counts.train.rate	0.13277511961722488
+counts.train.days	60
+counts.test.rows	1294
+counts.test.positives	153
+counts.test.rate	0.11823802163833076
+counts.test.days	46
+counts.purged_warmup.rows	789
+counts.purged_warmup.positives	456
+counts.purged_warmup.rate	0.5779467680608364
+counts.purged_warmup.days	21
+counts.purged_crossing.rows	175
+counts.purged_crossing.positives	36
+counts.purged_crossing.rate	0.2057142857142857
+counts.purged_crossing.days	10
+counts.unpurged_train_2026_10_26.rows	2636
+counts.unpurged_train_2026_10_26.positives	714
+counts.unpurged_train_2026_10_26.rate	0.2708649468892261
+decision_tree.parameters	16
+decision_tree.floor_training_positives	160
+decision_tree.train_positives	222
+decision_tree.test_positives	153
+decision_tree.test_days	46
+decision_tree.branch	1: full feature list
+null_parameters.rho	-0.4877144766358319
+null_parameters.rho_pairs	14681
+null_parameters.q	0.05037998235734742
+null_parameters.sigma_e_from_increments_median	0.26148416993284956
+null_parameters.sigma_fallback_qubits	1
+null_parameters.observed_increments_train.n	14837
+null_parameters.observed_increments_train.variance	0.15020089762749142
+null_parameters.observed_increments_train.rho	-0.4877144766358319
+null_parameters.observed_increments_train.pairs	14681
+null_parameters.observed_increments_full_history_train.n	10150
+null_parameters.observed_increments_full_history_train.variance	0.18550345573381946
+null_parameters.observed_increments_full_history_train.rho	-0.49874392101554094
+null_parameters.observed_increments_full_history_train.pairs	9994
+residuals_full_history.qubits_with_shape	155
+residuals_full_history.n	10129
+residuals_full_history.quantiles.p05	-0.5897010900402965
+residuals_full_history.quantiles.p25	-0.16268324401116097
+residuals_full_history.quantiles.p50	0.0404704481609226
+residuals_full_history.quantiles.p75	0.2013534528215999
+residuals_full_history.quantiles.p95	0.3965342521412215
+residuals_full_history.skew	-1.535610563794006
+residuals_full_history.standardised_skew	-1.22467046214234
+null_recovery_check.empirical.sim_increment_variance	0.1496365192574681
+null_recovery_check.empirical.observed_increment_variance	0.15020089762749142
+null_recovery_check.empirical.variance_ratio_sim_over_obs	0.9962425100053461
+null_recovery_check.empirical.sim_lag1_rho	-0.4868949118509074
+null_recovery_check.empirical.observed_lag1_rho	-0.4877144766358319
+null_recovery_check.empirical.sim_residual_quantiles.p05	-0.5707318591826857
+null_recovery_check.empirical.sim_residual_quantiles.p25	-0.1833929920544166
+null_recovery_check.empirical.sim_residual_quantiles.p50	0.02770387215416851
+null_recovery_check.empirical.sim_residual_quantiles.p75	0.21735420762926366
+null_recovery_check.empirical.sim_residual_quantiles.p95	0.4839142123376025
+null_recovery_check.empirical.sim_residual_skew	-0.8104201503239906
+null_recovery_check.empirical.sim_residual_n	187320
+null_recovery_check.gaussian.sim_increment_variance	0.14961129089411956
+null_recovery_check.gaussian.observed_increment_variance	0.15020089762749142
+null_recovery_check.gaussian.variance_ratio_sim_over_obs	0.9960745458736597
+null_recovery_check.gaussian.sim_lag1_rho	-0.48716873525306875
+null_recovery_check.gaussian.observed_lag1_rho	-0.4877144766358319
+null_recovery_check.gaussian.sim_residual_quantiles.p05	-0.5420724123494479
+null_recovery_check.gaussian.sim_residual_quantiles.p25	-0.21348287095592142
+null_recovery_check.gaussian.sim_residual_quantiles.p50	0.0007022144179300444
+null_recovery_check.gaussian.sim_residual_quantiles.p75	0.21493600999679063
+null_recovery_check.gaussian.sim_residual_quantiles.p95	0.5444032933098134
+null_recovery_check.gaussian.sim_residual_skew	0.01078716933390659
+null_recovery_check.gaussian.sim_residual_n	187320
+null_empirical.simulated_pairs	4258100.0
+null_empirical.bin_fallback_rows	162
+null_empirical.residual_fallback_qubits	1
+null_empirical.sim_rate_below	0.25294563528934355
+null_empirical.sim_rate_above	0.5504968394542887
+null_gaussian.simulated_pairs	4716795.0
+null_gaussian.bin_fallback_rows	304
+null_gaussian.residual_fallback_qubits	0
+null_gaussian.sim_rate_below	0.35381076081261414
+null_gaussian.sim_rate_above	0.35427228282744316
+logistic.dropped_constant_columns	['prev_d_missing', 'd_readout_missing']
+logistic.inner_boundary	2026-08-13T06:23:00+00:00
+logistic.inner_fit_rows	1196
+logistic.inner_fit_rows_purged_by_label_time	160
+logistic.inner_val_rows	316
+logistic.lambda_losses.0.001	0.3385567382291144
+logistic.lambda_losses.0.01	0.3385575726733361
+logistic.lambda_losses.0.1	0.33856596166018094
+logistic.lambda_losses.1.0	0.33865355925068724
+logistic.lambda_losses.10.0	0.33959050801403223
+logistic.lambda	0.001
+logistic.lambda_at_grid_boundary	True
+logistic.coefficients_standardised.d	0.3507579740302653
+logistic.coefficients_standardised.abs_d_rel	-0.9209551286552591
+logistic.coefficients_standardised.prev_d	-0.028421090173896938
+logistic.coefficients_standardised.n_distinct	0.020075243905620536
+logistic.coefficients_standardised.hours_since_prev	-0.0686440145071168
+logistic.coefficients_standardised.hours_since_sweep	0.2203700943624942
+logistic.coefficients_standardised.d_t2	0.0390077121740341
+logistic.coefficients_standardised.d_readout	-0.017344255012694248
+logistic.coefficients_standardised.chip_readout	-0.09735776777218817
+logistic.coefficients_standardised.same_sign_share	0.032585936174183636
+logistic.coefficients_standardised.sx_log	0.31726988284724955
+logistic.coefficients_standardised.cz_best_log	0.3285099416927865
+logistic.coefficients_standardised.hour_sin	-0.010895894522985741
+logistic.coefficients_standardised.hour_cos	0.10363917622091603
+logistic.coefficients_standardised.d_t2_missing	-0.25194183553809246
+logistic.intercept	-2.290127421801821
+test_scores.empirical_null.brier	0.16446535469993148
+test_scores.empirical_null.log_loss	0.5001121861092394
+test_scores.empirical_null.auc	0.7291104580891662
+test_scores.empirical_null.mean_forecast	0.35985491331690717
+test_scores.empirical_null.bss_vs_primary_null	-0.05222712226405646
+test_scores.empirical_null.bss_vs_always_level	-0.3909684247170675
+test_scores.empirical_null.bss_vs_constant_purged	-0.5742963674300954
+test_scores.gaussian_null.brier	0.1563021435391768
+test_scores.gaussian_null.log_loss	0.49875044789678635
+test_scores.gaussian_null.auc	0.6448162086920658
+test_scores.gaussian_null.mean_forecast	0.351719392502516
+test_scores.gaussian_null.bss_vs_primary_null	0.0
+test_scores.gaussian_null.bss_vs_always_level	-0.32192793293918154
+test_scores.gaussian_null.bss_vs_constant_purged	-0.4961564229999249
+test_scores.constant_p0_purged_train.brier	0.10446911909503237
+test_scores.constant_p0_purged_train.log_loss	0.36434733102135464
+test_scores.constant_p0_purged_train.auc	0.5
+test_scores.constant_p0_purged_train.mean_forecast	0.13277511961722488
+test_scores.constant_p0_purged_train.bss_vs_primary_null	0.33162068843382553
+test_scores.constant_p0_purged_train.bss_vs_always_level	0.1164507182420138
+test_scores.constant_p0_purged_train.bss_vs_constant_purged	0.0
+test_scores.constant_2026_10_26.brier	0.12755277018892675
+test_scores.constant_2026_10_26.log_loss	0.4329801623210396
+test_scores.constant_2026_10_26.auc	0.5
+test_scores.constant_2026_10_26.mean_forecast	0.2708649468892261
+test_scores.constant_2026_10_26.bss_vs_primary_null	0.18393460703271847
+test_scores.constant_2026_10_26.bss_vs_always_level	-0.07877963806843913
+test_scores.constant_2026_10_26.bss_vs_constant_purged	-0.220961479275956
+test_scores.always_level.brier	0.11823802163833076
+test_scores.always_level.log_loss	1.633519518059586
+test_scores.always_level.auc	0.5
+test_scores.always_level.mean_forecast	0.0
+test_scores.always_level.log_loss_note	clipped at 1e-6; a literal p = 0 forecast has infinite log loss
+test_scores.always_level.bss_vs_primary_null	0.24352910995942512
+test_scores.always_level.bss_vs_always_level	0.0
+test_scores.always_level.bss_vs_constant_purged	-0.13179878094667608
+test_scores.logistic.brier	0.09971505638189743
+test_scores.logistic.log_loss	0.3403400964164016
+test_scores.logistic.auc	0.7191604658223207
+test_scores.logistic.mean_forecast	0.12748378951208378
+test_scores.logistic.bss_vs_primary_null	0.36203653946112346
+test_scores.logistic.bss_vs_always_level	0.15665828131911597
+test_scores.logistic.bss_vs_constant_purged	0.04550687087550076
+test_scores.oracle_constant_test_rate.brier	0.10425779187738439
+test_scores.oracle_constant_test_rate.auc	0.5
+test_scores.oracle_constant_test_rate.mean_forecast	0.11823802163833076
+test_scores.oracle_constant_test_rate.bss_vs_primary_null	0.3329727314248099
+test_scores.oracle_constant_test_rate.bss_vs_always_level	0.11823802163833075
+test_scores.oracle_constant_test_rate.bss_vs_constant_purged	0.002022867805133277
+primary_null	gaussian_null
+calibration[0].split	train
+calibration[0].sign	below
+calibration[0].rows	1073
+calibration[0].observed_rate	0.08294501397949673
+calibration[0].empirical_mean_forecast	0.22984374834532115
+calibration[0].gaussian_mean_forecast	0.3351350060212786
+calibration[0].logistic_mean_forecast	0.08484248163479892
+calibration[1].split	train
+calibration[1].sign	above
+calibration[1].rows	599
+calibration[1].observed_rate	0.22203672787979967
+calibration[1].empirical_mean_forecast	0.5214159696573367
+calibration[1].gaussian_mean_forecast	0.3788446505013957
+calibration[1].logistic_mean_forecast	0.21863775827355725
+calibration[2].split	test
+calibration[2].sign	below
+calibration[2].rows	779
+calibration[2].observed_rate	0.044929396662387676
+calibration[2].empirical_mean_forecast	0.24709894830120482
+calibration[2].gaussian_mean_forecast	0.3374941630064995
+calibration[2].logistic_mean_forecast	0.07915818468838169
+calibration[3].split	test
+calibration[3].sign	above
+calibration[3].rows	515
+calibration[3].observed_rate	0.229126213592233
+calibration[3].empirical_mean_forecast	0.5304119943794938
+calibration[3].gaussian_mean_forecast	0.37323677847804393
+calibration[3].logistic_mean_forecast	0.20058213156580015
+bootstrap.test_days_with_rows	46
+bootstrap.calendar_days	50
+bootstrap.empty_calendar_days	['2026-09-10', '2026-09-16', '2026-10-02', '2026-10-08']
+bootstrap.resamples	1000
+bootstrap.daily_difference_acf_calendar_lags	[-0.17564447161358865, 0.2572267519367966, -0.23245532466521754, 0.04229012827606458, -0.2198825807747111, 0.1047790808360003, 0.0890149924686794, 0.009265322732124017, 0.08138868040170176, 0.03669986363632824, 0.01197330011833449, -0.2220556517123797]
+bootstrap.two_se_bound	0.29488391230979427
+bootstrap.block_length_chosen_calendar_days	6
+bootstrap.by_block_length.1.bs_null_minus_bs_logistic_90	(0.04956306397038197, 0.06363056721205042)
+bootstrap.by_block_length.1.bss_logistic_vs_null_90	(0.3083765216940072, 0.41899882230560753)
+bootstrap.by_block_length.1.bs_always_level_minus_bs_logistic_90	(0.011034612712164573, 0.025817076385302874)
+bootstrap.by_block_length.1.bs_constant_purged_minus_bs_logistic_90	(0.001130017223501037, 0.008422886674523676)
+bootstrap.by_block_length.1.bs_always_level_minus_bs_null_90	(-0.05133358981530935, -0.025134521026751115)
+bootstrap.by_block_length.3.bs_null_minus_bs_logistic_90	(0.049902973905364925, 0.06292966492403676)
+bootstrap.by_block_length.3.bss_logistic_vs_null_90	(0.3102567437190515, 0.4156091709654427)
+bootstrap.by_block_length.3.bs_always_level_minus_bs_logistic_90	(0.010990570572524864, 0.02698917814567147)
+bootstrap.by_block_length.3.bs_constant_purged_minus_bs_logistic_90	(0.0012911559948323215, 0.008823953178070647)
+bootstrap.by_block_length.3.bs_always_level_minus_bs_null_90	(-0.05123587593240809, -0.024348913447944057)
+bootstrap.by_block_length.5.bs_null_minus_bs_logistic_90	(0.05014551347054743, 0.06327677602721499)
+bootstrap.by_block_length.5.bss_logistic_vs_null_90	(0.3100435511541748, 0.4197126663579864)
+bootstrap.by_block_length.5.bs_always_level_minus_bs_logistic_90	(0.009975843189364985, 0.02701469409450278)
+bootstrap.by_block_length.5.bs_constant_purged_minus_bs_logistic_90	(0.001118914737723352, 0.008370575581252334)
+bootstrap.by_block_length.5.bs_always_level_minus_bs_null_90	(-0.052708048169654284, -0.0242519103673336)
+bootstrap.by_block_length.6.bs_null_minus_bs_logistic_90	(0.05090242534890839, 0.06258104743443951)
+bootstrap.by_block_length.6.bss_logistic_vs_null_90	(0.315752032754958, 0.4167832149269031)
+bootstrap.by_block_length.6.bs_always_level_minus_bs_logistic_90	(0.00988412852473194, 0.026933471402697164)
+bootstrap.by_block_length.6.bs_constant_purged_minus_bs_logistic_90	(0.0009987311997449269, 0.00849001252586417)
+bootstrap.by_block_length.6.bs_always_level_minus_bs_null_90	(-0.051983222251946196, -0.025089071282398397)
+bootstrap.by_block_length.7.bs_null_minus_bs_logistic_90	(0.050166161401971825, 0.0620193521218551)
+bootstrap.by_block_length.7.bss_logistic_vs_null_90	(0.3105769095550172, 0.40779404783128775)
+bootstrap.by_block_length.7.bs_always_level_minus_bs_logistic_90	(0.010813868831560916, 0.02690284761198454)
+bootstrap.by_block_length.7.bs_constant_purged_minus_bs_logistic_90	(0.0013901574499579912, 0.008371036478209998)
+bootstrap.by_block_length.7.bs_always_level_minus_bs_null_90	(-0.05066737471606643, -0.024153115972246883)
+bootstrap.by_block_length.10.bs_null_minus_bs_logistic_90	(0.0505425535507432, 0.062360699514446276)
+bootstrap.by_block_length.10.bss_logistic_vs_null_90	(0.3100168847227324, 0.41495918143881466)
+bootstrap.by_block_length.10.bs_always_level_minus_bs_logistic_90	(0.009831554001176033, 0.027666156474326783)
+bootstrap.by_block_length.10.bs_constant_purged_minus_bs_logistic_90	(0.001288905755996011, 0.008292791122479354)
+bootstrap.by_block_length.10.bs_always_level_minus_bs_null_90	(-0.05217672706292361, -0.023564692565062332)
+clause_1_amended.bss_logistic_vs_primary_null	0.36203653946112346
+clause_1_amended.threshold	0.1
+clause_1_amended.interval_excludes_zero_at_chosen_block	True
+clause_1_amended.holds	True
+clause_1_amended.bss_vs_always_level	0.15665828131911597
+clause_1_amended.bss_vs_constant_purged	0.04550687087550076
+clause_1_amended.constant_purged_minus_logistic_90_at_chosen_block	(0.0009987311997449269, 0.00849001252586417)
+clause_1_amended.bss_vs_oracle	0.04357214375717444

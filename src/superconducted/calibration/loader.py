@@ -317,6 +317,18 @@ def load_snapshot(path: str | pathlib.Path) -> ParsedCalibrationSnapshot:
     with snapshot_path.open(encoding="utf-8") as fp:
         data = json.load(fp)
 
+    return parse_snapshot(data, source=snapshot_path)
+
+
+def parse_snapshot(
+    data: Mapping[str, Any], *, source: str | pathlib.Path = "<memory>"
+) -> ParsedCalibrationSnapshot:
+    """Parse an archive mapping without I/O, using the file loader's validation.
+
+    ``source`` labels diagnostics. Missingness and SI conversions are identical
+    to :func:`load_snapshot`; malformed schemas raise CalibrationParseError.
+    """
+    snapshot_path = pathlib.Path(source)
     raw_properties = data.get("properties")
     if raw_properties is None:
         properties: dict[str, Any] = {}

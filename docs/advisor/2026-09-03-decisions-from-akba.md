@@ -371,3 +371,104 @@ which is Issue #58 / PR #79's scope. This narrows the recorded gap; it does not
 answer the ratification question or alter the item's Outstanding status, which
 under the 2026-10-03 entry above closes only through the lead's approval
 session (Issue #109).
+
+## Decision, 2026-10-21: the ADR-013 revisit note for Issue #63 stands
+
+| | |
+| --- | --- |
+| **Question** | Issue #63 decision 4: does the `> Revisited · 2026-10-21` note that PR #113 appends under ADR-013 in `docs/decisions.md` stand? |
+| **Answer** | Yes, as amended on 2026-10-21 in PR #113. The amendment, approved by the same approver the same day, adds the evidence refs and row counts decision 4 asked for (504 rows at `f0930b9`, 797 at `e5688d2`), uses the ledger's separator and dates the note 2026-10-21; the sign-off covers the amended text. |
+| **Approver** | @mertefesensoy, as lead in the advisor role (the 2026-10-03 reshape above) |
+| **Date given** | 2026-10-21 |
+| **Medium** | Chosen by @mertefesensoy during the PR #113 review and recorded here in that PR. This is the lead's sign-off, not a read from Dr. Akba. |
+| **Unblocks** | Issue #63's decision 4 and the ADR-013 half of PR #113's definition of done. |
+
+**The scope of this approval, stated exactly.** It covers the note's text only. ADR-013
+stays Open / Deferred: the note decides nothing about richer extractors, and their
+empirical comparison remains a future ADR. It flips no `**Status**` line. Issue #63's
+decisions 1 and 5 (the row timestamp and the dashboard-aligned digest) were confirmed
+separately, on Issue #63, on the same day; they are issue decisions, not advisor items.
+
+## Outstanding items, as of 2026-10-23
+
+Not a decision entry. Issue #58 section 10 asks for the advisor's read of the two
+`docs/decisions.md` notes PR #79 appends, and for that ask to be recorded in this file.
+It had no item here; @BurakOztekin's 2026-10-23 review of PR #79 asked for one. Recorded
+without a register number, because PR #120 also appends to this file and numbers are
+better given once both have merged.
+
+**#58 notes, advisor read.** The ADR-016 "Density mode · 2026-10-21" note (the mixture
+mean as the density-mode point estimate; Status stays Deferred) and the ADR-022 notes of
+2026-09-06 and 2026-10-21 (the property set asserted on the density-matrix path; Status
+stays Accepted). Ask: Read. Under the 2026-10-03 entry above this closes through the
+lead's approval, recorded here by @mertefesensoy when given. Outstanding; it does not
+block PR #79's merge, whose remaining gates are listed in that PR.
+
+## Decision, 2026-10-21: Dr. Akba gives the fuzzy-engine approvals through the lead's signature
+
+| | |
+| --- | --- |
+| **Question** | Who gives the advisor's approval on the register items still Outstanding? |
+| **Answer** | For the two fuzzy engines, Type-1 and Interval Type-2, @mertefesensoy's signature is Dr. Akba's approval. The deep-learning model is excluded; its approvals stay with Dr. Akba. |
+| **Approver** | Dr. Fırat Akba |
+| **Date given** | The exact day was not recorded. First stated on the record on Issue #57 on 2026-10-13 ([comment 6140571135](https://github.com/SuperconducTED/superconducted-noise-engine/issues/57#issuecomment-6140571135)). |
+| **Medium** | In person, with @mertefesensoy, who records it here. |
+| **Unblocks** | The three entries that follow (items 1, 10 and 12), and every later fuzzy-engine entry, each of which names this one. Tracked in Issue #109. |
+
+**The scope, stated exactly.**
+
+- This entry flips no `**Status**` line and answers no item by itself. Each item still closes through its own entry, naming this delegation, the decision, and the ADR it lands in.
+- Whether an item concerns the fuzzy engines is stated in that item's own entry, not inferred from this one.
+- The ADR-025 amendments are not answered by this entry: items 2 and 14, the 2026-09-17 heartbeat amendment and PR #105's capture amendment. Whether they fall under it is open in Issue #109.
+
+## Decision, 2026-10-21: Item 1, ADR-027 decisions D1, D3 and D4 stand as ADR-027 states them
+
+| | |
+| --- | --- |
+| **Question** | Do ADR-027's proposed decisions stand: D1 (raw-space target), D3 (the skip rule) and D4 (the per-snapshot mean)? Register item 1; Issue #57 §7, decisions 1, 3 and 4; Issue #84 §3. |
+| **Answer** | Yes, as ADR-027 states them at `main` @ `c33e438e`, with D3 made explicit below. |
+| **Approver** | @mertefesensoy, under Dr. Akba's delegation (the entry above). |
+| **Date given** | 2026-10-13, announced on Issue #57 ([comment 6140571135](https://github.com/SuperconducTED/superconducted-noise-engine/issues/57#issuecomment-6140571135), decision C and step 3). |
+| **Medium** | GitHub, Issue #57; recorded here by @mertefesensoy. |
+| **Unblocks** | ADR-027's Status flip from Open to Accepted in Issue #84's follow-up PR, and with it the close of Issue #57. Lands in ADR-027. |
+
+**What each decision says.**
+
+- **D1.** The target is raw-space; the inference projection stays responsible for probability clipping.
+- **D3.** Each qubit is rejected by its first applicable reason, in this order: `t1_missing`, `t2_missing`, `gate_length_missing`, `nonpositive`, `t2_exceeds_2t1` (the counters of `SkipCounts` in `training/targets.py`). When no qubit is usable, `snapshot_target` returns `None` rather than raising.
+- **D4.** The snapshot target is the mean of the usable per-qubit targets, with the standard deviation and the 10th, 50th and 90th percentiles retained. It is not the target evaluated at mean T1 and T2. A per-qubit target table is a separate future decision under ADR-027, not ADR-013.
+- **D2** is not part of this item. It was withdrawn from the advisor ask as item 1b, an internal ownership question.
+
+**Issue #58's obligation.** `benchmarks/reference.py` must apply the same ordered rule, so that the target and the reference model agree on which qubits exist. At PR #79's head `5400702` it does not: it has two reasons, `_SKIP_REASONS = ("missing_t1_t2", "t2_exceeds_2t1")`, and raises `ValueError` on a non-positive T1 or T2 and on a missing `gate_length`, where `training/targets.py` counts `nonpositive` and `gate_length_missing`. This stays Issue #58's obligation whatever happens to PR #79. It is not fixed before Issue #57 closes; ADR-027 records it.
+
+**What this approval does not claim.** The team's File 01 decisions on Issue #84 ([comment 5763872729](https://github.com/SuperconducTED/superconducted-noise-engine/issues/84#issuecomment-5763872729)) attach a limit to each decision, and the limits carry over:
+
+- D1 does not claim that raw-space training performs better. That has to be shown experimentally.
+- D3's counters account for every rejected qubit. They do not make the usable qubits representative of the device.
+- D4's mean is the best constant summary under equally weighted squared error. It does not in general describe the average channel.
+
+## Decision, 2026-10-21: Item 10, owner read of `TSKTrainer` and the four training value types
+
+| | |
+| --- | --- |
+| **Question** | As primary owner of `interfaces.py` and `types.py` (`docs/team.md`), does Dr. Akba accept the contracts PR #69 added: the `TSKTrainer` ABC in `interfaces.py`, and `TrainingSet` (with `time_split`), `TrainingResult`, `TrainingDiagnostics` and `ParameterCount` in `types.py`? Register item 10; Issue #84 §3, D5. |
+| **Answer** | Yes. |
+| **Approver** | Dr. Fırat Akba; signed by @mertefesensoy under the delegation above. |
+| **Date given** | Between 2026-09-29 and 2026-10-02. The exact day was not recorded. |
+| **Medium** | In person, with @mertefesensoy, who records it here. |
+| **Unblocks** | Issue #57's definition-of-done item "Dr. Akba's read of the `interfaces.py` / `types.py` change recorded out of band", together with item 12. No ADR: this is an owner read under `docs/team.md`. |
+
+The team's File 01 decision on D5 left owner approval as a separate requirement. This is that approval, given with the in-person approval the 2026-10-03 entry records, and written here in the per-item form that entry asks for. The approved text is the current text: `types.py` and `TSKTrainer` are unchanged from PR #69's merge (`2d66f7ab`) to `main` @ `c33e438e`. The only later change to `interfaces.py`, PR #96 (ADR-028), does not touch `TSKTrainer`.
+
+## Decision, 2026-10-21: Item 12, owner read of the `MembershipFunction` docstring correction
+
+| | |
+| --- | --- |
+| **Question** | As primary owner of `interfaces.py`, does Dr. Akba accept PR #69's correction to the `MembershipFunction` docstring, which now names `superconducted.training` as the ANFIS trainer's home instead of `superconducted.fuzzy.tsk`? Register item 12; Issue #57 FR-3. |
+| **Answer** | Yes. |
+| **Approver** | Dr. Fırat Akba; signed by @mertefesensoy under the delegation above. |
+| **Date given** | Between 2026-09-29 and 2026-10-02. The exact day was not recorded. |
+| **Medium** | In person, with @mertefesensoy, who records it here. |
+| **Unblocks** | Issue #57's owner-read definition-of-done item, together with item 10. No ADR: this is an owner read under `docs/team.md`. |
+
+Before PR #69 the docstring said the trainer "lives in :mod:`superconducted.fuzzy.tsk`", which contradicted `fuzzy/tsk.py`'s own docstring: the trainer is intentionally not in that module. Since PR #69 it reads "hybrid LSE/SGD ANFIS trainer in :mod:`superconducted.training`", unchanged at `main` @ `c33e438e`. No brief file argued this item (the 2026-09-14 section records the gap); it was put to Dr. Akba in person with the rest.
