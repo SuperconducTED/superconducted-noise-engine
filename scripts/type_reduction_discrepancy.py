@@ -115,11 +115,10 @@ point share them.
   ``grid_partition(GaussianMF, ..., k=3)`` (#61 section 6.2's fallback geometry).
   ``g59`` builds ``grid_partition(IntervalGaussianMF, ..., k=3,
   qubit_spread=s_i)`` with ``s_i`` the median of the survey's
-  ``<feature>_qubit_std`` column, NC-042's statistic. That choice of ``s_i`` is
-  an **assumption**: #84 File 02 called this grid "#59's shipped footprint"
-  without stating its ``qubit_spread``, and no production caller passes one.
-  The grid is labelled ``G59-assumed`` and the TSV header says so until it is
-  confirmed.
+  ``<feature>_qubit_std`` column, NC-042's statistic. That ``s_i`` is the one
+  #84 File 02 used: ``tests/test_parameterization.py::_committed_survey`` takes
+  the same medians at ``110cfad`` (#61 comment 6665986289). No production caller
+  passes a ``qubit_spread`` today.
 - **Consequent conventions** (FR-4). ``unit-spread``: zero-order, rule ``r``
   gets bias ``r / (R - 1)``, one output. ``anchored``: ``anchored_rule_base``
   with ``feature_target_fn`` at the quantile anchors, ``t_seconds = 24e-9``
@@ -365,7 +364,7 @@ LEVELS_PER_FEATURE = 3
 #: ``ibm_fez``'s single-qubit ``sx`` length, NC-035.
 SX_GATE_SECONDS = 24e-9
 G59_TOKEN = "g59"
-G59_GRID_NAME = "G59-assumed"
+G59_GRID_NAME = "G59"
 POINT_SETS: tuple[str, ...] = ("lattice", "uniform", "survey")
 POOLED = "pooled"
 SURVEY_PREFIX = "survey:"
@@ -515,8 +514,7 @@ def g59_grid(samples: FloatArray, spreads: FloatArray) -> Grid:
     """``grid_partition(IntervalGaussianMF, qubit_spread=s_i)`` with ``s_i = spreads[i]``.
 
     The lower MF is the T1 bin-cover Gaussian and ``s_high = sqrt(s_low^2 +
-    s_i^2)``. Which ``s_i`` #84 File 02 used is unconfirmed; see the module
-    docstring.
+    s_i^2)``, with ``s_i`` as in the module docstring.
     """
     per_input = tuple(
         tuple(
@@ -533,7 +531,7 @@ def g59_grid(samples: FloatArray, spreads: FloatArray) -> Grid:
         name=G59_GRID_NAME,
         description=(
             "grid_partition(IntervalGaussianMF, survey, k=3, placement=quantile, "
-            "qubit_spread=s_i), s_i ASSUMED (see g59_qubit_spread)"
+            "qubit_spread=s_i), see g59_qubit_spread"
         ),
         per_input_mfs=per_input,
     )
@@ -807,9 +805,9 @@ def header_lines(
         "not BasicCalibrationVectorizer's SI seconds)",
         f"box: {box}",
         f"grids: {grid_text}",
-        "g59_qubit_spread: ASSUMED, pending confirmation by @mertefesensoy. s_i = median over "
-        f"survey rows of <feature>_qubit_std (NC-042's statistic) = {spreads}. #84 File 02 "
-        "called this grid #59's shipped footprint without stating its qubit_spread",
+        "g59_qubit_spread: s_i = median over survey rows of <feature>_qubit_std "
+        f"(NC-042's statistic) = {spreads}, as #84 File 02 used it (#61 comment "
+        "6665986289, tests/test_parameterization.py::_committed_survey at 110cfad)",
         "conventions: unit-spread = zero-order, rule r bias r/(R-1), one output 'unit'; "
         "anchored = anchored_rule_base with feature_target_fn("
         f"t_seconds={SX_GATE_SECONDS!r}, coherence_unit='us') at the quantile anchors, "

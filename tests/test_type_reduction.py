@@ -520,7 +520,7 @@ def test_sweep_is_byte_identical_across_runs(tmp_path: Path) -> None:
     assert first.read_bytes() == second.read_bytes()
 
 
-def test_sweep_header_records_provenance_and_the_g59_assumption(tmp_path: Path) -> None:
+def test_sweep_header_records_provenance_and_the_g59_spread(tmp_path: Path) -> None:
     out = tmp_path / "sweep.tsv"
     _run(out)
     lines = out.read_text(encoding="utf-8").splitlines()
@@ -529,7 +529,9 @@ def test_sweep_header_records_provenance_and_the_g59_assumption(tmp_path: Path) 
     for key in ("commit:", "range_source:", "units:", "box:", "grids:", "seed: 84", "conventions:"):
         assert key in text
     assert "mean_T1 us" in text
-    assert "g59_qubit_spread: ASSUMED" in text
+    assert "g59_qubit_spread: s_i = median" in text
+    assert "ASSUMED" not in text
+    assert "G59-assumed" not in text
     assert "np.float64" not in text
     assert tuple(lines[len(header)].split("\t")) == COLUMNS
 
