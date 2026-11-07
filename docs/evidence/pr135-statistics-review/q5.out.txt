@@ -1,0 +1,6 @@
+skipped at this ref: {} files 2398 states 958
+2026-10-28T18:40:46+00:00: 780 rows, 10 shared columns, differing cells 0
+2026-08-15T03:45:00+00:00: 780 rows, 10 shared columns, differing cells 0
+old columns: ['qubit', 'quantity', 'reading', 'level', 'band_lo', 'band_hi', 'n_window', 'n_distinct', 'log_disagreement', 'reading_time']
+new columns: ['qubit', 'quantity', 'reading', 'level', 'band_lo', 'band_hi', 'n_window', 'n_distinct', 'log_disagreement', 'reading_time', 'n_window_distinct']
+mutation (one reading doubled): differing reading cells 1

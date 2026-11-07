@@ -1,0 +1,3 @@
+old 24 new 34
+unchanged 14 changed ['TSV_COLUMNS', 'Collected', 'PredictorRow', '_record', 'collect', '_live_record', 'predictor_rows', 'execution_rows', 'write_outputs', 'main']
+only new ['MIN_WINDOW_DISTINCT', 'LiveDocumentError', 'ControlsFileError', '_check_qubit_shapes', 'normalise_live', '_below_window_floor', 'freeze_controls', 'select_balanced', 'load_controls', '_write_json']

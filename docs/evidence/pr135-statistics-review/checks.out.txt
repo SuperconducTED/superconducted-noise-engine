@@ -1,0 +1,17 @@
+1. cache vs committed predictors.tsv: 780 rows, largest relative difference 0.0e+00, integer mismatches 0
+2. 2026-07-01: full vs cut at t_s identical on 780 rows: True
+   mutation: moving one future file onto t_s changes 448 reading rows (must be > 0)
+2. 2026-09-15: full vs cut at t_s identical on 780 rows: True
+   mutation: moving one future file onto t_s changes 308 reading rows (must be > 0)
+3. live path at snapshots/2026-10/ibm_fez/20261028T184046000000Z.json
+   latest archived document passed as live: differing values 0 (0 expected: its digest is already a state)
+   digest in window: False  digest in all states: True
+   old logic against archive-only, rows differing in level: 778
+   old logic against archive-only, rows differing in band_lo: 166
+   old logic against archive-only, rows differing in band_hi: 255
+   old logic against archive-only, rows differing in n_window: 778
+   old logic against archive-only, rows differing in n_distinct: 0
+   old logic against archive-only, rows differing in n_window_distinct: 438
+   old logic against archive-only, rows differing in log_disagreement: 770
+   new logic against archive-only, values differing (level, band, counts): 0 (0 expected; the reading alone moves)
+tau = 0: |p_level - p_reading| = |e10 difference|: median 0.0029, p90 0.0170; binomial se at p about 0.97 is 0.0038

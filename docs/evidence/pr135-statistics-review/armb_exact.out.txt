@@ -1,0 +1,14 @@
+b1_level                             exact 0.5049798180  committed 0.5049798180  diff 2.2e-16
+b2_level                             exact 0.6057879433  committed 0.6057879433  diff 3.3e-16
+b1_and_b2_level                      exact 0.3745265200  committed 0.3745265200  diff 1.7e-16
+b1_level_or_band                     exact 0.6716274430  committed 0.6716274430  diff 2.2e-16
+b2_level_or_band                     exact 0.7576664638  committed 0.7576664638  diff 3.3e-16
+joint_one_predictor_meets_both       exact 0.5356725131  committed 0.5356725131  diff 3.3e-16
+joint_each_condition_by_either       exact 0.5600559256  committed 0.5600559256  diff 2.2e-16
+p_tie_b1_level                       exact 0.0099596360  committed 0.0099596360  diff 5.2e-18
+p_tie_b2_level                       exact 0.2115758866  committed 0.2115758866  diff 2.8e-17
+largest |diff|: 3.3306690738754696e-16
+strict B1 (level mean Spearman strictly higher): 0.495
+strict B2 (level best-pick strictly more often): 0.3942
+strict B1 and strict B2, level alone:            0.2638
+mutation J=12: tie B2 = 0.2204 vs J=13 0.2116 (must differ)

@@ -1,0 +1,15 @@
+files 2398 configuration a dict 1610 null 788
+by (schema_version, has configuration): {('1.0.0', True): 1610, ('1.0.0', False): 788}
+('2026-05', True) 171
+('2026-06', True) 192
+('2026-07', True) 272
+('2026-08', False) 29
+('2026-08', True) 275
+('2026-09', False) 349
+('2026-09', True) 334
+('2026-10', False) 410
+('2026-10', True) 366
+first null: snapshots/2026-08/ibm_fez/20260805T234531000000Z.json
+days at 03:45 UTC whose latest file has configuration null: 33 of 138
+first and last such: ['2026-09-10'] ['2026-10-28']
+of the last 14, 30, 60 days: [6, 20, 33]

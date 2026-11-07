@@ -1,0 +1,37 @@
+I. Direct fit from Arm A rows, one simulated run, whole series (137 days). c=0 N, c=1 S.
+world                                      stratum        c             90% CI   s_res     n
+N level is true                            disc       0.000 [ -0.000,  0.001]   0.012  1096
+N level is true                            ctrl       0.002 [ -0.001,  0.005]   0.012   548
+F next reading                             disc       0.141 [  0.084,  0.204]   0.361  1096
+F next reading                             ctrl      -0.021 [ -0.087,  0.054]   0.279   548
+S reading persists                         disc       0.979 [  0.959,  0.998]   0.030  1096
+S reading persists                         ctrl       0.999 [  0.994,  1.003]   0.015   548
+M a=.50 s=0                                disc       0.500 [  0.493,  0.506]   0.017  1096
+M a=.50 s=0                                ctrl       0.499 [  0.496,  0.502]   0.014   548
+M a=1 s=.289                               disc      -0.006 [ -0.023,  0.010]   0.291  1096
+M a=1 s=.289                               ctrl       0.027 [ -0.040,  0.111]   0.267   548
+M a=1 s=.144 (half the scatter physical)   disc      -0.000 [ -0.009,  0.009]   0.149  1096
+M a=1 s=.144 (half the scatter physical)   ctrl      -0.011 [ -0.045,  0.026]   0.146   548
+
+NB on the second route: c on world F should sit near 1 + b, with b the reversion slope of NC-084 (-0.83 on gamma).
+
+II. The same two statistics on 14-day windows, per world (discriminating rows): median and 5th to 95th percentile.
+world                                        c med    c 5%   c 95% s_res med    s 5%   s 95%
+N level is true                              0.000  -0.002   0.002     0.013   0.012   0.015
+F next reading                               0.039  -0.024   0.427     0.324   0.239   0.590
+S reading persists                           0.994   0.921   1.014     0.025   0.018   0.067
+M a=.50 s=0                                  0.499   0.487   0.507     0.017   0.015   0.024
+M a=1 s=.289                                -0.012  -0.056   0.037     0.285   0.256   0.330
+M a=1 s=.144 (half the scatter physical)     0.001  -0.020   0.029     0.140   0.125   0.167
+
+III. Band coverage on tau > 0 rows after the one-SE widening: per 14-day window, discriminating rows.
+world                                       median      5%     95%  P>=.80  P>=.90  P>=.95
+N level is true                              1.000   0.999   1.000   1.000   1.000   1.000
+F next reading                               0.798   0.719   0.850   0.478   0.000   0.000
+S reading persists                           0.144   0.071   0.283   0.000   0.000   0.000
+M a=.50 s=0                                  0.692   0.629   0.760   0.000   0.000   0.000
+M a=1 s=.289                                 0.823   0.756   0.881   0.728   0.008   0.000
+M a=1 s=.144 (half the scatter physical)     0.982   0.958   0.997   1.000   1.000   0.987
+
+Mutation for the fit: a run with T1 x 2 must give a fit of about log 2.
+  T1 x 2: median fit 0.695 (log 2 = 0.693 )  robust sd 0.016

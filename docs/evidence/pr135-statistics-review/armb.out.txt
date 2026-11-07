@@ -1,0 +1,26 @@
+days usable 132 first 2026-06-13 last 2026-10-27
+
+I. How alike are the rankings the predictors actually produce?
+level vs reading: Spearman median 0.714 (10th pct 0.320), identical ranking 0.038, same top pick 0.530
+level vs band midpoint: Spearman median 1.000 (10th pct 0.943), identical ranking 0.720, same top pick 0.992
+predicted fidelity span under level, median 0.155; eligible triples per day, median 224
+
+II. Pass rates over consecutive 13-day windows (level alone unless named). Committed null (i): B1 0.505, B2 0.606, both 0.375; or-column 0.672, 0.758, 0.536 / 0.560.
+Mutation check of this code on independent random rankings for every predictor must reproduce null (i):
+independent, 40 draws          B1 0.508 B2 0.611 both 0.376 | strict B1 0.505 B2 0.401 both 0.269 | or: B1 0.673 B2 0.762 one 0.537 each 0.561 | tie B1 0.010 B2 0.210 | paired rho 0.050 regret 0.050
+
+Real predictor rankings, truth a uniform random ranking per job (the realistic no-information case):
+real rankings, random truth    B1 0.513 B2 0.664 both 0.390 | strict B1 0.506 B2 0.346 both 0.225 | or: B1 0.558 B2 0.670 one 0.423 each 0.423 | tie B1 0.019 B2 0.318 | paired rho 0.047 regret 0.033
+                               mean rho level 0.004 reading 0.002; best-pick count of 13 level 2.17 reading 2.15
+
+Worlds, with 4,096 shots per layout:
+N truth = level's model        B1 1.000 B2 1.000 both 1.000 | strict B1 1.000 B2 1.000 both 1.000 | or: B1 1.000 B2 1.000 one 1.000 each 1.000 | tie B1 0.000 B2 0.000 | paired rho 0.979 regret 0.590
+                               mean rho level 0.961 reading 0.662; best-pick count of 13 level 12.67 reading 6.77
+                               shot sd of a fidelity 0.0077; best minus second-best, median 0.0210; share of jobs with gap < 2 shot sd 0.015
+F next changed readings        B1 1.000 B2 0.937 both 0.936 | strict B1 1.000 B2 0.839 both 0.839 | or: B1 1.000 B2 0.937 one 0.937 each 0.937 | tie B1 0.000 B2 0.098 | paired rho 0.709 regret 0.359
+                               mean rho level 0.721 reading 0.521; best-pick count of 13 level 7.94 reading 4.71
+                               shot sd of a fidelity 0.0076; best minus second-best, median 0.0270; share of jobs with gap < 2 shot sd 0.280
+S truth = reading's model      B1 0.000 B2 0.010 both 0.000 | strict B1 0.000 B2 0.001 both 0.000 | or: B1 0.000 B2 0.010 one 0.000 each 0.000 | tie B1 0.000 B2 0.009 | paired rho 0.000 regret 0.000
+                               mean rho level 0.659 reading 0.964; best-pick count of 13 level 6.36 reading 11.29
+                               shot sd of a fidelity 0.0077; best minus second-best, median 0.0247; share of jobs with gap < 2 shot sd 0.348
+layouts with no usable next-reading truth in world F (fell back to level's model): 2 of 792

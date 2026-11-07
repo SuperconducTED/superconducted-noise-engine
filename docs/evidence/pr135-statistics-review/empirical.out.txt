@@ -1,0 +1,15 @@
+days 137, records 1644, sigma 0.2887
+records with no next change: 2
+selected-qubit overlap with the next day: mean 2.19 of 8; distribution [40, 44, 19, 7, 2, 0, 0, 5, 19]
+qubits selected on consecutive days: 298; with the same reading both days: 211
+
+F next reading: mean -0.0919, day sd 0.0426, skew 0.29, excess kurtosis -0.53
+   acf lag 1..4 of the series averaged over shot noise: [0.33, 0.13, 0.19, 0.15] (se about 0.09)
+   false-pass, mean removed, overlapping windows: {'b1_90': 0.198, 'b3_90': 0.196, 'b3_95': 0.189, 'b3_98': 0.161, 'b3_99': 0.155, 'bm3': 0.1, 'bm4': 0.108}
+   lag-1, circular block bootstrap of pairs, 90%: [0.15, 0.48]
+   rows with d below the level: mean score difference -0.1371 over 3836 rows
+   rows with d above the level: mean score difference -0.0471 over 3836 rows
+
+N level is true: mean -0.1690, day sd 0.0194, skew -0.05, excess kurtosis -0.12
+   acf lag 1..4 of the series averaged over shot noise: [0.34, 0.12, 0.06, -0.05] (se about 0.09)
+   false-pass, mean removed, overlapping windows: {'b1_90': 0.19, 'b3_90': 0.169, 'b3_95': 0.108, 'b3_98': 0.085, 'b3_99': 0.077, 'bm3': 0.092, 'bm4': 0.083}
