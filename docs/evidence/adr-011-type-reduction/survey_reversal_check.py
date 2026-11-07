@@ -41,7 +41,7 @@ SEED = 611107
 def scores(token: str, convention, output_index: int, survey, anchors) -> dict[str, np.ndarray]:
     """Per survey row: ``Db`` for each reducer, the band width, and ``|y_BMM - y_NT|``."""
     rule_base = convention.build(build_grid(token, survey), anchors)
-    out: dict[str, list[float]] = {"bmm": [], "nt": [], "width": [], "gap": []}
+    out: dict[str, list[float]] = {"bmm": [], "nt": [], "width": [], "gap": [], "y_nt": []}
     for x in survey.samples:
         firing = rule_base.evaluate(np.asarray(x, dtype=np.float64))
         lo, hi = firing.firing_strengths_lower, firing.firing_strengths_upper
@@ -55,6 +55,7 @@ def scores(token: str, convention, output_index: int, survey, anchors) -> dict[s
         out["nt"].append(0.0 if degenerate else abs(y_nt - mid) / width)
         out["width"].append(width)
         out["gap"].append(abs(y_bmm - y_nt))
+        out["y_nt"].append(y_nt)
     return {key: np.array(values) for key, values in out.items()}
 
 
@@ -115,6 +116,11 @@ def main() -> None:
     print(f"  second half: {np.median(cell['bmm'][half:]):.4f}, {np.median(cell['nt'][half:]):.4f}")
     print(f"  |y_BMM - y_NT| max {cell['gap'].max():.3e}, median {np.median(cell['gap']):.3e}")
     print(f"  band width median {np.median(cell['width']):.3e}")
+    level = float(np.median(cell["y_nt"]))
+    spread = (cell["y_nt"].max() - cell["y_nt"].min()) / level
+    print(f"  y_NT median {level:.3e}, moving {spread:.3f} of it across the rows")
+    print(f"  gap over that median: max {cell['gap'].max() / level:.4f}, ")
+    print(f"  median {np.median(cell['gap']) / level:.4f}")
 
 
 if __name__ == "__main__":

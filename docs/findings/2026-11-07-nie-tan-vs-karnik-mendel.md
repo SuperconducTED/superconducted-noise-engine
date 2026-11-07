@@ -154,7 +154,7 @@ Read cell by cell:
   on only 47% of rows. It is not reported as a reversal, and the earlier "2 of 12 cells" (#61 comment 6665986289) is narrowed here.
 - **`w=0.3` anchored lambda** cannot be told apart either, in Nie-Tan's favour. No claim is made for that cell.
 - **Size.** At `G59` anchored lambda, `|y_BMM - y_NT|` is at most 1.508e-05 and has a median of 1.480e-06, against a median band width of
-  6.104e-05. On a target near 6.7e-04 that is about 2% at most and 0.2% at the median, against a median daily drift of about 5% (File 03). So the choice there is about correctness and naming, as File 02 said.
+  6.104e-05. This cell's output is the anchored one, not the mean of per-qubit targets: `y_NT` has a median of 3.19e-04 and moves only 1.9% across the 975 rows. So the gap is at most 4.7% of the output and 0.46% at the median. File 02's and #61 comment 6665986289's "not a visible numerical change" holds at the median; the largest gap exceeds the output's own variation. The flat output is itself worth noting: with `G59`'s wide upper MFs, this anchored rule base barely responds to its inputs on the survey rows.
 
 **Why that cell: described, not explained.** There, in band position (0 is `y_l`, 1 is `y_r`, 0.5 the midpoint), `Y_lo` sits at 0.518 and `Y_hi` at
 0.441, the largest `Y_hi` offset of the 12 cells, with `rho` about 7.4. By P9 Nie-Tan leans on `Y_hi` and lands at 0.452; BMM lands at 0.478. A hypothesis
@@ -208,7 +208,7 @@ Not landed here. Under #61 architect decision B2, @mertefesensoy lands it in the
 >
 > Measured against the Karnik-Mendel midpoint on 3x3x3 `IntervalGaussianMF` grids at footprints `G59` and `w` in {0.1, 0.3, 0.6}, over the survey feature range in microseconds, with zero-order consequents (`unit-spread`, and `anchored` as the units-bearing companion), commit `10e8174`, NC-nnn. By File 02's pre-registered rule, the lower median of `Db = |y - m| / (y_r - y_l)` pooled over all grids and both conventions, Nie-Tan is selected on every point set: on the 975 survey rows 0.0340 against BMM's 0.0940 for gamma and 0.0322 against 0.0498 for lambda. At `G59`, `unit-spread`, Nie-Tan's `Db` has a median of 0.0465 and is at most 0.1558 over the 3,002 sampled points. These are sample maxima, not bounds.
 >
-> The result is not uniform. At `G59` anchored lambda on the survey rows BMM is closer, 0.0337 against 0.0483, on 744 of 975 rows, with a 90% block interval of the difference excluding zero; the two reducers differ there by at most 1.5e-05 against a median band width of 6.1e-05, so this is a matter of correctness and naming, not of a visible numerical change. No general mechanism was established. The consequents are not trained, and this comparison is re-measured on the first IT2 archive fit (#60).
+> The result is not uniform. At `G59` anchored lambda on the survey rows BMM is closer, 0.0337 against 0.0483, on 744 of 975 rows, with a 90% block interval of the difference excluding zero; the two reducers differ there by at most 1.5e-05 and by 1.5e-06 at the median, on an output near 3.2e-04, against a median band width of 6.1e-05. No general mechanism was established. The consequents are not trained, and this comparison is re-measured on the first IT2 archive fit (#60).
 >
 > Karnik-Mendel stays the band source (File 02, File 03) and out of the training loss, because its midpoint is not linear in the consequents. Nie-Tan is about 3 times cheaper per point than guarded iterative KM on 27 rules, so compute cost is not the reason for this choice. Figures are laptop and provisional until [the batch record].
 
@@ -230,7 +230,7 @@ Dated documents are not edited; these are listed.
 1. **File 02 §2.4's two KM implementations** were never committed and the session's folder is gone (#61 comment 6665986289). This record's scripts are now the command behind File 02's figures. Its four pooled medians reproduce to four decimals.
 2. **File 02 §2.4's 116** is one arithmetic's count (section 7).
 3. **#61 comment 6319118939, "Nie-Tan lower in all 12 cells"** holds for the pooled figures only.
-4. **#61 comment 6665986289, "BMM lower in 2 of 12"** holds for point medians; one of the two is not separable from noise (section 5).
+4. **#61 comment 6665986289, "BMM lower in 2 of 12"** holds for point medians; one of the two is not separable from noise (section 5). Its "not a visible numerical change", like File 02's, holds at the median and not at the largest gap (section 5).
 5. **ADR-011's Context**, "beats Karnik-Mendel iterative reduction in compute cost": measured at about a factor of 3.
 6. **The ticket's §11 closure sentence**, "at most X", is a sample maximum and says so above.
 

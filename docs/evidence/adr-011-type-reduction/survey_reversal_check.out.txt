@@ -29,3 +29,6 @@ G59 anchored lambda:
   second half: 0.0336, 0.0501
   |y_BMM - y_NT| max 1.508e-05, median 1.480e-06
   band width median 6.104e-05
+  y_NT median 3.188e-04, moving 0.019 of it across the rows
+  gap over that median: max 0.0473, 
+  median 0.0046
