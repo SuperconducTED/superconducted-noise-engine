@@ -32,8 +32,8 @@
   "conditions_total": 7,
   "counts": {
     "done": 2,
-    "in_review": 4,
-    "ready": 9
+    "in_review": 5,
+    "ready": 8
   },
   "date": "2026-11-07",
   "gates": {
@@ -65,18 +65,18 @@
   },
   "gates_done": 0,
   "gates_total": 5,
-  "generated": "2026-11-07 05:44 UTC",
+  "generated": "2026-11-07 18:33 UTC",
   "main_sha": "43a2c9b0",
   "milestone": {
     "closed": 6,
-    "open": 15,
+    "open": 17,
     "state": "open"
   },
   "owed": {
-    "BahaJarad": 2,
-    "BurakOztekin": 2,
-    "bengisucvd": 4,
-    "mertefesensoy": 4
+    "BahaJarad": 3,
+    "BurakOztekin": 4,
+    "bengisucvd": 3,
+    "mertefesensoy": 3
   },
   "phase": "Phase 4",
   "tickets": {
@@ -88,7 +88,7 @@
     "57": "in_review",
     "58": "done",
     "60": "in_review",
-    "61": "ready",
+    "61": "in_review",
     "62": "ready",
     "63": "done",
     "64": "ready",

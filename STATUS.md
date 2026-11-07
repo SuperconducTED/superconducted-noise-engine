@@ -1,6 +1,6 @@
 # Phase 4: Design-time predictor
 
-_Generated 2026-11-07 05:44 UTC · main at `43a2c9b0` (2026-11-05) · day 7 since 2026-11-01 · milestone 2 due 2027-02-27 (112 days), 15 open and 6 closed_
+_Generated 2026-11-07 18:33 UTC · main at `43a2c9b0` (2026-11-05) · day 7 since 2026-11-01 · milestone 2 due 2027-02-27 (112 days), 17 open and 6 closed_
 
 _Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, on main. Gates are ordered, not dated (plan §6)._
 
@@ -24,7 +24,7 @@ _Everyone starts on lane 1 (plan §5.1)._
   - ⬜ The hardware numbers registered as NC rows, one per conclusion
     - _No machine-checkable source: the register carries no per-ticket marker. Read docs/numerical-claims.md on main when #125 closes._
 
-1. 🟡 #125 Hardware test: reading versus level on ibm_fez (@mertefesensoy): in review, PR #140
+1. 🟡 #125 Hardware test: reading versus level on ibm_fez (@mertefesensoy): in review, PR #142
 2. ✅ #63 Training-set builder (training/dataset.py) (@BahaJarad): delivered by PR #113 on 2026-10-23; the issue is still open with 1 unticked ask (Burak Öztekin)
 3. ❌ #122 Public archive as a second training-set source (ADR-029) (@BahaJarad): ready to start
 4. ⬜ new: Per-qubit extractor and channel (ADR-013) (@BahaJarad, @BurakOztekin): opens after L1, not met yet. Opened after #125's job 1, because its centre (level or range) depends on the hardware answer (plan §2 lane 1 item 4, A.3).
@@ -47,7 +47,7 @@ _Resumes at gate L1, job 1's report, or earlier for whoever is idle on lane 1 (p
 2. ✅ #58 Certify the benchmark instruments (PR #79) (@bengisucvd): closed
 3. 🟡 #60 ADR-014 trainer: the first archive fit (@BurakOztekin): in review, PR #137
 4. ❌ #62 ADR-019 ablation table, both modes (@BahaJarad): ready to start
-5. ❌ #61 Nie-Tan versus Karnik-Mendel, premise gradients (@bengisucvd): ready to start
+5. 🟡 #61 Nie-Tan versus Karnik-Mendel, premise gradients (@bengisucvd): in review, PR #143
 6. ⬜ new: The ladder on the fuzzy band (@mertefesensoy, @bengisucvd): no issue yet. Persistence, shrinkage, rolling band and IT2 band scored on change events on pairs.tsv and rows.tsv.gz; gate L4 (plan §2 lane 2 item 6).
 
 ### Lane 3 · Housekeeping, one batched week, then closed
@@ -71,8 +71,8 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 
 **Mert Efe Şensoy** (@mertefesensoy)
 
-1. Unstick PR #140 for #125: Hardware test: reading versus level on ibm_fez (QPU side)
-   - CHANGES_REQUESTED standing from @BurakOztekin (2026-11-05). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+1. Unstick PR #142 for #125: Hardware test: reading versus level on ibm_fez (QPU side)
+   - Still a draft: CI and reviewers will not treat it as ready.
 1. Unstick PR #138 for #57: Training contract: ADR-027 accepted (PR #120)
    - Awaiting merge.
 1. Finish #84: Close the #57 advisor loop
@@ -87,20 +87,20 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 1. Re-review PR #140 (#125: Hardware test: reading versus level on ibm_fez)
    - Your CHANGES_REQUESTED from 2026-11-05 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Unstick PR #136 for #75: Decide #75's allowlist and clipping with Bengisu
-   - No approving review yet: main's ruleset requires one.
+   - CHANGES_REQUESTED standing from @mertefesensoy (2026-11-07). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 1. Unstick PR #137 for #60: ADR-014 trainer: the first archive fit
-   - No approving review yet: main's ruleset requires one. Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
+   - CHANGES_REQUESTED standing from @mertefesensoy (2026-11-07). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix. Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
 
 **Bengisu Cıvdı** (@bengisucvd)
 
 1. Review #125's decision rule and statistics before the pre-registration freezes them (#125)
    - The pre-registration commit waits on this review (plan §5.1).
+1. Re-review PR #135 (#125: Hardware test: reading versus level on ibm_fez)
+   - Your CHANGES_REQUESTED from 2026-11-07 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Start #92: Rule 7 for the NC register
    - Adopt as written: nine rows already use its form (plan §2 lane 3).
 1. Start #75: Decide the LOCKED Kraus projector boundary
    - Decide the allowlist and the clipping before the per-qubit channel opens (plan §2 lane 3).
-1. Start #64: ADR-015 / ADR-016 ensemble and intervals (PR-A)
-   - Bengisu's D1 to D5, in the gaps of lane 1 (plan §5.1); PR-A is lane 2's first item when it resumes. Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
 
 **Baha Jarad** (@BahaJarad)
 
@@ -116,44 +116,50 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 _Review requests not yet answered with a review, and unticked checkboxes that start with the person (`- [ ] @login does X`), on every open issue and PR. Oldest first; "or earlier" marks a post edited after it was written, so the wait shown is the shortest it can be._
 
 
-**Mert Efe Şensoy** (@mertefesensoy), 4 owed
+**Mert Efe Şensoy** (@mertefesensoy), 3 owed
 
 - has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (60 days); has posted there since, on 2026-10-21
 - links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (35 days); no post there since
-- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (5 days); no post there since
-- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (5 days); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (0 days); no post there since
 
-**Burak Öztekin** (@BurakOztekin), 2 owed
+**Burak Öztekin** (@BurakOztekin), 4 owed
 
 - confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (65 days); no post there since
 - Review PR #141: requested by @mertefesensoy, since 2026-11-05 (2 days); no post there since
+- Re-review PR #133: your CHANGES_REQUESTED from 2026-11-02 still stands: requested by @mertefesensoy, since 2026-11-07 (0 days); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (0 days); no post there since
 
-**Bengisu Cıvdı** (@bengisucvd), 4 owed
+**Bengisu Cıvdı** (@bengisucvd), 3 owed
 
 - Review PR #133: requested by @mertefesensoy, since 2026-10-28 (10 days); no post there since
-- Review PR #135: requested by @mertefesensoy, since 2026-10-28 (10 days); no post there since
 - Review PR #136: requested by @BurakOztekin, since 2026-11-02 (5 days); no post there since
 - Review PR #137: requested by @BurakOztekin, since 2026-11-02 (5 days); no post there since
 
-**Baha Jarad** (@BahaJarad), 2 owed
+**Baha Jarad** (@BahaJarad), 3 owed
 
 - posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (35 days); no post there since
 - Review PR #139: requested by @mertefesensoy, since 2026-11-04 (3 days); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (0 days); no post there since
 
 ## Not blocked by anything upstream, so what is holding them?
 
 
 **#125: Hardware test: reading versus level on ibm_fez** (@mertefesensoy)
 
-- [critical] CHANGES_REQUESTED standing from @BurakOztekin (2026-11-05). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+- [high] Still a draft: CI and reviewers will not treat it as ready.
+- [high] No approving review yet: main's ruleset requires one.
 
 **#60: ADR-014 trainer: the first archive fit** (@BurakOztekin)
+
+- [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-11-07). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+
+**#61: Nie-Tan versus Karnik-Mendel, premise gradients** (@bengisucvd)
 
 - [high] No approving review yet: main's ruleset requires one.
 
 **#75: Decide the LOCKED Kraus projector boundary** (@bengisucvd)
 
-- [high] No approving review yet: main's ruleset requires one.
+- [critical] CHANGES_REQUESTED standing from @mertefesensoy (2026-11-07). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 - [medium] Touches LOCKED src/superconducted/channels/kraus.py: needs a decision, not just a patch.
 
 ## Blocked upstream
@@ -172,7 +178,7 @@ Nothing is blocked upstream.
 
 | Date | Gates | Conditions | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| 2026-11-07 | 0/5 | 0/7 | 9 | 4 | 0 | nothing moved |
+| 2026-11-07 | 0/5 | 0/7 | 8 | 5 | 0 | milestone 2: 17 open and 6 closed (was 15 and 6); #61 Nie-Tan versus Karnik-Mendel, premise gradients: ready to start to in review; Baha Jarad owes 3 answers (was 2); Burak Öztekin owes 4 answers (was 2); Bengisu Cıvdı owes 3 answers (was 4); Mert Efe Şensoy owes 3 answers (was 4) |
 | 2026-11-06 | 0/5 | 0/7 | 9 | 4 | 0 | milestone 2: 15 open and 6 closed (was 13 and 5); Burak Öztekin owes 2 answers (was 1); Bengisu Cıvdı owes 4 answers (was 5); Mert Efe Şensoy owes 4 answers (was 5); main moved to 43a2c9b0 |
 | 2026-11-05 | 0/5 | 0/7 | 9 | 4 | 0 | milestone 2: 13 open and 5 closed (was 10 and 3); Baha Jarad owes 2 answers (was 1); main moved to 5c98f264 |
 | 2026-11-04 | 0/5 | 0/7 | 9 | 4 | 0 | nothing moved |
