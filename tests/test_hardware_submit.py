@@ -28,11 +28,14 @@ from scripts.hardware_reading_vs_level import (
     _write_tsv,
     archived_backend,
     arm_a_circuit,
+    build_job,
     calendar_block_bootstrap,
     circuit_seeds,
     ghz_idle_circuit,
+    not_operational_qubits,
     transpile_layout,
 )
+from scripts.hardware_test_predictors import collect, predictor_rows, select_balanced
 
 BASE = datetime(2026, 10, 1, tzinfo=UTC)
 T_S = datetime(2026, 10, 23, 3, 50, tzinfo=UTC)
@@ -527,7 +530,160 @@ def test_a_rep_delay_the_device_refuses_stops_before_the_capture(
     assert device.captures == 0 and not device.submitted
 
 
-def test_a_selected_qubit_missing_from_the_live_target_refuses_the_job(
+# --- a qubit that is not operational at t_s (amendment 20) --------------------------------------
+
+
+def _with_gate_error(
+    live: Mapping[str, Any], qubit: int, value: float | None, gates: Sequence[str] = ("x", "sx")
+) -> dict[str, Any]:
+    """``live`` with ``gate_error`` set on ``qubit``'s named gates; the target is not touched."""
+    doc = copy.deepcopy(dict(live))
+    hits = 0
+    for entry in doc["properties"]["gates"]:
+        if entry["gate"] in gates and entry["qubits"] == [qubit]:
+            for parameter in entry["parameters"]:
+                if parameter["name"] == "gate_error":
+                    parameter["value"] = value
+                    hits += 1
+    assert hits == len(gates), f"{gates} on qubit {qubit}: found {hits} errors"
+    return doc
+
+
+def _read(job_dir: Path, name: str) -> dict[str, Any]:
+    loaded: dict[str, Any] = json.loads((job_dir / name).read_text(encoding="utf-8"))
+    return loaded
+
+
+def _chosen(selection: Mapping[str, Any]) -> list[int]:
+    return [int(entry["qubit"]) for entry in selection["discriminating"]]
+
+
+def _touched(circuit: QuantumCircuit) -> set[int]:
+    return {
+        circuit.find_bit(q).index
+        for item in circuit.data
+        if item.operation.name != "barrier"
+        for q in item.qubits
+    }
+
+
+def test_a_healthy_device_has_no_qubit_marked(live_doc: dict[str, Any]) -> None:
+    target = archived_backend(live_doc).target
+    assert not_operational_qubits(live_doc["properties"], target) == []
+
+
+@pytest.mark.parametrize("gate", ["x", "sx", "measure"])
+def test_absent_from_any_one_of_the_target_gates_is_not_operational(
+    live_doc: dict[str, Any], gate: str
+) -> None:
+    target = copy.deepcopy(archived_backend(live_doc).target)
+    target[gate].pop((3,))
+    assert not_operational_qubits(live_doc["properties"], target) == [3]
+
+
+@pytest.mark.parametrize("gate", ["x", "sx"])
+def test_a_gate_error_of_one_on_either_gate_alone_is_not_operational(
+    live_doc: dict[str, Any], gate: str
+) -> None:
+    target = archived_backend(live_doc).target
+    doc = _with_gate_error(live_doc, 3, 1.0, (gate,))
+    assert (3,) in target[gate], "the marker must work with the qubit still in the target"
+    assert not_operational_qubits(doc["properties"], target) == [3]
+
+
+@pytest.mark.parametrize("value", [0.999, None])
+def test_a_high_or_null_gate_error_is_not_a_signal(
+    live_doc: dict[str, Any], value: float | None
+) -> None:
+    target = archived_backend(live_doc).target
+    doc = _with_gate_error(live_doc, 3, value)
+    assert not_operational_qubits(doc["properties"], target) == []
+
+
+def test_a_missing_gate_error_is_not_a_signal(live_doc: dict[str, Any]) -> None:
+    doc = copy.deepcopy(live_doc)
+    for entry in doc["properties"]["gates"]:
+        if entry["gate"] in ("x", "sx") and entry["qubits"] == [3]:
+            entry["parameters"] = [p for p in entry["parameters"] if p["name"] != "gate_error"]
+    target = archived_backend(live_doc).target
+    assert not_operational_qubits(doc["properties"], target) == []
+
+
+def test_a_gate_error_of_one_on_another_gate_is_not_a_signal(live_doc: dict[str, Any]) -> None:
+    doc = copy.deepcopy(live_doc)
+    hits = 0
+    for entry in doc["properties"]["gates"]:
+        if entry["gate"] == "cz" or (entry["gate"] == "id" and entry["qubits"] == [3]):
+            for parameter in entry["parameters"]:
+                if parameter["name"] == "gate_error":
+                    parameter["value"] = 1.0
+                    hits += 1
+    assert hits > 1
+    target = archived_backend(live_doc).target
+    assert not_operational_qubits(doc["properties"], target) == []
+
+
+def test_a_dead_discriminating_qubit_gives_way_to_the_next_by_the_same_rule(
+    tmp_path: Path,
+    controls_file: Path,
+    live_doc: dict[str, Any],
+    archive_docs: list[tuple[str, dict[str, Any]]],
+) -> None:
+    healthy = _build(tmp_path / "full", controls_file, ScriptedDevice(live_doc), archive_docs)
+    before = _read(healthy, "selection.json")
+    assert before["not_operational"] == [] and before["controls_left_out"] == []
+    gone = _chosen(before)[0]
+
+    doc = _with_gate_error(live_doc, gone, 1.0)
+    device = ScriptedDevice(doc)
+    assert (gone,) in device.target["x"], "the fixture must keep the dead qubit in the target"
+    job_dir = _build(tmp_path / "less", controls_file, device, archive_docs)
+    after = _read(job_dir, "selection.json")
+
+    assert device.submitted
+    assert gone not in _chosen(after)
+    assert after["not_operational"] == [gone]
+    assert after["controls_left_out"] == []
+    assert len(_chosen(after)) == hs.N_DISCRIMINATING
+    assert len(set(_chosen(after)) - set(_chosen(before))) == 1
+    rows = predictor_rows(collect(archive_docs, backend=hs.BACKEND, until=T_S), at=T_S, live=doc)
+    frozen_rule = select_balanced(
+        [r for r in rows if r.qubit != gone], k=hs.N_DISCRIMINATING, controls=set(CONTROLS)
+    )
+    assert _chosen(after) == _chosen(frozen_rule)
+
+
+def test_a_dead_control_is_left_out_and_the_job_still_runs(
+    tmp_path: Path,
+    controls_file: Path,
+    live_doc: dict[str, Any],
+    archive_docs: list[tuple[str, dict[str, Any]]],
+) -> None:
+    gone = CONTROLS[0]
+    healthy = _build(tmp_path / "full", controls_file, ScriptedDevice(live_doc), archive_docs)
+    assert str(gone) in _read(healthy, "sealed.json")["slots"], "it must run when it is healthy"
+    before = _chosen(_read(healthy, "selection.json"))
+
+    device = ScriptedDevice(_with_gate_error(live_doc, gone, 1.0))
+    job_dir = _build(tmp_path / "less", controls_file, device, archive_docs)
+    sealed = _read(job_dir, "sealed.json")
+    selection = _read(job_dir, "selection.json")
+
+    assert device.submitted
+    assert sealed["controls"] == list(CONTROLS[1:])
+    assert selection["controls"] == list(CONTROLS[1:])
+    assert selection["controls_left_out"] == [gone]
+    assert selection["not_operational"] == [gone]
+    assert str(gone) not in sealed["slots"]
+    assert all(gone not in layout for layout in sealed["layouts"])
+    circuits = device.submitted[0][0]
+    assert circuits and all(gone not in _touched(circuit) for circuit in circuits)
+    # The frozen set stays out of the discriminating stratum, and nothing else moves.
+    assert _chosen(selection) == before
+    assert not set(_chosen(selection)) & set(CONTROLS)
+
+
+def test_a_qubit_gone_from_the_live_target_is_left_out_the_same_way(
     tmp_path: Path,
     controls_file: Path,
     live_doc: dict[str, Any],
@@ -536,9 +692,65 @@ def test_a_selected_qubit_missing_from_the_live_target_refuses_the_job(
     target = copy.deepcopy(archived_backend(live_doc).target)
     target["x"].pop((CONTROLS[0],))
     device = ScriptedDevice(live_doc, target=target)
-    with pytest.raises(hs.RefusedError, match="not operational"):
-        _build(tmp_path, controls_file, device, archive_docs)
-    assert not device.submitted
+    job_dir = _build(tmp_path, controls_file, device, archive_docs)
+    assert device.submitted
+    assert _read(job_dir, "sealed.json")["controls"] == list(CONTROLS[1:])
+    assert _read(job_dir, "selection.json")["controls_left_out"] == [CONTROLS[0]]
+
+
+def test_arm_b_leaves_out_a_qubit_marked_dead(
+    tmp_path: Path,
+    controls_file: Path,
+    live_doc: dict[str, Any],
+    archive_docs: list[tuple[str, dict[str, Any]]],
+) -> None:
+    healthy = _build(tmp_path / "full", controls_file, ScriptedDevice(live_doc), archive_docs)
+    gone = _read(healthy, "sealed.json")["layouts"][0][0]
+    device = ScriptedDevice(_with_gate_error(live_doc, gone, 1.0))
+    job_dir = _build(tmp_path / "less", controls_file, device, archive_docs)
+    assert all(gone not in layout for layout in _read(job_dir, "sealed.json")["layouts"])
+
+
+def test_build_job_refuses_a_not_operational_qubit_it_is_handed(
+    live_doc: dict[str, Any],
+    archive_docs: list[tuple[str, dict[str, Any]]],
+) -> None:
+    rows = predictor_rows(
+        collect(archive_docs, backend=hs.BACKEND, until=T_S), at=T_S, live=live_doc
+    )
+    selection = select_balanced(rows, k=hs.N_DISCRIMINATING, controls=set(CONTROLS))
+    doc = _with_gate_error(live_doc, _chosen(selection)[0], 1.0)
+    with pytest.raises(ValueError, match="not operational"):
+        build_job(
+            rows=rows,
+            execution=None,
+            selection=selection,
+            controls=list(CONTROLS),
+            snapshot=doc,
+            t_s=T_S,
+            target=archived_backend(doc).target,
+        )
+
+
+def test_with_no_live_target_nothing_is_treated_as_not_operational(
+    live_doc: dict[str, Any],
+    archive_docs: list[tuple[str, dict[str, Any]]],
+) -> None:
+    """The dry run's path: its outputs must not change, so it reads no marker."""
+    rows = predictor_rows(
+        collect(archive_docs, backend=hs.BACKEND, until=T_S), at=T_S, live=live_doc
+    )
+    selection = select_balanced(rows, k=hs.N_DISCRIMINATING, controls=set(CONTROLS))
+    gone = _chosen(selection)[0]
+    job = build_job(
+        rows=rows,
+        execution=None,
+        selection=selection,
+        controls=list(CONTROLS),
+        snapshot=_with_gate_error(live_doc, gone, 1.0),
+        t_s=T_S,
+    )
+    assert gone in job.discriminating
 
 
 def test_arm_b_leaves_out_a_coupler_gone_from_the_live_target(
@@ -592,6 +804,28 @@ def _score(job_dir: Path, device: hs.Device, docs: Iterable[tuple[str, dict[str,
     return hs.run_score(
         job_dir=job_dir, device=device, archive=lambda: list(docs), now=lambda: AFTER
     )
+
+
+def test_a_job_with_a_control_left_out_scores_on_the_rest(
+    tmp_path: Path,
+    controls_file: Path,
+    live_doc: dict[str, Any],
+    archive_docs: list[tuple[str, dict[str, Any]]],
+    props: dict[str, Any],
+) -> None:
+    gone = CONTROLS[0]
+    device = ScriptedDevice(_with_gate_error(live_doc, gone, 1.0))
+    job_dir = _build(tmp_path, controls_file, device, archive_docs)
+    before = _state_at(props, 41, T_EXECUTE - timedelta(minutes=5))
+    after = _state_at(props, 42, T_EXECUTE + timedelta(minutes=5))
+    later = [*archive_docs, ("snapshots/before.json", before), ("snapshots/after.json", after)]
+    assert _score(job_dir, device, later) == 0
+
+    lines = (job_dir / "arm-a.tsv").read_text(encoding="utf-8").splitlines()
+    header = lines[0].split("\t")
+    table = [dict(zip(header, line.split("\t"), strict=True)) for line in lines[1:]]
+    assert {int(r["qubit"]) for r in table if r["stratum"] == "control"} == set(CONTROLS[1:])
+    assert gone not in {int(r["qubit"]) for r in table}
 
 
 def test_score_adds_the_control_from_the_archive_and_scores_both_arms(
@@ -1100,6 +1334,22 @@ def _strong_day(i: int, jitter: float = 0.0) -> list[dict[str, Any]]:
     disc = _row("discriminating", 0.20 + jitter, 0.05, 0.19 + jitter)
     ctrl = _row("control", 0.10 + jitter, 0.05, 0.09 + jitter)
     return [dict(disc) for _ in range(8)] + [dict(ctrl) for _ in range(4)]
+
+
+def test_a_run_with_no_control_rows_does_not_meet_a3(tmp_path: Path) -> None:
+    for i in range(14):
+        _scored_day(tmp_path, _day(i), _strong_day(i, 0.01 * (i % 3))[:8])
+    out = _report(tmp_path, 14)
+    assert out["arm_a"]["A1_level_beats_reading"]["passes"] is True
+    assert out["arm_a"]["A3_sign_holds_on_controls"] is False
+    assert out["reading"] != "S1 passes"
+
+
+def test_a3_uses_the_control_rows_that_exist(tmp_path: Path) -> None:
+    for i in range(14):
+        day = _strong_day(i, 0.01 * (i % 3))
+        _scored_day(tmp_path, _day(i), day[:9] if i % 2 else day)
+    assert _report(tmp_path, 14)["arm_a"]["A3_sign_holds_on_controls"] is True
 
 
 def test_report_passes_when_level_is_clearly_closer_on_every_day(tmp_path: Path) -> None:

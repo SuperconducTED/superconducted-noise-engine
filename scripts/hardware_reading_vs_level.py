@@ -680,6 +680,28 @@ def _operational_qubit(target: Target, qubit: int) -> bool:
     return all((qubit,) in target[name] for name in ("x", "sx", "measure"))
 
 
+def not_operational_qubits(properties: Mapping[str, Any], target: Target) -> list[int]:
+    """Qubits a job cannot use at ``t_s``, sorted, from the device's own status (amendment 20).
+
+    A qubit counts when it is absent from the target's ``x``, ``sx`` or ``measure``, or when its
+    ``x`` or ``sx`` ``gate_error`` is at least 1. ``ibm_fez`` reports a dead qubit the second way,
+    leaving it in the target, so a check of the target alone sees nothing. A missing or null error
+    is not a signal, and neither is an error on any other gate. Reads no result and changes nothing.
+    """
+    dead = {q for q in range(int(target.num_qubits)) if not _operational_qubit(target, q)}
+    for entry in properties.get("gates", []):
+        qubits = entry.get("qubits", [])
+        if entry.get("gate") not in ("x", "sx") or len(qubits) != 1:
+            continue
+        for parameter in entry.get("parameters", []):
+            if parameter.get("name") != "gate_error":
+                continue
+            value = parameter.get("value")
+            if value is not None and float(value) >= 1.0:
+                dead.add(int(qubits[0]))
+    return sorted(dead)
+
+
 def _operational_pair(target: Target, pair: frozenset[int]) -> bool:
     a, b = sorted(pair)
     return "cz" in target and ((a, b) in target["cz"] or (b, a) in target["cz"])
@@ -700,9 +722,10 @@ def build_job(
 
     On hardware ``execution`` is None, because those rows do not exist before the job runs, and
     ``with_execution`` adds the control afterwards. ``target`` is the device's live target there:
-    circuits are built against it, so a qubit or coupler taken out overnight is not used. A selected
-    qubit it lacks raises ``ValueError``, because the pre-registration has no rule to replace one.
-    Without it the target comes from ``snapshot``, as in the dry run.
+    circuits are built against it, so a qubit or coupler out of use that morning is not used. The
+    caller removes not-operational qubits before selecting (amendment 20), so being handed one is a
+    bug and raises ``ValueError``. Without it the target comes from ``snapshot``, as in the dry run,
+    and no qubit is treated as not operational.
     """
     live_target = target
     target = live_target if live_target is not None else archived_backend(snapshot).target
@@ -712,10 +735,12 @@ def build_job(
     sources = sources_from_rows(rows, execution)
     discriminating = [int(p["qubit"]) for p in selection["discriminating"]]
     arm_a_qubits = sorted(set(discriminating) | set(controls))
+    dead: set[int] = set()
     if live_target is not None:
-        missing = [q for q in arm_a_qubits if not _operational_qubit(live_target, q)]
+        dead = set(not_operational_qubits(snapshot["properties"], live_target))
+        missing = [q for q in arm_a_qubits if q in dead]
         if missing:
-            raise ValueError(f"selected qubits are not operational on the live target: {missing}")
+            raise ValueError(f"selected qubits are not operational at t_s: {missing}")
     slots = {
         q: delay_slots(
             sources["level"][q].t1, sources["reading"][q].t1, dt=dt, min_length=min_length
@@ -735,7 +760,7 @@ def build_job(
         for q, w in window.items()
         if w >= MIN_WINDOW_DISTINCT
         and sources["level"][q].usable_for_relaxation()
-        and (live_target is None or _operational_qubit(live_target, q))
+        and q not in dead
     }
     # A pair whose cz has no usable error (gate_error 1 marks a dead pair) is not a link.
     pairs = {

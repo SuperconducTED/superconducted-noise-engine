@@ -62,6 +62,7 @@ from scripts.hardware_reading_vs_level import (
     build_job,
     calendar_block_bootstrap,
     circuit_seeds,
+    not_operational_qubits,
     score_arm_a,
     score_arm_b,
     spearman,
@@ -540,14 +541,22 @@ def run_build(
     write_json_lf(live_path, live)
     collected = collect(archive(), backend=device.name, until=t_s)
     rows = predictor_rows(collected, at=t_s, live=live)
-    selection = select_balanced(rows, k=N_DISCRIMINATING, controls=set(controls))
-    selection["controls"] = controls
+    # Amendment 20: a qubit that is not operational at t_s gives no rows today. The frozen ranking
+    # runs over the rest, and the whole frozen set stays out of the discriminating stratum.
+    dead = not_operational_qubits(live["properties"], device.target)
+    selection = select_balanced(
+        [r for r in rows if r.qubit not in dead], k=N_DISCRIMINATING, controls=set(controls)
+    )
+    running_controls = [q for q in controls if q not in dead]
+    selection["controls"] = running_controls
+    selection["controls_left_out"] = [q for q in controls if q in dead]
+    selection["not_operational"] = dead
     try:
         job = build_job(
             rows=rows,
             execution=None,
             selection=selection,
-            controls=controls,
+            controls=running_controls,
             snapshot=live,
             t_s=t_s,
             target=device.target,
