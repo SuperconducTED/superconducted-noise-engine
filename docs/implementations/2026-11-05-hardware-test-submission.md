@@ -382,3 +382,75 @@ on the pins alone gives 1 passed, 87 deselected.
 - `docs/roadmap/2026-10-23-phase-4-plan.md` §8 on PR #131 (step 1d, gates L1 and L2)
 - `docs/findings/2026-10-28-aer-per-shot-seeding-and-simulation-lessons.md` (the one-circuit-per-run rule)
 - NC-026 (historical properties); Issue #125
+
+## Decisions of 2026-11-07, and amendment 20's rule changed: plan, before its code
+
+Appended; nothing above is edited. Where this section and "Owed to the pre-registration" differ, this one is
+the later.
+
+**Amendment 19 is accepted as drafted.** The lead confirmed it on 2026-11-07: always 14 days, nothing decided
+on what the daily scores show. Its "flagged for the lead to confirm" no longer applies.
+
+**Amendment 20 is replaced.** The draft refused the job when a selected qubit was missing from the live target,
+and said refusing is the one choice that cannot bias the result. The lead chose a different rule after seeing
+what follows.
+
+**What was found.** Read from every capture on `calibration-data` at `fafbc8f5` with scratch scripts, on the
+laptop, provisional, and to be re-run from a committed script before any figure here is cited in the
+pre-registration. 2,706 captures over 170 UTC days:
+
+- No qubit was ever absent from the `target` field's `x`, `sx` or `measure`. The draft's guard had nothing to
+  fire on.
+- `ibm_fez` marks a dead qubit by leaving it in the target with `x` and `sx` `gate_error` set to 1: qubit 72 on
+  every capture, qubit 17 on 208 (05-13 to 05-18 and 06-22 to 07-13), qubit 149 on 6 (05-13). The draft's guard
+  does not see this.
+- What keeps them out today is proposal A's window floor, indirectly. Qubit 72 is admitted on 0 of 132 days at
+  `w >= 15` (NC-088). Qubit 17's `T1` date stayed at 2026-04-13 through its dead span, so its window cannot have
+  held many distinct values; this is inferred from the date field, and its window count was not computed.
+- A qubit that dies during the run with a fresh `T1` would stay above the floor for about 15 days (about 30
+  distinct values, floor 15), and frozen controls are never re-checked. The record has no example of this, so
+  it is a gap in the rule, not a measured rate.
+
+The draft's reason also needs correcting. It said a replacement "no longer follows the frozen rule", but nothing
+is frozen yet, so a rule written now is the frozen rule. It reads only the device's status at `t_s`, never a
+result, and treats `level` and `reading` alike. Arm B already drops dead `cz` links the same way (amendment 9).
+
+**The rule, as the lead decided it.** A qubit is *not operational* at `t_s` when it is absent from the live
+target's `x`, `sx` or `measure`, or when its `x` or `sx` `gate_error` in the live properties document is at least
+1. Such a qubit gives no rows that morning, and the job is not refused on this ground:
+
+- It is not a candidate for the discriminating stratum, so the frozen ranking runs over the remaining candidates
+  and the next qubit by the same rule takes the place.
+- A frozen control that is not operational is left out that day. It is not replaced, and the frozen set still
+  stays out of the discriminating stratum. A3 uses the control rows that exist; if the whole run has none, A3 is
+  not met.
+- It is not eligible for an Arm B triple.
+- The qubits affected are logged in that job's `selection.json`.
+
+**What it does not cover.** A qubit that dies after `t_s` while the job is queued keeps its rows. A dead `measure`
+is not a signal, because the record shows none and the device's marker is on `x` and `sx`.
+
+**The change.**
+
+- `scripts/hardware_reading_vs_level.py`: a new function `not_operational_qubits(properties, target)`. Inputs: the
+  live document's `properties` and the live `Target`. Output: a sorted list of qubit indices. No side effects. A
+  missing or null `gate_error` is not a dead signal. `build_job` uses it for Arm B's eligibility and for its own
+  guard, which stays as the last check and still raises if it is handed such a qubit. With no live target, as in
+  the dry run, nothing changes.
+- `scripts/hardware_submit.py`: `run_build` removes the not-operational qubits' rows before `select_balanced`,
+  passes the frozen set as `controls` to that call, passes the running controls to `build_job`, and logs
+  `not_operational` and `controls_left_out`.
+- `tests/test_hardware_submit.py`: `test_a_selected_qubit_missing_from_the_live_target_refuses_the_job` pinned the
+  old rule, so it changes with it.
+
+**Expected, written before the code.** Laptop results stay provisional until Burak's run.
+
+| # | Criterion |
+| --- | --- |
+| 10 | The dry run's outputs stay identical to `dry-run-2026-11-05/`, checked with `compare_dry_run.py`, because the path with no live target does not change. |
+| 11 | The rehearsal's checks all hold. Criterion 2's selection, controls, slots and layouts do not change, because qubit 72 is the only not-operational qubit expected on those mornings and the floor already excludes it. |
+| 12 | A dead discriminating qubit gives way to the next by the same rule; the result equals the frozen rule applied to the remaining candidates. |
+| 13 | A dead control is left out, the job still runs, no circuit uses it, the other three stay out of the discriminating stratum, and a run with no control rows does not meet A3. |
+| 14 | Each signal is tested alone: absent from each of `x`, `sx` and `measure`, and `gate_error` 1 on each of `x` and `sx`. A `gate_error` just under 1, or a null one, is not a signal. |
+| 15 | Every new line is mutation-checked: removing it fails a test, and each mutant asserts its pattern was found. |
+| 16 | Gates clean on the exact pins. |
