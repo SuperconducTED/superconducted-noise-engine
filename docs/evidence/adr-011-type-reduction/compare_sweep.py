@@ -1,0 +1,54 @@
+"""#61: compare a sweep's rows with a committed TSV, to rounding, for another machine's run.
+
+The ``#`` provenance lines are ignored: they name the commit. Text columns must match exactly and
+numeric columns to the printed relative tolerance, because the last bits of a dot product can depend
+on the BLAS build. Exits 1 on a difference.
+
+Usage::
+
+    python docs/evidence/adr-011-type-reduction/compare_sweep.py <new.tsv> <committed.tsv>
+"""
+
+from __future__ import annotations
+
+import csv
+import math
+import sys
+from pathlib import Path
+
+TOLERANCE = 1e-9
+FLOOR = 1e-15
+
+
+def rows(path: Path) -> list[dict[str, str]]:
+    with path.open(encoding="utf-8") as handle:
+        body = (line for line in handle if not line.startswith("#"))
+        return list(csv.DictReader(body, delimiter="\t"))
+
+
+def main() -> int:
+    new, committed = rows(Path(sys.argv[1])), rows(Path(sys.argv[2]))
+    if len(new) != len(committed):
+        print(f"FAIL: {len(new)} rows against {len(committed)}")
+        return 1
+    worst = 0.0
+    for a, b in zip(new, committed, strict=True):
+        for key in b:
+            try:
+                u, v = float(a[key]), float(b[key])
+            except ValueError:
+                if a[key] != b[key]:
+                    print(f"FAIL: text column {key}: {a[key]!r} against {b[key]!r}")
+                    return 1
+                continue
+            if math.isfinite(u) and math.isfinite(v):
+                worst = max(worst, abs(u - v) / max(abs(v), FLOOR))
+            elif str(u) != str(v):
+                print(f"FAIL: column {key}: {a[key]} against {b[key]}")
+                return 1
+    print(f"{len(new)} rows, largest relative difference {worst:.3e}")
+    return 0 if worst < TOLERANCE else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

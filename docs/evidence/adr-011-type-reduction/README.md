@@ -127,6 +127,9 @@ reducer. The `km_*` columns do not, so they repeat on both reducer rows.
 `n_bracket_violations` equal to 0. Every `km_route_gap_max` is at most 8.743e-15, and that
 largest value is in a `unit-spread` cell, where the tolerance is about 3.8e-13.
 
+> **NOTE · 2026-11-07.** The text above describes the 2026-10-21 file and stays as written. Where it
+> disagrees with the last section of this README, the last section is current.
+
 ## What this file does not establish
 
 - **Bounds.** A `*_max` is a maximum over the sampled points, not a supremum over the box.
@@ -146,3 +149,39 @@ largest value is in a `unit-spread` cell, where the tolerance is about 3.8e-13.
   implement it, a deviation from FR-3 that has been put to the #61 owner.
 - **Canonical status.** These are laptop figures. The canonical numbers are the batch
   verification on Burak's desktop.
+
+## 2026-11-07: the sweep re-run, and the scripts behind the findings
+
+`2026-11-07-10e8174.tsv` is the current file. Its 96 data rows are identical to
+`2026-10-21-d0f144a.tsv` apart from the grid's name. The findings are in
+`docs/findings/2026-11-07-nie-tan-vs-karnik-mendel.md`.
+
+| | |
+| --- | --- |
+| **Code commit** | `10e8174bc26f921a7dfc79f49a0dfd32b70de8ce`, on `main` @ `43a2c9b0` |
+| **Survey** | as above, `calibration-data` @ `3d1569d` |
+| **Machine** | Mert's laptop: Windows 11, Python 3.12.10, numpy 2.4.4. **Provisional**; the canonical run is the batch on Burak's desktop. |
+| **Runtime** | 15.2 s and 14.8 s for two runs |
+| **SHA-256** | `c61102e80ee82bb83b163748b47cabe03a2770624fac0db3cbf5861c25210b11`; the two runs were byte-identical |
+
+What changed since 2026-10-21:
+
+- **`s_i` is confirmed.** @mertefesensoy confirmed on #61 (comment 6665986289) that File 02's
+  `qubit_spread` is NC-042's medians (`tests/test_parameterization.py::_committed_survey` at `110cfad`). The
+  grid is now `G59`, and the `# g59_qubit_spread:` line says where `s_i` comes from.
+- **Decision 1 is confirmed** in the same comment: `unit-spread` is the headline, `anchored` the units-bearing
+  companion. Reporting is approved: File 02's pooled `Db` decides, and survey rows are shown first, a choice made after
+  the result was seen.
+- **Decision 2 is still pending.** @BahaJarad has not answered on the footprint set. Register rows wait for it.
+- **`fixture-box` stays retired**, the #61 owner's recorded decision (comment 6319118939, stale-text item 8).
+
+Scripts, each run from the repository root with `PYTHONPATH=src`, output beside it as `<name>.out.txt`:
+
+| Script | What it answers |
+| --- | --- |
+| `file02_rule_by_point_set.py` | File 02's rule on each point set, and the closer-row tally. By @mertefesensoy, from #61 comment 6665986289. |
+| `second_route_reducers.py` | The `G59` anchored lambda figures from code sharing nothing with the sweep's KM or reducers, certified against vertex enumeration. From the same 2026-11-05 work. |
+| `survey_reversal_check.py` | All 12 cells on survey rows and on distinct rows, with a 90% block interval. Seeded (`SeedSequence(611107)`). |
+| `reducer_positions_and_cost.py` | The identity for `y_NT - y_BMM`, the rejected straddling hypothesis, and the cost per point. Its times move with laptop load; only the ratio is quoted. |
+| `km_cycle_sensitivity.py` | How File 02's cycle count moves with the switch-point tie rule and the summation order, and that the guarded result matches the exhaustive route on every cycling point. |
+| `compare_sweep.py` | Compares another machine's sweep with the committed TSV to rounding, for the desktop batch. |
