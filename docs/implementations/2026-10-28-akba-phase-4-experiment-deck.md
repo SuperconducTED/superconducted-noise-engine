@@ -122,3 +122,48 @@ From the worktree root, with `origin` fetched:
 - `docs/advisor/2026-09-03-decisions-from-akba.md`
 - `docs/implementations/2026-10-16-brand-chart-style.md`
 - `docs/numerical-claims.md`; Issues #92, #110, #125; PR #128
+
+## Fix of 2026-11-07: the number check ignored signs
+
+**Problem.** Baha asked on 2026-10-31 whether `check_numbers.py` meant to ignore signs, and Burak requested
+changes on 2026-11-02 with the reason. Both were right. Reproduced on `ceb844cb` before any change: a slide's
+`0.5` matched a source holding only `-0.5` or `+0.5`; `-0.5` matched a source holding only `0.5` or `+0.5`;
+`+0.5` matched `-0.5`; and the Turkish and English parity check compared `normalise(token)`, which drops the
+sign. So "296 numerals pass" could not vouch for a sign. The answer to Baha's question is no: the deck's values
+are signed, and the tool should not have dropped them.
+
+**What changed.**
+
+| File | One-sentence description |
+| --- | --- |
+| `docs/advisor/2026-10-28-akba-phase-4-experiment-deck/check_numbers.py` | A signed numeral now only meets the same sign, an unsigned one no longer meets a signed one, and parity keeps the sign. |
+| `docs/advisor/2026-10-28-akba-phase-4-experiment-deck/check_numbers.txt` | Regenerated from `15fc3d33`. |
+| `tests/test_check_numbers_deck.py` | New: 29 tests, including one through `main()` for the parity report. |
+
+**Approach.** `search_forms` no longer falls back to the unsigned form for a signed numeral. `found_in` skips an
+unsigned match whose preceding character is that number's own sign. The new `signed_in_source` decides that: a
+hyphen right after a digit or a letter joins two things, as in `0.5-1.0` or `mode-3`, so it is not a sign, and
+forbidding every preceding hyphen would have failed real ranges. `parity_key` is `normalise` with the sign kept.
+`normalise` itself stays, because the "single digit" weak flag reads it.
+
+**Design decision.** The stricter reading treats `+0.5` and `0.5` as different numerals too. They are numerically
+equal, but the deck and its sources write them deliberately (a gap's interval, `+0.0010 to +0.0085`), and a
+difference in how the two decks write one number is worth seeing. On this deck it cost nothing.
+
+**Verification.**
+
+- Mutation: 10 of 10 new lines caught, each mutant asserting its pattern was found once. The first run left two
+  survivors; a test for a non-sign character before a number and a test through `main()` closed them.
+- The real deck, re-run at `15fc3d33`: 296 numerals pass, 0 fail, 0 parity differences, and not one verdict line
+  differs from the committed report. Only the two header lines naming the commit moved. So **no slide carried a
+  sign error**, and the old "296 pass" turns out to have been right, though it could not have shown that.
+- Positive control, because an unchanged result proves nothing alone: changing `-0.486` to `0.486` on the English
+  `archive` slide gave exit 1, `FAIL missing` for the numeral and `FAIL archive: only in en ['0.486']; only in
+  tr ['-0.486']`, then restored from a backup. Laptop, provisional.
+
+Reproduce from the repository root, with the `origin` branches fetched:
+
+    python docs/advisor/2026-10-28-akba-phase-4-experiment-deck/check_numbers.py
+    pytest tests/test_check_numbers_deck.py
+
+This changes the test count, so NC-021 is re-measured at this PR's merge (Rule 6).
