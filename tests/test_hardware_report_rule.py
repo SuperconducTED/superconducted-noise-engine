@@ -236,3 +236,47 @@ def test_every_row_of_the_arm_b_table_is_reached(
 ) -> None:
     out = hs.arm_b_reading(s1_passes=s1, inconclusive=inconclusive, passes=passes)
     assert out[0] == row
+
+
+def test_the_report_computes_the_descriptive_figures_from_sealed_forecasts(tmp_path: Any) -> None:
+    from scripts.hardware_reading_vs_level import _write_tsv, write_json_lf
+
+    folder = tmp_path / "2026-11-10"
+    folder.mkdir()
+    levels = {1: 100e-6, 2: 200e-6}
+    reading = {1: 150e-6, 2: 150e-6}
+    sources = {
+        "level": {str(q): [t, t, 0.02, 0.01] for q, t in levels.items()},
+        "reading": {str(q): [t, t, 0.02, 0.01] for q, t in reading.items()},
+        "band_lo": {str(q): [t * 0.8, t, 0.02, 0.01] for q, t in levels.items()},
+        "band_hi": {str(q): [t * 1.3, t, 0.02, 0.01] for q, t in levels.items()},
+    }
+    write_json_lf(folder / "sealed.json", {"sources": sources})
+    rows = []
+    for q, t1 in levels.items():
+        truth = QubitSource(t1 * 1.1, t1, 0.02, 0.01)
+        for tau_dt in (5_000, 12_500, 25_000, 50_000, 75_000, 100_000):
+            tau = tau_dt * 4e-9
+            p = p1_closed_form(tau, truth)
+            rows.append(
+                {
+                    "stratum": "discriminating",
+                    "qubit": q,
+                    "tau_dt": tau_dt,
+                    "tau_s": tau,
+                    "shots": 2048,
+                    "ones": round(2048 * p),
+                    "p_hat": round(2048 * p) / 2048,
+                    "abs_err_reading": 0.05,
+                    "abs_err_level": 0.01,
+                    "abs_err_reading_at_execution": 0.04,
+                    "band_covered": 1,
+                    "band_covered_widened": 1,
+                    "band_width": 0.1,
+                }
+            )
+    _write_tsv(folder / "arm-a.tsv", rows)
+    out = hs.run_report(tmp_path, first_day=DAY, today=DAY)
+    a4 = out["arm_a"]["A4_band_calibration_report"]
+    assert a4["no_information_coverage"] is not None
+    assert out["arm_a"]["c_and_s_res"]["qubit_days"] == 2

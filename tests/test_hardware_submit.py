@@ -12,7 +12,7 @@ import json
 import math
 import subprocess
 from collections.abc import Iterable, Mapping, Sequence
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -1290,15 +1290,29 @@ def test_the_rehearsal_reports_its_metrics_in_the_real_shape(
 
 
 def _row(
-    stratum: str, reading: float, level: float, execution: float, band: int = 1
+    stratum: str,
+    reading: float,
+    level: float,
+    execution: float,
+    band: int = 1,
+    *,
+    qubit: int = 0,
+    tau_dt: int = 100,
 ) -> dict[str, Any]:
     return {
         "stratum": stratum,
+        "qubit": qubit,
+        "tau_dt": tau_dt,
+        "tau_s": tau_dt * 4e-9,
+        "shots": 2048,
+        "ones": 1024,
+        "p_hat": 0.5,
         "abs_err_reading": reading,
         "abs_err_level": level,
         "abs_err_reading_at_execution": execution,
         "band_covered": band,
         "band_covered_widened": band,
+        "band_width": 0.1,
     }
 
 
@@ -1342,7 +1356,7 @@ def test_a_run_with_no_control_rows_does_not_meet_a3(tmp_path: Path) -> None:
     out = _report(tmp_path, 14)
     assert out["arm_a"]["A1_level_beats_reading"]["passes"] is True
     assert out["arm_a"]["A3_sign_holds_on_controls"] is False
-    assert out["reading"] != "S1 passes"
+    assert out["s1"]["row"] == "A1 and A2 pass, A3 fails"
 
 
 def test_a3_uses_the_control_rows_that_exist(tmp_path: Path) -> None:
@@ -1357,12 +1371,17 @@ def test_report_passes_when_level_is_clearly_closer_on_every_day(tmp_path: Path)
         _scored_day(tmp_path, _day(i), _strong_day(i, 0.01 * (i % 3)))
     out = _report(tmp_path, 14)
     assert out["complete"] is True and out["interim_note"] is None
-    assert out["arm_a"]["A1_level_beats_reading"]["passes"] is True
+    a1 = out["arm_a"]["A1_level_beats_reading"]
+    assert a1["passes"] is True and a1["mean_d"] < 0.0
+    assert a1["batch_means"]["q"] == 4
     assert out["arm_a"]["A2_level_beats_reading_at_execution"]["passes"] is True
     assert out["arm_a"]["A3_sign_holds_on_controls"] is True
-    assert out["arm_a"]["A4_band_covers_nominal_within_widening"]["passes"] is True
-    assert out["reading"] == "S1 passes"
+    a4 = out["arm_a"]["A4_band_calibration_report"]
+    assert a4["part_of_s1"] is False and a4["coverage"] == 1.0
+    assert out["s1"]["row"] == "A1, A2 and A3 pass"
+    assert out["reading"].startswith("S1 passes")
     assert out["arm_a"]["rows"] == {"discriminating": 112, "control": 56}
+    assert out["arm_a"]["completed_days"] == 14
 
 
 def test_report_keeps_missed_failed_and_absent_days_on_the_calendar(tmp_path: Path) -> None:
@@ -1422,6 +1441,8 @@ def test_report_fails_s1_when_the_execution_reading_is_as_good_as_level(tmp_path
         _scored_day(tmp_path, _day(i), rows)
     out = _report(tmp_path, 14)
     assert out["arm_a"]["A2_level_beats_reading_at_execution"]["passes"] is False
+    assert out["arm_a"]["A2_level_beats_reading_at_execution"]["mean_d"] == 0.0
+    assert out["s1"]["row"] == "A2's mean D at or above zero"
     assert out["reading"].startswith("S1 fails")
 
 
@@ -1434,7 +1455,8 @@ def test_report_names_the_staleness_finding(tmp_path: Path) -> None:
     out = _report(tmp_path, 14)
     assert out["arm_a"]["A1_level_beats_reading"]["passes"] is True
     assert out["arm_a"]["A2_level_beats_reading_at_execution"]["passes"] is False
-    assert "staleness" in out["reading"]
+    assert out["s1"]["row"] == "A1 passes, A2 does not"
+    assert out["reading"].startswith("staleness")
 
 
 @pytest.mark.parametrize(
@@ -1453,27 +1475,24 @@ def test_a3_needs_level_ahead_of_both_readings_on_the_controls(
     assert _report(tmp_path, 0)["arm_a"]["A3_sign_holds_on_controls"] is expected
 
 
-@pytest.mark.parametrize(("hits", "passes"), [(8, True), (7, False)])
-def test_a4_reads_the_widened_coverage_against_the_nominal(
-    tmp_path: Path, hits: int, passes: bool
-) -> None:
+@pytest.mark.parametrize("hits", [8, 7])
+def test_a4_reports_the_widened_coverage_and_decides_nothing(tmp_path: Path, hits: int) -> None:
     rows = [_row("discriminating", 0.2, 0.05, 0.19, 1) for _ in range(hits)]
     rows += [_row("discriminating", 0.2, 0.05, 0.19, 0) for _ in range(10 - hits)]
     _scored_day(tmp_path, _day(0), rows)
-    a4 = _report(tmp_path, 0)["arm_a"]["A4_band_covers_nominal_within_widening"]
-    assert a4["passes"] is passes
+    a4 = _report(tmp_path, 0)["arm_a"]["A4_band_calibration_report"]
+    assert a4["part_of_s1"] is False and "passes" not in a4
     assert a4["coverage_widened"] == hits / 10
 
 
-def test_a4_passes_on_the_widening_when_the_nominal_alone_falls_short(tmp_path: Path) -> None:
+def test_a4_reports_nominal_and_widened_coverage_side_by_side(tmp_path: Path) -> None:
     rows = [_row("discriminating", 0.2, 0.05, 0.19, 1) for _ in range(7)]
     rows.append({**_row("discriminating", 0.2, 0.05, 0.19, 0), "band_covered_widened": 1})
     rows += [_row("discriminating", 0.2, 0.05, 0.19, 0) for _ in range(2)]
     _scored_day(tmp_path, _day(0), rows)
-    a4 = _report(tmp_path, 0)["arm_a"]["A4_band_covers_nominal_within_widening"]
+    a4 = _report(tmp_path, 0)["arm_a"]["A4_band_calibration_report"]
     assert a4["coverage"] == 0.7
     assert a4["coverage_widened"] == 0.8
-    assert a4["passes"] is True
 
 
 def test_a4_ignores_rows_with_no_band_and_reports_nominal_beside_widened(tmp_path: Path) -> None:
@@ -1481,9 +1500,19 @@ def test_a4_ignores_rows_with_no_band_and_reports_nominal_beside_widened(tmp_pat
     rows.append(_row("discriminating", 0.2, 0.05, 0.19, -1))
     rows.append({**_row("discriminating", 0.2, 0.05, 0.19, 0), "band_covered_widened": 1})
     _scored_day(tmp_path, _day(0), rows)
-    a4 = _report(tmp_path, 0)["arm_a"]["A4_band_covers_nominal_within_widening"]
+    a4 = _report(tmp_path, 0)["arm_a"]["A4_band_calibration_report"]
     assert a4["coverage"] == 4 / 5
     assert a4["coverage_widened"] == 1.0
+
+
+def test_a4_counts_no_zero_delay_row(tmp_path: Path) -> None:
+    rows = [_row("discriminating", 0.2, 0.05, 0.19, 1) for _ in range(4)]
+    rows += [_row("discriminating", 0.2, 0.05, 0.19, 0, tau_dt=0) for _ in range(6)]
+    _scored_day(tmp_path, _day(0), rows)
+    out = _report(tmp_path, 0)
+    a4 = out["arm_a"]["A4_band_calibration_report"]
+    assert a4["rows"] == 4 and a4["coverage"] == 1.0
+    assert out["arm_a"]["A1_level_beats_reading"]["rows"] == 10
 
 
 def test_unusable_predictors_are_left_out_of_the_comparison(tmp_path: Path) -> None:
@@ -1523,16 +1552,16 @@ def test_the_report_hands_the_bootstrap_the_whole_calendar_in_three_day_blocks(
 
 
 @pytest.mark.parametrize(("today", "has_interval"), [(2, False), (3, True)])
-def test_a_calendar_no_longer_than_a_block_has_no_interval(
+def test_a_calendar_no_longer_than_a_block_has_no_sensitivity_interval(
     tmp_path: Path, today: int, has_interval: bool
 ) -> None:
     """With three days and three-day blocks every draw is all three days: zero width, no evidence."""
     for i in range(today + 1):
         _scored_day(tmp_path, _day(i), _strong_day(i, 0.01 * (i % 2)))
     a1 = _report(tmp_path, today)["arm_a"]["A1_level_beats_reading"]
-    assert a1["mean_difference"] > 0.0
-    assert (a1["interval"] is not None) is has_interval
-    assert a1["passes"] is has_interval
+    assert a1["mean_d"] < 0.0
+    assert (a1["block3_sensitivity"]["interval"] is not None) is has_interval
+    assert a1["inconclusive"] is True and a1["passes"] is False
 
 
 def test_the_block_length_is_amendment_8s_three_days_and_the_run_is_fourteen() -> None:
@@ -1541,7 +1570,11 @@ def test_the_block_length_is_amendment_8s_three_days_and_the_run_is_fourteen() -
     assert hs.BAND_NOMINAL == 0.80
 
 
-def test_arm_b_ranks_the_band_by_its_midpoint_and_reports_both_readings() -> None:
+def _jobs(*jobs: dict[str, Any], start: int = 1) -> list[tuple[date, dict[str, Any]]]:
+    return [(_day(start + i).date(), job) for i, job in enumerate(jobs)]
+
+
+def test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures() -> None:
     measured = [0.9, 0.7, 0.5, 0.3]
     job = _arm_b(
         measured,
@@ -1550,46 +1583,46 @@ def test_arm_b_ranks_the_band_by_its_midpoint_and_reports_both_readings() -> Non
         band_lo=[0.85, 0.1, 0.45, 0.25],
         band_hi=[0.95, 1.3, 0.55, 0.35],
     )
-    out = hs._arm_b_report([job])
-    assert out["mean_spearman"]["band"] == pytest.approx(1.0)
-    assert out["best_pick_hits"] == {"reading": 0, "level": 0, "band": 1}
-    assert out["one_predictor_meets_both"] is True
-    assert out["each_condition_by_either"] is True
+    out = hs._arm_b_report(_jobs(job), first_day=FIRST.date())
+    assert out["descriptive"]["mean_spearman"]["band"] == pytest.approx(1.0)
+    assert out["descriptive"]["best_pick_hits"] == {"reading": 0, "level": 0, "band": 1}
+    assert out["descriptive"]["mean_regret"]["band"] == 0.0
 
 
-def test_arm_b_two_readings_of_level_or_band_can_differ() -> None:
-    """Level ranks better but misses the pick; the band picks but ranks worse than reading."""
-    jobs = [
-        _arm_b(
-            [0.9, 0.7, 0.5, 0.3],
-            reading=[0.9, 0.3, 0.7, 0.5],
-            level=[0.8, 0.9, 0.5, 0.3],
-            band_lo=[0.9, 0.1, 0.2, 0.8],
-            band_hi=[0.9, 0.1, 0.2, 0.8],
+def test_arm_b_decides_on_the_paired_spearman_difference_only() -> None:
+    better = _arm_b(
+        [0.9, 0.7, 0.5, 0.3],
+        reading=[0.3, 0.5, 0.9, 0.7],
+        level=[0.9, 0.7, 0.5, 0.3],
+        band_lo=[0.1, 0.2, 0.3, 0.4],
+        band_hi=[0.1, 0.2, 0.3, 0.4],
+    )
+    jobs = _jobs(*[better] * 13)
+    out = hs._arm_b_report(jobs, first_day=FIRST.date())
+    paired = out["paired_spearman"]
+    assert out["completed_jobs"] == 13 and paired["q"] == 4
+    assert paired["sd_zero"] is True and out["passes"] is False
+
+
+def test_arm_b_passes_with_a_varying_level_advantage_and_ten_jobs() -> None:
+    jobs = []
+    for i in range(10):
+        level = [0.9, 0.7, 0.5, 0.3] if i % 2 else [0.9, 0.5, 0.7, 0.3]
+        jobs.append(
+            _arm_b(
+                [0.9, 0.7, 0.5, 0.3],
+                reading=[0.3, 0.5, 0.7, 0.9],
+                level=level,
+                band_lo=[0.1, 0.2, 0.3, 0.4],
+                band_hi=[0.1, 0.2, 0.3, 0.4],
+            )
         )
-    ]
-    out = hs._arm_b_report(jobs)
-    assert out["best_pick_hits"] == {"reading": 1, "level": 0, "band": 1}
-    assert out["mean_spearman"]["level"] == pytest.approx(0.8)
-    assert out["mean_spearman"]["reading"] == pytest.approx(0.4)
-    assert out["mean_spearman"]["band"] == pytest.approx(0.2)
-    assert out["one_predictor_meets_both"] is False
-    assert out["each_condition_by_either"] is True
-
-
-def test_arm_b_fails_both_readings_when_neither_predictor_keeps_up() -> None:
-    jobs = [
-        _arm_b(
-            [0.9, 0.7, 0.5, 0.3],
-            reading=[0.9, 0.7, 0.5, 0.3],
-            level=[0.3, 0.5, 0.7, 0.9],
-            band_lo=[0.3, 0.5, 0.7, 0.9],
-            band_hi=[0.3, 0.5, 0.7, 0.9],
-        )
-    ]
-    out = hs._arm_b_report(jobs)
-    assert out["one_predictor_meets_both"] is False
-    assert out["each_condition_by_either"] is False
+    out = hs._arm_b_report(_jobs(*jobs), first_day=FIRST.date())
+    assert out["completed_jobs"] == 10 and out["inconclusive"] is False
+    assert out["paired_spearman"]["t"] > out["paired_spearman"]["critical"]
+    assert out["passes"] is True
+    nine = hs._arm_b_report(_jobs(*jobs[:9]), first_day=FIRST.date())
+    assert nine["inconclusive"] is True and nine["passes"] is False
 
 
 def test_arm_b_treats_a_missing_band_end_as_no_prediction() -> None:
@@ -1600,9 +1633,28 @@ def test_arm_b_treats_a_missing_band_end_as_no_prediction() -> None:
         band_lo=[None, 0.6, 0.4],
         band_hi=[0.8, 0.7, 0.6],
     )
-    out = hs._arm_b_report([job])
-    assert out["best_pick_hits"]["band"] == 0
-    assert out["mean_spearman"]["band"] == pytest.approx(1.0)
+    out = hs._arm_b_report(_jobs(job), first_day=FIRST.date())
+    assert out["descriptive"]["best_pick_hits"]["band"] == 0
+    assert out["descriptive"]["mean_spearman"]["band"] == pytest.approx(1.0)
+
+
+def test_arm_b_pairs_the_two_correlations_on_the_layouts_both_predicted() -> None:
+    job = _arm_b(
+        [0.9, 0.7, 0.5, 0.3],
+        reading=[None, 0.7, 0.5, 0.3],
+        level=[0.3, 0.7, 0.5, 0.9],
+        band_lo=[0.1, 0.2, 0.3, 0.4],
+        band_hi=[0.1, 0.2, 0.3, 0.4],
+    )
+    out = hs._arm_b_report(_jobs(job), first_day=FIRST.date())
+    expected = hs.spearman([0.7, 0.5, 0.9], [0.7, 0.5, 0.3]) - 1.0
+    assert out["paired_spearman"]["batch_means"][0] == pytest.approx(expected)
+
+
+def test_a_job_one_folder_with_arm_b_scores_is_refused() -> None:
+    job = _arm_b([0.9, 0.7], reading=[0.9, 0.7], level=[0.9, 0.7], band_lo=[0, 0], band_hi=[1, 1])
+    with pytest.raises(ValueError, match="in no batch"):
+        hs._arm_b_report(_jobs(job, start=0), first_day=FIRST.date())
 
 
 def test_report_refuses_a_jobs_dir_that_is_not_there(tmp_path: Path) -> None:
@@ -1645,10 +1697,27 @@ def test_day_fourteen_is_still_interim_and_the_next_is_not(tmp_path: Path) -> No
 def test_report_with_no_rows_says_so(tmp_path: Path) -> None:
     (tmp_path / f"{FIRST:%Y-%m-%d}").mkdir()
     out = _report(tmp_path, 0)
-    assert out["reading"] == "no scored rows"
+    assert out["s1"]["row"] == "too few completed days"
+    assert out["reading"].startswith("inconclusive")
     assert out["arm_a"]["A1_level_beats_reading"]["passes"] is False
     assert out["arm_a"]["A3_sign_holds_on_controls"] is False
-    assert out["arm_a"]["A4_band_covers_nominal_within_widening"]["passes"] is False
+    assert out["arm_a"]["A4_band_calibration_report"]["coverage"] is None
+
+
+@pytest.mark.parametrize(("days", "decides"), [(9, False), (10, True)])
+def test_s1_needs_ten_completed_days(tmp_path: Path, days: int, decides: bool) -> None:
+    for i in range(days):
+        _scored_day(tmp_path, _day(i), _strong_day(i, 0.01 * (i % 3)))
+    out = _report(tmp_path, 14)
+    assert out["arm_a"]["completed_days"] == days
+    assert (out["s1"]["row"] != "too few completed days") is decides
+
+
+def test_the_report_flips_d_so_negative_favours_level(tmp_path: Path) -> None:
+    _scored_day(tmp_path, _day(0), [_row("discriminating", 0.30, 0.10, 0.25)])
+    out = _report(tmp_path, 0)
+    assert out["arm_a"]["A1_level_beats_reading"]["mean_d"] == pytest.approx(-0.20)
+    assert out["arm_a"]["A2_level_beats_reading_at_execution"]["mean_d"] == pytest.approx(-0.15)
 
 
 def test_a_scored_day_reads_scored_even_with_an_older_status_file(tmp_path: Path) -> None:

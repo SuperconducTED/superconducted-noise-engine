@@ -781,65 +781,49 @@ def _mean(values: Iterable[float]) -> float | None:
     return float(np.mean(finite)) if finite else None
 
 
-def _gaps(rows: Sequence[Mapping[str, Any]], other: str) -> list[tuple[float, date]]:
-    """Per-row error of ``other`` minus that of ``level``, on the rows where both predicted.
-
-    Positive means ``level`` is closer. Pairing keeps each comparison on one set of rows when a
-    predictor has no value for some of them.
-    """
-    return [
-        (float(r[f"abs_err_{other}"]) - float(r["abs_err_level"]), r["date"])
-        for r in rows
-        if math.isfinite(float(r[f"abs_err_{other}"])) and math.isfinite(float(r["abs_err_level"]))
-    ]
-
-
-def _beats(
-    rows: Sequence[Mapping[str, Any]],
-    other: str,
-    *,
-    span: tuple[date, date],
-    seed: int,
+def _block3_sensitivity(
+    pairs: Sequence[tuple[float, date]], *, span: tuple[date, date], seed: int
 ) -> dict[str, Any]:
-    """``level`` against ``other`` on one set of rows.
+    """Block 3 at 90% on ``D``, reported beside the decision and never part of it (amendment 25).
 
-    Passes when the block bootstrap's 90% interval of the mean difference lies above zero.
+    ``below_zero`` is recorded, not acted on. A calendar no longer than one block gives every draw
+    the same days, so no interval is reported then.
     """
-    pairs = _gaps(rows, other)
-    if not pairs:
-        return {"rows": 0, "mean_difference": None, "interval": None, "passes": False}
+    if not pairs or (span[1] - span[0]).days + 1 <= BLOCK_DAYS:
+        return {"block_days": BLOCK_DAYS, "interval": None, "below_zero": False}
     diffs, dates = zip(*pairs, strict=True)
-    if (span[1] - span[0]).days + 1 <= BLOCK_DAYS:
-        # Early in the run a block can hold the whole calendar, so every draw is the same draw and
-        # the interval has no width. That says nothing about uncertainty, so it cannot pass.
-        return {
-            "rows": len(pairs),
-            "mean_difference": float(np.mean(diffs)),
-            "interval": None,
-            "passes": False,
-        }
     low, high = calendar_block_bootstrap(
         list(diffs), list(dates), block_days=BLOCK_DAYS, seed=seed, span=span
     )
-    return {
-        "rows": len(pairs),
-        "mean_difference": float(np.mean(diffs)),
-        "interval": [low, high],
-        "passes": low > 0.0,
-    }
+    return {"block_days": BLOCK_DAYS, "interval": [low, high], "below_zero": high < 0.0}
 
 
-def _arm_b_report(jobs: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-    """Arm B over its jobs. The band is ranked by the midpoint of its two ends (amendment 4).
+def _arm_b_report(
+    jobs: Sequence[tuple[date, Mapping[str, Any]]], *, first_day: date
+) -> dict[str, Any]:
+    """Arm B (amendment 26): the paired Spearman difference decides; the rest is descriptive.
 
-    The rule's "``level`` or ``band``" has two readings, and the pre-registration's null values give
-    both, so both are reported until the freeze settles one.
+    Each job's ``Delta = rho_level - rho_reading`` is taken on the layouts both predicted. The job
+    number comes from the folder's date (job 1 has no Arm B), so job ``j`` is item ``j - 2`` of
+    ``ARM_B_BATCHES``. A job is completed when both correlations are finite. The band is ranked by
+    the midpoint of its two ends (amendment 4), for the descriptive figures only. A near tie is a
+    best-to-second gap under two binomial standard errors at the best layout's fidelity, an
+    approximation.
     """
+    deltas: list[tuple[float, int]] = []
     rho: dict[str, list[float]] = {"reading": [], "level": [], "band": []}
     hits: dict[str, int] = {"reading": 0, "level": 0, "band": 0}
-    for job in jobs:
+    regret: dict[str, list[float]] = {"reading": [], "level": [], "band": []}
+    near_ties = 0
+    for day, job in jobs:
+        item = (day - first_day).days - 1
         measured = [float(m) for m in job["measured"]]
-        best = int(np.argmax(measured))
+        order = sorted(range(len(measured)), key=lambda i: -measured[i])
+        best = order[0]
+        if len(order) > 1:
+            gap = measured[order[0]] - measured[order[1]]
+            fidelity = min(max(measured[best], 0.0), 1.0)
+            near_ties += int(gap < 2.0 * binomial_se(fidelity, ARM_B_SHOTS))
         lows, highs = job["band_lo"]["predicted"], job["band_hi"]["predicted"]
         predicted = {
             "reading": job["reading"]["predicted"],
@@ -856,23 +840,38 @@ def _arm_b_report(jobs: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
             value = spearman([float(values[i]) for i in usable], [measured[i] for i in usable])
             if math.isfinite(value):
                 rho[name].append(value)
-            hits[name] += int(max(usable, key=lambda i: float(values[i])) == best)
-    mean_rho = {name: _mean(values) for name, values in rho.items()}
-
-    def ranks(name: str) -> bool:
-        ours, theirs = mean_rho[name], mean_rho["reading"]
-        return ours is not None and theirs is not None and ours >= theirs
-
-    def picks(name: str) -> bool:
-        return hits[name] >= hits["reading"]
-
+            pick = max(usable, key=lambda i: float(values[i]))
+            hits[name] += int(pick == best)
+            regret[name].append(measured[best] - measured[pick])
+        both = [
+            i
+            for i in range(len(measured))
+            if predicted["level"][i] is not None and predicted["reading"][i] is not None
+        ]
+        if len(both) >= 2:
+            level_rho = spearman(
+                [float(predicted["level"][i]) for i in both], [measured[i] for i in both]
+            )
+            reading_rho = spearman(
+                [float(predicted["reading"][i]) for i in both], [measured[i] for i in both]
+            )
+            if math.isfinite(level_rho) and math.isfinite(reading_rho):
+                deltas.append((level_rho - reading_rho, item))
+    test = batch_means_test(deltas, ARM_B_BATCHES, side=1)
+    inconclusive = len(deltas) < MIN_ARM_B_JOBS or test["inconclusive"]
     return {
         "jobs": len(jobs),
-        "mean_spearman": mean_rho,
-        "best_pick_hits": hits,
-        "one_predictor_meets_both": any(ranks(n) and picks(n) for n in ("level", "band")),
-        "each_condition_by_either": any(ranks(n) for n in ("level", "band"))
-        and any(picks(n) for n in ("level", "band")),
+        "completed_jobs": len(deltas),
+        "minimum_jobs": MIN_ARM_B_JOBS,
+        "paired_spearman": test,
+        "inconclusive": inconclusive,
+        "passes": not inconclusive and test["passes"],
+        "descriptive": {
+            "mean_spearman": {name: _mean(values) for name, values in rho.items()},
+            "best_pick_hits": hits,
+            "mean_regret": {name: _mean(values) for name, values in regret.items()},
+            "near_ties": near_ties,
+        },
     }
 
 
@@ -1095,15 +1094,19 @@ def arm_b_reading(*, s1_passes: bool, inconclusive: bool, passes: bool) -> tuple
     return "neither passes", "nothing is added"
 
 
-def run_report(jobs_dir: Path, *, first_day: date, today: date) -> dict[str, Any]:
-    """The decision rule (design section 7) over every day so far.
+def run_report(
+    jobs_dir: Path, *, first_day: date, today: date, scores_dir: Path | None = None
+) -> dict[str, Any]:
+    """The decision rule of PR #135's section 3.12 over every day so far.
 
     Every calendar day from ``first_day`` on is on the axis, and a day with no rows stays there as
     an empty day. ``first_day`` is declared, not read from the folders, so a first day the laptop
     slept through cannot move the calendar. A job folder outside the run's 14 days is refused: the
     run is never extended, and a stray folder must not be dropped or scored in silence. Until the
     14 days have passed the result is marked interim: it is not the decision, and it must not stop
-    or extend the run.
+    or extend the run. Scores are read from ``scores_dir`` (the sealed folder of amendment 27,
+    the jobs folder when not given), and each day's forecasts from ``sealed.json`` in the jobs
+    folder.
     """
     if not jobs_dir.is_dir():
         raise RefusedError(f"{jobs_dir} is not a folder")
@@ -1126,20 +1129,45 @@ def run_report(jobs_dir: Path, *, first_day: date, today: date) -> dict[str, Any
         for d in calendar
     ]
     span = (first_day, last)
+    scores = jobs_dir if scores_dir is None else scores_dir
 
     rows: list[dict[str, Any]] = []
-    arm_b_jobs: list[dict[str, Any]] = []
-    for day, folder in sorted(named.items()):
+    arm_b_jobs: list[tuple[date, dict[str, Any]]] = []
+    states: dict[date, dict[str, Any]] = {}
+    for day in calendar:
+        folder = scores / day.isoformat()
         if (folder / "arm-a.tsv").exists():
             rows.extend(_read_rows(folder / "arm-a.tsv", day))
         if (folder / "arm-b.json").exists():
-            arm_b_jobs.append(_read_json(folder / "arm-b.json"))
+            arm_b_jobs.append((day, _read_json(folder / "arm-b.json")))
+        if day in named and (named[day] / "sealed.json").exists():
+            states[day] = _read_json(named[day] / "sealed.json")
     discriminating = [r for r in rows if r["stratum"] == "discriminating"]
     control = [r for r in rows if r["stratum"] == "control"]
+    seeds = np.random.SeedSequence(SEED).generate_state(2, dtype=np.uint32)
 
-    state = np.random.SeedSequence(SEED).generate_state(2, dtype=np.uint32)
-    a1 = _beats(discriminating, "reading", span=span, seed=int(state[0]))
-    a2 = _beats(discriminating, "reading_at_execution", span=span, seed=int(state[1]))
+    def condition(other: str, seed: int) -> dict[str, Any]:
+        pairs = level_minus_other(discriminating, other)
+        values = [(d, (when - first_day).days) for d, when in pairs]
+        test = batch_means_test(values, ARM_A_BATCHES, side=-1)
+        return {
+            "rows": len(pairs),
+            "mean_d": float(np.mean([d for d, _ in pairs])) if pairs else None,
+            "batch_means": test,
+            "passes": test["passes"],
+            "inconclusive": test["inconclusive"],
+            "block3_sensitivity": _block3_sensitivity(pairs, span=span, seed=seed),
+        }
+
+    a1 = condition("reading", int(seeds[0]))
+    a2 = condition("reading_at_execution", int(seeds[1]))
+    a3 = all(
+        (m := _mean(d for d, _ in level_minus_other(control, name))) is not None and m < 0.0
+        for name in ("reading", "reading_at_execution")
+    )
+    completed_days = len({r["date"] for r in discriminating})
+    inconclusive = completed_days < MIN_ARM_A_DAYS or a1["inconclusive"] or a2["inconclusive"]
+    s1_row, s1_text = s1_reading(inconclusive=inconclusive, a1=a1, a2=a2, a3=a3)
     mae = {
         stratum: {
             name: _mean(_errors(subset, name))
@@ -1147,32 +1175,49 @@ def run_report(jobs_dir: Path, *, first_day: date, today: date) -> dict[str, Any
         }
         for stratum, subset in (("discriminating", discriminating), ("control", control))
     }
-    a3 = all(
-        (gap := _mean(g for g, _ in _gaps(control, name))) is not None and gap > 0.0
-        for name in ("reading", "reading_at_execution")
+
+    banded = [r for r in discriminating if int(r["tau_dt"]) > 0 and int(r["band_covered"]) >= 0]
+    widths = [float(r["band_width"]) for r in banded if math.isfinite(float(r["band_width"]))]
+    no_nominal: list[float] = []
+    no_widened: list[float] = []
+    for day, state in states.items():
+        nominal, widened = no_information_coverage([r for r in banded if r["date"] == day], state)
+        no_nominal += nominal
+        no_widened += widened
+    a4 = {
+        "part_of_s1": False,
+        "stratum": "discriminating",
+        "rows": len(banded),
+        "nominal": BAND_NOMINAL,
+        "coverage": _mean(float(r["band_covered"]) for r in banded),
+        "coverage_widened": _mean(float(r["band_covered_widened"]) for r in banded),
+        "mean_width": _mean(widths),
+        "no_information_coverage": _mean(no_nominal),
+        "no_information_coverage_widened": _mean(no_widened),
+    }
+
+    points: list[tuple[float, float]] = []
+    for day, state in states.items():
+        per_qubit: dict[int, list[dict[str, Any]]] = {}
+        for r in discriminating:
+            if r["date"] == day and int(r["tau_dt"]) > 0:
+                per_qubit.setdefault(int(r["qubit"]), []).append(r)
+        for q, q_rows in sorted(per_qubit.items()):
+            level, reading_src = _source(state, "level", q), _source(state, "reading", q)
+            if level is None or reading_src is None or not reading_src.usable_for_decay():
+                continue
+            fit = fit_log_t1_ratio(
+                [(float(r["tau_s"]), int(r["ones"]), int(r["shots"])) for r in q_rows], level
+            )
+            if fit is not None:
+                points.append((math.log(reading_src.t1) - math.log(level.t1), fit))
+
+    arm_b = _arm_b_report(arm_b_jobs, first_day=first_day)
+    b_row, b_text = arm_b_reading(
+        s1_passes=s1_row == "A1, A2 and A3 pass",
+        inconclusive=arm_b["inconclusive"],
+        passes=arm_b["passes"],
     )
-    covered = [int(r["band_covered"]) for r in discriminating if int(r["band_covered"]) >= 0]
-    widened = [
-        int(r["band_covered_widened"])
-        for r in discriminating
-        if int(r["band_covered_widened"]) >= 0
-    ]
-    coverage = float(np.mean(covered)) if covered else None
-    coverage_widened = float(np.mean(widened)) if widened else None
-    a4 = coverage_widened is not None and coverage_widened >= BAND_NOMINAL
-
-    execution_gap = a2["mean_difference"]
-    if not discriminating:
-        reading = "no scored rows"
-    elif a1["passes"] and a2["passes"] and a3 and a4:
-        reading = "S1 passes"
-    elif execution_gap is not None and execution_gap <= 0.0:
-        reading = "S1 fails: reading_at_execution is at least as good as level"
-    elif a1["passes"] and not a2["passes"]:
-        reading = "level beats reading but not reading_at_execution: a finding about staleness"
-    else:
-        reading = "none of the design's named outcomes"
-
     return {
         "complete": complete,
         "interim_note": None
@@ -1181,22 +1226,21 @@ def run_report(jobs_dir: Path, *, first_day: date, today: date) -> dict[str, Any
         "first_day": first_day.isoformat(),
         "last_day": last.isoformat(),
         "days": days,
-        "block_days": BLOCK_DAYS,
         "arm_a": {
             "rows": {"discriminating": len(discriminating), "control": len(control)},
+            "completed_days": completed_days,
+            "minimum_days": MIN_ARM_A_DAYS,
             "mean_abs_error": mae,
             "A1_level_beats_reading": a1,
             "A2_level_beats_reading_at_execution": a2,
             "A3_sign_holds_on_controls": a3,
-            "A4_band_covers_nominal_within_widening": {
-                "nominal": BAND_NOMINAL,
-                "coverage": coverage,
-                "coverage_widened": coverage_widened,
-                "passes": a4,
-            },
+            "A4_band_calibration_report": a4,
+            "c_and_s_res": slope_and_spread(points),
         },
-        "arm_b": _arm_b_report(arm_b_jobs),
-        "reading": reading,
+        "arm_b": arm_b,
+        "s1": {"row": s1_row, "reading": s1_text},
+        "arm_b_reading": {"row": b_row, "reading": b_text},
+        "reading": s1_text,
     }
 
 
