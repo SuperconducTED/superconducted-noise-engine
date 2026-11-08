@@ -512,3 +512,14 @@ What the two attempts together show: with the laptop awake on mains, idle and lo
 completes (06:45:00 on 2026-11-08, about 4.5 minutes); asleep, it does not fire until someone wakes it. A late start is not
 a late submission: the strict missed rule (amendment 18) refuses a build after 04:45 UTC, so a sleeping morning becomes an
 empty day, not a mistimed job. The way the run is fired is now the lead's decision.
+
+**The lead's decision, 2026-11-08: the laptop stays awake.** For the 14 nights the laptop stays on mains, logged in,
+lid open, and is never put to sleep; a locked screen is fine. Its power plan already never turns the display off or
+sleeps on mains. A night it sleeps through is a missed morning under amendment 18, an empty day, never a late job.
+
+**Criterion 8, restated.** The original wording ("fires unattended at 06:45 Istanbul with the laptop asleep") tested a
+wake this laptop does not do. The restated criterion is: the routine fires unattended at 06:45 with the laptop awake on
+mains, logged in, lid open and the app closed, and completes. The 2026-11-08 06:45 run meets it (first attempt above;
+the lead confirmed the lid was open). This restatement is written after that run, so it is disclosed as such: the run was
+set up to test the wake, and it is counted for the awake case it actually exercised. Still owed in the code:
+`scripts/hardware_schedule.ps1` describes the wake timer as how the job is fired, and that text is corrected in stage 2.
