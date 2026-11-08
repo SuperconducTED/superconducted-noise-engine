@@ -523,3 +523,53 @@ mains, logged in, lid open and the app closed, and completes. The 2026-11-08 06:
 the lead confirmed the lid was open). This restatement is written after that run, so it is disclosed as such: the run was
 set up to test the wake, and it is counted for the awake case it actually exercised. Still owed in the code:
 `scripts/hardware_schedule.ps1` describes the wake timer as how the job is fired, and that text is corrected in stage 2.
+
+## Stage 2 plan, 2026-11-08, before the code: the rule of PR #135's sections 3.11 and 3.12
+
+Appended. The lead decided four rules on 2026-11-07 and two more on 2026-11-08; PR #135 now states them as amendments 16 to
+35 (`d7909de3`). This section plans the code that applies them. Nothing above is edited. Three phases, each committed with
+its tests before the next starts.
+
+**Phase 2a, the decision rule in `report`.**
+
+- **Sign.** Every comparison uses amendment 25's `D = |p_hat - p_level| - |p_hat - p_other|`, negative favouring `level`.
+  Today's `_gaps` is `other - level`, positive favouring `level`, so `mean_difference` and `execution_gap` change sign. The
+  flip is deliberate, and a test pins it on a hand-made row.
+- **A1 and A2** by batch means: the declared 14-day calendar in batches of days 1-4, 5-8, 9-11, 12-14; a batch's value is the
+  mean of `D` over its discriminating rows; empty batches dropped while at least three remain, `t` with `q - 1` degrees of
+  freedom, critical values taken from SciPy's values written in the pre-registration, `sd = 0` fails. Block 3 stays in the
+  output as a sensitivity, never in the decision.
+- **A3** unchanged in meaning: the controls' mean `D` below zero against both readings.
+- **A4** becomes descriptive: on `tau > 0` discriminating rows, coverage, widened coverage, mean width, and the no-information
+  coverage of amendment 24 (each row's band moved in `log T1` by the difference to every other discriminating qubit's `log level`
+  that day, turned into `p_1` at the row's `tau` with the row's own `level` readout). It leaves the S1 decision.
+- **Arm B** by a paired Spearman difference: per Arm B job `rho_level - rho_reading`, jobs 2-5, 6-8, 9-11, 12-14, the same batch
+  rule with the opposite side. "Or band" and B1, B2 leave the decision; best-pick hits, regret and near ties stay descriptive.
+- **Minimum completed jobs:** at least 10 days with discriminating rows and at least 10 Arm B jobs, else inconclusive.
+- **The reading** is amendment 29's two tables, first match top to bottom, as an `if` chain that names the row it chose.
+- **`c` and `s_res`** as amendment 30 defines them, from each day's `sealed.json` sources and the `tau > 0` rows' counts.
+
+**Phase 2b, sealing (amendment 27).** The jobs folder is the data branch's worktree (`--commit-data` runs `git add -A` there),
+so a sealed file cannot live inside it. A new required `--sealed-dir`, refused when it is inside the jobs folder or the clone,
+receives everything that reads as a score: raw counts, `arm-a.tsv`, `arm-b.json`, the scores part of the daily summary, the
+interim report, and the `T1` fit. The jobs folder keeps the job ids, submissions, sealed forecasts, metrics, inputs read back,
+and a new `operations.json` per day: status, QPU seconds, queue delay, row counts, and whether the `T1` check ran and its fit
+converged. The routine prints only operations. On day 15 the routine copies the sealed folder into the jobs folder, so the
+final commit holds everything. `hardware_schedule.ps1`'s description stops calling the wake timer the mechanism.
+
+**Phase 2c, verification.** Mutation check of every new line, gates on the exact pins, then criteria 10 and 11 once.
+
+**Criteria, written before the code.**
+
+| # | Criterion |
+| --- | --- |
+| 17 | A hand-made row where `level` is closer gives a negative `D` and a negative `mean_difference` for A1 and A2. |
+| 18 | Batch means reproduce `rule_values.py`'s statistic on the same day means (a test builds the rows from a known matrix and compares `t` to a direct computation), including `V2` with one empty batch and inconclusive with two. |
+| 19 | With 9 completed days the report is inconclusive; with 10 it decides; the same for Arm B jobs. |
+| 20 | A4 counts no `tau = 0` row, and its no-information coverage on a hand-made day equals a direct computation. |
+| 21 | Each row of amendment 29's tables is reached by a constructed report, and the report names the row. |
+| 22 | `c` and `s_res` recover a planted slope and spread on synthetic counts within their tolerance. |
+| 23 | No file a morning writes inside the jobs folder holds a score, a count or a `T1` fit value (a test scans every file for the planted values); `--sealed-dir` inside the jobs folder or the clone is refused. |
+| 24 | Day 15 copies the sealed folder into the jobs folder, and only then. |
+| 25 | Every new line mutation-checked, each mutant asserting its pattern was found. |
+| 26 | Gates clean on the exact pins; then criteria 10 and 11 re-run once, the rehearsal's checks updated for the sealed folder. |
