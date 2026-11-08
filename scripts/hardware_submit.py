@@ -661,8 +661,13 @@ def run_score(
     device: Device,
     archive: Archive,
     now: Callable[[], datetime],
+    sealed_dir: Path | None = None,
 ) -> int:
     """Fetch, add the control, score. 0 when scored or recorded empty, ``EXIT_NOT_YET`` otherwise.
+
+    Sealing (amendment 27): raw counts, ``arm-a.tsv``, ``arm-b.json`` and the scored summary go to
+    ``sealed_dir / <day>``; the jobs folder gets only ``operations.json``, which is also what is
+    printed. Without ``sealed_dir`` everything stays in the job's folder, as tests do.
 
     A failed job, or one still queued at the next day's submission (then cancelled), is an empty
     day: ``failed.json`` records it and nothing is re-run.
@@ -718,7 +723,9 @@ def run_score(
         return EXIT_NOT_YET
     job = with_execution(job, execution_rows(collected, at=t_execute, live=None))
 
-    write_json_lf(job_dir / "results.json", {"job_id": job_id, "counts": fetched.counts})
+    out = job_dir if sealed_dir is None else sealed_dir / job_dir.name
+    out.mkdir(parents=True, exist_ok=True)
+    write_json_lf(out / "results.json", {"job_id": job_id, "counts": fetched.counts})
     write_json_lf(job_dir / "metrics.json", fetched.metrics)
     write_json_lf(job_dir / "inputs-read-back.json", fetched.inputs)
     try:
@@ -730,11 +737,11 @@ def run_score(
 
     n_a = len(job.arm_a)
     a_rows = score_arm_a(job, fetched.counts[:n_a], shots=ARM_A_SHOTS)
-    _write_tsv(job_dir / "arm-a.tsv", a_rows)
+    _write_tsv(out / "arm-a.tsv", a_rows)
     b_score = None
     if "B" in arms:
         b_score = score_arm_b(job, fetched.counts[n_a:], shots=ARM_B_SHOTS)
-        write_json_lf(job_dir / "arm-b.json", b_score)
+        write_json_lf(out / "arm-b.json", b_score)
     summary = {
         "job_id": job_id,
         "job_number": submission["job_number"],
@@ -746,8 +753,16 @@ def run_score(
         "quantum_seconds": fetched.metrics.get("usage", {}).get("quantum_seconds"),
         **daily_summary(a_rows, b_score),
     }
-    write_json_lf(job_dir / "daily-summary.json", summary)
-    print(json.dumps(summary, indent=2))
+    write_json_lf(out / "daily-summary.json", summary)
+    operations = {
+        "status": "scored",
+        **{k: summary[k] for k in ("job_id", "job_number", "t_s", "t_execute")},
+        "queue_seconds": summary["queue_seconds"],
+        "quantum_seconds": summary["quantum_seconds"],
+        "rows": {"arm_a": len(a_rows), "arm_b_layouts": len(b_score["measured"]) if b_score else 0},
+    }
+    write_json_lf(job_dir / "operations.json", operations)
+    print(json.dumps(operations))
     return 0
 
 
@@ -756,7 +771,7 @@ def run_score(
 
 
 def _day_status(job_dir: Path) -> str:
-    if (job_dir / "arm-a.tsv").exists():
+    if (job_dir / "operations.json").exists() or (job_dir / "arm-a.tsv").exists():
         return "scored"
     if (job_dir / "failed.json").exists():
         return "failed"
@@ -1267,6 +1282,14 @@ def _fetch_archive(repo: Path) -> None:
     _git(repo, "fetch", "origin", f"+refs/heads/calibration-data:{ARCHIVE_REF}")
 
 
+def refuse_sealed_inside(sealed_dir: Path, *folders: Path) -> None:
+    """Refuse a sealed folder inside any of ``folders``: a commit of them would publish it."""
+    sealed = sealed_dir.resolve()
+    for folder in folders:
+        if sealed == folder.resolve() or sealed.is_relative_to(folder.resolve()):
+            raise RefusedError(f"the sealed folder {sealed_dir} is inside {folder}")
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -1280,10 +1303,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     build.add_argument("--prereg", type=Path, default=None)
     score = modes.add_parser("score", help="fetch one job's results and score them")
     score.add_argument("--job-dir", type=Path, required=True)
+    score.add_argument("--sealed-dir", type=Path, required=True)
     report = modes.add_parser("report", help="the decision rule over every day so far")
     report.add_argument("--jobs-dir", type=Path, required=True)
     report.add_argument("--first-day", type=date.fromisoformat, required=True)
     report.add_argument("--today", type=date.fromisoformat, default=None, help="rehearsal only")
+    report.add_argument("--sealed-dir", type=Path, required=True)
     for mode in (build, score):
         mode.add_argument("--repo", type=Path, default=Path("."))
         mode.add_argument(
@@ -1298,14 +1323,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.mode == "report":
         try:
+            refuse_sealed_inside(args.sealed_dir, args.jobs_dir)
             outcome = run_report(
-                args.jobs_dir, first_day=args.first_day, today=args.today or _utc_now().date()
+                args.jobs_dir,
+                first_day=args.first_day,
+                today=args.today or _utc_now().date(),
+                scores_dir=args.sealed_dir,
             )
         except RefusedError as exc:
             print(f"refused: {exc}", file=sys.stderr)
             return EXIT_REFUSED
-        write_json_lf(args.jobs_dir / "report.json", outcome)
-        print(json.dumps(outcome, indent=2))
+        args.sealed_dir.mkdir(parents=True, exist_ok=True)
+        write_json_lf(args.sealed_dir / "report.json", outcome)
+        # Sealed (amendment 27): the report's content never reaches stdout or the routine's log.
+        print(f"report written: {args.sealed_dir / 'report.json'}")
         return 0
     local = args.local_live is not None
     if not local and args.at is not None:
@@ -1316,6 +1347,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     now: Callable[[], datetime] = (lambda: at) if at is not None else _utc_now
 
     try:
+        if args.mode == "score":
+            refuse_sealed_inside(args.sealed_dir, args.job_dir.parent)
         if args.mode == "build" and not local:
             # Before any network and before the token is read.
             try:
@@ -1352,7 +1385,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"submitted: {job_dir}")
             return 0
         return run_score(
-            job_dir=args.job_dir, device=device, archive=_archive_for(args.repo, sha), now=now
+            job_dir=args.job_dir,
+            device=device,
+            archive=_archive_for(args.repo, sha),
+            now=now,
+            sealed_dir=args.sealed_dir,
         )
     except RefusedError as exc:
         print(f"refused: {exc}", file=sys.stderr)

@@ -7,8 +7,12 @@
     only prints the task, so it changes nothing on the machine.
 
     The task is created with:
-      - a wake timer. Windows honours it only if "Allow wake timers" is on in the power plan, which
-        by default it is not on battery, so the laptop must stay plugged in;
+      - a wake timer, which is not how the run is fired. This laptop's only standby is Modern
+        Standby, and the wake tests showed the timer does not wake it from there. So for the 14
+        nights the laptop stays awake: on mains, logged in, lid open, never put to sleep (the lead's
+        decision of 2026-11-08, docs/implementations/2026-11-05-hardware-test-submission.md). A
+        night it sleeps through is a missed morning, never a late job. The timer stays because it
+        costs nothing on a machine where it does work;
       - "start as soon as possible" after a missed start, so a morning the laptop was off still scores
         earlier days and records the day as missed. It cannot submit late: the script refuses that;
       - a three hour limit above the per-step limits inside the routine;

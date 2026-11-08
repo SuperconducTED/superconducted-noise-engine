@@ -173,8 +173,12 @@ def run_submit(*, job_dir: Path, device: T1Device, local: bool) -> None:
     (job_dir / "t1-job_id.txt").write_text(job_id + "\n", encoding="utf-8", newline="\n")
 
 
-def run_score(*, job_dir: Path, device: T1Device) -> int:
-    """Fetch and fit. Raw counts reach the disk first, so a failed fit can be repeated."""
+def run_score(*, job_dir: Path, device: T1Device, sealed_dir: Path | None = None) -> int:
+    """Fetch and fit. Raw counts reach the disk first, so a failed fit can be repeated.
+
+    Sealing (amendment 27): the counts and the fit go to ``sealed_dir / <day>``; the jobs folder
+    gets only ``t1-operations.json``: that the check ran and each fit's quality, no value.
+    """
     if not (job_dir / "t1-job_id.txt").exists():
         raise RefusedError(f"{job_dir} holds no submitted check")
     job_id = (job_dir / "t1-job_id.txt").read_text(encoding="utf-8").strip()
@@ -198,7 +202,9 @@ def run_score(*, job_dir: Path, device: T1Device) -> int:
     for circuit, counts in zip(circuits, fetched.counts, strict=True):
         if sum(counts.values()) != expected:
             raise ValueError(f"{circuit.name}: {sum(counts.values())} shots, not {expected}")
-    write_json_lf(job_dir / "t1-results.json", {"job_id": job_id, "counts": fetched.counts})
+    out = job_dir if sealed_dir is None else sealed_dir / job_dir.name
+    out.mkdir(parents=True, exist_ok=True)
+    write_json_lf(out / "t1-results.json", {"job_id": job_id, "counts": fetched.counts})
     write_json_lf(job_dir / "t1-metrics.json", fetched.metrics)
 
     delays = {int(q): [float(d) for d in v] for q, v in sealed["delays_s"].items()}
@@ -214,8 +220,21 @@ def run_score(*, job_dir: Path, device: T1Device) -> int:
         }
         for q in sealed["qubits"]
     ]
+    qualities: dict[str, int] = {}
+    for fit in fits.values():
+        qualities[str(fit["quality"])] = qualities.get(str(fit["quality"]), 0) + 1
     write_json_lf(
-        job_dir / "t1-check.json",
+        job_dir / "t1-operations.json",
+        {
+            "status": "fitted",
+            "job_id": job_id,
+            "qubits": len(fits),
+            "fit_quality": qualities,
+            "quantum_seconds": fetched.metrics.get("usage", {}).get("quantum_seconds"),
+        },
+    )
+    write_json_lf(
+        out / "t1-check.json",
         {
             "job_id": job_id,
             "job_number": sealed["job_number"],
@@ -247,6 +266,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     submit.add_argument("--frozen-at", default=None)
     submit.add_argument("--prereg", type=Path, default=None)
     score = modes.add_parser("score", help="fetch the check's results and fit them")
+    score.add_argument("--sealed-dir", type=Path, required=True)
     for mode in (submit, score):
         mode.add_argument("--job-dir", type=Path, required=True)
         mode.add_argument("--repo", type=Path, default=Path("."))
@@ -259,6 +279,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.error("--local-live needs --local-execute-at")
 
     try:
+        if args.mode == "score":
+            # Before any network: a sealed folder inside the jobs folder would be committed.
+            sealed, jobs = args.sealed_dir.resolve(), args.job_dir.parent.resolve()
+            if sealed == jobs or sealed.is_relative_to(jobs):
+                raise RefusedError(
+                    f"the sealed folder {args.sealed_dir} is inside {args.job_dir.parent}"
+                )
         if args.mode == "submit" and not local:
             # Before any network and before the token is read.
             submission = _read_json(args.job_dir / "submission.json")
@@ -279,7 +306,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             run_submit(job_dir=args.job_dir, device=device, local=local)
             print(f"check submitted: {args.job_dir}")
             return 0
-        return run_score(job_dir=args.job_dir, device=device)
+        return run_score(job_dir=args.job_dir, device=device, sealed_dir=args.sealed_dir)
     except RefusedError as exc:
         print(f"refused: {exc}", file=sys.stderr)
         return EXIT_REFUSED

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -444,7 +445,9 @@ def test_the_guard_runs_before_the_token_is_read(
 
 def test_a_rehearsal_needs_an_execution_time(tmp_path: Path) -> None:
     with pytest.raises(SystemExit):
-        t1.main(["score", "--job-dir", str(tmp_path), "--local-live", "x.json"])
+        t1.main(
+            ["score", "--job-dir", str(tmp_path), "--sealed-dir", "s", "--local-live", "x.json"]
+        )
 
 
 def test_the_token_reaches_no_file_the_check_writes(
@@ -467,10 +470,13 @@ def test_the_token_reaches_no_file_the_check_writes(
     monkeypatch.setattr(t1, "check_frozen", lambda *args: None)
     monkeypatch.setattr(t1, "ibm_device", device_from)
     assert t1.main(["submit", "--job-dir", str(job_dir), "--env-file", str(env)]) == 0
-    assert t1.main(["score", "--job-dir", str(job_dir), "--env-file", str(env)]) == 0
+    sealed = tmp_path / "sealed"
+    score = ["score", "--job-dir", str(job_dir), "--sealed-dir", str(sealed)]
+    assert t1.main([*score, "--env-file", str(env)]) == 0
     assert seen == [FAKE_TOKEN, FAKE_TOKEN]
     written = [p for p in job_dir.iterdir() if p.is_file()]
-    assert len(written) >= 6
+    written += [p for p in (sealed / job_dir.name).iterdir() if p.is_file()]
+    assert len(written) >= 7
     assert not [p.name for p in written if FAKE_TOKEN.encode() in p.read_bytes()]
 
 
@@ -592,3 +598,93 @@ def test_each_fit_recovers_its_own_qubits_t1_through_the_whole_path(
         assert abs(row["t1_s"] - built) <= 4.0 * row["stderr_s"], row
         assert row["relative_se"] < 0.15, row
     assert out["qiskit_experiments"] == "0.14.2"
+
+
+# --- sealing (amendment 27, criterion 23) -----------------------------------------------------
+
+PLANTED_ONES = 677
+PLANTED_T1 = {0: 0.000123456789, 1: 0.000246913578, 2: 0.000370370367}
+
+
+class PlantedCounts(StubDevice):
+    def fetch(self, job_id: str, circuits: Sequence[QuantumCircuit]) -> hs.Fetched:
+        fetched = super().fetch(job_id, circuits)
+        counts = [{"0": self.shots_returned - PLANTED_ONES, "1": PLANTED_ONES} for _ in circuits]
+        return hs.Fetched(counts=counts, metrics=fetched.metrics, inputs=fetched.inputs)
+
+
+def test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder(
+    tmp_path: Path,
+    live_doc: dict[str, Any],
+    stub_library: list[Mapping[int, Sequence[float]]],
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Criterion 23 for the check: counts and every fitted number go to the sealed folder only."""
+
+    def fit(*args: Any) -> dict[int, dict[str, Any]]:
+        del args
+        return {
+            q: {
+                "t1_s": t,
+                "stderr_s": t / 37.0,
+                "relative_se": 1.0 / 37.0 + q * 1e-9,
+                "reduced_chi_squared": 1.0 + 0.0123456 * (q + 1),
+                "quality": "good",
+            }
+            for q, t in PLANTED_T1.items()
+        }
+
+    monkeypatch.setattr(t1, "fit_t1", fit)
+    jobs = tmp_path / "jobs"
+    jobs.mkdir()
+    job_dir = _job_folder(jobs)
+    device = PlantedCounts(live_doc)
+    _submit(job_dir, device)
+    sealed = tmp_path / "sealed"
+    capsys.readouterr()
+    assert t1.run_score(job_dir=job_dir, device=device, sealed_dir=sealed) == 0
+    printed = capsys.readouterr().out.encode()
+
+    day = sealed / job_dir.name
+    assert sorted(p.name for p in day.iterdir()) == ["t1-check.json", "t1-results.json"]
+    values = [v for fitted in fit().values() for k, v in fitted.items() if k != "quality"]
+    needles = {repr(v).encode() for v in values} | {str(PLANTED_ONES).encode()}
+    check = json.loads((day / "t1-check.json").read_text(encoding="utf-8"))
+    needles.add(repr(check["median_relative_se"]).encode())
+    in_sealed = b"".join(p.read_bytes() for p in day.iterdir())
+
+    def holds(data: bytes, needle: bytes) -> bool:
+        return re.search(rb"(?<![\w.])" + re.escape(needle) + rb"(?![\w])", data) is not None
+
+    assert all(holds(in_sealed, n) for n in needles), "a needle the sealed day does not hold"
+    files = [p for p in jobs.rglob("*") if p.is_file()]
+    assert len(files) >= 5
+    assert [(p.name, n) for p in files for n in needles if holds(p.read_bytes(), n)] == []
+    assert [n for n in needles if holds(printed, n)] == []
+    operations = json.loads((job_dir / "t1-operations.json").read_text(encoding="utf-8"))
+    assert operations == {
+        "status": "fitted",
+        "job_id": operations["job_id"],
+        "qubits": 3,
+        "fit_quality": {"good": 3},
+        "quantum_seconds": 6.5,
+    }
+
+
+def test_the_check_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    jobs = tmp_path / "jobs"
+    job_dir = jobs / "2026-11-10"
+    job_dir.mkdir(parents=True)
+
+    def no_network(*args: Any) -> Any:
+        raise AssertionError("the network was reached")
+
+    monkeypatch.setattr(t1, "ibm_device", no_network)
+    for inside in (jobs, jobs / "sealed", job_dir / "sealed"):
+        argv = ["score", "--job-dir", str(job_dir), "--sealed-dir", str(inside)]
+        assert t1.main(argv) == hs.EXIT_REFUSED
+        assert "refused" in capsys.readouterr().err
+    assert not (jobs / "sealed").exists()

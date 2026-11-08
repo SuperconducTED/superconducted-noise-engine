@@ -69,6 +69,7 @@ def _morning(tmp_path: Path, **changes: Any) -> daily.Morning:
         "env_file": tmp_path / "clone" / ".env",
         "python": "main-python",
         "t1_python": "t1-python",
+        "sealed_dir": tmp_path / "sealed",
     }
     values.update(changes)
     return daily.Morning(**values)
@@ -126,7 +127,7 @@ def test_a_morning_submits_first_so_the_capture_stays_on_time(tmp_path: Path) ->
 
 def test_every_earlier_day_with_no_outcome_is_scored_oldest_first(tmp_path: Path) -> None:
     waiting_one = _submitted(tmp_path, 1, "job_id.txt")
-    _submitted(tmp_path, 2, "job_id.txt", "arm-a.tsv")
+    _submitted(tmp_path, 2, "job_id.txt", "operations.json")
     _submitted(tmp_path, 3, "job_id.txt", "failed.json")
     _submitted(tmp_path, 4, "missed.json")
     waiting_five = _submitted(tmp_path, 5, "job_id.txt")
@@ -152,8 +153,8 @@ def test_only_day_folders_are_scored(tmp_path: Path) -> None:
 
 
 def test_the_check_is_scored_on_a_later_morning(tmp_path: Path) -> None:
-    folder = _submitted(tmp_path, 1, "job_id.txt", "arm-a.tsv", "t1-job_id.txt")
-    _submitted(tmp_path, 2, "t1-job_id.txt", "t1-check.json")
+    folder = _submitted(tmp_path, 1, "job_id.txt", "operations.json", "t1-job_id.txt")
+    _submitted(tmp_path, 2, "t1-job_id.txt", "t1-operations.json")
     _submitted(tmp_path, 3, "t1-job_id.txt", "t1-failed.json")
     runner = Runner()
     _run(_morning(tmp_path), 5, runner)
@@ -170,11 +171,54 @@ def test_a_check_submitted_today_is_not_scored_today(tmp_path: Path) -> None:
     assert "score" not in runner.names
 
 
+def _sealed_scores(tmp_path: Path) -> Path:
+    day = tmp_path / "sealed" / FIRST.isoformat()
+    day.mkdir(parents=True)
+    (day / "arm-a.tsv").write_text("scores", encoding="utf-8")
+    (tmp_path / "sealed" / "report.json").write_text("{}", encoding="utf-8")
+    return tmp_path / "sealed"
+
+
 def test_day_fifteen_scores_and_reports_but_submits_nothing(tmp_path: Path) -> None:
     _submitted(tmp_path, 14, "job_id.txt", "t1-job_id.txt")
+    _sealed_scores(tmp_path)
     runner = Runner()
     assert _run(_morning(tmp_path), 15, runner) == 0
     assert runner.names == ["score", "t1 score", "report"]
+
+
+def test_day_fifteen_unseals_after_the_report_and_before_the_commit(tmp_path: Path) -> None:
+    """Amendment 27: the scores join the data branch only once the run is over."""
+    _submitted(tmp_path, 14, "job_id.txt", "t1-job_id.txt")
+    _sealed_scores(tmp_path)
+    runner = Runner()
+    assert _run(_morning(tmp_path, commit_data=True), 15, runner) == 0
+    assert runner.names == ["score", "t1 score", "report", "git add", "git commit"]
+    written = json.loads((tmp_path / "jobs" / "routine-2026-11-24.json").read_text("utf-8"))
+    assert [s["name"] for s in written["steps"]][-2:] == ["report", "unseal"]
+    unsealed = tmp_path / "jobs" / "sealed"
+    assert (unsealed / FIRST.isoformat() / "arm-a.tsv").read_text("utf-8") == "scores"
+    assert (unsealed / "report.json").exists()
+
+
+@pytest.mark.parametrize("day", [1, 2, 7, 14])
+def test_no_day_before_fifteen_unseals(tmp_path: Path, day: int) -> None:
+    _sealed_scores(tmp_path)
+    runner = Runner()
+    _run(_morning(tmp_path, commit_data=True), day, runner)
+    assert not (tmp_path / "jobs" / "sealed").exists()
+    written = json.loads(
+        (
+            tmp_path / "jobs" / f"routine-{(FIRST + timedelta(days=day - 1)).isoformat()}.json"
+        ).read_text("utf-8")
+    )
+    assert "unseal" not in [s["name"] for s in written["steps"]]
+
+
+def test_day_fifteen_without_a_sealed_folder_is_not_a_clean_morning(tmp_path: Path) -> None:
+    _submitted(tmp_path, 14, "job_id.txt", "t1-job_id.txt")
+    assert _run(_morning(tmp_path), 15, Runner()) == 1
+    assert not (tmp_path / "jobs" / "sealed").exists()
 
 
 @pytest.mark.parametrize("day", [0, -3, 16, 40])
@@ -405,6 +449,8 @@ def _argv(tmp_path: Path, *extra: str) -> list[str]:
         str(tmp_path / "controls.json"),
         "--t1-python",
         "t1-python",
+        "--sealed-dir",
+        str(tmp_path / "sealed"),
         *extra,
     ]
 
@@ -442,6 +488,19 @@ def test_a_real_morning_needs_the_frozen_commit(tmp_path: Path) -> None:
 def test_a_partial_rehearsal_is_refused(tmp_path: Path) -> None:
     with pytest.raises(SystemExit):
         daily.main(_argv(tmp_path, "--at", "2026-11-10T03:45:00+00:00"))
+
+
+@pytest.mark.parametrize("inside", ["jobs", "jobs/sealed", "clone", "clone/out/sealed"])
+def test_a_sealed_folder_inside_the_jobs_folder_or_the_clone_is_refused(
+    tmp_path: Path, inside: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ran: list[Any] = []
+    monkeypatch.setattr(daily, "run_morning", lambda *a, **k: ran.append(a) or 0)
+    argv = _argv(tmp_path, "--frozen-at", "f" * 40, "--prereg", "p.md")
+    argv[argv.index("--sealed-dir") + 1] = str(tmp_path / inside)
+    with pytest.raises(SystemExit):
+        daily.main([*argv, "--repo", str(tmp_path / "clone")])
+    assert ran == []
 
 
 def test_pushing_needs_committing(tmp_path: Path) -> None:

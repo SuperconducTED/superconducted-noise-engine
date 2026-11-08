@@ -10,6 +10,7 @@ from __future__ import annotations
 import copy
 import json
 import math
+import re
 import subprocess
 from collections.abc import Iterable, Mapping, Sequence
 from datetime import UTC, date, datetime, timedelta
@@ -859,6 +860,136 @@ def test_score_adds_the_control_from_the_archive_and_scores_both_arms(
     back = json.loads((job_dir / "inputs-read-back.json").read_text(encoding="utf-8"))
     assert back["options"]["execution"]["rep_delay"] == hs.REP_DELAY_S
     assert (job_dir / "properties-at-execution.json").exists()
+
+
+# --- sealing (amendment 27, criterion 23) -----------------------------------------------------
+
+PLANTED_A, PLANTED_B = 1271, 2939
+
+
+class PlantedDevice(ScriptedDevice):
+    """Counts whose ones no other file holds: 1271 of 2048 in Arm A, 2939 of 4096 in Arm B."""
+
+    def fetch(self, job_id: str, circuits: Sequence[QuantumCircuit]) -> hs.Fetched:
+        fetched = super().fetch(job_id, circuits)
+        counts: list[dict[str, int]] = []
+        for circuit in circuits:
+            width = circuit.cregs[0].size
+            arm_a = circuit.metadata["arm"] == "A"
+            shots, ones = (hs.ARM_A_SHOTS, PLANTED_A) if arm_a else (hs.ARM_B_SHOTS, PLANTED_B)
+            counts.append({"0" * width: shots - ones, "1" * width: ones})
+        return hs.Fetched(counts=counts, metrics=fetched.metrics, inputs=fetched.inputs)
+
+
+TRIVIAL = {"0", "1", "0.0", "1.0", "nan", "inf", "-inf", "None", "True", "False"}
+
+
+def _floats(node: Any) -> list[float]:
+    if isinstance(node, bool) or node is None:
+        return []
+    if isinstance(node, float):
+        return [node]
+    if isinstance(node, Mapping):
+        return [x for v in node.values() for x in _floats(v)]
+    if isinstance(node, list):
+        return [x for v in node for x in _floats(v)]
+    return []
+
+
+def _score_needles(day: Path) -> set[bytes]:
+    """Every score-derived value the sealed day holds, as the bytes a leak would carry."""
+    lines = (day / "arm-a.tsv").read_text(encoding="utf-8").splitlines()
+    header = lines[0].split("\t")
+    scored = [
+        i
+        for i, name in enumerate(header)
+        if name in {"ones", "p_hat"} or name.startswith(("abs_err_", "log_score_"))
+    ]
+    needles = {line.split("\t")[i] for line in lines[1:] for i in scored}
+    arm_b = json.loads((day / "arm-b.json").read_text(encoding="utf-8"))
+    needles |= {repr(v) for v in _floats(arm_b["measured"])}
+    summary = json.loads((day / "daily-summary.json").read_text(encoding="utf-8"))
+    needles |= {repr(v) for v in _floats(summary["arm_a"]) + _floats(summary["arm_b"])}
+    return {n.encode() for n in needles - TRIVIAL}
+
+
+def _holds(data: bytes, needle: bytes) -> bool:
+    """``needle`` as a whole number, not inside a longer one: 1271 is not in 0.00012712."""
+    return re.search(rb"(?<![\w.])" + re.escape(needle) + rb"(?![\w])", data) is not None
+
+
+def test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout(
+    tmp_path: Path,
+    controls_file: Path,
+    live_doc: dict[str, Any],
+    archive_docs: list[tuple[str, dict[str, Any]]],
+    props: dict[str, Any],
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Criterion 23: counts, ``p_hat``, errors and Arm B's values go to the sealed folder only."""
+    device = PlantedDevice(live_doc)
+    job_dir = _build(tmp_path, controls_file, device, archive_docs)
+    before = _state_at(props, 41, T_EXECUTE - timedelta(minutes=5))
+    after = _state_at(props, 42, T_EXECUTE + timedelta(minutes=5))
+    later = [*archive_docs, ("snapshots/before.json", before), ("snapshots/after.json", after)]
+    sealed = tmp_path / "sealed"
+    capsys.readouterr()
+    code = hs.run_score(
+        job_dir=job_dir, device=device, archive=lambda: later, now=lambda: AFTER, sealed_dir=sealed
+    )
+    assert code == 0
+    printed = capsys.readouterr().out.encode()
+
+    day = sealed / job_dir.name
+    assert sorted(p.name for p in day.iterdir()) == [
+        "arm-a.tsv",
+        "arm-b.json",
+        "daily-summary.json",
+        "results.json",
+    ]
+    needles = _score_needles(day)
+    assert {b"1271", b"0.6206054688"} <= needles  # the TSV writes ten significant digits
+    in_sealed = b"".join(p.read_bytes() for p in day.iterdir())
+    assert all(_holds(in_sealed, n) for n in needles), "a needle the sealed day does not hold"
+    needles.add(repr(PLANTED_A / hs.ARM_A_SHOTS).encode())  # the full value, as JSON would carry it
+    files = [p for p in (tmp_path / "jobs").rglob("*") if p.is_file()]
+    assert len(files) >= 8
+    leaks = [(p.name, n) for p in files for n in needles if _holds(p.read_bytes(), n)]
+    assert leaks == []
+    assert [n for n in needles if _holds(printed, n)] == []
+
+    operations = json.loads((job_dir / "operations.json").read_text(encoding="utf-8"))
+    assert json.loads(printed) == operations
+    assert operations["status"] == "scored"
+    assert set(operations) == {
+        "status",
+        "job_id",
+        "job_number",
+        "t_s",
+        "t_execute",
+        "queue_seconds",
+        "quantum_seconds",
+        "rows",
+    }
+    assert hs._day_status(job_dir) == "scored"
+
+
+def test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    jobs = tmp_path / "jobs"
+    job_dir = jobs / "2026-11-10"
+    job_dir.mkdir(parents=True)
+
+    def no_network(*args: Any) -> Any:
+        raise AssertionError("the network was reached")
+
+    monkeypatch.setattr(hs, "ibm_device", no_network)
+    for inside in (jobs, jobs / "sealed", job_dir / "sealed"):
+        argv = ["score", "--job-dir", str(job_dir), "--sealed-dir", str(inside)]
+        assert hs.main(argv) == hs.EXIT_REFUSED
+        assert "refused" in capsys.readouterr().err
+    assert not (jobs / "sealed").exists()
 
 
 def test_job_one_scores_arm_a_only(
@@ -1744,26 +1875,49 @@ def test_the_arm_b_scores_of_a_job_folder_reach_the_report(tmp_path: Path) -> No
     assert _report(tmp_path, 1)["arm_b"]["jobs"] == 1
 
 
-def test_report_command_writes_the_file_and_marks_it_interim(tmp_path: Path) -> None:
-    _scored_day(tmp_path, _day(0), _strong_day(0))
-    code = hs.main(
-        [
-            "report",
-            "--jobs-dir",
-            str(tmp_path),
-            "--first-day",
-            f"{_day(0):%Y-%m-%d}",
-            "--today",
-            f"{_day(1):%Y-%m-%d}",
-        ]
-    )
-    assert code == 0
-    written = json.loads((tmp_path / "report.json").read_text(encoding="utf-8"))
+def _report_argv(jobs: Path, sealed: Path, today: int = 1) -> list[str]:
+    return [
+        "report",
+        "--jobs-dir",
+        str(jobs),
+        "--first-day",
+        f"{_day(0):%Y-%m-%d}",
+        "--today",
+        f"{_day(today):%Y-%m-%d}",
+        "--sealed-dir",
+        str(sealed),
+    ]
+
+
+def test_report_command_writes_the_file_and_marks_it_interim(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    jobs, sealed = tmp_path / "jobs", tmp_path / "sealed"
+    _scored_day(sealed, _day(0), _strong_day(0))
+    (jobs / f"{_day(0):%Y-%m-%d}").mkdir(parents=True)
+    (jobs / f"{_day(0):%Y-%m-%d}" / "operations.json").write_text("{}", encoding="utf-8")
+    assert hs.main(_report_argv(jobs, sealed)) == 0
+    written = json.loads((sealed / "report.json").read_text(encoding="utf-8"))
     assert written["complete"] is False
     assert written["interim_note"]
-    assert b"\r\n" not in (tmp_path / "report.json").read_bytes()
+    assert written["arm_a"]["completed_days"] == 1
+    assert b"\r\n" not in (sealed / "report.json").read_bytes()
+    # Sealed (amendment 27): the jobs folder gets no report, and stdout carries only the path.
+    assert not (jobs / "report.json").exists()
+    assert capsys.readouterr().out == f"report written: {sealed / 'report.json'}\n"
 
 
 def test_report_command_exits_refused_without_a_traceback(tmp_path: Path) -> None:
-    code = hs.main(["report", "--jobs-dir", str(tmp_path / "absent"), "--first-day", "2026-11-10"])
+    code = hs.main(_report_argv(tmp_path / "absent", tmp_path / "sealed"))
     assert code == hs.EXIT_REFUSED
+
+
+@pytest.mark.parametrize("inside", [".", "sealed", "2026-11-10/sealed"])
+def test_report_refuses_a_sealed_folder_inside_the_jobs_folder(
+    tmp_path: Path, inside: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    jobs = tmp_path / "jobs"
+    _scored_day(jobs, _day(0), _strong_day(0))
+    assert hs.main(_report_argv(jobs, jobs / inside)) == hs.EXIT_REFUSED
+    assert not list(jobs.rglob("report.json"))
+    assert "refused" in capsys.readouterr().err

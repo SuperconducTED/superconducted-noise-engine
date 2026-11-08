@@ -1,7 +1,8 @@
 """One morning of the #125 run, fired by the scheduled task: submit, score earlier days, report.
 
     python scripts/hardware_daily.py --first-day 2026-MM-DD --jobs-dir <folder outside the clone> \\
-        --controls <controls.json> --frozen-at <sha> --prereg <path> --t1-python <interpreter>
+        --controls <controls.json> --frozen-at <sha> --prereg <path> --t1-python <interpreter> \\
+        --sealed-dir <folder outside the jobs folder and the clone>
 
 **Order.** ``build`` runs first because its capture instant is the day's ``t_s``, and ``score``
 walks the archive for minutes. The ``T1`` check of design section 6 follows on the first and
@@ -19,6 +20,11 @@ thread.
 only scores and reports, and from day 16 on the routine does nothing, so a task left registered
 cannot extend the run.
 
+**Sealed.** Scores, raw counts and ``T1`` fits go to ``--sealed-dir``, outside the jobs folder (the
+data branch's worktree) and outside the clone, so nothing a morning commits or logs carries one
+(amendment 27). The jobs folder gets each day's ``operations.json``: that the job ran, when, and
+how many rows it scored. Day 15 copies the sealed folder into ``jobs/sealed`` before the commit.
+
 The token stays in the ``.env`` the two scripts read: this one only passes on the file's path.
 """
 
@@ -30,6 +36,7 @@ import ctypes
 import json
 import os
 import re
+import shutil
 import signal
 import subprocess
 import sys
@@ -97,6 +104,9 @@ class Morning:
     env_file: Path
     python: str
     t1_python: str
+    # Amendment 27: scores, counts and fits, outside the jobs folder and the clone; the jobs
+    # folder is the data branch's worktree, and on day 15 this folder is copied into it.
+    sealed_dir: Path
     commit_data: bool = False
     push_data: bool = False
     rehearsal: Rehearsal | None = None
@@ -163,7 +173,7 @@ def _earlier_days(jobs_dir: Path, today: date) -> list[Path]:
 def _awaits_score(job_dir: Path) -> bool:
     return (
         (job_dir / "job_id.txt").exists()
-        and not (job_dir / "arm-a.tsv").exists()
+        and not (job_dir / "operations.json").exists()
         and not (job_dir / "failed.json").exists()
     )
 
@@ -171,7 +181,7 @@ def _awaits_score(job_dir: Path) -> bool:
 def _check_awaits_score(job_dir: Path) -> bool:
     return (
         (job_dir / "t1-job_id.txt").exists()
-        and not (job_dir / "t1-check.json").exists()
+        and not (job_dir / "t1-operations.json").exists()
         and not (job_dir / "t1-failed.json").exists()
     )
 
@@ -227,6 +237,14 @@ def _wait_for_window(
     wait = (opens - current).total_seconds()
     if 0.0 < wait <= limit_s:
         sleep(wait)
+
+
+def unseal(sealed_dir: Path, jobs_dir: Path) -> int:
+    """Copy the sealed folder into ``jobs_dir / sealed``; 0 when done, 1 when there is nothing."""
+    if not sealed_dir.is_dir():
+        return 1
+    shutil.copytree(sealed_dir, jobs_dir / "sealed", dirs_exist_ok=True)
+    return 0
 
 
 def run_morning(
@@ -296,6 +314,8 @@ def run_morning(
                 "score",
                 "--job-dir",
                 str(job_dir),
+                "--sealed-dir",
+                str(morning.sealed_dir),
                 *_shared_flags(morning),
                 *_rehearsal_flags(morning),
             ],
@@ -309,6 +329,8 @@ def run_morning(
                 "score",
                 "--job-dir",
                 str(job_dir),
+                "--sealed-dir",
+                str(morning.sealed_dir),
                 *_shared_flags(morning),
                 *_t1_rehearsal_flags(morning),
             ],
@@ -325,9 +347,14 @@ def run_morning(
             morning.first_day.isoformat(),
             "--today",
             today.isoformat(),
+            "--sealed-dir",
+            str(morning.sealed_dir),
         ],
         REPORT_LIMIT_S,
     )
+    if number == N_JOBS + 1:
+        # Day 15 (amendment 27): the run is over, so the sealed folder joins the data branch.
+        steps.append(("unseal", unseal(morning.sealed_dir, morning.jobs_dir)))
     status = {
         "day": today.isoformat(),
         "job_number": number,
@@ -371,6 +398,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--repo", type=Path, default=Path("."))
     parser.add_argument("--env-file", type=Path, default=Path(".env"))
     parser.add_argument("--t1-python", required=True)
+    parser.add_argument("--sealed-dir", type=Path, required=True)
     parser.add_argument("--commit-data", action="store_true")
     parser.add_argument("--push-data", action="store_true")
     parser.add_argument("--local-live", type=Path, default=None, help="rehearsal")
@@ -389,6 +417,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.error("a real morning needs --frozen-at and --prereg")
     if args.push_data and not args.commit_data:
         parser.error("--push-data needs --commit-data")
+    sealed = args.sealed_dir.resolve()
+    for folder in (args.jobs_dir, args.repo):
+        if sealed == folder.resolve() or sealed.is_relative_to(folder.resolve()):
+            parser.error(f"--sealed-dir must be outside {folder}: a commit there would publish it")
 
     morning = Morning(
         first_day=args.first_day,
@@ -400,6 +432,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         env_file=args.env_file,
         python=sys.executable,
         t1_python=args.t1_python,
+        sealed_dir=args.sealed_dir,
         commit_data=args.commit_data,
         push_data=args.push_data,
         rehearsal=rehearsal,
