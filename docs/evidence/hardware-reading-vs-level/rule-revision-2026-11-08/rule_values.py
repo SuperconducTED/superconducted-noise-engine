@@ -38,7 +38,7 @@ N_ARM_B = 13
 ARM_B_BATCHES = [np.asarray(b) for b in np.array_split(np.arange(N_ARM_B), 4)]
 N_LAYOUTS = 6
 # One-sided 95% points of Student t with 2 and 3 degrees of freedom.
-T95 = {2: 2.919985580355516, 3: 2.353363434801823}
+T95 = {2: 2.9199855803537242, 3: 2.3533634348018233}
 KS_A = (1, 2, 3, 4)
 KS_B = (1, 2, 3)
 PLACEMENTS = ("random", "consecutive")

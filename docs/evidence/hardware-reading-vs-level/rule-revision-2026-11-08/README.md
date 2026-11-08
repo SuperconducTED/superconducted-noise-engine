@@ -60,7 +60,7 @@ value is the mean of `Delta`; `t` as above; Arm B passes when `t > t_{0.95, q - 
 - `V2`: empty batches are dropped; with `q' >= 3` non-empty batches, `t` uses `q'` batches and `q' - 1` degrees of freedom;
   with `q' < 3` the condition is inconclusive.
 
-Critical values: `t_{0.95, 2} = 2.919985580355516`, `t_{0.95, 3} = 2.353363434801823`, checked against SciPy when it is installed.
+Critical values: `t_{0.95, 2} = 2.9199855803537242`, `t_{0.95, 3} = 2.3533634348018233`, checked against SciPy when it is installed.
 
 **Block 3, as the scorer computes it.** PR #140's `calendar_block_bootstrap` (at `2aea1e18`): a calendar axis of the declared
 14 days with empty days kept, `ceil(14 / 3) = 5` circular blocks of 3 days, all 15 drawn days kept (not cut to 14),
