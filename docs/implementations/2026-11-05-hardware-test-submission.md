@@ -573,3 +573,13 @@ final commit holds everything. `hardware_schedule.ps1`'s description stops calli
 | 24 | Day 15 copies the sealed folder into the jobs folder, and only then. |
 | 25 | Every new line mutation-checked, each mutant asserting its pattern was found. |
 | 26 | Gates clean on the exact pins; then criteria 10 and 11 re-run once, the rehearsal's checks updated for the sealed folder. |
+
+**Stage 2, phases 2a and 2b done (2026-11-08).** `21e025d5` adds the statistics helpers with
+`tests/test_hardware_report_rule.py` (each value checked against a direct computation); `c083377b` rewrites `run_report`
+and `_arm_b_report` to decide by amendments 25 to 29 and report A4 and `c`, `s_res` as amendments 24 and 30 say, and turns
+the tests that pinned the old rule into tests of the new one. Criteria 17 to 22 hold on the laptop; 184 tests pass across the
+three hardware test files; `mypy --strict` is clean; `scripts/hardware_reading_vs_level.py` is untouched. Two points the
+text left open were settled in code and written back to PR #135 as amendment 36: shortfalls apply per arm (too few Arm B
+jobs leaves S1 readable), and an inconclusive Arm B adds nothing. The definitions the code pins: `D` is `level`'s absolute
+error minus the other's; a day's batch index is its offset from the declared first day; Arm B job `j` is batch item `j - 2`;
+the no-information band moves each row's band by `level_o / level_q` and uses the row's own `level` readout.
