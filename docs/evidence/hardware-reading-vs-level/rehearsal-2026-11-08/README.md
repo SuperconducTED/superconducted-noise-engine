@@ -5,7 +5,8 @@ built from the same reading the rehearsal compares against, so `level` loses by 
 reaching its answers, nothing about which predictor is right on hardware. Laptop, provisional.
 
 Record: `docs/implementations/2026-11-05-hardware-test-submission.md`, "Stage 2, phase 2d". Both runs are at
-`55f05ea0`, the commit that holds these scripts, from the full clone.
+`55f05ea0`, from the full clone; the dry run and rehearsal scripts are in that commit, and the checker's second
+version, which produced `check.out.txt`, is in the commit after it (`dce7414f`).
 
 | Criterion | Result | Evidence |
 | --- | --- | --- |
