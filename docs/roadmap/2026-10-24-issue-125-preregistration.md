@@ -47,6 +47,17 @@ draft stays unfrozen until the rest of section 6 is done.
 | Design §6, `rep_delay`, `init_qubits` | the `T1` characterisation on the first and last jobs, its environment and version, and the two submission options are step 1d's (the submission script), not this document's | section 3.7 | **amendment 7, 2026-10-28**, decided by the lead |
 | Predictor implementation, the commit | `scripts/hardware_test_predictors.py` at `5c98f264dee8292e4b07de4e9074e833c487d9cb`, PR #132's merge commit | PR #132; section 3.10 | **amendment 14, 2026-11-05**; gives amendment 13's row its commit and corrects its "unchanged" |
 | Controls file | `--mode controls` writes `requested_controls` and refuses to freeze fewer controls than requested; `load_controls` refuses a file without it, with a different number of controls, or with a duplicate or negative qubit; `--mode submission` refuses a control outside the pinned archive's qubit range | PR #132 (`3ed0728d`); section 3.10 | **amendment 15, 2026-11-05** |
+| `rep_delay`, `init_qubits`, options | 500 µs with `init_qubits` on; dynamical decoupling and twirling off; classified measurement | section 3.11 | **amendments 16, 17, 2026-11-08** |
+| Missed and failed jobs; how the job is fired | missed: not submitted by 04:45 UTC; failed: an IBM error, a cancellation, or still queued the next morning (the queue cap); no re-runs; an empty day. The laptop stays awake on mains every night | section 3.11 | **amendment 18, 2026-11-08** |
+| Length of the run | always 14 days; nothing decided on what the scores show | section 3.11 | **amendment 19, 2026-11-08** |
+| A qubit not operational at `t_s` | absent from the live target's `x`, `sx` or `measure`, or `x` or `sx` `gate_error` at least 1: no rows that morning; the next by the same rule in the discriminating stratum; left out of the control stratum; not eligible for Arm B; the job is not refused | section 3.11 | **amendment 20, 2026-11-08** |
+| `T1` check delays; freeze guard; first day | eight delays evenly from 1 µs to three times `level` `T1`; `**Status**: **Frozen` and `**Controls SHA-256**` with `--frozen-at`; the first day declared in the freezing commit | section 3.11 | **amendments 21 to 23, 2026-11-08** |
+| A4 | a calibration report on `tau > 0` discriminating rows with a same-width no-information band beside it; **not part of S1** | section 3.12 | **amendment 24, 2026-11-08**; replaces A4 in the "Decision rule" row |
+| A1, A2 | batch means over days 1-4, 5-8, 9-11, 12-14, one-sided `t` at 5% with `q - 1` degrees of freedom; empty batches dropped while at least three remain; `sd = 0` fails; block 3 reported as a sensitivity | section 3.12 | **amendment 25, 2026-11-08**; replaces the paired bootstrap 90% interval |
+| Arm B | paired Spearman difference over jobs 2-5, 6-8, 9-11, 12-14, batch means as for A1; "or band" dropped; best-pick, regret and near ties descriptive | section 3.12 | **amendment 26, 2026-11-08**; replaces B1 and B2 |
+| Scores during the run | operations visible daily; scores, the interim report and the `T1` fit sealed until day 15; the data branch gets job ids and operations daily, the rest on day 15 | section 3.12 | **amendment 27, 2026-11-08** |
+| Minimum completed jobs | at least 10 of 14 Arm A days and 10 of 13 Arm B jobs, and three non-empty batches per arm; otherwise inconclusive | section 3.12 | **amendment 28, 2026-11-08** |
+| Readings, descriptive estimates | every outcome combination read in section 3.12's table; `c` and `s_res` registered as descriptive | section 3.12 | **amendments 29, 30, 2026-11-08** |
 
 ## 3. The four proposals
 
@@ -434,6 +445,178 @@ edited.
     refused by today's code. It stays as committed, because it is not frozen and no job uses it. The
     frozen file is written by the pinned code, so it has the field.
 
+### 3.11 Amendments of 2026-11-08, from the submission script (step 1d)
+
+Appended 2026-11-08, before the freezing commit and before any QPU job. The code is PR #142
+(`mert/issue-125-submission`), named at the freezing commit. None of these changes a threshold or a null value; section
+3.12 does that. The rows and sections above are not edited; section 2's foot gains a row for each. Amendment 7 gave
+`rep_delay`, `init_qubits` and the `T1` characterisation to step 1d, and 16, 17 and 21 are what step 1d fixed.
+
+16. **`rep_delay`.** 500 µs with `init_qubits` on, refused at submission if outside the live `rep_delay_range`. The lead's
+    decision, 2026-11-05.
+17. **Options fixed explicitly.** Dynamical decoupling off, gate and measurement twirling off, classified measurement.
+    Decoupling would put pulses inside Arm A's `delay`; twirling would change the circuits the forecasts were computed for.
+    Local testing mode ignores these, so job 1's `job.inputs` is their first real check.
+18. **Missed and failed jobs.** Missed: not submitted by 04:45 UTC, including a build that began in time and finished late.
+    Failed: an IBM error or cancellation, or still queued when the next morning's routine reaches it, when it is cancelled;
+    this is also the queue cap. No re-runs. The day stays on the calendar with no rows (amendment 8). The lead's decision,
+    2026-11-05. **How the job is fired** (the lead's decision, 2026-11-08): the laptop stays awake on mains every night of
+    the run, logged in, lid open, never put to sleep. On 2026-11-08 a deliberate sleep showed that the task's wake timer
+    does not wake this laptop from Modern Standby (the job ran only when the laptop was woken by hand), while an awake,
+    idle laptop fired the routine at 06:45:00 and it completed. A night the laptop sleeps through is therefore a missed day
+    under this amendment, never a late job. The submission script's record (PR #142) holds both attempts; its criterion 8
+    was restated for the awake case after the first attempt, and says so.
+19. **Always 14 days.** The run neither stops early nor extends on what the scores show; an outside reason, such as
+    `ibm_fez` being retired, is not covered by this rule and is reported as what it is. Amendment 27 seals the scores until
+    day 15. What the rule protects, under the batch-means rule of amendment 25 and section 3.8's null model
+    (`docs/evidence/hardware-reading-vs-level/rule-revision-2026-11-08/`, N7, at `1a220220`): looking once at day 14 passes
+    A1 for a predictor with no information 0.047 to 0.080 of the time across the six cases; stopping at the first look that
+    passes gives 0.114 to 0.152 when looks start at day 9.
+20. **A qubit that is not operational at `t_s`.** A qubit is not operational when it is absent from the live target's `x`,
+    `sx` or `measure`, or when its `x` or `sx` `gate_error` in the live properties document is at least 1. It gives no rows
+    that morning, and the job is not refused on this ground:
+
+    - It is not a candidate for the discriminating stratum, so proposals A and B rank the remaining candidates and the next
+      qubit by the same rule takes the place.
+    - A frozen control that is not operational is left out that day. It is not replaced, and the frozen set still stays out
+      of the discriminating stratum. A3 uses the control rows that exist; if the whole run has none, A3 is not met.
+    - It is not eligible for an Arm B triple, as a dead `cz` is not a link (amendment 9).
+    - The qubits affected are logged in that job's `selection.json`.
+
+    **Why this rule.** On every archived capture up to `calibration-data` `fafbc8f5` (2,706 captures over 170 UTC days; N8 at
+    `315ecdc9`), no qubit was ever absent from the target, while `ibm_fez` marked qubits 17, 72 and 149 dead by `x` and `sx`
+    `gate_error` 1 and left them in it: qubit 72 on every capture, 17 on 208 in two spans, 149 on 6. A check of the target
+    alone would have nothing to fire on. What keeps such qubits out today is proposal A's floor, indirectly: a qubit that
+    dies during the run with a fresh `T1` would stay above the floor for about 15 days (about 30 distinct values, floor 15),
+    and frozen controls are never re-checked. The record has no such case, so this closes a gap in the rule rather than a
+    measured rate. A register row for these counts is drafted below; its id is allocated at merge.
+
+    **Why it cannot favour a predictor.** It reads only the device's status at `t_s`, never a result, and treats `level`
+    and `reading` alike. Refusing the job instead would be just as blind, but one death could empty the rest of the run,
+    and amendment 19 forbids extending it. **Not covered:** a qubit that dies after `t_s` while the job is queued keeps
+    its rows. An earlier draft of this amendment refused the job when a selected qubit was missing from the target, and said
+    refusing was the one choice that could not bias the result; the lead replaced it on 2026-11-07, because nothing is frozen
+    yet, so a rule written now is the frozen rule.
+21. **The `T1` check's delays.** The design fixes eight delays and 1,024 shots but not their spacing: evenly from 1 µs to
+    three times the qubit's `level` `T1`.
+22. **The status line the guard reads.** Section 1 says the freezing commit writes "Frozen at `<commit>`", which cannot name
+    its own hash. The guard requires `**Status**: **Frozen` and `**Controls SHA-256**: <hash>`, with the frozen commit passed
+    as `--frozen-at`.
+23. **The first day is declared.** The run's first calendar day is written in the freezing commit and passed to `report`.
+    Job `n` runs on day `n`, whatever happened before it. The report's calendar is the declared 14 days, so a missed first
+    or last day stays on it.
+
+**Drafted register row (id allocated at merge).** "`ibm_fez` reports a dead qubit by leaving it in the target with `x` and
+`sx` `gate_error` 1: on 2,706 captures to `calibration-data` `fafbc8f5`, no qubit absent from the target; qubits 17, 72, 149
+marked dead (72 on every capture). Source: `rule-revision-2026-11-08/dead_qubits.py` at `315ecdc9`, `dead-qubits.json`.
+Laptop, provisional."
+
+### 3.12 Amendments of 2026-11-08, from the statistics review
+
+Appended 2026-11-08, before the freezing commit and before any QPU job. @bengisucvd's statistics review of this branch at
+`51e9f425` (CHANGES_REQUESTED, 2026-11-07, posted on her behalf from her account) led to the lead's decisions of
+2026-11-07 and 2026-11-08, stated in his reply on this PR (comment 6710293101). Her figures are cited by her commit,
+`bengisu/pr135-review-evidence` at `5a7f5c58` (`docs/evidence/pr135-statistics-review/`), whose outputs were re-run in a
+separate folder on 2026-11-07 and matched byte for byte, except `harness_checks` and `astcmp2`, which were not re-run; they
+are seeded, so this rules out an environment problem, not a logic error. The values the new rules owe are in
+`docs/evidence/hardware-reading-vs-level/rule-revision-2026-11-08/` (protocol `315ecdc9`, results `1a220220`). The rows and
+sections above are not edited. **These amendments change the decision rule** and replace the corresponding parts of section
+2's "Decision rule" row and of design §7 as this document restates them; the design file itself is not edited.
+
+24. **A4 becomes a calibration report, not a gate.** Both ends of the band take `level`'s readout (`sources_from_rows`), so
+    at `tau = 0` the band has zero width, and a one-standard-error widening covers that point at most `P(|Z| <= 1) = 0.683`
+    of the time; design §3 calls `tau = 0` "the readout-only control". In her scenario F, where `T1` at execution is the next
+    changed archived reading, A4 as written passed 0.005 of 14-day windows with those rows and 0.475 without them. On
+    `tau > 0` rows the band was well calibrated, so a pass-or-fail threshold at 80% flips a coin in the world where the band is
+    the honest product. **From now:** `tau = 0` rows leave A4; A4 reports, on the discriminating stratum, the band's coverage
+    with and without the one-standard-error widening and its mean width; beside it, the coverage of a same-width band with no
+    information, computed for each row as the share of the other discriminating qubits of that day whose `level`, carrying
+    the row's own band width, would cover the row (a deterministic version of her "another qubit's level", proposed here for
+    her review). The band's calibration is its own registered finding at L2. **S1 is decided on A1, A2 and A3**, and a pass
+    reads "most of the deviation from the level is gone by execution", not "the truth sits near the level".
+25. **A1 and A2 are decided by batch means.** For each discriminating row `D = |p_hat - p_level| - |p_hat - p_other|`, with
+    `other` being `reading` for A1 and `reading_at_execution` for A2; negative favours `level`. The 14 run days form four fixed
+    batches: days 1-4, 5-8, 9-11 and 12-14. A batch's value is the mean of `D` over its discriminating rows (row-pooled, as
+    amendment 8 says). With `q` non-empty batches, `t = mean / (sd / sqrt(q))`, `sd` with `q - 1` degrees of freedom. The
+    condition passes when `t < -t_{0.95, q - 1}` (`t_{0.95, 3} = 2.3533634348018233`, `t_{0.95, 2} = 2.9199855803537242`);
+    `sd = 0` fails. **Empty batches (the lead's decision, 2026-11-08):** a batch with no discriminating row is dropped, and
+    with at least three non-empty batches the test uses them with `q - 1` degrees of freedom; with fewer, the condition is
+    inconclusive. Ibragimov and Müller 2010 (doi:10.1198/jbes.2009.08046) give the construction. **What a predictor with no
+    information scores** (section 3.8's model, N1 and N2 at `1a220220`): 0.050 to 0.052 with independent days and 0.049 to
+    0.081 with correlated days at full calendar; with up to four missed days, random or consecutive, 0.045 to 0.081, never
+    above the full-calendar value of its case by more than Monte Carlo noise, and never inconclusive. Her review measured the
+    real series too: 0.083 and 0.108 in her scenarios N and F with the mean removed, against 0.169 and 0.196 for block 3 at 90%.
+    **What it costs** (her `a1_a3_joint`, full calendar): S1 passes 0.472 at `a = 0.6`, against 0.660 for block 3 at 90%,
+    and 0.976 in F. The block 3 bootstrap stays as a reported sensitivity, not a decision.
+26. **Arm B is decided by a paired Spearman difference.** For each Arm B job, `Delta = rho_level - rho_reading`, each
+    predictor's Spearman correlation with the measured fidelity over the six layouts; positive favours `level`. The 13 Arm B
+    jobs form batches of jobs 2-5, 6-8, 9-11 and 12-14, which are not Arm A's day batches. Batch means and the empty-batch
+    rule as in amendment 25; the condition passes when `t > t_{0.95, q - 1}`; `sd = 0` fails, so identical rankings
+    (null (ii)) fail by definition. "Or band" is dropped: the band's midpoint and `level` picked the same top layout 0.992 of
+    the time in her review. Best-pick, regret and the number of near ties (a best-to-second gap under two shot standard
+    deviations) are descriptive. The band is reported in Arm B with its coverage (amendment 4). **No information:** 0.0505
+    under null (i) (N4 at `1a220220`), 0.047 under her realistic null; 0.047 to 0.052 with up to three missed jobs. **Cost:**
+    0.709 in her scenario F, against 0.936 for the rule as written, which a predictor with no information passed about 0.42
+    of the time.
+27. **Operations visible, scores sealed until day 15** (the lead's decision, 2026-11-07, partly reversing his 2026-11-05
+    "visible every day"). Each morning shows job status, QPU seconds, queue delay, row counts, and whether the `T1` check ran
+    and its fit converged. The scores, the interim report and the `T1` fit's values are written to a sealed folder that is
+    not opened until day 15. The data branch receives, daily, only job ids and that operational summary; raw results, scores
+    and the `T1` fit are committed on day 15 (the lead's decision, 2026-11-08), so the team cannot read scores early either.
+    Gate L1 reads job 1's QPU cost from the operational summary. Amendment 19 stands.
+28. **Minimum completed jobs** (the lead's decision, 2026-11-08). The run counts as a test only with at least 10 of the 14
+    Arm A days and at least 10 of the 13 Arm B jobs completed, and at least three non-empty batches in each arm; otherwise the
+    result is inconclusive and nothing is read. This is exactly the measured range (N2 to N4 at `1a220220`: up to four missed
+    days, up to three missed jobs).
+29. **The section 7 reading of every outcome.** S1 is read from A1, A2, A3 and the execution gap; Arm B and A4 add to the
+    reading but do not change S1:
+
+    | Outcome | Reading |
+    | --- | --- |
+    | Fewer completed jobs than amendment 28 asks | Inconclusive: nothing is read. |
+    | A1, A2 and A3 pass | S1 passes: `level` beats both readings, and most of the deviation is gone by execution. A4 reports how well the band is calibrated; `c` and `s_res` (amendment 30) say how much of the scatter is physical. |
+    | A1 and A2 pass, A3 fails | S1 not supported: the controls disagree in sign. The discriminating result is reported as specific to the selected qubits, with no claim about the chip. |
+    | `reading_at_execution` at least as good as `level` (execution gap at or below zero) | S1 fails: the scatter is what the device does between readings (design §7). |
+    | A1 passes, A2 fails, execution gap above zero | Staleness: `level` beats the submission-time reading but not the execution-time one (design §7). |
+    | A1 and A2 both fail with point estimates favouring `level` | No claim: the data do not separate the predictors. The estimates are reported, not read. |
+    | Any other combination | Reported as observed, with no S1 reading. |
+    | Arm A as S1 passes and Arm B fails | S1 holds for decay prediction, not for ranking layouts: the engineer's-purpose claim is not made. |
+    | Arm B passes and S1 does not | No claim from Arm B alone. |
+
+    The likeliest non-pass in her scenarios, A1 to A3 passing with the band not covering 80%, is now an S1 pass whose band
+    finding is reported separately.
+30. **`c` and `s_res`, registered descriptive estimates.** From the same rows and no new circuits: per qubit and day, `log T1`
+    is fitted by binomial maximum likelihood from the six `tau > 0` rows with `level`'s readout (her `arm_a_fit.py`: a grid of
+    1,201 values of `log(T1 / level)` from -3 to 3). `c` is the slope through the origin of `log T1_fit - log level` on
+    `d = log reading - log level`, on the discriminating stratum; `s_res` is the robust spread of the residual, the 10th to
+    90th percentile range divided by `2 z_0.9`. Named readings: `c` near 0 and `s_res` near the fit noise is her scenario N;
+    `c` near 1 is S; `s_res` well above the fit noise is physical scatter. In her simulation, `c` over the whole 137-day series is 0.000 in N,
+    0.141 in F and 0.979 in S; the median `s_res` over 14-day windows is 0.013 in N and 0.324 in F. On hardware `s_res` will sit above the simulated fit
+    noise, which has no non-exponential decay or readout-induced transition. They are not part of the decision rule.
+31. **The block length's reason.** Amendment 8 called block length 3 "a judgment, not derived". Her review measured the
+    dependence it guards against on the real selected rows: a lag-one correlation of the daily score difference of 0.33 and
+    0.34 in scenarios F and N, from qubits re-selected when no sweep arrived. Block 3 is now a sensitivity report (amendment
+    25), and this is its reason.
+32. **Section 3.8.1's block 3 values understate the scorer.** `null_values.py` cuts each bootstrap draw to 14 days, while
+    PR #140's `calendar_block_bootstrap` keeps all 15 drawn days. On the same draws (N6 at `1a220220`), the scorer's version
+    passes a predictor with no information 0.006 to 0.011 more often in every case (0.107 against 0.099 with no day effects).
+    The scorer is unchanged and section 3.8.1 is not edited; its block 3 rows should be read with this correction.
+33. **Amendment 14's wording.** Where it says the old logic "can move `level` and `band`", it should read "can move `level`,
+    `band`, the window counts and `log_disagreement`, and so eligibility and the discriminating selection": her review found
+    that on a live document repeating a state older than the window, the old logic changed `level` in 778 of 780 rows,
+    `n_window_distinct` in 438 and `log_disagreement` in 770.
+34. **A bad live document is a missed job.** It stops the run (`LiveDocumentError`, exit 2), while a bad archived document is
+    counted and skipped; on a job day the first is a missed morning under amendment 18.
+35. **A null `configuration` reaches the dry run, not a real morning.** 788 of 2,398 archived files have `configuration` null
+    (backfilled documents, by design), and `archived_backend` raises on them. A real morning's `build` reads the configuration
+    from its own live capture, and nothing on `score`'s path reads it (from reading PR #142's code; not run against IBM). The
+    rehearsal already picks a file with a configuration, and says so.
+
+### 3.13 What this branch still owes before the freezing commit
+
+The code for these amendments belongs on PR #142, not here: amendment 20's is built there; 24 to 30 and 34 are still to build. The lead asks @bengisucvd to read sections 3.11 and 3.12
+before the freezing commit: they are the rule the two of them agree, and her review's proposals are now written in his words.
+
 ## 4. The budget
 
 The lead stated on 2026-10-24 that the QPU budget is covered. The design's usage-page check of
@@ -491,6 +674,20 @@ Appended; the tables above are not edited.
 | Statistics review of the decision rule, the amendments, the bootstrap unit (amendment 8) and the open label-horizon question | Bengisu | requested on this branch's PR, opened 2026-10-28 UTC; no review yet |
 | The controls re-run at the freezing ref (proposal D) | Mert | the frozen run is in the freezing commit; the section 3.9 rehearsal stays a rehearsal |
 | The submission script: `build` and `score` modes, `rep_delay`, `init_qubits`, design §6's `T1` characterisation | Mert | step 1d (amendment 7), not built |
+| The second account for the daily cadence | Mert names it | before job 2 (section 5) |
+
+### 6.3 As of 2026-11-08
+
+Appended; the tables above are not edited.
+
+| Item | Owner | State on 2026-11-08 |
+| --- | --- | --- |
+| The offline half (PR #140) | Mert; Burak reviews and reproduces | review found no code error and holds for his desktop dry run; not merged |
+| The submission script (PR #142) | Mert; Burak reproduces | draft; amendment 20's rule built; amendments 24 to 30 and 34 still to build there; criteria 10 and 11 re-run after that; criterion 8 met for the awake laptop |
+| Amendments 16 to 35 | Mert | sections 3.11 and 3.12; the lead's decisions of 2026-11-07 and 2026-11-08 |
+| Values the new rules owe | Mert | measured: `rule-revision-2026-11-08/` at `1a220220` |
+| Statistics review | Bengisu | done 2026-11-07 (CHANGES_REQUESTED); her reading of sections 3.11 and 3.12 is owed |
+| The controls re-run at the freezing ref (proposal D) | Mert | after the above |
 | The second account for the daily cadence | Mert names it | before job 2 (section 5) |
 
 ## 7. Related
