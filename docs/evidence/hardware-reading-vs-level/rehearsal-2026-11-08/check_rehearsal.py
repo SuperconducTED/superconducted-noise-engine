@@ -22,6 +22,7 @@ Prints each check and its evidence; exit 1 on any failure.
 from __future__ import annotations
 
 import csv
+import functools
 import hashlib
 import json
 import re
@@ -72,8 +73,14 @@ def floats(node: Any) -> list[float]:
     return []
 
 
+@functools.cache
+def _pattern(needle: bytes) -> re.Pattern[bytes]:
+    return re.compile(rb"(?<![\w.])" + re.escape(needle) + rb"(?![\w])")
+
+
 def holds(data: bytes, needle: bytes) -> bool:
-    return re.search(rb"(?<![\w.])" + re.escape(needle) + rb"(?![\w])", data) is not None
+    """``needle`` as a whole number, not inside a longer one: 1271 is not in 0.00012712."""
+    return _pattern(needle).search(data) is not None
 
 
 def git(*args: str) -> str:
@@ -288,30 +295,96 @@ for row in t1_values["qubits"]:
 needles.add(repr(t1_values["median_relative_se"]))
 needles -= TRIVIAL
 encoded = sorted({n.encode() for n in needles})
+# Raw counts as written, every entry of every sealed results file: matched as a set, so a copied
+# results file shows wherever it lands.
+counts: set[tuple[bytes, bytes]] = set()
+for raw in [*SEALED.glob("*/results.json"), *SEALED.glob("*/t1-results.json")]:
+    for circuit in read(raw)["counts"]:
+        counts |= {(bits.encode(), str(n).encode()) for bits, n in circuit.items()}
+COUNT_ENTRY = re.compile(rb'"([01]+)": (\d+)')
+
+
+def found_in(data: bytes) -> list[str]:
+    values = [n.decode() for n in encoded if holds(data, n)]
+    entries = {m for m in COUNT_ENTRY.findall(data) if m in counts}
+    return values + [f'"{b.decode()}": {n.decode()}' for b, n in sorted(entries)]
+
+
 in_sealed = b"".join(p.read_bytes() for p in SEALED.rglob("*") if p.is_file())
 check(
     "every needle is in the sealed folder",
     all(n.startswith(b'"ones"') or holds(in_sealed, n) for n in encoded),
-    f"{len(encoded)} needles",
+    f"{len(encoded)} value needles and {len(counts)} count entries",
 )
 
+# Checker v2 (written after v1's run, whose output is check.out.first.txt): v1 failed on values that
+# are fractions of shots in both a score and the device's readout errors, found only in files a
+# day's build wrote. Such a file cannot hold a score if its bytes are those the build morning
+# committed, because that day's counts are fetched on a later morning. So a hit is excused only in a
+# day's file byte-identical to its build-morning commit; every other hit is a leak.
+commits = git("log", "--reverse", "--format=%H %s").splitlines()
+built = {subject.rsplit(" ", 1)[-1]: sha for sha, subject in (c.split(" ", 1) for c in commits)}
+
+
+def blob(sha: str, name: str) -> bytes | None:
+    run = subprocess.run(["git", "-C", str(JOBS), "show", f"{sha}:{name}"], capture_output=True)
+    return run.stdout if run.returncode == 0 else None
+
+
+def before_counts(name: str, data: bytes) -> bool:
+    """Compared with line endings normalised: ``predictors.tsv`` is written with CRLF, and git's
+    ``core.autocrlf`` stores it with LF, so the blob and the file differ only there."""
+    day = name.split("/", 1)[0]
+    if "/" not in name or day not in built:
+        return False
+    committed = blob(built[day], name)
+    return committed is not None and committed.replace(b"\r\n", b"\n") == data.replace(
+        b"\r\n", b"\n"
+    )
+
+
+# The simulator's store stands in for IBM's servers: it exists only with --local-live, and in a
+# real run the counts stay on the service until score fetches them into the sealed folder.
+store = sorted(p.name for p in (JOBS / "local-jobs").glob("*"))
+check(
+    "local-jobs/ is only the simulator's store, kept apart from the scan",
+    all(re.fullmatch(r"local-[0-9a-f-]+\.json", name) for name in store),
+    f"{len(store)} files",
+)
 outside = [
     p
     for p in JOBS.rglob("*")
-    if p.is_file() and ".git" not in p.parts and "sealed" not in p.relative_to(JOBS).parts
+    if p.is_file()
+    and ".git" not in p.parts
+    and p.relative_to(JOBS).parts[0] not in ("sealed", "local-jobs")
 ]
 outside += [*sorted(OUT.glob("morning-*.log")), OUT / "score-3.log", OUT / "report.log"]
-leaks = [
-    (str(p.relative_to(OUT)), n.decode())
-    for p in outside
-    for n in encoded
-    if holds(p.read_bytes(), n)
-]
+leaks, excused = [], {}
+for p in outside:
+    data = p.read_bytes()
+    found = found_in(data)
+    if not found:
+        continue
+    name = str(p.relative_to(JOBS)).replace("\\", "/") if JOBS in p.parents else p.name
+    if JOBS in p.parents and before_counts(name, data):
+        excused[name] = len(found)
+    else:
+        leaks += [(name, n) for n in found]
 logs = [p.name for p in outside if p.name.startswith("routine-")]
 check(
     "no needle in any file outside the sealed folder, routine logs and stdout included",
     leaks == [],
-    f"{len(outside)} files scanned, {len(logs)} routine logs and records; {leaks[:4]}",
+    f"{len(outside)} files scanned, {len(logs)} routine logs and records; "
+    f"{len(leaks)} hits in {sorted({f for f, _ in leaks})}: {leaks[:3]}",
+)
+print(f"  excused, as written by a build before its counts existed: {excused}")
+check(
+    "every excused file is one a build writes",
+    all(
+        n.rsplit("/", 1)[-1] in {"live-properties.json", "predictors.tsv", "sealed.json"}
+        for n in excused
+    ),
+    sorted(excused),
 )
 for name in ("operations.json",):
     for folder in (day1, day3):
@@ -340,7 +413,6 @@ check(
 )
 
 print("what each morning committed")
-commits = git("log", "--reverse", "--format=%H %s").splitlines()
 print("  commits:", [c.split(" ", 1)[1] for c in commits])
 check("one commit per morning: days 1, 3 and 15", len(commits) == 3, len(commits))
 for line in commits[:-1]:
@@ -350,15 +422,19 @@ for line in commits[:-1]:
         n for n in names if n.rsplit("/", 1)[-1] in SCORED_NAMES or n.startswith("sealed/")
     ]
     check(f"{subject}: no scored file committed", scored_names == [], scored_names[:4])
-    blobs = b"".join(
-        subprocess.run(
-            ["git", "-C", str(JOBS), "show", f"{sha}:{n}"], check=True, capture_output=True
-        ).stdout
-        for n in names
-    )
-    hits = [n.decode() for n in encoded if holds(blobs, n)]
+    hits, kept_apart = [], 0
+    for n in names:
+        if n.startswith("local-jobs/"):
+            kept_apart += 1
+            continue
+        data = blob(sha, n) or b""
+        found = found_in(data)
+        if found and not before_counts(n, data):
+            hits += [(n, x) for x in found]
     check(
-        f"{subject}: no needle in any committed file", hits == [], f"{len(names)} files; {hits[:4]}"
+        f"{subject}: no needle in any committed file",
+        hits == [],
+        f"{len(names)} files, {kept_apart} of the simulator's store kept apart; {hits[:4]}",
     )
 last_sha, last_subject = commits[-1].split(" ", 1)
 names = git("ls-tree", "-r", "--name-only", last_sha).split()

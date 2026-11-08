@@ -1,0 +1,226 @@
+{
+  "complete": true,
+  "interim_note": null,
+  "first_day": "2026-11-02",
+  "last_day": "2026-11-15",
+  "days": [
+    {
+      "date": "2026-11-02",
+      "status": "scored"
+    },
+    {
+      "date": "2026-11-03",
+      "status": "empty"
+    },
+    {
+      "date": "2026-11-04",
+      "status": "scored"
+    },
+    {
+      "date": "2026-11-05",
+      "status": "empty"
+    },
+    {
+      "date": "2026-11-06",
+      "status": "empty"
+    },
+    {
+      "date": "2026-11-07",
+      "status": "empty"
+    },
+    {
+      "date": "2026-11-08",
+      "status": "empty"
+    },
+    {
+      "date": "2026-11-09",
+      "status": "empty"
+    },
+    {
+      "date": "2026-11-10",
+      "status": "empty"
+    },
+    {
+      "date": "2026-11-11",
+      "status": "empty"
+    },
+    {
+      "date": "2026-11-12",
+      "status": "empty"
+    },
+    {
+      "date": "2026-11-13",
+      "status": "empty"
+    },
+    {
+      "date": "2026-11-14",
+      "status": "empty"
+    },
+    {
+      "date": "2026-11-15",
+      "status": "empty"
+    }
+  ],
+  "arm_a": {
+    "rows": {
+      "discriminating": 112,
+      "control": 56
+    },
+    "completed_days": 2,
+    "minimum_days": 10,
+    "mean_abs_error": {
+      "discriminating": {
+        "reading": 0.02590220374261875,
+        "level": 0.17995657397139286,
+        "reading_at_execution": 0.17198784981276785
+      },
+      "control": {
+        "reading": 0.009176882581139285,
+        "level": 0.06857961140555001,
+        "reading_at_execution": 0.05011061013233929
+      }
+    },
+    "A1_level_beats_reading": {
+      "rows": 112,
+      "mean_d": 0.15405437022877408,
+      "batch_means": {
+        "batch_means": [
+          0.15405437022877413,
+          null,
+          null,
+          null
+        ],
+        "batch_rows": [
+          112,
+          0,
+          0,
+          0
+        ],
+        "q": 1,
+        "mean_of_batches": null,
+        "t": null,
+        "critical": null,
+        "sd_zero": false,
+        "inconclusive": true,
+        "passes": false
+      },
+      "passes": false,
+      "inconclusive": true,
+      "block3_sensitivity": {
+        "block_days": 3,
+        "interval": [
+          0.14370565214415357,
+          0.16440308831339465
+        ],
+        "below_zero": false
+      }
+    },
+    "A2_level_beats_reading_at_execution": {
+      "rows": 112,
+      "mean_d": 0.007968724158625,
+      "batch_means": {
+        "batch_means": [
+          0.007968724158625002,
+          null,
+          null,
+          null
+        ],
+        "batch_rows": [
+          112,
+          0,
+          0,
+          0
+        ],
+        "q": 1,
+        "mean_of_batches": null,
+        "t": null,
+        "critical": null,
+        "sd_zero": false,
+        "inconclusive": true,
+        "passes": false
+      },
+      "passes": false,
+      "inconclusive": true,
+      "block3_sensitivity": {
+        "block_days": 3,
+        "interval": [
+          -0.011383369244267857,
+          0.02732081756151786
+        ],
+        "below_zero": false
+      }
+    },
+    "A3_sign_holds_on_controls": false,
+    "A4_band_calibration_report": {
+      "part_of_s1": false,
+      "stratum": "discriminating",
+      "rows": 96,
+      "nominal": 0.8,
+      "coverage": 0.13541666666666666,
+      "coverage_widened": 0.13541666666666666,
+      "mean_width": 0.241338154674375,
+      "no_information_coverage": 0.1264880952380952,
+      "no_information_coverage_widened": 0.14434523809523805
+    },
+    "c_and_s_res": {
+      "c": 0.8949333598536771,
+      "s_res": 0.2254951771215535,
+      "qubit_days": 16
+    }
+  },
+  "arm_b": {
+    "jobs": 1,
+    "completed_jobs": 1,
+    "minimum_jobs": 10,
+    "paired_spearman": {
+      "batch_means": [
+        -0.17142857142857126,
+        null,
+        null,
+        null
+      ],
+      "batch_rows": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "q": 1,
+      "mean_of_batches": null,
+      "t": null,
+      "critical": null,
+      "sd_zero": false,
+      "inconclusive": true,
+      "passes": false
+    },
+    "inconclusive": true,
+    "passes": false,
+    "descriptive": {
+      "mean_spearman": {
+        "reading": 1.0,
+        "level": 0.8285714285714287,
+        "band": 0.7714285714285715
+      },
+      "best_pick_hits": {
+        "reading": 1,
+        "level": 1,
+        "band": 1
+      },
+      "mean_regret": {
+        "reading": 0.0,
+        "level": 0.0,
+        "band": 0.0
+      },
+      "near_ties": 0
+    }
+  },
+  "s1": {
+    "row": "too few completed days",
+    "reading": "Inconclusive: nothing is read."
+  },
+  "arm_b_reading": {
+    "row": "Arm B inconclusive",
+    "reading": "Nothing is added."
+  },
+  "reading": "Inconclusive: nothing is read."
+}

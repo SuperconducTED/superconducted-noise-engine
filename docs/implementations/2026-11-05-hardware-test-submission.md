@@ -615,3 +615,39 @@ this needs a job to run for a day or the archive to stop for a day. The lead may
 
 237 tests pass and 2 skip across the four hardware test files at `950eed50`; ruff, `ruff format`, `check_ids.py` and
 `mypy --strict` are clean on the exact pins; `scripts/hardware_reading_vs_level.py` is identical to `999acee9`.
+
+**Stage 2, phase 2d done (2026-11-09): mutation, gates, the dry run and the sealed rehearsal.** Commits `1e434118`
+(tests for what the first mutation pass found), `47acd745` (the reading texts), `2514b260` and `5bafd1ba` (two more
+tests and the mutation script's fixes), `55f05ea0` (the mutation record and the rehearsal scripts, committed before they
+ran) and the commit that adds this record and the rehearsal's outputs.
+
+| Criterion | Result | Evidence |
+| --- | --- | --- |
+| 17 to 22 | **Hold**, as recorded for phases 2a and 2b; every test kept passing through 2c and 2d. | `tests/test_hardware_report_rule.py`, `tests/test_hardware_submit.py` |
+| 23 | **Holds.** Planted values in the unit tests, and on the real path the rehearsal's scan of every file, log, record, stdout and commit before day 15 (1,288 values and 7,530 raw count entries); `--sealed-dir` inside the jobs folder or the clone is refused before any network by the routine, `score` and the check's `score`; `report`, which takes no clone, refuses one inside the jobs folder, and the routine checks the clone before calling it. | `rehearsal-2026-11-08/check.out.txt`, `check.planted.out.txt` |
+| 24 | **Holds.** Day 15 unseals after the report and before the commit, no earlier day does, a second unseal adds a day, and the rehearsal's day-15 commit holds the sealed folder byte for byte. | Tests; `rehearsal-2026-11-08/check.out.txt` |
+| 25 | **Holds.** 598 mutants of every added line: 294 caught by an assertion, 292 by a crash (224 of them deletions), 12 survive, each equivalent for a stated reason. | `docs/evidence/hardware-reading-vs-level/mutation-2026-11-08/` |
+| 26 | **Holds.** Gates at `5bafd1ba`: ruff, `ruff format --check`, `check_ids.py` and `mypy --strict` on 52 files clean, `pytest tests/` 1,378 passed and 2 skipped in 7 min 37 s. Then criterion 10 (the dry run identical, 8 of 8 files) and criterion 11 (the rehearsal's 66 checks) once each, at `55f05ea0`. | `rehearsal-2026-11-08/` |
+
+What the mutation pass changed in the code, not only in the tests: the report's reading texts were paraphrases of
+amendment 29 (the S1 pass had lost "A4 reports how well the band is calibrated; c and s_res (amendment 30) say how much
+of the scatter is physical", the A3 failure "with no claim about the chip"); `47acd745` makes them the amendment's
+words, Markdown backticks dropped, with a test against the tables as copied from #135 at `ae2f4884`. The row names are
+unchanged. One row, "neither passes", is not in amendment 29's second table; with no row that applies, Arm B adds
+nothing, as amendment 36 says for an inconclusive Arm B.
+
+What the passes showed about the tests themselves: the first no-information fixture gave every row 0.5, so a row read
+against the wrong qubit went unseen; the first pass could not tell an assertion from a crash, because pytest at 80
+columns drops a long summary line's message; and two guard mutants were caught only because a later `git` call
+crashed. Each is fixed and recorded in the mutation folder's README.
+
+The rehearsal's checker was changed once after its first run, and the first output is kept (`check.out.first.txt`):
+values that are fractions of shots appear both in scores and in a build's calibration copy and predictions, so the
+second version excuses a hit only in a file whose bytes are those its build morning committed, before that day's counts
+existed, and a planted-leak run shows it still catches a leak in a log, in `operations.json` and in a changed build
+file. Two observations, neither changed: the rehearsal's simulator keeps its raw counts in `jobs/local-jobs/`, which a
+rehearsal's data commit includes (a real run has no such folder); and `predictors.tsv` is written with CRLF while every
+other build file is LF.
+
+Laptop, provisional: Burak's desktop is the source of truth, and his runbook for #142 is owed after #140 merges. Nothing
+of stage 2 is pushed yet; that, and #142's and #135's stale PR bodies, are stage 3, on the lead's word.
