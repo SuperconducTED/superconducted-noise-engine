@@ -61,6 +61,8 @@ SCORE_TESTS_FIRST = [
     "test_report_command_writes_the_file_and_marks_it_interim",
     "test_report_command_exits_refused_without_a_traceback",
     "test_report_refuses_a_sealed_folder_inside_the_jobs_folder",
+    "test_the_score_command_hands_its_sealed_folder_to_the_scoring",
+    "test_report_makes_a_sealed_folder_that_is_not_there_yet",
     "test_score_adds_the_control_from_the_archive_and_scores_both_arms",
     "test_a_job_with_a_control_left_out_scores_on_the_rest",
     "test_job_one_scores_arm_a_only",

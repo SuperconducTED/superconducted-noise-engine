@@ -226,6 +226,16 @@ def _cond(passes: bool, mean_d: float | None) -> dict[str, Any]:
             },
             "anything else",
         ),
+        (
+            # A mean D of exactly zero is not below zero.
+            {
+                "inconclusive": False,
+                "a1": _cond(False, 0.0),
+                "a2": _cond(False, -0.01),
+                "a3": True,
+            },
+            "anything else",
+        ),
     ],
 )
 def test_every_row_of_the_s1_table_is_reached(kwargs: dict[str, Any], row: str) -> None:
