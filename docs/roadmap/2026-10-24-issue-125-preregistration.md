@@ -483,8 +483,8 @@ Appended 2026-11-08, before the freezing commit and before any QPU job. The code
     - It is not eligible for an Arm B triple, as a dead `cz` is not a link (amendment 9).
     - The qubits affected are logged in that job's `selection.json`.
 
-    **Why this rule.** On every archived capture up to `calibration-data` `fafbc8f5` (2,706 captures over 170 UTC days; N8 at
-    `315ecdc9`), no qubit was ever absent from the target, while `ibm_fez` marked qubits 17, 72 and 149 dead by `x` and `sx`
+    **Why this rule.** On every archived capture up to `calibration-data` `fafbc8f5` (2,706 captures over 170 UTC days; N8, run at
+    `315ecdc9`, output committed at `1a220220`), no qubit was ever absent from the target, while `ibm_fez` marked qubits 17, 72 and 149 dead by `x` and `sx`
     `gate_error` 1 and left them in it: qubit 72 on every capture, 17 on 208 in two spans, 149 on 6. A check of the target
     alone would have nothing to fire on. What keeps such qubits out today is proposal A's floor, indirectly: a qubit that
     dies during the run with a fresh `T1` would stay above the floor for about 15 days (about 30 distinct values, floor 15),
@@ -508,7 +508,7 @@ Appended 2026-11-08, before the freezing commit and before any QPU job. The code
 
 **Drafted register row (id allocated at merge).** "`ibm_fez` reports a dead qubit by leaving it in the target with `x` and
 `sx` `gate_error` 1: on 2,706 captures to `calibration-data` `fafbc8f5`, no qubit absent from the target; qubits 17, 72, 149
-marked dead (72 on every capture). Source: `rule-revision-2026-11-08/dead_qubits.py` at `315ecdc9`, `dead-qubits.json`.
+marked dead (72 on every capture). Source: `rule-revision-2026-11-08/dead_qubits.py`, run at `315ecdc9`; `dead-qubits.json` at `1a220220`.
 Laptop, provisional."
 
 ### 3.12 Amendments of 2026-11-08, from the statistics review
@@ -529,10 +529,13 @@ sections above are not edited. **These amendments change the decision rule** and
     changed archived reading, A4 as written passed 0.005 of 14-day windows with those rows and 0.475 without them. On
     `tau > 0` rows the band was well calibrated, so a pass-or-fail threshold at 80% flips a coin in the world where the band is
     the honest product. **From now:** `tau = 0` rows leave A4; A4 reports, on the discriminating stratum, the band's coverage
-    with and without the one-standard-error widening and its mean width; beside it, the coverage of a same-width band with no
-    information, computed for each row as the share of the other discriminating qubits of that day whose `level`, carrying
-    the row's own band width, would cover the row (a deterministic version of her "another qubit's level", proposed here for
-    her review). The band's calibration is its own registered finding at L2. **S1 is decided on A1, A2 and A3**, and a pass
+    with and without the one-standard-error widening and its mean width; beside it, the coverage of a band with no information,
+    proposed here for her review: for each row, the row's own band is moved in `log T1` by the difference between another
+    discriminating qubit's `log level` and the row's own, so its width and its place relative to `level` are kept, and is
+    turned into `p_1` at the row's own `tau` with the row's own `level` readout; the row's no-information coverage is the
+    share of the other discriminating qubits of that day for which this moved band covers `p_hat`. Her simulation instead
+    centred a band of the same `log T1` width on one random other qubit's `level`, which gave 0.821, 0.653 and 0.270 in her
+    scenarios N, F and S; this version is deterministic and keeps the band's asymmetry. The band's calibration is its own registered finding at L2. **S1 is decided on A1, A2 and A3**, and a pass
     reads "most of the deviation from the level is gone by execution", not "the truth sits near the level".
 25. **A1 and A2 are decided by batch means.** For each discriminating row `D = |p_hat - p_level| - |p_hat - p_other|`, with
     `other` being `reading` for A1 and `reading_at_execution` for A2; negative favours `level`. The 14 run days form four fixed
@@ -556,8 +559,8 @@ sections above are not edited. **These amendments change the decision rule** and
     the time in her review. Best-pick, regret and the number of near ties (a best-to-second gap under two shot standard
     deviations) are descriptive. The band is reported in Arm B with its coverage (amendment 4). **No information:** 0.0505
     under null (i) (N4 at `1a220220`), 0.047 under her realistic null; 0.047 to 0.052 with up to three missed jobs. **Cost:**
-    0.709 in her scenario F, against 0.936 for the rule as written, which a predictor with no information passed about 0.42
-    of the time.
+    0.709 in her scenario F, against 0.937 for the rule as written ("`level` or `band`"), which a predictor with no
+    information passed about 0.42 of the time.
 27. **Operations visible, scores sealed until day 15** (the lead's decision, 2026-11-07, partly reversing his 2026-11-05
     "visible every day"). Each morning shows job status, QPU seconds, queue delay, row counts, and whether the `T1` check ran
     and its fit converged. The scores, the interim report and the `T1` fit's values are written to a sealed folder that is
@@ -568,20 +571,27 @@ sections above are not edited. **These amendments change the decision rule** and
     Arm A days and at least 10 of the 13 Arm B jobs completed, and at least three non-empty batches in each arm; otherwise the
     result is inconclusive and nothing is read. This is exactly the measured range (N2 to N4 at `1a220220`: up to four missed
     days, up to three missed jobs).
-29. **The section 7 reading of every outcome.** S1 is read from A1, A2, A3 and the execution gap; Arm B and A4 add to the
-    reading but do not change S1:
+29. **The section 7 reading of every outcome.** S1 is read from A1, A2, A3 and the sign of A2's mean `D` (amendment 25:
+    negative favours `level`). The rows are read top to bottom, and the first row that applies is the reading:
 
-    | Outcome | Reading |
+    | Outcome | S1 reading |
     | --- | --- |
     | Fewer completed jobs than amendment 28 asks | Inconclusive: nothing is read. |
     | A1, A2 and A3 pass | S1 passes: `level` beats both readings, and most of the deviation is gone by execution. A4 reports how well the band is calibrated; `c` and `s_res` (amendment 30) say how much of the scatter is physical. |
     | A1 and A2 pass, A3 fails | S1 not supported: the controls disagree in sign. The discriminating result is reported as specific to the selected qubits, with no claim about the chip. |
-    | `reading_at_execution` at least as good as `level` (execution gap at or below zero) | S1 fails: the scatter is what the device does between readings (design §7). |
-    | A1 passes, A2 fails, execution gap above zero | Staleness: `level` beats the submission-time reading but not the execution-time one (design §7). |
-    | A1 and A2 both fail with point estimates favouring `level` | No claim: the data do not separate the predictors. The estimates are reported, not read. |
-    | Any other combination | Reported as observed, with no S1 reading. |
-    | Arm A as S1 passes and Arm B fails | S1 holds for decay prediction, not for ranking layouts: the engineer's-purpose claim is not made. |
+    | A2's mean `D` at or above zero | S1 fails: `reading_at_execution` is at least as good as `level`, so the scatter is what the device does between readings (design §7). |
+    | A1 passes, A2 does not | Staleness: `level` beats the submission-time reading but not, by the rule, the execution-time one (design §7). |
+    | A1 and A2 both fail, both mean `D` below zero | No claim: the data do not separate the predictors. The estimates are reported, not read. |
+    | Anything else | Reported as observed, with no S1 reading. |
+
+    Arm B adds to the S1 reading and never changes it:
+
+    | Outcome | Added reading |
+    | --- | --- |
+    | S1 passes and Arm B passes | S1 passes for the engineer's purpose too: `level` ranks layouts better than `reading` (design §7). |
+    | S1 passes and Arm B does not | S1 holds for decay prediction, not for ranking layouts: the engineer's-purpose claim is not made. |
     | Arm B passes and S1 does not | No claim from Arm B alone. |
+    | Arm B inconclusive under amendment 28 | Nothing is added. |
 
     The likeliest non-pass in her scenarios, A1 to A3 passing with the band not covering 80%, is now an S1 pass whose band
     finding is reported separately.
