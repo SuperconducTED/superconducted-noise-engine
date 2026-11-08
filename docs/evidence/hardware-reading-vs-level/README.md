@@ -348,3 +348,9 @@ The guard passed: 2,249 files and 151 events, the event list identical to `recal
   are worst on both counts.
 
 None of this picks the hour; the draft carries it to the lead.
+
+## 8. The rule revision of 2026-11-08
+
+After the statistics review of PR #135, the lead replaced four rules (A4 as a report, batch means for A1 and A2, a paired
+Arm B rule, sealed scores). The values those rules owe, and the dead-qubit counts behind amendment 20, are measured in
+`rule-revision-2026-11-08/`, whose `README.md` is the protocol, committed before its two scripts ran.
