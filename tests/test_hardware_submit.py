@@ -961,6 +961,10 @@ def test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout(
     operations = json.loads((job_dir / "operations.json").read_text(encoding="utf-8"))
     assert json.loads(printed) == operations
     assert operations["status"] == "scored"
+    a_rows = len((day / "arm-a.tsv").read_text(encoding="utf-8").splitlines()) - 1
+    layouts = len(json.loads((day / "arm-b.json").read_text(encoding="utf-8"))["measured"])
+    assert operations["rows"] == {"arm_a": a_rows, "arm_b_layouts": layouts}
+    assert a_rows > 0 and layouts > 0
     assert set(operations) == {
         "status",
         "job_id",
@@ -1019,6 +1023,8 @@ def test_job_one_scores_arm_a_only(
     assert (job_dir / "arm-a.tsv").exists()
     assert not (job_dir / "arm-b.json").exists()
     assert "arm_b" not in json.loads((job_dir / "daily-summary.json").read_text(encoding="utf-8"))
+    operations = json.loads((job_dir / "operations.json").read_text(encoding="utf-8"))
+    assert operations["rows"] == {"arm_a": 84, "arm_b_layouts": 0}
 
 
 def test_score_waits_for_the_archive_to_pass_the_execution_time(
@@ -1706,6 +1712,18 @@ def test_a_calendar_no_longer_than_a_block_has_no_sensitivity_interval(
     assert a1["mean_d"] < 0.0
     assert (a1["block3_sensitivity"]["interval"] is not None) is has_interval
     assert a1["inconclusive"] is True and a1["passes"] is False
+    if not has_interval:
+        assert a1["block3_sensitivity"] == {"block_days": 3, "interval": None, "below_zero": False}
+
+
+@pytest.mark.parametrize(("high", "below"), [(0.0, False), (-1e-12, True), (0.01, False)])
+def test_the_sensitivity_is_below_zero_only_when_its_upper_end_is(
+    high: float, below: bool, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(hs, "calendar_block_bootstrap", lambda *a, **k: (-0.2, high))
+    pairs = [(-0.01, _day(i).date()) for i in range(5)]
+    out = hs._block3_sensitivity(pairs, span=(_day(0).date(), _day(4).date()), seed=1)
+    assert out == {"block_days": 3, "interval": [-0.2, high], "below_zero": below}
 
 
 def test_the_block_length_is_amendment_8s_three_days_and_the_run_is_fourteen() -> None:
@@ -1793,6 +1811,65 @@ def test_arm_b_pairs_the_two_correlations_on_the_layouts_both_predicted() -> Non
     out = hs._arm_b_report(_jobs(job), first_day=FIRST.date())
     expected = hs.spearman([0.7, 0.5, 0.9], [0.7, 0.5, 0.3]) - 1.0
     assert out["paired_spearman"]["batch_means"][0] == pytest.approx(expected)
+
+
+def _ranked(measured: list[float]) -> dict[str, Any]:
+    order = [float(m) for m in measured]
+    return _arm_b(measured, reading=order, level=order, band_lo=order, band_hi=order)
+
+
+@pytest.mark.parametrize(
+    ("measured", "near_ties"),
+    [
+        ([0.5, 0.4921875], 1),  # gap 0.0078125, one standard error at 0.5 with 4096 shots
+        ([0.5, 0.484375], 0),  # gap 0.015625, exactly two standard errors: not under them
+        ([0.9, 0.3, 0.2, 0.1, 0.05, 0.01], 0),  # a clear best layout
+        ([0.6], 0),  # one layout has no second to tie with
+    ],
+)
+def test_a_near_tie_is_a_best_to_second_gap_under_two_standard_errors(
+    measured: list[float], near_ties: int
+) -> None:
+    out = hs._arm_b_report(_jobs(_ranked(measured)), first_day=FIRST.date())
+    assert out["descriptive"]["near_ties"] == near_ties
+
+
+def test_near_ties_add_up_over_jobs() -> None:
+    jobs = _jobs(_ranked([0.5, 0.4921875]), _ranked([0.9, 0.3]), _ranked([0.5, 0.4921875]))
+    assert hs._arm_b_report(jobs, first_day=FIRST.date())["descriptive"]["near_ties"] == 2
+
+
+def test_a_job_with_one_undefined_correlation_is_not_completed() -> None:
+    """A constant prediction has no Spearman correlation, so the job has no paired difference."""
+    job = _arm_b(
+        [0.9, 0.7, 0.5],
+        reading=[0.9, 0.7, 0.5],
+        level=[0.5, 0.5, 0.5],
+        band_lo=[0.1, 0.2, 0.3],
+        band_hi=[0.1, 0.2, 0.3],
+    )
+    out = hs._arm_b_report(_jobs(job), first_day=FIRST.date())
+    assert out["jobs"] == 1 and out["completed_jobs"] == 0
+    assert out["minimum_jobs"] == 10
+
+
+def test_arm_b_is_tested_on_the_upper_tail_and_arm_a_on_the_lower(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    sides: list[int] = []
+    real = hs.batch_means_test
+
+    def spy(values: Any, batches: Any, *, side: int) -> dict[str, Any]:
+        sides.append(side)
+        return real(values, batches, side=side)
+
+    monkeypatch.setattr(hs, "batch_means_test", spy)
+    hs._arm_b_report(_jobs(_ranked([0.9, 0.7, 0.5])), first_day=FIRST.date())
+    assert sides == [1]
+    sides.clear()
+    _scored_day(tmp_path, _day(0), _strong_day(0))
+    _report(tmp_path, 0)
+    assert sides[:2] == [-1, -1]
 
 
 def test_a_job_one_folder_with_arm_b_scores_is_refused() -> None:
@@ -1934,3 +2011,88 @@ def test_report_refuses_a_sealed_folder_inside_the_jobs_folder(
     assert hs.main(_report_argv(jobs, jobs / inside)) == hs.EXIT_REFUSED
     assert not list(jobs.rglob("report.json"))
     assert "refused" in capsys.readouterr().err
+
+
+# --- what the mutation pass found untested (criterion 25) -------------------------------------------
+
+
+def test_a3_needs_the_control_mean_strictly_below_zero(tmp_path: Path) -> None:
+    for i in range(14):
+        day = _strong_day(i, 0.01 * (i % 3))
+        for row in day:
+            if row["stratum"] == "control":
+                row["abs_err_reading"] = row["abs_err_reading_at_execution"] = row["abs_err_level"]
+        _scored_day(tmp_path, _day(i), day)
+    out = _report(tmp_path, 14)
+    assert out["arm_a"]["A3_sign_holds_on_controls"] is False
+    assert out["s1"]["row"] == "A1 and A2 pass, A3 fails"
+
+
+def test_s1_is_inconclusive_when_a1_is_although_every_day_completed(tmp_path: Path) -> None:
+    """Days 8 to 14 have no reading: A1 has two batches, so S1 is not read, whatever A2 shows."""
+    for i in range(14):
+        day = _strong_day(i, 0.01 * (i % 3))
+        if i >= 7:
+            for row in day:
+                row["abs_err_reading"] = math.nan
+        _scored_day(tmp_path, _day(i), day)
+    out = _report(tmp_path, 14)
+    assert out["arm_a"]["completed_days"] == 14
+    assert out["arm_a"]["A1_level_beats_reading"]["inconclusive"] is True
+    assert out["arm_a"]["A2_level_beats_reading_at_execution"]["inconclusive"] is False
+    assert out["s1"]["row"] == "too few completed days"
+
+
+def test_the_arm_b_reading_is_told_whether_s1_passed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    told: list[bool] = []
+    real = hs.arm_b_reading
+
+    def spy(*, s1_passes: bool, inconclusive: bool, passes: bool) -> tuple[str, str]:
+        told.append(s1_passes)
+        return real(s1_passes=s1_passes, inconclusive=inconclusive, passes=passes)
+
+    monkeypatch.setattr(hs, "arm_b_reading", spy)
+    for i in range(14):
+        _scored_day(tmp_path / "pass", _day(i), _strong_day(i, 0.01 * (i % 3)))
+    assert _report(tmp_path / "pass", 14)["s1"]["row"] == "A1, A2 and A3 pass"
+    _scored_day(tmp_path / "short", _day(0), _strong_day(0))
+    _report(tmp_path / "short", 0)
+    assert told == [True, False]
+
+
+def test_the_score_command_hands_its_sealed_folder_to_the_scoring(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    job_dir = tmp_path / "jobs" / "2026-11-10"
+    job_dir.mkdir(parents=True)
+    sealed, clone = tmp_path / "sealed", tmp_path / "clone"
+    device, archive = object(), object()
+    seen: dict[str, Any] = {}
+
+    def run_score(**kwargs: Any) -> int:
+        seen.update(kwargs)
+        return 0
+
+    monkeypatch.setattr(hs, "_fetch_archive", lambda repo: None)
+    monkeypatch.setattr(hs, "resolve_archive_ref", lambda repo, ref: "s" * 40)
+    monkeypatch.setattr(hs, "ibm_device", lambda env_file: device)
+    monkeypatch.setattr(hs, "_archive_for", lambda repo, sha: archive)
+    monkeypatch.setattr(hs, "run_score", run_score)
+    argv = ["score", "--job-dir", str(job_dir), "--sealed-dir", str(sealed), "--repo", str(clone)]
+    assert hs.main(argv) == 0
+    assert set(seen) == {"job_dir", "device", "archive", "now", "sealed_dir"}
+    assert seen["job_dir"] == job_dir and seen["sealed_dir"] == sealed
+    assert seen["device"] is device and seen["archive"] is archive
+    assert isinstance(seen["now"](), datetime)
+
+
+def test_report_makes_a_sealed_folder_that_is_not_there_yet(tmp_path: Path) -> None:
+    jobs, sealed = tmp_path / "jobs", tmp_path / "a" / "b" / "sealed"
+    (jobs / f"{_day(0):%Y-%m-%d}").mkdir(parents=True)
+    (jobs / f"{_day(0):%Y-%m-%d}" / "job_id.txt").write_text("x", encoding="utf-8")
+    assert hs.main(_report_argv(jobs, sealed, today=0)) == 0
+    assert json.loads((sealed / "report.json").read_text(encoding="utf-8"))["days"][0][
+        "status"
+    ] == ("submitted, not scored")

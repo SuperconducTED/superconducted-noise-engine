@@ -522,3 +522,38 @@ def test_the_routine_never_opens_the_token_file(tmp_path: Path) -> None:
     assert not env.exists()
     build = runner.one("build")
     assert build[build.index("--env-file") + 1] == str(env)
+
+
+# --- what the mutation pass found untested (criterion 25) -------------------------------------------
+
+
+def test_unseal_says_when_there_is_nothing_and_can_be_run_again(tmp_path: Path) -> None:
+    jobs = tmp_path / "jobs"
+    jobs.mkdir()
+    assert daily.unseal(tmp_path / "absent", jobs) == 1
+    sealed = tmp_path / "sealed"
+    (sealed / "day1").mkdir(parents=True)
+    (sealed / "day1" / "a.tsv").write_text("a", encoding="utf-8")
+    assert daily.unseal(sealed, jobs) == 0
+    (sealed / "day2").mkdir()
+    (sealed / "day2" / "b.tsv").write_text("b", encoding="utf-8")
+    assert daily.unseal(sealed, jobs) == 0  # a day scored by hand later is added
+    assert (jobs / "sealed" / "day1" / "a.tsv").exists() and (
+        jobs / "sealed" / "day2" / "b.tsv"
+    ).exists()
+
+
+def test_day_fifteen_records_an_unseal_with_nothing_to_unseal(tmp_path: Path) -> None:
+    _submitted(tmp_path, 14, "job_id.txt", "t1-job_id.txt")
+    _run(_morning(tmp_path), 15, Runner())
+    written = json.loads((tmp_path / "jobs" / "routine-2026-11-24.json").read_text("utf-8"))
+    assert written["steps"][-1] == {"name": "unseal", "exit": 1}
+
+
+def test_every_score_and_the_report_get_the_sealed_folder(tmp_path: Path) -> None:
+    _submitted(tmp_path, 1, "job_id.txt", "t1-job_id.txt")
+    runner = Runner()
+    _run(_morning(tmp_path), 2, runner)
+    for name in ("score", "t1 score", "report"):
+        command = runner.one(name)
+        assert command[command.index("--sealed-dir") + 1] == str(tmp_path / "sealed"), name
