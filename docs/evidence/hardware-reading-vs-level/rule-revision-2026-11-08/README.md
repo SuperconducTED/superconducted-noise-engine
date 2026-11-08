@@ -140,6 +140,12 @@ check now uses 5/11. The row above is left as written, so the miss stays visible
 The same check had already caught a second error before it: the two `t` critical values in section 3 were typed from memory,
 and SciPy disagreed in the twelfth decimal. Both now come from SciPy (`22770723`), before any output was written.
 
+## 7b. A correction to section 7, 2026-11-08
+
+N6's row in section 7 says the scorer's construction is "0.008 to 0.011 higher across all six cases". Read again from
+`rule-values.json`, the six gaps are 0.0080, 0.0090, 0.0100, 0.0110, 0.0070 and 0.0055, so the range is **0.0055 to 0.011**.
+The row above is left as written.
+
 ## 8. What this does not do
 
 - No hardware result exists, and nothing here is a claim about the device except N8, which describes the archive.
