@@ -683,8 +683,38 @@ def test_the_check_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_net
         raise AssertionError("the network was reached")
 
     monkeypatch.setattr(t1, "ibm_device", no_network)
-    for inside in (jobs, jobs / "sealed", job_dir / "sealed"):
+    clone = tmp_path / "clone"
+    for inside in (jobs, jobs / "sealed", job_dir / "sealed", clone, clone / "out"):
         argv = ["score", "--job-dir", str(job_dir), "--sealed-dir", str(inside)]
-        assert t1.main(argv) == hs.EXIT_REFUSED
+        assert t1.main([*argv, "--repo", str(clone)]) == hs.EXIT_REFUSED
         assert "refused" in capsys.readouterr().err
     assert not (jobs / "sealed").exists()
+    assert not clone.exists()
+
+
+def test_the_check_score_needs_a_sealed_folder(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit):
+        t1.main(["score", "--job-dir", str(tmp_path / "2026-11-10")])
+
+
+def test_the_marker_is_written_after_the_fit(
+    tmp_path: Path,
+    live_doc: dict[str, Any],
+    stub_library: list[Mapping[int, Sequence[float]]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A fit that cannot be written leaves no marker, so a later morning scores the day again."""
+    job_dir = _job_folder(tmp_path)
+    device = StubDevice(live_doc)
+    _submit(job_dir, device)
+    real = t1.write_json_lf
+
+    def fails_on_the_fit(path: Path, value: Any) -> None:
+        if path.name == "t1-check.json":
+            raise OSError("disk full")
+        real(path, value)
+
+    monkeypatch.setattr(t1, "write_json_lf", fails_on_the_fit)
+    with pytest.raises(OSError, match="disk full"):
+        t1.run_score(job_dir=job_dir, device=device, sealed_dir=tmp_path / "sealed")
+    assert not (job_dir / "t1-operations.json").exists()

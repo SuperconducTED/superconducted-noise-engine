@@ -985,11 +985,24 @@ def test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network
         raise AssertionError("the network was reached")
 
     monkeypatch.setattr(hs, "ibm_device", no_network)
-    for inside in (jobs, jobs / "sealed", job_dir / "sealed"):
+    clone = tmp_path / "clone"
+    for inside in (jobs, jobs / "sealed", job_dir / "sealed", clone, clone / "out"):
         argv = ["score", "--job-dir", str(job_dir), "--sealed-dir", str(inside)]
-        assert hs.main(argv) == hs.EXIT_REFUSED
+        assert hs.main([*argv, "--repo", str(clone)]) == hs.EXIT_REFUSED
         assert "refused" in capsys.readouterr().err
     assert not (jobs / "sealed").exists()
+    assert not clone.exists()
+
+
+@pytest.mark.parametrize("mode", ["score", "report"])
+def test_score_and_report_need_a_sealed_folder(tmp_path: Path, mode: str) -> None:
+    argv = (
+        ["score", "--job-dir", str(tmp_path / "jobs" / "2026-11-10")]
+        if mode == "score"
+        else ["report", "--jobs-dir", str(tmp_path / "jobs"), "--first-day", "2026-11-10"]
+    )
+    with pytest.raises(SystemExit):
+        hs.main(argv)
 
 
 def test_job_one_scores_arm_a_only(

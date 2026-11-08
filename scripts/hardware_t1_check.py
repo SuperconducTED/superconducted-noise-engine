@@ -52,6 +52,7 @@ from scripts.hardware_submit import (
     ibm_device,
     pinned_options,
     read_circuits,
+    refuse_sealed_inside,
     write_circuits,
 )
 
@@ -220,19 +221,6 @@ def run_score(*, job_dir: Path, device: T1Device, sealed_dir: Path | None = None
         }
         for q in sealed["qubits"]
     ]
-    qualities: dict[str, int] = {}
-    for fit in fits.values():
-        qualities[str(fit["quality"])] = qualities.get(str(fit["quality"]), 0) + 1
-    write_json_lf(
-        job_dir / "t1-operations.json",
-        {
-            "status": "fitted",
-            "job_id": job_id,
-            "qubits": len(fits),
-            "fit_quality": qualities,
-            "quantum_seconds": fetched.metrics.get("usage", {}).get("quantum_seconds"),
-        },
-    )
     write_json_lf(
         out / "t1-check.json",
         {
@@ -245,6 +233,20 @@ def run_score(*, job_dir: Path, device: T1Device, sealed_dir: Path | None = None
             "quantum_seconds": fetched.metrics.get("usage", {}).get("quantum_seconds"),
             "median_relative_se": statistics.median(r["relative_se"] for r in per_qubit),
             "qubits": per_qubit,
+        },
+    )
+    # The marker is written last: a write that fails before it leaves the day to be scored again.
+    qualities: dict[str, int] = {}
+    for fit in fits.values():
+        qualities[str(fit["quality"])] = qualities.get(str(fit["quality"]), 0) + 1
+    write_json_lf(
+        job_dir / "t1-operations.json",
+        {
+            "status": "fitted",
+            "job_id": job_id,
+            "qubits": len(fits),
+            "fit_quality": qualities,
+            "quantum_seconds": fetched.metrics.get("usage", {}).get("quantum_seconds"),
         },
     )
     return 0
@@ -280,12 +282,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     try:
         if args.mode == "score":
-            # Before any network: a sealed folder inside the jobs folder would be committed.
-            sealed, jobs = args.sealed_dir.resolve(), args.job_dir.parent.resolve()
-            if sealed == jobs or sealed.is_relative_to(jobs):
-                raise RefusedError(
-                    f"the sealed folder {args.sealed_dir} is inside {args.job_dir.parent}"
-                )
+            # Before any network: a sealed folder inside either would be committed.
+            refuse_sealed_inside(args.sealed_dir, args.job_dir.parent, args.repo)
         if args.mode == "submit" and not local:
             # Before any network and before the token is read.
             submission = _read_json(args.job_dir / "submission.json")

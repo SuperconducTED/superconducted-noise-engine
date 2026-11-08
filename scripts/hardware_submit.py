@@ -1348,7 +1348,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     try:
         if args.mode == "score":
-            refuse_sealed_inside(args.sealed_dir, args.job_dir.parent)
+            refuse_sealed_inside(args.sealed_dir, args.job_dir.parent, args.repo)
         if args.mode == "build" and not local:
             # Before any network and before the token is read.
             try:

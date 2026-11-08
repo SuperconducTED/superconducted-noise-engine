@@ -503,6 +503,13 @@ def test_a_sealed_folder_inside_the_jobs_folder_or_the_clone_is_refused(
     assert ran == []
 
 
+def test_the_routine_needs_a_sealed_folder(tmp_path: Path) -> None:
+    argv = _argv(tmp_path, "--frozen-at", "f" * 40, "--prereg", "p.md")
+    at = argv.index("--sealed-dir")
+    with pytest.raises(SystemExit):
+        daily.main(argv[:at] + argv[at + 2 :])
+
+
 def test_pushing_needs_committing(tmp_path: Path) -> None:
     with pytest.raises(SystemExit):
         daily.main(_argv(tmp_path, "--frozen-at", "f" * 40, "--prereg", "p.md", "--push-data"))
