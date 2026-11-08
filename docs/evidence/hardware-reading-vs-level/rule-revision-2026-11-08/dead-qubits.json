@@ -1,0 +1,59 @@
+{
+  "captures_with_a_dead_cz_pair": 2707,
+  "captures_with_a_qubit_absent_from_target": 0,
+  "captures_without_target_operations": 0,
+  "dead_marked_qubits": {
+    "149": {
+      "captures": 6,
+      "spans": [
+        {
+          "captures": 6,
+          "first": "20260513121322",
+          "last": "20260513215706",
+          "t1_date_at_first": "2026-05-08T07:46:16+00:00",
+          "t1_date_at_last": "2026-05-13T21:57:03+00:00"
+        }
+      ]
+    },
+    "17": {
+      "captures": 208,
+      "spans": [
+        {
+          "captures": 53,
+          "first": "20260513121322",
+          "last": "20260518050826",
+          "t1_date_at_first": "2026-04-13T21:49:04+00:00",
+          "t1_date_at_last": "2026-04-13T21:49:04+00:00"
+        },
+        {
+          "captures": 155,
+          "first": "20260622014623",
+          "last": "20260713135208",
+          "t1_date_at_first": "2026-04-13T21:49:04+00:00",
+          "t1_date_at_last": "2026-04-13T21:49:04+00:00"
+        }
+      ]
+    },
+    "72": {
+      "captures": 2706,
+      "spans": [
+        {
+          "captures": 2706,
+          "first": "20260513121322",
+          "last": "20261105201738",
+          "t1_date_at_first": null,
+          "t1_date_at_last": "2026-10-25T23:20:25+00:00"
+        }
+      ]
+    }
+  },
+  "distinct_stamps": 2706,
+  "files": 2707,
+  "first": "20260513121322",
+  "last": "20261105201738",
+  "protocol": "docs/evidence/hardware-reading-vs-level/rule-revision-2026-11-08/README.md",
+  "qubits_ever_absent": [],
+  "ref": "fafbc8f5afbc75abb7650d3f9356bd6b21d39421",
+  "utc_days": 170,
+  "utc_days_with_a_dead_marked_qubit": 170
+}

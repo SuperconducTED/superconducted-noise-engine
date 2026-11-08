@@ -111,7 +111,23 @@ From the repository root, with the exact pins:
 
 ## 7. Results
 
-Appended after the runs, with the commit that produced them.
+`dead_qubits.py` ran at `315ecdc9` (unchanged since) and `rule_values.py` at `4b308363`, both on 2026-11-08 on the laptop,
+exact pins, outputs `dead-qubits.json` and `rule-values.json`. Laptop, provisional. Monte Carlo standard errors are about
+0.0016 at 20,000 runs and 0.0067 for N6's 2,000.
+
+| # | Expectation | Result |
+| --- | --- | --- |
+| N1 | `phi = 0` within two standard errors of 0.0505; `phi = 0.5` between 0.050 and 0.084, rising with `rho` | **Held, except "rising".** `phi = 0`: 0.0508, 0.0522, 0.0501 at `rho` 0, 0.3, 0.7. `phi = 0.5`: 0.0490 at `rho = 0` (no day effect, so `phi` cannot act), 0.0811 at 0.3, 0.0786 at 0.7: flat within noise, not rising. |
+| N2 | Random misses empty a batch in under 2% of runs for `k <= 4`; consecutive 2/12 and 5/11 (as corrected in 7a); false-pass moves under 0.01 under `V1`, may rise under `V2` | **Partly held.** Random: 0.5% at `k = 3`, **2.3% to 2.4% at `k = 4`, just above the 2% expected.** Consecutive: 0.164 to 0.169 at `k = 3`, 0.449 to 0.458 at `k = 4`. Under `V1` consecutive misses **lower** the false-pass rate by more than 0.01 (0.025 to 0.042 at `k = 4`), because the condition becomes inconclusive. Under `V2` it does not rise: 0.045 to 0.072 at `k = 4`, at or below the full-calendar value of each case. |
+| N3 | Power falls with `k`; `V2` keeps more under consecutive misses | **Held.** Shifts of -1.046 and -0.411 per-row standard deviations give full-calendar pass rates of 0.976 and 0.500. At `k = 4` consecutive: 0.519 under `V1` against 0.906 under `V2` (strong), 0.237 against 0.396 (moderate). Random misses cost less: 0.935 and 0.955 (strong). |
+| N4 | Arm B near 0.05 at full calendar; `sd = 0` under 1% | **Held.** 0.0505 (standard error 0.0015); `sd = 0` in 0 runs. With `k = 3` consecutive missed jobs, `V1` is inconclusive in 0.277 of runs and passes 0.033; `V2` passes 0.047, never inconclusive. |
+| N6 | The 14-day cut near section 3.8.1 (0.088 at `phi = 0`, `rho = 0`); the scorer's 15 days about 0.01 higher | **The gap held, the base did not.** Cut to 14: 0.0990; scorer's 15: 0.1070. Bengisu's `a1_size.py` gave 0.099 and 0.108 for the same comparison, so section 3.8.1's 0.088 is the value that differs (by about 1.6 standard errors); the scorer's construction is 0.008 to 0.011 higher across all six cases. |
+| N7 | Both above the fixed look; `V2` above `V1` | **Held.** Fixed day 14 against stop at the first pass: `V1` 0.049 to 0.080 against 0.074 to 0.108; `V2` against 0.114 to 0.152. |
+| N8 | 0 absences in 2,706 captures over 170 days; dead-marked exactly 17, 72, 149; 72 on every capture; 17 on 208 in two spans | **Held exactly.** 2,707 files, 2,706 distinct stamps, 170 UTC days, no capture with a qubit absent from the target. Qubit 72 on all 2,706; qubit 17 on 208 in 2 spans; qubit 149 on 6 in 1 span. A dead `cz` pair appears in all 2,707 files, so the reader does see `gate_error`. |
+
+**What N5 is for.** The lead's two remaining choices read from N2 to N4: the empty-batch rule (`V1` or `V2`) and the minimum
+number of completed jobs. Only `k <= 4` missed days (Arm A) and `k <= 3` missed jobs (Arm B) were measured, so a minimum
+below 10 completed Arm A days or 10 completed Arm B jobs would rest on no measurement here.
 
 ## 7a. A correction to N2's expectation, 2026-11-08, after the first full run
 
