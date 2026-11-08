@@ -113,6 +113,17 @@ From the repository root, with the exact pins:
 
 Appended after the runs, with the commit that produced them.
 
+## 7a. A correction to N2's expectation, 2026-11-08, after the first full run
+
+N2's row says four consecutive misses empty a batch with probability 6/11, counted by hand. That count is wrong, and the
+script's own check refused to write any output because of it. Counted again: a run of four days can start on days 1 to 11,
+and it empties a batch only from starts 1 and 5 (batches 1-4 and 5-8), 8 and 9 (batch 9-11) and 11 (batch 12-14), so
+**5/11 = 0.455**; the hand count had included a start that runs past day 14. The masks measured 0.4552 on that run. The
+check now uses 5/11. The row above is left as written, so the miss stays visible. Three consecutive misses, 2/12, passed.
+
+The same check had already caught a second error before it: the two `t` critical values in section 3 were typed from memory,
+and SciPy disagreed in the twelfth decimal. Both now come from SciPy (`22770723`), before any output was written.
+
 ## 8. What this does not do
 
 - No hardware result exists, and nothing here is a claim about the device except N8, which describes the archive.

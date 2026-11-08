@@ -285,7 +285,7 @@ def placement_check(seeds: dict[str, np.random.SeedSequence]) -> dict[str, Any]:
     """The hand-counted empty-batch shares for consecutive misses, against the masks' own."""
     rng = np.random.default_rng(seeds["check"])
     out: dict[str, Any] = {}
-    for k, exact in ((3, 2 / 12), (4, 6 / 11)):
+    for k, exact in ((3, 2 / 12), (4, 5 / 11)):
         present = present_mask(rng, N_RUNS, N_DAYS, k, "consecutive")
         counts = np.stack([present[:, b].sum(axis=1) for b in ARM_A_BATCHES], 1)
         share = float((counts == 0).any(axis=1).mean())
