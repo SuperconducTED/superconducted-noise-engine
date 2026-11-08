@@ -490,3 +490,25 @@ loaded), and a throwaway task proved the Task Scheduler launch (exit 0). Laptop,
 **Criterion 8 stays open.** What this attempt proves: Task Scheduler fires the routine at the hour with the app closed,
 and the routine completes on its own. What it does not prove: that a sleeping laptop wakes for it, which is the part only
 a sleep can test. Both tasks are unregistered, and the outputs stay in `C:\t\wake1` outside the repository.
+
+## Criterion 8, second attempt, 2026-11-08: the wake timer does not wake this laptop
+
+Appended. The first attempt could not test the wake, because the laptop never slept. This one used a deliberate sleep:
+a one-off task, wake flag on, registered for 10:04 Istanbul with the same command and a new output folder, then the lead
+chose Start, Power, Sleep. Read from the System log:
+
+| Time, Istanbul | Event |
+| --- | --- |
+| 09:46:14 | Kernel-Power 506: entering Modern Standby, reason Screen Off Request |
+| 10:04 | the task's start time: no event, no output |
+| 10:24:20 | the task starts |
+| 10:24:22 | Kernel-Power 507: exiting Modern Standby, reason Input Keyboard (the lead woke it) |
+
+No Power-Troubleshooter event, and `powercfg /lastwake` shows no wake source. The task ran only because "start as soon
+as possible after a missed start" fired it on resume. **Criterion 8 as written fails on this laptop:** in Modern Standby,
+its only standby state, the task's wake timer does not wake it.
+
+What the two attempts together show: with the laptop awake on mains, idle and logged in, the routine fires at the hour and
+completes (06:45:00 on 2026-11-08, about 4.5 minutes); asleep, it does not fire until someone wakes it. A late start is not
+a late submission: the strict missed rule (amendment 18) refuses a build after 04:45 UTC, so a sleeping morning becomes an
+empty day, not a mistimed job. The way the run is fired is now the lead's decision.
