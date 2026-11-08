@@ -489,4 +489,4 @@ loaded), and a throwaway task proved the Task Scheduler launch (exit 0). Laptop,
 
 **Criterion 8 stays open.** What this attempt proves: Task Scheduler fires the routine at the hour with the app closed,
 and the routine completes on its own. What it does not prove: that a sleeping laptop wakes for it, which is the part only
-a sleep can test. Both tasks are unregistered, and the outputs stay in `C:	\wake1` outside the repository.
+a sleep can test. Both tasks are unregistered, and the outputs stay in `C:\t\wake1` outside the repository.
