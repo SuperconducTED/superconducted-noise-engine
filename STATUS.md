@@ -1,6 +1,6 @@
 # Phase 4: Design-time predictor
 
-_Generated 2026-11-07 18:33 UTC · main at `43a2c9b0` (2026-11-05) · day 7 since 2026-11-01 · milestone 2 due 2027-02-27 (112 days), 17 open and 6 closed_
+_Generated 2026-11-08 05:45 UTC · main at `43a2c9b0` (2026-11-05) · day 8 since 2026-11-01 · milestone 2 due 2027-02-27 (111 days), 17 open and 6 closed_
 
 _Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, on main. Gates are ordered, not dated (plan §6)._
 
@@ -118,28 +118,27 @@ _Review requests not yet answered with a review, and unticked checkboxes that st
 
 **Mert Efe Şensoy** (@mertefesensoy), 3 owed
 
-- has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (60 days); has posted there since, on 2026-10-21
-- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (35 days); no post there since
-- Review PR #143: requested by @bengisucvd, since 2026-11-07 (0 days); no post there since
+- has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (61 days); has posted there since, on 2026-10-21
+- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (36 days); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (1 day); no post there since
 
 **Burak Öztekin** (@BurakOztekin), 4 owed
 
-- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (65 days); no post there since
-- Review PR #141: requested by @mertefesensoy, since 2026-11-05 (2 days); no post there since
-- Re-review PR #133: your CHANGES_REQUESTED from 2026-11-02 still stands: requested by @mertefesensoy, since 2026-11-07 (0 days); no post there since
-- Review PR #143: requested by @bengisucvd, since 2026-11-07 (0 days); no post there since
+- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (66 days); no post there since
+- Review PR #141: requested by @mertefesensoy, since 2026-11-05 (3 days); no post there since
+- Re-review PR #133: your CHANGES_REQUESTED from 2026-11-02 still stands: requested by @mertefesensoy, since 2026-11-07 (1 day); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (1 day); no post there since
 
 **Bengisu Cıvdı** (@bengisucvd), 3 owed
 
-- Review PR #133: requested by @mertefesensoy, since 2026-10-28 (10 days); no post there since
-- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (5 days); no post there since
-- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (5 days); no post there since
+- Review PR #133: requested by @mertefesensoy, since 2026-10-28 (11 days); no post there since
+- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (6 days); no post there since
+- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (6 days); no post there since
 
-**Baha Jarad** (@BahaJarad), 3 owed
+**Baha Jarad** (@BahaJarad), 2 owed
 
-- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (35 days); no post there since
-- Review PR #139: requested by @mertefesensoy, since 2026-11-04 (3 days); no post there since
-- Review PR #143: requested by @bengisucvd, since 2026-11-07 (0 days); no post there since
+- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (36 days); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (1 day); no post there since
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -178,6 +177,7 @@ Nothing is blocked upstream.
 
 | Date | Gates | Conditions | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 2026-11-08 | 0/5 | 0/7 | 8 | 5 | 0 | Baha Jarad owes 2 answers (was 3) |
 | 2026-11-07 | 0/5 | 0/7 | 8 | 5 | 0 | milestone 2: 17 open and 6 closed (was 15 and 6); #61 Nie-Tan versus Karnik-Mendel, premise gradients: ready to start to in review; Baha Jarad owes 3 answers (was 2); Burak Öztekin owes 4 answers (was 2); Bengisu Cıvdı owes 3 answers (was 4); Mert Efe Şensoy owes 3 answers (was 4) |
 | 2026-11-06 | 0/5 | 0/7 | 9 | 4 | 0 | milestone 2: 15 open and 6 closed (was 13 and 5); Burak Öztekin owes 2 answers (was 1); Bengisu Cıvdı owes 4 answers (was 5); Mert Efe Şensoy owes 4 answers (was 5); main moved to 43a2c9b0 |
 | 2026-11-05 | 0/5 | 0/7 | 9 | 4 | 0 | milestone 2: 13 open and 5 closed (was 10 and 3); Baha Jarad owes 2 answers (was 1); main moved to 5c98f264 |
