@@ -57,12 +57,15 @@ from scripts.hardware_reading_vs_level import (
     GateTable,
     Job,
     QubitSource,
+    UnusableSourceError,
     _write_tsv,
     archived_backend,
+    binomial_se,
     build_job,
     calendar_block_bootstrap,
     circuit_seeds,
     not_operational_qubits,
+    p1_closed_form,
     score_arm_a,
     score_arm_b,
     spearman,
@@ -871,6 +874,225 @@ def _arm_b_report(jobs: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         "each_condition_by_either": any(ranks(n) for n in ("level", "band"))
         and any(picks(n) for n in ("level", "band")),
     }
+
+
+# ---------------------------------------------------------------------------------------------
+# The decision rule of PR #135's section 3.12 (amendments 24 to 30)
+
+# One-sided 95% points of Student t with 2 and 3 degrees of freedom, as the pre-registration writes
+# them (amendment 25). A test checks them against SciPy; SciPy is not imported at runtime.
+T95: dict[int, float] = {2: 2.9199855803537242, 3: 2.3533634348018233}
+Z90 = 1.2815515655446004
+ARM_A_BATCHES: tuple[tuple[int, ...], ...] = tuple(
+    tuple(int(i) for i in batch) for batch in np.array_split(np.arange(N_JOBS), 4)
+)
+N_ARM_B_JOBS = N_JOBS - 1
+ARM_B_BATCHES: tuple[tuple[int, ...], ...] = tuple(
+    tuple(int(i) for i in batch) for batch in np.array_split(np.arange(N_ARM_B_JOBS), 4)
+)
+MIN_BATCHES = 3
+MIN_ARM_A_DAYS = 10
+MIN_ARM_B_JOBS = 10
+FIT_GRID = np.linspace(-3.0, 3.0, 1201)
+
+
+def level_minus_other(rows: Sequence[Mapping[str, Any]], other: str) -> list[tuple[float, date]]:
+    """Amendment 25's ``D``: ``level``'s absolute error minus ``other``'s, negative favouring it.
+
+    Only rows where both predicted, so each comparison stays on one set of rows.
+    """
+    out = []
+    for r in rows:
+        ours, theirs = float(r["abs_err_level"]), float(r[f"abs_err_{other}"])
+        if math.isfinite(ours) and math.isfinite(theirs):
+            out.append((ours - theirs, r["date"]))
+    return out
+
+
+def batch_means_test(
+    values: Sequence[tuple[float, int]], batches: Sequence[Sequence[int]], *, side: int
+) -> dict[str, Any]:
+    """Batch means over fixed batches (amendment 25), rows given as ``(value, item index)``.
+
+    A batch's value is the mean of its rows (row-pooled). Empty batches are dropped while at least
+    three remain, and ``t`` then has ``q - 1`` degrees of freedom; with fewer the result is
+    inconclusive; ``sd = 0`` fails. A pass needs ``t < -t95`` when ``side`` is -1 (Arm A) and
+    ``t > t95`` when it is +1 (Arm B).
+    """
+    where = {item: b for b, items in enumerate(batches) for item in items}
+    sums = [0.0] * len(batches)
+    counts = [0] * len(batches)
+    for value, item in values:
+        if item not in where:
+            raise ValueError(f"item {item} is in no batch")
+        sums[where[item]] += value
+        counts[where[item]] += 1
+    means = [s / c if c else None for s, c in zip(sums, counts, strict=True)]
+    present = [m for m in means if m is not None]
+    q = len(present)
+    out: dict[str, Any] = {
+        "batch_means": means,
+        "batch_rows": counts,
+        "q": q,
+        "mean_of_batches": None,
+        "t": None,
+        "critical": None,
+        "sd_zero": False,
+        "inconclusive": q < MIN_BATCHES,
+        "passes": False,
+    }
+    if q < MIN_BATCHES:
+        return out
+    mean = sum(present) / q
+    sd = math.sqrt(sum((m - mean) ** 2 for m in present) / (q - 1))
+    out["mean_of_batches"] = mean
+    if sd == 0.0:
+        out["sd_zero"] = True
+        return out
+    t = mean / (sd / math.sqrt(q))
+    critical = T95[q - 1]
+    out.update({"t": t, "critical": critical, "passes": side * t > critical})
+    return out
+
+
+def fit_log_t1_ratio(points: Sequence[tuple[float, int, int]], level: QubitSource) -> float | None:
+    """Amendment 30: grid maximum likelihood of ``log(T1 / level)`` from ``(tau_s, ones, shots)``.
+
+    Uses ``level``'s readout, as Bengisu's ``arm_a_fit.py`` does; ``None`` without points or a
+    usable ``level``.
+    """
+    if not points or not level.usable_for_decay():
+        return None
+    taus = np.array([p[0] for p in points], dtype=np.float64)
+    ones = np.array([p[1] for p in points], dtype=np.float64)
+    shots = np.array([p[2] for p in points], dtype=np.float64)
+    t1 = level.t1 * np.exp(FIT_GRID)
+    survive = np.exp(-taus[None, :] / t1[:, None])
+    p = np.clip((1.0 - level.e10) * survive + level.e01 * (1.0 - survive), 1e-9, 1.0 - 1e-9)
+    log_lik = (ones * np.log(p) + (shots - ones) * np.log1p(-p)).sum(axis=1)
+    return float(FIT_GRID[int(np.argmax(log_lik))])
+
+
+def slope_and_spread(points: Sequence[tuple[float, float]]) -> dict[str, Any]:
+    """Amendment 30's ``c`` (slope through the origin) and ``s_res`` (robust residual spread)."""
+    if not points:
+        return {"c": None, "s_res": None, "qubit_days": 0}
+    x = np.array([p[0] for p in points], dtype=np.float64)
+    y = np.array([p[1] for p in points], dtype=np.float64)
+    sxx = float((x * x).sum())
+    if sxx == 0.0:
+        return {"c": None, "s_res": None, "qubit_days": len(points)}
+    c = float((x * y).sum() / sxx)
+    q10, q90 = np.percentile(y - c * x, [10, 90])
+    return {"c": c, "s_res": float((q90 - q10) / (2.0 * Z90)), "qubit_days": len(points)}
+
+
+def _source(state: Mapping[str, Any], name: str, qubit: int) -> QubitSource | None:
+    values = state.get("sources", {}).get(name, {}).get(str(qubit))
+    return None if values is None else QubitSource(*(float(v) for v in values))
+
+
+def no_information_coverage(
+    rows: Sequence[Mapping[str, Any]], state: Mapping[str, Any]
+) -> tuple[list[float], list[float]]:
+    """Amendment 24's no-information coverage for one day's ``tau > 0`` discriminating rows.
+
+    Each row's band is moved in ``log T1`` by the difference between another discriminating qubit's
+    ``log level`` and its own, turned into ``p_1`` at the row's ``tau`` with the row's own
+    ``level`` readout, and checked against ``p_hat``; a row's value is the share of the other
+    qubits for which the moved band covers it. Returns per-row shares, nominal and widened.
+    """
+    levels: dict[int, QubitSource] = {}
+    for q in sorted({int(r["qubit"]) for r in rows}):
+        source = _source(state, "level", q)
+        if source is not None and source.usable_for_decay():
+            levels[q] = source
+    nominal: list[float] = []
+    widened: list[float] = []
+    for r in rows:
+        q = int(r["qubit"])
+        own, lo, hi = levels.get(q), _source(state, "band_lo", q), _source(state, "band_hi", q)
+        if own is None or lo is None or hi is None:
+            continue
+        others = [o for o in levels if o != q]
+        if not others:
+            continue
+        p_hat, tau = float(r["p_hat"]), float(r["tau_s"])
+        widen = binomial_se(p_hat, int(r["shots"]))
+        hits = [0, 0]
+        counted = 0
+        for o in others:
+            ratio = levels[o].t1 / own.t1
+            try:
+                ends = sorted(
+                    p1_closed_form(tau, QubitSource(band.t1 * ratio, band.t2, own.e10, own.e01))
+                    for band in (lo, hi)
+                )
+            except UnusableSourceError:
+                continue
+            counted += 1
+            hits[0] += int(ends[0] <= p_hat <= ends[1])
+            hits[1] += int(ends[0] - widen <= p_hat <= ends[1] + widen)
+        if counted:
+            nominal.append(hits[0] / counted)
+            widened.append(hits[1] / counted)
+    return nominal, widened
+
+
+def s1_reading(
+    *, inconclusive: bool, a1: Mapping[str, Any], a2: Mapping[str, Any], a3: bool
+) -> tuple[str, str]:
+    """Amendment 29's first table, read top to bottom: ``(row, reading)`` of the first that applies.
+
+    ``a1`` and ``a2`` carry ``passes`` and ``mean_d``, the row mean of ``D`` (negative favours
+    ``level``).
+    """
+    if inconclusive:
+        return "too few completed days", "inconclusive: nothing is read"
+    if a1["passes"] and a2["passes"] and a3:
+        return (
+            "A1, A2 and A3 pass",
+            "S1 passes: level beats both readings, and most of the deviation is gone by execution",
+        )
+    if a1["passes"] and a2["passes"]:
+        return (
+            "A1 and A2 pass, A3 fails",
+            "S1 not supported: the controls disagree in sign; the result is specific to the "
+            "selected qubits",
+        )
+    if a2["mean_d"] is not None and a2["mean_d"] >= 0.0:
+        return (
+            "A2's mean D at or above zero",
+            "S1 fails: reading_at_execution is at least as good as level",
+        )
+    if a1["passes"]:
+        return (
+            "A1 passes, A2 does not",
+            "staleness: level beats the submission-time reading but not the execution-time one",
+        )
+    means = (a1["mean_d"], a2["mean_d"])
+    if all(m is not None and m < 0.0 for m in means):
+        return (
+            "A1 and A2 both fail, both mean D below zero",
+            "no claim: the data do not separate the predictors",
+        )
+    return "anything else", "reported as observed, with no S1 reading"
+
+
+def arm_b_reading(*, s1_passes: bool, inconclusive: bool, passes: bool) -> tuple[str, str]:
+    """Amendment 29's second table. An inconclusive Arm B adds nothing, whatever S1 says."""
+    if inconclusive:
+        return "Arm B inconclusive", "nothing is added"
+    if s1_passes and passes:
+        return "S1 and Arm B pass", "S1 passes for the engineer's purpose too"
+    if s1_passes:
+        return (
+            "S1 passes, Arm B does not",
+            "S1 holds for decay prediction, not for ranking layouts",
+        )
+    if passes:
+        return "Arm B passes, S1 does not", "no claim from Arm B alone"
+    return "neither passes", "nothing is added"
 
 
 def run_report(jobs_dir: Path, *, first_day: date, today: date) -> dict[str, Any]:
