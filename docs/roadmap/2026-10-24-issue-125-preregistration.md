@@ -622,6 +622,13 @@ sections above are not edited. **These amendments change the decision rule** and
     from its own live capture, and nothing on `score`'s path reads it (from reading PR #142's code; not run against IBM). The
     rehearsal already picks a file with a configuration, and says so.
 
+36. **A clarification of amendments 28 and 29, 2026-11-08, written while building PR #142's report.** Amendment 28's
+    shortfall applies per arm: fewer than 10 completed Arm A days makes S1 inconclusive, and fewer than 10 completed Arm B jobs
+    makes only Arm B inconclusive, so S1 can still be read. In amendment 29's second table, an inconclusive Arm B adds nothing
+    whatever S1 says, and "does not" means Arm B was decided and failed. "A2's mean `D`" is the mean of `D` over A2's rows.
+    An Arm A day is completed when it has at least one scored discriminating row; an Arm B job is completed when both
+    `rho_level` and `rho_reading` are finite, on the layouts both predicted. Nothing here changes a threshold.
+
 ### 3.13 What this branch still owes before the freezing commit
 
 The code for these amendments belongs on PR #142, not here: amendment 20's is built there; 24 to 30 and 34 are still to build. The lead asks @bengisucvd to read sections 3.11 and 3.12
