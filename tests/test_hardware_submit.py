@@ -1606,7 +1606,7 @@ def test_report_names_the_staleness_finding(tmp_path: Path) -> None:
     assert out["arm_a"]["A1_level_beats_reading"]["passes"] is True
     assert out["arm_a"]["A2_level_beats_reading_at_execution"]["passes"] is False
     assert out["s1"]["row"] == "A1 passes, A2 does not"
-    assert out["reading"].startswith("staleness")
+    assert out["reading"].startswith("Staleness")
 
 
 @pytest.mark.parametrize(
@@ -1919,7 +1919,7 @@ def test_report_with_no_rows_says_so(tmp_path: Path) -> None:
     (tmp_path / f"{FIRST:%Y-%m-%d}").mkdir()
     out = _report(tmp_path, 0)
     assert out["s1"]["row"] == "too few completed days"
-    assert out["reading"].startswith("inconclusive")
+    assert out["reading"] == "Inconclusive: nothing is read."
     assert out["arm_a"]["A1_level_beats_reading"]["passes"] is False
     assert out["arm_a"]["A3_sign_holds_on_controls"] is False
     assert out["arm_a"]["A4_band_calibration_report"]["coverage"] is None

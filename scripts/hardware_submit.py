@@ -1053,6 +1053,49 @@ def no_information_coverage(
     return nominal, widened
 
 
+# Amendment 29's two tables (PR #135, section 3.12) in its own words, Markdown backticks dropped.
+# The keys are the rows' short names, which the report also writes.
+S1_READINGS: dict[str, str] = {
+    "too few completed days": "Inconclusive: nothing is read.",
+    "A1, A2 and A3 pass": (
+        "S1 passes: level beats both readings, and most of the deviation is gone by execution. "
+        "A4 reports how well the band is calibrated; c and s_res (amendment 30) say how much of "
+        "the scatter is physical."
+    ),
+    "A1 and A2 pass, A3 fails": (
+        "S1 not supported: the controls disagree in sign. The discriminating result is reported "
+        "as specific to the selected qubits, with no claim about the chip."
+    ),
+    "A2's mean D at or above zero": (
+        "S1 fails: reading_at_execution is at least as good as level, so the scatter is what the "
+        "device does between readings (design §7)."
+    ),
+    "A1 passes, A2 does not": (
+        "Staleness: level beats the submission-time reading but not, by the rule, the "
+        "execution-time one (design §7)."
+    ),
+    "A1 and A2 both fail, both mean D below zero": (
+        "No claim: the data do not separate the predictors. The estimates are reported, not read."
+    ),
+    "anything else": "Reported as observed, with no S1 reading.",
+}
+# "neither passes" is not a row of amendment 29's table: Arm B adds to the S1 reading and never
+# changes it, so with no row that applies nothing is added, as amendment 36 says for inconclusive.
+ARM_B_READINGS: dict[str, str] = {
+    "Arm B inconclusive": "Nothing is added.",
+    "S1 and Arm B pass": (
+        "S1 passes for the engineer's purpose too: level ranks layouts better than reading "
+        "(design §7)."
+    ),
+    "S1 passes, Arm B does not": (
+        "S1 holds for decay prediction, not for ranking layouts: the engineer's-purpose claim is "
+        "not made."
+    ),
+    "Arm B passes, S1 does not": "No claim from Arm B alone.",
+    "neither passes": "Nothing is added.",
+}
+
+
 def s1_reading(
     *, inconclusive: bool, a1: Mapping[str, Any], a2: Mapping[str, Any], a3: bool
 ) -> tuple[str, str]:
@@ -1062,51 +1105,35 @@ def s1_reading(
     ``level``).
     """
     if inconclusive:
-        return "too few completed days", "inconclusive: nothing is read"
-    if a1["passes"] and a2["passes"] and a3:
-        return (
-            "A1, A2 and A3 pass",
-            "S1 passes: level beats both readings, and most of the deviation is gone by execution",
-        )
-    if a1["passes"] and a2["passes"]:
-        return (
-            "A1 and A2 pass, A3 fails",
-            "S1 not supported: the controls disagree in sign; the result is specific to the "
-            "selected qubits",
-        )
-    if a2["mean_d"] is not None and a2["mean_d"] >= 0.0:
-        return (
-            "A2's mean D at or above zero",
-            "S1 fails: reading_at_execution is at least as good as level",
-        )
-    if a1["passes"]:
-        return (
-            "A1 passes, A2 does not",
-            "staleness: level beats the submission-time reading but not the execution-time one",
-        )
-    means = (a1["mean_d"], a2["mean_d"])
-    if all(m is not None and m < 0.0 for m in means):
-        return (
-            "A1 and A2 both fail, both mean D below zero",
-            "no claim: the data do not separate the predictors",
-        )
-    return "anything else", "reported as observed, with no S1 reading"
+        row = "too few completed days"
+    elif a1["passes"] and a2["passes"] and a3:
+        row = "A1, A2 and A3 pass"
+    elif a1["passes"] and a2["passes"]:
+        row = "A1 and A2 pass, A3 fails"
+    elif a2["mean_d"] is not None and a2["mean_d"] >= 0.0:
+        row = "A2's mean D at or above zero"
+    elif a1["passes"]:
+        row = "A1 passes, A2 does not"
+    elif all(m is not None and m < 0.0 for m in (a1["mean_d"], a2["mean_d"])):
+        row = "A1 and A2 both fail, both mean D below zero"
+    else:
+        row = "anything else"
+    return row, S1_READINGS[row]
 
 
 def arm_b_reading(*, s1_passes: bool, inconclusive: bool, passes: bool) -> tuple[str, str]:
     """Amendment 29's second table. An inconclusive Arm B adds nothing, whatever S1 says."""
     if inconclusive:
-        return "Arm B inconclusive", "nothing is added"
-    if s1_passes and passes:
-        return "S1 and Arm B pass", "S1 passes for the engineer's purpose too"
-    if s1_passes:
-        return (
-            "S1 passes, Arm B does not",
-            "S1 holds for decay prediction, not for ranking layouts",
-        )
-    if passes:
-        return "Arm B passes, S1 does not", "no claim from Arm B alone"
-    return "neither passes", "nothing is added"
+        row = "Arm B inconclusive"
+    elif s1_passes and passes:
+        row = "S1 and Arm B pass"
+    elif s1_passes:
+        row = "S1 passes, Arm B does not"
+    elif passes:
+        row = "Arm B passes, S1 does not"
+    else:
+        row = "neither passes"
+    return row, ARM_B_READINGS[row]
 
 
 def run_report(

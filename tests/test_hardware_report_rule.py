@@ -229,7 +229,7 @@ def _cond(passes: bool, mean_d: float | None) -> dict[str, Any]:
     ],
 )
 def test_every_row_of_the_s1_table_is_reached(kwargs: dict[str, Any], row: str) -> None:
-    assert hs.s1_reading(**kwargs)[0] == row
+    assert hs.s1_reading(**kwargs) == (row, hs.S1_READINGS[row])
 
 
 @pytest.mark.parametrize(
@@ -246,7 +246,7 @@ def test_every_row_of_the_arm_b_table_is_reached(
     s1: bool, inconclusive: bool, passes: bool, row: str
 ) -> None:
     out = hs.arm_b_reading(s1_passes=s1, inconclusive=inconclusive, passes=passes)
-    assert out[0] == row
+    assert out == (row, hs.ARM_B_READINGS[row])
 
 
 def test_the_report_computes_the_descriptive_figures_from_sealed_forecasts(tmp_path: Any) -> None:
@@ -574,3 +574,38 @@ def test_a_qubit_day_without_a_usable_reading_is_left_out_of_c(
     _sealed_day(tmp_path, DAY, 1.1, reading=reading)
     out = hs.run_report(tmp_path, first_day=DAY, today=DAY)["arm_a"]["c_and_s_res"]
     assert out["qubit_days"] == 1
+
+
+# Amendment 29 (PR #135 at ae2f4884), copied by hand from the pre-registration, backticks dropped.
+AMENDMENT_29_S1 = {
+    "too few completed days": "Inconclusive: nothing is read.",
+    "A1, A2 and A3 pass": "S1 passes: level beats both readings, and most of the deviation is gone "
+    "by execution. A4 reports how well the band is calibrated; c and s_res (amendment 30) say how "
+    "much of the scatter is physical.",
+    "A1 and A2 pass, A3 fails": "S1 not supported: the controls disagree in sign. The "
+    "discriminating result is reported as specific to the selected qubits, with no claim about "
+    "the chip.",
+    "A2's mean D at or above zero": "S1 fails: reading_at_execution is at least as good as level, "
+    "so the scatter is what the device does between readings (design §7).",
+    "A1 passes, A2 does not": "Staleness: level beats the submission-time reading but not, by the "
+    "rule, the execution-time one (design §7).",
+    "A1 and A2 both fail, both mean D below zero": "No claim: the data do not separate the "
+    "predictors. The estimates are reported, not read.",
+    "anything else": "Reported as observed, with no S1 reading.",
+}
+AMENDMENT_29_ARM_B = {
+    "S1 and Arm B pass": "S1 passes for the engineer's purpose too: level ranks layouts better "
+    "than reading (design §7).",
+    "S1 passes, Arm B does not": "S1 holds for decay prediction, not for ranking layouts: the "
+    "engineer's-purpose claim is not made.",
+    "Arm B passes, S1 does not": "No claim from Arm B alone.",
+    "Arm B inconclusive": "Nothing is added.",
+}
+
+
+def test_the_readings_are_amendment_29s_words() -> None:
+    assert hs.S1_READINGS == AMENDMENT_29_S1
+    assert {k: v for k, v in hs.ARM_B_READINGS.items() if k != "neither passes"} == (
+        AMENDMENT_29_ARM_B
+    )
+    assert hs.ARM_B_READINGS["neither passes"] == "Nothing is added."
