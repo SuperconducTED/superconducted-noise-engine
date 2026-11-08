@@ -469,3 +469,24 @@ is not a signal, because the record shows none and the device's marker is on `x`
 
 Amendments 16 to 23 are not on PR #135 yet: a session was analysing that PR at `51e9f425` today, and the lead asked to
 hold the push until it finishes. The wake test is not registered either, until the lead has freed memory.
+
+## Criterion 8, first attempt, 2026-11-08
+
+Appended; nothing above is edited.
+
+Two one-off tasks were registered on the lead's word on 2026-11-07: the morning routine at 06:45 Istanbul with
+its wake flag on, replaying the archived morning of 2026-11-02 in local mode from the full clone at `fa140cda`, and a
+memory logger at the same time with its wake flag off, so the logger could not wake the machine and hide whether the
+routine's own timer worked. Before registering, the exact command ran once awake (exit 0, 9.9 min with the laptop
+loaded), and a throwaway task proved the Task Scheduler launch (exit 0). Laptop, provisional.
+
+| What | Result |
+| --- | --- |
+| The routine fired unattended | **Yes.** Both tasks started at 06:45:00 and returned 0. The routine's first output is 06:45:10 and its last 06:49:21. |
+| The routine's steps | `build`, `t1 submit` and `report` each exit 0. `not_operational` is `[72]`, the four controls all ran, none left out. |
+| Memory on a quiet laptop | Commit used rose from 17.94 to a peak of 27.12 GB against a 42.14 GB limit; Python's private memory peaked at 9.92 GB; free RAM stayed at or above 4.96 GB. This is a simulated morning; a real one runs no simulator. |
+| The laptop was asleep | **No.** The System log has no Kernel-Power sleep or standby transition (ids 42, 107, 506, 507) between 2026-11-07 21:00 and the read at 08:46; the last ones are from 2026-11-05 21:05. `powercfg /lastwake` shows no wake source. AC idle sleep is "never" in the current scheme, and the lid action does not show there. |
+
+**Criterion 8 stays open.** What this attempt proves: Task Scheduler fires the routine at the hour with the app closed,
+and the routine completes on its own. What it does not prove: that a sleeping laptop wakes for it, which is the part only
+a sleep can test. Both tasks are unregistered, and the outputs stay in `C:	\wake1` outside the repository.
