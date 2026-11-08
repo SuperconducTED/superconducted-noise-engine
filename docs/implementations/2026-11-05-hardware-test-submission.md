@@ -583,3 +583,35 @@ text left open were settled in code and written back to PR #135 as amendment 36:
 jobs leaves S1 readable), and an inconclusive Arm B adds nothing. The definitions the code pins: `D` is `level`'s absolute
 error minus the other's; a day's batch index is its offset from the declared first day; Arm B job `j` is batch item `j - 2`;
 the no-information band moves each row's band by `level_o / level_q` and uses the row's own `level` readout.
+
+**Stage 2, phase 2c done (2026-11-08): the scores are sealed (amendment 27).** `950eed50`, with a follow-up `92f008ce`.
+
+| File | What changed |
+| --- | --- |
+| `scripts/hardware_submit.py` | `score` writes `results.json`, `arm-a.tsv`, `arm-b.json` and `daily-summary.json` to `<sealed>/<day>` and leaves `operations.json` in the job folder, written last; `report` reads the sealed folder, writes `report.json` there and prints only its path; `--sealed-dir` is required and refused inside the jobs folder or the clone before any network (`refuse_sealed_inside`). |
+| `scripts/hardware_t1_check.py` | `score` writes `t1-results.json` and `t1-check.json` to the sealed folder and leaves `t1-operations.json` (qubit count and fit quality counts, no value), written last. |
+| `scripts/hardware_daily.py` | `--sealed-dir` is required, refused inside the jobs folder or the clone, and passed to every score and the report; `operations.json` and `t1-operations.json` are the scored markers, so the routine never reads the sealed folder; day 15 copies the sealed folder into `jobs/sealed` after the report and before the commit. |
+| `scripts/hardware_schedule.ps1` | The wake timer is no longer described as how the run is fired: the laptop stays awake (the lead's decision above). |
+| `tests/test_hardware_*.py` | The sealing tests below, and the old tests moved to the sealed layout. |
+
+How a leak was looked for (criterion 23). A planted device returns counts whose values no other file holds: 1271 of 2048
+ones on every Arm A circuit, so `p_hat` is `0.6206054688` as the TSV writes it (ten significant digits) and
+`0.62060546875` as JSON would, and 2939 of 4096 on Arm B. The test gathers every score-derived value the sealed day holds
+(`ones`, `p_hat`, each `abs_err_` and `log_score_` cell, Arm B's measured values, each summary figure), first shows that
+each one is in the sealed folder, then looks for each, as a whole number (not inside a longer one), in every file of the jobs
+folder and in what `score` printed. The `T1` check's test does the same with planted fits. The routine's log is each
+step's stdout and stderr, so these tests cover only the stdout part; the rehearsal checks the log itself.
+
+What came out of the review before the mutation pass (`92f008ce`): `t1-operations.json` had been written before
+`t1-check.json`, so a write failing in between would have marked a day fitted with no fit and no later morning would have
+scored it; `score` and the check's `score` refused a sealed folder inside the jobs folder but not inside the clone; and no
+test called a command without `--sealed-dir`. All three fixed, each with a test that fails on `950eed50`.
+
+One edge recorded, not changed. Amendment 27 ties the unseal to the date ("committed on day 15"), and the routine does that.
+If job 14 is still running on day 15's morning, or the archive has no file after its execution yet, day 15 reports and
+unseals without it and day 16 does nothing, so job 14 would have to be scored by hand and copied in by hand
+(`unseal` copies with `dirs_exist_ok`, so running it again adds the day). Job 14 runs at 06:45 on day 14, a day earlier, so
+this needs a job to run for a day or the archive to stop for a day. The lead may want a rule for it.
+
+237 tests pass and 2 skip across the four hardware test files at `950eed50`; ruff, `ruff format`, `check_ids.py` and
+`mypy --strict` are clean on the exact pins; `scripts/hardware_reading_vs_level.py` is identical to `999acee9`.
