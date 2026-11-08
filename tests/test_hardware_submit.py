@@ -988,7 +988,12 @@ def test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network
     def no_network(*args: Any) -> Any:
         raise AssertionError("the network was reached")
 
+    def past_the_guard(*args: Any) -> Any:
+        raise AssertionError("the command went past the sealed-folder guard")
+
     monkeypatch.setattr(hs, "ibm_device", no_network)
+    monkeypatch.setattr(hs, "_fetch_archive", past_the_guard)
+    monkeypatch.setattr(hs, "resolve_archive_ref", past_the_guard)
     clone = tmp_path / "clone"
     for inside in (jobs, jobs / "sealed", job_dir / "sealed", clone, clone / "out"):
         argv = ["score", "--job-dir", str(job_dir), "--sealed-dir", str(inside)]

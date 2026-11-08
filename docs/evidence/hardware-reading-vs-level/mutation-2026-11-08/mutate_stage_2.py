@@ -347,7 +347,8 @@ def run(command: list[str], root: Path, limit: float) -> tuple[int | None, str]:
 
 def killer(output: str) -> tuple[str, str, str]:
     for row in output.splitlines():
-        match = re.match(r"^(FAILED|ERROR) (\S+)(?: - (.*))?$", row)
+        # A parametrized test id can hold spaces, so the id runs to the first " - ".
+        match = re.match(r"^(FAILED|ERROR) (.+?)(?: - (.*))?$", row)
         if match:
             message = (match.group(3) or "").strip()
             how = (
