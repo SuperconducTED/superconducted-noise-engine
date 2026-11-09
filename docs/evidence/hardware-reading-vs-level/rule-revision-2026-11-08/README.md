@@ -146,6 +146,18 @@ N6's row in section 7 says the scorer's construction is "0.008 to 0.011 higher a
 `rule-values.json`, the six gaps are 0.0080, 0.0090, 0.0100, 0.0110, 0.0070 and 0.0055, so the range is **0.0055 to 0.011**.
 The row above is left as written.
 
+## 7c. Two corrections from Bengisu's re-review, 2026-11-09
+
+Her re-review of PR #135 at `ae2f4884` (review 5819710665) found two errors here. The sections above are left as written.
+
+- Section 3 says her mean of day means and the row-pooled batch mean differ "when a day loses rows (a control left out
+  under amendment 20, or a slot missing)". A control left out does not touch A1 or A2, which use discriminating rows only,
+  so that example belongs to A3. In her cache all 1,096 discriminating records have all seven delays, so on discriminating
+  rows the two definitions differ only in a partly returned job.
+- Section 7's N7 row says "`V1` 0.049 to 0.080". The smallest `fixed_day_14` value in `rule-values.json` is 0.04715
+  (`phi = 0.5`, `rho = 0`), so the range is **0.047 to 0.080**, as amendment 19 of the pre-registration already says. Read
+  again from the JSON on 2026-11-09.
+
 ## 8. What this does not do
 
 - No hardware result exists, and nothing here is a claim about the device except N8, which describes the archive.

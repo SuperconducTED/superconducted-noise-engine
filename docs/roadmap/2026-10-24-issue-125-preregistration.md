@@ -629,10 +629,66 @@ sections above are not edited. **These amendments change the decision rule** and
     An Arm A day is completed when it has at least one scored discriminating row; an Arm B job is completed when both
     `rho_level` and `rho_reading` are finite, on the layouts both predicted. Nothing here changes a threshold.
 
+37. **Bengisu's re-review, 2026-11-09, and the lead's decisions on it.** @bengisucvd approved this branch at `ae2f4884`
+    (review 5819710665, 2026-11-08 21:19 UTC). She accepted amendments 16 to 36, compared every figure section 3.12 quotes
+    from her first review and found them unchanged, and asked for two additions before the freezing commit, a few text
+    corrections and one optional change. She re-ran `rule_values.py` from `ae2f4884` in a separate folder (`rule-values.json`
+    byte-identical) and checked three points by a second route, with her scripts in the review; `dead_qubits.py` was not
+    re-run. Laptop, provisional. The lead adopted all of it on 2026-11-09 and made the three choices she left open, marked
+    below. Amendments 16 to 36 are not edited; from now on they are read as follows. "PR #142's code" means
+    `scripts/hardware_submit.py` and `scripts/hardware_reading_vs_level.py` at `e639cf86`, read for this amendment, not run.
+
+    - **A3 under the new rule.** For each comparison (`reading` for A1's, `reading_at_execution` for A2's), the mean of `D`
+      over all control rows of the run, row-pooled as amendment 8 says, is below zero; A3 needs both. A run with no control
+      rows does not meet A3, as amendment 20 says. PR #142's code computes exactly this.
+    - **Amendment 29's first table, third row,** reads: "A1 and A2 pass, A3 fails: S1 not supported: the controls disagree in
+      sign, or the run has no control rows. The discriminating result is reported as specific to the selected qubits, with
+      no claim about the chip." The report's text changes to match on PR #142.
+    - **Amendment 29's second table gains a row** after "Arm B passes and S1 does not": "S1 does not pass and Arm B does not:
+      Nothing is added." Without it, an outcome where S1 does not pass and Arm B is decided and fails matched no row. With
+      amendment 36's row for an inconclusive Arm B, every outcome now has one. PR #142's report already has this row.
+    - **Amendment 24's comparison with her band.** Its sentence "this version is deterministic and keeps the band's
+      asymmetry" suggests her version did not keep it. It did, since it moved the band by the ratio to `level`. The sentence
+      reads: "Her simulation moved the band the same way, but to one random record of any day and either stratum; this
+      version averages over the same day's discriminating qubits, so it is deterministic." On her cached rows (137 days, 8
+      replications, `tau > 0`), this version covers 0.747 and 0.784 (nominal, widened) in her scenario N, 0.581 and 0.625 in
+      F, and 0.260 and 0.290 in S. That is 0.03 to 0.04 below her version in N and F, so the gap to the real band (1.000 and
+      0.789 widened) grows slightly. The reading does not change.
+    - **The no-information band is reported nominal and widened**, like the band itself. The run's single value of each is
+      formed like A4's coverage: row-weighted over the `tau > 0` discriminating rows. PR #142's code does this.
+    - **Amendment 26: ties and the layout floor** (the lead's decision: state the rule as built, with no new threshold).
+      The Spearman correlation uses average ranks, so tied values share the mean rank. A job is scored only on the layouts
+      that both `level` and `reading` predicted, at least two of them. If either ranking is constant there, its correlation
+      is undefined and the job is not completed. With two layouts a correlation can only be +1 or -1, so the report gives
+      each job's layout count. A higher floor would be a new threshold, and it would owe its no-information value first
+      (section 3.8).
+    - **Amendment 30: how `c`'s uncertainty is reported** (the lead's decision). `c` is reported with a 90% interval from the
+      same circular 3-day calendar blocks as A1's and A2's sensitivity (amendment 25), with `c` refitted on each draw and the
+      percentile ends taken. As with that sensitivity, no interval is given while the calendar is no longer than one block,
+      so not before day 4. `s_res` stays a point estimate. Neither is part of the decision rule. To be built on PR #142.
+    - **Amendment 36: partial days.** A day with at least one scored discriminating row is completed even if it lost rows.
+      N2 measured only wholly missed days, so a partly returned day is not measured. Row-pooled batch means give such a day
+      less weight.
+    - **A control that is not operational at the freeze** (her suggestion; the lead's decision on where it runs). Today a
+      control already dead when the controls are frozen is left out on all 14 days and never replaced (amendment 20).
+      Amendment 20's test is therefore also applied to the control candidates when they are frozen: `--mode controls` also
+      excludes any candidate whose `x` or `sx` `gate_error` is at least 1 in the newest archived capture at the freezing
+      ref, or that is absent from that capture's target when the capture has a configuration. The next candidate by
+      proposal D's rule takes its place, and the excluded qubits are written into `controls.json`. The test reads only the
+      device's status, never a result, so it does not conflict with proposal D. A control that dies after the freeze is
+      still left out that day, as amendment 20 says. To be built on PR #142; which controls it changes, if any, is measured
+      there after this text is committed.
+    - **Two corrections to `rule-revision-2026-11-08/README.md`**, in its dated section 7c: section 3's example of where the
+      two batch definitions differ belongs to A3, and N7's range starts at 0.047, as amendment 19 already says.
+
 ### 3.13 What this branch still owes before the freezing commit
 
 The code for these amendments belongs on PR #142, not here: amendment 20's is built there; 24 to 30 and 34 are still to build. The lead asks @bengisucvd to read sections 3.11 and 3.12
 before the freezing commit: they are the rule the two of them agree, and her review's proposals are now written in his words.
+
+**As of 2026-11-09.** The paragraph above is from 2026-11-08. PR #142 has since built amendments 24 to 30 and 34
+(`e639cf86`), and @bengisucvd read sections 3.11 and 3.12 and approved (amendment 37). Still owed on PR #142 before the
+freezing commit: amendment 37's new third-row text, `c`'s interval and the controls test.
 
 ## 4. The budget
 
@@ -705,6 +761,19 @@ Appended; the tables above are not edited.
 | Values the new rules owe | Mert | measured: `rule-revision-2026-11-08/` at `1a220220` |
 | Statistics review | Bengisu | done 2026-11-07 (CHANGES_REQUESTED); her reading of sections 3.11 and 3.12 is owed |
 | The controls re-run at the freezing ref (proposal D) | Mert | after the above |
+| The second account for the daily cadence | Mert names it | before job 2 (section 5) |
+
+### 6.4 As of 2026-11-09
+
+Appended; the tables above are not edited.
+
+| Item | Owner | State on 2026-11-09 |
+| --- | --- | --- |
+| The offline half (PR #140) | Mert; Burak reviews and reproduces | unchanged since 2026-11-08: holds for his desktop dry run |
+| The submission script (PR #142) | Mert; Burak reproduces | draft at `e639cf86`; amendments 20, 24 to 30 and 34 built; amendment 37's three code items owed; Burak's desktop run after PR #140 merges |
+| Statistics review | Bengisu | **done**: approved at `ae2f4884` on 2026-11-08; amendment 37 answers her re-review, and her reading of it is asked |
+| Amendments 16 to 37 | Mert | sections 3.11 and 3.12 |
+| The controls re-run at the freezing ref (proposal D) | Mert | with amendment 37's test, after PR #142's code |
 | The second account for the daily cadence | Mert names it | before job 2 (section 5) |
 
 ## 7. Related

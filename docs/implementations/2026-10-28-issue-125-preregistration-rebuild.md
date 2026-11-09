@@ -312,6 +312,46 @@ Bengisu's review.
 her review. Both documents and the body were reworded on 2026-11-05, before any review of them; this
 is the one place today's new text was edited instead of appended to. No value or rule changes.
 
+## Update, 2026-11-09: amendment 37, from Bengisu's re-review
+
+**Problem.** @bengisucvd approved this branch at `ae2f4884` (review 5819710665) and asked for two additions
+before the freezing commit: A3's statistic was never restated after amendment 25 moved A1 and A2 to batch
+means, and amendment 29's second table had no row for "S1 does not pass, Arm B decided and failed". She
+also sent five text corrections, two README errors and one optional change: apply amendment 20's test to the
+control candidates at the freeze.
+
+**What changed.**
+
+| File | Change |
+| --- | --- |
+| `docs/roadmap/2026-10-24-issue-125-preregistration.md` | Amendment 37 in section 3.12; a dated note under section 3.13; section 6.4. Nothing above is edited. |
+| `docs/evidence/hardware-reading-vs-level/rule-revision-2026-11-08/README.md` | Section 7c: section 3's example belongs to A3; N7's range starts at 0.047. |
+| `docs/implementations/2026-10-28-issue-125-preregistration-rebuild.md` | This update. |
+
+**Approach.** Each ask was checked against PR #142's code at `e639cf86` before it was written, so the
+text states what the scorer does: A3 there is already the row-pooled mean of `D` over all control rows,
+below zero for both comparisons, and none means A3 fails (`run_report`). The second table's missing row
+already exists ("neither passes"). Spearman uses average ranks. The no-information band is reported nominal
+and widened, row-weighted. Where the code and her ask differ, the lead decided on 2026-11-09:
+the third reading row gains "or the run has no control rows"; `c` gets a 90% interval from 3-day calendar
+blocks; the dead-control test runs inside `--mode controls`. Those three are code owed on PR #142. Arm B's
+layout floor is stated as built (at least two layouts both predicted), with no new threshold.
+
+**Mathematical details.** No formula changes. A3: for `other` in {`reading`, `reading_at_execution`},
+`mean over control rows of D = |p_hat - p_level| - |p_hat - p_other|` must be below zero for both. `c`'s
+interval: resample days in circular blocks of 3 over the declared 14-day calendar (empty days kept), refit
+`c = sum(x y) / sum(x^2)` on each draw, and take the 5th and 95th percentiles. It is reported only when the
+calendar is longer than one block.
+
+**Design decisions.** Raising Arm B's layout floor was rejected for now: it would be a new threshold, which
+section 3.8 says must owe its no-information value first. A separate refusing check at the freeze was the
+alternative to running the dead-control test inside `--mode controls`. It was rejected because it would
+need a manual re-run, while `propose_controls` already takes an exclusion set.
+
+**Verification.** Text only, nothing run on this branch. N7's 0.04715 was read from `rule-values.json` on
+2026-11-09. Every "PR #142's code" claim was read at `e639cf86`, not executed. Her figures quoted in
+amendment 37 are from her review, laptop, provisional.
+
 ## Related docs
 
 - `docs/roadmap/2026-10-24-issue-125-preregistration.md` (the draft this changes)
