@@ -1,0 +1,37 @@
+<section id="grid" style="background:#EEF3F5;color:#2E3E46;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<p style="font-family:'Space Mono', 'Courier New', monospace;font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#0A6C7C">Yöntem · gecikme ızgarası</p>
+<h2 style="font-size:56px;font-weight:600;line-height:1.2;color:#0A1B24">Kazananı Izgara Seçmemeli</h2>
+<p style="font-size:28px;font-weight:700;line-height:1.35;color:#0A1B24;border-left:6px solid #0A6C7C;padding-left:20px">Bir öngörücüye merkezli ızgara diğerini kayırır; iki ızgaranın birleşimi bu eğilimi kaldırır (NC-087).</p>
+<div style="display:flex;gap:40px">
+<div style="width:620px;display:flex;flex-direction:column;gap:8px">
+<svg aria-label="Şematik, veri değil: üstel bir bozunum eğrisi; seviyeye merkezli gecikmeler düz teal çizgilerle, okumaya merkezli gecikmeler kesikli turuncu çizgilerle işaretli; birleşim ızgarası ikisini de kullanır" width="620" height="340" viewBox="0 0 620 340" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="620" height="340" fill="#F8FAFB"/>
+<line x1="40" y1="320" x2="600" y2="320" stroke="#45535A" stroke-width="2"/>
+<line x1="40" y1="40" x2="40" y2="320" stroke="#45535A" stroke-width="2"/>
+<line x1="130" y1="40" x2="130" y2="320" stroke="#0A6C7C" stroke-width="5"/>
+<line x1="220" y1="40" x2="220" y2="320" stroke="#0A6C7C" stroke-width="5"/>
+<line x1="400" y1="40" x2="400" y2="320" stroke="#0A6C7C" stroke-width="5"/>
+<line x1="94" y1="40" x2="94" y2="320" stroke="#A34A12" stroke-width="5" stroke-dasharray="10 8"/>
+<line x1="148" y1="40" x2="148" y2="320" stroke="#A34A12" stroke-width="5" stroke-dasharray="10 8"/>
+<line x1="256" y1="40" x2="256" y2="320" stroke="#A34A12" stroke-width="5" stroke-dasharray="10 8"/>
+<polyline points="40,60 85,117 130,162 175,197 220,224 310,262 400,285 490,299 580,307" fill="none" stroke="#0A1B24" stroke-width="5"/>
+</svg>
+<p style="font-size:24px;line-height:1.35;color:#45535A">Şematik, veri değil. Siyah: uyarılmış durumun bozunumu. Düz teal: T1_level katlarındaki gecikmeler. Kesikli turuncu: T1_reading katları.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<table style="width:1004px;font-size:24px;line-height:1.35;color:#2E3E46;border:1px solid #C9D3D8">
+<tr style="background:#DCE6EA"><th style="width:40%;text-align:left;color:#0A1B24">Eşitlik noktası a* (0.5 üstü okumayı kayırır)</th><th style="width:30%;text-align:left;color:#0A1B24">Okuma seviyenin 0.75 · 1.0 · 1.75 altında</th><th style="width:30%;text-align:left;color:#0A1B24">Okuma seviyenin 0.75 · 1.0 · 1.75 üstünde</th></tr>
+<tr style="background:#F8FAFB"><td>Tasarımın ızgarası, {0, 0.5, 1, 2} × T1_level</td><td>0.539 · 0.562 · 0.653</td><td>0.513 · 0.527 · 0.582</td></tr>
+<tr style="background:#F8FAFB"><td>Birleşim ızgarası, yedi gecikme (kabul edildi)</td><td>0.512 · 0.515 · 0.526</td><td>0.488 · 0.485 · 0.474</td></tr>
+</table>
+<ul style="font-size:24px;line-height:1.45;padding-left:28px">
+<li>Tasarımın ızgarası iki işarette de okumaya yaslanıyordu: S1 aleyhine bir yanlılık</li>
+<li>Birleşim ızgarası: {0} ∪ {0.5, 1, 2} × T1_level ∪ {0.5, 1, 2} × T1_reading</li>
+<li>2&#8239;048 shot gürültüsü hiçbir eşitlik noktasını 0.000004’ten fazla oynatmaz</li>
+<li>Ölçüm değil, hesaplama: arşiv yok, donanım yok</li>
+</ul>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#45535A">10 · NC-087 (ön kayıt dalı, scripts/hardware_test_grid_bias.py) · ön kayıt §3.3</p>
+<aside>Bu bir sürprizdi. PR #126’nın kaydı, tasarımın ızgarasının seviyeyi kayırdığını söylüyordu. Hesaplanınca okumayı kayırdığı çıktı, hem de iki tarafta; çünkü ızgaranın merkezlendiği tahmin eğrinin en dik yerine düşüyor ve aynı hata için en çok bedeli ödüyor. Resimdeki teal ve turuncu ızgaraların birleşimi bu yanlılığı kaldırıyor; bütçe kısıt olmadığı için üç ek gecikme her öngörücüye en duyarlı noktalarını kazandırıyor.</aside>
+</section>
