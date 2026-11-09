@@ -14,7 +14,7 @@ did not include.
 
 Out of this slice, and blocked elsewhere: `scripts/train_anfis.py` and the JSON
 round trip (FR-15, FR-16; they need #62's `dump_rule_base` / `load_rule_base`),
-the archive fit (step 9; it needs #63's training set), the import of #61's
+the archive fit (step 9), the import of #61's
 `effective_weights` and its analytic gradient, and the ADR-014 / ADR-024
 ledger notes (step 11). ADR-014 stays **Deferred**; ADR-009 and ADR-011 stay
 Open.
@@ -27,7 +27,9 @@ Open.
 | `tests/test_anfis.py` | Replaces the M2 test that `epochs > 0` raises with 20 tests for the premise stage, early stopping and their contracts. |
 | `docs/evidence/anfis-premise-stage/` | Holds the script, the TSVs and the README for the planted 3x3x3 recovery and conditioning measurements below. |
 | `docs/implementations/2026-10-18-anfis-premise-stage.md` | This record. |
-| `docs/numerical-claims.md` | Updates NC-021 to the direct collection at this branch's code commit (Rule 6). |
+
+NC-021 was not changed in this PR; its count records a different, earlier
+main-tree measurement, not this branch's test count.
 
 `fuzzy/tsk.py`, `channels/kraus.py`, `interfaces.py`, `types.py` and
 `pyproject.toml` are unchanged.
@@ -134,16 +136,26 @@ strictly decreases at every accepted step. With `ridge = 0` and no weights,
 `loss_history` equals `S / n` up to rounding, so it falls with `S`. Otherwise
 `loss_history` reports only the unweighted data term, as in M2.
 
-**Early stopping (FR-6).** The validation loss is the unweighted section 6.4
-loss over the validation rows that fire, in the training standardization. A
-state improves on the best only if its validation loss is strictly lower.
+**Early stopping (FR-6).** The validation loss is the unweighted mean over
+all validation rows of the sum of squared standardized output errors, using
+the training standardization. Validation weights do not affect it even when
+training weights are supplied. The initial fitted state must produce finite
+outputs on every validation row, or `fit` raises `ValueError`. A trial premise
+that loses any validation row is rejected and halved, just like a trial that
+loses a kept training row. This also applies when `epochs=0`: partial
+validation coverage is now an error rather than an M2 partial-row metric.
+The returned per-output `validation_rmse` is unweighted and in raw units.
+A state improves on the best only if its validation loss is strictly lower:
+there is deliberately no minimum-improvement threshold, so even a tiny
+strict improvement resets patience.
 After `patience` epochs without improvement the loop stops; `early_stopped` is
 true exactly when fewer than `epochs` epochs ran. The returned state is the
 best-validation one. `loss_history` covers every epoch run, `epochs_run + 1`
 entries with entry 0 the M2 state, so the returned state is
 `loss_history[epochs_run - patience]` when the run stopped early. Without a
 validation set every epoch runs and the last state is returned. It is also the
-state with the lowest `S`.
+state with the lowest `S`. Patience limits non-improvement; it is not a
+convergence test.
 
 **Identifiability and conditioning.** With the product t-norm and normalized
 weights, a rule's weight depends on its Gaussian MFs only through
@@ -206,7 +218,10 @@ epoch moved, not that it moved at the full rate. Source:
 Recovery of the premise parameters is therefore slow and partial with plain
 gradient descent, as the conditioning predicts. The training and held-out
 fits improve much faster than the parameters do. For the archive fit (step 9)
-this means more epochs and a premise rate tuned on the validation split. It
+this means more epochs and a premise rate tuned on the validation split. A
+metric used to select that rate is a validation-selection metric, not an
+unbiased out-of-sample estimate; report it as such and use a separate held-out
+test split for an out-of-sample claim. It
 also makes #61's analytic gradient a speed path worth having: each finite-
 difference epoch costs `2P` forward passes over all rows.
 
@@ -237,13 +252,15 @@ desktop figure, which step 9 records.
    order the issue gives: solve, step, solve, step. Each epoch is scored after
    its solve, so the state compared on validation, and possibly returned, has
    consequents solved at its own premise. Epoch 0 is the M2 state.
-3. **Training rows are fixed at the warm start.** Rows dropped by FR-12 at the
+3. **Training and validation rows are fixed.** Rows dropped by FR-12 at the
    warm start stay dropped, and a step that would stop a kept row from firing
-   is rejected. Otherwise a step could lower the loss by pushing hard rows out
-   of every support, which matters for compact shapes such as the triangle.
+   is rejected. All validation rows must fire initially and remain firing.
+   Otherwise a step could lower the loss by pushing hard rows out of every
+   support, which matters for compact shapes such as the triangle.
 4. **Row weights.** The premise stage descends the same weighted data term
    the solve minimizes. Without weights this is section 6.4's `L`.
-   `loss_history` keeps the M2 unweighted definition.
+   `loss_history` keeps the M2 unweighted definition. Validation selection
+   and raw-unit validation RMSE are unweighted, regardless of training weights.
 5. **Without validation, the last state.** With decision 1 it is also the
    state with the lowest `S`.
 6. **Defaults are unchanged from M2.** `fd_step = 6e-6` (the cube root of
@@ -251,8 +268,7 @@ desktop figure, which step 9 records.
    `premise_lr = 1e-2`. The planted fixtures need rates of 50 to 1e4, because
    their residual is near zero and the gradients are tiny. A real archive fit
    has a larger residual, so a default tuned on planted data would be wrong
-   there. The archive fit sets `premise_lr` from its validation split, and the
-   default is part of decision 4.
+   there. The default is a placeholder for step 9 and part of decision 4.
 7. **One-sided differences and zero gradients are not reported.**
    `TrainingDiagnostics` has no field for them, and its field list is fixed by
    #57 (FR-11), which this slice does not reopen. The M3 findings doc wants
@@ -264,10 +280,15 @@ desktop figure, which step 9 records.
    differences go through the trainer's forward pass, whose IT2 weights use
    both firing bounds, so `gradients.py` and this stage differentiate the
    same function.
+9. **Archive validation is a future script requirement.** `fit` deliberately
+   accepts `validation=None` for general use. The not-yet-implemented FR-15
+   `scripts/train_anfis.py` must reject an archive fit without a nonempty
+   snapshot-boundary validation split before calling `fit`; its own tests must
+   exercise that rejection. Neither enforcement nor its test exists in this PR.
 
 ## Verification
 
-At `6d98f0d` (code and tests) on the pinned stack (numpy 2.4.4, scipy
+Historical run at `6d98f0d` (code and tests) on the pinned stack (numpy 2.4.4, scipy
 1.17.1, ruff 0.15.12, mypy 1.20.2, pytest 9.0.3) under Python 3.13.16, in a
 Linux cloud sandbox. Provisional: NFR-8's canonical record is the batch
 desktop run.
@@ -281,7 +302,7 @@ desktop run.
   The skip is `test_the_committed_survey_reproduces_from_the_archive`, which
   needs the `calibration-data` ref that a shallow clone lacks.
 - `python -m pytest tests/ --collect-only -q -o addopts="" -p no:cacheprovider`:
-  879 collected; NC-021.
+  879 collected at that historical commit, not the current PR tree or NC-021.
 - `git diff main -- src/superconducted/fuzzy/tsk.py src/superconducted/channels/kraus.py src/superconducted/interfaces.py src/superconducted/types.py pyproject.toml`:
   empty.
 

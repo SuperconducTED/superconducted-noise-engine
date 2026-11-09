@@ -86,12 +86,14 @@ class HybridANFISTrainer(TSKTrainer):
             ``epochs > 0`` until it merges.
         validation: Optional compatible raw-unit validation set. When given,
             training stops after ``patience`` epochs without a validation
-            improvement and returns the best-validation state.
+            improvement and returns the best-validation state. Every validation
+            row must fire at the initial fit and at each accepted premise.
         fd_step: Positive relative central-difference step.
         patience: Positive number of non-improving epochs before stopping.
         max_halvings: Non-negative number of learning-rate halvings tried
             when a premise step leaves a shape's valid domain, stops a kept
-            training row from firing, or does not lower the training loss.
+            training or validation row from firing, or does not lower the
+            training loss.
 
     ``fit`` returns a new rule base, never mutates caller-owned membership
     functions or consequent arrays, and excludes zero-firing training rows
@@ -203,6 +205,10 @@ class HybridANFISTrainer(TSKTrainer):
                 (self._validation.features - feature_mean) / feature_scale,
                 (self._validation.targets - target_mean) / target_scale,
             )
+            if not math.isfinite(_validation_loss(fitted, *standardized_validation)):
+                raise ValueError(
+                    "initial model must produce finite outputs for every validation row"
+                )
         outcome = self._alternate(
             standardized,
             _Candidate(fitted, premise_layout(standardized).flatten(), condition_number),
@@ -223,6 +229,8 @@ class HybridANFISTrainer(TSKTrainer):
             validation_predictions, validation_kept = _predictions_with_mask(
                 raw_rule_base, self._validation.features
             )
+            if not np.all(validation_kept):
+                raise ValueError("returned model has zero firing strength on a validation row")
         _ensure_finite_model(
             raw_rule_base,
             ((raw_predictions, np.ones(raw_predictions.shape[0], dtype=np.bool_)),)
@@ -291,7 +299,15 @@ class HybridANFISTrainer(TSKTrainer):
             if weights is None
             else np.asarray(weights / np.mean(weights), dtype=np.float64),
         )
-        solve = _ConsequentSolver(standardized, layout, features, targets, weights, self._ridge)
+        solve = _ConsequentSolver(
+            standardized,
+            layout,
+            features,
+            targets,
+            weights,
+            self._ridge,
+            None if validation is None else validation[0],
+        )
         start = solve(initial.premise)
         if start is None:
             raise RuntimeError("the warm-start premise is outside the loss's domain")
@@ -394,7 +410,10 @@ class _PremiseObjective:
             self.layout.set_flat(premise)
         except ValueError:
             return None
-        predictions, fired = _predictions_with_mask(rule_base, self.features)
+        try:
+            predictions, fired = _predictions_with_mask(rule_base, self.features)
+        except OverflowError:
+            return None
         if not np.all(fired):
             return None
         loss = float(np.mean(self.weights * np.sum((predictions - self.targets) ** 2, axis=1)))
@@ -417,6 +436,7 @@ class _ConsequentSolver:
     targets: npt.NDArray[np.float64]
     weights: npt.NDArray[np.float64] | None
     ridge: float
+    validation_features: npt.NDArray[np.float64] | None = None
 
     def __call__(self, premise: npt.NDArray[np.float64]) -> tuple[_Candidate, float] | None:
         """Return the solved candidate and its score, or ``None`` off the domain.
@@ -430,7 +450,14 @@ class _ConsequentSolver:
             self.layout.set_flat(premise)
         except ValueError:
             return None
-        design, fired = _design_matrix(self.standardized, self.features)
+        try:
+            design, fired = _design_matrix(self.standardized, self.features)
+            if self.validation_features is not None:
+                _, validation_fired = _design_matrix(self.standardized, self.validation_features)
+                if not np.all(validation_fired):
+                    return None
+        except OverflowError:
+            return None
         if not np.all(fired):
             return None
         fitted, condition_number = _fit_consequents(
@@ -594,11 +621,12 @@ def _validation_loss(
     features: npt.NDArray[np.float64],
     targets: npt.NDArray[np.float64],
 ) -> float:
-    """Standardized validation loss over firing rows; ``inf`` if none fire."""
+    """Unweighted standardized validation loss, or ``inf`` if any row is invalid."""
     predictions, fired = _predictions_with_mask(rule_base, features)
-    if not np.any(fired):
+    if not np.all(fired) or not np.all(np.isfinite(predictions)):
         return math.inf
-    return float(np.mean(np.sum((predictions[fired] - targets[fired]) ** 2, axis=1)))
+    loss = float(np.mean(np.sum((predictions - targets) ** 2, axis=1)))
+    return loss if math.isfinite(loss) else math.inf
 
 
 def _validate_validation(validation: TrainingSet, training: TrainingSet) -> None:

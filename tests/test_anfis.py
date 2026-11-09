@@ -27,11 +27,13 @@ from superconducted.training.anfis import (
     _finite_difference_gradient,
     _log_space_mask,
     _predict,
+    _predictions_with_mask,
     _premise_step,
     _PremiseObjective,
     _standardization,
     _to_raw_rule_base,
     _to_standardized_rule_base,
+    _validation_loss,
 )
 from superconducted.training.parameters import count_trainable_parameters, premise_layout
 
@@ -1159,3 +1161,96 @@ def test_rows_dropped_at_the_warm_start_stay_dropped_through_premise_epochs() ->
     assert result.train_rmse == pytest.approx(
         evaluate_rmse(result.rule_base, _data(features[:-1], data.targets[:-1])), rel=1e-12
     )
+
+
+def test_noisy_planted_grid_rejects_overflowing_premise_step() -> None:
+    axes = np.meshgrid(
+        np.linspace(98.8, 154.4, 6),
+        np.linspace(67.4, 110.5, 6),
+        np.linspace(0.0171, 0.0374, 6),
+        indexing="ij",
+    )
+    features = np.column_stack([axis.ravel() for axis in axes])
+    targets = _targets_of(_planted_grid(False, warm=False), features)
+    rng = np.random.default_rng(1)
+    rng.normal(0, 0 * targets.std(axis=0), targets.shape)
+    data = _data(features, targets + rng.normal(0, 0.5 * targets.std(axis=0), targets.shape))
+    warm = _planted_grid(False, warm=True)
+
+    baseline = HybridANFISTrainer().fit(warm, data)
+    result = HybridANFISTrainer(epochs=1, premise_lr=1e4).fit(warm, data)
+
+    assert result.diagnostics.premise_steps_rejected == 1
+    assert result.loss_history == (baseline.loss_history[0],) * 2
+    assert np.array_equal(_consequents(result.rule_base), _consequents(baseline.rule_base))
+
+
+def test_validation_rows_cannot_disappear_during_training() -> None:
+    warm = TSKRuleBase(
+        [
+            TSKRule((mf,), np.array([[0.1, 0.1]]))
+            for mf in (TriangularMF(-2.2, -1.0, 0.3), TriangularMF(-0.3, 1.0, 2.2))
+        ],
+        input_dim=1,
+        output_dim=1,
+    )
+    train_features = np.linspace(-1.0, 1.0, 14)[:, None]
+    val_features = np.array([-0.8, -0.5, -0.25, -0.1, -0.03, 0.0, 0.03, 0.1, 0.25, 0.5, 0.8])[
+        :, None
+    ]
+    data = _data(train_features, np.tanh(20 * train_features))
+    validation = _data(val_features, np.tanh(20 * (val_features - 0.1)))
+
+    baseline = HybridANFISTrainer(validation=validation).fit(warm, data)
+    result = HybridANFISTrainer(epochs=30, premise_lr=30.0, validation=validation).fit(warm, data)
+
+    predictions, fired = _predictions_with_mask(result.rule_base, validation.features)
+    assert np.all(fired)
+    assert result.validation_rmse == pytest.approx(
+        np.sqrt(np.mean((predictions - validation.targets) ** 2, axis=0))
+    )
+    assert result.validation_rmse is not None
+    assert baseline.validation_rmse is not None
+    assert result.validation_rmse[0] <= baseline.validation_rmse[0]
+
+
+@pytest.mark.parametrize("epochs", [0, 1])
+def test_initial_model_must_cover_every_validation_row(epochs: int) -> None:
+    warm = TSKRuleBase([TSKRule((TriangularMF(-1.0, 0.0, 1.0),), np.array([[0.1, 0.2]]))], 1, 1)
+    data = _data(np.array([[-0.5], [0.5]]), np.array([[0.1], [0.3]]))
+    validation = _data(np.array([[0.0], [2.0]]), np.array([[0.2], [0.3]]))
+
+    assert np.isinf(_validation_loss(warm, validation.features, validation.targets))
+    with pytest.raises(ValueError, match="every validation row"):
+        HybridANFISTrainer(epochs=epochs, validation=validation).fit(warm, data)
+
+
+def test_solver_rejects_candidate_losing_validation_row() -> None:
+    warm = TSKRuleBase([TSKRule((TriangularMF(-1.0, 0.0, 1.0),), np.array([[0.1, 0.2]]))], 1, 1)
+    layout = premise_layout(warm)
+    train = np.array([[-0.5], [0.5]])
+    validation = np.array([[0.8]])
+    solve = _ConsequentSolver(warm, layout, train, np.array([[0.1], [0.3]]), None, 0.0, validation)
+    assert solve(layout.flatten()) is not None
+    assert solve(np.array([-1.0, 0.0, 0.7])) is None
+
+
+def test_validation_loss_sums_outputs_and_ignores_row_weights() -> None:
+    rule_base = TSKRuleBase(
+        [TSKRule((GaussianMF(0.0, 1.0),), np.array([[0.1, 0.2], [0.3, 0.4]]))], 1, 2
+    )
+    features = np.array([[-0.5], [0.0], [0.5]])
+    targets = np.array([[0.0, 0.1], [0.2, 0.0], [0.1, 0.8]])
+    predictions, fired = _predictions_with_mask(rule_base, features)
+    assert np.all(fired)
+    assert _validation_loss(rule_base, features, targets) == pytest.approx(
+        np.mean(np.sum((predictions - targets) ** 2, axis=1))
+    )
+
+    data = _data(features, targets)
+    first = _data(features, targets, weights=np.array([100.0, 1.0, 1.0]))
+    second = _data(features, targets, weights=np.array([1.0, 1.0, 100.0]))
+    a = HybridANFISTrainer(epochs=2, validation=first).fit(rule_base, data)
+    b = HybridANFISTrainer(epochs=2, validation=second).fit(rule_base, data)
+    assert a.loss_history == b.loss_history
+    assert a.validation_rmse == pytest.approx(b.validation_rmse)
