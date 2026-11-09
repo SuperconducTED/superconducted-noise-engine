@@ -1018,6 +1018,50 @@ def slope_and_spread(points: Sequence[tuple[float, float]]) -> dict[str, Any]:
     return {"c": c, "s_res": float((q90 - q10) / (2.0 * Z90)), "qubit_days": len(points)}
 
 
+def c_block_interval(
+    points: Sequence[tuple[float, float, date]],
+    *,
+    span: tuple[date, date],
+    seed: int,
+    n_boot: int = 10_000,
+    level: float = 0.90,
+) -> list[float] | None:
+    """Amendment 37's interval for ``c``: A1's block 3 draws, with ``c`` refitted on each draw.
+
+    ``points`` are ``(x, y, day)`` qubit-days. Each draw takes ``ceil(n_days / BLOCK_DAYS)``
+    circular blocks of calendar days over ``span``, empty days kept, exactly as PR #140's
+    ``calendar_block_bootstrap`` does, and its value is the slope through the origin,
+    ``sum(x y) / sum(x^2)``, over the drawn days' points; a draw with ``sum(x^2) = 0`` is drawn
+    again. Returns the percentile ends, or ``None`` while the calendar is no longer than one block
+    (so not before day 4) and when ``c`` itself is undefined. Not part of the decision rule.
+    """
+    first, last = span
+    n_days = (last - first).days + 1
+    if n_days <= BLOCK_DAYS or not points:
+        return None
+    sxy = np.zeros(n_days)
+    sxx = np.zeros(n_days)
+    for x, y, day in points:
+        sxy[(day - first).days] += x * y
+        sxx[(day - first).days] += x * x
+    if sxx.sum() == 0.0:
+        return None
+    n_blocks = math.ceil(n_days / BLOCK_DAYS)
+    rng = np.random.default_rng(seed)
+    offsets = np.arange(BLOCK_DAYS)
+    draws: list[float] = []
+    while len(draws) < n_boot:
+        starts = rng.integers(0, n_days, size=n_blocks)
+        days = ((starts[:, None] + offsets[None, :]) % n_days).reshape(-1)
+        denominator = sxx[days].sum()
+        if denominator == 0.0:
+            continue
+        draws.append(float(sxy[days].sum() / denominator))
+    alpha = (1.0 - level) / 2.0
+    low, high = np.quantile(np.asarray(draws), [alpha, 1.0 - alpha])
+    return [float(low), float(high)]
+
+
 def _source(state: Mapping[str, Any], name: str, qubit: int) -> QubitSource | None:
     values = state.get("sources", {}).get(name, {}).get(str(qubit))
     return None if values is None else QubitSource(*(float(v) for v in values))
@@ -1070,8 +1114,11 @@ def no_information_coverage(
     return nominal, widened
 
 
-# Amendment 29's two tables (PR #135, section 3.12) in its own words, Markdown backticks dropped.
-# The keys are the rows' short names, which the report also writes.
+# Amendment 29's two tables (PR #135, section 3.12, merged as d929424a) in its own words, Markdown
+# backticks dropped, as amendment 37 amends them: the first table's third row names a run with no
+# control rows, and the second gains its last row, for an S1 that does not pass beside a decided,
+# failed Arm B, which matched no row before. The keys are the rows' short names, which the report
+# also writes.
 S1_READINGS: dict[str, str] = {
     "too few completed days": "Inconclusive: nothing is read.",
     "A1, A2 and A3 pass": (
@@ -1080,8 +1127,9 @@ S1_READINGS: dict[str, str] = {
         "the scatter is physical."
     ),
     "A1 and A2 pass, A3 fails": (
-        "S1 not supported: the controls disagree in sign. The discriminating result is reported "
-        "as specific to the selected qubits, with no claim about the chip."
+        "S1 not supported: the controls disagree in sign, or the run has no control rows. The "
+        "discriminating result is reported as specific to the selected qubits, with no claim "
+        "about the chip."
     ),
     "A2's mean D at or above zero": (
         "S1 fails: reading_at_execution is at least as good as level, so the scatter is what the "
@@ -1096,8 +1144,6 @@ S1_READINGS: dict[str, str] = {
     ),
     "anything else": "Reported as observed, with no S1 reading.",
 }
-# "neither passes" is not a row of amendment 29's table: Arm B adds to the S1 reading and never
-# changes it, so with no row that applies nothing is added, as amendment 36 says for inconclusive.
 ARM_B_READINGS: dict[str, str] = {
     "Arm B inconclusive": "Nothing is added.",
     "S1 and Arm B pass": (
@@ -1109,7 +1155,7 @@ ARM_B_READINGS: dict[str, str] = {
         "not made."
     ),
     "Arm B passes, S1 does not": "No claim from Arm B alone.",
-    "neither passes": "Nothing is added.",
+    "S1 does not pass and Arm B does not": "Nothing is added.",
 }
 
 
@@ -1149,7 +1195,7 @@ def arm_b_reading(*, s1_passes: bool, inconclusive: bool, passes: bool) -> tuple
     elif passes:
         row = "Arm B passes, S1 does not"
     else:
-        row = "neither passes"
+        row = "S1 does not pass and Arm B does not"
     return row, ARM_B_READINGS[row]
 
 
@@ -1203,7 +1249,8 @@ def run_report(
             states[day] = _read_json(named[day] / "sealed.json")
     discriminating = [r for r in rows if r["stratum"] == "discriminating"]
     control = [r for r in rows if r["stratum"] == "control"]
-    seeds = np.random.SeedSequence(SEED).generate_state(2, dtype=np.uint32)
+    # A1, A2 and c's interval; the first two words are those generate_state(2) gives.
+    seeds = np.random.SeedSequence(SEED).generate_state(3, dtype=np.uint32)
 
     def condition(other: str, seed: int) -> dict[str, Any]:
         pairs = level_minus_other(discriminating, other)
@@ -1255,7 +1302,7 @@ def run_report(
         "no_information_coverage_widened": _mean(no_widened),
     }
 
-    points: list[tuple[float, float]] = []
+    points: list[tuple[float, float, date]] = []
     for day, state in states.items():
         per_qubit: dict[int, list[dict[str, Any]]] = {}
         for r in discriminating:
@@ -1269,7 +1316,7 @@ def run_report(
                 [(float(r["tau_s"]), int(r["ones"]), int(r["shots"])) for r in q_rows], level
             )
             if fit is not None:
-                points.append((math.log(reading_src.t1) - math.log(level.t1), fit))
+                points.append((math.log(reading_src.t1) - math.log(level.t1), fit, day))
 
     arm_b = _arm_b_report(arm_b_jobs, first_day=first_day)
     b_row, b_text = arm_b_reading(
@@ -1294,7 +1341,11 @@ def run_report(
             "A2_level_beats_reading_at_execution": a2,
             "A3_sign_holds_on_controls": a3,
             "A4_band_calibration_report": a4,
-            "c_and_s_res": slope_and_spread(points),
+            "c_and_s_res": {
+                **slope_and_spread([(x, y) for x, y, _ in points]),
+                "c_interval_90": c_block_interval(points, span=span, seed=int(seeds[2])),
+                "c_interval_block_days": BLOCK_DAYS,
+            },
         },
         "arm_b": arm_b,
         "s1": {"row": s1_row, "reading": s1_text},

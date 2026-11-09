@@ -121,6 +121,80 @@ def test_c_is_undefined_without_disagreement() -> None:
     assert hs.slope_and_spread([])["c"] is None
 
 
+def _days(n: int) -> list[date]:
+    from datetime import timedelta
+
+    return [DAY + timedelta(days=i) for i in range(n)]
+
+
+def test_c_interval_with_x_one_is_the_block_bootstrap_of_the_mean() -> None:
+    """Amendment 37's "same circular 3-day calendar blocks": with every ``x`` equal to 1, ``c`` is
+    the row mean of ``y``, so the interval must be ``calendar_block_bootstrap``'s, to the float.
+    Days 3 and 9 are empty and stay on the axis; the others hold one to three rows.
+    """
+    from scripts.hardware_reading_vs_level import calendar_block_bootstrap
+
+    rng = np.random.default_rng(37)
+    days = _days(14)
+    dates = [d for i, d in enumerate(days) if i not in (3, 9) for _ in range(1 + i % 3)]
+    ys = rng.normal(0.2, 0.3, len(dates)).tolist()
+    span = (days[0], days[-1])
+    got = hs.c_block_interval(
+        [(1.0, y, d) for y, d in zip(ys, dates, strict=True)], span=span, seed=8
+    )
+    want = calendar_block_bootstrap(ys, dates, block_days=3, seed=8, span=span)
+    assert got == list(want)
+
+
+def test_c_interval_refits_the_slope_on_each_draw() -> None:
+    """The draws computed here directly: each one's ``sum(x y) / sum(x^2)`` over its days."""
+    rng = np.random.default_rng(38)
+    days = _days(6)
+    points = [(float(rng.normal(0.0, 0.5)), 0.0, d) for d in days for _ in range(2)]
+    points = [(x, (0.2 if i < 6 else 1.0) * x + 0.01 * i, d) for i, (x, _, d) in enumerate(points)]
+    got = hs.c_block_interval(points, span=(days[0], days[-1]), seed=5, n_boot=500)
+    sxy = np.zeros(6)
+    sxx = np.zeros(6)
+    for x, y, d in points:
+        sxy[(d - DAY).days] += x * y
+        sxx[(d - DAY).days] += x * x
+    draw_rng = np.random.default_rng(5)
+    slopes = []
+    while len(slopes) < 500:
+        picked = ((draw_rng.integers(0, 6, size=2)[:, None] + np.arange(3)) % 6).reshape(-1)
+        slopes.append(sxy[picked].sum() / sxx[picked].sum())
+    assert got == pytest.approx(list(np.quantile(slopes, [0.05, 0.95])), abs=1e-12)
+    assert got is not None and got[1] - got[0] > 0.1
+
+
+def test_an_exact_slope_gives_a_zero_width_interval() -> None:
+    days = _days(8)
+    points = [(x, 0.7 * x, d) for d in days for x in (0.3, -0.5)]
+    got = hs.c_block_interval(points, span=(days[0], days[-1]), seed=1)
+    assert got == pytest.approx([0.7, 0.7], abs=1e-12)
+
+
+def test_c_interval_waits_for_a_fourth_day() -> None:
+    four = _days(4)
+    points = [(0.4, 0.1 * (i + 1), d) for i, d in enumerate(four)]
+    assert hs.c_block_interval(points[:3], span=(four[0], four[2]), seed=1) is None
+    got = hs.c_block_interval(points, span=(four[0], four[3]), seed=1)
+    assert got is not None and len(got) == 2 and got[0] <= got[1]
+
+
+def test_c_interval_is_none_without_points_or_disagreement() -> None:
+    days = _days(5)
+    span = (days[0], days[-1])
+    assert hs.c_block_interval([], span=span, seed=1) is None
+    assert hs.c_block_interval([(0.0, 0.3, d) for d in days], span=span, seed=1) is None
+
+
+def test_the_third_seed_leaves_a1_and_a2s_seeds_alone() -> None:
+    two = np.random.SeedSequence(hs.SEED).generate_state(2, dtype=np.uint32)
+    three = np.random.SeedSequence(hs.SEED).generate_state(3, dtype=np.uint32)
+    assert three[:2].tolist() == two.tolist()
+
+
 def _state(levels: dict[int, float], lo: dict[int, float], hi: dict[int, float]) -> dict[str, Any]:
     return {
         "sources": {
@@ -248,7 +322,7 @@ def test_every_row_of_the_s1_table_is_reached(kwargs: dict[str, Any], row: str) 
         (True, False, True, "S1 and Arm B pass"),
         (True, False, False, "S1 passes, Arm B does not"),
         (False, False, True, "Arm B passes, S1 does not"),
-        (False, False, False, "neither passes"),
+        (False, False, False, "S1 does not pass and Arm B does not"),
         (True, True, False, "Arm B inconclusive"),
     ],
 )
@@ -586,15 +660,50 @@ def test_a_qubit_day_without_a_usable_reading_is_left_out_of_c(
     assert out["qubit_days"] == 1
 
 
-# Amendment 29 (PR #135 at ae2f4884), copied by hand from the pre-registration, backticks dropped.
+def test_the_report_gives_c_its_interval_from_the_fourth_day(tmp_path: Any) -> None:
+    """The report's interval is ``c_block_interval`` over its own qubit-days, with the third seed
+    word and the run's calendar; on the third day it has none."""
+    days = _days(4)
+    factors = (1.1, 0.7, 1.3, 0.9)
+    short, full = tmp_path / "three", tmp_path / "four"
+    short.mkdir()
+    full.mkdir()
+    for i, (day, factor) in enumerate(zip(days, factors, strict=True)):
+        _sealed_day(full, day, factor)
+        if i < 3:
+            _sealed_day(short, day, factor)
+    third = hs.run_report(short, first_day=DAY, today=days[2])["arm_a"]["c_and_s_res"]
+    assert third["c_interval_90"] is None and third["c_interval_block_days"] == 3
+    assert third["qubit_days"] == 6
+    out = hs.run_report(full, first_day=DAY, today=days[3])["arm_a"]["c_and_s_res"]
+    points = []
+    for day, factor in zip(days, factors, strict=True):
+        for t1 in (100e-6, 200e-6):
+            truth = QubitSource(t1 * factor, t1, 0.02, 0.01)
+            fit_points = []
+            for tau_dt in (5_000, 12_500, 25_000, 50_000, 75_000, 100_000):
+                ones = round(2048 * p1_closed_form(tau_dt * 4e-9, truth))
+                fit_points.append((tau_dt * 4e-9, ones, 2048))
+            fit = hs.fit_log_t1_ratio(fit_points, QubitSource(t1, t1, 0.02, 0.01))
+            assert fit is not None
+            points.append((math.log(150e-6) - math.log(t1), fit, day))
+    seed = int(np.random.SeedSequence(hs.SEED).generate_state(3, dtype=np.uint32)[2])
+    want = hs.c_block_interval(points, span=(days[0], days[3]), seed=seed)
+    assert want is not None and out["c_interval_90"] == want
+    assert want[0] < want[1]
+    assert out["c_interval_block_days"] == 3 and out["qubit_days"] == 8
+
+
+# Amendment 29 as amendment 37 amends it (the pre-registration on main at d929424a, PR #135's
+# merge), copied by hand, backticks dropped. This branch does not carry that document.
 AMENDMENT_29_S1 = {
     "too few completed days": "Inconclusive: nothing is read.",
     "A1, A2 and A3 pass": "S1 passes: level beats both readings, and most of the deviation is gone "
     "by execution. A4 reports how well the band is calibrated; c and s_res (amendment 30) say how "
     "much of the scatter is physical.",
-    "A1 and A2 pass, A3 fails": "S1 not supported: the controls disagree in sign. The "
-    "discriminating result is reported as specific to the selected qubits, with no claim about "
-    "the chip.",
+    "A1 and A2 pass, A3 fails": "S1 not supported: the controls disagree in sign, or the run has "
+    "no control rows. The discriminating result is reported as specific to the selected qubits, "
+    "with no claim about the chip.",
     "A2's mean D at or above zero": "S1 fails: reading_at_execution is at least as good as level, "
     "so the scatter is what the device does between readings (design §7).",
     "A1 passes, A2 does not": "Staleness: level beats the submission-time reading but not, by the "
@@ -610,12 +719,10 @@ AMENDMENT_29_ARM_B = {
     "engineer's-purpose claim is not made.",
     "Arm B passes, S1 does not": "No claim from Arm B alone.",
     "Arm B inconclusive": "Nothing is added.",
+    "S1 does not pass and Arm B does not": "Nothing is added.",
 }
 
 
 def test_the_readings_are_amendment_29s_words() -> None:
     assert hs.S1_READINGS == AMENDMENT_29_S1
-    assert {k: v for k, v in hs.ARM_B_READINGS.items() if k != "neither passes"} == (
-        AMENDMENT_29_ARM_B
-    )
-    assert hs.ARM_B_READINGS["neither passes"] == "Nothing is added."
+    assert hs.ARM_B_READINGS == AMENDMENT_29_ARM_B

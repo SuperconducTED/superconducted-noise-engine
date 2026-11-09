@@ -1512,6 +1512,9 @@ def test_a_run_with_no_control_rows_does_not_meet_a3(tmp_path: Path) -> None:
     assert out["arm_a"]["A1_level_beats_reading"]["passes"] is True
     assert out["arm_a"]["A3_sign_holds_on_controls"] is False
     assert out["s1"]["row"] == "A1 and A2 pass, A3 fails"
+    assert out["arm_a"]["rows"]["control"] == 0
+    # Amendment 37: the reading names this case, not only controls that disagree in sign.
+    assert "or the run has no control rows" in out["s1"]["reading"]
 
 
 def test_a3_uses_the_control_rows_that_exist(tmp_path: Path) -> None:
