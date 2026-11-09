@@ -1,6 +1,6 @@
 # Phase 4: Design-time predictor
 
-_Generated 2026-11-08 05:45 UTC · main at `43a2c9b0` (2026-11-05) · day 8 since 2026-11-01 · milestone 2 due 2027-02-27 (111 days), 17 open and 6 closed_
+_Generated 2026-11-09 05:44 UTC · main at `6d64f64b` (2026-11-08) · day 9 since 2026-11-01 · milestone 2 due 2027-02-27 (110 days), 16 open and 7 closed_
 
 _Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, on main. Gates are ordered, not dated (plan §6)._
 
@@ -56,9 +56,9 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 
 - ❌ **L5** Phase 3 closed: The phase-3 milestone closed with every item either done or moved to the phase-4 milestone with a reason. (0/1) · **next**
   - ❌ Milestone 1 (Phase 3) closed
-    - _Milestone 1 (Phase 3 · ANFIS results) is open: 9 open and 27 closed issues._
+    - _Milestone 1 (Phase 3 · ANFIS results) is open: 8 open and 28 closed issues._
 
-1. 🟡 #57 Training contract: ADR-027 accepted (PR #120) (@mertefesensoy): in review, PR #138
+1. ❌ #57 Training contract: ADR-027 accepted (PR #120) (@mertefesensoy): ready to finish
 2. ❌ #84 Close the #57 advisor loop (@mertefesensoy): ready to finish
 3. ❌ #109 Phase-3 close record (@mertefesensoy): ready to start
 4. ❌ #92 Rule 7 for the NC register (@bengisucvd): ready to start
@@ -73,8 +73,8 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 
 1. Unstick PR #142 for #125: Hardware test: reading versus level on ibm_fez (QPU side)
    - Still a draft: CI and reviewers will not treat it as ready.
-1. Unstick PR #138 for #57: Training contract: ADR-027 accepted (PR #120)
-   - Awaiting merge.
+1. Finish #57: Training contract: ADR-027 accepted (PR #120)
+   - One closing ritual with #84 and #109: ADR-027 accepted, the register entries, the phase-3 close record (plan §2 lane 3).
 1. Finish #84: Close the #57 advisor loop
    - Closes with #57 in the same ritual (plan §2 lane 3).
 1. Start #109: Phase-3 close record
@@ -95,12 +95,12 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 
 1. Review #125's decision rule and statistics before the pre-registration freezes them (#125)
    - The pre-registration commit waits on this review (plan §5.1).
-1. Re-review PR #135 (#125: Hardware test: reading versus level on ibm_fez)
-   - Your CHANGES_REQUESTED from 2026-11-07 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Start #92: Rule 7 for the NC register
    - Adopt as written: nine rows already use its form (plan §2 lane 3).
 1. Start #75: Decide the LOCKED Kraus projector boundary
    - Decide the allowlist and the clipping before the per-qubit channel opens (plan §2 lane 3).
+1. Start #64: ADR-015 / ADR-016 ensemble and intervals (PR-A)
+   - Bengisu's D1 to D5, in the gaps of lane 1 (plan §5.1); PR-A is lane 2's first item when it resumes. Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
 
 **Baha Jarad** (@BahaJarad)
 
@@ -116,29 +116,28 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 _Review requests not yet answered with a review, and unticked checkboxes that start with the person (`- [ ] @login does X`), on every open issue and PR. Oldest first; "or earlier" marks a post edited after it was written, so the wait shown is the shortest it can be._
 
 
-**Mert Efe Şensoy** (@mertefesensoy), 3 owed
+**Mert Efe Şensoy** (@mertefesensoy), 5 owed
 
-- has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (61 days); has posted there since, on 2026-10-21
-- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (36 days); no post there since
-- Review PR #143: requested by @bengisucvd, since 2026-11-07 (1 day); no post there since
+- has sent it to Dr. Akba (issue #84): own checklist, since 2026-09-08 (62 days); has posted there since, on 2026-10-21
+- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (37 days); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (2 days); no post there since
+- Re-review PR #136: your CHANGES_REQUESTED from 2026-11-07 still stands: requested by @BurakOztekin, since 2026-11-09 (0 days); no post there since
+- Re-review PR #137: your CHANGES_REQUESTED from 2026-11-07 still stands: requested by @BurakOztekin, since 2026-11-09 (0 days); no post there since
 
-**Burak Öztekin** (@BurakOztekin), 4 owed
+**Burak Öztekin** (@BurakOztekin), 2 owed
 
-- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (66 days); no post there since
-- Review PR #141: requested by @mertefesensoy, since 2026-11-05 (3 days); no post there since
-- Re-review PR #133: your CHANGES_REQUESTED from 2026-11-02 still stands: requested by @mertefesensoy, since 2026-11-07 (1 day); no post there since
-- Review PR #143: requested by @bengisucvd, since 2026-11-07 (1 day); no post there since
+- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (67 days); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (2 days); no post there since
 
-**Bengisu Cıvdı** (@bengisucvd), 3 owed
+**Bengisu Cıvdı** (@bengisucvd), 2 owed
 
-- Review PR #133: requested by @mertefesensoy, since 2026-10-28 (11 days); no post there since
-- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (6 days); no post there since
-- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (6 days); no post there since
+- Review PR #136: requested by @BurakOztekin, since 2026-11-02 (7 days); no post there since
+- Review PR #137: requested by @BurakOztekin, since 2026-11-02 (7 days); no post there since
 
 **Baha Jarad** (@BahaJarad), 2 owed
 
-- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (36 days); no post there since
-- Review PR #143: requested by @bengisucvd, since 2026-11-07 (1 day); no post there since
+- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (37 days); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (2 days); no post there since
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -177,6 +176,7 @@ Nothing is blocked upstream.
 
 | Date | Gates | Conditions | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 2026-11-09 | 0/5 | 0/7 | 9 | 4 | 0 | milestone 2: 16 open and 7 closed (was 17 and 6); #57 Training contract: ADR-027 accepted (PR #120): in review to ready to start; Burak Öztekin owes 2 answers (was 4); Bengisu Cıvdı owes 2 answers (was 3); Mert Efe Şensoy owes 5 answers (was 3); main moved to 6d64f64b |
 | 2026-11-08 | 0/5 | 0/7 | 8 | 5 | 0 | Baha Jarad owes 2 answers (was 3) |
 | 2026-11-07 | 0/5 | 0/7 | 8 | 5 | 0 | milestone 2: 17 open and 6 closed (was 15 and 6); #61 Nie-Tan versus Karnik-Mendel, premise gradients: ready to start to in review; Baha Jarad owes 3 answers (was 2); Burak Öztekin owes 4 answers (was 2); Bengisu Cıvdı owes 3 answers (was 4); Mert Efe Şensoy owes 3 answers (was 4) |
 | 2026-11-06 | 0/5 | 0/7 | 9 | 4 | 0 | milestone 2: 15 open and 6 closed (was 13 and 5); Burak Öztekin owes 2 answers (was 1); Bengisu Cıvdı owes 4 answers (was 5); Mert Efe Şensoy owes 4 answers (was 5); main moved to 43a2c9b0 |
