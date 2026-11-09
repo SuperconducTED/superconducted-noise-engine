@@ -1,0 +1,177 @@
+{
+  "ref": "5828b4a29fabc245aa096e530852249a3496dc5b",
+  "backend": "ibm_fez",
+  "files": 2249,
+  "states": 924,
+  "skipped": {},
+  "guard": {
+    "at": "2026-10-23T09:34:56+00:00",
+    "passed": true,
+    "observed": {
+      "files": 2249,
+      "states": 924,
+      "q72_n_distinct": 29,
+      "discriminating": [
+        148,
+        108,
+        72,
+        132,
+        155,
+        10,
+        80,
+        77
+      ],
+      "controls": [
+        105,
+        112,
+        48,
+        140
+      ]
+    },
+    "mismatches": {},
+    "skipped": {},
+    "discriminating_d": [
+      -1.7048,
+      -1.1109,
+      -1.0387,
+      -0.8694,
+      -0.7647,
+      -0.687,
+      -0.67,
+      -0.582
+    ]
+  },
+  "collect_seconds": 533.6,
+  "python": "3.12.10",
+  "numpy": "2.4.4",
+  "instants": {
+    "first": "2026-06-13T12:00:00+00:00",
+    "last": "2026-10-22T12:00:00+00:00",
+    "count": 132
+  },
+  "eval_hour_utc": 12,
+  "window_days": 30.0,
+  "current_floor": 20,
+  "window_floors": [
+    5,
+    10,
+    15,
+    20
+  ],
+  "results": {
+    "days": 132,
+    "excluded_current": {
+      "median": 1.0,
+      "min": 0.0,
+      "max": 3.0
+    },
+    "excluded_w5": {
+      "median": 1.0,
+      "min": 0.0,
+      "max": 2.0
+    },
+    "overlap_w5": {
+      "median": 8.0,
+      "min": 7.0,
+      "max": 8.0
+    },
+    "days_72_admitted_w5": 99,
+    "days_72_in_top8_w5": 32,
+    "excluded_w10": {
+      "median": 2.0,
+      "min": 1.0,
+      "max": 3.0
+    },
+    "overlap_w10": {
+      "median": 8.0,
+      "min": 7.0,
+      "max": 8.0
+    },
+    "days_72_admitted_w10": 14,
+    "days_72_in_top8_w10": 3,
+    "excluded_w15": {
+      "median": 2.0,
+      "min": 1.0,
+      "max": 3.0
+    },
+    "overlap_w15": {
+      "median": 8.0,
+      "min": 6.0,
+      "max": 8.0
+    },
+    "days_72_admitted_w15": 0,
+    "days_72_in_top8_w15": 0,
+    "excluded_w20": {
+      "median": 2.0,
+      "min": 2.0,
+      "max": 7.0
+    },
+    "overlap_w20": {
+      "median": 8.0,
+      "min": 6.0,
+      "max": 8.0
+    },
+    "days_72_admitted_w20": 0,
+    "days_72_in_top8_w20": 0,
+    "days_72_admitted_current": 55,
+    "days_72_in_top8_current": 5,
+    "top8_below_current_distribution": {
+      "1": 1,
+      "2": 2,
+      "3": 1,
+      "4": 5,
+      "5": 13,
+      "6": 17,
+      "7": 40,
+      "8": 53
+    },
+    "admitted_below_share_current": {
+      "median": 0.4323,
+      "min": 0.2222,
+      "max": 0.7468
+    },
+    "absd_8th_current": {
+      "median": 0.5655,
+      "min": 0.4399,
+      "max": 0.8528,
+      "days": 132
+    },
+    "absd_4th_below": {
+      "median": 0.7482500000000001,
+      "min": 0.3474,
+      "max": 1.3478,
+      "days": 132
+    },
+    "absd_4th_above": {
+      "median": 0.44135,
+      "min": 0.2795,
+      "max": 0.603,
+      "days": 132
+    },
+    "union_longest_us": {
+      "median": 420.44449999999995,
+      "min": 256.445,
+      "max": 799.468
+    },
+    "union_shortest_us": {
+      "median": 15.274000000000001,
+      "min": 0.838,
+      "max": 35.579
+    },
+    "union_shortest_extreme": {
+      "at": "2026-09-18T12:00:00+00:00",
+      "us": 0.838,
+      "qubit": 49,
+      "reading_us": 1.675,
+      "level_us": 115.518
+    },
+    "union_longest_extreme": {
+      "at": "2026-06-14T12:00:00+00:00",
+      "us": 799.468,
+      "qubit": 15,
+      "reading_us": 399.734,
+      "level_us": 240.418
+    }
+  },
+  "total_seconds": 573.2
+}

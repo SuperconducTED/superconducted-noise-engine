@@ -1,0 +1,17 @@
+{
+  "mode": "controls",
+  "ref": "7adda8035a5a76b93147ffc3171975a7684d239d",
+  "ref_sha": "7adda8035a5a76b93147ffc3171975a7684d239d",
+  "backend": "ibm_fez",
+  "at": "2026-10-28T18:40:46+00:00",
+  "window_days": 30.0,
+  "min_window_states": 5,
+  "min_distinct_values": 20,
+  "min_window_distinct": 15,
+  "files_used": 2398,
+  "states_used": 958,
+  "skipped": {},
+  "live_properties_sha256": null,
+  "python": "3.12.10",
+  "numpy": "2.4.4"
+}
