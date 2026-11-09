@@ -74,6 +74,7 @@ from scripts.hardware_reading_vs_level import (
 )
 from scripts.hardware_test_predictors import (
     ControlsFileError,
+    LiveDocumentError,
     collect,
     execution_rows,
     load_controls,
@@ -502,6 +503,15 @@ def _record_missed(job_dir: Path, at: datetime, closes: datetime) -> NoReturn:
     raise RefusedError(f"the window closed at {closes:%H:%M} UTC: this day stays empty")
 
 
+def _record_unusable_live(job_dir: Path, at: datetime, exc: LiveDocumentError) -> NoReturn:
+    """Amendment 34: a live document that cannot be used is a missed morning, as amendment 18's."""
+    write_json_lf(
+        job_dir / "missed.json",
+        {"reason": f"the live document is unusable: {exc}", "at": at.isoformat()},
+    )
+    raise RefusedError(f"the live document is unusable ({exc}): this day stays empty") from exc
+
+
 def run_build(
     *,
     jobs_dir: Path,
@@ -516,15 +526,19 @@ def run_build(
 ) -> Path:
     """Capture, seal, validate, write, submit; returns the job's folder.
 
-    Refuses a second job for one UTC day, and with ``enforce_window`` anything outside the day's
-    window, recording ``missed.json`` once the window has closed. The job id reaches the disk before
-    anything else happens after submission.
+    Refuses a second job for one UTC day, and a day already recorded missed (amendment 18 allows no
+    re-run), and with ``enforce_window`` anything outside the day's window, recording
+    ``missed.json`` once the window has closed. A live document that cannot be used is recorded
+    missed too (amendment 34). The job id reaches the disk before anything else happens after
+    submission.
     """
     arms = arms_for(job_number)
     t_s = now()
     job_dir = jobs_dir / f"{t_s:%Y-%m-%d}"
     if (job_dir / "job_id.txt").exists():
         raise RefusedError(f"a job was already submitted for {t_s:%Y-%m-%d}")
+    if (job_dir / "missed.json").exists():
+        raise RefusedError(f"{t_s:%Y-%m-%d} was recorded missed: no re-run (amendment 18)")
     opens, closes = window_for(t_s)
     if enforce_window:
         if t_s >= closes:
@@ -543,7 +557,10 @@ def run_build(
     live_path = job_dir / "live-properties.json"
     write_json_lf(live_path, live)
     collected = collect(archive(), backend=device.name, until=t_s)
-    rows = predictor_rows(collected, at=t_s, live=live)
+    try:
+        rows = predictor_rows(collected, at=t_s, live=live)
+    except LiveDocumentError as exc:
+        _record_unusable_live(job_dir, t_s, exc)
     # Amendment 20: a qubit that is not operational at t_s gives no rows today. The frozen ranking
     # runs over the rest, and the whole frozen set stays out of the discriminating stratum.
     dead = not_operational_qubits(live["properties"], device.target)

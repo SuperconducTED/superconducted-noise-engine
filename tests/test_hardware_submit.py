@@ -2101,3 +2101,77 @@ def test_report_makes_a_sealed_folder_that_is_not_there_yet(tmp_path: Path) -> N
     assert json.loads((sealed / "report.json").read_text(encoding="utf-8"))["days"][0][
         "status"
     ] == ("submitted, not scored")
+
+
+# --- amendment 34: a bad live document is a missed morning ------------------------------------
+
+
+def _another_device(doc: dict[str, Any]) -> dict[str, Any]:
+    return {**doc, "backend": "ibm_torino"}
+
+
+def _no_backend(doc: dict[str, Any]) -> dict[str, Any]:
+    properties = {k: v for k, v in doc["properties"].items() if k != "backend_name"}
+    return {**{k: v for k, v in doc.items() if k != "backend"}, "properties": properties}
+
+
+def _neither_shape(doc: dict[str, Any]) -> dict[str, Any]:
+    return {k: v for k, v in doc.items() if k != "properties"}
+
+
+def _does_not_parse(doc: dict[str, Any]) -> dict[str, Any]:
+    return {**doc, "properties": {**doc["properties"], "qubits": [None]}}
+
+
+@pytest.mark.parametrize(
+    ("spoil", "why"),
+    [
+        (_another_device, "name"),
+        (_no_backend, "name no backend"),
+        (_neither_shape, "must be the archive envelope"),
+        (_does_not_parse, "do not parse"),
+    ],
+)
+def test_a_bad_live_document_is_a_missed_morning(
+    tmp_path: Path,
+    controls_file: Path,
+    live_doc: dict[str, Any],
+    archive_docs: list[tuple[str, dict[str, Any]]],
+    spoil: Any,
+    why: str,
+) -> None:
+    """Amendment 34: the build stops before submitting, records the day missed, and is refused."""
+    device = ScriptedDevice(
+        spoil(copy.deepcopy(live_doc)), target=archived_backend(live_doc).target
+    )
+    with pytest.raises(hs.RefusedError, match="the live document is unusable"):
+        _build(tmp_path, controls_file, device, archive_docs)
+    job_dir = tmp_path / "jobs" / f"{T_S:%Y-%m-%d}"
+    missed = json.loads((job_dir / "missed.json").read_text(encoding="utf-8"))
+    assert missed["reason"].startswith("the live document is unusable: ")
+    assert why in missed["reason"]
+    assert missed["at"] == T_S.isoformat()
+    assert device.submitted == []
+    assert not (job_dir / "job_id.txt").exists()
+    assert not (job_dir / "submission.json").exists()
+    assert (job_dir / "live-properties.json").exists()  # kept, to see what was wrong
+    assert hs._day_status(job_dir) == "missed"
+
+
+def test_a_day_recorded_missed_is_not_built_again(
+    tmp_path: Path,
+    controls_file: Path,
+    live_doc: dict[str, Any],
+    archive_docs: list[tuple[str, dict[str, Any]]],
+) -> None:
+    """Amendment 18: no re-runs, so a good document later that day changes nothing."""
+    bad = ScriptedDevice(
+        _another_device(copy.deepcopy(live_doc)), target=archived_backend(live_doc).target
+    )
+    with pytest.raises(hs.RefusedError):
+        _build(tmp_path, controls_file, bad, archive_docs)
+    good = ScriptedDevice(live_doc)
+    with pytest.raises(hs.RefusedError, match="recorded missed"):
+        _build(tmp_path, controls_file, good, archive_docs, at=T_S + timedelta(minutes=5))
+    assert good.submitted == [] and good.captures == 0
+    assert hs._day_status(tmp_path / "jobs" / f"{T_S:%Y-%m-%d}") == "missed"
