@@ -697,3 +697,78 @@ Nothing else changes. The good path is the same code, so the dry run (which neve
 The dry run and the rehearsal were not re-run: the dry run never calls `run_build`, and on a good live document
 `run_build` runs the same code as before (the new guard finds no `missed.json` and the new `except` is not entered),
 which every existing build test still passes.
+
+## Stage 3 plan, 2026-11-09, before the code: amendment 37's three code items
+
+Appended; nothing above is edited. PR #135 merged on 2026-11-09 as `d929424a`, so the pre-registration is on `main`.
+This branch, stacked on PR #140, does not carry it, and `main` is not merged in here, because that would put #135's
+diff into this stacked PR. Amendment 37 (section 3.12 on `main`) leaves three code items to this PR before the freezing
+commit: the first reading table's third row, `c`'s interval, and the control test at the freeze. This section is the
+plan; the code follows it.
+
+**The lead's decisions, 2026-11-09, taken before this section was written.**
+
+- The control test is built inside `--mode controls`, as amendment 37 says. That changes
+  `scripts/hardware_test_predictors.py`, the file amendment 14 pins at `5c98f264`, and amendment 14 says that moving the
+  pin takes another dated amendment. Amendment 37 did not say so. The move is amendment 38, written on `main` after this
+  code exists: it names this PR's merge commit as the new pin (given at the freezing commit, as amendment 13 did for PR
+  #132) and lists, definition by definition, what changed against `5c98f264`.
+- A candidate that fails the test is skipped and the ranking is kept: the median and the order are those proposal D
+  gives without the test, and the next qubit in that order takes the place. This reads amendment 37 literally ("The
+  next candidate by proposal D's rule takes its place"). The other reading, dropping the qubit before the median as the
+  window floor does, can move the median, and the frozen controls sit within a few thousandths of it, so near-tied
+  candidates could swap. Read literally, the test can only remove a qubit, never reorder the others.
+
+**1. The third row's text.** `S1_READINGS["A1 and A2 pass, A3 fails"]` becomes amendment 37's sentence, Markdown
+backticks dropped: "S1 not supported: the controls disagree in sign, or the run has no control rows. The
+discriminating result is reported as specific to the selected qubits, with no claim about the chip." The second
+table's fifth row is a row of the table since amendment 37, so its key "neither passes", chosen when it had no name,
+becomes the table's own words, "S1 does not pass and Arm B does not", and the comment saying it is not a row goes. No
+other row name changes. The hand copies in `tests/test_hardware_report_rule.py` are re-cited to `main` at `d929424a`
+and gain that row; `test_a_run_with_no_control_rows_does_not_meet_a3` also checks that the reading names the empty case.
+
+**2. `c`'s 90% interval.** Amendment 37: "`c` is reported with a 90% interval from the same circular 3-day calendar
+blocks as A1's and A2's sensitivity (amendment 25), with `c` refitted on each draw and the percentile ends taken." No
+interval is given while the calendar is no longer than one block, so not before day 4. A new function in
+`scripts/hardware_submit.py` draws exactly as PR #140's `calendar_block_bootstrap` does: the run's whole calendar from
+the first day, empty days kept at zero rows, `ceil(n_days / 3)` circular blocks per draw, 10,000 draws, the 5th and 95th
+percentiles by NumPy's default. Only the statistic differs: each draw's value is the slope through the origin over the
+drawn days' qubit-days. `calendar_block_bootstrap` is not changed. The report's `c_and_s_res` gains `c_interval_90`
+(`null` when there is none) and `c_interval_block_days`; `slope_and_spread` and its `c`, `s_res` and `qubit_days` do not
+change, and `s_res` stays a point estimate. The seed is the third word of the `SeedSequence` that gives A1's and A2's
+(`generate_state(3)`, whose first two words equal `generate_state(2)`'s, checked on 2026-11-09), so A1's and A2's draws
+do not move.
+
+**3. The control test at the freeze.** In `--mode controls`, the newest archived file at or before `--at`, the file
+`reading` comes from (`_latest_file`), is read again by its path. Amendment 20's own function, `not_operational_qubits`
+in PR #140's `scripts/hardware_reading_vs_level.py`, is applied to it: `x` or `sx` `gate_error` at least 1, or absent
+from the target's `x`, `sx` or `measure` when the file has a `configuration`, whose target `archived_backend` builds as
+the dry run does. When the file has no configuration, the function gets a target that holds every qubit, so only the
+`gate_error` rule can fire. `freeze_controls` takes the marked set, asks `propose_controls` (unchanged) for that many
+more candidates, and skips the marked ones. `controls.json` gains `not_operational_at_freeze`: the file's path and time,
+whether it had a configuration, the qubits marked and the candidates skipped. `load_controls` reads only `controls` and
+`requested_controls`, so `--mode submission` is unaffected. The import is made inside the function, because PR #140's
+script imports this one at load; PR #140's script is not edited. The test reads the device's status in one file, never
+a result.
+
+**What is not re-run, and why.** The rehearsal does not run `--mode controls`, and its checks read only the row names
+"too few completed days" and "Arm B inconclusive", which do not change. The dry run takes its `controls.json` from the
+committed reference and runs `--mode submission` only (`dry_run.sh`, line 29), so none of the three changes reaches it.
+It is still run once (criterion 33), because amendment 38 cites it as the proof that the pinned file's change leaves
+submission output alone.
+
+| # | Criterion |
+| --- | --- |
+| 30 | `S1_READINGS`'s third row is amendment 37's sentence and the second table's fifth row carries the table's name; both hand copies are re-cited to `main` at `d929424a`; a run with no control rows reads the third row, with the words "or the run has no control rows". |
+| 31 | With every `x` equal to 1, `c`'s interval equals `calendar_block_bootstrap`'s for the same values, dates, seed and span, to the float; a planted exact slope gives a zero-width interval at that slope; a three-day calendar gives none and a four-day one gives one; no points, or `sum(x^2) = 0`, gives none; A1's and A2's `block3_sensitivity` do not change with the third seed. |
+| 32 | A candidate marked in the newest file at or before `--at`, by `x` or by `sx`, is skipped and the next in the unchanged order takes its place; the median and the remaining order do not change; a marker in an older file, or in a file after `--at`, is not read; absence from the target counts only when that file has a configuration; `controls.json` records the file, its time, the configuration flag, the marked qubits and the skipped candidates; with nothing marked, the frozen controls are those of today's code. |
+| 33 | Against `5c98f264`, `scripts/hardware_test_predictors.py` differs only on the controls path (expected: `freeze_controls`, `main` and one new function); `collect`, `predictor_rows`, `execution_rows`, `select_balanced`, `load_controls` and `write_outputs` are unchanged; the dry run is 8 of 8 identical. |
+| 34 | Every new line is mutation-checked, with predictions written before the run; each mutant is caught (by an assertion where it can be) or shown equivalent; ruff, `ruff format --check`, `check_ids.py`, `mypy --strict` and `pytest tests/` pass on the exact pins. |
+| 35 | Amendment 37's last clause: `--mode controls` with this code and with `e639cf86`'s, at the same `--ref` and `--at`, once at the section 3.9 rehearsal's instant (`calibration-data` `7adda803`, `--at 2026-10-28T18:40:46Z`) and once at the archive tip; the predictions below are committed before either run; the record says which controls changed, if any. |
+
+**Predictions for criterion 35, committed before the runs.** Read literally, a marked qubit outside the four chosen
+changes nothing, so the four change only if one of them is itself marked in the newest file at or before `--at`. At the
+rehearsal's instant both codes are predicted to give 144, 110, 140 and 77 and to differ only in the new
+`not_operational_at_freeze` field; the 2026-11-07 preflight, replaying 2026-11-02, marked only qubit 72, which is not one
+of them. At the archive tip, both codes are predicted to give the same four, again unless one of them is marked there; a
+difference would be the test doing its job, not a failure, and is recorded as found.
