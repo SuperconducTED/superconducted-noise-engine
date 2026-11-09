@@ -671,10 +671,16 @@ def test_a_qubit_day_without_a_usable_reading_is_left_out_of_c(
 
 def test_the_report_gives_c_its_interval_from_the_fourth_day(tmp_path: Any) -> None:
     """The report's interval is ``c_block_interval`` over its own qubit-days, with the third seed
-    word and the run's calendar; on the third day it has none."""
-    days = _days(4)
-    factors = (1.1, 0.7, 1.3, 0.9)
-    short, full = tmp_path / "three", tmp_path / "four"
+    word and the run's calendar; on the third day it has none.
+
+    The run's fourteen days, not four: the fits sit on a grid of 0.005 and there are two values of
+    ``x``, so with few days the draws repeat and every seed gives the same percentile ends. The
+    first mutation run showed this test then could not tell the third seed word from the first
+    (four days); nine days still could not.
+    """
+    days = _days(14)
+    factors = (1.1, 0.7, 1.3, 0.9, 1.05, 0.8, 1.2, 0.95, 1.15, 0.75, 1.25, 0.85, 1.35, 1.0)
+    short, full = tmp_path / "three", tmp_path / "fourteen"
     short.mkdir()
     full.mkdir()
     for i, (day, factor) in enumerate(zip(days, factors, strict=True)):
@@ -684,7 +690,7 @@ def test_the_report_gives_c_its_interval_from_the_fourth_day(tmp_path: Any) -> N
     third = hs.run_report(short, first_day=DAY, today=days[2])["arm_a"]["c_and_s_res"]
     assert third["c_interval_90"] is None and third["c_interval_block_days"] == 3
     assert third["qubit_days"] == 6
-    out = hs.run_report(full, first_day=DAY, today=days[3])["arm_a"]["c_and_s_res"]
+    out = hs.run_report(full, first_day=DAY, today=days[-1])["arm_a"]["c_and_s_res"]
     points = []
     for day, factor in zip(days, factors, strict=True):
         for t1 in (100e-6, 200e-6):
@@ -696,11 +702,15 @@ def test_the_report_gives_c_its_interval_from_the_fourth_day(tmp_path: Any) -> N
             fit = hs.fit_log_t1_ratio(fit_points, QubitSource(t1, t1, 0.02, 0.01))
             assert fit is not None
             points.append((math.log(150e-6) - math.log(t1), fit, day))
-    seed = int(np.random.SeedSequence(hs.SEED).generate_state(3, dtype=np.uint32)[2])
-    want = hs.c_block_interval(points, span=(days[0], days[3]), seed=seed)
+    words = np.random.SeedSequence(hs.SEED).generate_state(3, dtype=np.uint32)
+    span = (days[0], days[-1])
+    want = hs.c_block_interval(points, span=span, seed=int(words[2]))
     assert want is not None and out["c_interval_90"] == want
     assert want[0] < want[1]
-    assert out["c_interval_block_days"] == 3 and out["qubit_days"] == 8
+    # The check has power: A1's and A2's words would give other ends on these points.
+    for other in (int(words[0]), int(words[1])):
+        assert hs.c_block_interval(points, span=span, seed=other) != want
+    assert out["c_interval_block_days"] == 3 and out["qubit_days"] == 28
 
 
 # Amendment 29 as amendment 37 amends it (the pre-registration on main at d929424a, PR #135's

@@ -365,10 +365,12 @@ def _classify(code: int | None, output: str) -> str:
     return "caught: crash"
 
 
-def run(root: Path, python: str) -> list[tuple[Mutant, str, float, str]]:
+def run(root: Path, python: str, only: str = "") -> list[tuple[Mutant, str, float, str]]:
     env = {**os.environ, "PYTHONPATH": "src", "COLUMNS": "1000"}
     results = []
     for mutant in MUTANTS:
+        if not mutant.name.startswith(only):
+            continue
         target = root / mutant.path
         original = target.read_bytes()
         digest = hashlib.sha256(original).hexdigest()
@@ -408,8 +410,9 @@ def main() -> int:
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--python", required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--only", default="", help="run only the mutants whose name starts so")
     args = parser.parse_args()
-    results = run(args.root, args.python)
+    results = run(args.root, args.python, args.only)
     lines = ["mutant\tfile\tprediction\toutcome\tmatches\tseconds\tpytest"]
     for mutant, outcome, seconds, summary in results:
         predicted_caught = mutant.prediction == "caught"
