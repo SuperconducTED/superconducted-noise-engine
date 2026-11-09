@@ -1,0 +1,51 @@
+<section id="scl" style="background:#E8EDF2;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">WHAT WE EXAMINED</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">Testing Supervised Contrastive Learning</h2>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between">
+<div style="display:flex;gap:16px">
+<div style="flex:1;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;line-height:1.3;font-weight:700;color:#14213D">1 · Classes on the change</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">Change y(t + h) − y(t): decrease · no material change · increase</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">Threshold from the measured noise floor (T13), fixed before training</p>
+</div>
+<x-shape kind="arrow-right" style="width:48px;height:32px;background:#5B6B82;align-self:center"></x-shape>
+<div style="flex:1;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;line-height:1.3;font-weight:700;color:#14213D">2 · E3 encoder + forecasting head</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">Encoder = stage 2's hidden layer, followed by a linear forecasting head</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;line-height:1.3;color:#14213D">loss = MSE + β · SupCon</p>
+</div>
+</div>
+<x-shape kind="arrow-down" style="width:32px;height:40px;background:#5B6B82;align-self:center"></x-shape>
+<div style="display:flex;gap:16px">
+<p style="width:220px;align-self:center;font-size:24px;line-height:1.3;font-weight:700;color:#14213D">3 · Four arms</p>
+<div style="flex:1;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:24px;line-height:1.3;font-weight:700;color:#14213D">β = 0</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">control</p>
+</div>
+<div style="flex:1;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:24px;line-height:1.3;font-weight:700;color:#14213D">SupCon, β &gt; 0</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">on the three classes</p>
+</div>
+<div style="flex:1;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:24px;line-height:1.3;font-weight:700;color:#14213D">Rank-N-Contrast</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">on the change, regression form</p>
+</div>
+<div style="flex:1;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:24px;line-height:1.3;font-weight:700;color:#14213D">References</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">persistence, linear forecaster</p>
+</div>
+</div>
+<x-shape kind="arrow-down" style="width:32px;height:40px;background:#5B6B82;align-self:center"></x-shape>
+<div style="display:flex;gap:16px">
+<div style="flex:2;background:#FCFBF8;border:2px solid #14213D;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;line-height:1.3;font-weight:700;color:#14213D">4 · Success rule, written before the run</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">β &gt; 0 must beat β = 0 on band score and point error, paired over epochs × circuits; otherwise the result is reported as negative.</p>
+</div>
+<div style="flex:1;background:#FCFBF8;border:2px dashed #5B6B82;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;line-height:1.3;font-weight:700;color:#14213D">Task T14 · decision A8</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">Runs at stage-B scale; waits on the evaluation-protocol decision.</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">14 · Task T14, research doc §2.1a (PR #111); T13: plan §7; decision A8 (2026-10-04); Khosla et al. 2020; Zha et al. 2023</p>
+</section>
