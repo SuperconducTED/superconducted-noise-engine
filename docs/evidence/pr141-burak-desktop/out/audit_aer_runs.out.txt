@@ -1,0 +1,94 @@
+primary ref main at 5c98f264; other refs scanned: 1
+distinct blobs 108, unreadable 0
+
+1. Files on main importing a Qiskit execution package
+  aer: 18
+    docs/evidence/aer-per-shot-seeding/boundary.py
+    docs/evidence/aer-per-shot-seeding/reproduce.py
+    docs/evidence/aer-per-shot-seeding/seed_distance_and_jobs.py
+    docs/evidence/aer-per-shot-seeding/within_job_overlap.py
+    scripts/first_ensemble_run.py
+    scripts/resolution_measurement.py
+    src/superconducted/benchmarks/harness.py
+    src/superconducted/benchmarks/reference.py
+    src/superconducted/channels/kraus.py
+    src/superconducted/fuzzy/fuzzification.py
+    src/superconducted/integration/aer_factory.py
+    src/superconducted/interfaces.py
+    tests/test_first_ensemble_run.py
+    tests/test_harness.py
+    tests/test_interfaces.py
+    tests/test_noise_gate_eligibility.py
+    tests/test_reference.py
+    tests/training/test_aer_pin.py
+  experiments: 0
+  mthree: 0
+  primitives: 0
+  runtime: 3
+    scripts/probe_historical_properties.py
+    src/superconducted/calibration/poller.py
+    tests/test_probe_historical_properties.py
+
+2. Call sites on main: line, call, first argument, file's Qiskit imports
+  docs/evidence/aer-per-shot-seeding/boundary.py:34  sim.run(qc)  [aer]
+  docs/evidence/aer-per-shot-seeding/boundary.py:35  sim.run(qc)  [aer]
+  docs/evidence/aer-per-shot-seeding/reproduce.py:16  sim.run(qc)  [aer]
+  docs/evidence/aer-per-shot-seeding/seed_distance_and_jobs.py:36  sim().run(qc8)  [aer]
+  docs/evidence/aer-per-shot-seeding/seed_distance_and_jobs.py:38  sim().run(qc8)  [aer]
+  docs/evidence/aer-per-shot-seeding/seed_distance_and_jobs.py:51  sim().run([circ(8, 'c0'), circ(8, 'c1')])  [aer]
+  docs/evidence/aer-per-shot-seeding/seed_distance_and_jobs.py:61  sim(max_job_size=1).run([circ(8, 'c0'), circ(8, 'c1')])  [aer]
+  docs/evidence/aer-per-shot-seeding/seed_distance_and_jobs.py:71  sim().run(qc8)  [aer]
+  docs/evidence/aer-per-shot-seeding/seed_distance_and_jobs.py:72  sim().run(qc8)  [aer]
+  docs/evidence/aer-per-shot-seeding/seed_distance_and_jobs.py:92  sim(**o).run(qc8)  [aer]
+  docs/evidence/aer-per-shot-seeding/seed_distance_and_jobs.py:107  sim().run(qc4)  [aer]
+  docs/evidence/aer-per-shot-seeding/within_job_overlap.py:28  sim.run([hcirc(8, 'c0'), hcirc(8, 'c1')])  [aer]
+  docs/evidence/aer-per-shot-seeding/within_job_overlap.py:46  sim.run(cs)  [aer]
+  docs/evidence/aer-per-shot-seeding/within_job_overlap.py:62  sim.run(q8)  [aer]
+  docs/evidence/aer-per-shot-seeding/within_job_overlap.py:63  sim.run(q8)  [aer]
+  docs/evidence/public-archive-overlap-2026-10/compare_public_archive.py:227  con.execute("set TimeZone='UTC'")  [-]
+  docs/evidence/public-archive-overlap-2026-10/compare_public_archive.py:242  con.execute(f"\n        create table theirs as\n        select property, qubit_a as qa, coalesce(cast()  [-]
+  docs/evidence/public-archive-overlap-2026-10/compare_public_archive.py:251  con.execute('\n        with t as (select distinct property, qa, qb, epoch, value, unit from theirs),\n)  [-]
+  docs/evidence/public-archive-overlap-2026-10/compare_public_archive.py:280  con.execute(f"\n        with t as (select distinct property, qa, qb, epoch from theirs\n              )  [-]
+  docs/evidence/public-archive-overlap-2026-10/compare_public_archive.py:293  con.execute(f'select property, count(*) from theirs where {coh} and {below} group by 1 order by 1')  [-]
+  docs/evidence/public-archive-overlap-2026-10/compare_public_archive.py:296  con.execute(f'select count(*) from theirs where {coh} and not {below} and value < 1')  [-]
+  docs/evidence/public-archive-overlap-2026-10/compare_public_archive.py:299  con.execute(f'select count(*) from (select property, qa, epoch from theirs where {coh}\n              )  [-]
+  docs/evidence/public-archive-overlap-2026-10/compare_public_archive.py:304  con.execute(f"select max(obs) from theirs where property = 'T1' and {below}")  [-]
+  docs/evidence/public-archive-overlap-2026-10/compare_public_archive.py:311  con.execute(f"\n        select cast(epoch(calibrated_time) as bigint) cal, property, qubit_a,\n       )  [-]
+  scripts/first_ensemble_run.py:173  simulator.run(prepared_circuit)  [aer]
+  scripts/resolution_measurement.py:198  simulator.run(circuit)  [aer]
+  scripts/resolution_measurement.py:220  simulator.run(state_circuit)  [aer]
+  src/superconducted/benchmarks/harness.py:160  sim.run(prepared_circuit)  [aer]
+  src/superconducted/benchmarks/harness.py:188  sim.run(prepared_circuit)  [aer]
+  src/superconducted/benchmarks/harness.py:244  sim.run(circuit.copy())  [aer]
+  src/superconducted/benchmarks/harness.py:257  sim.run(state_circuit)  [aer]
+
+3. Call sites on other refs and not on main, deduplicated
+  docs/evidence/aer-batching-defect/bridge_arm_b.py  fake.run([big_t, ghz_t])  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/bridge_arm_b.py  fake.run(ghz_t)  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/bridge_arm_b.py  passes.run(circuit)  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/bridge_arm_b.py  sim.run([arm_a, saved])  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/bridge_arm_b.py  sim.run([big_t, ghz_t])  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/bridge_arm_b.py  sim.run([saved, arm_a])  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/bridge_arm_b.py  sim.run(ghz_t)  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/bridge_arm_b.py  sim.run(saved)  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/from-issue-125-submission/probe_batching.py  SamplerV2(mode=sim, options=options).run([arm_a, arm_b])  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/from-issue-125-submission/probe_batching.py  SamplerV2(mode=sim, options=options).run([arm_a])  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/from-issue-125-submission/probe_batching.py  SamplerV2(mode=sim, options=options).run([arm_b, arm_a])  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/from-issue-125-submission/probe_batching.py  SamplerV2(mode=sim, options=options).run([arm_b])  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/from-issue-125-submission/probe_batching.py  SamplerV2(mode=sim, options={'simulator': {'seed_simulator': SEED}}).run([(arm_a, None, 2048), (arm_b, None, 4096)])  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/from-issue-125-submission/probe_batching.py  sim.run([arm_a, arm_b])  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/from-issue-125-submission/probe_batching.py  sim.run([arm_b, arm_a])  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/from-issue-125-submission/probe_batching.py  sim.run(arm_b)  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/from-issue-125-submission/probe_build_time.py  sampler.run([job.arm_a[2], job.arm_b[0]])  [aer,runtime]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/minimal_reproduction.py  sim.run(circuits)  [aer]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/minimal_reproduction.py  sim.run(swapped)  [aer]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/spy_positive_control.py  AerSimulator().run([circuit(2), circuit(1)])  [aer,primitives]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/spy_positive_control.py  SamplerV2(default_shots=16).run([circuit(2), circuit(1)])  [aer,primitives]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/spy_positive_control.py  sampler.run([(circuit(2), None, 16), (circuit(1), None, 32)])  [aer,primitives]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/spy_positive_control.py  sampler.run([circuit(2), circuit(1)])  [aer,primitives]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/trigger_sweep.py  factory().run(pubs)  [aer,primitives]  on 1 refs, e.g. HEAD
+  docs/evidence/aer-batching-defect/trigger_sweep.py  sim.run(circuits)  [aer,primitives]  on 1 refs, e.g. HEAD
+
+4. Calls on main that start a Python subprocess (outside the pytest spy's reach)
+
+5. Files that could not be parsed: 0
