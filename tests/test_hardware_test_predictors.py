@@ -760,6 +760,27 @@ def test_controls_mode_reads_only_the_newest_file_at_the_freeze(
     }
 
 
+def test_controls_mode_with_nothing_archived_by_the_freeze_refuses_cleanly(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """No file at or before ``--at``: no document to test, no candidate, and exit 2."""
+    later = [_doc(T0 + timedelta(days=1), {0: 100.0})]
+    freeze = tmp_path / "freeze"
+    args = ["--mode", "controls", "--propose-controls", "1", "--out", str(freeze)]
+    assert _cli(monkeypatch, args, later) == 2
+    assert "only 0 eligible" in capsys.readouterr().err
+    assert not freeze.exists()
+
+
+def test_the_freeze_refuses_a_path_that_is_not_one_file(monkeypatch: pytest.MonkeyPatch) -> None:
+    from scripts import hardware_test_predictors as htp
+
+    record = collect(_cli_archive(), backend="ibm_fez", until=T0).files[-1]
+    monkeypatch.setattr(htp, "iter_archive", lambda repo, sha, prefix="": iter([]))
+    with pytest.raises(ValueError, match="is not one file"):
+        htp._not_operational_at_freeze(Path("."), "f" * 40, record)
+
+
 @pytest.fixture(scope="module")
 def fez_doc() -> dict[str, Any]:
     """FakeFez's configuration and properties in the archive's JSON form (dates as text)."""

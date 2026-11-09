@@ -182,6 +182,15 @@ def test_c_interval_waits_for_a_fourth_day() -> None:
     assert got is not None and len(got) == 2 and got[0] <= got[1]
 
 
+def test_a_draw_with_no_points_is_drawn_again() -> None:
+    """Seven days, points on day 0 only: two 3-day blocks often miss it, and such a draw has no
+    slope, so it must be drawn again rather than enter the percentiles."""
+    days = _days(7)
+    points = [(0.5, 0.35, days[0]), (-0.2, -0.14, days[0])]
+    got = hs.c_block_interval(points, span=(days[0], days[-1]), seed=3, n_boot=200)
+    assert got == pytest.approx([0.7, 0.7], abs=1e-12)
+
+
 def test_c_interval_is_none_without_points_or_disagreement() -> None:
     days = _days(5)
     span = (days[0], days[-1])
