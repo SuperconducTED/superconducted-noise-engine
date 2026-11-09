@@ -27,6 +27,7 @@ from scripts.hardware_test_predictors import (
     freeze_controls,
     main,
     normalise_live,
+    not_operational_in,
     predictor_rows,
     propose_controls,
     select_balanced,
@@ -643,14 +644,173 @@ def _cli_archive() -> list[Any]:
     return _archive(40, t1)
 
 
-def _cli(monkeypatch: pytest.MonkeyPatch, args: list[str]) -> int:
+def _cli(monkeypatch: pytest.MonkeyPatch, args: list[str], docs: list[Any] | None = None) -> int:
+    archive = _cli_archive() if docs is None else docs
+
+    def fake_iter(repo: Path, sha: str, prefix: str = "snapshots/") -> Any:
+        return iter([copy.deepcopy(d) for d in archive if d[0].startswith(prefix)])
+
     monkeypatch.setattr(
         "scripts.hardware_test_predictors.resolve_archive_ref", lambda repo, ref: "f" * 40
     )
-    monkeypatch.setattr(
-        "scripts.hardware_test_predictors.iter_archive", lambda repo, sha: iter(_cli_archive())
-    )
+    monkeypatch.setattr("scripts.hardware_test_predictors.iter_archive", fake_iter)
     return main(["--ref", "pinned", "--at", T0.isoformat(), *args])
+
+
+def _marked(
+    doc: tuple[str, dict[str, Any]], qubit: int, gate: str = "x", value: float = 1.0
+) -> tuple[str, dict[str, Any]]:
+    """``doc`` with a ``gate`` entry on ``qubit`` whose ``gate_error`` is ``value``."""
+    path, body = doc
+    body = copy.deepcopy(body)
+    stamp = body["properties"]["last_update_date"]
+    body["properties"]["gates"].append(
+        {
+            "qubits": [qubit],
+            "gate": gate,
+            "name": f"{gate}{qubit}",
+            "parameters": [{"date": stamp, "name": "gate_error", "unit": "", "value": value}],
+        }
+    )
+    return path, body
+
+
+def _four_scatters() -> list[Any]:
+    """40 days, every qubit past both floors, ``log T1`` scatter rising with the qubit index."""
+    amplitude = {0: 0.05, 1: 0.10, 2: 0.16, 3: 0.30}
+    t1: dict[int, dict[int, float | None]] = {
+        d: {q: 100.0 * math.exp(a * math.sin(d + q)) for q, a in amplitude.items()}
+        for d in range(40)
+    }
+    return _archive(40, t1)
+
+
+def test_a_marked_candidate_is_skipped_and_the_ranking_is_kept() -> None:
+    """Amendment 37 read literally: the next candidate in the same order takes the place."""
+    col = collect(_four_scatters(), backend="ibm_fez", until=T0)
+    rows = predictor_rows(col, at=T0, live=None)
+    ranked = propose_controls(col, k=4, exclude=set())
+    order = [c["qubit"] for c in ranked]
+    frozen = freeze_controls(col, rows, k=2, not_operational={order[0]})
+    assert [c["qubit"] for c in frozen["controls"]] == order[1:3]
+    assert frozen["controls"] == ranked[1:3]  # same scatter, same median: nothing re-ranked
+    assert frozen["skipped"] == [order[0]]
+    # Dropping the marked qubit before the median would move it: the test must not.
+    without = propose_controls(col, k=3, exclude={order[0]})
+    assert without[0]["median_scatter"] != ranked[0]["median_scatter"]
+    outside = freeze_controls(col, rows, k=2, not_operational={order[3]})
+    assert outside["controls"] == ranked[:2] and outside["skipped"] == []
+    two = freeze_controls(col, rows, k=2, not_operational=set(order[:2]))
+    assert two["controls"] == ranked[2:4] and two["skipped"] == order[:2]
+    assert freeze_controls(col, rows, k=2) == {
+        "below_window_floor": [],
+        "controls": ranked[:2],
+        "skipped": [],
+    }
+
+
+@pytest.mark.parametrize("gate", ["x", "sx"])
+def test_controls_mode_skips_a_candidate_marked_in_the_newest_file(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, gate: str
+) -> None:
+    col = collect(_cli_archive(), backend="ibm_fez", until=T0)
+    order = [c["qubit"] for c in propose_controls(col, k=4, exclude=set())]
+    archive = _cli_archive()
+    archive[-1] = _marked(archive[-1], order[0], gate)
+    freeze = tmp_path / "freeze"
+    args = ["--mode", "controls", "--propose-controls", "2", "--out", str(freeze)]
+    assert _cli(monkeypatch, args, archive) == 0
+    frozen = json.loads((freeze / "controls.json").read_text(encoding="utf-8"))
+    assert [c["qubit"] for c in frozen["controls"]] == order[1:3]
+    assert frozen["not_operational_at_freeze"] == {
+        "file": archive[-1][0],
+        "time": T0.isoformat(),
+        "has_configuration": False,
+        "qubits": [order[0]],
+        "skipped": [order[0]],
+    }
+
+
+@pytest.mark.parametrize("where", ["older file", "after --at", "below one"])
+def test_controls_mode_reads_only_the_newest_file_at_the_freeze(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, where: str
+) -> None:
+    col = collect(_cli_archive(), backend="ibm_fez", until=T0)
+    order = [c["qubit"] for c in propose_controls(col, k=4, exclude=set())]
+    archive = _cli_archive()
+    newest = archive[-1][0]
+    if where == "older file":
+        archive[-2] = _marked(archive[-2], order[0])
+    elif where == "after --at":
+        later = _doc(T0 + timedelta(hours=1), {0: 140.0})
+        archive.append(_marked(later, order[0]))
+    else:
+        archive[-1] = _marked(archive[-1], order[0], value=0.999)
+    freeze = tmp_path / "freeze"
+    args = ["--mode", "controls", "--propose-controls", "2", "--out", str(freeze)]
+    assert _cli(monkeypatch, args, archive) == 0
+    frozen = json.loads((freeze / "controls.json").read_text(encoding="utf-8"))
+    assert [c["qubit"] for c in frozen["controls"]] == order[:2]
+    assert frozen["not_operational_at_freeze"] == {
+        "file": newest,
+        "time": T0.isoformat(),
+        "has_configuration": False,
+        "qubits": [],
+        "skipped": [],
+    }
+
+
+@pytest.fixture(scope="module")
+def fez_doc() -> dict[str, Any]:
+    """FakeFez's configuration and properties in the archive's JSON form (dates as text)."""
+    from qiskit_ibm_runtime.fake_provider import FakeFez
+
+    backend = FakeFez()
+    backend._set_props_dict_from_json()
+    props = copy.deepcopy(backend._props_dict)
+
+    def text(value: Any) -> Any:
+        return value.isoformat() if isinstance(value, datetime) else value
+
+    props["last_update_date"] = text(props["last_update_date"])
+    for entries in props["qubits"]:
+        for entry in entries:
+            entry["date"] = text(entry.get("date"))
+    for gate in props["gates"]:
+        for parameter in gate["parameters"]:
+            parameter["date"] = text(parameter.get("date"))
+    return {"configuration": backend._get_conf_dict_from_json(), "properties": props}
+
+
+def test_a_gate_error_of_one_marks_a_qubit_with_or_without_a_configuration(
+    fez_doc: dict[str, Any],
+) -> None:
+    assert not_operational_in(fez_doc) == (True, [])
+    marked = copy.deepcopy(fez_doc)
+    for entry in marked["properties"]["gates"]:
+        if entry["gate"] == "sx" and entry["qubits"] == [5]:
+            for parameter in entry["parameters"]:
+                if parameter["name"] == "gate_error":
+                    parameter["value"] = 1.0
+    assert not_operational_in(marked) == (True, [5])
+    assert not_operational_in({**marked, "configuration": None}) == (False, [5])
+    _, plain = _marked(_doc(T0, {}), 2, "x")
+    assert not_operational_in(plain) == (False, [2])
+
+
+def test_absence_from_the_target_counts_only_with_a_configuration(
+    fez_doc: dict[str, Any],
+) -> None:
+    """IBM drops a qubit whose ``operational`` is 0 from the converted target; that is how a
+    qubit goes missing from a real capture's target. Without a configuration there is no target,
+    so amendment 37 reads only ``gate_error`` there."""
+    faulty = copy.deepcopy(fez_doc)
+    stamp = faulty["properties"]["last_update_date"]
+    faulty["properties"]["qubits"][3].append(
+        {"date": stamp, "name": "operational", "unit": "", "value": 0}
+    )
+    assert not_operational_in(faulty) == (True, [3])
+    assert not_operational_in({**faulty, "configuration": None}) == (False, [])
 
 
 def test_submission_without_frozen_controls_is_refused(
