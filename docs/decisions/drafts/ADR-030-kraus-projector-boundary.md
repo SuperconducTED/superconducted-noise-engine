@@ -30,8 +30,10 @@
 - Every in-range channel is unchanged (SuperOp difference < `1e-12`, pinned in
   `tests/test_kraus_boundary.py`).
 - A pipeline using `IdentitySquashing` that emits values outside `[0, 1]` now
-  fails loudly at `project()` instead of silently clipping.
+  fails loudly at `project()` instead of silently clipping. For an eligible
+  gate, `FuzzyNoiseModel.prepare()` propagates that `ValueError`.
 - ADR-008's normalization strategies still see only valid CPTP-by-construction
   candidate sets.
-- `is_identity_damping` still reports a NaN vector as identity; with the
-  projector now raising, that vector can no longer be installed as damping.
+- `is_identity_damping` still reports a NaN vector as identity; when `prepare`
+  encounters an eligible gate, the projector rejects that vector and
+  `prepare` raises instead of installing or silently skipping its channel.

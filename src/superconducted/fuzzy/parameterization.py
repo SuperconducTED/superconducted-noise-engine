@@ -18,8 +18,8 @@ Two conventions that look inconsistent until you read them together (NFR-5):
   :class:`ClampingFeatureExtractor` moves it onto the boundary and counts it.
   Its one exception is a **non-finite** component, which raises: that is not a
   measurement, and clamping cannot absorb it -- ``np.clip`` preserves NaN, and a
-  NaN reaching the channel installs maximal damping while every viability check
-  stays green. See :meth:`ClampingFeatureExtractor.extract`.
+  NaN can evade viability checks and is rejected only when an eligible channel
+  is projected. See :meth:`ClampingFeatureExtractor.extract`.
 
 No direct qiskit use here; qiskit arrives transitively through
 ``superconducted.interfaces``, which imports it at module level for the ABCs
@@ -569,8 +569,8 @@ def anchored_rule_base(
     allocated consequent array, because ``TSKRule`` aliases the array it is given.
 
     Raises ``ValueError`` on a length mismatch, a non-finite target (a NaN bias
-    would install maximal damping while passing every viability check, NFR-5),
-    or an inconsistent ``output_dim``.
+    could evade viability checks and fail later during channel projection,
+    NFR-5), or an inconsistent ``output_dim``.
     """
     input_dim = len(per_input_mfs)
     if input_dim == 0:
