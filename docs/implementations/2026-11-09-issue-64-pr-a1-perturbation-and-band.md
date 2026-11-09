@@ -117,9 +117,9 @@ under the condition in 6727434243; inside the min/max band with probability exac
 
 - @bengisucvd's approval (owner of `metrics.py` and of the new module).
 - Burak's read of `aer_factory.py` (his module).
-- Dr. Akba's read as primary owner of `interfaces.py` (the ticket's FR-1: "Do not merge PR-A on @mertefesensoy +
-  @BurakOztekin alone"). How it is collected is the lead's decision, written in the PR; this plan does not assume that
-  any earlier arrangement covers a primary-owner read.
+- The primary owner's read of `interfaces.py`, Dr. Akba's (the ticket's FR-1: "Do not merge PR-A on @mertefesensoy +
+  @BurakOztekin alone"). How it is met, by his read or by the lead's under the advisor arrangement, is the lead's
+  decision, written in the PR; this plan assumes neither.
 - NC-021 re-measured at the merge commit (Rule 6).
 
 ## Verification
