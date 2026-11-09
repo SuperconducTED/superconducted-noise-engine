@@ -651,3 +651,37 @@ other build file is LF.
 
 Laptop, provisional: Burak's desktop is the source of truth, and his runbook for #142 is owed after #140 merges. Nothing
 of stage 2 is pushed yet; that, and #142's and #135's stale PR bodies, are stage 3, on the lead's word.
+
+**As of 2026-11-09 morning:** stage 2 is pushed to #142 at `6f745934` and its body rewritten, both on the lead's word;
+CI is green there. #135's body is still stale.
+
+## Amendment 34 plan, 2026-11-09, before the code
+
+Appended; nothing above is edited. PR #135's section 3.13 lists amendment 34 among those still to build ("24 to 30 and
+34"). Stage 2 built 24 to 30 and 36, not 34; this was found while drafting #142's body. Amendment 34 (#135 at
+`ae2f4884`): "A bad live document is a missed job. It stops the run (`LiveDocumentError`, exit 2), while a bad archived
+document is counted and skipped; on a job day the first is a missed morning under amendment 18."
+
+**What happens today**, reproduced at `6f745934` by the tests below before any code change. `run_build` saves the live
+capture, then `predictor_rows` raises `LiveDocumentError` when the document names another device, names none, has
+neither document shape, or its qubits do not parse. `main` catches only `RefusedError`, so the build ends in a
+traceback with exit 1 and no `missed.json`. The day then holds no job, so the report counts it "empty", which is the
+amendment's outcome. But the routine records exit 1, nothing names the day missed, and a second `build` the same day
+would be allowed, against amendment 18's "no re-runs".
+
+**The change.**
+
+1. `run_build` catches `LiveDocumentError` from `predictor_rows`, writes `missed.json` with the reason ("the live
+   document is unusable: " and the message) and the capture's time, and raises `RefusedError`. `main` then exits 2 and
+   prints "refused: ...", as it does for a closed window; the routine records the build's exit 2, submits no `T1`
+   check and still scores and reports. The saved live document stays, to show what was wrong.
+2. `run_build` refuses a day that already holds `missed.json` before any capture: amendment 18 allows no re-run.
+
+Nothing else changes. The good path is the same code, so the dry run (which never calls `run_build`) and the rehearsal
+(whose live documents are good) are not re-run; the existing build tests stand for that path.
+
+| # | Criterion |
+| --- | --- |
+| 27 | A live document that names another device, names none, has neither shape, or does not parse makes `build` record `missed.json` with its reason and time, submit nothing, write no `job_id.txt` or `submission.json`, keep `live-properties.json`, and raise `RefusedError`; the report reads the day "missed". |
+| 28 | A day recorded missed is refused by a later `build` that day, before any capture, and nothing is submitted. |
+| 29 | Every new line is mutation-checked, each mutant caught (by an assertion where it can be) or shown equivalent; the four hardware test files and the gates pass on the exact pins. |
