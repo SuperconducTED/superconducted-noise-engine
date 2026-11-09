@@ -1,0 +1,51 @@
+{
+  "backend": "ibm_fez",
+  "ref": "60d082b0ea5f7b6678aec796357f7b7fcb99794e",
+  "ref_sha": "60d082b0ea5f7b6678aec796357f7b7fcb99794e",
+  "at": "2026-11-09T12:11:46+00:00",
+  "min_window_distinct": 15,
+  "min_distinct_values": 20,
+  "requested_controls": 4,
+  "below_window_floor": [
+    11,
+    72,
+    148
+  ],
+  "controls": [
+    {
+      "qubit": 45,
+      "log_t1_scatter": 0.29185178571586734,
+      "median_scatter": 0.29185178571586734,
+      "n_distinct": 165
+    },
+    {
+      "qubit": 147,
+      "log_t1_scatter": 0.2922987967678683,
+      "median_scatter": 0.29185178571586734,
+      "n_distinct": 168
+    },
+    {
+      "qubit": 42,
+      "log_t1_scatter": 0.2913912932723336,
+      "median_scatter": 0.29185178571586734,
+      "n_distinct": 167
+    },
+    {
+      "qubit": 142,
+      "log_t1_scatter": 0.29235445267752885,
+      "median_scatter": 0.29185178571586734,
+      "n_distinct": 167
+    }
+  ],
+  "not_operational_at_freeze": {
+    "file": "snapshots/2026-11/ibm_fez/20261109T114744000000Z.json",
+    "time": "2026-11-09T11:47:44+00:00",
+    "has_configuration": true,
+    "qubits": [
+      72,
+      148,
+      149
+    ],
+    "skipped": []
+  }
+}
