@@ -2147,6 +2147,7 @@ def test_a_bad_live_document_is_a_missed_morning(
     with pytest.raises(hs.RefusedError, match="the live document is unusable"):
         _build(tmp_path, controls_file, device, archive_docs)
     job_dir = tmp_path / "jobs" / f"{T_S:%Y-%m-%d}"
+    assert (job_dir / "missed.json").exists(), "the day was not recorded missed"
     missed = json.loads((job_dir / "missed.json").read_text(encoding="utf-8"))
     assert missed["reason"].startswith("the live document is unusable: ")
     assert why in missed["reason"]
