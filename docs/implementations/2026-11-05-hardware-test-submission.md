@@ -796,3 +796,14 @@ either way.
 
 The rehearsal was not re-run, as the plan says. Owed, each on the lead's word: amendment 38 on `main` (drafted), the push
 to PR #142 and its body. Laptop, provisional; Burak's desktop is the source of truth.
+
+**Correction, 2026-11-09, before the push.** The stage 3 plan says the dry run "runs `--mode submission` only
+(`dry_run.sh`, line 29)". It does not. Line 29 writes the reference's `controls.json` from the commit's blob, and lines 33
+and 34 run PR #140's `python -m scripts.hardware_reading_vs_level`. That script imports from
+`scripts/hardware_test_predictors.py` exactly `MIN_WINDOW_DISTINCT`, `Collected`, `PredictorRow`, `collect`,
+`execution_rows`, `load_controls`, `predictor_rows` and `select_balanced`, all unchanged against `5c98f264` by the
+definition comparison, and none of `freeze_controls`, `not_operational_in`, `_not_operational_at_freeze` or `main`; it
+does not import `scripts/hardware_submit.py`. So the plan's conclusion holds for this reason: none of the three changes
+reaches the dry run, and its 8 identical files show that those functions write what they wrote. That `--mode submission`
+and `--mode execution` themselves are unchanged rests on the definition comparison (`main` differs only in its controls
+branch), not on the dry run. Found in review before anything left the laptop.
