@@ -446,3 +446,7 @@ Forecasting**, summarizes this research document's role in the wider three-engin
 The repository-specific domain remains superconducting-qubit calibration and quantum-noise
 modelling. This title is an English academic framing for the capstone, not a new architecture
 decision or a result.
+
+## As of 2026-11-09: the evaluation protocol withdrawn
+
+Appended 2026-11-09, after the PR #111 reviews: the paired Wilcoxon over epochs x circuits (§0, §2.1a, §4) and the binomial interval for a single run's coverage (§2.3) are withdrawn, and the rule that replaces them is in the plan's section "As of 2026-11-09" (`2026-10-04-three-engine-and-deep-model-plan.md`).

@@ -442,3 +442,88 @@ three engine modes; it does not claim that an adaptive selector has already been
 The detailed forecasting motivation, drift evidence, and recommended evaluation protocol
 remain in `2026-10-04-deep-engine-architecture-research.md`. The topic therefore describes
 the research program without promoting its open recommendations or planned tasks into results.
+
+## As of 2026-11-09: what reached `main`, what stayed on PR #111's branch, and the evaluation protocol
+
+Appended 2026-11-09; the text above, including the 2026-10-05 and 2026-10-16 sections, is
+unchanged.
+
+**How this document reached `main`.** PR #111 was split on the lead's decision of 2026-11-09.
+This plan, the architecture research, the Turkish summary, this plan's implementation record,
+the 2026-10-05 meeting deck and its record landed as they stood at `d9c04cb6` on
+`mert/three-engine-deep-model-plan`. @BurakOztekin's capstone commit `f8a8d2e5` followed as
+his own commit, cherry-picked unchanged. Nothing in these files was edited. This section and a
+one-line note at the research document's foot were appended.
+
+**What stayed on the branch, and why.** The branch is kept, and the tag `archive/pr-111` pins
+its last commit, `f8a8d2e5`. These stay there:
+
+- `scripts/feature_patterns.py` and its 20 tests;
+- `docs/evidence/feature-patterns/`;
+- `docs/roadmap/2026-10-05-feature-patterns-and-method.md` and its record;
+- `docs/roadmap/2026-10-05-gate-error-literature-survey.md`;
+- the 2026-10-05 report page and its record;
+- `docs/findings/2026-10-06-feature-deep-dive/`, its report page and its record;
+- the branch's NC-021 edit.
+
+The reviews of 2026-10-28 (@bengisucvd) and 2026-11-02 (@BurakOztekin), both made at
+`f8a8d2e5`, found two defects in the script:
+
+- `events()` keeps an event only when the value and the stamped date both change, so a fresh
+  measurement that repeats the previous value is dropped;
+- `_spearman()` gives tied values different ranks and returns a finite correlation for a
+  constant input.
+
+The deep dive's loader (`analysis/ddload.py`) imports the event rule. Neither defect is
+fixed, so every figure the script or the deep dive produced stays provisional and stays off
+`main`.
+
+**Paths above that exist only on the branch.** The A9 section names
+`docs/roadmap/2026-10-05-feature-patterns-and-method.md` and `scripts/feature_patterns.py`.
+The meeting record names `docs/advisor/2026-10-05-feature-patterns-report/` and the
+feature-patterns document again. None of these paths is on `main`; read them at the tag. The
+meeting record still says what Dr. Akba was shown on 2026-10-05. The defects bear on the
+figures he saw, not on the fact that he saw them.
+
+**The evaluation protocol: the third item of both reviews.** The reviews found the same
+problem in four places:
+
+- §1's test, "paired Wilcoxon signed-rank at alpha = 0.05 over snapshots x circuits", and
+  T11's row treat observations that share a calibration state as independent replicates;
+- the research document's paired Wilcoxon over epochs x circuits (its §0, §2.1a and §4) does
+  the same;
+- an entity's mean does not repair it, because qubits and couplers share calibration rounds
+  and physical connections;
+- serially dependent coverage indicators do not justify an ordinary binomial interval, which
+  is what the research document proposes for a single run's coverage (its §2.3).
+
+The answer:
+
+1. **Withdrawn.** §1's last sentence (the shared test) and the test named in T11's row; the
+   research document's Wilcoxon over epochs x circuits and its binomial coverage interval. The
+   rest of §1 stands: the same target, split, downstream layers, circuits and metrics.
+2. **Replaced by a rule for the protocol, not by a method chosen now.** Before any engine
+   comparison under #110 runs, its protocol is committed and states:
+   - **the inferential unit:** one UTC calendar day of the device, with every circuit, qubit
+     and coupler observed that day kept together;
+   - **the uncertainty method:** resampling of circular blocks of consecutive calendar days,
+     with empty days kept on the axis. The block length and its reason are fixed before any
+     score is seen, as `main` already does in two places. The pattern detector's record uses
+     six days (`docs/evidence/pattern-detector/README.md` §7, amendment 8 item 4, and §12.4).
+     The hardware test's pre-registration uses three (`docs/roadmap/2026-10-24-issue-125-preregistration.md`
+     §3.7, item 8);
+   - **band coverage:** reported with an interval from that same block resampling, never a
+     binomial interval.
+3. **Nothing reported is withdrawn with it.** No engine comparison has been run: T11 needs
+   T7, T8, #58, #62 and #64.
+
+**What else has changed since this plan.**
+
+- The strategy audit (`docs/findings/2026-10-23-strategy-audit.md` §3) records that NC-084
+  and NC-085 contradict A7's premise for `T1` and `T2`, and leaves A7 for #110 to revisit.
+- The phase-4 plan (`docs/roadmap/2026-10-23-phase-4-plan.md` §3, §4 and §4.1) parks #110
+  and allows only the pattern detector's tasks N0 to N6 on it (Issue #110, comment
+  6412965244), with N2 behind gate L1 (§8.3, block 4). The tasks of §7 above are therefore not
+  scheduled, and this section reopens none of them.
+- PR #98 merged on 2026-10-06, so T0 no longer waits on it. T0's entry is still owed:
+  `docs/advisor/2026-09-03-decisions-from-akba.md` has no entry for the 2026-10-05 meeting.
