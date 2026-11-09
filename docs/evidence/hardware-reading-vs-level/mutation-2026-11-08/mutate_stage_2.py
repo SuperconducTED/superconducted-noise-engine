@@ -2,7 +2,7 @@
 """Criterion 25: mutate every line stage 2 added to the scripts and confirm a test fails.
 
     python mutate_stage_2.py <repo root> <base commit> <out folder> [--list]
-        [--run-root <copy>] [--shard <i>/<n>] [--only <n,n,...>]
+        [--run-root <copy>] [--shard <i>/<n>] [--only <n,n,...>] [--group <name>]
     python mutate_stage_2.py <repo root> <base commit> <out folder> --merge <n> [--rerun]
 
 The lines come from ``git diff <base>..HEAD`` (added lines only), so a line cannot be missed by
@@ -53,7 +53,13 @@ SUBMIT_TESTS = "tests/test_hardware_submit.py"
 
 # Functions of hardware_submit.py whose lines the score command's tests exercise; every other
 # new line in that file belongs to the report and its statistics.
-SCORE_FUNCTIONS = {"run_score", "refuse_sealed_inside", "main"}
+SCORE_FUNCTIONS = {
+    "run_score",
+    "refuse_sealed_inside",
+    "main",
+    "run_build",
+    "_record_unusable_live",
+}
 SCORE_TESTS_FIRST = [
     "test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout",
     "test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network",
@@ -63,6 +69,8 @@ SCORE_TESTS_FIRST = [
     "test_report_refuses_a_sealed_folder_inside_the_jobs_folder",
     "test_the_score_command_hands_its_sealed_folder_to_the_scoring",
     "test_report_makes_a_sealed_folder_that_is_not_there_yet",
+    "test_a_bad_live_document_is_a_missed_morning",
+    "test_a_day_recorded_missed_is_not_built_again",
     "test_score_adds_the_control_from_the_archive_and_scores_both_arms",
     "test_a_job_with_a_control_left_out_scores_on_the_rest",
     "test_job_one_scores_arm_a_only",
@@ -414,6 +422,12 @@ def main() -> int:
         found, none = mutants_for(root, base, name)
         every += found
         bare += [(name, n, t) for n, t in none]
+    if "--group" in rest:
+        # One test command for every mutant, for a pass over a few lines whose tests are known.
+        forced = rest[rest.index("--group") + 1]
+        assert forced in LIMIT_S, forced
+        for m in every:
+            m.group = forced
     groups = {g: sum(m.group == g for m in every) for g in LIMIT_S}
 
     def line(text: str) -> None:

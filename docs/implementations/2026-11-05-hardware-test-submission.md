@@ -685,3 +685,15 @@ Nothing else changes. The good path is the same code, so the dry run (which neve
 | 27 | A live document that names another device, names none, has neither shape, or does not parse makes `build` record `missed.json` with its reason and time, submit nothing, write no `job_id.txt` or `submission.json`, keep `live-properties.json`, and raise `RefusedError`; the report reads the day "missed". |
 | 28 | A day recorded missed is refused by a later `build` that day, before any capture, and nothing is submitted. |
 | 29 | Every new line is mutation-checked, each mutant caught (by an assertion where it can be) or shown equivalent; the four hardware test files and the gates pass on the exact pins. |
+
+**Amendment 34 done (2026-11-09).** Plan `a1e1b22a`, code and tests `48718a91`, one test tightened `8341e32d`.
+
+| # | Result | Evidence |
+| --- | --- | --- |
+| 27 | **Holds.** The four bad documents (another device named, none named, neither shape, qubits that do not parse) each record `missed.json` with the reason and the capture's time, submit nothing, write no `job_id.txt` or `submission.json`, keep `live-properties.json`, and raise `RefusedError`; `_day_status` reads the day "missed". The five tests failed at `6f745934` with `LiveDocumentError` escaping `run_build`, before the code changed. | `test_a_bad_live_document_is_a_missed_morning` |
+| 28 | **Holds.** After a bad document, a good one five minutes later that day is refused before any capture (`captures == 0`), and nothing is submitted. | `test_a_day_recorded_missed_is_not_built_again` |
+| 29 | **Holds.** 11 mutants of the new lines, all caught: two by an assertion, nine by the crash each mutant makes (a missing name or argument, `rows` unbound, a path multiplied). Gates at `8341e32d`: ruff, `ruff format --check`, `check_ids.py` and `mypy --strict` on 52 files clean, `pytest tests/` 1,383 passed and 2 skipped in 7 min 2 s. | `docs/evidence/hardware-reading-vs-level/missed-live-2026-11-09/` |
+
+The dry run and the rehearsal were not re-run: the dry run never calls `run_build`, and on a good live document
+`run_build` runs the same code as before (the new guard finds no `missed.json` and the new `except` is not entered),
+which every existing build test still passes.

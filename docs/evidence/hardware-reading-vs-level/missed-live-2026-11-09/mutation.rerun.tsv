@@ -1,0 +1,2 @@
+n	file	line	group	kind	mutant	outcome	how	test	message	seconds	code
+2	scripts/hardware_submit.py	508	score	delete	statement removed	caught	assert	test_a_bad_live_document_is_a_missed_morning[_another_device-name]	AssertionError: the day was not recorded missed	15.5	write_json_lf(
