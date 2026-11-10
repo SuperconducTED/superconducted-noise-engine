@@ -3,8 +3,10 @@
 The ``#`` provenance lines are ignored: they name the commit. Text columns must match exactly and
 numeric columns to the printed relative tolerance, because the last bits of a dot product can depend
 on the BLAS build. The ``km_*`` columns count rounding-level events or measure rounding itself, so
-they belong to the arithmetic: they are printed and never fail the comparison. Exits 1 on a
-difference.
+they belong to the arithmetic: they are not compared between the two files. One of them is checked
+on the new file alone: ``km_route_gap_over_tolerance_max`` must be at most 1 in every row, that is,
+the iterative route agreed with the exhaustive one to each point's tolerance (PR #143 review,
+item 1). Exits 1 on a difference or on a gap above tolerance.
 
 Usage::
 
@@ -20,7 +22,14 @@ from pathlib import Path
 
 TOLERANCE = 1e-9
 FLOOR = 1e-15
-ARITHMETIC_COLUMNS = ("km_passes_max", "km_passes_mean", "km_guard_stops", "km_route_gap_max")
+GAP_OVER_TOLERANCE = "km_route_gap_over_tolerance_max"
+ARITHMETIC_COLUMNS = (
+    "km_passes_max",
+    "km_passes_mean",
+    "km_guard_stops",
+    "km_route_gap_max",
+    GAP_OVER_TOLERANCE,
+)
 
 
 def rows(path: Path) -> list[dict[str, str]]:
@@ -33,6 +42,12 @@ def main() -> int:
     new, committed = rows(Path(sys.argv[1])), rows(Path(sys.argv[2]))
     if len(new) != len(committed):
         print(f"FAIL: {len(new)} rows against {len(committed)}")
+        return 1
+    over = [float(a[GAP_OVER_TOLERANCE]) for a in new if a.get(GAP_OVER_TOLERANCE, "") != ""]
+    if any(not v <= 1.0 for v in over):
+        bad = sum(not v <= 1.0 for v in over)
+        print(f"FAIL: {bad} rows where the iterative route misses the exhaustive one by more than")
+        print(f"their tolerance; largest {max(over):.3g} tolerances")
         return 1
     worst = 0.0
     arithmetic = dict.fromkeys(ARITHMETIC_COLUMNS, 0)

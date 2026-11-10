@@ -64,6 +64,17 @@ rather than looping, in case that argument is ever broken by an edit. A guarded
 stop can land within rounding of the endpoint rather than on the exact
 minimiser; :func:`exhaustive_type_reduce` is the check on that.
 
+The guard does not make the iteration correct in float64. The argument for it
+(the #61 Part A findings, P3) needs every computed ``y`` to equal ``Y(v)``
+exactly for some ``v`` in the box. When the first average rounds onto a
+consequent, ``k`` counts that rule, the switch vertex returns the same value, and
+the iteration stops at a fixed point that is not the endpoint:
+``lower = [1e-17, 1e-20]``, ``upper = [1e-17, 1]``, ``values = [0, 1]`` gives
+``y_l = 1.0`` against 9.99e-4 (PR #143 review, 2026-11-09; pinned in the tests).
+So the sweep takes its band from :func:`exhaustive_type_reduce`, which has no
+stop rule, and reports the iterative route's gap to it as a diagnostic, also in
+units of the point's tolerance.
+
 The two closed-form reducers
 ----------------------------
 
@@ -128,7 +139,8 @@ point share them.
   survey rows themselves, which is where the archive sits (on the ``3d1569d``
   survey, 44 of 975 lie outside the ``[p1, p99]`` box in at least one feature).
   ``pooled``: all requested sets together.
-- **Distances.** ``D = |y - (y_l + y_r) / 2|`` with the Karnik-Mendel endpoints;
+- **Distances.** ``D = |y - (y_l + y_r) / 2|`` with the Karnik-Mendel endpoints of
+  :func:`exhaustive_type_reduce`;
   ``Dc = D / (max c - min c)`` (#61 FR-3); ``Db = D / (y_r - y_l)`` (#84 File 02's
   pre-registered score), set to 0 and counted where the band width is within
   rounding (``64 R eps max|c|``) and capped at ``1/2`` elsewhere, so a reducer
@@ -146,6 +158,7 @@ stderr.
 import argparse
 import csv
 import itertools
+import math
 import subprocess
 import sys
 import time
@@ -233,8 +246,16 @@ def _sorted_by_value(
 
 
 def _weighted_average(weights: FloatArray, values: FloatArray) -> float:
-    """``sum w c / sum w``; every caller guarantees ``sum w > 0``."""
-    return float(weights @ values) / float(weights.sum())
+    """``sum w c / sum w``, computed on ``w / max w``; every caller guarantees ``sum w > 0``.
+
+    Dividing by the largest weight changes nothing in exact arithmetic. In float64 the
+    largest scaled weight is 1, so the products and the sum cannot underflow together:
+    lower weights near ``1e-322`` gave ``Y(lower) = 0.0``, below every consequent
+    (PR #143 review, item 2).
+    """
+    scale = float(weights.max())
+    scaled = weights / scale
+    return float(scaled @ values) / float(scaled.sum())
 
 
 def _switch_vertex(
@@ -288,7 +309,9 @@ def karnik_mendel_detailed(
     """Iterative Karnik-Mendel endpoints with pass counts and guard stops.
 
     Inputs follow the module contract. Output satisfies ``y_l <= y_r`` up to
-    rounding and agrees with :func:`exhaustive_type_reduce` to rounding. Pure.
+    rounding. It agreed with :func:`exhaustive_type_reduce` to rounding on every point
+    of the committed sweeps, but not in general: it can stop at a float fixed point
+    (module docstring), so the sweep's band does not come from it. Pure.
     """
     lo, hi, c = _sorted_by_value(*_validated(lower, upper, values))
     y_l, passes_l, guard_l = _km_endpoint(lo, hi, c, "left")
@@ -309,7 +332,8 @@ def karnik_mendel_type_reduce(
 
     Raises ``ValueError`` or ``ZeroDivisionError`` per the module contract and
     ``RuntimeError`` if an endpoint exceeds ``n_rules + 1`` passes, which the
-    monotone guard makes unreachable. Pure.
+    monotone guard makes unreachable. Can stop at a float fixed point that is not
+    the endpoint (module docstring). Pure.
     """
     result = karnik_mendel_detailed(lower, upper, values)
     return result.y_l, result.y_r
@@ -321,8 +345,9 @@ def exhaustive_type_reduce(
     """Return ``(y_l, y_r)`` by evaluating all ``n_rules + 1`` switch vertices per endpoint.
 
     Exact up to the rounding of each weighted average (module docstring), with
-    no iteration and no stop rule, so it is the independent check on
-    :func:`karnik_mendel_type_reduce`. Same contract and errors. Pure.
+    no iteration and no stop rule. The sweep's band comes from it, and it is the check
+    on :func:`karnik_mendel_type_reduce`; the tests check it in turn against exact
+    rational vertex enumeration. Same contract and errors. Pure.
     """
     lo, hi, c = _sorted_by_value(*_validated(lower, upper, values))
     switch_points = range(c.size + 1)
@@ -394,6 +419,7 @@ COLUMNS: tuple[str, ...] = (
     "km_passes_mean",
     "km_guard_stops",
     "km_route_gap_max",
+    "km_route_gap_over_tolerance_max",
 )
 
 
@@ -615,7 +641,11 @@ def parse_point_sets(text: str) -> tuple[str, ...]:
 
 
 def _measure(lower: FloatArray, upper: FloatArray, values: FloatArray) -> _Measurement | None:
-    """Every reducer and both KM routes at one (point, output); ``None`` on a zero sum."""
+    """Every reducer and both KM routes at one (point, output); ``None`` on a zero sum.
+
+    The band ``[y_l, y_r]`` is the exhaustive route's. The iterative route runs too, for
+    its passes, guard stops and its gap to the exhaustive route (PR #143 review, item 1).
+    """
     try:
         km = karnik_mendel_detailed(lower, upper, values)
         exhaustive_l, exhaustive_r = exhaustive_type_reduce(lower, upper, values)
@@ -625,8 +655,8 @@ def _measure(lower: FloatArray, upper: FloatArray, values: FloatArray) -> _Measu
         return None
     eps = float(np.finfo(np.float64).eps)
     return _Measurement(
-        y_l=km.y_l,
-        y_r=km.y_r,
+        y_l=exhaustive_l,
+        y_r=exhaustive_r,
         y_bmm=y_bmm,
         y_nt=y_nt,
         spread=float(values.max() - values.min()),
@@ -636,6 +666,13 @@ def _measure(lower: FloatArray, upper: FloatArray, values: FloatArray) -> _Measu
         guard_stops=km.guard_stops,
         route_gap=max(abs(km.y_l - exhaustive_l), abs(km.y_r - exhaustive_r)),
     )
+
+
+def _gap_over_tolerance(m: _Measurement) -> float:
+    """The iterative route's gap in units of the point's tolerance, ``64 R eps max|c|``."""
+    if m.tolerance > 0.0:
+        return m.route_gap / m.tolerance
+    return 0.0 if m.route_gap == 0.0 else math.inf
 
 
 def _stats(values: FloatArray) -> list[str]:
@@ -662,6 +699,7 @@ def _summary_rows(
         repr(float(passes.mean())) if passes.size else "",
         str(sum(m.guard_stops for m in kept)),
         repr(max((m.route_gap for m in kept), default=0.0)),
+        repr(max((_gap_over_tolerance(m) for m in kept), default=0.0)),
     ]
     rows = []
     for reducer in ("bmm_half", "nie_tan"):
@@ -822,11 +860,14 @@ def header_lines(
         f"seed: {seed}",
         "reducers: bmm_half = (Y(lower) + Y(upper))/2, what NieTanDefuzzifier computes; "
         "nie_tan = Y(lower + upper), textbook Nie-Tan",
-        "distances: D = |y - (y_l + y_r)/2| with Karnik-Mendel endpoints; "
+        "distances: D = |y - (y_l + y_r)/2| with the Karnik-Mendel endpoints of the "
+        "exhaustive switch-vertex route; "
         "Dc = D/(max c - min c); Db = min(D/(y_r - y_l), 1/2), 0 and counted in "
         "n_degenerate_band where y_r - y_l <= 64 R eps max|c|; a reducer outside "
         "[y_l, y_r] by more than that tolerance is counted in n_bracket_violations; "
-        "km_route_gap_max = max |iterative - exhaustive|",
+        "km_* columns are diagnostics of the iterative route: km_route_gap_max = "
+        "max |iterative - exhaustive|, km_route_gap_over_tolerance_max = max of that gap "
+        "over 64 R eps max|c|",
     ]
 
 

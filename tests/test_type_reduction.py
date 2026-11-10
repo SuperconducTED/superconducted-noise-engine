@@ -110,16 +110,21 @@ def _boxes(n_rules: int, seed: int) -> list[tuple[FloatArray, FloatArray, FloatA
 
 # A two-rule box on which the switch-point stop alone cycles in float64. Rule 2
 # fires about 1e-16 times as strongly as rule 1, so every weighted average rounds
-# to values[0] or to one ulp below it, and on the right endpoint k alternates
-# 1, 0, 1, 0, ... Found by a seeded search on 2026-10-21 (Issue #61 Part A plan).
+# to values[0] or to one ulp beside it, and on the right endpoint k alternates.
+# Which box cycles depends on the arithmetic, not on the problem (findings section 7):
+# the box found on 2026-10-21 (lower 0x1.51d2466664a90p-11, 0x1.2978dcd7da47bp-64;
+# upper 0x1.eba9da337995ap-11, 0x1.63d9374034e0ep-64; values 0x1.61261207e7cf4p-13,
+# 0x1.9197bc1f2828fp-13) stopped cycling once _weighted_average rescaled by the
+# largest weight (PR #143 review, item 2). This one was found by the same kind of
+# seeded search under the new arithmetic on 2026-11-11 (rng 20261111, trial 21).
 CYCLE_LOWER = np.array(
-    [float.fromhex("0x1.51d2466664a90p-11"), float.fromhex("0x1.2978dcd7da47bp-64")]
+    [float.fromhex("0x1.2828e4bec9a52p-13"), float.fromhex("0x1.082ac8d4fd4e0p-67")]
 )
 CYCLE_UPPER = np.array(
-    [float.fromhex("0x1.eba9da337995ap-11"), float.fromhex("0x1.63d9374034e0ep-64")]
+    [float.fromhex("0x1.f5cf0b54ed14ep-13"), float.fromhex("0x1.4864fe3c3729cp-66")]
 )
 CYCLE_VALUES = np.array(
-    [float.fromhex("0x1.61261207e7cf4p-13"), float.fromhex("0x1.9197bc1f2828fp-13")]
+    [float.fromhex("0x1.985abef0c2c49p-13"), float.fromhex("0x1.205fba82c7984p-12")]
 )
 
 
@@ -634,15 +639,16 @@ UNDERFLOW_UPPER = np.array([1e-3, 1e-3])
 UNDERFLOW_VALUES = np.array([1e-4, 2e-4])
 
 # A two-rule box on which the left guard stops on a strict increase, found by a seeded
-# search on 2026-11-11 (rng 20261111, trial 0); CYCLE_* exercises the right guard.
+# search under the rescaled arithmetic on 2026-11-11 (rng 20261111, trial 3); CYCLE_*
+# exercises the right guard.
 LEFT_GUARD_LOWER = np.array(
-    [float.fromhex("0x1.fa9af23555a09p-12"), float.fromhex("0x1.6d92b1100f2f4p-64")]
+    [float.fromhex("0x1.38d9cd865d6d6p-12"), float.fromhex("0x1.fafe8735193a3p-65")]
 )
 LEFT_GUARD_UPPER = np.array(
-    [float.fromhex("0x1.1ca764ae76b94p-11"), float.fromhex("0x1.d2ba1c9af99adp-64")]
+    [float.fromhex("0x1.01f52ac1e271bp-11"), float.fromhex("0x1.1f8c985fe635bp-64")]
 )
 LEFT_GUARD_VALUES = np.array(
-    [float.fromhex("0x1.d83215a1fe2f5p-14"), float.fromhex("0x1.25f278791192ap-12")]
+    [float.fromhex("0x1.b00020ed7eb4ep-14"), float.fromhex("0x1.60d13f9980ffap-13")]
 )
 
 WIDE_RANGE_RULE_COUNTS = (2, 3, 4, 5, 6)
@@ -720,9 +726,7 @@ def test_exhaustive_route_matches_exact_rational_enumeration(index: int) -> None
 
 def test_weighted_average_survives_subnormal_weights() -> None:
     """Item 2: rescaling by the largest weight keeps the average off zero."""
-    assert _weighted_average(UNDERFLOW_LOWER, UNDERFLOW_VALUES) == pytest.approx(
-        1.5e-4, rel=1e-12
-    )
+    assert _weighted_average(UNDERFLOW_LOWER, UNDERFLOW_VALUES) == pytest.approx(1.5e-4, rel=1e-12)
     m = _measure(UNDERFLOW_LOWER, UNDERFLOW_UPPER, UNDERFLOW_VALUES)
     assert m is not None
     assert m.y_l >= float(UNDERFLOW_VALUES.min())
@@ -803,16 +807,25 @@ def test_summary_reports_the_route_gap_over_tolerance() -> None:
 def test_guard_returns_the_better_iterate(
     side: Literal["left", "right"], lower: FloatArray, upper: FloatArray, values: FloatArray
 ) -> None:
-    """Item 5: when the guard stops, one more step from the returned value cannot improve it."""
+    """Item 5: when the guard stops, it returns the last accepted iterate, not the rejected one.
+
+    The iterates are replayed here, step by step, from the textbook update (start at the
+    midpoint average, take the switch vertex at ``k = #{c <= y}``), so the check does not
+    read the guard's own code.
+    """
     lo, hi, c = _sorted_by_value(lower, upper, values)
-    y, _, stopped = _km_endpoint(lo, hi, c, side)
+    y, passes, stopped = _km_endpoint(lo, hi, c, side)
     assert stopped
-    k = int(np.searchsorted(c, y, side="right"))
-    following = _weighted_average(_switch_vertex(lo, hi, k, side), c)
+    iterates = [_weighted_average(0.5 * (lo + hi), c)]
+    for _ in range(passes):
+        k = int(np.searchsorted(c, iterates[-1], side="right"))
+        iterates.append(_weighted_average(_switch_vertex(lo, hi, k, side), c))
+    accepted, rejected = iterates[-2], iterates[-1]
+    assert y == accepted
     if side == "left":
-        assert following >= y
+        assert rejected > accepted
     else:
-        assert following <= y
+        assert rejected < accepted
 
 
 def test_each_output_reads_its_own_consequent_column(tmp_path: Path) -> None:
