@@ -1,0 +1,588 @@
+n	file	line	group	kind	mutant	outcome	how	test	message	seconds	code
+1	scripts/hardware_submit.py	60	report	delete	line removed	SURVIVED				17.2	UnusableSourceError,
+2	scripts/hardware_submit.py	63	report	delete	line removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		10.4	binomial_se,
+3	scripts/hardware_submit.py	68	report	delete	line removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		11.8	p1_closed_form,
+4	scripts/hardware_submit.py	664	score	delete	line removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		14.0	sealed_dir: Path | None = None,
+5	scripts/hardware_submit.py	726	score	delete	statement removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		15.9	out = job_dir if sealed_dir is None else sealed_dir / job_dir.name
+6	scripts/hardware_submit.py	726	score	operator	is -> is not	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		14.5	out = job_dir if sealed_dir is None else sealed_dir / job_dir.name
+7	scripts/hardware_submit.py	726	score	operator	/ -> *	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		21.8	out = job_dir if sealed_dir is None else sealed_dir / job_dir.name
+8	scripts/hardware_submit.py	727	score	delete	statement removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		16.7	out.mkdir(parents=True, exist_ok=True)
+9	scripts/hardware_submit.py	727	score	constant	True -> False	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		15.5	out.mkdir(parents=True, exist_ok=True)
+10	scripts/hardware_submit.py	727	score	constant	True -> False	caught	crash	test_score_adds_the_control_from_the_archive_and_scores_both_arms		62.7	out.mkdir(parents=True, exist_ok=True)
+11	scripts/hardware_submit.py	728	score	delete	statement removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		14.2	"write_json_lf(out / ""results.json"", {""job_id"": job_id, ""counts"": fetched.counts})"
+12	scripts/hardware_submit.py	728	score	operator	/ -> *	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		22.1	"write_json_lf(out / ""results.json"", {""job_id"": job_id, ""counts"": fetched.counts})"
+13	scripts/hardware_submit.py	740	score	delete	statement removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		15.5	"_write_tsv(out / ""arm-a.tsv"", a_rows)"
+14	scripts/hardware_submit.py	740	score	operator	/ -> *	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		19.0	"_write_tsv(out / ""arm-a.tsv"", a_rows)"
+15	scripts/hardware_submit.py	744	score	delete	statement removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		26.8	"write_json_lf(out / ""arm-b.json"", b_score)"
+16	scripts/hardware_submit.py	744	score	operator	/ -> *	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		19.7	"write_json_lf(out / ""arm-b.json"", b_score)"
+17	scripts/hardware_submit.py	756	score	delete	statement removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		19.2	"write_json_lf(out / ""daily-summary.json"", summary)"
+18	scripts/hardware_submit.py	756	score	operator	/ -> *	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		17.9	"write_json_lf(out / ""daily-summary.json"", summary)"
+19	scripts/hardware_submit.py	757	score	delete	statement removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		20.0	operations = {
+20	scripts/hardware_submit.py	758	score	delete	line removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		46.5	"""status"": ""scored"","
+21	scripts/hardware_submit.py	759	score	delete	line removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		50.6	"**{k: summary[k] for k in (""job_id"", ""job_number"", ""t_s"", ""t_execute"")},"
+22	scripts/hardware_submit.py	760	score	delete	line removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		55.7	"""queue_seconds"": summary[""queue_seconds""],"
+23	scripts/hardware_submit.py	761	score	delete	line removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		53.2	"""quantum_seconds"": summary[""quantum_seconds""],"
+24	scripts/hardware_submit.py	762	score	delete	line removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		54.0	"""rows"": {""arm_a"": len(a_rows), ""arm_b_layouts"": len(b_score[""measured""]) if b_score else 0},"
+25	scripts/hardware_submit.py	762	score	constant	0 -> 1	SURVIVED				65.0	"""rows"": {""arm_a"": len(a_rows), ""arm_b_layouts"": len(b_score[""measured""]) if b_score else 0},"
+26	scripts/hardware_submit.py	764	score	delete	statement removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		54.5	"write_json_lf(job_dir / ""operations.json"", operations)"
+27	scripts/hardware_submit.py	764	score	operator	/ -> *	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		15.9	"write_json_lf(job_dir / ""operations.json"", operations)"
+28	scripts/hardware_submit.py	765	score	delete	statement removed	caught	crash	test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout		50.3	print(json.dumps(operations))
+29	scripts/hardware_submit.py	774	report	delete	test negated	caught	crash	test_report_keeps_missed_failed_and_absent_days_on_the_calendar		18.8	"if (job_dir / ""operations.json"").exists() or (job_dir / ""arm-a.tsv"").exists():"
+30	scripts/hardware_submit.py	774	report	operator	/ -> *	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		23.0	"if (job_dir / ""operations.json"").exists() or (job_dir / ""arm-a.tsv"").exists():"
+31	scripts/hardware_submit.py	774	report	operator	or -> and	caught	crash	test_report_keeps_missed_failed_and_absent_days_on_the_calendar		16.1	"if (job_dir / ""operations.json"").exists() or (job_dir / ""arm-a.tsv"").exists():"
+32	scripts/hardware_submit.py	774	report	operator	/ -> *	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		20.6	"if (job_dir / ""operations.json"").exists() or (job_dir / ""arm-a.tsv"").exists():"
+33	scripts/hardware_submit.py	800	report	delete	line removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		11.4	pairs: Sequence[tuple[float, date]], *, span: tuple[date, date], seed: int
+34	scripts/hardware_submit.py	807	report	delete	test negated	caught	crash	test_the_report_hands_the_bootstrap_the_whole_calendar_in_three_day_blocks		25.0	if not pairs or (span[1] - span[0]).days + 1 <= BLOCK_DAYS:
+35	scripts/hardware_submit.py	807	report	operator	not dropped	caught	crash	test_the_report_hands_the_bootstrap_the_whole_calendar_in_three_day_blocks		13.8	if not pairs or (span[1] - span[0]).days + 1 <= BLOCK_DAYS:
+36	scripts/hardware_submit.py	807	report	operator	or -> and	caught	crash	test_a_calendar_no_longer_than_a_block_has_no_sensitivity_interval[2-False]		26.5	if not pairs or (span[1] - span[0]).days + 1 <= BLOCK_DAYS:
+37	scripts/hardware_submit.py	807	report	constant	1 -> 2	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		10.8	if not pairs or (span[1] - span[0]).days + 1 <= BLOCK_DAYS:
+38	scripts/hardware_submit.py	807	report	operator	- -> +	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		10.0	if not pairs or (span[1] - span[0]).days + 1 <= BLOCK_DAYS:
+39	scripts/hardware_submit.py	807	report	constant	0 -> 1	caught	crash	test_the_report_hands_the_bootstrap_the_whole_calendar_in_three_day_blocks		15.1	if not pairs or (span[1] - span[0]).days + 1 <= BLOCK_DAYS:
+40	scripts/hardware_submit.py	807	report	operator	+ -> -	caught	crash	test_the_report_hands_the_bootstrap_the_whole_calendar_in_three_day_blocks		14.2	if not pairs or (span[1] - span[0]).days + 1 <= BLOCK_DAYS:
+41	scripts/hardware_submit.py	807	report	constant	1 -> 2	caught	crash	test_a_calendar_no_longer_than_a_block_has_no_sensitivity_interval[2-False]		25.1	if not pairs or (span[1] - span[0]).days + 1 <= BLOCK_DAYS:
+42	scripts/hardware_submit.py	807	report	operator	<= -> <	caught	crash	test_a_calendar_no_longer_than_a_block_has_no_sensitivity_interval[2-False]		15.9	if not pairs or (span[1] - span[0]).days + 1 <= BLOCK_DAYS:
+43	scripts/hardware_submit.py	808	report	delete	statement removed	caught	crash	test_a_calendar_no_longer_than_a_block_has_no_sensitivity_interval[2-False]		37.6	"return {""block_days"": BLOCK_DAYS, ""interval"": None, ""below_zero"": False}"
+44	scripts/hardware_submit.py	808	report	constant	False -> True	SURVIVED				16.9	"return {""block_days"": BLOCK_DAYS, ""interval"": None, ""below_zero"": False}"
+45	scripts/hardware_submit.py	813	report	delete	statement removed	caught	crash	test_a_calendar_no_longer_than_a_block_has_no_sensitivity_interval[3-True]		25.6	"return {""block_days"": BLOCK_DAYS, ""interval"": [low, high], ""below_zero"": high < 0.0}"
+46	scripts/hardware_submit.py	813	report	operator	< -> <=	SURVIVED				16.9	"return {""block_days"": BLOCK_DAYS, ""interval"": [low, high], ""below_zero"": high < 0.0}"
+47	scripts/hardware_submit.py	817	report	delete	line removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		10.3	jobs: Sequence[tuple[date, Mapping[str, Any]]], *, first_day: date
+48	scripts/hardware_submit.py	828	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		10.2	deltas: list[tuple[float, int]] = []
+49	scripts/hardware_submit.py	831	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		10.0	"regret: dict[str, list[float]] = {""reading"": [], ""level"": [], ""band"": []}"
+50	scripts/hardware_submit.py	832	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		12.9	near_ties = 0
+51	scripts/hardware_submit.py	832	report	constant	0 -> 1	SURVIVED				16.7	near_ties = 0
+52	scripts/hardware_submit.py	833	report	delete	loop removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.1	for day, job in jobs:
+53	scripts/hardware_submit.py	834	report	delete	statement removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.5	item = (day - first_day).days - 1
+54	scripts/hardware_submit.py	834	report	operator	- -> +	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.8	item = (day - first_day).days - 1
+55	scripts/hardware_submit.py	834	report	operator	- -> +	caught	crash	test_arm_b_decides_on_the_paired_spearman_difference_only		16.4	item = (day - first_day).days - 1
+56	scripts/hardware_submit.py	834	report	constant	1 -> 2	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.4	item = (day - first_day).days - 1
+57	scripts/hardware_submit.py	836	report	delete	statement removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.5	order = sorted(range(len(measured)), key=lambda i: -measured[i])
+58	scripts/hardware_submit.py	837	report	delete	statement removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		18.8	best = order[0]
+59	scripts/hardware_submit.py	837	report	constant	0 -> 1	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		15.9	best = order[0]
+60	scripts/hardware_submit.py	838	report	delete	test negated	SURVIVED				17.1	if len(order) > 1:
+61	scripts/hardware_submit.py	838	report	operator	> -> >=	SURVIVED				18.0	if len(order) > 1:
+62	scripts/hardware_submit.py	838	report	constant	1 -> 2	SURVIVED				17.4	if len(order) > 1:
+63	scripts/hardware_submit.py	839	report	delete	statement removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.1	gap = measured[order[0]] - measured[order[1]]
+64	scripts/hardware_submit.py	839	report	constant	0 -> 1	SURVIVED				17.4	gap = measured[order[0]] - measured[order[1]]
+65	scripts/hardware_submit.py	839	report	operator	- -> +	SURVIVED				16.8	gap = measured[order[0]] - measured[order[1]]
+66	scripts/hardware_submit.py	839	report	constant	1 -> 2	caught	crash	test_a_job_one_folder_with_arm_b_scores_is_refused		18.6	gap = measured[order[0]] - measured[order[1]]
+67	scripts/hardware_submit.py	840	report	delete	statement removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		15.8	fidelity = min(max(measured[best], 0.0), 1.0)
+68	scripts/hardware_submit.py	840	report	constant	1.0 -> 1.01	SURVIVED				17.5	fidelity = min(max(measured[best], 0.0), 1.0)
+69	scripts/hardware_submit.py	841	report	delete	statement removed	SURVIVED				18.6	near_ties += int(gap < 2.0 * binomial_se(fidelity, ARM_B_SHOTS))
+70	scripts/hardware_submit.py	841	report	operator	< -> <=	SURVIVED				17.2	near_ties += int(gap < 2.0 * binomial_se(fidelity, ARM_B_SHOTS))
+71	scripts/hardware_submit.py	841	report	constant	2.0 -> 2.02	SURVIVED				17.2	near_ties += int(gap < 2.0 * binomial_se(fidelity, ARM_B_SHOTS))
+72	scripts/hardware_submit.py	841	report	operator	* -> /	SURVIVED				18.2	near_ties += int(gap < 2.0 * binomial_se(fidelity, ARM_B_SHOTS))
+73	scripts/hardware_submit.py	858	report	delete	statement removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.0	pick = max(usable, key=lambda i: float(values[i]))
+74	scripts/hardware_submit.py	859	report	delete	statement removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.3	hits[name] += int(pick == best)
+75	scripts/hardware_submit.py	859	report	operator	== -> !=	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.4	hits[name] += int(pick == best)
+76	scripts/hardware_submit.py	860	report	delete	statement removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		15.5	regret[name].append(measured[best] - measured[pick])
+77	scripts/hardware_submit.py	860	report	operator	- -> +	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.7	regret[name].append(measured[best] - measured[pick])
+78	scripts/hardware_submit.py	861	report	delete	statement removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.4	both = [
+79	scripts/hardware_submit.py	864	report	delete	line removed	caught	crash	test_arm_b_pairs_the_two_correlations_on_the_layouts_both_predicted		16.3	"if predicted[""level""][i] is not None and predicted[""reading""][i] is not None"
+80	scripts/hardware_submit.py	864	report	operator	is not -> is	caught	crash	test_arm_b_decides_on_the_paired_spearman_difference_only		17.5	"if predicted[""level""][i] is not None and predicted[""reading""][i] is not None"
+81	scripts/hardware_submit.py	864	report	operator	and -> or	caught	crash	test_arm_b_pairs_the_two_correlations_on_the_layouts_both_predicted		16.1	"if predicted[""level""][i] is not None and predicted[""reading""][i] is not None"
+82	scripts/hardware_submit.py	864	report	operator	is not -> is	caught	crash	test_arm_b_decides_on_the_paired_spearman_difference_only		16.6	"if predicted[""level""][i] is not None and predicted[""reading""][i] is not None"
+83	scripts/hardware_submit.py	866	report	delete	test negated	caught	crash	test_arm_b_decides_on_the_paired_spearman_difference_only		16.3	if len(both) >= 2:
+84	scripts/hardware_submit.py	866	report	operator	>= -> >	caught	crash	test_a_job_one_folder_with_arm_b_scores_is_refused		16.4	if len(both) >= 2:
+85	scripts/hardware_submit.py	866	report	constant	2 -> 3	caught	crash	test_a_job_one_folder_with_arm_b_scores_is_refused		17.3	if len(both) >= 2:
+86	scripts/hardware_submit.py	867	report	delete	statement removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.3	level_rho = spearman(
+87	scripts/hardware_submit.py	868	report	delete	line removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.2	"[float(predicted[""level""][i]) for i in both], [measured[i] for i in both]"
+88	scripts/hardware_submit.py	870	report	delete	statement removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		17.3	reading_rho = spearman(
+89	scripts/hardware_submit.py	871	report	delete	line removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.6	"[float(predicted[""reading""][i]) for i in both], [measured[i] for i in both]"
+90	scripts/hardware_submit.py	873	report	delete	test negated	caught	crash	test_arm_b_decides_on_the_paired_spearman_difference_only		16.6	if math.isfinite(level_rho) and math.isfinite(reading_rho):
+91	scripts/hardware_submit.py	873	report	operator	and -> or	SURVIVED				19.4	if math.isfinite(level_rho) and math.isfinite(reading_rho):
+92	scripts/hardware_submit.py	874	report	delete	statement removed	caught	crash	test_arm_b_decides_on_the_paired_spearman_difference_only		17.1	deltas.append((level_rho - reading_rho, item))
+93	scripts/hardware_submit.py	874	report	operator	- -> +	caught	crash	test_arm_b_passes_with_a_varying_level_advantage_and_ten_jobs		16.0	deltas.append((level_rho - reading_rho, item))
+94	scripts/hardware_submit.py	875	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		10.7	test = batch_means_test(deltas, ARM_B_BATCHES, side=1)
+95	scripts/hardware_submit.py	875	report	constant	1 -> 2	SURVIVED				17.0	test = batch_means_test(deltas, ARM_B_BATCHES, side=1)
+96	scripts/hardware_submit.py	876	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		10.5	"inconclusive = len(deltas) < MIN_ARM_B_JOBS or test[""inconclusive""]"
+97	scripts/hardware_submit.py	876	report	operator	< -> <=	caught	crash	test_arm_b_passes_with_a_varying_level_advantage_and_ten_jobs		16.0	"inconclusive = len(deltas) < MIN_ARM_B_JOBS or test[""inconclusive""]"
+98	scripts/hardware_submit.py	876	report	operator	or -> and	caught	crash	test_arm_b_passes_with_a_varying_level_advantage_and_ten_jobs		17.0	"inconclusive = len(deltas) < MIN_ARM_B_JOBS or test[""inconclusive""]"
+99	scripts/hardware_submit.py	877	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		10.6	return {
+100	scripts/hardware_submit.py	878	report	delete	line removed	caught	crash	test_the_arm_b_scores_of_a_job_folder_reach_the_report		18.2	"""jobs"": len(jobs),"
+101	scripts/hardware_submit.py	879	report	delete	line removed	caught	crash	test_arm_b_decides_on_the_paired_spearman_difference_only		17.4	"""completed_jobs"": len(deltas),"
+102	scripts/hardware_submit.py	880	report	delete	line removed	SURVIVED				17.4	"""minimum_jobs"": MIN_ARM_B_JOBS,"
+103	scripts/hardware_submit.py	881	report	delete	line removed	caught	crash	test_arm_b_decides_on_the_paired_spearman_difference_only		17.6	"""paired_spearman"": test,"
+104	scripts/hardware_submit.py	882	report	delete	line removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		10.6	"""inconclusive"": inconclusive,"
+105	scripts/hardware_submit.py	883	report	delete	line removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		11.0	"""passes"": not inconclusive and test[""passes""],"
+106	scripts/hardware_submit.py	883	report	operator	not dropped	caught	crash	test_arm_b_passes_with_a_varying_level_advantage_and_ten_jobs		15.6	"""passes"": not inconclusive and test[""passes""],"
+107	scripts/hardware_submit.py	883	report	operator	and -> or	caught	crash	test_arm_b_decides_on_the_paired_spearman_difference_only		16.3	"""passes"": not inconclusive and test[""passes""],"
+108	scripts/hardware_submit.py	885	report	delete	line removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		15.5	"""mean_spearman"": {name: _mean(values) for name, values in rho.items()},"
+109	scripts/hardware_submit.py	886	report	delete	line removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		16.8	"""best_pick_hits"": hits,"
+110	scripts/hardware_submit.py	887	report	delete	line removed	caught	crash	test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures		15.8	"""mean_regret"": {name: _mean(values) for name, values in regret.items()},"
+111	scripts/hardware_submit.py	888	report	delete	line removed	SURVIVED				16.8	"""near_ties"": near_ties,"
+112	scripts/hardware_submit.py	898	report	delete	statement removed	caught	crash	test_the_critical_values_are_scipys		9.7	T95: dict[int, float] = {2: 2.9199855803537242, 3: 2.3533634348018233}
+113	scripts/hardware_submit.py	898	report	constant	2 -> 3	caught	crash	test_one_empty_batch_is_dropped_and_two_make_it_inconclusive		10.1	T95: dict[int, float] = {2: 2.9199855803537242, 3: 2.3533634348018233}
+114	scripts/hardware_submit.py	898	report	constant	2.9199855803537242 -> 2.9491854361572614	caught	crash	test_the_critical_values_are_scipys		9.5	T95: dict[int, float] = {2: 2.9199855803537242, 3: 2.3533634348018233}
+115	scripts/hardware_submit.py	898	report	constant	3 -> 4	caught	crash	test_the_critical_values_are_scipys		9.9	T95: dict[int, float] = {2: 2.9199855803537242, 3: 2.3533634348018233}
+116	scripts/hardware_submit.py	898	report	constant	2.3533634348018233 -> 2.3768970691498414	caught	crash	test_the_critical_values_are_scipys		18.7	T95: dict[int, float] = {2: 2.9199855803537242, 3: 2.3533634348018233}
+117	scripts/hardware_submit.py	899	report	delete	statement removed	caught	crash	test_the_critical_values_are_scipys		10.2	Z90 = 1.2815515655446004
+118	scripts/hardware_submit.py	899	report	constant	1.2815515655446004 -> 1.2943670812000463	caught	crash	test_the_critical_values_are_scipys		9.9	Z90 = 1.2815515655446004
+119	scripts/hardware_submit.py	900	report	delete	statement removed	caught	crash	test_the_batches_are_the_pre_registrations		9.2	ARM_A_BATCHES: tuple[tuple[int, ...], ...] = tuple(
+120	scripts/hardware_submit.py	901	report	delete	line removed	caught	crash	test_the_batches_are_the_pre_registrations		10.0	tuple(int(i) for i in batch) for batch in np.array_split(np.arange(N_JOBS), 4)
+121	scripts/hardware_submit.py	901	report	constant	4 -> 5	caught	crash	test_the_batches_are_the_pre_registrations		10.1	tuple(int(i) for i in batch) for batch in np.array_split(np.arange(N_JOBS), 4)
+122	scripts/hardware_submit.py	903	report	delete	statement removed	caught	crash	tests/test_hardware_submit.py	NameError: name 'N_ARM_B_JOBS' is not d...	7.8	N_ARM_B_JOBS = N_JOBS - 1
+123	scripts/hardware_submit.py	903	report	operator	- -> +	caught	crash	test_the_batches_are_the_pre_registrations		9.6	N_ARM_B_JOBS = N_JOBS - 1
+124	scripts/hardware_submit.py	903	report	constant	1 -> 2	caught	crash	test_the_batches_are_the_pre_registrations		10.2	N_ARM_B_JOBS = N_JOBS - 1
+125	scripts/hardware_submit.py	904	report	delete	statement removed	caught	crash	test_the_batches_are_the_pre_registrations		9.3	ARM_B_BATCHES: tuple[tuple[int, ...], ...] = tuple(
+126	scripts/hardware_submit.py	905	report	delete	line removed	TIMEOUT				21678.0	tuple(int(i) for i in batch) for batch in np.array_split(np.arange(N_ARM_B_JOBS), 4)
+127	scripts/hardware_submit.py	905	report	constant	4 -> 5	caught	crash	test_the_batches_are_the_pre_registrations		10.2	tuple(int(i) for i in batch) for batch in np.array_split(np.arange(N_ARM_B_JOBS), 4)
+128	scripts/hardware_submit.py	907	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		59.2	MIN_BATCHES = 3
+129	scripts/hardware_submit.py	907	report	constant	3 -> 4	caught	crash	test_one_empty_batch_is_dropped_and_two_make_it_inconclusive		9.4	MIN_BATCHES = 3
+130	scripts/hardware_submit.py	908	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		13.2	MIN_ARM_A_DAYS = 10
+131	scripts/hardware_submit.py	908	report	constant	10 -> 11	caught	crash	test_s1_needs_ten_completed_days[10-True]		26.1	MIN_ARM_A_DAYS = 10
+132	scripts/hardware_submit.py	909	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		8.6	MIN_ARM_B_JOBS = 10
+133	scripts/hardware_submit.py	909	report	constant	10 -> 11	caught	crash	test_arm_b_passes_with_a_varying_level_advantage_and_ten_jobs		15.9	MIN_ARM_B_JOBS = 10
+134	scripts/hardware_submit.py	910	report	delete	statement removed	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		7.0	FIT_GRID = np.linspace(-3.0, 3.0, 1201)
+135	scripts/hardware_submit.py	910	report	constant	3.0 -> 3.0300000000000002	SURVIVED				17.8	FIT_GRID = np.linspace(-3.0, 3.0, 1201)
+136	scripts/hardware_submit.py	910	report	constant	3.0 -> 3.0300000000000002	SURVIVED				9.9	FIT_GRID = np.linspace(-3.0, 3.0, 1201)
+137	scripts/hardware_submit.py	910	report	constant	1201 -> 1202	TIMEOUT				21683.5	FIT_GRID = np.linspace(-3.0, 3.0, 1201)
+138	scripts/hardware_submit.py	918	report	delete	statement removed	caught	crash	test_d_is_level_minus_other_so_negative_favours_level		6.0	out = []
+139	scripts/hardware_submit.py	919	report	delete	loop removed	caught	crash	test_d_is_level_minus_other_so_negative_favours_level		61.1	for r in rows:
+140	scripts/hardware_submit.py	920	report	delete	statement removed	caught	crash	test_d_is_level_minus_other_so_negative_favours_level		6.2	"ours, theirs = float(r[""abs_err_level""]), float(r[f""abs_err_{other}""])"
+141	scripts/hardware_submit.py	921	report	delete	test negated	caught	crash	test_d_is_level_minus_other_so_negative_favours_level		7.7	if math.isfinite(ours) and math.isfinite(theirs):
+142	scripts/hardware_submit.py	921	report	operator	and -> or	caught	crash	test_d_is_level_minus_other_so_negative_favours_level		5.7	if math.isfinite(ours) and math.isfinite(theirs):
+143	scripts/hardware_submit.py	922	report	delete	statement removed	caught	crash	test_d_is_level_minus_other_so_negative_favours_level		8.3	"out.append((ours - theirs, r[""date""]))"
+144	scripts/hardware_submit.py	922	report	operator	- -> +	caught	crash	test_d_is_level_minus_other_so_negative_favours_level		4.8	"out.append((ours - theirs, r[""date""]))"
+145	scripts/hardware_submit.py	923	report	delete	statement removed	caught	crash	test_d_is_level_minus_other_so_negative_favours_level		7.2	return out
+146	scripts/hardware_submit.py	927	report	delete	line removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.0	values: Sequence[tuple[float, int]], batches: Sequence[Sequence[int]], *, side: int
+147	scripts/hardware_submit.py	936	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		6.5	where = {item: b for b, items in enumerate(batches) for item in items}
+148	scripts/hardware_submit.py	937	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.4	sums = [0.0] * len(batches)
+149	scripts/hardware_submit.py	937	report	operator	* -> /	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.9	sums = [0.0] * len(batches)
+150	scripts/hardware_submit.py	938	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.9	counts = [0] * len(batches)
+151	scripts/hardware_submit.py	938	report	constant	0 -> 1	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		6.3	counts = [0] * len(batches)
+152	scripts/hardware_submit.py	938	report	operator	* -> /	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.9	counts = [0] * len(batches)
+153	scripts/hardware_submit.py	939	report	delete	loop removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		6.0	for value, item in values:
+154	scripts/hardware_submit.py	940	report	delete	test negated	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.5	if item not in where:
+155	scripts/hardware_submit.py	940	report	operator	not dropped	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.3	if item not in where:
+156	scripts/hardware_submit.py	941	report	delete	statement removed	caught	crash	test_an_item_outside_every_batch_is_refused		5.0	"raise ValueError(f""item {item} is in no batch"")"
+157	scripts/hardware_submit.py	942	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.9	sums[where[item]] += value
+158	scripts/hardware_submit.py	943	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.2	counts[where[item]] += 1
+159	scripts/hardware_submit.py	943	report	constant	1 -> 2	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.1	counts[where[item]] += 1
+160	scripts/hardware_submit.py	944	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.3	means = [s / c if c else None for s, c in zip(sums, counts, strict=True)]
+161	scripts/hardware_submit.py	944	report	operator	/ -> *	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.2	means = [s / c if c else None for s, c in zip(sums, counts, strict=True)]
+162	scripts/hardware_submit.py	944	report	constant	True -> False	SURVIVED				7.9	means = [s / c if c else None for s, c in zip(sums, counts, strict=True)]
+163	scripts/hardware_submit.py	945	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.9	present = [m for m in means if m is not None]
+164	scripts/hardware_submit.py	945	report	operator	is not -> is	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.0	present = [m for m in means if m is not None]
+165	scripts/hardware_submit.py	946	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.3	q = len(present)
+166	scripts/hardware_submit.py	947	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.1	out: dict[str, Any] = {
+167	scripts/hardware_submit.py	948	report	delete	line removed	caught	crash	test_arm_b_pairs_the_two_correlations_on_the_layouts_both_predicted		7.5	"""batch_means"": means,"
+168	scripts/hardware_submit.py	949	report	delete	line removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.8	"""batch_rows"": counts,"
+169	scripts/hardware_submit.py	950	report	delete	line removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.2	"""q"": q,"
+170	scripts/hardware_submit.py	951	report	delete	line removed	SURVIVED				7.8	"""mean_of_batches"": None,"
+171	scripts/hardware_submit.py	952	report	delete	line removed	caught	crash	test_one_empty_batch_is_dropped_and_two_make_it_inconclusive		5.3	"""t"": None,"
+172	scripts/hardware_submit.py	953	report	delete	line removed	SURVIVED				7.9	"""critical"": None,"
+173	scripts/hardware_submit.py	954	report	delete	line removed	SURVIVED				8.1	"""sd_zero"": False,"
+174	scripts/hardware_submit.py	954	report	constant	False -> True	SURVIVED				7.8	"""sd_zero"": False,"
+175	scripts/hardware_submit.py	955	report	delete	line removed	caught	crash	test_one_empty_batch_is_dropped_and_two_make_it_inconclusive		5.0	"""inconclusive"": q < MIN_BATCHES,"
+176	scripts/hardware_submit.py	955	report	operator	< -> <=	caught	crash	test_one_empty_batch_is_dropped_and_two_make_it_inconclusive		4.8	"""inconclusive"": q < MIN_BATCHES,"
+177	scripts/hardware_submit.py	956	report	delete	line removed	caught	crash	test_one_empty_batch_is_dropped_and_two_make_it_inconclusive		5.0	"""passes"": False,"
+178	scripts/hardware_submit.py	956	report	constant	False -> True	caught	crash	test_one_empty_batch_is_dropped_and_two_make_it_inconclusive		4.9	"""passes"": False,"
+179	scripts/hardware_submit.py	958	report	delete	test negated	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.8	if q < MIN_BATCHES:
+180	scripts/hardware_submit.py	958	report	operator	< -> <=	caught	crash	test_one_empty_batch_is_dropped_and_two_make_it_inconclusive		4.8	if q < MIN_BATCHES:
+181	scripts/hardware_submit.py	959	report	delete	statement removed	caught	crash	test_one_empty_batch_is_dropped_and_two_make_it_inconclusive		4.8	return out
+182	scripts/hardware_submit.py	960	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.8	mean = sum(present) / q
+183	scripts/hardware_submit.py	960	report	operator	/ -> *	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.2	mean = sum(present) / q
+184	scripts/hardware_submit.py	961	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.8	sd = math.sqrt(sum((m - mean) ** 2 for m in present) / (q - 1))
+185	scripts/hardware_submit.py	961	report	operator	- -> +	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.7	sd = math.sqrt(sum((m - mean) ** 2 for m in present) / (q - 1))
+186	scripts/hardware_submit.py	961	report	constant	2 -> 3	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.7	sd = math.sqrt(sum((m - mean) ** 2 for m in present) / (q - 1))
+187	scripts/hardware_submit.py	961	report	operator	/ -> *	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.9	sd = math.sqrt(sum((m - mean) ** 2 for m in present) / (q - 1))
+188	scripts/hardware_submit.py	961	report	operator	- -> +	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.1	sd = math.sqrt(sum((m - mean) ** 2 for m in present) / (q - 1))
+189	scripts/hardware_submit.py	961	report	constant	1 -> 2	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.9	sd = math.sqrt(sum((m - mean) ** 2 for m in present) / (q - 1))
+190	scripts/hardware_submit.py	962	report	delete	statement removed	SURVIVED				7.9	"out[""mean_of_batches""] = mean"
+191	scripts/hardware_submit.py	963	report	delete	test negated	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.9	if sd == 0.0:
+192	scripts/hardware_submit.py	963	report	operator	== -> !=	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.2	if sd == 0.0:
+193	scripts/hardware_submit.py	964	report	delete	statement removed	caught	crash	test_equal_batch_means_fail_because_sd_is_zero		4.9	"out[""sd_zero""] = True"
+194	scripts/hardware_submit.py	964	report	constant	True -> False	caught	crash	test_equal_batch_means_fail_because_sd_is_zero		5.6	"out[""sd_zero""] = True"
+195	scripts/hardware_submit.py	965	report	delete	statement removed	caught	crash	test_equal_batch_means_fail_because_sd_is_zero		4.8	return out
+196	scripts/hardware_submit.py	966	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.3	t = mean / (sd / math.sqrt(q))
+197	scripts/hardware_submit.py	966	report	operator	/ -> *	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.8	t = mean / (sd / math.sqrt(q))
+198	scripts/hardware_submit.py	966	report	operator	/ -> *	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.9	t = mean / (sd / math.sqrt(q))
+199	scripts/hardware_submit.py	967	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.8	critical = T95[q - 1]
+200	scripts/hardware_submit.py	967	report	operator	- -> +	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.0	critical = T95[q - 1]
+201	scripts/hardware_submit.py	967	report	constant	1 -> 2	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.6	critical = T95[q - 1]
+202	scripts/hardware_submit.py	968	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.7	"out.update({""t"": t, ""critical"": critical, ""passes"": side * t > critical})"
+203	scripts/hardware_submit.py	968	report	operator	* -> /	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		5.2	"out.update({""t"": t, ""critical"": critical, ""passes"": side * t > critical})"
+204	scripts/hardware_submit.py	968	report	operator	> -> >=	SURVIVED				8.2	"out.update({""t"": t, ""critical"": critical, ""passes"": side * t > critical})"
+205	scripts/hardware_submit.py	969	report	delete	statement removed	caught	crash	test_batch_means_match_a_direct_computation_with_unequal_rows		4.8	return out
+206	scripts/hardware_submit.py	978	report	delete	test negated	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.1	if not points or not level.usable_for_decay():
+207	scripts/hardware_submit.py	978	report	operator	not dropped	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.4	if not points or not level.usable_for_decay():
+208	scripts/hardware_submit.py	978	report	operator	or -> and	caught	crash	test_the_t1_fit_needs_points_and_a_usable_level		5.1	if not points or not level.usable_for_decay():
+209	scripts/hardware_submit.py	978	report	operator	not dropped	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.4	if not points or not level.usable_for_decay():
+210	scripts/hardware_submit.py	979	report	delete	statement removed	caught	crash	test_the_t1_fit_needs_points_and_a_usable_level		5.3	return None
+211	scripts/hardware_submit.py	980	report	delete	statement removed	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.6	taus = np.array([p[0] for p in points], dtype=np.float64)
+212	scripts/hardware_submit.py	980	report	constant	0 -> 1	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.1	taus = np.array([p[0] for p in points], dtype=np.float64)
+213	scripts/hardware_submit.py	981	report	delete	statement removed	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.0	ones = np.array([p[1] for p in points], dtype=np.float64)
+214	scripts/hardware_submit.py	981	report	constant	1 -> 2	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.3	ones = np.array([p[1] for p in points], dtype=np.float64)
+215	scripts/hardware_submit.py	982	report	delete	statement removed	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.0	shots = np.array([p[2] for p in points], dtype=np.float64)
+216	scripts/hardware_submit.py	982	report	constant	2 -> 3	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.0	shots = np.array([p[2] for p in points], dtype=np.float64)
+217	scripts/hardware_submit.py	983	report	delete	statement removed	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.4	t1 = level.t1 * np.exp(FIT_GRID)
+218	scripts/hardware_submit.py	983	report	operator	* -> /	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.5	t1 = level.t1 * np.exp(FIT_GRID)
+219	scripts/hardware_submit.py	984	report	delete	statement removed	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.5	survive = np.exp(-taus[None, :] / t1[:, None])
+220	scripts/hardware_submit.py	984	report	operator	/ -> *	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		4.9	survive = np.exp(-taus[None, :] / t1[:, None])
+221	scripts/hardware_submit.py	985	report	delete	statement removed	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.2	p = np.clip((1.0 - level.e10) * survive + level.e01 * (1.0 - survive), 1e-9, 1.0 - 1e-9)
+222	scripts/hardware_submit.py	985	report	constant	1.0 -> 1.01	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.0	p = np.clip((1.0 - level.e10) * survive + level.e01 * (1.0 - survive), 1e-9, 1.0 - 1e-9)
+223	scripts/hardware_submit.py	985	report	operator	- -> +	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.2	p = np.clip((1.0 - level.e10) * survive + level.e01 * (1.0 - survive), 1e-9, 1.0 - 1e-9)
+224	scripts/hardware_submit.py	985	report	operator	* -> /	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.0	p = np.clip((1.0 - level.e10) * survive + level.e01 * (1.0 - survive), 1e-9, 1.0 - 1e-9)
+225	scripts/hardware_submit.py	985	report	operator	+ -> -	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.1	p = np.clip((1.0 - level.e10) * survive + level.e01 * (1.0 - survive), 1e-9, 1.0 - 1e-9)
+226	scripts/hardware_submit.py	985	report	operator	* -> /	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.4	p = np.clip((1.0 - level.e10) * survive + level.e01 * (1.0 - survive), 1e-9, 1.0 - 1e-9)
+227	scripts/hardware_submit.py	985	report	constant	1.0 -> 1.01	SURVIVED				8.2	p = np.clip((1.0 - level.e10) * survive + level.e01 * (1.0 - survive), 1e-9, 1.0 - 1e-9)
+228	scripts/hardware_submit.py	985	report	operator	- -> +	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		4.8	p = np.clip((1.0 - level.e10) * survive + level.e01 * (1.0 - survive), 1e-9, 1.0 - 1e-9)
+229	scripts/hardware_submit.py	985	report	constant	1e-9 -> 1.01e-09	SURVIVED				8.3	p = np.clip((1.0 - level.e10) * survive + level.e01 * (1.0 - survive), 1e-9, 1.0 - 1e-9)
+230	scripts/hardware_submit.py	985	report	constant	1.0 -> 1.01	SURVIVED				9.0	p = np.clip((1.0 - level.e10) * survive + level.e01 * (1.0 - survive), 1e-9, 1.0 - 1e-9)
+231	scripts/hardware_submit.py	985	report	operator	- -> +	SURVIVED				7.8	p = np.clip((1.0 - level.e10) * survive + level.e01 * (1.0 - survive), 1e-9, 1.0 - 1e-9)
+232	scripts/hardware_submit.py	985	report	constant	1e-9 -> 1.01e-09	SURVIVED				8.7	p = np.clip((1.0 - level.e10) * survive + level.e01 * (1.0 - survive), 1e-9, 1.0 - 1e-9)
+233	scripts/hardware_submit.py	986	report	delete	statement removed	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.3	log_lik = (ones * np.log(p) + (shots - ones) * np.log1p(-p)).sum(axis=1)
+234	scripts/hardware_submit.py	986	report	operator	* -> /	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		4.8	log_lik = (ones * np.log(p) + (shots - ones) * np.log1p(-p)).sum(axis=1)
+235	scripts/hardware_submit.py	986	report	operator	+ -> -	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.0	log_lik = (ones * np.log(p) + (shots - ones) * np.log1p(-p)).sum(axis=1)
+236	scripts/hardware_submit.py	986	report	operator	- -> +	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.0	log_lik = (ones * np.log(p) + (shots - ones) * np.log1p(-p)).sum(axis=1)
+237	scripts/hardware_submit.py	986	report	operator	* -> /	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.0	log_lik = (ones * np.log(p) + (shots - ones) * np.log1p(-p)).sum(axis=1)
+238	scripts/hardware_submit.py	986	report	constant	1 -> 2	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.1	log_lik = (ones * np.log(p) + (shots - ones) * np.log1p(-p)).sum(axis=1)
+239	scripts/hardware_submit.py	987	report	delete	statement removed	caught	crash	test_the_t1_fit_recovers_a_planted_ratio		5.4	return float(FIT_GRID[int(np.argmax(log_lik))])
+240	scripts/hardware_submit.py	992	report	delete	test negated	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		5.8	if not points:
+241	scripts/hardware_submit.py	992	report	operator	not dropped	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		5.1	if not points:
+242	scripts/hardware_submit.py	993	report	delete	statement removed	SURVIVED				11.6	"return {""c"": None, ""s_res"": None, ""qubit_days"": 0}"
+243	scripts/hardware_submit.py	993	report	constant	0 -> 1	SURVIVED				8.7	"return {""c"": None, ""s_res"": None, ""qubit_days"": 0}"
+244	scripts/hardware_submit.py	994	report	delete	statement removed	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		6.5	x = np.array([p[0] for p in points], dtype=np.float64)
+245	scripts/hardware_submit.py	994	report	constant	0 -> 1	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		5.9	x = np.array([p[0] for p in points], dtype=np.float64)
+246	scripts/hardware_submit.py	995	report	delete	statement removed	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		5.9	y = np.array([p[1] for p in points], dtype=np.float64)
+247	scripts/hardware_submit.py	995	report	constant	1 -> 2	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		5.5	y = np.array([p[1] for p in points], dtype=np.float64)
+248	scripts/hardware_submit.py	996	report	delete	statement removed	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		5.9	sxx = float((x * x).sum())
+249	scripts/hardware_submit.py	996	report	operator	* -> /	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		4.8	sxx = float((x * x).sum())
+250	scripts/hardware_submit.py	997	report	delete	test negated	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		5.3	if sxx == 0.0:
+251	scripts/hardware_submit.py	997	report	operator	== -> !=	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		5.0	if sxx == 0.0:
+252	scripts/hardware_submit.py	998	report	delete	statement removed	caught	crash	test_c_is_undefined_without_disagreement		5.8	"return {""c"": None, ""s_res"": None, ""qubit_days"": len(points)}"
+253	scripts/hardware_submit.py	999	report	delete	statement removed	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		5.1	c = float((x * y).sum() / sxx)
+254	scripts/hardware_submit.py	999	report	operator	* -> /	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		5.3	c = float((x * y).sum() / sxx)
+255	scripts/hardware_submit.py	999	report	operator	/ -> *	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		5.9	c = float((x * y).sum() / sxx)
+256	scripts/hardware_submit.py	1000	report	delete	statement removed	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		7.0	q10, q90 = np.percentile(y - c * x, [10, 90])
+257	scripts/hardware_submit.py	1000	report	operator	- -> +	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		7.9	q10, q90 = np.percentile(y - c * x, [10, 90])
+258	scripts/hardware_submit.py	1000	report	operator	* -> /	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		8.2	q10, q90 = np.percentile(y - c * x, [10, 90])
+259	scripts/hardware_submit.py	1000	report	constant	10 -> 11	SURVIVED				9.7	q10, q90 = np.percentile(y - c * x, [10, 90])
+260	scripts/hardware_submit.py	1000	report	constant	90 -> 91	SURVIVED				13.1	q10, q90 = np.percentile(y - c * x, [10, 90])
+261	scripts/hardware_submit.py	1001	report	delete	statement removed	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		5.7	"return {""c"": c, ""s_res"": float((q90 - q10) / (2.0 * Z90)), ""qubit_days"": len(points)}"
+262	scripts/hardware_submit.py	1001	report	operator	- -> +	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		6.4	"return {""c"": c, ""s_res"": float((q90 - q10) / (2.0 * Z90)), ""qubit_days"": len(points)}"
+263	scripts/hardware_submit.py	1001	report	operator	/ -> *	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		5.9	"return {""c"": c, ""s_res"": float((q90 - q10) / (2.0 * Z90)), ""qubit_days"": len(points)}"
+264	scripts/hardware_submit.py	1001	report	constant	2.0 -> 2.02	SURVIVED				8.2	"return {""c"": c, ""s_res"": float((q90 - q10) / (2.0 * Z90)), ""qubit_days"": len(points)}"
+265	scripts/hardware_submit.py	1001	report	operator	* -> /	caught	crash	test_c_and_s_res_recover_a_planted_slope_and_spread		5.4	"return {""c"": c, ""s_res"": float((q90 - q10) / (2.0 * Z90)), ""qubit_days"": len(points)}"
+266	scripts/hardware_submit.py	1005	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		10.7	"values = state.get(""sources"", {}).get(name, {}).get(str(qubit))"
+267	scripts/hardware_submit.py	1006	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.8	return None if values is None else QubitSource(*(float(v) for v in values))
+268	scripts/hardware_submit.py	1006	report	operator	is -> is not	caught	crash	test_no_information_coverage_matches_a_direct_computation		7.9	return None if values is None else QubitSource(*(float(v) for v in values))
+269	scripts/hardware_submit.py	1010	report	delete	line removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.3	rows: Sequence[Mapping[str, Any]], state: Mapping[str, Any]
+270	scripts/hardware_submit.py	1019	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.7	levels: dict[int, QubitSource] = {}
+271	scripts/hardware_submit.py	1020	report	delete	loop removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		7.0	"for q in sorted({int(r[""qubit""]) for r in rows}):"
+272	scripts/hardware_submit.py	1021	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.9	"source = _source(state, ""level"", q)"
+273	scripts/hardware_submit.py	1022	report	delete	test negated	caught	crash	test_no_information_coverage_matches_a_direct_computation		8.3	if source is not None and source.usable_for_decay():
+274	scripts/hardware_submit.py	1022	report	operator	is not -> is	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.5	if source is not None and source.usable_for_decay():
+275	scripts/hardware_submit.py	1022	report	operator	and -> or	SURVIVED				13.1	if source is not None and source.usable_for_decay():
+276	scripts/hardware_submit.py	1023	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		7.5	levels[q] = source
+277	scripts/hardware_submit.py	1024	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.4	nominal: list[float] = []
+278	scripts/hardware_submit.py	1025	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.9	widened: list[float] = []
+279	scripts/hardware_submit.py	1026	report	delete	loop removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.2	for r in rows:
+280	scripts/hardware_submit.py	1027	report	delete	statement removed	SURVIVED				10.2	"q = int(r[""qubit""])"
+281	scripts/hardware_submit.py	1028	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		8.2	"own, lo, hi = levels.get(q), _source(state, ""band_lo"", q), _source(state, ""band_hi"", q)"
+282	scripts/hardware_submit.py	1029	report	delete	test negated	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.6	if own is None or lo is None or hi is None:
+283	scripts/hardware_submit.py	1029	report	operator	is -> is not	caught	crash	test_no_information_coverage_matches_a_direct_computation		9.3	if own is None or lo is None or hi is None:
+284	scripts/hardware_submit.py	1029	report	operator	or -> and	SURVIVED				12.3	if own is None or lo is None or hi is None:
+285	scripts/hardware_submit.py	1029	report	operator	is -> is not	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.8	if own is None or lo is None or hi is None:
+286	scripts/hardware_submit.py	1029	report	operator	or -> and	SURVIVED				10.5	if own is None or lo is None or hi is None:
+287	scripts/hardware_submit.py	1029	report	operator	is -> is not	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.7	if own is None or lo is None or hi is None:
+288	scripts/hardware_submit.py	1030	report	delete	statement removed	SURVIVED				10.2	continue
+289	scripts/hardware_submit.py	1031	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.8	others = [o for o in levels if o != q]
+290	scripts/hardware_submit.py	1031	report	operator	!= -> ==	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.2	others = [o for o in levels if o != q]
+291	scripts/hardware_submit.py	1032	report	delete	test negated	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.7	if not others:
+292	scripts/hardware_submit.py	1032	report	operator	not dropped	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.9	if not others:
+293	scripts/hardware_submit.py	1033	report	delete	statement removed	SURVIVED				10.6	continue
+294	scripts/hardware_submit.py	1034	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.1	"p_hat, tau = float(r[""p_hat""]), float(r[""tau_s""])"
+295	scripts/hardware_submit.py	1035	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.1	"widen = binomial_se(p_hat, int(r[""shots""]))"
+296	scripts/hardware_submit.py	1036	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.8	hits = [0, 0]
+297	scripts/hardware_submit.py	1036	report	constant	0 -> 1	caught	crash	test_no_information_coverage_matches_a_direct_computation		7.6	hits = [0, 0]
+298	scripts/hardware_submit.py	1036	report	constant	0 -> 1	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.9	hits = [0, 0]
+299	scripts/hardware_submit.py	1037	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.0	counted = 0
+300	scripts/hardware_submit.py	1037	report	constant	0 -> 1	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.6	counted = 0
+301	scripts/hardware_submit.py	1038	report	delete	loop removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		9.1	for o in others:
+302	scripts/hardware_submit.py	1039	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.2	ratio = levels[o].t1 / own.t1
+303	scripts/hardware_submit.py	1039	report	operator	/ -> *	caught	crash	test_no_information_coverage_matches_a_direct_computation		7.1	ratio = levels[o].t1 / own.t1
+304	scripts/hardware_submit.py	1041	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.9	ends = sorted(
+305	scripts/hardware_submit.py	1042	report	operator	* -> /	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.9	p1_closed_form(tau, QubitSource(band.t1 * ratio, band.t2, own.e10, own.e01))
+306	scripts/hardware_submit.py	1043	report	delete	line removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.6	for band in (lo, hi)
+307	scripts/hardware_submit.py	1046	report	delete	statement removed	SURVIVED				9.6	continue
+308	scripts/hardware_submit.py	1047	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.9	counted += 1
+309	scripts/hardware_submit.py	1047	report	constant	1 -> 2	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.9	counted += 1
+310	scripts/hardware_submit.py	1048	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.2	hits[0] += int(ends[0] <= p_hat <= ends[1])
+311	scripts/hardware_submit.py	1048	report	constant	0 -> 1	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.2	hits[0] += int(ends[0] <= p_hat <= ends[1])
+312	scripts/hardware_submit.py	1048	report	constant	0 -> 1	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.6	hits[0] += int(ends[0] <= p_hat <= ends[1])
+313	scripts/hardware_submit.py	1048	report	operator	<= -> <	SURVIVED				9.8	hits[0] += int(ends[0] <= p_hat <= ends[1])
+314	scripts/hardware_submit.py	1048	report	operator	<= -> <	SURVIVED				8.8	hits[0] += int(ends[0] <= p_hat <= ends[1])
+315	scripts/hardware_submit.py	1048	report	constant	1 -> 2	caught	crash	test_no_information_coverage_matches_a_direct_computation		7.2	hits[0] += int(ends[0] <= p_hat <= ends[1])
+316	scripts/hardware_submit.py	1049	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.1	hits[1] += int(ends[0] - widen <= p_hat <= ends[1] + widen)
+317	scripts/hardware_submit.py	1049	report	constant	1 -> 2	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.7	hits[1] += int(ends[0] - widen <= p_hat <= ends[1] + widen)
+318	scripts/hardware_submit.py	1049	report	constant	0 -> 1	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.3	hits[1] += int(ends[0] - widen <= p_hat <= ends[1] + widen)
+319	scripts/hardware_submit.py	1049	report	operator	- -> +	SURVIVED				9.3	hits[1] += int(ends[0] - widen <= p_hat <= ends[1] + widen)
+320	scripts/hardware_submit.py	1049	report	operator	<= -> <	SURVIVED				8.4	hits[1] += int(ends[0] - widen <= p_hat <= ends[1] + widen)
+321	scripts/hardware_submit.py	1049	report	operator	<= -> <	SURVIVED				9.7	hits[1] += int(ends[0] - widen <= p_hat <= ends[1] + widen)
+322	scripts/hardware_submit.py	1049	report	constant	1 -> 2	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.4	hits[1] += int(ends[0] - widen <= p_hat <= ends[1] + widen)
+323	scripts/hardware_submit.py	1049	report	operator	+ -> -	SURVIVED				8.8	hits[1] += int(ends[0] - widen <= p_hat <= ends[1] + widen)
+324	scripts/hardware_submit.py	1050	report	delete	test negated	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.3	if counted:
+325	scripts/hardware_submit.py	1051	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.1	nominal.append(hits[0] / counted)
+326	scripts/hardware_submit.py	1051	report	constant	0 -> 1	SURVIVED				8.9	nominal.append(hits[0] / counted)
+327	scripts/hardware_submit.py	1051	report	operator	/ -> *	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.6	nominal.append(hits[0] / counted)
+328	scripts/hardware_submit.py	1052	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.2	widened.append(hits[1] / counted)
+329	scripts/hardware_submit.py	1052	report	constant	1 -> 2	caught	crash	test_no_information_coverage_matches_a_direct_computation		5.7	widened.append(hits[1] / counted)
+330	scripts/hardware_submit.py	1052	report	operator	/ -> *	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.1	widened.append(hits[1] / counted)
+331	scripts/hardware_submit.py	1053	report	delete	statement removed	caught	crash	test_no_information_coverage_matches_a_direct_computation		6.0	return nominal, widened
+332	scripts/hardware_submit.py	1057	report	delete	line removed	caught	crash		======================== 1 failed, 14 passed in 3.16s =========================	5.7	*, inconclusive: bool, a1: Mapping[str, Any], a2: Mapping[str, Any], a3: bool
+333	scripts/hardware_submit.py	1064	report	delete	test negated	caught	crash		======================== 1 failed, 14 passed in 3.45s =========================	6.3	if inconclusive:
+334	scripts/hardware_submit.py	1065	report	delete	statement removed	caught	crash		======================== 1 failed, 14 passed in 3.11s =========================	5.8	"return ""too few completed days"", ""inconclusive: nothing is read"""
+335	scripts/hardware_submit.py	1066	report	delete	test negated	caught	crash		======================== 1 failed, 15 passed in 3.26s =========================	5.4	"if a1[""passes""] and a2[""passes""] and a3:"
+336	scripts/hardware_submit.py	1066	report	operator	and -> or	caught	crash		======================== 1 failed, 16 passed in 3.24s =========================	5.5	"if a1[""passes""] and a2[""passes""] and a3:"
+337	scripts/hardware_submit.py	1066	report	operator	and -> or	caught	crash		======================== 1 failed, 16 passed in 3.06s =========================	5.4	"if a1[""passes""] and a2[""passes""] and a3:"
+338	scripts/hardware_submit.py	1067	report	delete	statement removed	caught	crash		======================== 1 failed, 15 passed in 2.95s =========================	5.2	return (
+339	scripts/hardware_submit.py	1068	report	delete	line removed	caught	crash		======================== 1 failed, 15 passed in 3.01s =========================	5.3	"""A1, A2 and A3 pass"","
+340	scripts/hardware_submit.py	1069	report	delete	line removed	caught	crash	test_a3_uses_the_control_rows_that_exist		6.0	"""S1 passes: level beats both readings, and most of the deviation is gone by execution"","
+341	scripts/hardware_submit.py	1071	report	delete	test negated	caught	crash		======================== 1 failed, 16 passed in 3.11s =========================	5.4	"if a1[""passes""] and a2[""passes""]:"
+342	scripts/hardware_submit.py	1071	report	operator	and -> or	caught	crash		======================== 1 failed, 17 passed in 2.99s =========================	5.6	"if a1[""passes""] and a2[""passes""]:"
+343	scripts/hardware_submit.py	1072	report	delete	statement removed	caught	crash		======================== 1 failed, 16 passed in 3.70s =========================	6.1	return (
+344	scripts/hardware_submit.py	1073	report	delete	line removed	caught	crash		======================== 1 failed, 16 passed in 3.00s =========================	5.5	"""A1 and A2 pass, A3 fails"","
+345	scripts/hardware_submit.py	1074	report	delete	line removed	SURVIVED				8.6	"""S1 not supported: the controls disagree in sign; the result is specific to the """
+346	scripts/hardware_submit.py	1075	report	delete	line removed	SURVIVED				8.2	"""selected qubits"","
+347	scripts/hardware_submit.py	1077	report	delete	test negated	caught	crash		======================== 1 failed, 17 passed in 3.29s =========================	6.0	"if a2[""mean_d""] is not None and a2[""mean_d""] >= 0.0:"
+348	scripts/hardware_submit.py	1077	report	operator	is not -> is	caught	crash		======================== 1 failed, 17 passed in 2.90s =========================	5.3	"if a2[""mean_d""] is not None and a2[""mean_d""] >= 0.0:"
+349	scripts/hardware_submit.py	1077	report	operator	and -> or	caught	crash		======================== 1 failed, 18 passed in 3.35s =========================	5.8	"if a2[""mean_d""] is not None and a2[""mean_d""] >= 0.0:"
+350	scripts/hardware_submit.py	1077	report	operator	>= -> >	caught	crash		======================== 1 failed, 17 passed in 3.36s =========================	5.7	"if a2[""mean_d""] is not None and a2[""mean_d""] >= 0.0:"
+351	scripts/hardware_submit.py	1078	report	delete	statement removed	caught	crash		======================== 1 failed, 17 passed in 3.05s =========================	5.4	return (
+352	scripts/hardware_submit.py	1079	report	delete	line removed	caught	crash		======================== 1 failed, 17 passed in 2.92s =========================	5.5	"""A2's mean D at or above zero"","
+353	scripts/hardware_submit.py	1080	report	delete	line removed	caught	crash	test_report_fails_s1_when_the_execution_reading_is_as_good_as_level		7.0	"""S1 fails: reading_at_execution is at least as good as level"","
+354	scripts/hardware_submit.py	1082	report	delete	test negated	caught	crash		======================== 1 failed, 18 passed in 3.13s =========================	5.3	"if a1[""passes""]:"
+355	scripts/hardware_submit.py	1083	report	delete	statement removed	caught	crash		======================== 1 failed, 18 passed in 2.83s =========================	5.1	return (
+356	scripts/hardware_submit.py	1084	report	delete	line removed	caught	crash		======================== 1 failed, 18 passed in 3.10s =========================	5.3	"""A1 passes, A2 does not"","
+357	scripts/hardware_submit.py	1085	report	delete	line removed	caught	crash	test_report_names_the_staleness_finding		7.6	"""staleness: level beats the submission-time reading but not the execution-time one"","
+358	scripts/hardware_submit.py	1087	report	delete	statement removed	caught	crash		======================== 1 failed, 19 passed in 3.00s =========================	5.3	"means = (a1[""mean_d""], a2[""mean_d""])"
+359	scripts/hardware_submit.py	1088	report	delete	test negated	caught	crash		======================== 1 failed, 19 passed in 3.00s =========================	5.5	if all(m is not None and m < 0.0 for m in means):
+360	scripts/hardware_submit.py	1088	report	operator	is not -> is	caught	crash		======================== 1 failed, 19 passed in 3.07s =========================	6.1	if all(m is not None and m < 0.0 for m in means):
+361	scripts/hardware_submit.py	1088	report	operator	and -> or	caught	crash		======================== 1 failed, 20 passed in 3.04s =========================	5.4	if all(m is not None and m < 0.0 for m in means):
+362	scripts/hardware_submit.py	1088	report	operator	< -> <=	SURVIVED				8.5	if all(m is not None and m < 0.0 for m in means):
+363	scripts/hardware_submit.py	1089	report	delete	statement removed	caught	crash		======================== 1 failed, 19 passed in 2.94s =========================	5.2	return (
+364	scripts/hardware_submit.py	1090	report	delete	line removed	caught	crash		======================== 1 failed, 19 passed in 3.05s =========================	5.3	"""A1 and A2 both fail, both mean D below zero"","
+365	scripts/hardware_submit.py	1091	report	delete	line removed	SURVIVED				8.6	"""no claim: the data do not separate the predictors"","
+366	scripts/hardware_submit.py	1093	report	delete	statement removed	caught	crash		======================== 1 failed, 20 passed in 3.41s =========================	5.9	"return ""anything else"", ""reported as observed, with no S1 reading"""
+367	scripts/hardware_submit.py	1098	report	delete	test negated	caught	crash		======================== 1 failed, 21 passed in 2.92s =========================	5.4	if inconclusive:
+368	scripts/hardware_submit.py	1099	report	delete	statement removed	caught	crash		======================== 1 failed, 25 passed in 2.90s =========================	5.5	"return ""Arm B inconclusive"", ""nothing is added"""
+369	scripts/hardware_submit.py	1100	report	delete	test negated	caught	crash		======================== 1 failed, 21 passed in 3.13s =========================	5.3	if s1_passes and passes:
+370	scripts/hardware_submit.py	1100	report	operator	and -> or	caught	crash		======================== 1 failed, 22 passed in 3.59s =========================	6.5	if s1_passes and passes:
+371	scripts/hardware_submit.py	1101	report	delete	statement removed	caught	crash		======================== 1 failed, 21 passed in 3.10s =========================	5.3	"return ""S1 and Arm B pass"", ""S1 passes for the engineer's purpose too"""
+372	scripts/hardware_submit.py	1102	report	delete	test negated	caught	crash		======================== 1 failed, 22 passed in 3.12s =========================	5.4	if s1_passes:
+373	scripts/hardware_submit.py	1103	report	delete	statement removed	caught	crash		======================== 1 failed, 22 passed in 2.98s =========================	5.3	return (
+374	scripts/hardware_submit.py	1104	report	delete	line removed	caught	crash		======================== 1 failed, 22 passed in 2.92s =========================	5.2	"""S1 passes, Arm B does not"","
+375	scripts/hardware_submit.py	1105	report	delete	line removed	SURVIVED				9.4	"""S1 holds for decay prediction, not for ranking layouts"","
+376	scripts/hardware_submit.py	1107	report	delete	test negated	caught	crash		======================== 1 failed, 23 passed in 2.80s =========================	5.0	if passes:
+377	scripts/hardware_submit.py	1108	report	delete	statement removed	caught	crash		======================== 1 failed, 23 passed in 2.92s =========================	5.1	"return ""Arm B passes, S1 does not"", ""no claim from Arm B alone"""
+378	scripts/hardware_submit.py	1109	report	delete	statement removed	caught	crash		======================== 1 failed, 24 passed in 2.84s =========================	5.7	"return ""neither passes"", ""nothing is added"""
+379	scripts/hardware_submit.py	1113	report	delete	line removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.5	jobs_dir: Path, *, first_day: date, today: date, scores_dir: Path | None = None
+380	scripts/hardware_submit.py	1147	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.3	scores = jobs_dir if scores_dir is None else scores_dir
+381	scripts/hardware_submit.py	1147	report	operator	is -> is not	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		6.0	scores = jobs_dir if scores_dir is None else scores_dir
+382	scripts/hardware_submit.py	1150	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.3	arm_b_jobs: list[tuple[date, dict[str, Any]]] = []
+383	scripts/hardware_submit.py	1151	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.5	states: dict[date, dict[str, Any]] = {}
+384	scripts/hardware_submit.py	1152	report	delete	loop removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.3	for day in calendar:
+385	scripts/hardware_submit.py	1153	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		6.5	folder = scores / day.isoformat()
+386	scripts/hardware_submit.py	1153	report	operator	/ -> *	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.2	folder = scores / day.isoformat()
+387	scripts/hardware_submit.py	1157	report	delete	statement removed	caught	crash	test_the_arm_b_scores_of_a_job_folder_reach_the_report		8.5	"arm_b_jobs.append((day, _read_json(folder / ""arm-b.json"")))"
+388	scripts/hardware_submit.py	1157	report	operator	/ -> *	caught	crash	test_the_arm_b_scores_of_a_job_folder_reach_the_report		9.0	"arm_b_jobs.append((day, _read_json(folder / ""arm-b.json"")))"
+389	scripts/hardware_submit.py	1158	report	delete	test negated	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.0	"if day in named and (named[day] / ""sealed.json"").exists():"
+390	scripts/hardware_submit.py	1158	report	operator	and -> or	caught	crash	test_a_run_with_no_control_rows_does_not_meet_a3		5.3	"if day in named and (named[day] / ""sealed.json"").exists():"
+391	scripts/hardware_submit.py	1158	report	operator	/ -> *	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.7	"if day in named and (named[day] / ""sealed.json"").exists():"
+392	scripts/hardware_submit.py	1159	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.0	"states[day] = _read_json(named[day] / ""sealed.json"")"
+393	scripts/hardware_submit.py	1159	report	operator	/ -> *	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.4	"states[day] = _read_json(named[day] / ""sealed.json"")"
+394	scripts/hardware_submit.py	1162	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.2	seeds = np.random.SeedSequence(SEED).generate_state(2, dtype=np.uint32)
+395	scripts/hardware_submit.py	1162	report	constant	2 -> 3	SURVIVED				8.2	seeds = np.random.SeedSequence(SEED).generate_state(2, dtype=np.uint32)
+396	scripts/hardware_submit.py	1165	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.8	pairs = level_minus_other(discriminating, other)
+397	scripts/hardware_submit.py	1166	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.3	values = [(d, (when - first_day).days) for d, when in pairs]
+398	scripts/hardware_submit.py	1166	report	operator	- -> +	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		12.7	values = [(d, (when - first_day).days) for d, when in pairs]
+399	scripts/hardware_submit.py	1167	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.3	test = batch_means_test(values, ARM_A_BATCHES, side=-1)
+400	scripts/hardware_submit.py	1167	report	constant	1 -> 2	SURVIVED				8.4	test = batch_means_test(values, ARM_A_BATCHES, side=-1)
+401	scripts/hardware_submit.py	1168	report	delete	statement removed	caught	crash	test_a_run_with_no_control_rows_does_not_meet_a3		5.8	return {
+402	scripts/hardware_submit.py	1169	report	delete	line removed	caught	crash	test_a4_counts_no_zero_delay_row	KeyE...	8.7	"""rows"": len(pairs),"
+403	scripts/hardware_submit.py	1170	report	delete	line removed	caught	crash	test_report_passes_when_level_is_clearly_closer_on_every_day		6.0	"""mean_d"": float(np.mean([d for d, _ in pairs])) if pairs else None,"
+404	scripts/hardware_submit.py	1171	report	delete	line removed	caught	crash	test_report_passes_when_level_is_clearly_closer_on_every_day		5.9	"""batch_means"": test,"
+405	scripts/hardware_submit.py	1172	report	delete	line removed	caught	crash	test_a_run_with_no_control_rows_does_not_meet_a3		5.3	"""passes"": test[""passes""],"
+406	scripts/hardware_submit.py	1173	report	delete	line removed	caught	crash	test_a_run_with_no_control_rows_does_not_meet_a3		5.7	"""inconclusive"": test[""inconclusive""],"
+407	scripts/hardware_submit.py	1174	report	delete	line removed	caught	crash	test_the_report_hands_the_bootstrap_the_whole_calendar_in_three_day_blocks		5.5	"""block3_sensitivity"": _block3_sensitivity(pairs, span=span, seed=seed),"
+408	scripts/hardware_submit.py	1177	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.0	"a1 = condition(""reading"", int(seeds[0]))"
+409	scripts/hardware_submit.py	1177	report	constant	0 -> 1	caught	crash	test_the_report_hands_the_bootstrap_the_whole_calendar_in_three_day_blocks		11.0	"a1 = condition(""reading"", int(seeds[0]))"
+410	scripts/hardware_submit.py	1178	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.7	"a2 = condition(""reading_at_execution"", int(seeds[1]))"
+411	scripts/hardware_submit.py	1178	report	constant	1 -> 2	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		9.9	"a2 = condition(""reading_at_execution"", int(seeds[1]))"
+412	scripts/hardware_submit.py	1179	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.7	a3 = all(
+413	scripts/hardware_submit.py	1180	report	operator	is not -> is	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.0	(m := _mean(d for d, _ in level_minus_other(control, name))) is not None and m < 0.0
+414	scripts/hardware_submit.py	1180	report	operator	and -> or	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.8	(m := _mean(d for d, _ in level_minus_other(control, name))) is not None and m < 0.0
+415	scripts/hardware_submit.py	1180	report	operator	< -> <=	SURVIVED				10.0	(m := _mean(d for d, _ in level_minus_other(control, name))) is not None and m < 0.0
+416	scripts/hardware_submit.py	1181	report	delete	line removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.9	"for name in (""reading"", ""reading_at_execution"")"
+417	scripts/hardware_submit.py	1183	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.5	"completed_days = len({r[""date""] for r in discriminating})"
+418	scripts/hardware_submit.py	1184	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.9	"inconclusive = completed_days < MIN_ARM_A_DAYS or a1[""inconclusive""] or a2[""inconclusive""]"
+419	scripts/hardware_submit.py	1184	report	operator	< -> <=	caught	crash	test_s1_needs_ten_completed_days[10-True]		8.7	"inconclusive = completed_days < MIN_ARM_A_DAYS or a1[""inconclusive""] or a2[""inconclusive""]"
+420	scripts/hardware_submit.py	1184	report	operator	or -> and	caught	crash	test_s1_needs_ten_completed_days[9-False]		7.5	"inconclusive = completed_days < MIN_ARM_A_DAYS or a1[""inconclusive""] or a2[""inconclusive""]"
+421	scripts/hardware_submit.py	1184	report	operator	or -> and	SURVIVED				7.3	"inconclusive = completed_days < MIN_ARM_A_DAYS or a1[""inconclusive""] or a2[""inconclusive""]"
+422	scripts/hardware_submit.py	1185	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.1	s1_row, s1_text = s1_reading(inconclusive=inconclusive, a1=a1, a2=a2, a3=a3)
+423	scripts/hardware_submit.py	1194	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.8	"banded = [r for r in discriminating if int(r[""tau_dt""]) > 0 and int(r[""band_covered""]) >= 0]"
+424	scripts/hardware_submit.py	1194	report	operator	> -> >=	caught	crash	test_a4_counts_no_zero_delay_row	asse...	7.5	"banded = [r for r in discriminating if int(r[""tau_dt""]) > 0 and int(r[""band_covered""]) >= 0]"
+425	scripts/hardware_submit.py	1194	report	constant	0 -> 1	SURVIVED				7.5	"banded = [r for r in discriminating if int(r[""tau_dt""]) > 0 and int(r[""band_covered""]) >= 0]"
+426	scripts/hardware_submit.py	1194	report	operator	and -> or	caught	crash	test_a4_ignores_rows_with_no_band_and_reports_nominal_beside_widened		8.7	"banded = [r for r in discriminating if int(r[""tau_dt""]) > 0 and int(r[""band_covered""]) >= 0]"
+427	scripts/hardware_submit.py	1194	report	operator	>= -> >	caught	crash	test_a4_reports_the_widened_coverage_and_decides_nothing[8]		6.6	"banded = [r for r in discriminating if int(r[""tau_dt""]) > 0 and int(r[""band_covered""]) >= 0]"
+428	scripts/hardware_submit.py	1194	report	constant	0 -> 1	caught	crash	test_a4_reports_the_widened_coverage_and_decides_nothing[8]		12.0	"banded = [r for r in discriminating if int(r[""tau_dt""]) > 0 and int(r[""band_covered""]) >= 0]"
+429	scripts/hardware_submit.py	1195	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.8	"widths = [float(r[""band_width""]) for r in banded if math.isfinite(float(r[""band_width""]))]"
+430	scripts/hardware_submit.py	1196	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		7.2	no_nominal: list[float] = []
+431	scripts/hardware_submit.py	1197	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.9	no_widened: list[float] = []
+432	scripts/hardware_submit.py	1198	report	delete	loop removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		6.3	for day, state in states.items():
+433	scripts/hardware_submit.py	1199	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.5	"nominal, widened = no_information_coverage([r for r in banded if r[""date""] == day], state)"
+434	scripts/hardware_submit.py	1199	report	operator	== -> !=	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		6.5	"nominal, widened = no_information_coverage([r for r in banded if r[""date""] == day], state)"
+435	scripts/hardware_submit.py	1200	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.4	no_nominal += nominal
+436	scripts/hardware_submit.py	1201	report	delete	statement removed	SURVIVED				12.2	no_widened += widened
+437	scripts/hardware_submit.py	1202	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.5	a4 = {
+438	scripts/hardware_submit.py	1203	report	delete	line removed	caught	crash	test_report_passes_when_level_is_clearly_closer_on_every_day		9.1	"""part_of_s1"": False,"
+439	scripts/hardware_submit.py	1203	report	constant	False -> True	caught	crash	test_report_passes_when_level_is_clearly_closer_on_every_day		8.9	"""part_of_s1"": False,"
+440	scripts/hardware_submit.py	1204	report	delete	line removed	SURVIVED				11.5	"""stratum"": ""discriminating"","
+441	scripts/hardware_submit.py	1205	report	delete	line removed	caught	crash	test_a4_counts_no_zero_delay_row	KeyE...	11.7	"""rows"": len(banded),"
+442	scripts/hardware_submit.py	1206	report	delete	line removed	SURVIVED				9.0	"""nominal"": BAND_NOMINAL,"
+443	scripts/hardware_submit.py	1207	report	delete	line removed	caught	crash	test_report_passes_when_level_is_clearly_closer_on_every_day		8.1	"""coverage"": _mean(float(r[""band_covered""]) for r in banded),"
+444	scripts/hardware_submit.py	1208	report	delete	line removed	caught	crash	test_a4_reports_the_widened_coverage_and_decides_nothing[8]		6.4	"""coverage_widened"": _mean(float(r[""band_covered_widened""]) for r in banded),"
+445	scripts/hardware_submit.py	1209	report	delete	line removed	SURVIVED				12.5	"""mean_width"": _mean(widths),"
+446	scripts/hardware_submit.py	1210	report	delete	line removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.9	"""no_information_coverage"": _mean(no_nominal),"
+447	scripts/hardware_submit.py	1211	report	delete	line removed	SURVIVED				11.7	"""no_information_coverage_widened"": _mean(no_widened),"
+448	scripts/hardware_submit.py	1214	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.9	points: list[tuple[float, float]] = []
+449	scripts/hardware_submit.py	1215	report	delete	loop removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		6.6	for day, state in states.items():
+450	scripts/hardware_submit.py	1216	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.8	per_qubit: dict[int, list[dict[str, Any]]] = {}
+451	scripts/hardware_submit.py	1217	report	delete	loop removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.2	for r in discriminating:
+452	scripts/hardware_submit.py	1218	report	delete	test negated	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.5	"if r[""date""] == day and int(r[""tau_dt""]) > 0:"
+453	scripts/hardware_submit.py	1218	report	operator	== -> !=	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.7	"if r[""date""] == day and int(r[""tau_dt""]) > 0:"
+454	scripts/hardware_submit.py	1218	report	operator	and -> or	SURVIVED				7.9	"if r[""date""] == day and int(r[""tau_dt""]) > 0:"
+455	scripts/hardware_submit.py	1218	report	operator	> -> >=	SURVIVED				8.1	"if r[""date""] == day and int(r[""tau_dt""]) > 0:"
+456	scripts/hardware_submit.py	1218	report	constant	0 -> 1	SURVIVED				8.8	"if r[""date""] == day and int(r[""tau_dt""]) > 0:"
+457	scripts/hardware_submit.py	1219	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.8	"per_qubit.setdefault(int(r[""qubit""]), []).append(r)"
+458	scripts/hardware_submit.py	1220	report	delete	loop removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.7	for q, q_rows in sorted(per_qubit.items()):
+459	scripts/hardware_submit.py	1221	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.1	"level, reading_src = _source(state, ""level"", q), _source(state, ""reading"", q)"
+460	scripts/hardware_submit.py	1222	report	delete	test negated	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.8	if level is None or reading_src is None or not reading_src.usable_for_decay():
+461	scripts/hardware_submit.py	1222	report	operator	is -> is not	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.9	if level is None or reading_src is None or not reading_src.usable_for_decay():
+462	scripts/hardware_submit.py	1222	report	operator	or -> and	SURVIVED				7.1	if level is None or reading_src is None or not reading_src.usable_for_decay():
+463	scripts/hardware_submit.py	1222	report	operator	is -> is not	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.8	if level is None or reading_src is None or not reading_src.usable_for_decay():
+464	scripts/hardware_submit.py	1222	report	operator	or -> and	SURVIVED				7.6	if level is None or reading_src is None or not reading_src.usable_for_decay():
+465	scripts/hardware_submit.py	1222	report	operator	not dropped	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.5	if level is None or reading_src is None or not reading_src.usable_for_decay():
+466	scripts/hardware_submit.py	1223	report	delete	statement removed	SURVIVED				7.7	continue
+467	scripts/hardware_submit.py	1224	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.3	fit = fit_log_t1_ratio(
+468	scripts/hardware_submit.py	1225	report	delete	line removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.7	"[(float(r[""tau_s""]), int(r[""ones""]), int(r[""shots""])) for r in q_rows], level"
+469	scripts/hardware_submit.py	1227	report	delete	test negated	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.1	if fit is not None:
+470	scripts/hardware_submit.py	1227	report	operator	is not -> is	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.7	if fit is not None:
+471	scripts/hardware_submit.py	1228	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.8	points.append((math.log(reading_src.t1) - math.log(level.t1), fit))
+472	scripts/hardware_submit.py	1228	report	operator	- -> +	SURVIVED				8.2	points.append((math.log(reading_src.t1) - math.log(level.t1), fit))
+473	scripts/hardware_submit.py	1230	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.0	arm_b = _arm_b_report(arm_b_jobs, first_day=first_day)
+474	scripts/hardware_submit.py	1231	report	delete	statement removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.7	b_row, b_text = arm_b_reading(
+475	scripts/hardware_submit.py	1232	report	delete	line removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.0	"s1_passes=s1_row == ""A1, A2 and A3 pass"","
+476	scripts/hardware_submit.py	1232	report	operator	== -> !=	SURVIVED				8.2	"s1_passes=s1_row == ""A1, A2 and A3 pass"","
+477	scripts/hardware_submit.py	1233	report	delete	line removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.7	"inconclusive=arm_b[""inconclusive""],"
+478	scripts/hardware_submit.py	1234	report	delete	line removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.9	"passes=arm_b[""passes""],"
+479	scripts/hardware_submit.py	1246	report	delete	line removed	caught	crash	test_report_passes_when_level_is_clearly_closer_on_every_day		5.5	"""completed_days"": completed_days,"
+480	scripts/hardware_submit.py	1247	report	delete	line removed	SURVIVED				7.4	"""minimum_days"": MIN_ARM_A_DAYS,"
+481	scripts/hardware_submit.py	1252	report	delete	line removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		4.8	"""A4_band_calibration_report"": a4,"
+482	scripts/hardware_submit.py	1253	report	delete	line removed	caught	crash	test_the_report_computes_the_descriptive_figures_from_sealed_forecasts		5.4	"""c_and_s_res"": slope_and_spread(points),"
+483	scripts/hardware_submit.py	1255	report	delete	line removed	caught	crash	test_the_arm_b_scores_of_a_job_folder_reach_the_report		7.9	"""arm_b"": arm_b,"
+484	scripts/hardware_submit.py	1256	report	delete	line removed	caught	crash	test_a_run_with_no_control_rows_does_not_meet_a3		5.0	"""s1"": {""row"": s1_row, ""reading"": s1_text},"
+485	scripts/hardware_submit.py	1257	report	delete	line removed	SURVIVED				7.0	"""arm_b_reading"": {""row"": b_row, ""reading"": b_text},"
+486	scripts/hardware_submit.py	1258	report	delete	line removed	caught	crash	test_report_passes_when_level_is_clearly_closer_on_every_day		5.6	"""reading"": s1_text,"
+487	scripts/hardware_submit.py	1287	score	delete	statement removed	caught	crash	test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network		17.5	sealed = sealed_dir.resolve()
+488	scripts/hardware_submit.py	1288	score	delete	loop removed	caught	crash	test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network		18.7	for folder in folders:
+489	scripts/hardware_submit.py	1289	score	delete	test negated	caught	crash	test_report_command_writes_the_file_and_marks_it_interim		17.6	if sealed == folder.resolve() or sealed.is_relative_to(folder.resolve()):
+490	scripts/hardware_submit.py	1289	score	operator	== -> !=	caught	crash	test_report_command_writes_the_file_and_marks_it_interim		19.5	if sealed == folder.resolve() or sealed.is_relative_to(folder.resolve()):
+491	scripts/hardware_submit.py	1289	score	operator	or -> and	caught	crash	test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network		17.4	if sealed == folder.resolve() or sealed.is_relative_to(folder.resolve()):
+492	scripts/hardware_submit.py	1290	score	delete	statement removed	caught	crash	test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network		19.1	"raise RefusedError(f""the sealed folder {sealed_dir} is inside {folder}"")"
+493	scripts/hardware_submit.py	1306	score	delete	statement removed	caught	crash	test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network		18.7	"score.add_argument(""--sealed-dir"", type=Path, required=True)"
+494	scripts/hardware_submit.py	1306	score	constant	True -> False	caught	crash	test_score_and_report_need_a_sealed_folder[score]		19.6	"score.add_argument(""--sealed-dir"", type=Path, required=True)"
+495	scripts/hardware_submit.py	1311	score	delete	statement removed	caught	crash	test_score_and_report_need_a_sealed_folder[report]		19.4	"report.add_argument(""--sealed-dir"", type=Path, required=True)"
+496	scripts/hardware_submit.py	1311	score	constant	True -> False	caught	crash	test_score_and_report_need_a_sealed_folder[report]		20.2	"report.add_argument(""--sealed-dir"", type=Path, required=True)"
+497	scripts/hardware_submit.py	1326	score	delete	statement removed	caught	crash	test_report_refuses_a_sealed_folder_inside_the_jobs_folder[.]		18.8	refuse_sealed_inside(args.sealed_dir, args.jobs_dir)
+498	scripts/hardware_submit.py	1328	score	delete	line removed	caught	crash	test_report_command_writes_the_file_and_marks_it_interim		21.1	args.jobs_dir,
+499	scripts/hardware_submit.py	1329	score	delete	line removed	caught	crash	test_report_command_writes_the_file_and_marks_it_interim		19.6	first_day=args.first_day,
+500	scripts/hardware_submit.py	1330	score	delete	line removed	caught	crash	test_report_command_writes_the_file_and_marks_it_interim		22.5	today=args.today or _utc_now().date(),
+501	scripts/hardware_submit.py	1330	score	operator	or -> and	caught	crash	test_report_command_writes_the_file_and_marks_it_interim		20.3	today=args.today or _utc_now().date(),
+502	scripts/hardware_submit.py	1331	score	delete	line removed	caught	crash	test_report_command_writes_the_file_and_marks_it_interim		19.0	scores_dir=args.sealed_dir,
+503	scripts/hardware_submit.py	1336	score	delete	statement removed	SURVIVED				27.3	args.sealed_dir.mkdir(parents=True, exist_ok=True)
+504	scripts/hardware_submit.py	1336	score	constant	True -> False	SURVIVED				25.5	args.sealed_dir.mkdir(parents=True, exist_ok=True)
+505	scripts/hardware_submit.py	1336	score	constant	True -> False	caught	crash	test_report_command_writes_the_file_and_marks_it_interim		19.0	args.sealed_dir.mkdir(parents=True, exist_ok=True)
+506	scripts/hardware_submit.py	1337	score	delete	statement removed	caught	crash	test_report_command_writes_the_file_and_marks_it_interim		19.0	"write_json_lf(args.sealed_dir / ""report.json"", outcome)"
+507	scripts/hardware_submit.py	1337	score	operator	/ -> *	caught	crash	test_report_command_writes_the_file_and_marks_it_interim		18.5	"write_json_lf(args.sealed_dir / ""report.json"", outcome)"
+508	scripts/hardware_submit.py	1339	score	delete	statement removed	caught	crash	test_report_command_writes_the_file_and_marks_it_interim		19.3	"print(f""report written: {args.sealed_dir / 'report.json'}"")"
+509	scripts/hardware_submit.py	1339	score	operator	/ -> *	caught	crash	test_report_command_writes_the_file_and_marks_it_interim		22.6	"print(f""report written: {args.sealed_dir / 'report.json'}"")"
+510	scripts/hardware_submit.py	1350	score	delete	test negated	caught	crash	test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network		22.6	"if args.mode == ""score"":"
+511	scripts/hardware_submit.py	1350	score	operator	== -> !=	caught	crash	test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network		19.0	"if args.mode == ""score"":"
+512	scripts/hardware_submit.py	1351	score	delete	statement removed	caught	crash	test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network		22.3	refuse_sealed_inside(args.sealed_dir, args.job_dir.parent, args.repo)
+513	scripts/hardware_submit.py	1388	score	delete	line removed	SURVIVED				24.8	job_dir=args.job_dir,
+514	scripts/hardware_submit.py	1389	score	delete	line removed	SURVIVED				25.9	device=device,
+515	scripts/hardware_submit.py	1390	score	delete	line removed	SURVIVED				27.0	archive=_archive_for(args.repo, sha),
+516	scripts/hardware_submit.py	1391	score	delete	line removed	SURVIVED				23.2	now=now,
+517	scripts/hardware_submit.py	1392	score	delete	line removed	SURVIVED				24.8	sealed_dir=args.sealed_dir,
+518	scripts/hardware_t1_check.py	55	t1	delete	line removed	caught	crash	test_the_token_reaches_no_file_the_check_writes		5.5	refuse_sealed_inside,
+519	scripts/hardware_t1_check.py	206	t1	delete	statement removed	caught	crash	test_a_finished_check_writes_each_qubits_fit_beside_its_readings		5.4	out = job_dir if sealed_dir is None else sealed_dir / job_dir.name
+520	scripts/hardware_t1_check.py	206	t1	operator	is -> is not	caught	crash	test_a_finished_check_writes_each_qubits_fit_beside_its_readings		5.2	out = job_dir if sealed_dir is None else sealed_dir / job_dir.name
+521	scripts/hardware_t1_check.py	206	t1	operator	/ -> *	caught	crash	test_the_token_reaches_no_file_the_check_writes		7.9	out = job_dir if sealed_dir is None else sealed_dir / job_dir.name
+522	scripts/hardware_t1_check.py	207	t1	delete	statement removed	caught	crash	test_the_token_reaches_no_file_the_check_writes		5.4	out.mkdir(parents=True, exist_ok=True)
+523	scripts/hardware_t1_check.py	207	t1	constant	True -> False	caught	crash	test_the_token_reaches_no_file_the_check_writes		6.4	out.mkdir(parents=True, exist_ok=True)
+524	scripts/hardware_t1_check.py	207	t1	constant	True -> False	caught	crash	test_a_finished_check_writes_each_qubits_fit_beside_its_readings		5.2	out.mkdir(parents=True, exist_ok=True)
+525	scripts/hardware_t1_check.py	208	t1	delete	statement removed	caught	crash	test_a_finished_check_writes_each_qubits_fit_beside_its_readings		5.4	"write_json_lf(out / ""t1-results.json"", {""job_id"": job_id, ""counts"": fetched.counts})"
+526	scripts/hardware_t1_check.py	208	t1	operator	/ -> *	caught	crash	test_a_finished_check_writes_each_qubits_fit_beside_its_readings		4.9	"write_json_lf(out / ""t1-results.json"", {""job_id"": job_id, ""counts"": fetched.counts})"
+527	scripts/hardware_t1_check.py	225	t1	delete	line removed	caught	crash	test_a_finished_check_writes_each_qubits_fit_beside_its_readings		5.4	"out / ""t1-check.json"","
+528	scripts/hardware_t1_check.py	225	t1	operator	/ -> *	caught	crash	test_a_finished_check_writes_each_qubits_fit_beside_its_readings		5.0	"out / ""t1-check.json"","
+529	scripts/hardware_t1_check.py	239	t1	delete	statement removed	caught	crash	test_a_finished_check_writes_each_qubits_fit_beside_its_readings		7.1	qualities: dict[str, int] = {}
+530	scripts/hardware_t1_check.py	240	t1	delete	loop removed	caught	crash	test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder		5.6	for fit in fits.values():
+531	scripts/hardware_t1_check.py	241	t1	delete	statement removed	caught	crash	test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder		5.7	"qualities[str(fit[""quality""])] = qualities.get(str(fit[""quality""]), 0) + 1"
+532	scripts/hardware_t1_check.py	241	t1	constant	0 -> 1	caught	crash	test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder		5.5	"qualities[str(fit[""quality""])] = qualities.get(str(fit[""quality""]), 0) + 1"
+533	scripts/hardware_t1_check.py	241	t1	operator	+ -> -	caught	crash	test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder		5.6	"qualities[str(fit[""quality""])] = qualities.get(str(fit[""quality""]), 0) + 1"
+534	scripts/hardware_t1_check.py	241	t1	constant	1 -> 2	caught	crash	test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder		5.5	"qualities[str(fit[""quality""])] = qualities.get(str(fit[""quality""]), 0) + 1"
+535	scripts/hardware_t1_check.py	242	t1	delete	statement removed	caught	crash	test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder		5.4	write_json_lf(
+536	scripts/hardware_t1_check.py	243	t1	delete	line removed	caught	crash	test_a_finished_check_writes_each_qubits_fit_beside_its_readings		5.3	"job_dir / ""t1-operations.json"","
+537	scripts/hardware_t1_check.py	243	t1	operator	/ -> *	caught	crash	test_a_finished_check_writes_each_qubits_fit_beside_its_readings		5.1	"job_dir / ""t1-operations.json"","
+538	scripts/hardware_t1_check.py	245	t1	delete	line removed	caught	crash	test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder		5.3	"""status"": ""fitted"","
+539	scripts/hardware_t1_check.py	246	t1	delete	line removed	caught	crash	test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder		5.5	"""job_id"": job_id,"
+540	scripts/hardware_t1_check.py	247	t1	delete	line removed	caught	crash	test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder		5.4	"""qubits"": len(fits),"
+541	scripts/hardware_t1_check.py	248	t1	delete	line removed	caught	crash	test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder		5.5	"""fit_quality"": qualities,"
+542	scripts/hardware_t1_check.py	249	t1	delete	line removed	caught	crash	test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder		5.3	"""quantum_seconds"": fetched.metrics.get(""usage"", {}).get(""quantum_seconds""),"
+543	scripts/hardware_t1_check.py	271	t1	delete	statement removed	caught	crash	test_the_token_reaches_no_file_the_check_writes		5.5	"score.add_argument(""--sealed-dir"", type=Path, required=True)"
+544	scripts/hardware_t1_check.py	271	t1	constant	True -> False	caught	crash	test_the_check_score_needs_a_sealed_folder		5.4	"score.add_argument(""--sealed-dir"", type=Path, required=True)"
+545	scripts/hardware_t1_check.py	284	t1	delete	test negated	caught	crash	test_the_guard_runs_before_the_token_is_read		5.2	"if args.mode == ""score"":"
+546	scripts/hardware_t1_check.py	284	t1	operator	== -> !=	caught	crash	test_the_guard_runs_before_the_token_is_read		5.3	"if args.mode == ""score"":"
+547	scripts/hardware_t1_check.py	286	t1	delete	statement removed	caught	crash	test_the_check_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network		5.7	refuse_sealed_inside(args.sealed_dir, args.job_dir.parent, args.repo)
+548	scripts/hardware_t1_check.py	307	t1	delete	statement removed	caught	crash	test_the_token_reaches_no_file_the_check_writes		5.6	return run_score(job_dir=args.job_dir, device=device, sealed_dir=args.sealed_dir)
+549	scripts/hardware_daily.py	39	daily	delete	statement removed	caught	crash	test_day_fifteen_scores_and_reports_but_submits_nothing		3.6	import shutil
+550	scripts/hardware_daily.py	109	daily	delete	statement removed	caught	crash	test_day_one_submits_the_main_job_then_the_check_then_reports		3.3	sealed_dir: Path
+551	scripts/hardware_daily.py	176	daily	delete	line removed	caught	crash	test_every_earlier_day_with_no_outcome_is_scored_oldest_first		3.2	"and not (job_dir / ""operations.json"").exists()"
+552	scripts/hardware_daily.py	176	daily	operator	and -> or	caught	crash	test_every_earlier_day_with_no_outcome_is_scored_oldest_first		3.5	"and not (job_dir / ""operations.json"").exists()"
+553	scripts/hardware_daily.py	176	daily	operator	not dropped	caught	crash	test_a_morning_submits_first_so_the_capture_stays_on_time		3.2	"and not (job_dir / ""operations.json"").exists()"
+554	scripts/hardware_daily.py	176	daily	operator	/ -> *	caught	crash	test_a_morning_submits_first_so_the_capture_stays_on_time		3.2	"and not (job_dir / ""operations.json"").exists()"
+555	scripts/hardware_daily.py	184	daily	delete	line removed	caught	crash	test_the_check_is_scored_on_a_later_morning		3.4	"and not (job_dir / ""t1-operations.json"").exists()"
+556	scripts/hardware_daily.py	184	daily	operator	and -> or	caught	crash	test_a_morning_submits_first_so_the_capture_stays_on_time		2.9	"and not (job_dir / ""t1-operations.json"").exists()"
+557	scripts/hardware_daily.py	184	daily	operator	not dropped	caught	crash	test_the_check_is_scored_on_a_later_morning		3.3	"and not (job_dir / ""t1-operations.json"").exists()"
+558	scripts/hardware_daily.py	184	daily	operator	/ -> *	caught	crash	test_the_check_is_scored_on_a_later_morning		2.9	"and not (job_dir / ""t1-operations.json"").exists()"
+559	scripts/hardware_daily.py	244	daily	delete	test negated	caught	crash	test_day_fifteen_scores_and_reports_but_submits_nothing		3.3	if not sealed_dir.is_dir():
+560	scripts/hardware_daily.py	244	daily	operator	not dropped	caught	crash	test_day_fifteen_scores_and_reports_but_submits_nothing		3.1	if not sealed_dir.is_dir():
+561	scripts/hardware_daily.py	245	daily	delete	statement removed	caught	crash	test_day_fifteen_without_a_sealed_folder_is_not_a_clean_morning		3.4	return 1
+562	scripts/hardware_daily.py	245	daily	constant	1 -> 2	SURVIVED				11.5	return 1
+563	scripts/hardware_daily.py	246	daily	delete	statement removed	caught	crash	test_day_fifteen_unseals_after_the_report_and_before_the_commit		3.2	"shutil.copytree(sealed_dir, jobs_dir / ""sealed"", dirs_exist_ok=True)"
+564	scripts/hardware_daily.py	246	daily	operator	/ -> *	caught	crash	test_day_fifteen_scores_and_reports_but_submits_nothing		3.1	"shutil.copytree(sealed_dir, jobs_dir / ""sealed"", dirs_exist_ok=True)"
+565	scripts/hardware_daily.py	246	daily	constant	True -> False	SURVIVED				12.0	"shutil.copytree(sealed_dir, jobs_dir / ""sealed"", dirs_exist_ok=True)"
+566	scripts/hardware_daily.py	247	daily	delete	statement removed	caught	crash	test_day_fifteen_scores_and_reports_but_submits_nothing		2.9	return 0
+567	scripts/hardware_daily.py	247	daily	constant	0 -> 1	caught	crash	test_day_fifteen_scores_and_reports_but_submits_nothing		3.4	return 0
+568	scripts/hardware_daily.py	317	daily	delete	line removed	SURVIVED				11.4	"""--sealed-dir"","
+569	scripts/hardware_daily.py	318	daily	delete	line removed	SURVIVED				11.6	str(morning.sealed_dir),
+570	scripts/hardware_daily.py	332	daily	delete	line removed	SURVIVED				11.7	"""--sealed-dir"","
+571	scripts/hardware_daily.py	333	daily	delete	line removed	SURVIVED				11.7	str(morning.sealed_dir),
+572	scripts/hardware_daily.py	350	daily	delete	line removed	SURVIVED				11.7	"""--sealed-dir"","
+573	scripts/hardware_daily.py	351	daily	delete	line removed	SURVIVED				11.5	str(morning.sealed_dir),
+574	scripts/hardware_daily.py	355	daily	delete	test negated	caught	crash	test_day_one_submits_the_main_job_then_the_check_then_reports		2.9	if number == N_JOBS + 1:
+575	scripts/hardware_daily.py	355	daily	operator	== -> !=	caught	crash	test_day_one_submits_the_main_job_then_the_check_then_reports		2.9	if number == N_JOBS + 1:
+576	scripts/hardware_daily.py	355	daily	operator	+ -> -	caught	crash	test_day_fifteen_unseals_after_the_report_and_before_the_commit		2.9	if number == N_JOBS + 1:
+577	scripts/hardware_daily.py	355	daily	constant	1 -> 2	caught	crash	test_day_fifteen_unseals_after_the_report_and_before_the_commit		3.2	if number == N_JOBS + 1:
+578	scripts/hardware_daily.py	357	daily	delete	statement removed	caught	crash	test_day_fifteen_unseals_after_the_report_and_before_the_commit		3.0	"steps.append((""unseal"", unseal(morning.sealed_dir, morning.jobs_dir)))"
+579	scripts/hardware_daily.py	401	daily	delete	statement removed	caught	crash	test_the_morning_holds_the_machine_awake_before_anything_else		12.5	"parser.add_argument(""--sealed-dir"", type=Path, required=True)"
+580	scripts/hardware_daily.py	401	daily	constant	True -> False	caught	crash	test_the_routine_needs_a_sealed_folder		12.4	"parser.add_argument(""--sealed-dir"", type=Path, required=True)"
+581	scripts/hardware_daily.py	420	daily	delete	statement removed	caught	crash	test_the_morning_holds_the_machine_awake_before_anything_else		12.1	sealed = args.sealed_dir.resolve()
+582	scripts/hardware_daily.py	421	daily	delete	loop removed	caught	crash	test_a_sealed_folder_inside_the_jobs_folder_or_the_clone_is_refused[jobs]		12.1	for folder in (args.jobs_dir, args.repo):
+583	scripts/hardware_daily.py	422	daily	delete	test negated	caught	crash	test_the_morning_holds_the_machine_awake_before_anything_else		12.1	if sealed == folder.resolve() or sealed.is_relative_to(folder.resolve()):
+584	scripts/hardware_daily.py	422	daily	operator	== -> !=	caught	crash	test_the_morning_holds_the_machine_awake_before_anything_else		12.1	if sealed == folder.resolve() or sealed.is_relative_to(folder.resolve()):
+585	scripts/hardware_daily.py	422	daily	operator	or -> and	caught	crash	test_a_sealed_folder_inside_the_jobs_folder_or_the_clone_is_refused[jobs/sealed]		11.9	if sealed == folder.resolve() or sealed.is_relative_to(folder.resolve()):
+586	scripts/hardware_daily.py	423	daily	delete	statement removed	caught	crash	test_a_sealed_folder_inside_the_jobs_folder_or_the_clone_is_refused[jobs]		12.5	"parser.error(f""--sealed-dir must be outside {folder}: a commit there would publish it"")"
+587	scripts/hardware_daily.py	435	daily	delete	line removed	caught	crash	test_the_morning_holds_the_machine_awake_before_anything_else		12.2	sealed_dir=args.sealed_dir,

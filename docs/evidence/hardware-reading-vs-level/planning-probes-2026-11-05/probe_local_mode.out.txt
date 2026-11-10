@@ -1,0 +1,20 @@
+A. ISA check
+   validate_isa_circuits accepted both
+B. local testing mode, explicit options
+   ran in 39.9 s; job id '8977f3c5-fce7-4257-9ecf-fd3243d20797'
+   warning: Options {'dynamical_decoupling': {'enable': False}, 'twirling': {'enable_gates': False, 'enable_measure': False}, 'execution': {'init_qubits': True, '
+   zero: cregs ['c'], data keys ['c'], shots 512, p_1 by qubit {3: np.float64(0.973), 17: np.float64(0.996), 40: np.float64(0.992)}
+   decayed: cregs ['c'], data keys ['c'], shots 512, p_1 by qubit {3: np.float64(0.971), 17: np.float64(0.994), 40: np.float64(0.051)}
+   expected: every p_1 near 1 at zero; only qubit 40 lower in 'decayed'
+C. shot time per job, from dry-run-2026-11-05
+   dt 4e-09 s; measure 1.56 us; x 24 ns; qubits 12
+   slot 0 zero           longest delay      0.0 us
+   slot 1 level_x0.5     longest delay     85.3 us
+   slot 2 level_x1       longest delay    170.6 us
+   slot 3 level_x2       longest delay    341.3 us
+   slot 4 reading_x0.5   longest delay    110.7 us
+   slot 5 reading_x1     longest delay    221.4 us
+   slot 6 reading_x2     longest delay    442.8 us
+   rep_delay 250 us: Arm A   6.4 s, Arm B about   8.6 s, job with both about  15.1 s; 14 jobs (job 1 Arm A only) about  3.4 min
+   rep_delay 500 us: Arm A  10.0 s, Arm B about  14.8 s, job with both about  24.8 s; 14 jobs (job 1 Arm A only) about  5.5 min
+   shot time only: per-circuit and per-job overhead is unmeasured until job 1

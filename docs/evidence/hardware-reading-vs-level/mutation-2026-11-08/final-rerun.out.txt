@@ -1,0 +1,76 @@
+01:10:49 start at 5bafd1ba from 999acee9: 598 mutants {'report': 472, 'score': 56, 't1': 31, 'daily': 39}; 58 new lines with no mutant; shard 0 of 1: 12 mutants, run in C:\t1d
+01:10:49 no mutant  scripts/hardware_submit.py:763: }
+01:10:49 no mutant  scripts/hardware_submit.py:799: def _block3_sensitivity(
+01:10:49 no mutant  scripts/hardware_submit.py:816: def _arm_b_report(
+01:10:49 no mutant  scripts/hardware_submit.py:818: ) -> dict[str, Any]:
+01:10:49 no mutant  scripts/hardware_submit.py:862: i
+01:10:49 no mutant  scripts/hardware_submit.py:863: for i in range(len(measured))
+01:10:49 no mutant  scripts/hardware_submit.py:865: ]
+01:10:49 no mutant  scripts/hardware_submit.py:869: )
+01:10:49 no mutant  scripts/hardware_submit.py:872: )
+01:10:49 no mutant  scripts/hardware_submit.py:884: "descriptive": {
+01:10:49 no mutant  scripts/hardware_submit.py:889: },
+01:10:49 no mutant  scripts/hardware_submit.py:890: }
+01:10:49 no mutant  scripts/hardware_submit.py:902: )
+01:10:49 no mutant  scripts/hardware_submit.py:906: )
+01:10:49 no mutant  scripts/hardware_submit.py:913: def level_minus_other(rows: Sequence[Mapping[str, Any]], other: str) -> list[tuple[float, date]]:
+01:10:49 no mutant  scripts/hardware_submit.py:926: def batch_means_test(
+01:10:49 no mutant  scripts/hardware_submit.py:928: ) -> dict[str, Any]:
+01:10:49 no mutant  scripts/hardware_submit.py:972: def fit_log_t1_ratio(points: Sequence[tuple[float, int, int]], level: QubitSource) -> float | None:
+01:10:49 no mutant  scripts/hardware_submit.py:990: def slope_and_spread(points: Sequence[tuple[float, float]]) -> dict[str, Any]:
+01:10:49 no mutant  scripts/hardware_submit.py:1004: def _source(state: Mapping[str, Any], name: str, qubit: int) -> QubitSource | None:
+01:10:49 no mutant  scripts/hardware_submit.py:1009: def no_information_coverage(
+01:10:49 no mutant  scripts/hardware_submit.py:1011: ) -> tuple[list[float], list[float]]:
+01:10:49 no mutant  scripts/hardware_submit.py:1040: try:
+01:10:49 no mutant  scripts/hardware_submit.py:1044: )
+01:10:49 no mutant  scripts/hardware_submit.py:1045: except UnusableSourceError:
+01:10:49 no mutant  scripts/hardware_submit.py:1060: "A1, A2 and A3 pass": (
+01:10:49 no mutant  scripts/hardware_submit.py:1064: ),
+01:10:49 no mutant  scripts/hardware_submit.py:1065: "A1 and A2 pass, A3 fails": (
+01:10:49 no mutant  scripts/hardware_submit.py:1068: ),
+01:10:49 no mutant  scripts/hardware_submit.py:1069: "A2's mean D at or above zero": (
+01:10:49 no mutant  scripts/hardware_submit.py:1072: ),
+01:10:49 no mutant  scripts/hardware_submit.py:1073: "A1 passes, A2 does not": (
+01:10:49 no mutant  scripts/hardware_submit.py:1076: ),
+01:10:49 no mutant  scripts/hardware_submit.py:1077: "A1 and A2 both fail, both mean D below zero": (
+01:10:49 no mutant  scripts/hardware_submit.py:1079: ),
+01:10:49 no mutant  scripts/hardware_submit.py:1081: }
+01:10:49 no mutant  scripts/hardware_submit.py:1086: "S1 and Arm B pass": (
+01:10:49 no mutant  scripts/hardware_submit.py:1089: ),
+01:10:49 no mutant  scripts/hardware_submit.py:1090: "S1 passes, Arm B does not": (
+01:10:49 no mutant  scripts/hardware_submit.py:1093: ),
+01:10:49 no mutant  scripts/hardware_submit.py:1096: }
+01:10:49 no mutant  scripts/hardware_submit.py:1099: def s1_reading(
+01:10:49 no mutant  scripts/hardware_submit.py:1101: ) -> tuple[str, str]:
+01:10:49 no mutant  scripts/hardware_submit.py:1124: def arm_b_reading(*, s1_passes: bool, inconclusive: bool, passes: bool) -> tuple[str, str]:
+01:10:49 no mutant  scripts/hardware_submit.py:1139: def run_report(
+01:10:49 no mutant  scripts/hardware_submit.py:1141: ) -> dict[str, Any]:
+01:10:49 no mutant  scripts/hardware_submit.py:1191: def condition(other: str, seed: int) -> dict[str, Any]:
+01:10:49 no mutant  scripts/hardware_submit.py:1202: }
+01:10:49 no mutant  scripts/hardware_submit.py:1209: )
+01:10:49 no mutant  scripts/hardware_submit.py:1239: }
+01:10:49 no mutant  scripts/hardware_submit.py:1253: )
+01:10:49 no mutant  scripts/hardware_submit.py:1262: )
+01:10:49 no mutant  scripts/hardware_submit.py:1312: def refuse_sealed_inside(sealed_dir: Path, *folders: Path) -> None:
+01:10:49 no mutant  scripts/hardware_t1_check.py:177: def run_score(*, job_dir: Path, device: T1Device, sealed_dir: Path | None = None) -> int:
+01:10:49 no mutant  scripts/hardware_t1_check.py:244: {
+01:10:49 no mutant  scripts/hardware_t1_check.py:250: },
+01:10:49 no mutant  scripts/hardware_t1_check.py:251: )
+01:10:49 no mutant  scripts/hardware_daily.py:242: def unseal(sealed_dir: Path, jobs_dir: Path) -> int:
+01:10:57 baseline report: exit 0; ========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================= 110 passed in 5.94s =========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+01:11:27 baseline score: exit 0; ========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================= 14 passed in 27.46s =========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+01:11:35 baseline t1: exit 0; ==================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================== 40 passed, 2 skipped in 4.45s ====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+01:11:47 baseline daily: exit 0; ========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================= 59 passed in 10.33s =========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+01:11:52 caught   357/598 scripts/hardware_submit.py:1109 operator: and -> or [assert] test_every_row_of_the_s1_table_is_reached[kwargs2-A1 and A2 pass, A3 fails]
+01:11:57 caught   358/598 scripts/hardware_submit.py:1109 operator: and -> or [assert] test_every_row_of_the_s1_table_is_reached[kwargs2-A1 and A2 pass, A3 fails]
+01:12:02 caught   361/598 scripts/hardware_submit.py:1111 operator: and -> or [assert] test_every_row_of_the_s1_table_is_reached[kwargs3-A2's mean D at or above zero]
+01:12:08 caught   364/598 scripts/hardware_submit.py:1113 operator: is not -> is [assert] test_every_row_of_the_s1_table_is_reached[kwargs3-A2's mean D at or above zero]
+01:12:13 caught   365/598 scripts/hardware_submit.py:1113 operator: and -> or [assert] test_every_row_of_the_s1_table_is_reached[kwargs4-A1 passes, A2 does not]
+01:12:18 caught   366/598 scripts/hardware_submit.py:1113 operator: >= -> > [assert] test_every_row_of_the_s1_table_is_reached[kwargs3-A2's mean D at or above zero]
+01:12:23 caught   371/598 scripts/hardware_submit.py:1117 operator: is not -> is [assert] test_every_row_of_the_s1_table_is_reached[kwargs5-A1 and A2 both fail, both mean D below zero]
+01:12:30 caught   372/598 scripts/hardware_submit.py:1117 operator: and -> or [assert] test_every_row_of_the_s1_table_is_reached[kwargs6-anything else]
+01:12:36 caught   373/598 scripts/hardware_submit.py:1117 operator: < -> <= [assert] test_every_row_of_the_s1_table_is_reached[kwargs7-anything else]
+01:12:41 caught   381/598 scripts/hardware_submit.py:1128 operator: and -> or [assert] test_every_row_of_the_arm_b_table_is_reached[True-False-False-S1 passes, Arm B does not]
+01:13:05 caught   502/598 scripts/hardware_submit.py:1316 operator: or -> and [assert] test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network
+01:13:30 caught   522/598 scripts/hardware_submit.py:1377 operator: == -> != [assert] test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network
+01:13:30 RUN END: 12 of 12 mutants run, 0 survived, 0 timed out, 0 caught by a crash rather than an assertion

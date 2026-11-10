@@ -1,0 +1,97 @@
+criterion 2: build at a past instant matches the dry run on the same inputs
+pass  discriminating  [148, 132, 155, 10, 39, 147, 35, 44]
+pass  controls  [48, 112, 54, 105]
+pass  slots  12 qubits
+pass  layouts  [[85, 77, 86], [15, 14, 19], [128, 127, 129], [67, 57, 66], [135, 134, 139], [1, 0, 2]]
+pass  the archive commit is named  5828b4a29fab
+pass  the controls hash matches  
+criterion 3: the cycle over three days, the middle one absent
+  days: [{'date': '2026-11-02', 'status': 'scored'}, {'date': '2026-11-03', 'status': 'empty'}, {'date': '2026-11-04', 'status': 'scored'}]
+pass  first day declared  2026-11-02
+pass  three days on the axis  ['scored', 'empty', 'scored']
+pass  the outer days are scored  ['scored', 'empty', 'scored']
+pass  the middle day is empty  empty
+pass  the report is marked interim  
+  rows: {'discriminating': 112, 'control': 56}  completed days: 2
+  S1: {'row': 'too few completed days', 'reading': 'Inconclusive: nothing is read.'}
+  Arm B reading: {'row': 'Arm B inconclusive', 'reading': 'Nothing is added.'}
+  A1: rows 112, mean_d 0.15405437022877408, batches q 1, passes False, inconclusive True
+  A2: rows 112, mean_d 0.007968724158625, batches q 1, passes False, inconclusive True
+  A3: False
+  A4: {'part_of_s1': False, 'rows': 96, 'nominal': 0.8, 'coverage': 0.13541666666666666, 'coverage_widened': 0.13541666666666666, 'mean_width': 0.241338154674375, 'no_information_coverage': 0.1264880952380952, 'no_information_coverage_widened': 0.14434523809523805}
+  c and s_res: {'c': 0.8949333598536771, 's_res': 0.2254951771215535, 'qubit_days': 16}
+  B: {'jobs': 1, 'completed_jobs': 1, 'minimum_jobs': 10, 'paired_spearman': {'batch_means': [-0.17142857142857126, None, None, None], 'batch_rows': [1, 0, 0, 0], 'q': 1, 'mean_of_batches': None, 't': None, 'critical': None, 'sd_zero': False, 'inconclusive': True, 'passes': False}, 'inconclusive': True, 'passes': False}
+pass  two completed Arm A days  2
+pass  two days are too few to decide: S1 inconclusive  too few completed days
+pass  one Arm B job is too few: Arm B inconclusive, adding nothing  1
+pass  A4 counts no zero-delay row  (96, 112)
+pass  no folder for the middle day  ['2026-11-02', '2026-11-04']
+pass  day 1: job number and arms  
+pass  day 3: job number and arms  
+pass  day 1 was scored the next morning, into the sealed folder  
+pass  day 1 has no Arm B  
+pass  day 3 was scored the morning after  
+pass  day 3 has Arm B  
+pass  the routine wrote no job on the missing day  
+pass  rows from both days reach the report  {'discriminating': 112, 'control': 56}
+pass  day 1 keeps its own execution time  2026-11-02T05:45:00+00:00
+pass  day 1 rows: 12 qubits on 7 slots  84
+pass  the execution reading was filled in  
+the T1 check through the routine
+pass  day 1 submitted the check  
+pass  day 3 has no check  
+pass  the check names its library version  
+  Q21   fitted    22.9 us, se   5.7%, built from    23.0 us,  0.1 se away, good
+pass  Q21 fit agrees with the simulator's T1  
+  Q103  fitted    22.9 us, se   4.4%, built from    23.0 us,  0.1 se away, good
+pass  Q103 fit agrees with the simulator's T1  
+  Q148  fitted     6.2 us, se  10.5%, built from     5.9 us,  0.4 se away, bad
+pass  Q148 fit agrees with the simulator's T1  
+  Q69   fitted    65.3 us, se   2.9%, built from    66.3 us,  0.5 se away, good
+pass  Q69 fit agrees with the simulator's T1  
+  Q51   fitted    91.0 us, se   8.0%, built from    92.4 us,  0.2 se away, good
+pass  Q51 fit agrees with the simulator's T1  
+  Q120  fitted   223.6 us, se   7.6%, built from   206.1 us,  1.0 se away, good
+pass  Q120 fit agrees with the simulator's T1  
+  Q30   fitted   220.4 us, se   7.1%, built from   210.0 us,  0.7 se away, good
+pass  Q30 fit agrees with the simulator's T1  
+  Q23   fitted   312.2 us, se   7.4%, built from   272.0 us,  1.7 se away, good
+pass  Q23 fit agrees with the simulator's T1  
+pass  the jobs folder says the check was fitted, with no value  {'status': 'fitted', 'job_id': 'local-789c300f-4e2e-40ea-baa7-14fa4b4d2297', 'qubits': 8, 'fit_quality': {'good': 7, 'bad': 1}, 'quantum_seconds': 0}
+criterion 4: a later snapshot as the live document
+pass  day 1: the manifest names the saved document's hash  
+pass  day 1: the saved document is the live one  2026-11-02T20:18:36+00:00
+pass  day 1: reading comes from the live document  [21, 103, 148, 69, 51, 120, 30, 23]
+  day 1: t_s 2026-11-02T03:45:00+00:00, live document stamped 2026-11-02T20:18:36+00:00
+pass  day 1: the live state is new, so reading and the execution reading differ  60 of 84 rows
+pass  day 3: the manifest names the saved document's hash  
+pass  day 3: the saved document is the live one  2026-11-04T11:29:36+00:00
+pass  day 3: reading comes from the live document  [21, 50, 148, 117, 141, 134, 65, 116]
+  day 3: t_s 2026-11-04T03:45:00+00:00, live document stamped 2026-11-04T11:29:36+00:00
+pass  day 3: the live state is new, so reading and the execution reading differ  66 of 84 rows
+pass  A1 and A2 are different comparisons here  (0.15405437022877408, 0.007968724158625)
+amendment 27: no score, count or fit outside the sealed folder before day 15
+pass  every needle is in the sealed folder  1288 value needles and 7530 count entries
+pass  local-jobs/ is only the simulator's store, kept apart from the scan  3 files
+pass  no needle in any file outside the sealed folder, routine logs and stdout included  38 files scanned, 6 routine logs and records; 0 hits in []: []
+  excused, as written by a build before its counts existed: {'2026-11-02/live-properties.json': 24, '2026-11-02/predictors.tsv': 24, '2026-11-02/sealed.json': 8, '2026-11-04/live-properties.json': 21, '2026-11-04/predictors.tsv': 21, '2026-11-04/sealed.json': 9}
+pass  every excused file is one a build writes  ['2026-11-02/live-properties.json', '2026-11-02/predictors.tsv', '2026-11-02/sealed.json', '2026-11-04/live-properties.json', '2026-11-04/predictors.tsv', '2026-11-04/seale
+pass  2026-11-02: operations.json holds operations only  {'arm_a': 84, 'arm_b_layouts': 0}
+pass  2026-11-04: operations.json holds operations only  {'arm_a': 84, 'arm_b_layouts': 6}
+pass  report's stdout is its path only  report written: C:\t\r1d8\sealed\report.json
+what each morning committed
+  commits: ['data(issue-125): morning of 2026-11-02', 'data(issue-125): morning of 2026-11-04', 'data(issue-125): morning of 2026-11-16']
+pass  one commit per morning: days 1, 3 and 15  3
+pass  data(issue-125): morning of 2026-11-02: no scored file committed  []
+pass  data(issue-125): morning of 2026-11-02: no needle in any committed file  15 files, 2 of the simulator's store kept apart; []
+pass  data(issue-125): morning of 2026-11-04: no scored file committed  []
+pass  data(issue-125): morning of 2026-11-04: no needle in any committed file  31 files, 3 of the simulator's store kept apart; []
+pass  data(issue-125): morning of 2026-11-16: the sealed folder is committed  10 files
+pass  jobs/sealed equals the sealed folder byte for byte  
+day 15
+pass  the day-15 report is complete  
+pass  it lists fourteen days  2026-11-15
+pass  days 1 and 3 scored, the other twelve empty  
+pass  day 15's morning reported, unsealed and committed, and built nothing  ('routine-2026-11-16.json', ['report', 'unseal'])
+
+all checks pass
