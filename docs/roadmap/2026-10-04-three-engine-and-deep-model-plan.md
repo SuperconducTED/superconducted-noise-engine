@@ -506,14 +506,32 @@ The answer:
    comparison under #110 runs, its protocol is committed and states:
    - **the inferential unit:** one UTC calendar day of the device, with every circuit, qubit
      and coupler observed that day kept together;
-   - **the uncertainty method:** resampling of circular blocks of consecutive calendar days,
-     with empty days kept on the axis. The block length and its reason are fixed before any
-     score is seen, as `main` already does in two places. The pattern detector's record uses
-     six days (`docs/evidence/pattern-detector/README.md` §7, amendment 8 item 4, and §12.4).
-     The hardware test's pre-registration uses three (`docs/roadmap/2026-10-24-issue-125-preregistration.md`
-     §3.7, item 8);
-   - **band coverage:** reported with an interval from that same block resampling, never a
-     binomial interval.
+   - **the uncertainty method:** one that keeps calendar days together and whose rate of
+     passing an engine with no information is computed before any score is seen, as the
+     hardware test's pre-registration does in its section 3.8. On a calendar as short as the
+     hardware test's, that is batch means over fixed day batches (Ibragimov and Müller 2010;
+     the pre-registration's amendment 25), with circular blocks of consecutive calendar days
+     reported as a sensitivity. Circular block resampling decides only where its
+     no-information rate has been measured near the nominal level. Empty days stay on the
+     axis, and the batches or the block length, with the reason, are fixed before any score
+     is seen;
+   - **band coverage:** reported with an interval from the same method, never a binomial
+     interval.
+
+   *Changed on 2026-11-11, before this section reached `main`, at @bengisucvd's review of
+   PR #146 (5849593886).* The two items above are her wording. As written on 2026-11-09, the
+   method read "resampling of circular blocks of consecutive calendar days, with empty days
+   kept on the axis", with the block length and its reason fixed before any score is seen, "as
+   `main` already does in two places": six days in the pattern detector's record
+   (`docs/evidence/pattern-detector/README.md` §7, amendment 8 item 4, and §12.4) and three in
+   the hardware test's pre-registration (`docs/roadmap/2026-10-24-issue-125-preregistration.md`
+   §3.7, item 8). Band coverage read "reported with an interval from that same block
+   resampling, never a binomial interval". The second precedent no longer holds. That
+   pre-registration's amendment 25 decides by batch means and keeps the 3-day blocks as a
+   reported sensitivity, because on its 14-day calendar a predictor with no information passed
+   at rates of 0.083 and 0.108 under batch means, against 0.169 and 0.196 under 3-day blocks
+   at 90% (her scenarios N and F, mean removed; the figures are amendment 25's). No threshold
+   or result changes with this: no engine comparison has been run.
 3. **Nothing reported is withdrawn with it.** No engine comparison has been run: T11 needs
    T7, T8, #58, #62 and #64.
 

@@ -170,3 +170,77 @@ Expected: the tag's object. `git rev-parse 'archive/pr-111^{commit}'` gives `f8a
 - `docs/evidence/pattern-detector/README.md` §7 (amendment 8) and §12.4
 - `docs/roadmap/2026-10-24-issue-125-preregistration.md` §3.7
 - `docs/advisor/2026-09-03-decisions-from-akba.md`
+
+## Update, 2026-11-11: the rule's uncertainty method, after the review of PR #146
+
+Everything above is left as written on 2026-11-09. This section records one change made before
+merge.
+
+**Why.** Review 5849593886 (@bengisucvd, approving, at `4cd15c84`) accepts the answer to the
+third review item on the unit, the withdrawn tests and the fixed-before-any-score condition. It
+asks for one change. The rule named circular block resampling as the method and cited the
+hardware test's pre-registration (§3.7, item 8) as a precedent, but that pre-registration no
+longer decides by blocks. Its amendment 25 decides by batch means and reports the 3-day blocks
+as a sensitivity. Left as written, the rule would have required of #110's first protocol a
+method that `main` has measured as passing a no-information predictor too often on a short
+calendar.
+
+**What changed.** One file:
+`docs/roadmap/2026-10-04-three-engine-and-deep-model-plan.md`, in the 2026-11-09 section "The
+evaluation protocol: the third item of both reviews". The "uncertainty method" and "band
+coverage" items now carry her wording, and a dated note under them quotes the 2026-11-09 text
+and gives the reason. This record gains this section. No other file changed.
+
+**The mathematics, where it differs from "What replaces it" above.**
+
+- The unit is unchanged: one UTC calendar day, never split.
+- The method is no longer fixed to resampling. It must satisfy two conditions: it keeps
+  calendar days together, and its rate of passing an engine that carries no information is
+  computed before any score is seen (the pre-registration's section 3.8 is the model).
+- On a calendar as short as the hardware test's 14 days, the deciding method is batch means
+  (Ibragimov and Müller 2010). The days are cut into `q` fixed batches of consecutive days. Each
+  batch gives one value, the mean score difference over its rows. The statistic is
+  `t = mean / (sd / sqrt(q))` over the `q` batch values, with `sd` on `q - 1` degrees of
+  freedom, compared with a one-sided Student t quantile on `q - 1` degrees of freedom. The
+  pre-registration's amendment 25 is the worked case: four batches (days 1 to 4, 5 to 8, 9 to
+  11 and 12 to 14).
+- Circular block resampling, as described under "Resampling" above, stays as a reported
+  sensitivity. It decides only on a calendar where its no-information rate has been measured
+  near the nominal level.
+- Coverage takes its interval from the same method, never from a binomial formula.
+
+The figures behind the change are amendment 25's, on `main`: with the mean removed from the real
+series, a no-information predictor passed at rates of 0.083 and 0.108 under batch means and at
+0.169 and 0.196 under 3-day blocks at 90% (scenarios N and F). This record measures nothing new.
+
+**Design decision.** The item was replaced in place, with the earlier text quoted in a dated
+note under it. Appending a correcting paragraph and leaving the old item standing was the
+alternative. It was not taken because the section had not reached `main`, and a rule that reads
+one way in its list and another way in a note below is the precedent risk the review named.
+
+**Verification, from this commit on.** The commands above were written at `4cd15c84`, where
+`HEAD~2` was `3c6e7bc1` and `HEAD~1` was `4c77b8aa`. Use the hashes:
+
+```bash
+git diff --stat origin/main -- tests scripts src docs/numerical-claims.md docs/decisions.md
+```
+
+Expected: empty.
+
+```bash
+git diff 4cd15c84 HEAD --stat
+```
+
+Expected: two files, the plan and this record.
+
+```bash
+git grep -n -E "0\.083 and 0\.108|0\.169 and 0\.196" origin/main -- docs/roadmap/2026-10-24-issue-125-preregistration.md
+```
+
+Expected: one line, inside amendment 25, carrying all four figures.
+
+```bash
+python scripts/check_ids.py
+```
+
+Expected: `No duplicate or colliding ADR / NC identifiers.`
