@@ -192,8 +192,12 @@ sweep's endpoints, the exact-rational check on the underflow box, the subnormal 
   script's average; the two that use `np.sum(w * c) / np.sum(w)` stayed at 102 and 126.
 - The first three-way cost run timed each row in its own block of passes and showed `_validated` alone (40.1 us) slower
   than `nie_tan_reduce` (30.6 us), which calls it. Interleaved passes with the minimum kept fixed it (`f6e9719b`).
-  Iterative KM then costs 4.9 times Nie-Tan through the public functions and 13.9 times on the arithmetic alone, so
-  section 1's "the measured gap is small" does not hold; the findings' section 15.3 says so.
+  Iterative KM then costs 4.9 times Nie-Tan through the public functions and 13.9 times on the arithmetic alone; a
+  second committed run (`reducer_positions_and_cost.run2.out.txt`) gave 3.4 and 9.6, so the findings quote ranges.
+  Either way section 1's "the measured gap is small" does not hold; the findings' section 15.3 says so, in the wording
+  Bengisu accepted ("the choice rests on the rule above, and cost points the same way").
+- Section 13's `y_l`-as-reference mutation in the cost script cannot fail, as review 5828001160 said; the findings'
+  section 15.5 withdraws it as a check.
 - P9's check moved from 3.89e-16 to 5.00e-16, and the committed grids' largest route gap from 8.743e-15 to 8.771e-15.
 - The sweep runs about twice as long (one footprint: 10.7, 9.2, 3.6 s before and 21.2, 12.0, 4.2 s after).
 

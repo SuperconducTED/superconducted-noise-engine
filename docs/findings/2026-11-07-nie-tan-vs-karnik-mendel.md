@@ -306,28 +306,29 @@ At `w = 0.99` this was the source of BMM's bracket violations:
 `NieTanDefuzzifier` in `src/` has the same arithmetic. It is not changed here; the class switch (#61 comment 6727626228) is where it changes.
 
 **15.3 What the cost ratio measures (review item 3).** Section 6 timed the public functions, and input validation is most of a closed-form
-reducer's time. "Three runs" and "8 to 12" in section 6 trace to no committed output and are withdrawn. From `reducer_positions_and_cost.out.txt`
-at `f6e9719b`:
+reducer's time. "Three runs" and "8 to 12" in section 6 trace to no committed output and are withdrawn. Two runs at `f6e9719b`, `reducer_positions_and_cost.out.txt`
+and `reducer_positions_and_cost.run2.out.txt`:
 
-| Route | Per point | Ratio |
-| --- | ---: | ---: |
-| `nie_tan_reduce`, public | 24.3 us | 1 |
-| `bmm_half_reduce`, public | 45.2 us | 1.9 |
-| `karnik_mendel_detailed`, public | 120.0 us | 4.9 |
-| `exhaustive_type_reduce`, public | 624.5 us | 25.7 |
-| `_validated` alone | 16.9 us | 0.7 of `nie_tan_reduce` |
-| Nie-Tan, arithmetic | 4.5 us | 1 |
-| BMM(1/2, 1/2), arithmetic | 10.4 us | 2.3 |
-| iterative KM, arithmetic, consequents sorted once | 62.7 us | 13.9 |
-| iterative KM, arithmetic, sorting each point | 89.5 us | 19.9 |
-| exhaustive, arithmetic, sorted once | 639.1 us | 142 |
+| Route | Run 1, per point | Run 1, ratio | Run 2, per point | Run 2, ratio |
+| --- | ---: | ---: | ---: | ---: |
+| `nie_tan_reduce`, public | 24.3 us | 1 | 18.9 us | 1 |
+| `bmm_half_reduce`, public | 45.2 us | 1.9 | 21.7 us | 1.1 |
+| `karnik_mendel_detailed`, public | 120.0 us | 4.9 | 63.4 us | 3.4 |
+| `exhaustive_type_reduce`, public | 624.5 us | 25.7 | 350.7 us | 18.6 |
+| `_validated` alone | 16.9 us | 0.7 of `nie_tan_reduce` | 13.8 us | 0.7 of `nie_tan_reduce` |
+| Nie-Tan, arithmetic | 4.5 us | 1 | 3.8 us | 1 |
+| BMM(1/2, 1/2), arithmetic | 10.4 us | 2.3 | 6.7 us | 1.7 |
+| iterative KM, arithmetic, consequents sorted once | 62.7 us | 13.9 | 36.9 us | 9.6 |
+| iterative KM, arithmetic, sorting each point | 89.5 us | 19.9 | 54.3 us | 14.1 |
+| exhaustive, arithmetic, sorted once | 639.1 us | 142 | 283.7 us | 74 |
 
 G59 anchored lambda, 975 survey points, the fastest of 15 interleaved passes. The arithmetic includes the rescale
 of 15.2 (a maximum and a division per average), which is why the exhaustive route, with 56 averages per point,
 is the slowest by far. With zero-order consequents (A2) the sort can be done once per rule base.
 
-So iterative KM costs about 5 times Nie-Tan through the public functions and about 14 times on the arithmetic
-alone (about 20 when each point sorts its consequents). The gap is not the small one section 1 described, and it
+So iterative KM costs 3.4 to 4.9 times Nie-Tan through the public functions and 9.6 to 13.9 times on the
+arithmetic alone (14 to 20 when each point sorts its consequents). The absolute times moved by up to a half between
+the two runs, so these are ranges over two runs on one laptop, not numbers. The gap is not the small one section 1 described, and it
 points the same way as the rule. The choice still rests on File 02's pre-registered rule and on P8, not on cost. "About 3 times cheaper" in sections 1, 6 and 9, and correction 5
 of section 11, are replaced by this paragraph.
 
@@ -353,6 +354,9 @@ Nie-Tan has the lower median in every anchored pool as well. On the survey rows 
 **15.5 Tests (review item 5).** On `c8a1dd54` all eight mutants the reviews named survived all 46 tests (`mutate.py`, output in this PR's
 record). The tests now kill all eleven, two of them added for the fix itself (`mutate.out.txt`). `Db_max <= 0.5`, which was the clip itself, is now
 `Db_max < 0.5`; `passes <= 28`, which could not fail before the `RuntimeError`, is gone; the route-gap bound is per point.
+Section 13's mutation for `reducer_positions_and_cost.py`, `y_l` as the reference, is withdrawn as a check: a reducer
+near the middle of the band sits about 1/2 of its width from `y_l` whatever the code does, so the shift to about 1/2
+cannot fail (review 5828001160, item 5). The column stays in the output as a description.
 
 **15.6 The `km_*` columns are diagnostics.** They are printed, never compared between machines and never cited. Two measurements say why. On
 @BurakOztekin's desktop `km_guard_stops` was 17 where the committed file has 15 (`w = 0.3`, `unit-spread`). And the two-rule box that cycled
@@ -375,7 +379,7 @@ only, none at the lattice points, and with the guarded result equal to the exhau
 >
 > The result is not uniform. At `G59` anchored lambda on the survey rows BMM is closer, 0.0337 against 0.0483, on 744 of 975 rows, with a 90% block interval of the difference of medians excluding zero; the two reducers differ there by at most 1.5e-05 and by 1.5e-06 at the median, on an output near 3.2e-04, against a median band width of 6.1e-05. No general mechanism was established. The consequents are not trained, and this comparison is re-measured on the first IT2 archive fit (#60).
 >
-> Karnik-Mendel stays the band source (File 02, File 03) and out of the training loss, because its midpoint is not linear in the consequents. Per point on 27 rules, iterative Karnik-Mendel costs about 5 times Nie-Tan through the public functions and about 14 times on the arithmetic alone; the choice rests on the rule above, and cost points the same way. Figures are laptop and provisional until [the batch record].
+> Karnik-Mendel stays the band source (File 02, File 03) and out of the training loss, because its midpoint is not linear in the consequents. Per point on 27 rules, iterative Karnik-Mendel costs 3 to 5 times Nie-Tan through the public functions and 10 to 14 times on the arithmetic alone, over two laptop runs; the choice rests on the rule above, and cost points the same way. Figures are laptop and provisional until [the batch record].
 
 **15.9 Register rows, restated.** Rows 1 and 2 of section 10 stand, citing `35da0446`. Row 3 cites `2026-11-11-35da0446.tsv`, SHA-256
 `af97c29f24c2b660cebed91bd1d5638a96f970b71d63de529d249a7eead79d0c`. Row 4 becomes: **the cost of iterative KM against Nie-Tan, per point on 27 rules, through the public functions and on the

@@ -224,3 +224,4 @@ ways (findings 15.3), and `file02_rule_by_point_set.py` prints the anchored-only
 | Script | What it answers |
 | --- | --- |
 | `mutate.py` | Applies each of eleven mutants to the script in turn, runs `tests/test_type_reduction.py`, restores from a copy. All eleven are killed at this commit (`mutate.out.txt`). |
+| `reducer_positions_and_cost.run2.out.txt` | A second run of the cost script at the same commit. Its timings differ from the first by up to a half, so the findings quote the ratios as ranges over the two. |
