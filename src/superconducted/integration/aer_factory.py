@@ -191,6 +191,10 @@ def is_identity_damping(crisp_params: npt.NDArray[np.float64]) -> bool:
     ``KrausChannelProjector.project``. Such a vector is not an identity
     channel — it is one the projector cannot read at all, and reporting it
     as degenerate would name the wrong defect.
+
+    This predicate does not validate the parameter domain. For example, NaN
+    can be classified as identity; the projector rejects invalid values when
+    ``prepare`` encounters an eligible gate.
     """
     params = np.asarray(crisp_params, dtype=np.float64)
     if params.size < 2:
@@ -337,6 +341,10 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
         caller silently simulates a noiseless circuit. That case warns via
         :func:`_warn_if_nothing_was_installed` rather than raising, because
         a noise-free circuit is legal; see that function for the trade-off.
+
+        For eligible operations, ``ValueError`` from the projector propagates
+        to the caller; unsupported channels raising ``NotImplementedError``
+        are skipped.
         """
 
         eligible_operations = self._eligible_operations
@@ -346,7 +354,7 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
                 return None
             try:
                 return self._channel_projector.project(self._crisp_params, gate.name, qubits)
-            except (NotImplementedError, ValueError):
+            except NotImplementedError:
                 return None
 
         fresh_noise_model: NoiseModel = NoiseModel()

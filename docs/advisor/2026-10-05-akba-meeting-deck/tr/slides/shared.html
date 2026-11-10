@@ -1,0 +1,65 @@
+<section id="shared" style="background:#E8EDF2;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">MOTORLAR NASIL ÇALIŞIYOR</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">Ortak İşlem Hattı</h2>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:24px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;width:1664px">
+<div style="flex:none;width:360px;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">1 · Öznitelikler</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;color:#5B6B82;line-height:1.25">features.py</p>
+<p style="line-height:1.25">Anlık görüntü başına 3 sayı: tüm kübitlerin ortalama T1, T2 ve okuma hatası</p>
+</div>
+<x-shape kind="arrow-right" style="flex:none;align-self:center;width:48px;height:24px;background:#5B6B82"></x-shape>
+<div style="flex:none;width:470px;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">2 · Motor çekirdeği</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;color:#5B6B82;line-height:1.25">tsk.py</p>
+<p style="line-height:1.25">Bugün <span style="color:#2B6CB0">M1</span>, <span style="color:#A84E0C">M2</span>: 27 kuralın ateşleme güçleri ve kural çıktıları</p>
+<p style="color:#6B3FA0;line-height:1.25">M3 buraya bağlanacak (yeni arayüz, T8)</p>
+</div>
+<x-shape kind="arrow-right" style="flex:none;align-self:center;width:48px;height:24px;background:#5B6B82"></x-shape>
+<div style="flex:none;width:310px;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">3 · Durulaştırma</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;color:#5B6B82;line-height:1.25">defuzzification.py</p>
+<p style="line-height:1.25">tek bir (γ, λ) çifti</p>
+</div>
+<x-shape kind="arrow-right" style="flex:none;align-self:center;width:48px;height:24px;background:#5B6B82"></x-shape>
+<div style="flex:none;width:380px;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">4 · Sıkıştırma</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;color:#5B6B82;line-height:1.25">squashing.py</p>
+<p style="line-height:1.25">Pratikte ProbabilityClip: [0, 1] aralığına kırpar</p>
+</div>
+</div>
+<div style="display:flex;justify-content:end;width:1664px">
+<div style="display:flex;justify-content:center;width:380px">
+<x-shape kind="arrow-down" style="flex:none;width:24px;height:40px;background:#5B6B82"></x-shape>
+</div>
+</div>
+<div style="display:flex;flex-direction:row-reverse;width:1664px">
+<div style="flex:none;width:380px;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">5 · Kanal</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;color:#5B6B82;line-height:1.25">kraus.py</p>
+<p style="line-height:1.25">Genlik sönümü (γ) ile faz sönümünün (λ) bileşimi: 4 Kraus operatörü</p>
+</div>
+<x-shape kind="arrow-left" style="flex:none;align-self:center;width:48px;height:24px;background:#5B6B82"></x-shape>
+<div style="flex:none;width:594px;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">6 · Yerleştirme</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;color:#5B6B82;line-height:1.25">aer_factory.py</p>
+<p style="line-height:1.25">Aynı kanal her id, rx, sx, x kapısına uygulanır; rz'ye uygulanmaz (sanal, 0 ns). Her kübitte aynı (γ, λ); iki kübitlik hata ve okuma hatası yok.</p>
+</div>
+<x-shape kind="arrow-left" style="flex:none;align-self:center;width:48px;height:24px;background:#5B6B82"></x-shape>
+<div style="flex:none;width:594px;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">7 · Kıyaslama</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;color:#5B6B82;line-height:1.25">harness.py, metrics.py</p>
+<p style="line-height:1.25">Aer, topluluk üyesi başına 4.096 atış (varsayılan); referansa karşı Hellinger, KL, R²; rastgele Clifford, GHZ, QFT, VQE (EfficientSU2)</p>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:24px;width:1664px">
+<p style="flex:none;width:170px;font-size:24px;font-weight:700;line-height:1.25;color:#14213D;padding:8px 0px">Bugünkü eksikler</p>
+<p style="flex:1;font-size:24px;line-height:1.25;border-left:4px solid #5B6B82;padding:8px 16px">Henüz transpile yok: transpile edilmemiş devreler motor gürültüsü almaz (#58, PR #79)</p>
+<p style="flex:1;font-size:24px;line-height:1.25;border-left:4px solid #5B6B82;padding:8px 16px">32 topluluk üyesi bugün özdeş (çeşitlilik: ADR-015, #64)</p>
+<p style="flex:1;font-size:24px;line-height:1.25;border-left:4px solid #5B6B82;padding:8px 16px">Henüz eğitici yok: yalnızca arayüz (hibrit eğitici: #60, ADR-014)</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">6 · Kaynak: main @ 110cfad kodu, dosyalar src/superconducted/ altında, her kutuda adıyla; eksikler: #58, PR #79, #64, #60</p>
+</section>

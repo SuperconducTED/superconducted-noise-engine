@@ -352,6 +352,44 @@ need a manual re-run, while `propose_controls` already takes an exclusion set.
 2026-11-09. Every "PR #142's code" claim was read at `e639cf86`, not executed. Her figures quoted in
 amendment 37 are from her review, laptop, provisional.
 
+## Update, 2026-11-09, later: amendment 38, the predictor-code pin
+
+**Problem.** Amendment 37 put the dead-control test inside `--mode controls`, in
+`scripts/hardware_test_predictors.py`, the file amendment 14 pins at `5c98f264`. Amendment 14 says moving
+the pin takes a dated amendment; amendment 37 did not say the pin moves. This was found while planning the
+code on PR #142, before any of it was written.
+
+**What changed.**
+
+| File | Change |
+| --- | --- |
+| `docs/roadmap/2026-10-24-issue-125-preregistration.md` | Amendment 38 in a new section 3.14; one row at the foot of section 2's table; a dated note under section 6.4. Nothing above is edited. |
+| `docs/implementations/2026-10-28-issue-125-preregistration-rebuild.md` | This update. |
+
+**Approach.** The text was written after the code existed on PR #142, so it can say exactly what moved. An
+`ast` comparison of every top-level definition against `5c98f264` finds three differences: the module
+docstring (one sentence), `freeze_controls` and `main`'s controls branch, and two added functions. Everything
+`--mode submission`, `--mode execution` and PR #140's offline script use is unchanged, which the dry run
+confirms (8 of 8 files identical at `14fbcf05`). The lead chose the replacement rule on 2026-11-09: a marked
+candidate is skipped and the ranking kept. The amendment 37 update above says the alternative was rejected
+because "`propose_controls` already takes an exclusion set"; the code does not use that set for marked qubits,
+because a qubit dropped there also drops out of the median.
+
+**Mathematical details.** Proposal D ranks qubits by `|s_q - median(s)|`, where `s_q` is the standard
+deviation of qubit `q`'s `log T1` over the archive's states and the median runs over the eligible qubits.
+With `M` the marked set, the frozen controls are the first `k` qubits of that ranking that are not in `M`,
+with the median taken as if `M` were empty. The other reading, excluding `M` before the median, changes the
+median and so can reorder near-tied candidates; PR #142's test shows that on its fixture.
+
+**Design decisions.** Restating the pin only at the freezing commit was the alternative. It was rejected so
+that the move is on `main` and readable before PR #142 merges, which waits on it. Building the test outside
+the pinned file would have kept the pin, but would have left two ways to freeze the controls and
+contradicted amendment 37's "inside `--mode controls`".
+
+**Verification.** Text only on this branch. The figures are PR #142's, laptop, provisional: the definition
+comparison, the dry run, and criterion 35's controls runs (`docs/evidence/hardware-reading-vs-level/stage-3-2026-11-09/`
+on PR #142, predictions committed first at `59ba1fd0`). `check_ids.py` is clean here.
+
 ## Related docs
 
 - `docs/roadmap/2026-10-24-issue-125-preregistration.md` (the draft this changes)
