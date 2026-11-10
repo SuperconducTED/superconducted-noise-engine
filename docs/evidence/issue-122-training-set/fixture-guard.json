@@ -1,0 +1,25 @@
+{
+  "fixture_sha256": "02d27ff1bf6af8bb06e0bce886454160926cb3adc1466e536245e03431487082",
+  "n_usable": 152,
+  "skipped": {
+    "t1_missing": 1,
+    "t2_missing": 0,
+    "gate_length_missing": 0,
+    "nonpositive": 0,
+    "t2_exceeds_2t1": 0,
+    "coherence_implausible": 3
+  },
+  "mean": [
+    0.0001706675322994933,
+    0.0005200513780321
+  ],
+  "gap": [
+    -1.6032761767812456e-05,
+    -0.00023676355147325765
+  ],
+  "guard_rejected_indices": [
+    11,
+    149,
+    150
+  ]
+}

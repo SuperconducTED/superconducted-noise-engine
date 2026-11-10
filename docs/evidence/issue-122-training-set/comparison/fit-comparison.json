@@ -1,0 +1,108 @@
+{
+  "input": "docs/evidence/issue-122-training-set/2026-11-08-5828b4a2-public.tsv",
+  "input_sha256": "8711289617fd6565e30bfa00ec0a6883297cb6b1f019f25cc9805ec144a2eedb",
+  "cut": "2026-09-23T00:00:00Z",
+  "quantile_weighting": "one row per distinct kept state",
+  "quantile_method": "linear",
+  "shape": "GaussianMF",
+  "levels": 3,
+  "epochs": 0,
+  "ridge": 1e-06,
+  "seed": 0,
+  "results": [
+    {
+      "fit": "IBM only",
+      "n_train": 660,
+      "n_validation": 264,
+      "train_rmse": [
+        3.3500121491255345e-06,
+        2.0369299981907463e-05
+      ],
+      "validation_rmse": [
+        6.964198333165346e-05,
+        0.000622428439740813
+      ],
+      "parameters": {
+        "premise": 18,
+        "consequent": 216,
+        "total": 234
+      },
+      "diagnostics": {
+        "clip_binding_rate": 0.0,
+        "zero_firing_rows_dropped": 0,
+        "nonfinite_rows_rejected": 0,
+        "lse_condition_number": 15843.554781604978,
+        "premise_steps_rejected": 0,
+        "epochs_run": 0,
+        "early_stopped": false,
+        "standardization": [
+          [
+            130.6181391384175,
+            96.20167424297577,
+            0.02273732906362303
+          ],
+          [
+            13.896842291327815,
+            9.04275352604242,
+            0.0049708062421882455
+          ],
+          [
+            0.00020779489521051666,
+            0.0005660312215380576
+          ],
+          [
+            2.139306136115062e-05,
+            4.811968906069269e-05
+          ]
+        ]
+      }
+    },
+    {
+      "fit": "IBM + public",
+      "n_train": 1284,
+      "n_validation": 264,
+      "train_rmse": [
+        4.383495197957768e-06,
+        2.8628885216469226e-05
+      ],
+      "validation_rmse": [
+        0.00046134683504154926,
+        0.0005209823043253563
+      ],
+      "parameters": {
+        "premise": 18,
+        "consequent": 216,
+        "total": 234
+      },
+      "diagnostics": {
+        "clip_binding_rate": 0.0,
+        "zero_firing_rows_dropped": 3,
+        "nonfinite_rows_rejected": 0,
+        "lse_condition_number": 25347.910675008417,
+        "premise_steps_rejected": 0,
+        "epochs_run": 0,
+        "early_stopped": false,
+        "standardization": [
+          [
+            138.44221250046093,
+            100.25838733118634,
+            0.026544530501138263
+          ],
+          [
+            13.760473500322062,
+            8.301949407406463,
+            0.012681390594221372
+          ],
+          [
+            0.0001971998422262606,
+            0.0005673257914113363
+          ],
+          [
+            2.0862248219183222e-05,
+            4.412569318704717e-05
+          ]
+        ]
+      }
+    }
+  ]
+}

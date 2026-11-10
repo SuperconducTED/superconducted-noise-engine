@@ -603,10 +603,11 @@ def _fixture_with_every_skip_reason() -> dict[str, Any]:
 
 @pytest.mark.parametrize("variant", ["fixture", "every_skip_reason"])
 def test_reference_matches_training_targets_per_qubit(variant: str, tmp_path: Path) -> None:
-    """Cross-module pin (#58 FR-5, #57 section 7 item 3): one skip rule, one channel.
+    """Cross-module physics pin, with ADR-029's explicit training-only guard.
 
     On the same snapshot, ``build_reference`` and ``training.targets.qubit_targets``
-    reject exactly the same qubits, with the same count per ADR-027 reason, and on
+    share the ADR-027 skip reasons. Training additionally rejects implausible
+    coherence under ADR-029; the reference retains its existing physics scope. On
     every usable qubit the reference's ``sx`` channel equals the engine's projector
     applied to that qubit's ``(gamma, lambda)`` target, under ``SuperOp``.
     """
@@ -623,8 +624,11 @@ def test_reference_matches_training_targets_per_qubit(variant: str, tmp_path: Pa
     report = build_reference_report(snapshot, scope="single_qubit_relaxation")
 
     rejected = {q for qubits in report.skipped.values() for q in qubits}
+    # The fixture's low-coherence tails are legitimate physical channels but
+    # outside the factor-10 NC-041 training box. Pin this difference explicitly.
+    training_only_rejected = {11, 149, 150}
     assert {q for q in range(len(targets.usable)) if targets.usable[q]} == (
-        set(range(len(targets.usable))) - rejected
+        set(range(len(targets.usable))) - rejected - training_only_rejected
     )
     assert targets.skipped == SkipCounts(
         t1_missing=len(report.skipped["t1_missing"]),
@@ -632,6 +636,7 @@ def test_reference_matches_training_targets_per_qubit(variant: str, tmp_path: Pa
         gate_length_missing=0,
         nonpositive=len(report.skipped["nonpositive"]),
         t2_exceeds_2t1=len(report.skipped["t2_exceeds_2t1"]),
+        coherence_implausible=len(training_only_rejected),
     )
     if variant == "every_skip_reason":
         assert report.skipped == {

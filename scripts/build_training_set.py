@@ -61,6 +61,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--repo", type=Path, default=Path("."))
     parser.add_argument("--ref", required=True)
     parser.add_argument("--backend")
+    parser.add_argument(
+        "--public-parquet",
+        type=Path,
+        help="Pinned ADR-029 parquet; ibm_fez only, never downloaded implicitly",
+    )
     parser.add_argument("--weighting", choices=("uniform", "hour_of_day"), default="uniform")
     parser.add_argument("--out", type=Path, default=Path("docs/evidence/training-set"))
     args = parser.parse_args(argv)
@@ -68,7 +73,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     started = time.perf_counter()
     try:
         dataset = build_training_set(
-            args.repo, args.ref, backend=args.backend, weighting=args.weighting, report=report
+            args.repo,
+            args.ref,
+            backend=args.backend,
+            weighting=args.weighting,
+            report=report,
+            public_parquet=args.public_parquet,
         )
     except NoUsableRowsError as exc:
         print(exc, file=sys.stderr)
@@ -78,9 +88,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 2
     runtime = time.perf_counter() - started
     args.out.mkdir(parents=True, exist_ok=True)
-    filename = f"{datetime.now(UTC):%Y-%m-%d}-{dataset.archive_ref[:8]}.tsv"
+    suffix = "-public" if args.public_parquet else ""
+    filename = f"{datetime.now(UTC):%Y-%m-%d}-{dataset.archive_ref[:8]}{suffix}.tsv"
     columns = (
         "path",
+        "source",
+        "source_revision",
+        "source_sha256",
         "stem",
         "qubit_digest",
         "last_update_date",
@@ -117,6 +131,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     ]
     if args.backend:
         command.extend(("--backend", args.backend))
+    if args.public_parquet:
+        command.extend(("--public-parquet", args.public_parquet.as_posix()))
     hours = Counter(stamp.hour for stamp in dataset.timestamps)
     document_skips = {
         name: report.skipped[name]
@@ -146,11 +162,26 @@ def main(argv: Sequence[str] | None = None) -> int:
         "a singleton has an empty std cell. "
         "Target gamma spread follows snapshot_target's population standard deviation. "
         "Both weight columns are emitted; uniform is the default. "
-        "Digests match the dashboard: parameter dates are normalized away; "
+        "IBM digests match the dashboard: parameter dates are normalized away; "
         "measurement names, units and values remain. Parameter date bounds are retained "
         "as provenance columns.\n\n"
         f"Fixed column order: `{', '.join(columns)}`.\n\n"
     )
+    if report.public is not None:
+        from dataclasses import asdict
+
+        record += (
+            f"Public replay audit: `{json.dumps(asdict(report.public), sort_keys=True)}`.\n\n"
+            "Public source: Charles C. Norton, phanerozoic/qiskit-calibration-drift, "
+            "CC-BY-4.0; SN (CC-BY-NC-4.0) never loaded. Neither party has checked "
+            "IBM's redistribution terms for backend.properties() output.\n\n"
+            "Rules: T1/T2 below 0.01 us multiplied by 1e6; qubit 72 T1/T2 dropped; "
+            "first observed value per stamp retained. Completeness uses all five required "
+            "fields on every non-excluded qubit before state counting. "
+            "Targets from both sources use the factor-10 NC-041 plausibility guard. "
+            "Replay marks stop before the first IBM snapshot and never extend beyond "
+            "2026-05-13T12:13:22Z. Public rows never enter calibration-data.\n\n"
+        )
     readme = args.out / "README.md"
     previous = (
         readme.read_text(encoding="utf-8") if readme.exists() else "# Training-set evidence\n\n"

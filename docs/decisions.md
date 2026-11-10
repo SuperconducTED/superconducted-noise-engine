@@ -1920,3 +1920,59 @@ what the ABC is for and what
 Related: ADR-002 and ADR-021 (the DI contract), ADR-007 (fuzzification
 placement), ADR-013 (per-qubit features), Issues #58 and #74 (where the circuit
 is compiled).
+
+---
+
+## ADR-029 — Public calibration archive as a training-set source
+
+**Status**: Open. Evaluation implemented locally for Issue #122 on 2026-11-08;
+final adoption is pending the lead's recorded approval. The lead's 2026-10-23
+acceptance of the three provenance rules, recorded in the draft, is approval
+of those rules as the basis for evaluation, not a final adoption verdict.
+
+**Authoring record**:
+[`docs/decisions/drafts/ADR-029-public-calibration-archive-as-training-source.md`](decisions/drafts/ADR-029-public-calibration-archive-as-training-source.md).
+The draft's corrected NC-078 count supersedes Issue #122's original count.
+
+**Context**: A public event table can supply earlier device states, but cannot
+reproduce every omission or the target/configuration of an IBM document. It
+must not enter ADR-020's IBM-only archive or ADR-025's ledger.
+
+**Decision proposed for adoption**:
+
+- Permit an explicit second training reader for `ibm_fez` only. Replay hourly
+  from 2026-01-31T00:00:00Z until the earlier of the selected IBM archive's first
+  timestamp and NC-078's exact boundary, 2026-05-13T12:13:22Z. The latter is the
+  first IBM document, rather than midnight at the start of that date.
+- Pin `phanerozoic/qiskit-calibration-drift` to revision
+  `0c298c2ba07f9b230a81a0e5fa8d993dcd2cf37d` and parquet SHA-256
+  `dbb53131a6c2c96732e5be070c6ad1621b7d90cb052298975d78d6bbd86fcc73`.
+  Check the bytes before reading any data columns. Never request `SN`.
+- Multiply T1/T2 below 0.01 archive microseconds by 1e6; drop qubit 72's T1/T2;
+  retain the first observed value per calibration stamp. Replay as of
+  `calibrated_time`, not `observed_time`. Completeness requires the draft's
+  five fields on every non-excluded qubit before distinct-state counting.
+- Keep source, revision and public-file hash in the evidence rows. Retain IBM's
+  document digest and use NC-078's all7 projection only to remove public
+  overlap. IBM remains authoritative even when its representative is unusable.
+- For both sources, reject per-qubit training targets whose SI T1/T2 falls
+  outside NC-041's inclusive p1/p99 box widened multiplicatively by factor 10:
+  lower bound divided by the factor, upper bound multiplied by it. The data
+  owner selected this factor in the implementation session on 2026-11-08.
+  Count `coherence_implausible` separately before the T2 <= 2*T1 check.
+- Survey quantiles by source before fitting. Report both source choices on the
+  same IBM-only chronological holdout, measuring membership grids on each
+  fit's training rows. These are calibration-target fits, not hardware results.
+- Attribute Charles C. Norton and the dataset under CC-BY-4.0. State that neither
+  party has checked IBM's redistribution terms for `backend.properties()` output.
+
+**Consequences**: The reader is opt-in for evaluation and never writes to the
+archive. Guarded training masks can differ from the benchmark reference's
+physical-validity mask; their channels still agree on shared usable qubits.
+The source survey is equal-weight over distinct kept states, whereas NC-041's
+dated survey was file-weighted. No dated evidence is replaced and no result is
+claimed canonically verified before the desktop batch.
+
+**Evidence**: `docs/evidence/issue-122-training-set/`, including the pinned
+source TSV, source-tagged quantiles and the fit comparison;
+`docs/implementations/2026-11-08-issue-122-public-training-source.md`.
