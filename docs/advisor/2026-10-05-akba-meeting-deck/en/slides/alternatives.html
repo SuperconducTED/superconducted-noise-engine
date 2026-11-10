@@ -1,0 +1,39 @@
+<section id="alternatives" style="background:#F6F4EF;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">WHAT WE EXAMINED</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">Strategies We Examined</h2>
+<div style="flex:1;display:flex;gap:24px">
+<div style="flex:1;background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;font-weight:600;line-height:1.15;color:#14213D;min-height:92px">Contrastive learning</p>
+<p style="font-size:24px;line-height:1.25;color:#3A4558;border:2px solid #14213D;border-radius:12px;padding:8px 12px"><b>SupCon</b> · poor on paper; <b>testing anyway (A8)</b></p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">Rank-N-Contrast</span></b> · conditional</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">CPC / TS2Vec</span></b> · weak</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">SCARF pretraining</span></b> · poor</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">Autoencoder as stage 1</span></b> · poor</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">TabNet</span></b> · poor</p>
+</div>
+<div style="flex:1;background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;font-weight:600;line-height:1.15;color:#14213D;min-height:92px">Reinforcement learning</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">As the engine</span></b> · no</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">Online decisions</span></b> · they fit, but are not RL</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">Qubit control</span></b> · needs pulse access, deprecated by IBM</p>
+</div>
+<div style="flex:1;background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;font-weight:600;line-height:1.15;color:#14213D;min-height:92px">Forecasting models</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">Persistence</span></b> · required reference</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">Linear on lags</span></b> · recommended (Option B, v1)</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">Exponential smoothing</span></b> · baseline</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">MLP on lags</span></b> · stage-B challenger</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">LSTM/GRU, TCN, Transformers, N-BEATS</span></b> · rejected for v1</p>
+</div>
+<div style="flex:1;background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;font-weight:600;line-height:1.15;color:#14213D;min-height:92px">Structure and physics</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">Grey-box residual</span></b> · recommended (Option B)</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">Per-qubit GP</span></b> · reference</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">Graph-kernel GP</span></b> · diagnostic</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">Graph neural networks</span></b> · defer</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">PINN</span></b> · does not apply</p>
+<p style="font-size:24px;line-height:1.25;color:#5B6B82"><b><span style="color:#14213D">Deep kernel learning</span></b> · reject</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">12 · Research verdicts, not decisions: research doc §1-§2 (PR #111); SCL test = decision A8 (2026-10-04); IBM pulse-migration guide</p>
+</section>

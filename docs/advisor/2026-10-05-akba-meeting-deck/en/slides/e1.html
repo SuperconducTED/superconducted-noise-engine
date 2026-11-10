@@ -1,0 +1,51 @@
+<section id="e1" style="background:#E8EDF2;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">HOW THE ENGINES WORK</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">Engine 1: Type-1 Fuzzy</h2>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:24px">
+<div style="display:flex;width:1664px">
+<div style="flex:none;width:240px;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">1 · Features</p>
+<p style="line-height:1.25">Mean T1, T2, readout error over all qubits</p>
+<p style="color:#5B6B82;line-height:1.25">(shared stage 1)</p>
+</div>
+<x-shape kind="arrow-right" style="flex:none;align-self:center;width:48px;height:24px;background:#5B6B82"></x-shape>
+<div style="flex:none;width:360px;background:#FCFBF8;border:2px solid #2B6CB0;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">2a · Membership functions (MFs)</p>
+<p style="line-height:1.25">3 per input, shared by all rules: 9 MFs</p>
+<p style="line-height:1.25">Gaussian (2 parameters) or Triangular, TanhBell (3 parameters)</p>
+</div>
+<x-shape kind="arrow-right" style="flex:none;align-self:center;width:48px;height:24px;background:#5B6B82"></x-shape>
+<div style="flex:none;width:380px;background:#FCFBF8;border:2px solid #2B6CB0;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">2b · 27 rules</p>
+<p style="line-height:1.25">3 × 3 × 3 grid</p>
+<p style="line-height:1.25">Firing strength f_r: product of the rule's 3 MF degrees</p>
+<p style="line-height:1.25">Output, first-order linear:</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;line-height:1.25">y_r = A_r [x; 1]</p>
+</div>
+<x-shape kind="arrow-right" style="flex:none;align-self:center;width:48px;height:24px;background:#5B6B82"></x-shape>
+<div style="flex:none;width:540px;background:#FCFBF8;border:2px solid #2B6CB0;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">3 · Defuzzify</p>
+<p style="line-height:1.25">Weighted average:</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;line-height:1.25">y = Σ f_r y_r / Σ f_r</p>
+<p style="line-height:1.25">One (γ, λ) pair, then shared stages 4 to 7 (squash, channel, install, benchmark)</p>
+</div>
+</div>
+<div style="display:flex;gap:32px;width:1664px">
+<div style="flex:13;background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px;font-size:24px;line-height:1.25">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:30px;font-weight:600;color:#14213D">Parameters</p>
+<p style="line-height:1.25">27 premise + 216 rule-output (27 × 2 × 4) = 243 with Triangular or TanhBell: the parameter-matched control</p>
+<p style="line-height:1.25">Gaussian: 18 + 216 = 234</p>
+</div>
+<div style="flex:14;background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px;font-size:24px;line-height:1.25">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:30px;font-weight:600;color:#14213D">Start and training</p>
+<p style="line-height:1.25">Rule outputs start anchored at the physics target at each rule's centre (#59, PR #68).</p>
+<p style="line-height:1.25">Training planned (#60): hybrid ANFIS, least squares for rule outputs, gradient steps for MF parameters.</p>
+</div>
+<div style="flex:7;background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px;font-size:24px;line-height:1.25">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:30px;font-weight:600;color:#14213D">Band</p>
+<p style="line-height:1.25">None built in: an open question (plan §1.1).</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">7 · Source: code on main @ 110cfad (tsk.py, defuzzification.py); NC-045, NC-046; #59, PR #68, #60; plan §1.1</p>
+</section>
