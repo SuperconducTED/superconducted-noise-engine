@@ -259,3 +259,124 @@ Everything in the evidence folder, from the repository root, with `PYTHONPATH=sr
 ## 14. Related
 
 #61 (comments 6319118939, 6665986289); #84 comment 5885404218 (File 02), comment 5970300012 (File 03); #60, PR #114, PR #137; #62; #109 item 4; ADR-009, ADR-011, ADR-014 in `docs/decisions.md`; NC-035, NC-041, NC-042. Sources opened on 2026-10-21: Karnik and Mendel 2001, Wu and Mendel 2009, Mendel and Liu 2007, Wu and Mendel 2019 (arXiv:1907.01697).
+
+## 15. 2026-11-11: corrections after the PR #143 reviews
+
+Appended after @mertefesensoy's review 5828001160 and @BurakOztekin's 5831798256, both at `c8a1dd54`. Sections 1 to 14 are not
+edited; where they disagree with this section, this section is current. Measured at `35da0446`; the cost and cycle outputs at
+`f6e9719b`, after their own scripts changed (the module they import is the same). Commits: the plan `d34bb16c`, the tests `fc98ed4a`,
+the fix `5a5c8e3b`, the evidence scripts `35da0446` and `f6e9719b`, the outputs `8b6914c7`. Record:
+`docs/implementations/2026-11-11-issue-61-pr143-review-fixes.md`. Laptop, provisional.
+
+**What did not change.** Every figure in sections 1, 5 and 8 reproduces at the four decimals printed, from
+`2026-11-11-35da0446.tsv` and the regenerated outputs. `compare_sweep.py` against `2026-11-07-10e8174.tsv` exits 0, largest
+relative difference 2.809e-11. Nie-Tan is selected on every point set by File 02's rule, and `G59` anchored lambda still reverses.
+Two smaller figures moved in their last digits with the arithmetic of 15.2: P9's check, largest absolute error 5.00e-16 (it was
+3.89e-16), and section 7's largest route gap on the committed grids, 8.771e-15 (it was 8.743e-15). Section 6's pass counts (means
+2.65 and 2.34, largest 4 and 3; largest over the sweep 6) did not move.
+
+**15.1 The band now comes from the exhaustive route (review item 1).** P3's lemma needs `y_t = Y(v)` exactly for some `v` in
+`B`. In float64 that can fail at the first step: with `f_lo = (1e-17, 1e-20)`, `f_hi = (1e-17, 1)`, `c = (0, 1)`, `y_0 = 0.5 / (0.5 + 1e-17)`
+rounds to exactly 1.0, a consequent; `k_0 = 2` counts that rule, the switch vertex is `f_hi`, and `Y(f_hi)` rounds to 1.0 again. The
+iteration stops there, against `y_l = 9.99e-4`. So P3's last sentence, "The exhaustive route bounds what the guard can cost", is
+withdrawn: the guard does not make the iteration correct in floats. The sweep's `y_l` and `y_r`, and the evidence scripts' bands, now
+come from P2's switch-vertex enumeration, which has no stop rule. The iterative route still runs and is reported as a diagnostic, now
+also in units of each point's tolerance (`km_route_gap_over_tolerance_max`). Section 7's first bullet stays true of the committed grids;
+at wider footprints it is not:
+
+| Footprint | `unit-spread` iterative route gap | Over tolerance |
+| --- | ---: | ---: |
+| `w = 0.8` | 0.0038 | about 1e10 |
+| `w = 0.9` | 0.0769 | about 2e11 |
+| the committed grids (`0.1`, `0.3`, `0.6`, `G59`) | at most 8.771e-15 | at most 0.023 |
+
+The exhaustive route, now that it decides, has its own second route: exact rational enumeration of all `2^R` vertices on 202 boxes whose
+firing spans `1e-20` to `1`, the counterexample and the underflow case among them (`tests/test_type_reduction.py`).
+
+**15.2 The weighted average no longer underflows (review item 2).** With every lower weight near the subnormal floor, `sum f_lo c` rounded
+to zero before the division, so `Y(f_lo) = 0.0` sat below every consequent. `Y` is now computed on `w / max w`, equal in exact arithmetic.
+At `w = 0.99` this was the source of BMM's bracket violations:
+
+| `w = 0.99`, pooled | `c8a1dd54` | `35da0446` |
+| --- | ---: | ---: |
+| BMM, anchored gamma | 2 | 0 |
+| BMM, anchored lambda | 3 | 0 |
+| every row of the `w = 0.99` file, all point sets | 10 | 0 |
+
+`NieTanDefuzzifier` in `src/` has the same arithmetic. It is not changed here; the class switch (#61 comment 6727626228) is where it changes.
+
+**15.3 What the cost ratio measures (review item 3).** Section 6 timed the public functions, and input validation is most of a closed-form
+reducer's time. "Three runs" and "8 to 12" in section 6 trace to no committed output and are withdrawn. From `reducer_positions_and_cost.out.txt`
+at `f6e9719b`:
+
+| Route | Per point | Ratio |
+| --- | ---: | ---: |
+| `nie_tan_reduce`, public | 24.3 us | 1 |
+| `bmm_half_reduce`, public | 45.2 us | 1.9 |
+| `karnik_mendel_detailed`, public | 120.0 us | 4.9 |
+| `exhaustive_type_reduce`, public | 624.5 us | 25.7 |
+| `_validated` alone | 16.9 us | 0.7 of `nie_tan_reduce` |
+| Nie-Tan, arithmetic | 4.5 us | 1 |
+| BMM(1/2, 1/2), arithmetic | 10.4 us | 2.3 |
+| iterative KM, arithmetic, consequents sorted once | 62.7 us | 13.9 |
+| iterative KM, arithmetic, sorting each point | 89.5 us | 19.9 |
+| exhaustive, arithmetic, sorted once | 639.1 us | 142 |
+
+G59 anchored lambda, 975 survey points, the fastest of 15 interleaved passes. The arithmetic includes the rescale
+of 15.2 (a maximum and a division per average), which is why the exhaustive route, with 56 averages per point,
+is the slowest by far. With zero-order consequents (A2) the sort can be done once per rule base.
+
+So iterative KM costs about 5 times Nie-Tan through the public functions and about 14 times on the arithmetic
+alone (about 20 when each point sorts its consequents). The gap is not the small one section 1 described, and it
+points the same way as the rule. The choice still rests on File 02's pre-registered rule and on P8, not on cost. "About 3 times cheaper" in sections 1, 6 and 9, and correction 5
+of section 11, are replaced by this paragraph.
+
+**15.4 What each pool holds (review item 4).** File 02's rule pools, per output, every grid and both conventions, with `unit-spread`'s single
+output entering both the gamma and the lambda pool. That is why each "all" pool has 24,016 scores. Section 1 did not say so. The same medians
+on the anchored rows alone, a description beside the rule, not a second rule:
+
+| Point set | Output | Scores | BMM(1/2, 1/2) | Nie-Tan |
+| --- | --- | ---: | ---: | ---: |
+| survey | gamma | 3,900 | 0.1036 | **0.0359** |
+| survey | lambda | 3,900 | 0.0359 | **0.0325** |
+| lattice | gamma | 108 | 0.0670 | **0.0265** |
+| lattice | lambda | 108 | 0.0362 | **0.0268** |
+| uniform | gamma | 8,000 | 0.1537 | **0.0460** |
+| uniform | lambda | 8,000 | 0.0768 | **0.0415** |
+| all | gamma | 12,008 | 0.1370 | **0.0422** |
+| all | lambda | 12,008 | 0.0614 | **0.0371** |
+
+Nie-Tan has the lower median in every anchored pool as well. On the survey rows the lambda medians are close,
+0.0359 against 0.0325, far closer than the pooled 0.0498 against 0.0322: most of the pooled lambda gap comes from
+`unit-spread`'s rows entering the lambda pool. `file02_rule_by_point_set.out.txt` prints both tables.
+
+**15.5 Tests (review item 5).** On `c8a1dd54` all eight mutants the reviews named survived all 46 tests (`mutate.py`, output in this PR's
+record). The tests now kill all eleven, two of them added for the fix itself (`mutate.out.txt`). `Db_max <= 0.5`, which was the clip itself, is now
+`Db_max < 0.5`; `passes <= 28`, which could not fail before the `RuntimeError`, is gone; the route-gap bound is per point.
+
+**15.6 The `km_*` columns are diagnostics.** They are printed, never compared between machines and never cited. Two measurements say why. On
+@BurakOztekin's desktop `km_guard_stops` was 17 where the committed file has 15 (`w = 0.3`, `unit-spread`). And the two-rule box that cycled
+under the old summation (pinned in the tests since 2026-10-21) stopped cycling once `Y` divided by `max w` first; a new one was found by the same kind of seeded
+search. Which boxes cycle belongs to the arithmetic, as section 7 says of the count, and so does the count: at `w = 0.6` anchored
+gamma the four variants of section 7 now give 104, 149, 102 and 126 (they gave 100, 132, 102 and 126), still at the right endpoint
+only, none at the lattice points, and with the guarded result equal to the exhaustive route on every cycling point.
+
+**15.7 Smaller text corrections (review 5828001160, item 6).**
+
+1. Section 5's interval is of the difference of medians, not the median difference, as `block_interval` computes it.
+2. Section 7: the cycle count moves with the switch-point tie rule and the summation order among the variants tried, not "only" with them; and
+   "right endpoint only, none at the lattice points" was measured in one cell, `w = 0.6` anchored gamma.
+
+**15.8 Closure text, restated.** This block replaces section 9's. The rest of section 9 (who lands it and when) stands.
+
+> **ADR-011, closed [date].** T1: weighted average. IT2: textbook Nie-Tan, `y = Y(f_lo + f_hi)`. At this closure's commit, the class `NieTanDefuzzifier` computes BMM(1/2, 1/2); [the switch PR] moves it to the textbook formula.
+>
+> Measured against the Karnik-Mendel midpoint, its endpoints by exhaustive switch-vertex enumeration, on 3x3x3 `IntervalGaussianMF` grids at footprints `G59` and `w` in {0.1, 0.3, 0.6}, over the survey feature range in microseconds, with zero-order consequents (`unit-spread`, and `anchored` as the units-bearing companion), commit `35da0446`, NC-nnn. By File 02's pre-registered rule, the lower median of `Db = |y - m| / (y_r - y_l)` per output, pooled over all grids and both conventions with `unit-spread`'s single output in both pools, Nie-Tan is selected on every point set: on the 975 survey rows 0.0340 against BMM's 0.0940 for gamma and 0.0322 against 0.0498 for lambda. On the anchored rows alone the survey medians are 0.0359 against BMM's 0.1036 for gamma and 0.0325 against 0.0359 for lambda. At `G59`, `unit-spread`, Nie-Tan's `Db` has a median of 0.0465 and is at most 0.1558 over the 3,002 sampled points. These are sample maxima, not bounds.
+>
+> The result is not uniform. At `G59` anchored lambda on the survey rows BMM is closer, 0.0337 against 0.0483, on 744 of 975 rows, with a 90% block interval of the difference of medians excluding zero; the two reducers differ there by at most 1.5e-05 and by 1.5e-06 at the median, on an output near 3.2e-04, against a median band width of 6.1e-05. No general mechanism was established. The consequents are not trained, and this comparison is re-measured on the first IT2 archive fit (#60).
+>
+> Karnik-Mendel stays the band source (File 02, File 03) and out of the training loss, because its midpoint is not linear in the consequents. Per point on 27 rules, iterative Karnik-Mendel costs about 5 times Nie-Tan through the public functions and about 14 times on the arithmetic alone; the choice rests on the rule above, and cost points the same way. Figures are laptop and provisional until [the batch record].
+
+**15.9 Register rows, restated.** Rows 1 and 2 of section 10 stand, citing `35da0446`. Row 3 cites `2026-11-11-35da0446.tsv`, SHA-256
+`af97c29f24c2b660cebed91bd1d5638a96f970b71d63de529d249a7eead79d0c`. Row 4 becomes: **the cost of iterative KM against Nie-Tan, per point on 27 rules, through the public functions and on the
+arithmetic alone** (section 15.3), `reducer_positions_and_cost.py`. Nothing else in section 10 changes.

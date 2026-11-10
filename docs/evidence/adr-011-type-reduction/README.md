@@ -185,3 +185,42 @@ Scripts, each run from the repository root with `PYTHONPATH=src`, output beside 
 | `reducer_positions_and_cost.py` | The identity for `y_NT - y_BMM`, the rejected straddling hypothesis, and the cost per point. Its times move with laptop load; only the ratio is quoted. |
 | `km_cycle_sensitivity.py` | How File 02's cycle count moves with the switch-point tie rule and the summation order, and that the guarded result matches the exhaustive route on every cycling point. |
 | `compare_sweep.py` | Compares another machine's sweep with the committed TSV to rounding, for the desktop batch. |
+
+## 2026-11-11: after the PR #143 reviews
+
+`2026-11-11-35da0446.tsv` is the current file. The sections above describe the earlier files and stay as written; where they
+disagree with this one, this one is current. The findings' section 15 has the corrections in full, and
+`docs/implementations/2026-11-11-issue-61-pr143-review-fixes.md` the record.
+
+| | |
+| --- | --- |
+| **Code commit** | `35da0446020c26775a059a901bf0ce42d8c24f67` |
+| **Survey** | as above, `calibration-data` @ `3d1569d` |
+| **Machine** | Mert's laptop: Windows 11, Python 3.12.10, numpy 2.4.4. **Provisional**; the canonical run is the batch on Burak's desktop. |
+| **Runtime** | 62.5 s and 60.7 s for two runs. The rescale costs a maximum and a division per average: on the same laptop the same night, one footprint took 10.7, 9.2 and 3.6 s before the fix (`w` = 0.8, 0.9, 0.99) and 21.2, 12.0 and 4.2 s after. |
+| **SHA-256** | `af97c29f24c2b660cebed91bd1d5638a96f970b71d63de529d249a7eead79d0c`; the two runs were byte-identical |
+
+What changed, and what did not:
+
+- **The band is the exhaustive route's.** `y_l` and `y_r` come from evaluating every switch vertex, not from the iteration,
+  which can stop at a float fixed point (the reviews' counterexample, findings 15.1). On the committed grids the two routes
+  agree to rounding, so every compared column matches `2026-11-07-10e8174.tsv`: `compare_sweep.py` exits 0, largest relative
+  difference 2.809e-11.
+- **`Y` is computed on `w / max w`**, so lower weights near the subnormal floor no longer round the average to zero
+  (findings 15.2). Every reducer's last bits move with it, which is why the file is new.
+- **A new last column**, `km_route_gap_over_tolerance_max`: the largest `|iterative - exhaustive|` over the cell's points, each
+  divided by its own tolerance `64 R eps max|c|`. At most 1 in every row of this file (largest 0.023). `compare_sweep.py`
+  now fails a run where it exceeds 1.
+- **The `km_*` columns are diagnostics of the iterative route.** They are not compared between machines and are never cited.
+  @BurakOztekin's desktop run at `c8a1dd54` gave `km_guard_stops` 17 where the committed file has 15 (`w = 0.3`, `unit-spread`),
+  and `km_passes_mean` also differed; that is the platform difference these columns carry.
+
+Invariants in this file: every row has `n_skipped`, `n_degenerate_band` and `n_bracket_violations` equal to 0, and
+`Db_max < 0.5`.
+
+The evidence scripts take their bands from the exhaustive route too, `reducer_positions_and_cost.py` prints the cost three
+ways (findings 15.3), and `file02_rule_by_point_set.py` prints the anchored-only pools (findings 15.4). New:
+
+| Script | What it answers |
+| --- | --- |
+| `mutate.py` | Applies each of eleven mutants to the script in turn, runs `tests/test_type_reduction.py`, restores from a copy. All eleven are killed at this commit (`mutate.out.txt`). |

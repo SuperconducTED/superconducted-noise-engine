@@ -63,3 +63,12 @@ Definitions are in the findings doc, sections 2 to 4. New here: P9, `y_NT = (S_l
 - `docs/implementations/2026-10-21-type-reduction-reference.md`
 - ADR-009, ADR-011 in `docs/decisions.md`
 - #61 comments 6319118939, 6665986289; #84 comment 5885404218; #109 item 4
+
+## Update, 2026-11-11: after the PR #143 reviews
+
+Appended; the text above is not edited. The review fixes are recorded in
+`docs/implementations/2026-11-11-issue-61-pr143-review-fixes.md`, and the corrections to the findings in their section 15:
+the band from the exhaustive route, the rescaled average, the cost measured three ways (iterative KM about 5 times Nie-Tan
+through the public functions, about 14 times on the arithmetic alone, where this record's findings said about 3), the pool
+contents with the anchored-only medians, and the tests that now kill eleven mutants. The sweep file is
+`2026-11-11-35da0446.tsv`; the five outputs were regenerated. No headline figure moved.

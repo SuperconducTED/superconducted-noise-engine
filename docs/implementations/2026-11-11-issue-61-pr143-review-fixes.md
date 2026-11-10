@@ -145,7 +145,82 @@ If prediction 1 fails, the work stops and the moved figure is shown to Bengisu b
 
 ## Verification
 
-To be filled after the build.
+Filled on 2026-11-11 after the build. Laptop (Windows 11, Python 3.12.10, numpy 2.4.4, scipy 1.17.1, qiskit 2.4.1,
+qiskit-aer 0.17.2), provisional. Every command from the repository root with `PYTHONPATH=src`; outputs at `35da0446`,
+the cost and cycle outputs at `f6e9719b`.
+
+**Reproduced on `c8a1dd54` before any change.** The counterexample: iterative `y_l = 1.0`, exhaustive 9.99e-4, the
+sweep's `_measure` used 1.0, route gap 0.999. The underflow case `lower = [1e-322, 1e-322]`, `values = [1e-4, 2e-4]`:
+`Y(lower) = 0.0`, exhaustive `y_l = 0.0`, below every consequent. `--footprint 0.8` and `0.9`: `unit-spread` route gap
+0.0038 and 0.0769, exit 0, no warning. `--footprint 0.99`: BMM bracket violations 2 (anchored gamma) and 3 (anchored
+lambda) in the pooled rows, 10 in the file. The mutants, `mutate.py` on the 46 tests of the time:
+
+| Mutant | `c8a1dd54`, 46 tests | `35da0446`, 259 tests |
+| --- | --- | --- |
+| M1 `route_gap = 0.0` | survived | killed |
+| M2 every output reads column 0 | survived | killed |
+| M3 mean and median swapped | survived | killed |
+| M4 p90 is the median | survived | killed |
+| M5 `Db` clip removed | survived | killed |
+| M6 degenerate tolerance 0 | survived | killed |
+| M7 degenerate tolerance times 1000 | survived | killed |
+| M8 left guard returns the worse value | survived | killed |
+| M8b right guard returns the worse value | (added during the build) | killed |
+| M9 distances from the iterative route | (no such code) | killed |
+| M10 no rescale in `_weighted_average` | (no such code) | killed |
+
+Of the new tests, six failed on `c8a1dd54` as intended (`fc98ed4a`): the invariants test (no tolerance column), the
+sweep's endpoints, the exact-rational check on the underflow box, the subnormal average, the tolerance column, and
+`compare_sweep`'s new check.
+
+**The predictions, against the outcome.**
+
+| # | Prediction (`d34bb16c`) | Outcome |
+| --- | --- | --- |
+| 1 | §1, §5 and §8 unchanged at four decimals; `compare_sweep` against `2026-11-07-10e8174.tsv` exits 0 | Held. Largest relative difference 2.809e-11. File 02's table and the reversal check are identical; the second route is identical. |
+| 2 | `km_route_gap_over_tolerance_max` at most 1 in every row | Held. Largest 0.023 (route gap 8.771e-15). |
+| 3 | All ten mutants killed | Held, for eleven. M8 first survived a check that took one more step from the returned value, because the left-guard box is not a 2-cycle; the test now replays the iterates. |
+| 4 | No bracket violations at 0.8, 0.9, 0.99 | Held. At 0.99, 10 before and 0 after. |
+| 5 | The `unit-spread` route gap stays at 0.0038 and 0.0769 at 0.8 and 0.9, ratio above 1 | Held: about 1e10 and 2e11 tolerances. |
+
+**Not predicted, found during the build.**
+
+- The rescale changes rounding, so the 2026-10-21 cycle box stopped cycling and the first left-guard box stopped
+  firing. Both were re-found by a seeded search under the new arithmetic (`rng 20261111`, trials 21 and 3); the old
+  constants are kept in a comment.
+- The cycle counts at `w = 0.6` anchored gamma moved from 100 and 132 to 104 and 149 in the two variants that use the
+  script's average; the two that use `np.sum(w * c) / np.sum(w)` stayed at 102 and 126.
+- The first three-way cost run timed each row in its own block of passes and showed `_validated` alone (40.1 us) slower
+  than `nie_tan_reduce` (30.6 us), which calls it. Interleaved passes with the minimum kept fixed it (`f6e9719b`).
+  Iterative KM then costs 4.9 times Nie-Tan through the public functions and 13.9 times on the arithmetic alone, so
+  section 1's "the measured gap is small" does not hold; the findings' section 15.3 says so.
+- P9's check moved from 3.89e-16 to 5.00e-16, and the committed grids' largest route gap from 8.743e-15 to 8.771e-15.
+- The sweep runs about twice as long (one footprint: 10.7, 9.2, 3.6 s before and 21.2, 12.0, 4.2 s after).
+
+**Commands.**
+
+```bash
+python -m pytest tests/test_type_reduction.py -q -p no:cacheprovider
+python -m scripts.type_reduction_discrepancy --range-source survey:docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv --footprint 0.1 --footprint 0.3 --footprint 0.6 --footprint g59 --points 2000 --seed 84 --out sweep.tsv
+python docs/evidence/adr-011-type-reduction/compare_sweep.py sweep.tsv docs/evidence/adr-011-type-reduction/2026-11-11-35da0446.tsv
+python docs/evidence/adr-011-type-reduction/compare_sweep.py sweep.tsv docs/evidence/adr-011-type-reduction/2026-11-07-10e8174.tsv
+python docs/evidence/adr-011-type-reduction/mutate.py all
+python docs/evidence/adr-011-type-reduction/file02_rule_by_point_set.py
+python docs/evidence/adr-011-type-reduction/survey_reversal_check.py
+python docs/evidence/adr-011-type-reduction/second_route_reducers.py
+python docs/evidence/adr-011-type-reduction/reducer_positions_and_cost.py
+python docs/evidence/adr-011-type-reduction/km_cycle_sensitivity.py
+```
+
+The sweep twice at `35da0446`: byte-identical, SHA-256
+`af97c29f24c2b660cebed91bd1d5638a96f970b71d63de529d249a7eead79d0c`.
+
+**Gates.** `tests/test_type_reduction.py`: 259 passed. `ruff check .` and `ruff format --check .` (ruff 0.15.12): clean.
+`mypy --strict` with the project's file set: no issues in 49 files. `scripts/check_ids.py`: no collisions. The full suite
+on a local merge of the branch with `main` `d929424a` (not pushed): 1,397 passed, none failed or skipped, with the `FuzzyNoiseModel.prepare installed no error` warning promoted to an error (8 minutes): the 1,184 of review 5828001160's run plus the 213 new tests.
+
+**Not checked here.** Linux and WSL2 (the desktop runbook does that), the wide footprints against a committed file (there
+is none), and any trained rule base (A9).
 
 ## Related docs
 

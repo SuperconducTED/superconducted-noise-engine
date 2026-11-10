@@ -396,3 +396,20 @@ digits is not by itself a failure.
 - Karnik & Mendel 2001, *Inf. Sci.* 132, section 3.1; Wu & Mendel 2009, "Enhanced
   Karnik-Mendel algorithms", *IEEE TFS* 17(4); Mendel & Liu 2007, *IEEE TFS* 15(2); Wu &
   Mendel 2019, arXiv:1907.01697 v1, Eqs. (9) to (11) and section II-H.
+
+## Update, 2026-11-11: after the PR #143 reviews
+
+Appended; the text above is not edited. Two of its statements are not true in general, as reviews 5828001160 and
+5831798256 found:
+
+- "The guard can stop within rounding of the endpoint rather than at the exact minimizer. The exhaustive route bounds
+  that, and every test compares the two." In float64 the iteration can also stop at a fixed point that is not the
+  endpoint, when its first average rounds onto a consequent: `lower = [1e-17, 1e-20]`, `upper = [1e-17, 1]`,
+  `values = [0, 1]` gives `y_l = 1.0` against 9.99e-4. Since `5a5c8e3b` the sweep's band comes from the exhaustive route,
+  the iterative route is a reported diagnostic, and the exhaustive route is itself checked against exact rational vertex
+  enumeration.
+- The two-rule `CYCLE_*` box no longer cycles once `_weighted_average` divides by the largest weight first (the fix for
+  an underflow at `w = 0.99`). It was replaced by a box found the same way under the new arithmetic; the old constants are
+  kept in a comment in the tests.
+
+Record: `docs/implementations/2026-11-11-issue-61-pr143-review-fixes.md`; findings section 15.
