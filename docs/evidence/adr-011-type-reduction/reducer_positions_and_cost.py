@@ -46,7 +46,7 @@ from scripts.type_reduction_discrepancy import (
 
 SURVEY = Path("docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv")
 TOKENS = ("0.1", "0.3", "0.6", "g59")
-COST_PASSES = 7
+COST_PASSES = 15
 
 
 def positions(firings, output_index: int) -> dict[str, np.ndarray]:
@@ -80,25 +80,28 @@ def positions(firings, output_index: int) -> dict[str, np.ndarray]:
     return {key: np.array(values) for key, values in out.items()}
 
 
-def _timed(function, arguments) -> float:
-    """Median over ``COST_PASSES`` passes of the mean wall time per call."""
-    times = []
+def timings(rows) -> dict[str, float]:
+    """Per row, the fastest of ``COST_PASSES`` passes of the mean wall time per call.
+
+    The passes are interleaved: every pass times every row once, in the same order, so a change
+    in laptop load hits all rows alike, and the minimum is the pass least disturbed by it. Timing
+    each row in its own block of passes let a quieter block make ``_validated`` alone look slower
+    than ``nie_tan_reduce``, which calls it (first run of this script on 2026-11-11).
+    """
+    best = {name: float("inf") for name, _, _ in rows}
     for _ in range(COST_PASSES):
-        start = time.perf_counter()
-        for args in arguments:
-            function(*args)
-        times.append((time.perf_counter() - start) / len(arguments))
-    return float(np.median(times))
+        for name, function, arguments in rows:
+            start = time.perf_counter()
+            for args in arguments:
+                function(*args)
+            best[name] = min(best[name], (time.perf_counter() - start) / len(arguments))
+    return best
 
 
-def report(rows, base: float | None = None) -> float:
-    """Print each row's time per point and its ratio to ``base`` (the first row by default)."""
-    for name, function, arguments in rows:
-        value = _timed(function, arguments)
-        base = base or value
-        print(f"  {name:32s} {value * 1e6:8.1f} us  {value / base:6.1f} x")
-    assert base is not None
-    return base
+def report(rows, best: dict[str, float], base: float) -> None:
+    """Print each row's time per point and its ratio to ``base``."""
+    for name, _, _ in rows:
+        print(f"  {name:32s} {best[name] * 1e6:8.1f} us  {best[name] / base:6.1f} x")
 
 
 def _bmm_arithmetic(lo, hi, c) -> float:
@@ -160,7 +163,10 @@ def main() -> None:
         firing = rule_base.evaluate(x)
         c = firing.consequent_outputs[:, lambda_index]
         items.append((firing.firing_strengths_lower, firing.firing_strengths_upper, c))
-    print(f"\nCost per point, 27 rules, median of {COST_PASSES} passes over {len(items)} points")
+    print(
+        f"\nCost per point, 27 rules, fastest of {COST_PASSES} interleaved passes over "
+        f"{len(items)} points"
+    )
     print("G59 anchored lambda; python and numpy; laptop, provisional")
     validated = [_validated(lo, hi, c) for lo, hi, c in items]
     ordered = [_sorted_by_value(*v) for v in validated]
@@ -171,10 +177,7 @@ def main() -> None:
         ("karnik_mendel_detailed", karnik_mendel_detailed, items),
         ("exhaustive_type_reduce", exhaustive_type_reduce, items),
     )
-    base = report(public)
-    print("Input validation alone, the part every public function shares:")
-    report((("_validated", _validated, items),), base)
-    print("Arithmetic alone, on validated arrays (ratio to Nie-Tan's arithmetic):")
+    validation = (("_validated", _validated, items),)
     arithmetic = (
         ("Nie-Tan", lambda lo, hi, c: _weighted_average(lo + hi, c), validated),
         ("BMM(1/2, 1/2)", _bmm_arithmetic, validated),
@@ -182,7 +185,12 @@ def main() -> None:
         ("iterative KM, sorting each point", _km_with_sort, validated),
         ("exhaustive, sorted once", _exhaustive_arithmetic, ordered),
     )
-    report(arithmetic)
+    best = timings((*public, *validation, *arithmetic))
+    report(public, best, best["nie_tan_reduce"])
+    print("Input validation alone, the part every public function shares:")
+    report(validation, best, best["nie_tan_reduce"])
+    print("Arithmetic alone, on validated arrays (ratio to Nie-Tan's arithmetic):")
+    report(arithmetic, best, best["Nie-Tan"])
     results = [karnik_mendel_detailed(lo, hi, c) for lo, hi, c in items]
     for field in ("passes_l", "passes_r", "guard_stops"):
         values = np.array([getattr(r, field) for r in results], dtype=np.float64)

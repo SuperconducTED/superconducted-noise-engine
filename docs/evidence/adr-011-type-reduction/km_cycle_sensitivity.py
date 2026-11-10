@@ -4,7 +4,8 @@ File 02 (#84 comment 5885404218) reports 116 (point, gamma) pairs on which the y
 terminates. This counts, per switch-point tie convention and per summation order, the points whose
 left, right, either or both endpoints hit the n + 1 cap, split by point set, and checks the guarded
 result on every cycling point against the exhaustive route. The count belongs to the
-implementation: the mechanism is what to report.
+implementation: the mechanism is what to report. Since 2026-11-11 (PR #143 review, item 2) the
+script's ``Y`` divides the weights by their largest before ``w @ c``, which moves the counts again.
 
 Run from the repository root, with ``PYTHONPATH=src``::
 
@@ -87,7 +88,10 @@ def main() -> None:
                 total[key] += counts[key]
         print(f"  total    {total}")
         print(f"  guarded result off the exhaustive route on cycling points: {guard_bad}")
-        print(f"  points cycling with np.sum(w * c) / np.sum(w) in place of w @ c: {other_order}")
+        print(
+            f"  points cycling with np.sum(w * c) / np.sum(w) in place of the script's Y: "
+            f"{other_order}"
+        )
 
 
 if __name__ == "__main__":
