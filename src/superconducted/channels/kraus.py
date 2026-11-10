@@ -40,34 +40,22 @@ from qiskit_aer.noise import QuantumError
 
 from ..interfaces import ChannelProjector, NormalizationStrategy
 
-_SINGLE_QUBIT_GATES: frozenset[str] = frozenset(
-    {
-        "id",
-        "x",
-        "y",
-        "z",
-        "h",
-        "s",
-        "sdg",
-        "sx",
-        "sxdg",
-        "t",
-        "tdg",
-        "rx",
-        "ry",
-        "rz",
-        "u",
-        "u1",
-        "u2",
-        "u3",
-        "p",
-    }
-)
+
+def _validated_probability(value: float, name: str) -> float:
+    """Return ``value`` as a float, rejecting anything outside ``[0, 1]``.
+
+    NaN and infinities fail the range test. Clipping is the pipeline's job
+    (ADR-012 ``ProbabilityClip``); the channel boundary never repairs input.
+    """
+    v = float(value)
+    if not 0.0 <= v <= 1.0:
+        raise ValueError(f"{name} must be a finite probability in [0, 1]; got {v!r}")
+    return v
 
 
 def _amplitude_damping_kraus(gamma: float) -> list[npt.NDArray[np.complex128]]:
     """Single-qubit amplitude-damping Kraus operators for parameter ``gamma``."""
-    g = max(0.0, min(1.0, float(gamma)))
+    g = _validated_probability(gamma, "gamma")
     sqrt_g = math.sqrt(g)
     sqrt_1mg = math.sqrt(1.0 - g)
     k0 = np.array([[1.0, 0.0], [0.0, sqrt_1mg]], dtype=np.complex128)
@@ -77,7 +65,7 @@ def _amplitude_damping_kraus(gamma: float) -> list[npt.NDArray[np.complex128]]:
 
 def _phase_damping_kraus(lam: float) -> list[npt.NDArray[np.complex128]]:
     """Single-qubit phase-damping Kraus operators for parameter ``lambda``."""
-    lam_c = max(0.0, min(1.0, float(lam)))
+    lam_c = _validated_probability(lam, "lambda")
     sqrt_l = math.sqrt(lam_c)
     sqrt_1ml = math.sqrt(1.0 - lam_c)
     k0 = np.array([[1.0, 0.0], [0.0, sqrt_1ml]], dtype=np.complex128)
@@ -101,7 +89,11 @@ class KrausChannelProjector(ChannelProjector):
     """Build single-qubit composed amplitude+phase damping noise channels.
 
     The crisp parameter vector is interpreted as ``[p_amp, p_phase, ...]``;
-    additional entries are ignored at bootstrap. Two-qubit gates raise
+    additional entries are ignored at bootstrap. ``gamma`` and ``lambda``
+    must lie in ``[0, 1]``: non-finite or out-of-range values raise
+    :class:`ValueError` and are never clipped (ADR-012 owns clipping, in the
+    squashing stage). The projector is gate-name agnostic; which gates get
+    noise is decided by ``FuzzyNoiseModel.prepare()`` (#73). Two-qubit gates raise
     :class:`NotImplementedError` until ADR-008 lands a multi-qubit
     extension.
 
