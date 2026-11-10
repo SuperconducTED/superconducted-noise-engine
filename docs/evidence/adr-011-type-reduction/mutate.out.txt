@@ -1,0 +1,12 @@
+target scripts\type_reduction_discrepancy.py, sha256 d2068925dce3089b, tests tests/test_type_reduction.py
+M1 route_gap=0.0                           KILLED  (======================== 1 failed, 47 passed in 6.16s =========================)
+M2 output column 0                         KILLED  (======================== 1 failed, 257 passed in 6.88s ========================)
+M3 mean and median swapped                 KILLED  (======================== 1 failed, 251 passed in 6.79s ========================)
+M4 p90 is the median                       KILLED  (======================== 1 failed, 251 passed in 8.84s ========================)
+M5 Db clip removed                         KILLED  (======================== 1 failed, 252 passed in 5.94s ========================)
+M6 degenerate tolerance 0                  KILLED  (======================== 1 failed, 253 passed in 6.72s ========================)
+M7 degenerate tolerance x1000              KILLED  (======================= 1 failed, 252 passed in 10.84s ========================)
+M8 left guard returns the worse value      KILLED  (======================== 1 failed, 255 passed in 8.82s ========================)
+M8b right guard returns the worse value    KILLED  (======================== 1 failed, 256 passed in 8.59s ========================)
+M9 distances from the iterative route      KILLED  (======================== 1 failed, 47 passed in 10.91s ========================)
+M10 no rescale in _weighted_average        KILLED  (======================== 1 failed, 30 passed in 3.33s =========================)

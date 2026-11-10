@@ -13,15 +13,24 @@ g59   unit-spread unit    |   7.4 | 0.4075  0.5232  0.4873  0.5143 | 0.999    | 
 g59   anchored    gamma   |   7.4 | 0.5130  0.4732  0.4770  0.4684 | 0.650    | 0.0778  0.0316  0.291      | 0.468
 g59   anchored    lambda  |   7.4 | 0.5177  0.4405  0.4776  0.4517 | 0.595    | 0.0337  0.0483  0.763      | 0.452
 
-Identity, largest absolute error over all cells: 3.89e-16
+Identity, largest absolute error over all cells: 5.00e-16
 Correlation across 12 cells, share straddling, share BMM closer: 0.270
 
-Cost per point, 27 rules, median of 7 passes over 975 points
+Cost per point, 27 rules, fastest of 15 interleaved passes over 975 points
 G59 anchored lambda; python and numpy; laptop, provisional
-  nie_tan_reduce               20.2 us     1.0 x
-  bmm_half_reduce              19.8 us     1.0 x
-  karnik_mendel_detailed       58.5 us     2.9 x
-  exhaustive_type_reduce      162.2 us     8.0 x
+Through the public functions, each validating its input (ratio to nie_tan_reduce):
+  nie_tan_reduce                       24.3 us     1.0 x
+  bmm_half_reduce                      45.2 us     1.9 x
+  karnik_mendel_detailed              120.0 us     4.9 x
+  exhaustive_type_reduce              624.5 us    25.7 x
+Input validation alone, the part every public function shares:
+  _validated                           16.9 us     0.7 x
+Arithmetic alone, on validated arrays (ratio to Nie-Tan's arithmetic):
+  Nie-Tan                               4.5 us     1.0 x
+  BMM(1/2, 1/2)                        10.4 us     2.3 x
+  iterative KM, sorted once            62.7 us    13.9 x
+  iterative KM, sorting each point     89.5 us    19.9 x
+  exhaustive, sorted once             639.1 us   142.0 x
   passes_l: mean 2.65, max 4
   passes_r: mean 2.34, max 3
   guard_stops: mean 0.00, max 0
