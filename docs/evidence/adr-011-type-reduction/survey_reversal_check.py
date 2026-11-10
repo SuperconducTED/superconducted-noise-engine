@@ -24,7 +24,7 @@ from scripts.type_reduction_discrepancy import (
     anchor_levels,
     bmm_half_reduce,
     build_grid,
-    karnik_mendel_detailed,
+    exhaustive_type_reduce,
     load_survey,
     nie_tan_reduce,
 )
@@ -46,9 +46,10 @@ def scores(token: str, convention, output_index: int, survey, anchors) -> dict[s
         firing = rule_base.evaluate(np.asarray(x, dtype=np.float64))
         lo, hi = firing.firing_strengths_lower, firing.firing_strengths_upper
         c = firing.consequent_outputs[:, output_index]
-        km = karnik_mendel_detailed(lo, hi, c)
-        width = km.y_r - km.y_l
-        mid = 0.5 * (km.y_l + km.y_r)
+        # The band from the exhaustive route (PR #143 review, item 1).
+        y_l, y_r = exhaustive_type_reduce(lo, hi, c)
+        width = y_r - y_l
+        mid = 0.5 * (y_l + y_r)
         y_bmm, y_nt = bmm_half_reduce(lo, hi, c), nie_tan_reduce(lo, hi, c)
         degenerate = width <= 64 * c.size * EPS * float(np.max(np.abs(c)))
         out["bmm"].append(0.0 if degenerate else abs(y_bmm - mid) / width)

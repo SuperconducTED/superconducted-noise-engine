@@ -12,6 +12,10 @@ File 02 section 2.4's rule: per output, the lower median of Db pooled over all g
 conventions. As in File 02, unit-spread's one output enters both the gamma and the lambda pool,
 which gives its 24016 scores per output. Uses the functions in
 scripts/type_reduction_discrepancy.py.
+
+2026-11-11 (PR #143 review): the band comes from ``exhaustive_type_reduce`` (item 1), and the
+anchored rows' pools are printed beside File 02's, with what each pool contains (item 4).
+File 02's rule still decides; the anchored-only table is a description.
 """
 
 from __future__ import annotations
@@ -28,7 +32,7 @@ from scripts.type_reduction_discrepancy import (
     anchor_levels,
     bmm_half_reduce,
     build_grid,
-    karnik_mendel_detailed,
+    exhaustive_type_reduce,
     load_survey,
     nie_tan_reduce,
     point_sets,
@@ -50,6 +54,9 @@ def main() -> None:
     sets = point_sets(("lattice", "uniform", "survey"), survey, 2000, 84)
     anchors = anchor_levels(survey.samples)
     pools = {name: {o: {"bmm": [], "nt": []} for o in OUTPUT_POOLS} for name in (*sets, "all")}
+    anchored_pools = {
+        name: {o: {"bmm": [], "nt": []} for o in OUTPUT_POOLS} for name in (*sets, "all")
+    }
     closer: dict[tuple[str, str, str], list[int]] = {}
     gaps: list[float] = []
     widths: list[float] = []
@@ -65,9 +72,13 @@ def main() -> None:
                     for oi, output in enumerate(convention.outputs):
                         c = firing.consequent_outputs[:, oi]
                         tol = 64 * c.size * EPS * float(np.max(np.abs(c)))
-                        km = karnik_mendel_detailed(lo, hi, c)
+                        y_l, y_r = exhaustive_type_reduce(lo, hi, c)
                         y_bmm, y_nt = bmm_half_reduce(lo, hi, c), nie_tan_reduce(lo, hi, c)
-                        a, b = score(y_bmm, km.y_l, km.y_r, tol), score(y_nt, km.y_l, km.y_r, tol)
+                        a, b = score(y_bmm, y_l, y_r, tol), score(y_nt, y_l, y_r, tol)
+                        if convention.name == "anchored":
+                            for name in (set_name, "all"):
+                                anchored_pools[name][output]["bmm"].append(a)
+                                anchored_pools[name][output]["nt"].append(b)
                         for target in OUTPUT_POOLS if output not in OUTPUT_POOLS else (output,):
                             for name in (set_name, "all"):
                                 pools[name][target]["bmm"].append(a)
@@ -77,7 +88,7 @@ def main() -> None:
                             tally[0 if b < a else (1 if a < b else 2)] += 1
                             if (token, convention.name, output) == ("g59", "anchored", "lambda"):
                                 gaps.append(abs(y_bmm - y_nt))
-                                widths.append(km.y_r - km.y_l)
+                                widths.append(y_r - y_l)
 
     print(f"{'point set':10s} {'output':7s} {'n':>7s} {'BMM':>8s} {'Nie-Tan':>8s}  winner")
     for name in ("lattice", "uniform", "survey", "all"):
@@ -87,6 +98,17 @@ def main() -> None:
             print(
                 f"{name:10s} {output:7s} {n:7d} {a:8.4f} {b:8.4f}  {'Nie-Tan' if b < a else 'BMM'}"
             )
+
+    print("\nWhat each pool holds: every grid; unit-spread's single output in both the gamma and")
+    print("the lambda pool (File 02's rule, which decides); anchored outputs in their own.")
+    print("Anchored rows only, no unit-spread (a description; File 02's rule above decides):")
+    print(f"{'point set':10s} {'output':7s} {'n':>7s} {'BMM':>8s} {'Nie-Tan':>8s}  lower")
+    for name in ("lattice", "uniform", "survey", "all"):
+        for output in OUTPUT_POOLS:
+            cell = anchored_pools[name][output]
+            a, b = np.median(cell["bmm"]), np.median(cell["nt"])
+            lower = "Nie-Tan" if b < a else "BMM"
+            print(f"{name:10s} {output:7s} {len(cell['bmm']):7d} {a:8.4f} {b:8.4f}  {lower}")
 
     print(
         f"\nsurvey rows {len(survey.samples)}, distinct: {len(np.unique(survey.samples, axis=0))}"
