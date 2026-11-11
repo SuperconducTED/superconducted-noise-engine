@@ -283,8 +283,9 @@ desktop figure, which step 9 records.
 9. **Archive validation is a future script requirement.** `fit` deliberately
    accepts `validation=None` for general use. The not-yet-implemented FR-15
    `scripts/train_anfis.py` must reject an archive fit without a nonempty
-   snapshot-boundary validation split before calling `fit`; its own tests must
-   exercise that rejection. Neither enforcement nor its test exists in this PR.
+   snapshot-boundary validation split, and must verify before calling `fit`
+   that every validation row fires; its own tests must exercise these
+   rejections. Neither enforcement nor its test exists in this PR.
 
 ## Verification
 
