@@ -1,0 +1,16 @@
+### controls
+
+real	1m14.455s
+user	0m55.213s
+sys	0m22.107s
+controls exit 0
+### dry run
+
+real	18m4.745s
+user	19m53.774s
+sys	0m47.325s
+dry run exit 0
+{
+  "truth1": true,
+  "truth2": true
+}

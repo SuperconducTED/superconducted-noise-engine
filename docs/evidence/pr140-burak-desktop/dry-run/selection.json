@@ -1,0 +1,105 @@
+{
+  "discriminating": [
+    {
+      "qubit": 148,
+      "side": "below",
+      "filled": false,
+      "log_disagreement": -1.7048461852691865,
+      "abs_log_disagreement": 1.7048461852691865,
+      "n_window_distinct": 25,
+      "n_distinct": 146,
+      "n_window": 264
+    },
+    {
+      "qubit": 132,
+      "side": "below",
+      "filled": false,
+      "log_disagreement": -0.8694338405105313,
+      "abs_log_disagreement": 0.8694338405105313,
+      "n_window_distinct": 29,
+      "n_distinct": 149,
+      "n_window": 264
+    },
+    {
+      "qubit": 155,
+      "side": "below",
+      "filled": false,
+      "log_disagreement": -0.7646522056457989,
+      "abs_log_disagreement": 0.7646522056457989,
+      "n_window_distinct": 30,
+      "n_distinct": 150,
+      "n_window": 264
+    },
+    {
+      "qubit": 10,
+      "side": "below",
+      "filled": false,
+      "log_disagreement": -0.6869900111776399,
+      "abs_log_disagreement": 0.6869900111776399,
+      "n_window_distinct": 29,
+      "n_distinct": 143,
+      "n_window": 264
+    },
+    {
+      "qubit": 39,
+      "side": "above",
+      "filled": false,
+      "log_disagreement": 0.4285201846993143,
+      "abs_log_disagreement": 0.4285201846993143,
+      "n_window_distinct": 30,
+      "n_distinct": 146,
+      "n_window": 264
+    },
+    {
+      "qubit": 147,
+      "side": "above",
+      "filled": false,
+      "log_disagreement": 0.42472088426648646,
+      "abs_log_disagreement": 0.42472088426648646,
+      "n_window_distinct": 30,
+      "n_distinct": 149,
+      "n_window": 264
+    },
+    {
+      "qubit": 35,
+      "side": "above",
+      "filled": false,
+      "log_disagreement": 0.4155055285200717,
+      "abs_log_disagreement": 0.4155055285200717,
+      "n_window_distinct": 29,
+      "n_distinct": 146,
+      "n_window": 264
+    },
+    {
+      "qubit": 44,
+      "side": "above",
+      "filled": false,
+      "log_disagreement": 0.41180297255202447,
+      "abs_log_disagreement": 0.41180297255202447,
+      "n_window_distinct": 29,
+      "n_distinct": 148,
+      "n_window": 264
+    }
+  ],
+  "n_selected": 8,
+  "admitted": {
+    "below": 62,
+    "above": 87,
+    "zero": 0
+  },
+  "zero_disagreement": [],
+  "below_window_floor": [
+    11,
+    72,
+    108
+  ],
+  "excluded_controls": [
+    48,
+    54,
+    105,
+    112
+  ],
+  "short_side": null,
+  "filled_from": null,
+  "n_filled": 0
+}
