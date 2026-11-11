@@ -31,8 +31,7 @@ fixture ``ibm_fez_20260513T121322Z_q72_missing_t1t2.json`` the T1 spread is
 
 Note, 2026-11-11 (Issue #64 decision D4, comment 6706908485): #64 does not add
 ``per_qubit_spread``. The function named above does not exist and PR-A1 ships
-without it, so this script stays the only home of the statistic. The ``ddof=1``
-statement above stands as written.
+without it. The ``ddof=1`` statement above stands as written.
 
 Read-only: the archive is never checked out, never written to, and the network
 is never touched. Requires ``git fetch superconducted-noise-engine

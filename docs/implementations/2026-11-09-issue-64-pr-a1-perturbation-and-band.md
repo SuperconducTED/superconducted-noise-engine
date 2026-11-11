@@ -465,7 +465,7 @@ dated note under the original text, which is left as written; no value changes.
 
 | Place | Note |
 | --- | --- |
-| `scripts/feature_distribution.py`, module docstring | #64 does not add `per_qubit_spread`; this script stays the only home of the statistic; the `ddof=1` statement stands |
+| `scripts/feature_distribution.py`, module docstring | #64 does not add `per_qubit_spread`; the function named there does not exist; the `ddof=1` statement stands |
 | `scripts/feature_distribution.py`, the comment above the private import | there is nothing to import instead, so the private import stays |
 | `tests/test_feature_distribution.py::test_compute_stats_uses_ddof_one_not_ddof_zero`, docstring | the pin stands on its own |
 | `docs/numerical-claims.md`, NC-042's note | the same statement; the value and the "Last verified" date are unchanged |
@@ -487,8 +487,16 @@ looks like and what it gave.
 
 All of them reproduced the scratch results: the pin's values; 2 of 2, 16 of 16 and 32 of 32 mutants
 behaving as recorded, plus C05b and the negative-count mutant; the three step 4 probes; one `to_dict` call
-per run; and 1, 2 and 1025 calls under the two simulated Aer behaviours. The step 1 mutation script edits
-the old `__iter__`, so it was run in a throwaway checkout of `75b86dbb`. No source file was left modified.
+per run; and 1, 2 and 1025 calls under the two simulated Aer behaviours. One of the step 1 script's two
+mutants (M2) edits the old `__iter__`, which step 2 replaced, so that script was run in a throwaway
+checkout of `75b86dbb`; the other (M1) edits `_compute_crisp_params` and is not tied to that commit. No
+source file was left modified.
+
+**A correction, the same day.** The first version of two of D4's notes (the script's module docstring and
+NC-042's note, both in `1cc60374`) added that the script "stays the only home of the statistic". That is
+false: `training/dataset.py` computes the same `*_qubit_std` with `ddof=1` for the training set's rows. The
+check behind the sentence had searched for the name `per_qubit_spread`, not for the statistic. The clause
+is removed in the commit that carries this paragraph; the notes now say only what D4 decided.
 
 Two things changed between scratch and folder, neither affecting a mutant or a prediction: the scripts
 were renamed and made to pass ruff, and the step 4 mutation run is now on the test file's 75 cases (the

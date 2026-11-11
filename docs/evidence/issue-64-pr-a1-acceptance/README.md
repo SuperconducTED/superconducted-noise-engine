@@ -27,7 +27,7 @@ predictions are in its docstring. "Killed" means the test file failed.
 | Script | Step | What it checks | A pass looks like |
 | --- | --- | --- | --- |
 | `capture_identity_pin.py` | 1 | prints the values the identity pin holds, and that spawning seed sequences draws nothing from the caller's stream | seed 1; three identical `crisp_params`; `stream untouched by spawn: True` |
-| `mutate_step1_identity_pin.py` | 1 | 2 mutants of the old `__iter__`, on a checkout of `75b86dbb` | M1 fails the literal pin only; M2 fails the relational, literal and density-matrix pins |
+| `mutate_step1_identity_pin.py` | 1 | 2 mutants, on a checkout of `75b86dbb`: M1 scales every model's `crisp_params` in `_compute_crisp_params`; M2 scales members 1 and later inside the old `__iter__`, which step 2 replaced (the script's docstring says both edit `__iter__`; only M2 does) | M1 fails the literal pin only; M2 fails the relational, literal and density-matrix pins |
 | `mutate_step2_seeding.py` | 2 | 16 mutants of the ensemble's seeding and of `IdentityPerturbation` | all killed |
 | `quantile_probe.py` | 4 | 20,000 random tables: the 0 and 1 quantiles are exactly min and max under `linear`; no disorder; three summations of seven sevenths | zeros on the first line; `numpy.sum` below 1.0, `math.fsum` exactly 1.0 |
 | `methods_probe.py` | 4 | the same min/max equality for each of numpy's 13 methods, 3,000 tables each | `0 of 3000` thirteen times |
