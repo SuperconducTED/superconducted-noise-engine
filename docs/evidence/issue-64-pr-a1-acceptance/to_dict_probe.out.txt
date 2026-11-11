@@ -1,0 +1,17 @@
+qiskit 2.4.1 qiskit-aer 0.17.2
+direct call: model 1 error 1
+automatic       run option         shots     1: model.to_dict 1, error.to_dict 1, counts sum 1, minority outcome 0
+automatic       run option         shots  1024: model.to_dict 1, error.to_dict 1, counts sum 1024, minority outcome 136
+automatic       run option         shots  8192: model.to_dict 1, error.to_dict 1, counts sum 8192, minority outcome 1090
+automatic       constructor option shots     1: model.to_dict 1, error.to_dict 1, counts sum 1, minority outcome 0
+automatic       constructor option shots  1024: model.to_dict 1, error.to_dict 1, counts sum 1024, minority outcome 136
+automatic       constructor option shots  8192: model.to_dict 1, error.to_dict 1, counts sum 8192, minority outcome 1090
+density_matrix  run option         shots     1: model.to_dict 1, error.to_dict 1, counts sum 1, minority outcome 0
+density_matrix  run option         shots  1024: model.to_dict 1, error.to_dict 1, counts sum 1024, minority outcome 136
+density_matrix  run option         shots  8192: model.to_dict 1, error.to_dict 1, counts sum 8192, minority outcome 1090
+density_matrix  constructor option shots     1: model.to_dict 1, error.to_dict 1, counts sum 1, minority outcome 0
+density_matrix  constructor option shots  1024: model.to_dict 1, error.to_dict 1, counts sum 1024, minority outcome 136
+density_matrix  constructor option shots  8192: model.to_dict 1, error.to_dict 1, counts sum 8192, minority outcome 1090
+density_matrix, save_density_matrix, shots 1: model.to_dict 1 error.to_dict 1
+automatic, two circuits in one run, shots 1024: model.to_dict 1 error.to_dict 1
+automatic, no noise model, shots 1024: model.to_dict 0 error.to_dict 0

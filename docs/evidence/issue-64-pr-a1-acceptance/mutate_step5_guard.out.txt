@@ -1,0 +1,23 @@
+none      passed | 13 passed in 2.55s | 0 failed
+extra     KILLED | 10 failed, 3 passed in 1.58s | 10 failed
+           test_one_serialisation_per_multi_shot_run[constructor-automatic]
+           test_one_serialisation_per_multi_shot_run[constructor-density_matrix]
+           test_one_serialisation_per_multi_shot_run[run-automatic]
+           test_one_serialisation_per_multi_shot_run[run-density_matrix]
+           test_the_harness_error_serialisations_do_not_depend_on_shots
+           test_the_harness_serialises_once_per_member_and_circuit[counts-1024]
+           test_the_harness_serialises_once_per_member_and_circuit[counts-1]
+           test_the_harness_serialises_once_per_member_and_circuit[density_matrix-1024]
+           test_the_number_of_serialisations_does_not_depend_on_shots[automatic]
+           test_the_number_of_serialisations_does_not_depend_on_shots[density_matrix]
+per_shot  KILLED | 10 failed, 3 passed in 3.94s | 10 failed
+           test_one_serialisation_per_multi_shot_run[constructor-automatic]
+           test_one_serialisation_per_multi_shot_run[constructor-density_matrix]
+           test_one_serialisation_per_multi_shot_run[run-automatic]
+           test_one_serialisation_per_multi_shot_run[run-density_matrix]
+           test_the_harness_error_serialisations_do_not_depend_on_shots
+           test_the_harness_serialises_once_per_member_and_circuit[counts-1024]
+           test_the_harness_serialises_once_per_member_and_circuit[counts-1]
+           test_the_harness_serialises_once_per_member_and_circuit[density_matrix-1024]
+           test_the_number_of_serialisations_does_not_depend_on_shots[automatic]
+           test_the_number_of_serialisations_does_not_depend_on_shots[density_matrix]

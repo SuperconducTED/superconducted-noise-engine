@@ -1,0 +1,2 @@
+C05b: KILLED | 3 failed, 72 passed in 3.16s | ['test_adr022_property_1_identity[sevenths]', 'test_adr022_property_1_identity[state_trace_off]', 'test_adr022_property_4_monotonicity_with_aers_depolarizing_noise_exact']
+restored: True
