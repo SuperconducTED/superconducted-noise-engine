@@ -251,3 +251,135 @@ constructor `InputVectorPerturbation(scale, *, bounds, max_redraws=64)` holds no
 redraw rule tests `x + scale * z` against the bounds, and the member's offset is `x_i - x`. The ticket
 (its `from_snapshot` factory had the snapshot) and its comments do not settle this for the form the plan
 adopted. Step 3 waits for the owner's and the lead's answer; steps 4 and 5 do not depend on it.
+
+**Asked, 2026-11-11.** The lead sent the question to the owner as decision D6 in #64 comment 6789691655,
+with two options: the perturbation holds `x` (recommended there), or `x` is read at extraction time.
+Step 3 starts when she answers.
+
+## Results, 2026-11-11: step 4, the band and the coverage metric (laptop, provisional)
+
+Same environment as steps 1 and 2. Nothing below has run on Burak's desktop.
+
+| File | Change |
+| --- | --- |
+| `src/superconducted/benchmarks/metrics.py` | `IntervalBand` (frozen value), `interval_band(members, *, alpha, method="linear")`, `IntervalCoverage`; two private helpers, `_outcome_probabilities` and `_check_alpha`; two tolerances for density matrices. The four existing metrics are untouched. |
+| `tests/test_interval_band.py` (new) | 75 test cases in four sections: the band, the value's invariants, ADR-022's six properties, edges and input checks. |
+
+### What was built, and the mathematics behind three choices
+
+**The band.** Members' probability vectors `p_1 ... p_N` are laid on the sorted union of their outcomes
+(a member that never saw an outcome has probability 0 there), and per outcome `L = Q_alpha`,
+`U = Q_(1 - alpha)` through `numpy.quantile(..., method=method)`. `alpha` is a required keyword;
+`alpha`, `method` and `n_members` are stored on the band.
+
+**Choice 1: the `alpha = 0` band is exactly min and max.** PR-A2's invariant (the sum aggregate lies inside
+the `alpha = 0` band) needs the edges to be members' own values, with no interpolation residue. NumPy
+gives that for the default `linear` method: over 20,000 random count tables (2 to 39 members, 1 to 5
+outcomes, NumPy 2.4.4) the 0 and 1 quantiles equalled the per-outcome minimum and maximum bit for bit
+every time, and no table gave `L > U` or a central band outside the min/max band (`quantile_probe.py`).
+For the other twelve methods NumPy accepts, the min/max equality was checked on 3,000 tables each and
+held every time (`methods_probe.py`); the `L <= U` and nesting checks were run for `linear` only. Both
+probes are to be committed with the evidence in step 7, and a test pins the min/max equality on 200
+tables for each of the thirteen methods.
+
+**Choice 2: coverage is a ratio of masses, not a sum of probabilities.** The ticket's section 6.3 defines
+`C = sum_b q(b) 1[L(b) <= q(b) <= U(b)]` and promises `C(interval_band([q, q]), q) == 1.0` with no tolerance.
+Summing normalised probabilities cannot keep that promise: seven outcomes of probability 1/7 sum to
+`0.9999999999999998` under `numpy.sum`. So the code keeps two aligned arrays per result:
+
+- `probabilities`, on which membership in the band is decided. For counts it is `count / total`, the
+  same division for members and reference, so an identical member and reference compare equal bit for
+  bit and the inclusive edges need no tolerance. For a density matrix it is the diagonal itself.
+- `masses`, the unnormalised weights (the counts, or the diagonal), from which
+  `C = fsum(covered masses) / fsum(all masses)`.
+
+When every outcome is covered the two sums are the same number, so `C` is exactly 1.0. `C <= 1` holds
+because the masses are non-negative: the covered masses are then a subset of non-negative terms, and
+`math.fsum` is correctly rounded, hence monotone under adding non-negative terms. Non-negativity is
+enforced, not assumed: a density matrix's diagonal is clamped at 0, and a negative count is refused with
+`ValueError` (a `Counter` can hold one; without the refusal the reference `{"0": 3, "1": 3, "2": -1}` with
+both positive outcomes covered scores 1.2, which is now a test). For counts both sums are exact integers, so `C` is the correctly
+rounded value of a ratio of integers; the ticket's example gives `65 / 100`, which is the float `0.65`.
+
+**Choice 3: a density matrix's diagonal is used as it is, with two stated tolerances.** The diagonal is
+read in Qiskit's order (index `i` is the outcome whose bitstring is `i` in binary; rightmost character is
+qubit 0), not renormalised. A value outside `[0, 1]` or off the real axis by at most `1e-12` is clamped;
+beyond that the matrix is refused. A trace further than `1e-9` from 1 is refused. Both thresholds were
+checked against what Aer returns here (`tolerance_probe.py`, 10 matrices: the engine on GHZ-2, GHZ-3 and
+QFT-3 with 1 and 3 members, and four depolarizing references): no negative diagonal entry, largest
+imaginary part `9.4e-18`, largest distance of the trace from 1 `2.4e-15`. So neither threshold fires on
+these, with five to six orders of magnitude to spare, and the non-zero imaginary part shows an exact
+"imaginary part is zero" test would have refused a real result. Ten matrices is a small sample; it shows
+the thresholds are not tight, not that nothing can reach them.
+
+**An outcome the band never saw** has the band `[0, 0]`: reference mass there is uncovered, and nothing
+is dropped from the sum. **A reference on another register** (outcome keys of a different length from
+the band's) raises `ValueError`; it would otherwise score a silent zero.
+
+### ADR-022's six properties (criterion 6)
+
+| Property | Test | What it shows |
+| --- | --- | --- |
+| 1 Identity | `test_adr022_property_1_identity`, seven references | `C == 1.0` exactly, including sevenths, primes, and a matrix whose trace is `1 + 1e-10` |
+| 2 Asymmetry | `test_adr022_property_2_asymmetry` | a wide ensemble covers a narrow one's aggregate (1.0); the reverse is 0.0 |
+| 3 Bounds | `test_adr022_property_3_bounds` | 300 random cases in `[0, 1]`, reaching 0, 1 and the interior |
+| 4 Monotonicity | three tests | nested bands on 300 cases; Aer's depolarizing error exactly (members at `p` in 0.1 to 0.3: coverage 1 inside the range with the edges, 0 outside); the same at 20,000 shots with references more than 3 standard errors from an edge |
+| 5 Determinism | `test_adr022_property_5_determinism` | two seeded runs give the same band and the same value |
+| 6 Reference value | `test_adr022_property_6_reference_value` | the ticket's hand-derived example gives `0.65` exactly, and not the `0.75` a count of outcomes would give |
+
+`IntervalCoverage` has `name == "interval_coverage"` and does not subclass `BenchmarkMetric` (the ticket's
+FR-9), which a test asserts.
+
+### Departures from the ticket's text, for the owner
+
+1. **`method` is a field of `IntervalBand`.** FR-8 lists `support`, `lower`, `upper`, `alpha`, `n_members` and
+   says the method name "is stored"; it is stored as a sixth field.
+2. **`alpha` has no default** in `interval_band` (FR-8 wrote `alpha=0.0`). This is the plan's decision under
+   D2 and was announced in #64 comment 6744024748.
+3. **A central band is not widened to hold the member mean.** Bengisu's counterexample of 2026-10-26 (31
+   members at 0.1, one at 0.9, `alpha = 0.1`) is a test here: the band is `[0.1, 0.1]` and the mean 0.125 is
+   outside it.
+4. **Density-matrix handling is new text**, since the ticket does not say how a diagonal becomes outcomes:
+   Qiskit's bit order (pinned against `DensityMatrix.probabilities_dict` on an asymmetric state), the two
+   tolerances above, the same-shape and power-of-two checks.
+5. **`IntervalBand` copies and freezes its arrays**, as `TrainingSet` does and as issue #148 asks of the
+   other value types.
+
+### Mutation check
+
+`tests/test_interval_band.py` only; predictions written in the script before the run; the source restored
+from a backup copy after each mutant. All 34 were killed.
+
+| Mutants | What was mutated | Result |
+| --- | --- | --- |
+| C01 to C07 | coverage: each edge made exclusive, an unseen outcome treated as covered, outcomes counted instead of mass, probabilities summed, a density reference divided by its trace, the key-length check removed | all killed |
+| B01 to B14 | the band: quantile order swapped, `alpha` ignored, 0.5 accepted, each input check removed, bit order reversed, the clamp and each density-matrix check removed | all killed |
+| V01 to V11 | the value: arrays not copied, not frozen, each of nine invariants removed | all killed |
+| C05b | a plain `numpy.sum` of covered probabilities | killed by the sevenths identity case |
+| N01 | the negative-count refusal removed | killed by both negative-count tests |
+
+Two predictions were off (C05 and B05) and one held in a way worth writing down (B04):
+
+- **C05** summed the covered probabilities with Python's built-in `sum`. On Python 3.12 that is a
+  compensated sum for floats, so seven sevenths still gave 1.0 and the sevenths case did not fail; the
+  mutant died on the trace case instead. C05b is the mutant that was meant.
+- **B05** (the member-count check in `interval_band` removed) was predicted to survive for one member,
+  because `IntervalBand` repeats the check with the same message. It was killed by the empty-list half of
+  the same test. The one-member half is therefore covered twice, by design.
+- **B04** (`interval_band` not checking `alpha` itself) fails five of the six bad values; `alpha = 0.5` is
+  still refused with the right message by `IntervalBand`'s own check, as predicted.
+
+**Gates at this point**: `ruff check .`, `ruff format --check .`, `mypy --strict` (50 source files) and
+`scripts/check_ids.py` clean; the six files of criterion 9 show no difference against `origin/main`;
+`tests/test_metrics.py`, `tests/test_harness.py` and `tests/test_interval_band.py` together: 146 passed.
+With `tests/test_perturbation.py` and `tests/test_interfaces.py`, run at `df7353b6` before the two
+tightenings above: 202 passed.
+
+**The full suite was not completed for this step.** A run of `python -m pytest tests/ -q -p no:cacheprovider`
+started at `df7353b6` was still inside the slow archive test (`tests/test_feature_distribution.py`, one
+`git show` per archived file) after 50 minutes, against about 5 minutes in the morning's runs, while
+other processes on the laptop were running git at the same time. Its log is `suite-step4.log` in the
+scratch evidence folder. Nothing in `metrics.py` is imported by a module outside the tests named above
+and `scripts/resolution_measurement.py`, which uses the three older metrics only. The full suite on the
+exact pins remains criterion 11's gate at step 7; the expected count there is 1211 + 75 for this step.
+
