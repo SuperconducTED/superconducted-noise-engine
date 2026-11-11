@@ -139,3 +139,12 @@ The acceptance run's command, seed and `calibration-data` ref go in `docs/eviden
   `docs/findings/2026-10-23-adr-015-what-an-interval-needs.md`.
 - ADR-002, ADR-012, ADR-015, ADR-016, ADR-021, ADR-022, ADR-024, ADR-027 in `docs/decisions.md`.
 - #84 comment 5970300012 (File 03); PR #121; PR #123 (the scoring-row protocol); #79 (`a0ea1161`).
+
+## Update, 2026-11-11: the base moved before any code
+
+The plan above was written on `main` @ `d929424a`. Before the first line of code, `main` had moved to
+`cd277a64` (PR #144, PR #146 and PR #136). It was merged into this branch as `29e4b93d`, so every step
+below is built and measured on `cd277a64`'s code, and that is the tree the identity pin of step 1 was
+captured on. PR #136 is the one that touches a file of this plan: it changed `FuzzyNoiseModel.prepare`'s
+error handling in `aer_factory.py`. It did not touch `FuzzyNoiseModelEnsemble`, which is the class step 2
+changes. The plan's decisions and acceptance criteria are unchanged.
