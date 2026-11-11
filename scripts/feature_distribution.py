@@ -29,6 +29,11 @@ is not a measurement. ``ddof=1`` matches ``calibration/features.py::per_qubit_sp
 fixture ``ibm_fez_20260513T121322Z_q72_missing_t1t2.json`` the T1 spread is
 45.4847 with ``ddof=1`` and 45.3377 with ``ddof=0``.
 
+Note, 2026-11-11 (Issue #64 decision D4, comment 6706908485): #64 does not add
+``per_qubit_spread``. The function named above does not exist and PR-A1 ships
+without it, so this script stays the only home of the statistic. The ``ddof=1``
+statement above stands as written.
+
 Read-only: the archive is never checked out, never written to, and the network
 is never touched. Requires ``git fetch superconducted-noise-engine
 calibration-data`` first -- the remote is not ``origin``.
@@ -66,6 +71,8 @@ from scripts.init_error_analysis import _git, list_snapshots, read_snapshot
 # would let the two drift silently, which is the one failure this column exists
 # to rule out. #64 makes `calibration/features.py::per_qubit_spread` the single
 # home for this loop; when it lands, import that instead.
+# Note, 2026-11-11 (Issue #64 decision D4): #64 does not add `per_qubit_spread`,
+# so there is nothing to import instead and the private import stays.
 from superconducted.calibration.features import (
     ArchiveUnitFeatureExtractor,
     _coerce_finite_float,
