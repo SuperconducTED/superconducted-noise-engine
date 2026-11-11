@@ -453,3 +453,62 @@ this spy; the test would then still pass with one `to_dict` call.
 together: 120 passed. The full suite was not re-run for this step, which adds a test file and changes no
 source; the expected count at step 7's gate is 1211 + 75 + 13 = 1299 before step 3's tests.
 
+## Results, 2026-11-11: the parts of step 7 that do not wait on step 3
+
+Step 7 has four parts. Three are done here; the fourth (the final gates and this record's last results)
+comes after steps 3 and 6.
+
+### D4's four dated notes (criterion 10), commit `1cc60374`
+
+Bengisu's D4 keeps `per_qubit_spread` out of PR-A. Four places still said #64 adds it. Each now carries a
+dated note under the original text, which is left as written; no value changes.
+
+| Place | Note |
+| --- | --- |
+| `scripts/feature_distribution.py`, module docstring | #64 does not add `per_qubit_spread`; this script stays the only home of the statistic; the `ddof=1` statement stands |
+| `scripts/feature_distribution.py`, the comment above the private import | there is nothing to import instead, so the private import stays |
+| `tests/test_feature_distribution.py::test_compute_stats_uses_ddof_one_not_ddof_zero`, docstring | the pin stands on its own |
+| `docs/numerical-claims.md`, NC-042's note | the same statement; the value and the "Last verified" date are unchanged |
+
+`tests/test_feature_distribution.py` without its slow archive test: 27 passed. `scripts/check_ids.py` clean.
+
+### D5's ownership row (criterion 10), commit `1cc60374`
+
+`docs/team.md` names Bengisu as primary owner of `integration/perturbation.py` and Mert as secondary, in
+the module-ownership table and in her list of primary modules.
+
+### The evidence folder (criterion 11), commits `95c2d69f` and the one after it
+
+`docs/evidence/issue-64-pr-a1-acceptance/` now holds the thirteen check scripts of steps 1, 2, 4 and 5 and
+the outputs of their runs. The scripts went in first, at `95c2d69f`, with no output; every `*.out.txt`
+comes from a run of the committed copy after that commit, because the first runs were made from a session
+scratch folder and are not evidence. The folder's `README.md` lists each script, its command, what a pass
+looks like and what it gave.
+
+All of them reproduced the scratch results: the pin's values; 2 of 2, 16 of 16 and 32 of 32 mutants
+behaving as recorded, plus C05b and the negative-count mutant; the three step 4 probes; one `to_dict` call
+per run; and 1, 2 and 1025 calls under the two simulated Aer behaviours. The step 1 mutation script edits
+the old `__iter__`, so it was run in a throwaway checkout of `75b86dbb`. No source file was left modified.
+
+Two things changed between scratch and folder, neither affecting a mutant or a prediction: the scripts
+were renamed and made to pass ruff, and the step 4 mutation run is now on the test file's 75 cases (the
+scratch run was on 61, before the negative-count refusal and the per-method min/max test).
+
+The folder does not hold the acceptance run of criterion 8, which is step 6.
+
+### Where the criteria stand after this
+
+| # | Criterion | State |
+| --- | --- | --- |
+| 1 | identity pin | met, with the stated deviation (relational pin exact, literal at a relative `1e-9`) |
+| 2 | `perturb` does not mutate, shapes kept | met for `IdentityPerturbation`; `InputVectorPerturbation` is step 3 |
+| 3 | repeat iteration, `build(seed)` pure, `len()`, unseeded raise | met |
+| 4 | `InputVectorPerturbation` | not built: waits on D6 |
+| 5 | `interval_band` and `IntervalBand` | met |
+| 6 | ADR-022's six properties for `IntervalCoverage` | met |
+| 7 | the `to_dict` guard | met |
+| 8 | the acceptance run | not run: needs step 3 |
+| 9 | protected files untouched | holds against `origin/main` at every step so far |
+| 10 | D4's notes, D5's row, docstrings with units and contracts | notes and row in; docstrings written for every new symbol so far |
+| 11 | mutation checks and gates | mutation checks done for steps 1, 2, 4, 5; ruff, format, mypy and `check_ids` clean; full suite last run at `df7353b6` (1272 passed), to be run again at the end |
+
