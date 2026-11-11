@@ -383,3 +383,65 @@ scratch evidence folder. Nothing in `metrics.py` is imported by a module outside
 and `scripts/resolution_measurement.py`, which uses the three older metrics only. The full suite on the
 exact pins remains criterion 11's gate at step 7; the expected count there is 1211 + 75 for this step.
 
+**Later the same day: that run finished.** `1272 passed in 7333.27s (2:02:13)`, at `df7353b6`. That is
+1211 plus the 61 cases the test file had at that commit, as expected. It does not cover `ba675ec0`, which
+added 14 cases and the negative-count refusal; those were run directly (75 passed). The two hours were
+spent almost entirely in the archive test.
+
+## Results, 2026-11-11: step 5, the `to_dict` guard (laptop, provisional)
+
+| File | Change |
+| --- | --- |
+| `tests/test_aer_serialises_once.py` (new) | 13 test cases. No source file changes in this step. |
+
+**What it guards.** ADR-002's invariant is that Aer has no per-shot Python hook: `NoiseModel.to_dict` runs
+once at submission and the C++ controller takes over. Until now that was a sentence in
+`integration/aer_factory.py`'s docstring. The test measures it.
+
+**Measured first, asserted second** (`to_dict_probe.py`, qiskit 2.4.1, qiskit-aer 0.17.2). A spy on the
+class attributes `NoiseModel.to_dict` and `QuantumError.to_dict` counts calls on any instance, including a
+copy Aer might make:
+
+| Case | `NoiseModel.to_dict` calls | `QuantumError.to_dict` calls |
+| --- | --- | --- |
+| a direct call (the spy fires) | 1 | 1 |
+| one circuit, a one-error model, 1, 1024 and 8192 shots; automatic and density-matrix methods; model passed to `run` or to the constructor (12 runs) | 1 each | 1 each |
+| the harness's state mode (`save_density_matrix`, `shots=1`) | 1 | 1 |
+| no noise model, 1024 shots | 0 | 0 |
+
+At 1024 shots the non-ideal outcome appeared 136 times, so the one serialised model acted in many shots.
+The call sits in `qiskit_aer/backends/backend_utils.py::cpp_execute_circuits`.
+
+**The tests.**
+
+| Section | Tests | What they pin |
+| --- | --- | --- |
+| 1 The spy and the guard can fail | 3 | a direct call is counted; no noise model gives 0; a runner that serialises once per shot trips the guard's own assertion |
+| 2 Aer itself (criterion 7) | 6 | one serialisation in a 1024-shot run, for both methods and both ways of passing the model, with the noise visible in the counts; the count is the same at 1, 1024 and 8192 shots |
+| 3 The engine through the harness | 4 | three members and two circuits are six runs and six serialisations, in counts mode at 1 and 1024 shots and in density-matrix mode; the per-error count is the same at 1 and 1024 shots |
+
+They pin the behaviour and not the version: nothing asserts `qiskit_aer.__version__`. Each run holds one
+circuit, which is how the project runs Aer since the batching defect recorded as NC-097. (The probe also
+ran two circuits in one `run()`: still one `to_dict` call. No test pins that.)
+
+**Can the guard fail?** The thing under guard is Aer, so the mutants change Aer for one test session
+through a pytest plugin (`aer_mutant_plugin.py`), replacing the name `cpp_execute_circuits` inside
+`qiskit_aer.backends.aer_simulator`. No installed file is edited. Predictions were written first and both
+held:
+
+| Simulated Aer | Result |
+| --- | --- |
+| one more serialisation per run | 10 of 13 fail: all of sections 2 and 3. Section 1 passes, as predicted, because it never runs a noise model through Aer. |
+| one more serialisation per shot | the same 10 fail |
+
+**What this does not show.** It counts Python-level calls of `to_dict`. It says nothing about what the
+C++ controller does with the serialised model per shot, which is ADR-002's point: sampling the error
+happens there. A future Aer that reached the model through another Python method would not be seen by
+this spy; the test would then still pass with one `to_dict` call.
+
+**Gates at this point**: `ruff check .`, `ruff format --check .`, `mypy --strict` (50 source files) and
+`scripts/check_ids.py` clean; the six files of criterion 9 show no difference against `origin/main`;
+`tests/test_aer_serialises_once.py`, `tests/test_interval_band.py` and `tests/test_perturbation.py`
+together: 120 passed. The full suite was not re-run for this step, which adds a test file and changes no
+source; the expected count at step 7's gate is 1211 + 75 + 13 = 1299 before step 3's tests.
+
