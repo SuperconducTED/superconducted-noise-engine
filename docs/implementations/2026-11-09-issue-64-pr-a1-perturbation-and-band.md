@@ -429,10 +429,18 @@ through a pytest plugin (`aer_mutant_plugin.py`), replacing the name `cpp_execut
 `qiskit_aer.backends.aer_simulator`. No installed file is edited. Predictions were written first and both
 held:
 
-| Simulated Aer | Result |
-| --- | --- |
-| one more serialisation per run | 10 of 13 fail: all of sections 2 and 3. Section 1 passes, as predicted, because it never runs a noise model through Aer. |
-| one more serialisation per shot | the same 10 fail |
+| Simulated Aer | `to_dict` calls in one 1024-shot run | Result |
+| --- | --- | --- |
+| unchanged | 1 | 13 pass |
+| one more serialisation per run | 2 | 10 of 13 fail: all of sections 2 and 3. Section 1 passes, as predicted, because it never runs a noise model through Aer. |
+| one more serialisation per shot | 1025 | the same 10 fail |
+
+**A correction to the first run of this check.** The first version of the per-shot simulation took the
+shot count from the assembled circuits, where it is 1, so it made one extra call per run and was the same
+mutant as the row above it. It failed the same ten tests, and with tracebacks switched off the names
+alone could not show that. An advisor pass asked for the counts; `mutate_step5_counts.py` printed 2 where
+1025 was claimed. The plugin now reads the run's config, the count is 1025, and the ten tests fail as
+before. The middle column above is from that corrected run.
 
 **What this does not show.** It counts Python-level calls of `to_dict`. It says nothing about what the
 C++ controller does with the serialised model per shot, which is ADR-002's point: sampling the error

@@ -199,10 +199,13 @@ def test_the_harness_serialises_once_per_member_and_circuit(
     mode: str,
     shots: int,
 ) -> None:
-    """Three members and two circuits are six runs, so six serialisations, at any shot count.
+    """Three members and two circuits are six runs, so six serialisations.
 
-    This is the ensemble design of ADR-002 seen from the spy: uncertainty comes
-    from the number of models, each serialised once, never from shots.
+    Counts mode is run at 1 shot and at 1024. In density-matrix mode the
+    harness always runs one shot, whatever ``shots`` is given, so that case
+    pins the mode and not a shot count. This is the ensemble design of ADR-002
+    seen from the spy: uncertainty comes from the number of models, each
+    serialised once, never from shots.
     """
     circuits = [ghz_state_circuit(2), qft_circuit(2)]
     ensemble = make_benchmark_ensemble(3)
