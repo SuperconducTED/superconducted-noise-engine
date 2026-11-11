@@ -58,6 +58,7 @@ draft stays unfrozen until the rest of section 6 is done.
 | Scores during the run | operations visible daily; scores, the interim report and the `T1` fit sealed until day 15; the data branch gets job ids and operations daily, the rest on day 15 | section 3.12 | **amendment 27, 2026-11-08** |
 | Minimum completed jobs | at least 10 of 14 Arm A days and 10 of 13 Arm B jobs, and three non-empty batches per arm; otherwise inconclusive | section 3.12 | **amendment 28, 2026-11-08** |
 | Readings, descriptive estimates | every outcome combination read in section 3.12's table; `c` and `s_res` registered as descriptive | section 3.12 | **amendments 29, 30, 2026-11-08** |
+| Predictor implementation, the commit, for the control test | `scripts/hardware_test_predictors.py` at PR #142's merge commit, named at the freezing commit; it replaces `5c98f264` because amendment 37's control test is built in `--mode controls` | PR #142; section 3.14 | **amendment 38, 2026-11-09**; moves amendment 14's pin |
 
 ## 3. The four proposals
 
@@ -690,6 +691,48 @@ before the freezing commit: they are the rule the two of them agree, and her rev
 (`e639cf86`), and @bengisucvd read sections 3.11 and 3.12 and approved (amendment 37). Still owed on PR #142 before the
 freezing commit: amendment 37's new third-row text, `c`'s interval and the controls test.
 
+### 3.14 Amendment of 2026-11-09, after PR #135's merge
+
+Appended 2026-11-09, before the freezing commit and before any QPU job. It changes no decision rule, threshold or null
+value, and the sections above are not edited.
+
+38. **The predictor-code pin moves, for amendment 37's control test.** Amendment 37 put the test of a control that is
+    not operational at the freeze inside `--mode controls`, which is in `scripts/hardware_test_predictors.py`, the file
+    amendment 14 pins at `5c98f264`. Amendment 37 did not say that this moves the pin. Amendment 14 says a move takes
+    another dated amendment, and this is it. The pin moves to PR #142's merge commit, named at the freezing commit, as
+    amendment 13 named PR #132's.
+
+    Compared definition by definition with `5c98f264` (PR #142 at `bbb209bb`, the code unchanged since `d45edaac`):
+    the module docstring gains one sentence; `freeze_controls` takes the marked qubits and skips them; `main`'s
+    controls branch reads the newest archived file at or before `--at` again and records what it found in
+    `controls.json`; and two functions are added, `not_operational_in` and `_not_operational_at_freeze`. The imports,
+    the `__main__` guard, the other 24 functions and classes and all 8 constants are unchanged, among them `collect`,
+    `predictor_rows`, `execution_rows`, `select_balanced`, `load_controls`, `write_outputs` and `propose_controls`. So
+    `reading`, `level`, `band` and the discriminating selection cannot move, and since `main` differs only in its
+    controls branch, `--mode submission` and `--mode execution` are unchanged. The dry run runs PR #140's
+    `scripts/hardware_reading_vs_level.py`, which imports from the predictors only unchanged definitions (`collect`,
+    `predictor_rows`, `execution_rows`, `select_balanced`, `load_controls` and three names); at `14fbcf05` it wrote
+    all 8 of its files identically, with `compare_dry_run.py` exit 0.
+
+    How a marked candidate is replaced (the lead's decision, 2026-11-09): it is skipped and proposal D's ranking is
+    kept, so the next qubit in the same order takes its place and the median does not move. This is amendment 37's
+    wording read literally ("The next candidate by proposal D's rule takes its place"). The test reads the newest
+    archived file at or before `--at`, the one `reading` comes from: an `x` or `sx` `gate_error` of at least 1 marks a
+    qubit, and so does absence from the target's `x`, `sx` or `measure` when that file has a configuration. Without a
+    configuration the file has no target, so a qubit that IBM flags only as not operational (an `operational` value
+    of 0, which removes it from a converted target) is not marked there; `ibm_fez` marks its dead qubits by
+    `gate_error` 1, which is read either way. The new code imports PR #140's `scripts/hardware_reading_vs_level.py`
+    (amendment 20's `not_operational_qubits`) only when `--mode controls` runs. That file's commit is named at the
+    freezing commit, as amendment 14 already says.
+
+    Measured on PR #142, with the predictions committed first (`59ba1fd0`): with the test and without it,
+    `--mode controls` gives the same four controls at the section 3.9 rehearsal's instant (`7adda803`,
+    2026-10-28T18:40:46Z: 144, 110, 140, 77; qubit 72 marked, no candidate skipped) and at the archive tip of
+    2026-11-09 (`60d082b0`, 2026-11-09T12:11:46Z: 45, 147, 42, 142; qubits 72, 148 and 149 marked, each by `x` and
+    `sx` `gate_error` 1, no candidate skipped). The tip's four differ from section 3.9's because the archive grew from
+    2,398 to 2,817 files; section 3.9's four were never the frozen ones. Laptop, provisional. The record is the stage 3
+    section of `docs/implementations/2026-11-05-hardware-test-submission.md` on PR #142.
+
 ## 4. The budget
 
 The lead stated on 2026-10-24 that the QPU budget is covered. The design's usage-page check of
@@ -775,6 +818,11 @@ Appended; the tables above are not edited.
 | Amendments 16 to 37 | Mert | sections 3.11 and 3.12 |
 | The controls re-run at the freezing ref (proposal D) | Mert | with amendment 37's test, after PR #142's code |
 | The second account for the daily cadence | Mert names it | before job 2 (section 5) |
+
+**Later on 2026-11-09.** PR #142 built amendment 37's three code items and was pushed at `bbb209bb`, so the row above
+that says they are owed is out of date. The controls re-run at the freezing ref now runs that test. Because the test
+changes the pinned predictor file, the freeze also waits on amendment 38 (section 3.14), which moves the pin to
+PR #142's merge commit.
 
 ## 7. Related
 

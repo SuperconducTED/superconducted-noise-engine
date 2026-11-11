@@ -18,8 +18,8 @@ Two conventions that look inconsistent until you read them together (NFR-5):
   :class:`ClampingFeatureExtractor` moves it onto the boundary and counts it.
   Its one exception is a **non-finite** component, which raises: that is not a
   measurement, and clamping cannot absorb it -- ``np.clip`` preserves NaN, and a
-  NaN reaching the channel installs maximal damping while every viability check
-  stays green. See :meth:`ClampingFeatureExtractor.extract`.
+  NaN can evade viability checks and is rejected only when an eligible channel
+  is projected. See :meth:`ClampingFeatureExtractor.extract`.
 
 No direct qiskit use here; qiskit arrives transitively through
 ``superconducted.interfaces``, which imports it at module level for the ABCs
@@ -569,8 +569,8 @@ def anchored_rule_base(
     allocated consequent array, because ``TSKRule`` aliases the array it is given.
 
     Raises ``ValueError`` on a length mismatch, a non-finite target (a NaN bias
-    would install maximal damping while passing every viability check, NFR-5),
-    or an inconsistent ``output_dim``.
+    could evade viability checks and fail later during channel projection,
+    NFR-5), or an inconsistent ``output_dim``.
     """
     input_dim = len(per_input_mfs)
     if input_dim == 0:
@@ -729,10 +729,9 @@ class ClampingFeatureExtractor(CalibrationFeatureExtractor):
         sits outside the model's stated domain, and a NaN is not a measurement.
         Letting it through would be worse than crashing -- ``np.clip`` preserves
         NaN, every firing strength then goes NaN, the defuzzifier does not raise
-        (the sum is NaN, not zero), ``KrausChannelProjector`` maps NaN to 1.0 and
-        installs maximal damping, and ``is_identity_damping`` reports that vector
-        as the identity channel. The run would be wrong in both directions at
-        once and every viability check would stay green (NFR-5).
+        (the sum is NaN, not zero), ``KrausChannelProjector`` rejects it (#75), but
+        ``is_identity_damping`` reports that vector as the identity channel, so
+        the failure would surface late and at the wrong layer (NFR-5).
         ``BasicCalibrationVectorizer`` cannot produce one -- it drops non-finite
         Nduv values and raises when nothing is usable -- so this guard is for the
         wrappers that compose with this one, ``OffsetFeatureExtractor`` (#64)

@@ -31,7 +31,7 @@ from superconducted.fuzzy.membership import GaussianMF
 from superconducted.fuzzy.squashing import ProbabilityClip
 from superconducted.fuzzy.tsk import TSKRuleBase
 from superconducted.integration.aer_factory import FuzzyNoiseModel
-from superconducted.interfaces import CalibrationFeatureExtractor
+from superconducted.interfaces import CalibrationFeatureExtractor, SquashingStrategy
 from superconducted.types import CalibrationSnapshot
 
 if TYPE_CHECKING:
@@ -48,6 +48,7 @@ GATE_FIXTURE = (
 def _model(
     properties: dict[str, object],
     gate_eligibility_policy: GateEligibilityPolicy | None = None,
+    squashing: SquashingStrategy | None = None,
 ) -> FuzzyNoiseModel:
     rule_base = TSKRuleBase.from_grid(
         per_input_mfs=[[GaussianMF(center=0.0, sigma=1.0)]],
@@ -80,7 +81,7 @@ def _model(
         feature_extractor=ConstantExtractor(),
         rule_base=rule_base,
         defuzzifier=WeightedAverageDefuzzifier(),
-        squashing=ProbabilityClip(),
+        squashing=squashing if squashing is not None else ProbabilityClip(),
         channel_projector=KrausChannelProjector(NoOpNormalization()),
         fuzzification_strategy=PostGateFuzzification(),
         **(
@@ -89,6 +90,65 @@ def _model(
             else {"gate_eligibility_policy": gate_eligibility_policy}
         ),
     )
+
+
+class _FixedSquashing(SquashingStrategy):
+    def __init__(self, values: list[float]) -> None:
+        self._values = values
+
+    def squash(self, raw: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+        return np.asarray(self._values, dtype=np.float64)
+
+
+@pytest.mark.parametrize(
+    ("values", "message"),
+    [
+        ([1.5, 0.1], "gamma must be a finite probability"),
+        ([-0.1, 0.1], "gamma must be a finite probability"),
+        ([0.2, 1.5], "lambda must be a finite probability"),
+        ([np.nan, 0.1], "gamma must be a finite probability"),
+        ([np.nan, np.nan], "gamma must be a finite probability"),
+        ([0.1], "at least 2 entries"),
+    ],
+)
+def test_prepare_propagates_invalid_projector_parameters(values: list[float], message: str) -> None:
+    fixture = json.loads(GATE_FIXTURE.read_text(encoding="utf-8"))
+    model = _model(fixture["properties"], squashing=_FixedSquashing(values))
+    circuit = QuantumCircuit(1)
+    circuit.sx(0)
+
+    with pytest.raises(ValueError, match=message):
+        model.prepare(circuit)
+
+
+def test_prepare_installs_a_valid_projector_channel() -> None:
+    fixture = json.loads(GATE_FIXTURE.read_text(encoding="utf-8"))
+    model = _model(fixture["properties"], squashing=_FixedSquashing([0.2, 0.1]))
+    circuit = QuantumCircuit(1)
+    circuit.sx(0)
+
+    _, noise_model = model.prepare(circuit)
+
+    assert noise_model.noise_instructions == ["sx"]
+
+
+def test_prepare_still_skips_unsupported_multiqubit_channels() -> None:
+    from superconducted.interfaces import GateEligibilityPolicy
+
+    class CxIsEligible(GateEligibilityPolicy):
+        def eligible_operations(
+            self, snapshot: CalibrationSnapshot
+        ) -> frozenset[tuple[str, tuple[int, ...]]]:
+            return frozenset({("cx", (0, 1))})
+
+    model = _model({}, CxIsEligible(), squashing=_FixedSquashing([0.2, 0.1]))
+    circuit = QuantumCircuit(2)
+    circuit.cx(0, 1)
+
+    with pytest.warns(UserWarning, match="installed no error"):
+        _, noise_model = model.prepare(circuit)
+
+    assert noise_model.noise_instructions == []
 
 
 def test_real_archive_gate_lengths_include_physical_sx_and_exclude_virtual_rz() -> None:

@@ -1,0 +1,48 @@
+<section id="e2" style="background:#E8EDF2;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">HOW THE ENGINES WORK</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">Engine 2: Interval Type-2 Fuzzy</h2>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:24px">
+<div style="display:flex;width:1664px">
+<div style="flex:none;width:240px;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">1 · Features</p>
+<p style="line-height:1.25">Mean T1, T2, readout error over all qubits</p>
+<p style="color:#5B6B82;line-height:1.25">(shared stage 1)</p>
+</div>
+<x-shape kind="arrow-right" style="flex:none;align-self:center;width:48px;height:24px;background:#5B6B82"></x-shape>
+<div style="flex:none;width:360px;background:#FCFBF8;border:2px solid #A84E0C;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">2a · Interval MFs</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;color:#5B6B82;line-height:1.25">IntervalGaussianMF</p>
+<p style="line-height:1.25">One centre, two widths σ_low &lt; σ_high: a lower and an upper curve</p>
+<p style="line-height:1.25">3 parameters each; 9 MFs, 27 premise parameters</p>
+</div>
+<x-shape kind="arrow-right" style="flex:none;align-self:center;width:48px;height:24px;background:#5B6B82"></x-shape>
+<div style="flex:none;width:380px;background:#FCFBF8;border:2px solid #A84E0C;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:6px">
+<p style="font-weight:700;line-height:1.25">2b · 27 rules</p>
+<p style="line-height:1.25">Lower and upper firing strengths: product t-norm on each curve</p>
+<p style="line-height:1.25">Same linear outputs as <span style="color:#2B6CB0">E1</span>:</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;line-height:1.25">y_r = A_r [x; 1]</p>
+</div>
+<x-shape kind="arrow-right" style="flex:none;align-self:center;width:48px;height:24px;background:#5B6B82"></x-shape>
+<div style="flex:none;width:540px;background:#FCFBF8;border:2px solid #A84E0C;border-radius:12px;padding:16px 20px;font-size:24px;line-height:1.25;color:#14213D;display:flex;flex-direction:column;gap:8px">
+<p style="font-weight:700;line-height:1.25">3 · Point and band</p>
+<div style="border-left:4px solid #A84E0C;padding:8px 16px;display:flex;flex-direction:column;gap:4px">
+<p style="line-height:1.25"><b>Point (shipped):</b> mean of the lower-firing and upper-firing weighted averages, then stages 4 to 7</p>
+<p style="line-height:1.25"><b>Decided:</b> textbook Nie-Tan, weights ½(f_low + f_up)</p>
+</div>
+<p style="border-left:4px dashed #A84E0C;padding:8px 16px;line-height:1.25"><b>Band (planned):</b> Karnik-Mendel [y_l, y_r], the decided band source; no code yet</p>
+</div>
+</div>
+<div style="display:flex;gap:32px;width:1664px">
+<div style="flex:1;background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px;font-size:24px;line-height:1.25">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:30px;font-weight:600;color:#14213D">Parameters</p>
+<p style="line-height:1.25">27 premise + 216 rule-output = 243, the same count as <span style="color:#2B6CB0">E1</span></p>
+</div>
+<div style="flex:2;background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px;font-size:24px;line-height:1.25">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:30px;font-weight:600;color:#14213D">Footprint today</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;color:#14213D;line-height:1.25">σ_high = sqrt(σ_low² + qubit_spread²)</p>
+<p style="line-height:1.25">It encodes the spread across qubits at one instant, not drift over time. The drift claim needs a footprint built from temporal variability (File 02, band design: measure first).</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">8 · Source: code on main @ 110cfad (parameterization.py:363, NieTanDefuzzifier); NC-046; File 02 Q2, approved as presented</p>
+</section>

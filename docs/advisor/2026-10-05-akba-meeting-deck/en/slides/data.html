@@ -1,0 +1,32 @@
+<section id="data" style="background:#F6F4EF;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">THE PROBLEM AND THE DATA</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">The Data We Have</h2>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:24px">
+<div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:32px">
+<div style="background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:120px;font-weight:600;line-height:1;color:#14213D">1,697</p>
+<p style="font-size:24px;line-height:1.35;color:#5B6B82">snapshot files, 2026-05-13 to 2026-10-03</p>
+</div>
+<div style="background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:120px;font-weight:600;line-height:1;color:#14213D">740</p>
+<p style="font-size:24px;line-height:1.35;color:#5B6B82">distinct device states</p>
+</div>
+<div style="background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:120px;font-weight:600;line-height:1;color:#14213D">132</p>
+<p style="font-size:24px;line-height:1.35;color:#5B6B82">distinct T1 / T2 vectors, about daily</p>
+</div>
+<div style="background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:120px;font-weight:600;line-height:1;color:#14213D">156</p>
+<p style="font-size:24px;line-height:1.35;color:#5B6B82">qubits on ibm_fez, with 176 couplers</p>
+</div>
+</div>
+<table style="width:1664px;font-size:24px;color:#3A4558;border:1px solid #D5DAE1">
+<tr style="background:#E8EDF2"><th style="width:30%;text-align:left;padding:10px 16px;color:#14213D">Feature group</th><th style="width:70%;text-align:left;color:#14213D">Fields</th></tr>
+<tr style="background:#FCFBF8"><td>6 core, time-varying, all files</td><td>T1, T2, readout error, prob_meas0_prep1, prob_meas1_prep0, sx gate error</td></tr>
+<tr style="background:#FCFBF8"><td>Duplicates</td><td>id, rx, x, xslow errors = sx on every qubit; measure error = readout error</td></tr>
+<tr style="background:#FCFBF8"><td>Recent, need a missing-data rule</td><td>init_error since 2026-08-04; measure_2 since 2026-08-13; measure_reset since 2026-09-03</td></tr>
+<tr style="background:#FCFBF8"><td>Engine uses today</td><td>3 features: T1, T2, readout error, each averaged over qubits</td></tr>
+</table>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">3 · Provisional: calibration-data ref 43607a2 (740 = states_total), to be registered by tasks T1, T12 · 156 qubits, 176 couplers: ibm_fez</p>
+</section>
