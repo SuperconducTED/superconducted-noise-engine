@@ -169,14 +169,18 @@ def _outcome_probabilities(
     which is exactly 1 when everything is covered even where the
     probabilities themselves do not sum to 1.0 in floating point.
 
-    Raises ``ValueError`` for an empty counts distribution, and for a density
-    matrix that is not square with a power-of-two dimension, whose diagonal
-    leaves ``[0, 1]`` or the real axis by more than ``_DIAGONAL_TOLERANCE``,
-    or whose trace is further than ``_TRACE_TOLERANCE`` from 1.
+    Raises ``ValueError`` for an empty counts distribution, for a negative
+    count (a ``Counter`` can hold one, and the coverage ratio is bounded by 1
+    only for non-negative masses), and for a density matrix that is not
+    square with a power-of-two dimension, whose diagonal leaves ``[0, 1]`` or
+    the real axis by more than ``_DIAGONAL_TOLERANCE``, or whose trace is
+    further than ``_TRACE_TOLERANCE`` from 1.
     """
     if result.counts is not None:
         keys = tuple(sorted(result.counts))
         masses = np.array([result.counts[key] for key in keys], dtype=np.float64)
+        if masses.size and masses.min() < 0.0:
+            raise ValueError(f"Counts must be non-negative; got a minimum of {masses.min()}")
         total = float(masses.sum())
         if total <= 0.0:
             raise ValueError("Cannot normalize an empty counts distribution")

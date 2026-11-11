@@ -109,8 +109,27 @@ def test_an_unknown_quantile_method_is_refused() -> None:
         interval_band(example_members(), alpha=0.1, method="nonsense")
 
 
-def test_the_min_max_band_is_exactly_the_per_outcome_minimum_and_maximum() -> None:
-    """``alpha = 0`` must give min and max with no interpolation residue.
+#: Every ``method`` numpy 2.4 accepts in ``numpy.quantile``.
+QUANTILE_METHODS = [
+    "inverted_cdf",
+    "averaged_inverted_cdf",
+    "closest_observation",
+    "interpolated_inverted_cdf",
+    "hazen",
+    "weibull",
+    "linear",
+    "median_unbiased",
+    "normal_unbiased",
+    "lower",
+    "higher",
+    "midpoint",
+    "nearest",
+]
+
+
+@pytest.mark.parametrize("method", QUANTILE_METHODS)
+def test_the_min_max_band_is_exactly_the_per_outcome_minimum_and_maximum(method: str) -> None:
+    """``alpha = 0`` must give min and max with no interpolation residue, under any method.
 
     PR-A2's invariant (the sum aggregate lies inside the ``alpha = 0`` band)
     is exact only if the band's edges are members' own values.
@@ -123,8 +142,9 @@ def test_the_min_max_band_is_exactly_the_per_outcome_minimum_and_maximum() -> No
         members = [counts({format(i, "02b"): int(v) for i, v in enumerate(row)}) for row in table]
         probabilities = table / table.sum(axis=1, keepdims=True)
 
-        band = interval_band(members, alpha=0.0)
+        band = interval_band(members, alpha=0.0, method=method)
 
+        assert band.method == method
         assert np.array_equal(band.lower, probabilities.min(axis=0))
         assert np.array_equal(band.upper, probabilities.max(axis=0))
 
@@ -238,6 +258,16 @@ def test_an_empty_counts_member_is_refused() -> None:
     empty = SimulationResult(shots=1, backend_label="test", counts=Counter())
     with pytest.raises(ValueError, match="empty"):
         interval_band([empty, counts({"0": 1})], alpha=0.0)
+
+
+def test_a_negative_count_is_refused() -> None:
+    """A ``Counter`` can hold one; a band or a coverage built on it would mean nothing."""
+    negative = SimulationResult(
+        shots=5, backend_label="test", counts=Counter({"0": 3, "1": 3, "2": -1})
+    )
+
+    with pytest.raises(ValueError, match="non-negative"):
+        interval_band([negative, counts({"0": 1, "1": 1, "2": 1})], alpha=0.0)
 
 
 # --------------------------------------------------------------------------
@@ -544,6 +574,27 @@ def test_an_empty_reference_is_refused() -> None:
 
     with pytest.raises(ValueError, match="empty"):
         IntervalCoverage().compute(band, empty)
+
+
+def test_a_reference_with_a_negative_count_is_refused() -> None:
+    """Without the refusal this reference scores 1.2: both positive outcomes are covered."""
+    band = interval_band(
+        [counts({"0": 3, "1": 3, "2": 0}), counts({"0": 3, "1": 3, "2": 0})], alpha=0.0
+    )
+    wide = IntervalBand(
+        support=band.support,
+        lower=np.zeros(3),
+        upper=np.ones(3),
+        alpha=0.0,
+        method="linear",
+        n_members=2,
+    )
+    negative = SimulationResult(
+        shots=5, backend_label="test", counts=Counter({"0": 3, "1": 3, "2": -1})
+    )
+
+    with pytest.raises(ValueError, match="non-negative"):
+        IntervalCoverage().compute(wide, negative)
 
 
 def test_coverage_reads_the_band_it_is_given(recwarn: pytest.WarningsRecorder) -> None:
