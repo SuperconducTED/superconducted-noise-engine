@@ -520,3 +520,9 @@ The folder does not hold the acceptance run of criterion 8, which is step 6.
 | 10 | D4's notes, D5's row, docstrings with units and contracts | notes and row in; docstrings written for every new symbol so far |
 | 11 | mutation checks and gates | mutation checks done for steps 1, 2, 4, 5; ruff, format, mypy and `check_ids` clean; full suite last run at `df7353b6` (1272 passed), to be run again at the end |
 
+
+**The full suite at this point, 2026-11-11.** `python -m pytest tests/ -q -p no:cacheprovider` at `622fafd7`:
+`1299 passed in 388.65s (0:06:28)`, laptop, exact pins. That is the expected 1211 + 75 + 13, and it covers
+every commit of steps 1, 2, 4 and 5 and the edits to `scripts/feature_distribution.py` and its test, with the
+slow archive test included. The commit that carries this paragraph changes this document only. Criterion 11
+still needs the run repeated after steps 3 and 6.
