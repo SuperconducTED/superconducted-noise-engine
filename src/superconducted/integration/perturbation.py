@@ -9,8 +9,8 @@ rule base and defuzzifier the member is built from.
 
 Status:
 
-- :class:`IdentityPerturbation` — full. The default: members are identical,
-  as they were before Issue #64.
+- :class:`IdentityPerturbation`: full. The default, under which members are
+  identical, as they were before Issue #64.
 """
 
 from __future__ import annotations
