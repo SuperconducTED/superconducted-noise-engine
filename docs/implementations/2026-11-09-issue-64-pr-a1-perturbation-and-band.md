@@ -148,3 +148,106 @@ below is built and measured on `cd277a64`'s code, and that is the tree the ident
 captured on. PR #136 is the one that touches a file of this plan: it changed `FuzzyNoiseModel.prepare`'s
 error handling in `aer_factory.py`. It did not touch `FuzzyNoiseModelEnsemble`, which is the class step 2
 changes. The plan's decisions and acceptance criteria are unchanged.
+
+## Results, 2026-11-11: steps 1 and 2 (laptop, provisional)
+
+Environment: Python 3.12.10, NumPy 2.4.4, Qiskit 2.4.1, qiskit-aer 0.17.2, pytest 9.0.3, ruff 0.15.12,
+mypy 1.20.2, installed from the pins. Nothing below has run on Burak's desktop.
+
+### Step 1: the identity pin (commit `75b86dbb`, tests only)
+
+Five tests in `tests/test_perturbation.py`, section 1, written and committed before `aer_factory.py`
+changed, so history shows them passing on `cd277a64`'s `__iter__`.
+
+| Test | What it pins |
+| --- | --- |
+| `test_the_pinned_seed_is_the_first_viable_one` | `first_viable_seed` returns seed 1 for this grid on the gate-bearing `ibm_fez` fixture, and `build(seed)` gives the same members twice. |
+| `test_every_member_equals_a_directly_built_model` | Each member's `crisp_params` is bit for bit the `crisp_params` of a `FuzzyNoiseModel` built directly from the same seven dependencies. |
+| `test_members_match_the_values_captured_before_the_wiring_changed` | The members' `crisp_params` equal `(0.0010631876854835232, 0.018299147946441743)` to a relative `1e-9`. |
+| `test_iterating_twice_gives_the_same_members` | Two passes over one ensemble agree bit for bit. |
+| `test_identical_members_preserve_the_density_matrix_exactly` | `rho_ens == rho_1` (Issue #58 section 6.3) through `simulate_engine` in density-matrix mode. |
+
+**A deviation from criterion 1's wording, stated here for the reviewers.** Criterion 1 says "bit-identical
+to the pin captured on `main`". The bit-identical part is the relational test (the second row), which is
+exact on any machine. The captured literal (the third row) is held to a relative `1e-9` and not to the
+bit, because the laptop and the desktop have differed in the last digits of other quantities (PR #149's
+evidence shows relative differences up to 3.7e-14 between them). The tolerance is nine orders of
+magnitude tighter than a relative jitter of 1e-3 moves a member, so it cannot hide a perturbed default.
+
+Mutation check on the unmodified tree, predictions written first: scaling every model's `crisp_params`
+by `1 + 1e-6` fails the literal pin only (as predicted, the relational pin cannot see a change that hits
+both sides); scaling members 1 and later by the same factor fails the relational pin, the literal pin
+and the density-matrix pin.
+
+### Step 2: the interface, the identity and the seeding
+
+| File | Change |
+| --- | --- |
+| `src/superconducted/interfaces.py` | `MemberPerturbation` ABC, with FR-1's signature and its contract in the docstring. |
+| `src/superconducted/integration/perturbation.py` (new) | `IdentityPerturbation`: returns its three inputs themselves, reads no randomness. |
+| `src/superconducted/integration/aer_factory.py` | `FuzzyNoiseModelEnsemble(..., perturbation=None)`; child seed sequences spawned once at construction; `_perturbed(index)` builds a fresh generator per member per pass and checks the returned shapes; the module and class docstrings updated. |
+| `src/superconducted/__init__.py` | `MemberPerturbation` re-exported; the docstring's count moves from eleven ABCs to twelve. |
+| `tests/test_interfaces.py` | `MemberPerturbation` added to the ABC list; the count guard moves from 11 to 12. |
+| `tests/test_perturbation.py` | 32 test cases, up from 5. Section 1's four parametrised tests now also run under `perturbation=None`, `IdentityPerturbation()` and a seeded `IdentityPerturbation()`, with their bodies unchanged (12 more cases); sections 2 and 3 add 15. |
+
+**How the seeding works.** At construction the ensemble calls `rng.bit_generator.seed_seq.spawn(n)` once
+and stores the `n` child `SeedSequence` objects. Each pass of `__iter__` builds
+`numpy.random.default_rng(child_i)` for member `i` and hands it to `perturb`. A seed sequence is not
+consumed by drawing, so a second pass rebuilds the same generators and yields the same members; a stored
+`Generator` would not (the ticket's FR-6 note, and mutant W01 below). Spawning draws nothing from the
+caller's stream, so the caller's generator produces the numbers it would have produced. It does advance
+the seed sequence's spawn counter, so two ensembles built from the *same generator object* get different
+children. Two ensembles that must match are built from two fresh `default_rng(seed)` objects, which is
+what `build(seed)` in `first_viable_seed` does.
+
+**Three things in the code that the plan did not list.** Each is small; each is for the reviewers to
+accept or send back.
+
+1. **`src/superconducted/__init__.py` and the count guard.** `tests/test_interfaces.py` pins the number of
+   exported ABCs and the count written in the package docstring. A twelfth ABC fails that guard until
+   both say twelve and the root re-exports it. No register row states the count.
+2. **The shape check in the ensemble.** FR-1's contract says the returned extractor keeps `output_dim` and
+   `feature_names` and the returned rule base keeps `input_dim` and `output_dim`. `_perturbed` checks those
+   four where the tuple is consumed and raises `ValueError` naming the perturbation and the member. With
+   any one check removed, the matching case (a renamed feature vector, an extractor claiming four outputs,
+   a rule base with other dimensions) no longer raises that `ValueError` (mutants W08 to W11). This is in
+   Burak's module and is his to read.
+3. **A generator whose seed sequence cannot spawn.** `numpy.random.Generator` accepts a bit generator
+   seeded with an object that has no `spawn`. The ensemble raises `ValueError` at construction for it,
+   in place of an `AttributeError` from inside the constructor. This also applies with no perturbation,
+   which is the one way the default path is stricter than before; every generator made with
+   `default_rng` can spawn.
+
+**Mutation check** (`tests/test_perturbation.py` only; predictions written in the script before the run;
+sources restored from backup copies after each mutant). All sixteen were killed. W10 was predicted
+"unknown" because `tsk.py` might have raised its own matching error; it does not.
+
+| Mutant | Killed by |
+| --- | --- |
+| W01 stored `Generator.spawn` generators | the two-pass test |
+| W02 the unseeded raise removed | the unseeded test |
+| W03 the unseeded raise also fires for the identity | section 1 and the unseeded test (14 cases) |
+| W04 member `i` perturbed from member `i - 1`'s extractor | the base-objects test and two more |
+| W05 the returned tuple ignored | the members-differ test |
+| W06 the caller's generator handed to `perturb` | the spawned-children and untouched-stream tests |
+| W07 every member seeded from child 0 | the own-stream test |
+| W08 to W11 one of the four shape checks removed | the contract test, one case each |
+| W12 children spawned from an unseeded generator | the spawned-children and two-constructions tests |
+| W13 index 0 passed for every member | the index test |
+| W14 the identity draws once | the draws-nothing test |
+| W15 one child too many spawned, the first skipped | the spawned-children test |
+| W16 the no-spawn check removed | the no-spawn test |
+
+**Gates at this point**: `ruff check .`, `ruff format --check .`, `mypy --strict` (50 source files) and
+`scripts/check_ids.py` clean; the six files of criterion 9 show no difference against `origin/main`;
+`python -m pytest tests/ -q -p no:cacheprovider`: 1211 passed in 540 s, which is `main`'s 1177 at
+`cd277a64` plus 34 (32 in `tests/test_perturbation.py`, 2 from the new entry in `tests/test_interfaces.py`'s
+ABC list).
+
+### Open before step 3: where the unperturbed vector comes from
+
+FR-1's `perturb` receives the extractor but no snapshot, so it cannot extract `x` itself, and the plan's
+constructor `InputVectorPerturbation(scale, *, bounds, max_redraws=64)` holds no `x` either. Yet the
+redraw rule tests `x + scale * z` against the bounds, and the member's offset is `x_i - x`. The ticket
+(its `from_snapshot` factory had the snapshot) and its comments do not settle this for the form the plan
+adopted. Step 3 waits for the owner's and the lead's answer; steps 4 and 5 do not depend on it.
