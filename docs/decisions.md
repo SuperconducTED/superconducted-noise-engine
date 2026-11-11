@@ -1920,3 +1920,71 @@ what the ABC is for and what
 Related: ADR-002 and ADR-021 (the DI contract), ADR-007 (fuzzification
 placement), ADR-013 (per-qubit features), Issues #58 and #74 (where the circuit
 is compiled).
+
+## ADR-030 — Kraus projector boundary: gate-name agnostic, parameters rejected not clipped
+
+**Status**: Accepted.
+
+> **NOTE ·** Accepted on 2026-11-11 by the condition its draft set: approval from both
+> owners of the LOCKED module `channels/kraus.py`. @bengisucvd, primary owner, approved
+> PR #136 at `76ab3950` (review 5849593436). @BurakOztekin, secondary owner, wrote the
+> draft and the change. The lead approved the same commit (review 5822740472). PR #136
+> merged as `cd277a64`. The Context, Decision and Consequences below are the draft's,
+> copied as written, with one Consequences bullet added from the primary owner's review
+> and marked as added.
+
+> **NOTE ·** There is no ADR-029 in this ledger yet. That id is held by the draft
+> `docs/decisions/drafts/ADR-029-public-calibration-archive-as-training-source.md`, on
+> `main` since PR #121, and PR #150 proposes its ledger entry as Open. ADR-030 therefore
+> lands before ADR-029. `scripts/check_ids.py` reports no collision.
+
+**Context**: Issue #58 found two unresolved contracts in
+`KrausChannelProjector`:
+
+1. `_SINGLE_QUBIT_GATES` was declared but never consulted; `project()` took
+   `gate_name` and behaved identically for every name.
+2. `_amplitude_damping_kraus` / `_phase_damping_kraus` clamped `gamma` and
+   `lambda` into `[0, 1]`. That duplicates ADR-012's pipeline-level
+   `ProbabilityClip`, changes values when a caller deliberately chooses
+   `IdentitySquashing`, and mapped NaN to `1.0` (maximal damping) while
+   `integration.aer_factory.is_identity_damping` classifies the same NaN vector
+   as degenerate.
+
+**Decision**:
+
+- *Gate names*: the unused constant is deleted. The projector is documented as
+  name-agnostic. Gate eligibility lives exclusively in
+  `FuzzyNoiseModel.prepare()` through the injected policy (#73, ADR-028), so
+  there is one filter, not two.
+- *Parameter domain*: `gamma` and `lambda` must be finite and in `[0, 1]`;
+  anything else raises `ValueError`. The channel boundary never repairs input.
+  Clipping remains the squashing stage's responsibility (ADR-012).
+
+**Consequences**:
+
+- Every in-range channel is unchanged (SuperOp difference < `1e-12`, pinned in
+  `tests/test_kraus_boundary.py`).
+- A pipeline using `IdentitySquashing` that emits values outside `[0, 1]` now
+  fails loudly at `project()` instead of silently clipping. For an eligible
+  gate, `FuzzyNoiseModel.prepare()` propagates that `ValueError`.
+- ADR-008's normalization strategies still see only valid CPTP-by-construction
+  candidate sets.
+- `is_identity_damping` still reports a NaN vector as identity; when `prepare`
+  encounters an eligible gate, the projector rejects that vector and
+  `prepare` raises instead of installing or silently skipping its channel.
+- A vector with fewer than two entries is rejected too. `project()` already raised
+  `ValueError` for it (`crisp_params must contain at least 2 entries`), and `prepare()`
+  used to swallow that, because it caught `ValueError` beside `NotImplementedError`. It
+  now catches only `NotImplementedError`, so a short vector on an eligible gate stops
+  `prepare()`. Pinned by `test_prepare_propagates_invalid_projector_parameters` (the
+  `[0.1]` case) in `tests/test_noise_gate_eligibility.py`. *Added on 2026-11-11 from the
+  primary owner's review (5849593436); not in the draft.*
+
+**Source**: Issue #75, raised by Issue #58; PR #136 (`f692d85e` the tests first, then
+`a5d74612` and `76ab3950`); `src/superconducted/channels/kraus.py`
+(`KrausChannelProjector`); `src/superconducted/integration/aer_factory.py`
+(`FuzzyNoiseModel.prepare`); `tests/test_kraus_boundary.py`;
+`tests/test_noise_gate_eligibility.py`; the draft
+`docs/decisions/drafts/ADR-030-kraus-projector-boundary.md`.
+Related: ADR-012 (the squashing stage owns clipping), ADR-008 (normalization), ADR-028
+(gate eligibility), ADR-021 (the factory).
