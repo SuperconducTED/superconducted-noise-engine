@@ -16,10 +16,12 @@ laptop and the desktop on another quantity).
 
 from __future__ import annotations
 
+import copy
 import math
 from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 import pytest
 
 from superconducted.benchmarks.circuits import ghz_state_circuit
@@ -36,6 +38,13 @@ from superconducted.integration.aer_factory import (
     FuzzyNoiseModel,
     FuzzyNoiseModelEnsemble,
     first_viable_seed,
+)
+from superconducted.integration.perturbation import IdentityPerturbation
+from superconducted.interfaces import (
+    CalibrationFeatureExtractor,
+    Defuzzifier,
+    MemberPerturbation,
+    RuleBase,
 )
 from superconducted.types import CalibrationSnapshot
 
@@ -109,10 +118,17 @@ def _ensemble(
 
 
 #: Constructor keywords under which the ensemble must behave as it did before
-#: #64. Step 1 has only the empty set; the wiring step adds the spellings of
-#: "no perturbation" it introduces, and the tests below run unchanged on each.
-IDENTITY_KWARGS: list[dict[str, Any]] = [{}]
-IDENTITY_IDS = ["no_keyword"]
+#: #64. Step 1 had only the empty set (commit ``75b86dbb``); the wiring step
+#: added the spellings of "no perturbation" it introduced, and the tests of
+#: section 1 run unchanged on each. The generator in the last entry is shared
+#: between tests on purpose: an identity perturbation must not read it.
+IDENTITY_KWARGS: list[dict[str, Any]] = [
+    {},
+    {"perturbation": None},
+    {"perturbation": IdentityPerturbation()},
+    {"perturbation": IdentityPerturbation(), "rng": np.random.default_rng(64)},
+]
+IDENTITY_IDS = ["no_keyword", "none", "identity", "identity_seeded"]
 
 # --------------------------------------------------------------------------
 # 1. The identity pin (acceptance criterion 1)
@@ -205,3 +221,313 @@ def test_identical_members_preserve_the_density_matrix_exactly(
     assert single.density_matrix is not None and mixture.density_matrix is not None
     assert mixture.metadata is not None and all(mixture.metadata["noise_instructions"])
     assert np.array_equal(mixture.density_matrix, single.density_matrix)
+
+
+# --------------------------------------------------------------------------
+# 2. The interface and the identity (acceptance criterion 2, for the identity)
+# --------------------------------------------------------------------------
+
+
+class _Shifted(CalibrationFeatureExtractor):
+    """The wrapped extractor's output plus a fixed shift, in the wrapped units.
+
+    A test double for section 3, so the seeding is tested before the real
+    wrapper exists. ``names`` and ``dim`` override what it reports, for the
+    contract tests.
+    """
+
+    def __init__(
+        self,
+        wrapped: CalibrationFeatureExtractor,
+        shift: npt.NDArray[np.float64],
+        *,
+        names: tuple[str, ...] | None = None,
+        dim: int | None = None,
+    ) -> None:
+        self._wrapped = wrapped
+        self._shift = shift
+        self._names = names
+        self._dim = dim
+
+    def extract(self, snapshot: CalibrationSnapshot) -> npt.NDArray[np.float64]:
+        return self._wrapped.extract(snapshot) + self._shift
+
+    @property
+    def output_dim(self) -> int:
+        return self._wrapped.output_dim if self._dim is None else self._dim
+
+    @property
+    def feature_names(self) -> tuple[str, ...]:
+        return self._wrapped.feature_names if self._names is None else self._names
+
+
+#: Seconds. A twentieth of the fixture's ``mean_T1`` (about 1.55e-4 s). A smoke
+#: value chosen only so that members differ; nothing reads it as a physical scale.
+T1_SHIFT_PER_SIGMA = 7.5e-6
+
+
+class _RecordingJitter(MemberPerturbation):
+    """Shift ``mean_T1`` by ``T1_SHIFT_PER_SIGMA`` times a standard normal; record each call."""
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[int, npt.NDArray[np.float64], Any, Any, Any]] = []
+
+    def perturb(
+        self,
+        index: int,
+        rng: np.random.Generator,
+        *,
+        feature_extractor: CalibrationFeatureExtractor,
+        rule_base: RuleBase,
+        defuzzifier: Defuzzifier,
+    ) -> tuple[CalibrationFeatureExtractor, RuleBase, Defuzzifier]:
+        draw = rng.standard_normal(3)
+        self.calls.append((index, draw.copy(), feature_extractor, rule_base, defuzzifier))
+        shift = np.array([T1_SHIFT_PER_SIGMA * draw[0], 0.0, 0.0])
+        return _Shifted(feature_extractor, shift), rule_base, defuzzifier
+
+
+class _ContractBreaker(MemberPerturbation):
+    """Returns a tuple that breaks FR-1's shape contract in the way ``mode`` names."""
+
+    def __init__(self, mode: str, other_rule_base: RuleBase) -> None:
+        self._mode = mode
+        self._other = other_rule_base
+
+    def perturb(
+        self,
+        index: int,
+        rng: np.random.Generator,
+        *,
+        feature_extractor: CalibrationFeatureExtractor,
+        rule_base: RuleBase,
+        defuzzifier: Defuzzifier,
+    ) -> tuple[CalibrationFeatureExtractor, RuleBase, Defuzzifier]:
+        zero = np.zeros(3)
+        if self._mode == "feature_names":
+            return _Shifted(feature_extractor, zero, names=("a", "b", "c")), rule_base, defuzzifier
+        if self._mode == "extractor_output_dim":
+            return _Shifted(feature_extractor, zero, dim=4), rule_base, defuzzifier
+        return feature_extractor, self._other, defuzzifier
+
+
+def test_member_perturbation_cannot_be_instantiated() -> None:
+    with pytest.raises(TypeError):
+        MemberPerturbation()  # type: ignore[abstract]
+
+
+def test_identity_returns_the_same_objects_and_draws_nothing(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    """The identity hands back its three inputs, reads no randomness, mutates nothing."""
+    deps = _dependencies(benchmark_snapshot, RULE_BASE_SEED)
+    extractor = deps["feature_extractor"]
+    rule_base = deps["rule_base"]
+    defuzzifier = deps["defuzzifier"]
+    consequents = [rule.consequent_params.copy() for rule in rule_base.rules]
+    rng = np.random.default_rng(3)
+    state = copy.deepcopy(rng.bit_generator.state)
+
+    out = IdentityPerturbation().perturb(
+        7, rng, feature_extractor=extractor, rule_base=rule_base, defuzzifier=defuzzifier
+    )
+
+    assert out[0] is extractor and out[1] is rule_base and out[2] is defuzzifier
+    assert rng.bit_generator.state == state
+    assert all(
+        np.array_equal(rule.consequent_params, before)
+        for rule, before in zip(rule_base.rules, consequents, strict=True)
+    )
+
+
+# --------------------------------------------------------------------------
+# 3. Ensemble seeding (acceptance criterion 3)
+# --------------------------------------------------------------------------
+
+
+def test_each_member_gets_its_index_the_base_objects_and_its_own_stream(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    """Member ``i`` is perturbed from the ensemble's own dependencies, never from member ``i - 1``'s."""
+    jitter = _RecordingJitter()
+    deps = _dependencies(benchmark_snapshot, RULE_BASE_SEED)
+    ensemble = FuzzyNoiseModelEnsemble(
+        **deps, ensemble_size=4, perturbation=jitter, rng=np.random.default_rng(11)
+    )
+
+    members = list(ensemble)
+
+    assert len(ensemble) == 4 and len(members) == 4
+    assert [call[0] for call in jitter.calls] == [0, 1, 2, 3]
+    for _, _, extractor, rule_base, defuzzifier in jitter.calls:
+        assert extractor is deps["feature_extractor"]
+        assert rule_base is deps["rule_base"]
+        assert defuzzifier is deps["defuzzifier"]
+    draws = [call[1] for call in jitter.calls]
+    assert all(not np.array_equal(draws[0], other) for other in draws[1:])
+
+
+def test_member_streams_are_the_spawned_children_of_the_callers_seed_sequence(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    """FR-6's derivation, pinned exactly: child ``i`` of ``rng.bit_generator.seed_seq``."""
+    jitter = _RecordingJitter()
+    list(_ensemble(benchmark_snapshot, 4, perturbation=jitter, rng=np.random.default_rng(11)))
+
+    children = np.random.default_rng(11).bit_generator.seed_seq.spawn(4)
+    expected = [np.random.default_rng(child).standard_normal(3) for child in children]
+
+    assert len(jitter.calls) == 4
+    assert all(
+        np.array_equal(call[1], draw) for call, draw in zip(jitter.calls, expected, strict=True)
+    )
+
+
+def test_perturbed_members_differ_and_the_returned_tuple_is_what_builds_them(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    """Each member's ``crisp_params`` is the model of the tuple ``perturb`` returned for it."""
+    jitter = _RecordingJitter()
+    deps = _dependencies(benchmark_snapshot, RULE_BASE_SEED)
+    members = list(
+        FuzzyNoiseModelEnsemble(
+            **deps, ensemble_size=4, perturbation=jitter, rng=np.random.default_rng(11)
+        )
+    )
+
+    params = [member.crisp_params for member in members]
+    assert all(not np.array_equal(params[0], other) for other in params[1:])
+    for member, call in zip(members, jitter.calls, strict=True):
+        shift = np.array([T1_SHIFT_PER_SIGMA * call[1][0], 0.0, 0.0])
+        direct = FuzzyNoiseModel(
+            **{**deps, "feature_extractor": _Shifted(deps["feature_extractor"], shift)}
+        )
+        assert np.array_equal(member.crisp_params, direct.crisp_params)
+
+
+def test_iterating_a_perturbed_ensemble_twice_gives_identical_members(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    """The stored seed sequences are not consumed by drawing (the ticket's FR-6 note)."""
+    jitter = _RecordingJitter()
+    ensemble = _ensemble(benchmark_snapshot, 4, perturbation=jitter, rng=np.random.default_rng(11))
+
+    first = [member.crisp_params.copy() for member in ensemble]
+    second = [member.crisp_params.copy() for member in ensemble]
+
+    assert all(np.array_equal(a, b) for a, b in zip(first, second, strict=True))
+    assert len(jitter.calls) == 8
+    assert all(np.array_equal(jitter.calls[i][1], jitter.calls[i + 4][1]) for i in range(4))
+
+
+def test_two_constructions_from_one_seed_agree_and_another_seed_differs(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    def build(seed: int) -> list[npt.NDArray[np.float64]]:
+        ensemble = _ensemble(
+            benchmark_snapshot,
+            4,
+            perturbation=_RecordingJitter(),
+            rng=np.random.default_rng(seed),
+        )
+        return [member.crisp_params for member in ensemble]
+
+    assert all(np.array_equal(a, b) for a, b in zip(build(11), build(11), strict=True))
+    assert not all(np.array_equal(a, b) for a, b in zip(build(11), build(12), strict=True))
+
+
+def test_build_stays_a_pure_function_of_the_seed_under_a_perturbation(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    """``first_viable_seed`` needs ``build(seed)`` to depend on the seed and nothing else."""
+
+    def build(seed: int) -> list[FuzzyNoiseModel]:
+        return list(
+            FuzzyNoiseModelEnsemble(
+                **_dependencies(benchmark_snapshot, seed),
+                ensemble_size=3,
+                perturbation=_RecordingJitter(),
+                rng=np.random.default_rng(seed),
+            )
+        )
+
+    first, seed_a = first_viable_seed(build)
+    second, seed_b = first_viable_seed(build)
+
+    assert seed_a == seed_b
+    assert all(
+        np.array_equal(a.crisp_params, b.crisp_params) for a, b in zip(first, second, strict=True)
+    )
+
+
+def test_construction_and_iteration_leave_the_callers_stream_untouched(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    """Members draw from spawned children; the caller's generator yields what it would have."""
+    rng = np.random.default_rng(11)
+    state = copy.deepcopy(rng.bit_generator.state)
+
+    list(_ensemble(benchmark_snapshot, 4, perturbation=_RecordingJitter(), rng=rng))
+
+    assert rng.bit_generator.state == state
+    assert rng.standard_normal() == np.random.default_rng(11).standard_normal()
+
+
+def test_an_unseeded_non_identity_perturbation_is_refused(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    """An unseeded perturbed ensemble could not be reproduced (ADR-024's lesson)."""
+    with pytest.raises(ValueError, match="needs a seeded rng"):
+        _ensemble(benchmark_snapshot, 4, perturbation=_RecordingJitter())
+    with pytest.raises(ValueError, match="needs a seeded rng"):
+        _ensemble(benchmark_snapshot, 4, perturbation=_RecordingJitter(), rng=None)
+
+    # The identity needs no seed: it reads no randomness.
+    assert len(_ensemble(benchmark_snapshot, 4, perturbation=IdentityPerturbation())) == 4
+    assert len(_ensemble(benchmark_snapshot, 4, perturbation=None, rng=None)) == 4
+
+
+class _SeedSequenceWithoutSpawn(np.random.bit_generator.ISeedSequence):
+    """A legal seed for a bit generator that cannot produce children."""
+
+    def generate_state(
+        self, n_words: int, dtype: type[np.uint32] | type[np.uint64] = np.uint32
+    ) -> npt.NDArray[Any]:
+        return np.random.SeedSequence(1).generate_state(n_words, dtype)
+
+
+def test_a_generator_whose_seed_sequence_cannot_spawn_is_refused(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    """Named at construction, instead of an ``AttributeError`` from inside numpy."""
+    rng = np.random.Generator(np.random.PCG64(_SeedSequenceWithoutSpawn()))
+
+    with pytest.raises(ValueError, match="spawnable seed sequence"):
+        _ensemble(benchmark_snapshot, 4, perturbation=_RecordingJitter(), rng=rng)
+
+
+@pytest.mark.parametrize(
+    ("mode", "match"),
+    [
+        ("feature_names", "feature_names"),
+        ("extractor_output_dim", "output_dim"),
+        ("rule_base_output_dim", "output_dim"),
+        ("rule_base_input_dim", "input_dim"),
+    ],
+)
+def test_a_perturbation_that_breaks_the_shape_contract_is_refused(
+    benchmark_snapshot: CalibrationSnapshot, mode: str, match: str
+) -> None:
+    """FR-1: the returned extractor and rule base keep the base objects' names and dimensions."""
+    inputs, outputs = (2, 2) if mode == "rule_base_input_dim" else (3, 3)
+    mfs = [[GaussianMF(center=0.0, sigma=1.0)] for _ in range(inputs)]
+    other = TSKRuleBase.from_grid(per_input_mfs=mfs, output_dim=outputs)
+    ensemble = _ensemble(
+        benchmark_snapshot,
+        2,
+        perturbation=_ContractBreaker(mode, other),
+        rng=np.random.default_rng(0),
+    )
+
+    with pytest.raises(ValueError, match=match):
+        list(ensemble)

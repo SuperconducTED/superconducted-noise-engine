@@ -27,8 +27,12 @@ Bootstrap status:
   :class:`AerSimulator.run`. Builds a fresh ``NoiseModel`` each call so
   repeated invocations are idempotent.
 - :class:`FuzzyNoiseModelEnsemble` — partial. Yields ``ensemble_size``
-  identical models at bootstrap. Per-member sampling (input perturbation,
-  premise-MF perturbation, IT2 footprint sampling) is deferred to ADR-015.
+  models, identical unless a
+  :class:`~superconducted.interfaces.MemberPerturbation` is injected
+  (Issue #64). Each member is perturbed from its own seeded generator, so one
+  ensemble iterated twice yields the same members. Which perturbation the
+  project adopts (input perturbation, premise-MF perturbation, IT2 footprint
+  sampling) is still ADR-015's open decision.
 - :func:`is_identity_damping` / :attr:`FuzzyNoiseModel.is_degenerate` /
   :func:`first_viable_seed` — full. Channel viability under a randomly
   initialized rule base, per ADR-024. Viability is a property of the
@@ -52,11 +56,13 @@ from ..interfaces import (
     Defuzzifier,
     FuzzificationStrategy,
     GateEligibilityPolicy,
+    MemberPerturbation,
     RuleBase,
     SquashingStrategy,
 )
 from ..training.targets import gate_lengths
 from ..types import CalibrationSnapshot
+from .perturbation import IdentityPerturbation
 
 # Upper bound on the deterministic seed search in :func:`first_viable_seed`.
 # A random consequent draw is degenerate with probability 1/4 (ADR-024), so
@@ -369,16 +375,43 @@ class FuzzyNoiseModel(NoiseModel):  # type: ignore[misc]
 class FuzzyNoiseModelEnsemble:
     """Factory yielding an ensemble of :class:`FuzzyNoiseModel` instances.
 
-    Bootstrap status: yields ``ensemble_size`` *identical* models. Per-member
-    sampling — input-vector perturbation, premise-MF perturbation, IT2
-    footprint sampling — is deferred to ADR-015. Until that ADR lands the
-    ensemble exists for API stability and to validate the
-    aggregate-then-compare workflow.
+    With no ``perturbation`` the ensemble yields ``ensemble_size`` *identical*
+    models, as it did before Issue #64. With one, member ``i`` is built from
+    the extractor, rule base and defuzzifier that
+    ``perturbation.perturb(i, rng_i, ...)`` returns for the ensemble's base
+    dependencies, where ``rng_i`` is that member's own generator.
 
-    ADR-021 records those three mechanisms as the plug-in points inside
-    :meth:`__iter__`, so ADR-015 can choose among them without refactoring
-    this factory. The choice additionally depends on ADR-009 (T1 vs IT2)
+    ADR-021 records three mechanisms (input-vector perturbation, premise-MF
+    perturbation, IT2 footprint sampling) as the plug-in points inside
+    :meth:`__iter__`; :class:`~superconducted.interfaces.MemberPerturbation`
+    is the one slot that carries all three. Which of them the project adopts
+    is ADR-015's decision and additionally depends on ADR-009 (T1 vs IT2)
     and ADR-014 (trained MFs with meaningful variance).
+
+    Seeding (Issue #64 FR-6). At construction the ensemble spawns
+    ``ensemble_size`` child seed sequences from
+    ``rng.bit_generator.seed_seq`` and stores them. Every iteration builds a
+    fresh ``numpy.random.default_rng(child_i)`` for member ``i``, so:
+
+    - iterating one ensemble twice yields identical members (a stored
+      ``Generator`` would be consumed by the first pass);
+    - two ensembles built from two generators with the same seed agree bit
+      for bit, which keeps ``build(seed)`` in :func:`first_viable_seed` a pure
+      function of the seed;
+    - the caller's generator is not advanced: spawning draws nothing from its
+      stream. It does advance the seed sequence's spawn counter, so a second
+      ensemble built from the *same generator object* gets different
+      children. Pass a fresh ``default_rng(seed)`` per ensemble when two
+      ensembles must match.
+
+    Raises ``ValueError`` at construction for a non-positive
+    ``ensemble_size``, for a perturbation other than
+    :class:`~superconducted.integration.perturbation.IdentityPerturbation`
+    given without ``rng`` (an unseeded perturbed ensemble cannot be
+    reproduced; ADR-024 records what an implicit seed cost once), and for an
+    ``rng`` whose bit generator has no spawnable seed sequence. Raises
+    ``ValueError`` during iteration when a perturbation returns an extractor
+    or a rule base whose names or dimensions differ from the base objects'.
     """
 
     def __init__(
@@ -394,11 +427,32 @@ class FuzzyNoiseModelEnsemble:
         gate_eligibility_policy: GateEligibilityPolicy | None = None,
         ensemble_size: int = 32,
         rng: np.random.Generator | None = None,
+        perturbation: MemberPerturbation | None = None,
     ) -> None:
         if ensemble_size <= 0:
             raise ValueError(f"ensemble_size must be positive; got {ensemble_size}")
         self._size = int(ensemble_size)
+        self._perturbation: MemberPerturbation = (
+            perturbation if perturbation is not None else IdentityPerturbation()
+        )
+        # Decided on the argument, before the default generator below exists:
+        # afterwards a seeded and an unseeded ensemble look the same.
+        if rng is None and not isinstance(self._perturbation, IdentityPerturbation):
+            raise ValueError(
+                f"{type(self._perturbation).__name__} needs a seeded rng: an ensemble "
+                "perturbed from an unseeded generator cannot be reproduced. Pass "
+                "rng=numpy.random.default_rng(seed)."
+            )
         self._rng = rng if rng is not None else np.random.default_rng()
+        seed_seq = self._rng.bit_generator.seed_seq
+        if not hasattr(seed_seq, "spawn"):
+            raise ValueError(
+                "rng's bit generator has no spawnable seed sequence "
+                f"({type(seed_seq).__name__}); build it with numpy.random.default_rng(seed)."
+            )
+        # Seed sequences, not generators: a stored Generator is consumed by
+        # drawing, so a second iteration would yield different members.
+        self._seed_seqs: tuple[np.random.SeedSequence, ...] = tuple(seed_seq.spawn(self._size))
         self._calibration = calibration
         self._feature_extractor = feature_extractor
         self._rule_base = rule_base
@@ -408,13 +462,51 @@ class FuzzyNoiseModelEnsemble:
         self._fuzzification_strategy = fuzzification_strategy
         self._gate_eligibility_policy = gate_eligibility_policy
 
+    def _perturbed(self, index: int) -> tuple[CalibrationFeatureExtractor, RuleBase, Defuzzifier]:
+        """Member ``index``'s extractor, rule base and defuzzifier, shape-checked.
+
+        Always starts from the ensemble's base dependencies, never from an
+        earlier member's, and gives the perturbation a generator freshly
+        seeded from the stored child sequence.
+        """
+        extractor, rule_base, defuzzifier = self._perturbation.perturb(
+            index,
+            np.random.default_rng(self._seed_seqs[index]),
+            feature_extractor=self._feature_extractor,
+            rule_base=self._rule_base,
+            defuzzifier=self._defuzzifier,
+        )
+        name = type(self._perturbation).__name__
+        if extractor.feature_names != self._feature_extractor.feature_names:
+            raise ValueError(
+                f"{name} changed feature_names for member {index}: "
+                f"{extractor.feature_names} != {self._feature_extractor.feature_names}"
+            )
+        if extractor.output_dim != self._feature_extractor.output_dim:
+            raise ValueError(
+                f"{name} changed the extractor's output_dim for member {index}: "
+                f"{extractor.output_dim} != {self._feature_extractor.output_dim}"
+            )
+        if rule_base.input_dim != self._rule_base.input_dim:
+            raise ValueError(
+                f"{name} changed the rule base's input_dim for member {index}: "
+                f"{rule_base.input_dim} != {self._rule_base.input_dim}"
+            )
+        if rule_base.output_dim != self._rule_base.output_dim:
+            raise ValueError(
+                f"{name} changed the rule base's output_dim for member {index}: "
+                f"{rule_base.output_dim} != {self._rule_base.output_dim}"
+            )
+        return extractor, rule_base, defuzzifier
+
     def __iter__(self) -> Iterator[FuzzyNoiseModel]:
-        for _ in range(self._size):
+        for index in range(self._size):
+            feature_extractor, rule_base, defuzzifier = self._perturbed(index)
             yield FuzzyNoiseModel(
                 calibration=self._calibration,
-                feature_extractor=self._feature_extractor,
-                rule_base=self._rule_base,
-                defuzzifier=self._defuzzifier,
+                feature_extractor=feature_extractor,
+                rule_base=rule_base,
+                defuzzifier=defuzzifier,
                 squashing=self._squashing,
                 channel_projector=self._channel_projector,
                 fuzzification_strategy=self._fuzzification_strategy,
