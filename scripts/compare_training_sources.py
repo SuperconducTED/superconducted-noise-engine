@@ -113,6 +113,9 @@ def compare(rows: list[dict[str, str]], cut: datetime) -> list[dict[str, Any]]:
         )
         if fit.validation_rmse is None:
             raise RuntimeError("Missing validation metrics")
+        constant_rmse = np.sqrt(
+            np.mean((validation.targets - data.targets.mean(axis=0)) ** 2, axis=0)
+        )
         result.append(
             dict(
                 fit=label,
@@ -120,6 +123,17 @@ def compare(rows: list[dict[str, str]], cut: datetime) -> list[dict[str, Any]]:
                 n_validation=validation.n_rows,
                 train_rmse=fit.train_rmse.tolist(),
                 validation_rmse=fit.validation_rmse.tolist(),
+                constant_validation_rmse=constant_rmse.tolist(),
+                beats_constant=(fit.validation_rmse < constant_rmse).tolist(),
+                holdout_outside_training_range={
+                    name: int(
+                        np.count_nonzero(
+                            (validation.features[:, i] < data.features[:, i].min())
+                            | (validation.features[:, i] > data.features[:, i].max())
+                        )
+                    )
+                    for i, name in enumerate(FEATURES)
+                },
                 parameters=asdict(fit.parameter_count),
                 diagnostics=asdict(fit.diagnostics),
             )
@@ -172,6 +186,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         "Both fits score the same IBM-only chronological holdout. Each fit's Gaussian grid",
         "is re-derived from its training rows; no holdout data sets membership parameters.",
         "The comparison therefore changes both the training source and its grid.",
+        "The constant baseline predicts each fit's training-target mean on the same holdout.",
+        "These exploratory fits are not informative evidence of a source improvement yet;",
+        "compare them with the constant baselines before drawing any conclusion.",
         "",
         f"Input TSV SHA-256: `{record['input_sha256']}`. Cut: `{args.cut}`.",
         "",
@@ -179,6 +196,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         "| --- | --- | --- | --- | --- |",
     ]
     for r in results:
+        table.append(
+            f"| {r['fit']} (training-mean baseline) | {r['n_train']} | {r['n_validation']} | "
+            f"{r['constant_validation_rmse'][0]:.10g} | "
+            f"{r['constant_validation_rmse'][1]:.10g} |"
+        )
         table.append(
             f"| {r['fit']} | {r['n_train']} | {r['n_validation']} | "
             f"{r['validation_rmse'][0]:.10g} | {r['validation_rmse'][1]:.10g} |"

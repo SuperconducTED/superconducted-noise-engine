@@ -23,6 +23,9 @@ PUBLIC_START = datetime(2026, 1, 31, tzinfo=UTC)
 # NC-078's exact boundary: the first IBM document, not midnight on that day.
 PUBLIC_END = datetime(2026, 5, 13, 12, 13, 22, tzinfo=UTC)
 PUBLIC_SOURCE = "phanerozoic/qiskit-calibration-drift"
+# A complete replay can still have only one gate duration initialized. Require
+# broad target coverage separately; never change NC-078's completeness count.
+PUBLIC_MIN_TARGET_QUBITS = 100
 QUBIT_PROPERTIES = tuple(EXPECTED_UNITS)
 COMPLETE = ("T1", "T2", "readout_error", "prob_meas0_prep1", "prob_meas1_prep0")
 EXCLUDE = frozenset({(72, "T1"), (72, "T2")})
@@ -49,7 +52,10 @@ class PublicReplayReport:
     incomplete_marks: int = 0
     distinct_states: int = 0
     overlap_states: int = 0
+    minimum_target_qubits: int = PUBLIC_MIN_TARGET_QUBITS
+    target_coverage_skips: int = 0
     rescaled_events: dict[str, int] = field(default_factory=dict)
+    excluded_rescale_events: dict[str, int] = field(default_factory=dict)
 
 
 def projected_digest(doc: dict[str, Any]) -> str:
@@ -105,6 +111,10 @@ def _events(path: Path, report: PublicReplayReport) -> list[tuple[Any, ...]]:
             if not isinstance(q, int) or not 0 <= q < 156:
                 raise ValueError(f"Invalid ibm_fez qubit: {q!r}")
             if (q, prop) in EXCLUDE:
+                if float(row["value"]) < 0.01:
+                    report.excluded_rescale_events[prop] = (
+                        report.excluded_rescale_events.get(prop, 0) + 1
+                    )
                 continue
             expected = "ns" if prop == "sx_gate_length" else EXPECTED_UNITS[prop]
             if row["unit"] != expected:

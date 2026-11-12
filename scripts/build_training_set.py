@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
+import platform
 import re
 import shlex
 import subprocess
@@ -136,11 +138,21 @@ def main(argv: Sequence[str] | None = None) -> int:
     hours = Counter(stamp.hour for stamp in dataset.timestamps)
     document_skips = {
         name: report.skipped[name]
-        for name in ("parse_error", "features_unusable", "target_unusable")
+        for name in (
+            "parse_error",
+            "features_unusable",
+            "target_unusable",
+            "target_coverage_insufficient",
+        )
     }
+    requirements = Path(__file__).resolve().parents[1] / "requirements-dev.txt"
+    requirements_hash = hashlib.sha256(requirements.read_bytes()).hexdigest()
     record = (
         f"## {filename}\n\nArchive commit: `{dataset.archive_ref}`.\n\n"
         f"Builder source revision: `{_source_revision()}`.\n\n"
+        f"Python: `{platform.python_version()}`. "
+        "Pinned environment: `requirements-dev.txt`, SHA-256 "
+        f"`{requirements_hash}`.\n\n"
         "```sh\ngit fetch superconducted-noise-engine calibration-data\n"
         f"{shlex.join(command)}\n```\n\n"
         "NC-012's unit is distinct device states; this file has one row per state.\n\n"
@@ -149,6 +161,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "Document skips: "
         f"`{json.dumps(document_skips, sort_keys=True)}`.\n\n"
         f"Target qubit skips: `{json.dumps(dict(report.target_skips), sort_keys=True)}`.\n\n"
+        "Target qubit skips by source: "
+        f"`{json.dumps(report.target_skips_by_source, sort_keys=True)}`.\n\n"
         "Kept-document loader missingness: "
         f"`{json.dumps(dict(report.missingness), sort_keys=True)}`.\n\n"
         f"UTC row-hour histogram: `{json.dumps(dict(sorted(hours.items())))}`.\n\n"
@@ -178,7 +192,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             "Rules: T1/T2 below 0.01 us multiplied by 1e6; qubit 72 T1/T2 dropped; "
             "first observed value per stamp retained. Completeness uses all five required "
             "fields on every non-excluded qubit before state counting. "
-            "Targets from both sources use the factor-10 NC-041 plausibility guard. "
+            "Targets from both sources use the factor-1000 NC-041 unit-error guard. "
+            "Public states need at least 100 usable target qubits; insufficient coverage "
+            "is a separate target_coverage_insufficient skip after NC-078 state counting. "
             "Replay marks stop before the first IBM snapshot and never extend beyond "
             "2026-05-13T12:13:22Z. Public rows never enter calibration-data.\n\n"
         )

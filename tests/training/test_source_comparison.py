@@ -58,6 +58,11 @@ def test_same_ibm_holdout_and_no_holdout_in_membership_grid(monkeypatch):
             expected = [float(r[feature]) for r in rows[:26]]
         np.testing.assert_array_equal(samples, expected)
     assert all(np.all(np.isfinite(r["validation_rmse"])) for r in result)
+    holdout = np.array([[float(row[n]) for n in ("gamma", "lambda")] for row in rows[26:]])
+    for r, start in zip(result, (6, 0), strict=True):
+        train = np.array([[float(row[n]) for n in ("gamma", "lambda")] for row in rows[start:26]])
+        expected = np.sqrt(np.mean((holdout - train.mean(axis=0)) ** 2, axis=0))
+        np.testing.assert_allclose(r["constant_validation_rmse"], expected)
 
 
 def test_source_quantiles_and_cli_provenance(tmp_path):
@@ -81,6 +86,8 @@ def test_source_quantiles_and_cli_provenance(tmp_path):
     assert record["input_sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
     assert (out / "source-quantiles.tsv").is_file()
     assert "IBM + public" in (out / "results.md").read_text()
+    assert "training-mean baseline" in (out / "results.md").read_text()
+    assert "not informative evidence" in (out / "results.md").read_text()
 
 
 def test_source_fit_refuses_unpinned_data_and_public_holdout():

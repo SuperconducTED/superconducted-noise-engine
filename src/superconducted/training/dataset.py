@@ -26,6 +26,7 @@ from ..calibration.storage import _decode_filename_stem
 from ..interfaces import CalibrationFeatureExtractor
 from ..types import CalibrationSnapshot, TrainingSet
 from .public_archive import (
+    PUBLIC_MIN_TARGET_QUBITS,
     PUBLIC_SOURCE,
     PublicReplayReport,
     iter_public_archive,
@@ -211,10 +212,13 @@ class BuildReport:
     - ``skipped``: dropped documents keyed by reason. A document whose digest or
       timestamp cannot be read counts once as ``parse_error``; otherwise the
       selected representative of a dropped state counts once as
-      ``parse_error``, ``features_unusable`` or ``target_unusable``.
+      ``parse_error``, ``features_unusable``, ``target_unusable`` or
+      ``target_coverage_insufficient`` (public representatives only).
     - ``missingness``: loader missingness totals over kept rows only.
     - ``target_skips``: per-qubit target skip counts over every selected
       representative that reached the target step, kept or not.
+    - ``target_skips_by_source``: the same counts separated by source, so a
+      unit-error guard's effect on IBM and public measurements can be audited.
     - ``rows``: one dict per kept row, in timestamp order, holding the TSV columns.
 
     Invariant after a successful build:
@@ -226,12 +230,18 @@ class BuildReport:
     skipped: Counter[str] = field(default_factory=Counter)
     missingness: Counter[str] = field(default_factory=Counter)
     target_skips: Counter[str] = field(default_factory=Counter)
+    target_skips_by_source: dict[str, Counter[str]] = field(default_factory=dict)
     rows: list[dict[str, Any]] = field(default_factory=list)
     public: PublicReplayReport | None = None
 
 
 def _row(
-    path: str, doc: dict[str, Any], digest: str, extractor: CalibrationFeatureExtractor
+    path: str,
+    doc: dict[str, Any],
+    digest: str,
+    extractor: CalibrationFeatureExtractor,
+    *,
+    minimum_target_qubits: int = 1,
 ) -> tuple[dict[str, Any], Counter[str], Counter[str], str | None]:
     parsed = parse_snapshot(doc, source=path)
     props = doc["properties"]
@@ -284,9 +294,14 @@ def _row(
     skipped = Counter(asdict(targets.skipped))
     target = snapshot_target(targets)
     if target is None:
+        if minimum_target_qubits > 1:
+            row["n_usable_qubits_target"] = 0
+            return row, Counter(), skipped, "target_coverage_insufficient"
         return row, Counter(), skipped, "target_unusable"
-    row.update({"gamma": float(target.mean[0]), "lambda": float(target.mean[1])})
     row["n_usable_qubits_target"] = target.n_usable
+    if target.n_usable < minimum_target_qubits:
+        return row, Counter(), skipped, "target_coverage_insufficient"
+    row.update({"gamma": float(target.mean[0]), "lambda": float(target.mean[1])})
     row.update(
         zip(
             TARGET_SPREAD_NAMES,
@@ -344,6 +359,7 @@ def build_training_set(
     audit.skipped.clear()
     audit.missingness.clear()
     audit.target_skips.clear()
+    audit.target_skips_by_source.clear()
     audit.rows.clear()
     audit.public = PublicReplayReport() if public_parquet is not None else None
     archive_projections: set[str] = set()
@@ -387,7 +403,13 @@ def build_training_set(
             digest = f"{PUBLIC_SOURCE}@{audit.public.revision}:{projection}"
             timestamp = _timestamp(doc)
             try:
-                row, missingness, target_skips, reason = _row(path, doc, digest, extractor)
+                row, missingness, target_skips, reason = _row(
+                    path,
+                    doc,
+                    digest,
+                    extractor,
+                    minimum_target_qubits=PUBLIC_MIN_TARGET_QUBITS,
+                )
             except (ValueError, KeyError, TypeError, AttributeError):
                 row, missingness, target_skips, reason = {}, Counter(), Counter(), "parse_error"
             row.update(
@@ -396,6 +418,8 @@ def build_training_set(
                 source_sha256=audit.public.sha256,
             )
             first[digest] = timestamp, path, row, missingness, target_skips, reason
+            if reason == "target_coverage_insufficient":
+                audit.public.target_coverage_skips += 1
     ordered = sorted(first.values(), key=lambda item: item[:2])
     for previous, current in pairwise(ordered):
         if previous[0] == current[0]:
@@ -405,6 +429,9 @@ def build_training_set(
     timestamps = []
     for timestamp, _, row, missingness, target_skips, reason in ordered:
         audit.target_skips.update(target_skips)
+        audit.target_skips_by_source.setdefault(
+            row.get("source", "calibration-data"), Counter()
+        ).update(target_skips)
         if reason:
             audit.skipped[reason] += 1
         else:

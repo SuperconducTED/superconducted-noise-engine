@@ -26,9 +26,9 @@ from ..calibration.loader import UNIT_SCALE, CalibrationParseError, ParsedCalibr
 _COHERENCE_UNIT_SCALE: Final[Mapping[str, float]] = {"us": UNIT_SCALE["us"], "s": 1.0}
 
 # NC-041's archive-microsecond p1/p99 box, widened multiplicatively by
-# factor 10 (data-track choice for issue #122). This is a unit-defect guard,
+# factor 1000 (PR #150 review proposal). This is a unit-defect guard,
 # not a new quantile estimate. Applied to both training sources after parsing.
-COHERENCE_PLAUSIBILITY_FACTOR: Final[float] = 10.0
+COHERENCE_PLAUSIBILITY_FACTOR: Final[float] = 1000.0
 COHERENCE_BOUNDS_SECONDS: Final[Mapping[str, tuple[float, float]]] = {
     name: (
         lo / COHERENCE_PLAUSIBILITY_FACTOR * UNIT_SCALE["us"],
@@ -176,7 +176,7 @@ def qubit_targets(
     """Derive aligned targets with ADR-029's training-only plausibility guard.
 
     After missing/non-positive checks, require T1/T2 inside the inclusive
-    NC-041 p1/p99 box widened by factor 10. Record coherence_implausible
+    NC-041 p1/p99 box widened by factor 1000. Record coherence_implausible
     before the T2 <= 2*T1 physics check so a mislabeled T1 has its own reason.
     The raw archive and benchmark reference are not rewritten by this guard.
     """

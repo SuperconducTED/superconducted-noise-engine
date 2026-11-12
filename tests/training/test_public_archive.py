@@ -12,8 +12,9 @@ from superconducted.training.dataset import BuildReport, build_training_set
 
 
 def write_parquet(tmp_path, monkeypatch, rows):
-    pa = pytest.importorskip("pyarrow")
-    pq = pytest.importorskip("pyarrow.parquet")
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
     path = tmp_path / "public.parquet"
     pq.write_table(pa.Table.from_pylist(rows), path)
     monkeypatch.setattr(public, "PUBLIC_SHA256", hashlib.sha256(path.read_bytes()).hexdigest())
@@ -72,6 +73,7 @@ def test_replay_completeness_rescaling_first_value_and_no_lookahead(tmp_path, mo
     assert not {e["name"] for e in first["properties"]["qubits"][72]} & {"T1", "T2"}
     assert first["properties"]["gates"][0]["parameters"][0]["value"] == 24
     assert report.rescaled_events == {"T1": 155, "T2": 155}
+    assert report.excluded_rescale_events == {"T1": 1, "T2": 1}
     assert all(k not in first for k in ("target", "configuration"))
 
 
@@ -147,3 +149,45 @@ def test_builder_keeps_ibm_authoritative_and_tags_public_rows(tmp_path, monkeypa
     assert '"distinct_states": 2' in readme
     assert '"rescaled_events": {"T1": 155, "T2": 155}' in readme
     assert "Public replay audit" in readme
+
+
+@pytest.mark.parametrize("usable_qubits", [0, 1, 99, 100])
+def test_sparse_public_targets_are_skipped_after_state_counting(
+    tmp_path, monkeypatch, usable_qubits
+):
+    from superconducted.training import dataset
+
+    full = write_parquet(tmp_path, monkeypatch, complete_events())
+    own = next(
+        public.iter_public_archive(
+            full, public.PublicReplayReport(), end=public.PUBLIC_START + timedelta(hours=2)
+        )
+    )[1]
+    own["properties"]["last_update_date"] = "2026-05-13T12:13:22+00:00"
+    for entry in own["properties"]["qubits"][0]:
+        if entry["name"] == "T1":
+            entry["value"] = 300.0  # distinct IBM state, never suppresses the public state
+    selected = set([q for q in range(156) if q != 72][:usable_qubits])
+    rows = [
+        r
+        for r in complete_events()
+        if r["property"] != "sx_gate_length" or r["qubit_a"] in selected
+    ]
+    path = write_parquet(tmp_path, monkeypatch, rows)
+    monkeypatch.setattr(dataset, "resolve_archive_ref", lambda *args: "a" * 40)
+    monkeypatch.setattr(
+        dataset,
+        "iter_archive",
+        lambda *args: iter([("snapshots/2026-05/ibm_fez/20260513T121322000000Z.json", own)]),
+    )
+    report = BuildReport()
+    result = build_training_set(
+        tmp_path, "HEAD", backend="ibm_fez", public_parquet=path, report=report
+    )
+    rejected = int(usable_qubits < public.PUBLIC_MIN_TARGET_QUBITS)
+    assert result.n_rows == 2 - rejected
+    assert report.public.distinct_states == 1 and report.public.incomplete_marks == 1
+    assert report.public.minimum_target_qubits == 100
+    assert report.public.target_coverage_skips == rejected
+    assert report.skipped["target_coverage_insufficient"] == rejected
+    assert len(report.rows) + sum(report.skipped.values()) + report.duplicates == report.documents
