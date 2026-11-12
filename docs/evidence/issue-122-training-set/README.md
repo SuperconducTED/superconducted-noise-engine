@@ -1,5 +1,11 @@
 # Training-set evidence
 
+> **Historical evidence, superseded 2026-11-12.** The November 8 artifacts use
+> the rejected factor-10 guard and include a public target derived from one
+> qubit. They are retained as the review audit trail. Use
+> [the review rebuild](review-2026-11-12/README.md) for the corrected policy and
+> committed-source, supported-Python reproduction.
+
 ## 2026-11-08-5828b4a2-public.tsv
 
 Archive commit: `5828b4a29fabc245aa096e530852249a3496dc5b`.
@@ -85,8 +91,9 @@ The source-tagged quantile survey and both fits are under `comparison/`.
 The common IBM-only holdout begins 2026-09-23T00:00:00Z, a fixed evaluation choice
 for this run rather than a preregistered hardware experiment. The comparison
 changes the source data and re-derives each grid from its training subset.
-Public rows improve lambda error and worsen gamma error in this run; no blanket
-improvement or hardware-transferability claim follows. The public reader remains
+These original fits are not informative evidence of a source improvement: both
+lose to training-target-mean constant baselines, and the lambda comparison is
+sensitive to the single-qubit target row. The public reader remains
 opt-in and final ADR-029 adoption awaits the lead's recorded approval.
 
 The source-quantiles table uses one row per distinct kept state, unlike NC-041's

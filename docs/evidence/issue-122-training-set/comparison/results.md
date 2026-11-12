@@ -1,5 +1,11 @@
 # Source comparison (provisional)
 
+> **Historical, superseded 2026-11-12.** These fits use the rejected factor-10
+> target guard and a public row with only one usable target qubit. Both fits
+> lose to training-target-mean constant baselines. The comparison is not
+> informative evidence of a source improvement. The corrected comparison and
+> explicit baselines are in `../review-2026-11-12/comparison/results.md`.
+
 Derived calibration targets only; this does not measure hardware transferability.
 Both fits score the same IBM-only chronological holdout. Each fit's Gaussian grid
 is re-derived from its training rows; no holdout data sets membership parameters.

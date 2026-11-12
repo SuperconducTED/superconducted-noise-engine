@@ -154,3 +154,21 @@ The evidence reports fits with and without public rows on the same IBM holdout.
 Final adoption still needs the lead's recorded approval; none is invented here.
 See `docs/implementations/2026-11-08-issue-122-public-training-source.md` and
 `docs/evidence/issue-122-training-set/`.
+
+## PR #150 review correction, 2026-11-12
+
+NC-041 describes snapshot means, not a per-qubit distribution. The original
+factor-10 implementation removed real weak qubits and changed ADR-027 targets;
+that is not an acceptable side effect of a unit-error guard. The lead's review
+proposes factor 1000 instead. The implementation adopts that proposal for
+evaluation, restores the reference-mask and NC-039 checks, and leaves final
+adoption Open. The original 2026-11-08 factor choice above is superseded.
+
+A complete replay may still have too few gate lengths to estimate a chip-wide
+target. Public representatives now require at least 100 usable target qubits,
+with an explicit coverage skip after NC-078's completeness/state count. Both
+source fits are reported alongside their own training-target-mean baselines.
+The earlier comparison is not informative evidence of a source improvement;
+its fit claim is withdrawn from the numerical register. See the dated review
+implementation record and rebuilt evidence under
+`docs/evidence/issue-122-training-set/review-2026-11-12/`.

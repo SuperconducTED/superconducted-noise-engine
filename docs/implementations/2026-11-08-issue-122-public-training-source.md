@@ -1,5 +1,11 @@
 # 2026-11-08: Issue #122 public training source
 
+> **Superseded policy and results interpretation (2026-11-12).** PR #150's
+> reviews found that factor 10 excludes real weak qubits and that the fitted
+> models lose to constant baselines. This file records the original work;
+> the correction, supported-version verification and rebuilt evidence are in
+> [the review-fix record](2026-11-12-pr150-public-source-review-fixes.md).
+
 ## Problem / Motivation
 
 Issue #122 asks the distinct-state builder to evaluate the earlier public

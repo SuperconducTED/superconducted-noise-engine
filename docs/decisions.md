@@ -1956,19 +1956,27 @@ must not enter ADR-020's IBM-only archive or ADR-025's ledger.
   document digest and use NC-078's all7 projection only to remove public
   overlap. IBM remains authoritative even when its representative is unusable.
 - For both sources, reject per-qubit training targets whose SI T1/T2 falls
-  outside NC-041's inclusive p1/p99 box widened multiplicatively by factor 10:
+  outside NC-041's inclusive p1/p99 box widened multiplicatively by factor 1000:
   lower bound divided by the factor, upper bound multiplied by it. The data
-  owner selected this factor in the implementation session on 2026-11-08.
+  owner initially selected factor 10 on 2026-11-08. The 2026-11-11/12 PR #150
+  reviews found it excluded real weak qubits and proposed factor 1000 instead.
+  The implementation uses that proposal; final adoption remains Open.
   Count `coherence_implausible` separately before the T2 <= 2*T1 check.
+- Require at least 100 usable per-qubit targets for a public training row.
+  This coverage threshold is separate from NC-078's completeness/state count;
+  rejected representatives count as `target_coverage_insufficient` in the audit.
 - Survey quantiles by source before fitting. Report both source choices on the
   same IBM-only chronological holdout, measuring membership grids on each
-  fit's training rows. These are calibration-target fits, not hardware results.
+  fit's training rows. Include each training-target-mean constant baseline on
+  that same holdout. These exploratory fits are not informative evidence of a
+  source improvement yet and are not hardware results.
 - Attribute Charles C. Norton and the dataset under CC-BY-4.0. State that neither
   party has checked IBM's redistribution terms for `backend.properties()` output.
 
 **Consequences**: The reader is opt-in for evaluation and never writes to the
-archive. Guarded training masks can differ from the benchmark reference's
-physical-validity mask; their channels still agree on shared usable qubits.
+archive. The unit-error guard must preserve real measured IBM qubits and the
+reference/target agreement checks; tightening it into a training-tail filter
+would change ADR-027's target and requires a separate decision.
 The source survey is equal-weight over distinct kept states, whereas NC-041's
 dated survey was file-weighted. No dated evidence is replaced and no result is
 claimed canonically verified before the desktop batch.
