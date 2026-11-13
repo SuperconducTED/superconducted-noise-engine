@@ -6,7 +6,8 @@ on the BLAS build. The ``km_*`` columns count rounding-level events or measure r
 they belong to the arithmetic: they are not compared between the two files. One of them is checked
 on the new file alone: ``km_route_gap_over_tolerance_max`` must be at most 1 in every row, that is,
 the iterative route agreed with the exhaustive one to each point's tolerance (PR #143 review,
-item 1). Exits 1 on a difference or on a gap above tolerance.
+item 1). Exits 1 on a difference or on a gap above tolerance, and since 2026-11-13 also when the
+new file lacks that column or leaves it empty in any row (second review, item b).
 
 Usage::
 
@@ -43,7 +44,14 @@ def main() -> int:
     if len(new) != len(committed):
         print(f"FAIL: {len(new)} rows against {len(committed)}")
         return 1
-    over = [float(a[GAP_OVER_TOLERANCE]) for a in new if a.get(GAP_OVER_TOLERANCE, "") != ""]
+    # A file without the column, or with it empty, would skip the check below (second review of
+    # 2026-11-11, item b), so it fails here instead.
+    missing = sum(a.get(GAP_OVER_TOLERANCE) in (None, "") for a in new)
+    if missing:
+        print(f"FAIL: {GAP_OVER_TOLERANCE} absent or empty in {missing} of {len(new)} rows of the")
+        print("new file; it must come from a sweep that writes the column")
+        return 1
+    over = [float(a[GAP_OVER_TOLERANCE]) for a in new]
     if any(not v <= 1.0 for v in over):
         bad = sum(not v <= 1.0 for v in over)
         print(f"FAIL: {bad} rows where the iterative route misses the exhaustive one by more than")
