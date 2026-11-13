@@ -117,3 +117,42 @@ below.
 - `docs/implementations/2026-11-11-issue-61-pr143-review-fixes.md` (the first round).
 - `docs/findings/2026-11-07-nie-tan-vs-karnik-mendel.md`, sections 15.3 and 15.8.
 - Issue #61; ADR-011 in `docs/decisions.md`.
+
+## Results, 2026-11-13 (laptop, provisional)
+
+Machine: Mert's laptop, Windows 11, Python 3.12.10, numpy 2.4.4 (the pinned environment, `PYTHONPATH=".;src"`).
+
+| Commit | What |
+| --- | --- |
+| `74e524d7` | This record's plan and predictions, before anything was run. |
+| `be79df7d` | The two tests. On this commit, before the fix, test (a) passes and test (b) fails (1 failed, 1 passed of the two). |
+| `7de7e2fb` | The fix in `compare_sweep.py`. `tests/test_type_reduction.py`: 261 passed. |
+| `fab9306a` | `mutate.py`: a target per mutant, the killing test named, M11 and M12; its docstring's "aborts the run" corrected to what the code does (reports NOT APPLIED and goes on). |
+| `a507cecd` | `mutate.out.txt` from the committed `mutate.py`: 13 of 13 KILLED. |
+| `0c2eca4e` | `reducer_positions_and_cost.run3.out.txt`, findings section 16, the README's dated section. |
+
+**The predictions.**
+
+1. Held. Test (a) passed and test (b) failed on `be79df7d`; both pass after the fix; 259 became 261.
+2. Held. The eleven earlier mutants are still killed. M11 is killed by
+   `test_summary_reports_the_largest_route_gap_over_tolerance` and M12 by
+   `test_compare_sweep_fails_when_the_new_file_lacks_the_route_gap_column`, the tests written for them. A first version of M12
+   only set the missing count to 0; it was replaced before any run, because with the column absent the next line raises
+   `KeyError`, so the mutant would have been killed by a crash and not by the check it is named for.
+3. Held. The README's sweep command, 25.8 s: 96 data rows identical to `2026-11-11-35da0446.tsv`; `compare_sweep.py` exits 0
+   against it (`0.000e+00`) and against `2026-11-07-10e8174.tsv` (`2.809e-11`, with 6, 24, 22 and 0 rows differing in the four
+   uncompared `km_*` columns, the arithmetic difference section 15.6 describes). The 2026-11-07 TSV given as the new file
+   now exits 1 ("absent or empty in 96 of 96 rows").
+4. The third cost run: 3.1 through the public functions, 11.5 on the arithmetic, its non-timing lines identical to run 1's.
+   Inside both earlier ranges, so the range over three committed runs is still 3.1 to 4.9 and 9.6 to 13.9; the closure
+   sentence keeps "3 to 5" and "10 to 14" and now names three runs.
+
+**Gates.** `ruff check .` and `ruff format --check .` clean (109 files); `mypy --strict` clean (49 source files, the
+runbook's command); `scripts/check_ids.py`: no duplicate or colliding identifiers.
+
+**Full suite on a merge with `main`.** A throwaway worktree at `C:/t143m`, `0c2eca4e` merged with `main` `667972c5` (no
+conflict): `python -m pytest tests/ -q -p no:cacheprovider -rs`, **1464 passed in 222 s**, none skipped. That is `main`'s 1203 (the count CI collected at `667972c5`, in @BurakOztekin's review of PR #145) plus this branch's 261 type-reduction tests.
+
+**Not done here.** The runbook's dry run from a fresh clone happens after the push, since it clones the branch; the
+desktop batch is Burak's. Item d waits on decision 2. The owner's own re-derivation is not done; the reply asks what would
+satisfy it.
