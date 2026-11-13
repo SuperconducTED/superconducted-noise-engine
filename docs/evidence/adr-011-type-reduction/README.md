@@ -225,3 +225,22 @@ ways (findings 15.3), and `file02_rule_by_point_set.py` prints the anchored-only
 | --- | --- |
 | `mutate.py` | Applies each of eleven mutants to the script in turn, runs `tests/test_type_reduction.py`, restores from a copy. All eleven are killed at this commit (`mutate.out.txt`). |
 | `reducer_positions_and_cost.run2.out.txt` | A second run of the cost script at the same commit. Its timings differ from the first by up to a half, so the findings quote the ratios as ranges over the two. |
+
+## 2026-11-13: after the second review of PR #143
+
+`2026-11-11-35da0446.tsv` stays the current file: the sweep script is unchanged, so the README's command gives the same data
+rows. What changed is the checking around it (findings section 16, record
+`docs/implementations/2026-11-13-issue-61-pr143-second-review-gaps.md`):
+
+- **`compare_sweep.py` fails on a new file without `km_route_gap_over_tolerance_max`**, or with it empty in any row, instead of
+  skipping the check. A sweep made by the code before `1b8f6089` no longer passes. The committed file may still predate the
+  column.
+- **`tests/test_type_reduction.py` has 261 tests**, two more: the column is the cell's largest gap, and the comparison fails
+  without it.
+- **`mutate.py` runs thirteen mutants** and may target `compare_sweep.py` as well as the script; each killed mutant's line names
+  the first failing test. All thirteen are killed (`mutate.out.txt`). Its docstring said a non-matching replacement "aborts
+  the run"; the code reports it as NOT APPLIED and goes on, and the docstring now says so.
+
+| Script or output | What it answers |
+| --- | --- |
+| `reducer_positions_and_cost.run3.out.txt` | A third run of the cost script, unchanged since `1b8f6089`, on the same laptop. Ratios 3.1 (public) and 11.5 (arithmetic); the findings quote the range over the three committed runs, 3.1 to 4.9 and 9.6 to 13.9. |

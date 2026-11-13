@@ -384,3 +384,47 @@ only, none at the lattice points, and with the guarded result equal to the exhau
 **15.9 Register rows, restated.** Rows 1 and 2 of section 10 stand, citing `35da0446`. Row 3 cites `2026-11-11-35da0446.tsv`, SHA-256
 `af97c29f24c2b660cebed91bd1d5638a96f970b71d63de529d249a7eead79d0c`. Row 4 becomes: **the cost of iterative KM against Nie-Tan, per point on 27 rules, through the public functions and on the
 arithmetic alone** (section 15.3), `reducer_positions_and_cost.py`. Nothing else in section 10 changes.
+
+## 16. 2026-11-13: after the second review of PR #143
+
+@mertefesensoy's second review, 5854006318 (a comment, at `1b8f6089`), found the five items of section 15 closed and left
+three points, answered here, and one question for decision 2. The sweep and evidence scripts are unchanged since `1b8f6089`,
+so no figure of section 15 moves. Laptop, provisional. The record is
+`docs/implementations/2026-11-13-issue-61-pr143-second-review-gaps.md`.
+
+**16.1 The new column is pinned (item a).** `km_route_gap_over_tolerance_max` is the largest gap over tolerance among the
+cell's points. A test now gives a cell three points at 0, 5 and 2 tolerances and requires 5. With `max` replaced by `min` all
+259 earlier tests passed; that mutant (M11) now fails the new test.
+
+**16.2 A sweep without the column fails the comparison (item b).** `compare_sweep.py` exits 1 when the new file has no
+`km_route_gap_over_tolerance_max` column or leaves it empty in any row. On `1b8f6089` it read the column only where present,
+so a sweep from the older code compared with itself exited 0 and the check of 15.1 was skipped. The column is checked on the
+new file only, so `2026-11-07-10e8174.tsv`, which predates it, is still accepted as the committed file. M12 puts back
+`1b8f6089`'s read and fails the new test. `mutate.py all`: 13 of 13 killed, each line naming the test that failed
+(`mutate.out.txt`).
+
+**16.3 The cost over three committed runs (item c).** A third run of `reducer_positions_and_cost.py`, unchanged, on the same
+laptop: `reducer_positions_and_cost.run3.out.txt`, its non-timing lines identical to the first run's.
+
+| Ratio to Nie-Tan, per point, 27 rules | run 1 | run 2 | run 3 | range |
+| --- | ---: | ---: | ---: | ---: |
+| `karnik_mendel_detailed`, through the public functions | 4.9 | 3.4 | 3.1 | 3.1 to 4.9 |
+| iterative KM, arithmetic, consequents sorted once | 13.9 | 9.6 | 11.5 | 9.6 to 13.9 |
+
+Review 5854006318 reports a run on the same laptop at 2.8 and 10.3. It is not committed, so it is cited as the reviewer's and
+does not set the range. Three runs show how far the laptop's load moved the ratio on those three runs; they do not bound it.
+The desktop batch gives the figure the ledger cites.
+
+**16.4 Closure text, its fourth paragraph restated.** This replaces the fourth paragraph of 15.8's block; the rest of 15.8
+stands.
+
+> Karnik-Mendel stays the band source (File 02, File 03) and out of the training loss, because its midpoint is not linear in the consequents. Per point on 27 rules, iterative Karnik-Mendel costs 3 to 5 times Nie-Tan through the public functions and 10 to 14 times on the arithmetic alone, over three committed laptop runs; the choice rests on the rule above, and cost points the same way. Figures are laptop and provisional until [the batch record], which gives the cost figure.
+
+**16.5 Register row 4.** As 15.9 states it, citing the three committed runs and their count; when the desktop batch exists,
+its ratios replace the laptop range.
+
+**16.6 Open: the comparator on wide footprints (item d).** On any sweep that includes `w = 0.8` or `0.9`, `compare_sweep.py`
+exits 1, because the iterative route misses the exhaustive one there by far more than its tolerance (review 5854006318 measured
+it). The figures in such a file are right, since the band comes from the exhaustive route. If decision 2 widens the footprint
+set, the comparator must either stay fatal, so those footprints cannot be committed, or report the gap without failing on
+footprints where the iterative route is known to miss. That is decided with decision 2 (@BahaJarad), not here.
