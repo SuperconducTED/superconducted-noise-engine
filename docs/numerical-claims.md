@@ -55,6 +55,17 @@ to make that failure mode structurally hard to repeat.
    name the commit it was measured at, so a stale row surfaces as a visible
    mismatch instead of a silent contradiction.
 
+## Issue #122 source survey (identifier allocated at merge time)
+
+The original provisional source-fit claim is withdrawn following PR #150's
+review: the fits lose to constant baselines and are not informative evidence
+of a source improvement. No fit result is proposed for registration here.
+The November 8 source survey is superseded by the committed-source rebuild.
+
+| ID pending | Claim | Value | Source | Last verified | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Next free NC at merge (source survey) | Source-tagged p1/p50/p99 over distinct kept states | Feature quantiles and source counts in `docs/evidence/issue-122-training-set/review-2026-11-12/comparison/source-quantiles.tsv` | Builder/comparison source `cd20cc3788539cba04870bf6e26bbd5f3e9fed6c`; IBM archive `5828b4a29fabc245aa096e530852249a3496dc5b`; public revision `0c298c2ba07f9b230a81a0e5fa8d993dcd2cf37d`, parquet SHA-256 `dbb53131a6c2c96732e5be070c6ad1621b7d90cb052298975d78d6bbd86fcc73`; input TSV SHA-256 `4c20d6e942a2ab6375525aa13f2cf401278cba8152bef3f5c28b669b37fcb3bf` | 2026-11-12 | Python 3.12.10, pinned requirements; provisional Windows run. Linear quantiles with equal weight per kept state, after coverage skips and IBM precedence. NC-041's dated file-weighted evidence remains unchanged. Allocate the identifier at merge time; canonical desktop verification pending. |
+
 ## Active claims
 
 | ID | Claim | Value | Source | Last verified | Notes |

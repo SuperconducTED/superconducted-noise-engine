@@ -37,6 +37,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+public-archive = ["pyarrow>=18,<27", "tzdata>=2025.1; sys_platform == 'win32'"]
 dev = [
     "pytest>=9,<10",
     "pytest-cov>=7,<8",
@@ -84,6 +85,8 @@ disallow_subclassing_any = false
 
 [[tool.mypy.overrides]]
 module = [
+    "pyarrow",
+    "pyarrow.*",
     "qiskit",
     "qiskit.*",
     "qiskit_aer",

@@ -139,7 +139,7 @@ def test_qubit_targets_counts_first_skip_reason_and_keeps_nan_rows() -> None:
             _qubit(0, None, None),
             _qubit(1, 1.0, None),
             _qubit(2, 0.0, 1.0),
-            _qubit(3, 1.0, 3.0),
+            _qubit(3, 100e-6, 300e-6),
             _qubit(4, 1.0, 1.0),
         ),
         {0: 1.0, 1: 1.0, 2: 1.0, 3: 1.0},
@@ -155,7 +155,9 @@ def test_qubit_targets_counts_first_skip_reason_and_keeps_nan_rows() -> None:
 
 
 def test_snapshot_target_uses_only_usable_rows() -> None:
-    targets = qubit_targets(_snapshot(_qubit(0, 2.0, 2.0), _qubit(1, None, None)), {0: 1.0})
+    targets = qubit_targets(
+        _snapshot(_qubit(0, 100e-6, 100e-6), _qubit(1, None, None)), {0: SX_SECONDS}
+    )
     summary = snapshot_target(targets)
     assert summary is not None
     assert summary.n_usable == 1
@@ -264,6 +266,7 @@ def test_real_fixture_derives_targets_from_all_sx_gate_lengths() -> None:
     assert targets.skipped.t2_exceeds_2t1 == 0
     assert summary is not None
     assert summary.n_usable == 155
+    assert targets.skipped.coherence_implausible == 0
 
     snapshot = _calibration_snapshot(GATE_FIXTURE)
     target_at_mean_features = feature_target_fn(
@@ -282,3 +285,50 @@ def test_real_fixture_derives_targets_from_all_sx_gate_lengths() -> None:
         coherence_unit="s",
     )
     assert target_from_seconds - summary.mean == pytest.approx(NC_039_GAP, rel=1e-9)
+
+
+@pytest.mark.parametrize("field", ["T1", "T2"])
+def test_seconds_value_labelled_microseconds_gets_its_own_skip_reason(field):
+    from superconducted.calibration.loader import parse_snapshot
+
+    raw = json.loads(GATE_FIXTURE.read_text(encoding="utf-8"))
+    for entry in raw["properties"]["qubits"][0]:
+        if entry["name"] == field:
+            entry["value"] *= 1e-6
+    result = qubit_targets(parse_snapshot(raw), gate_lengths(raw["properties"]))
+    assert not result.usable[0]
+    assert result.skipped.coherence_implausible == 1
+    assert np.all(np.isnan(result.values[0]))
+
+
+def test_unit_guard_preserves_measured_weak_qubits_and_rejects_mislabelled_seconds():
+    # Minima reported by the review's full IBM scan, plus a real sub-us pair.
+    # The final pair is larger than the seconds-valued defect's observed maximum.
+    result = qubit_targets(
+        _snapshot(
+            _qubit(0, 1.675e-6, 2.479e-6),
+            _qubit(1, 0.5e-6, 0.5e-6),
+            _qubit(2, 0.0004e-6, 0.0004e-6),
+        ),
+        dict.fromkeys(range(3), SX_SECONDS),
+    )
+    assert result.usable.tolist() == [True, True, False]
+    assert result.skipped.coherence_implausible == 1
+
+
+def test_plausibility_bounds_are_inclusive_and_reject_extremes():
+    from superconducted.training.targets import COHERENCE_BOUNDS_SECONDS
+
+    lo1, hi1 = COHERENCE_BOUNDS_SECONDS["T1"]
+    lo2, hi2 = COHERENCE_BOUNDS_SECONDS["T2"]
+    result = qubit_targets(
+        _snapshot(
+            _qubit(0, lo1, lo2),
+            _qubit(1, hi1, hi2),
+            _qubit(2, lo1 / 2, lo2),
+            _qubit(3, hi1, hi2 * 2),
+        ),
+        dict.fromkeys(range(4), SX_SECONDS),
+    )
+    assert result.usable.tolist() == [True, True, False, False]
+    assert result.skipped.coherence_implausible == 2

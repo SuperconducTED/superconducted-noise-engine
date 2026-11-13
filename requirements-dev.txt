@@ -11,3 +11,6 @@ ipykernel==7.2.0
 # The chart style (superconducted.figures, the `figures` extra). The version the brand's
 # style checks ran on (SuperconducTED/.github, brand/figures/check_styles.py, 2026-10-16).
 matplotlib==3.11.2
+# Exercise the public archive reader in both CI Python versions; never skip it.
+pyarrow==26.0.1
+tzdata==2026.6; sys_platform == "win32"

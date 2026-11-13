@@ -25,6 +25,18 @@ from ..calibration.loader import UNIT_SCALE, CalibrationParseError, ParsedCalibr
 # has no key for because no archive field is published in seconds.
 _COHERENCE_UNIT_SCALE: Final[Mapping[str, float]] = {"us": UNIT_SCALE["us"], "s": 1.0}
 
+# NC-041's archive-microsecond p1/p99 box, widened multiplicatively by
+# factor 1000 (PR #150 review proposal). This is a unit-defect guard,
+# not a new quantile estimate. Applied to both training sources after parsing.
+COHERENCE_PLAUSIBILITY_FACTOR: Final[float] = 1000.0
+COHERENCE_BOUNDS_SECONDS: Final[Mapping[str, tuple[float, float]]] = {
+    name: (
+        lo / COHERENCE_PLAUSIBILITY_FACTOR * UNIT_SCALE["us"],
+        hi * COHERENCE_PLAUSIBILITY_FACTOR * UNIT_SCALE["us"],
+    )
+    for name, lo, hi in (("T1", 98.8191, 154.3887), ("T2", 67.4411, 110.5429))
+}
+
 
 @dataclass(frozen=True, slots=True)
 class SkipCounts:
@@ -35,6 +47,7 @@ class SkipCounts:
     gate_length_missing: int = 0
     nonpositive: int = 0
     t2_exceeds_2t1: int = 0
+    coherence_implausible: int = 0
 
     def __post_init__(self) -> None:
         if (
@@ -44,6 +57,7 @@ class SkipCounts:
                 self.gate_length_missing,
                 self.nonpositive,
                 self.t2_exceeds_2t1,
+                self.coherence_implausible,
             )
             < 0
         ):
@@ -159,7 +173,13 @@ def qubit_targets(
     snapshot: ParsedCalibrationSnapshot,
     lengths: Mapping[int, float],
 ) -> QubitTargets:
-    """Derive aligned ``(gamma, lambda)`` targets from a parsed snapshot."""
+    """Derive aligned targets with ADR-029's training-only plausibility guard.
+
+    After missing/non-positive checks, require T1/T2 inside the inclusive
+    NC-041 p1/p99 box widened by factor 1000. Record coherence_implausible
+    before the T2 <= 2*T1 physics check so a mislabeled T1 has its own reason.
+    The raw archive and benchmark reference are not rewritten by this guard.
+    """
     values = np.full((len(snapshot.qubits), 2), np.nan, dtype=np.float64)
     usable = np.zeros(len(snapshot.qubits), dtype=np.bool_)
     counts = SkipCounts()
@@ -173,6 +193,11 @@ def qubit_targets(
             counts = replace(counts, gate_length_missing=counts.gate_length_missing + 1)
         elif t1 <= 0.0 or t2 <= 0.0 or gate_length < 0.0:
             counts = replace(counts, nonpositive=counts.nonpositive + 1)
+        elif not (
+            COHERENCE_BOUNDS_SECONDS["T1"][0] <= t1 <= COHERENCE_BOUNDS_SECONDS["T1"][1]
+            and COHERENCE_BOUNDS_SECONDS["T2"][0] <= t2 <= COHERENCE_BOUNDS_SECONDS["T2"][1]
+        ):
+            counts = replace(counts, coherence_implausible=counts.coherence_implausible + 1)
         elif t2 > 2.0 * t1:
             counts = replace(counts, t2_exceeds_2t1=counts.t2_exceeds_2t1 + 1)
         else:

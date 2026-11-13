@@ -1,0 +1,134 @@
+{
+  "input": "docs/evidence/issue-122-training-set/review-2026-11-12/2026-11-12-5828b4a2-public.tsv",
+  "input_sha256": "4c20d6e942a2ab6375525aa13f2cf401278cba8152bef3f5c28b669b37fcb3bf",
+  "cut": "2026-09-23T00:00:00Z",
+  "quantile_weighting": "one row per distinct kept state",
+  "quantile_method": "linear",
+  "shape": "GaussianMF",
+  "levels": 3,
+  "epochs": 0,
+  "ridge": 1e-06,
+  "seed": 0,
+  "results": [
+    {
+      "fit": "IBM only",
+      "n_train": 660,
+      "n_validation": 264,
+      "train_rmse": [
+        4.588416419680248e-06,
+        2.4853127969855853e-05
+      ],
+      "validation_rmse": [
+        2.8230182322373825e-05,
+        0.00048019735977554987
+      ],
+      "constant_validation_rmse": [
+        1.1920228523055615e-05,
+        3.453190816465282e-05
+      ],
+      "beats_constant": [
+        false,
+        false
+      ],
+      "holdout_outside_training_range": {
+        "mean_T1": 0,
+        "mean_T2": 0,
+        "mean_readout_error": 17
+      },
+      "parameters": {
+        "premise": 18,
+        "consequent": 216,
+        "total": 234
+      },
+      "diagnostics": {
+        "clip_binding_rate": 0.0,
+        "zero_firing_rows_dropped": 0,
+        "nonfinite_rows_rejected": 0,
+        "lse_condition_number": 15843.554781604978,
+        "premise_steps_rejected": 0,
+        "epochs_run": 0,
+        "early_stopped": false,
+        "standardization": [
+          [
+            130.6181391384175,
+            96.20167424297577,
+            0.02273732906362303
+          ],
+          [
+            13.896842291327815,
+            9.04275352604242,
+            0.0049708062421882455
+          ],
+          [
+            0.00021074317294967308,
+            0.0006800371119157024
+          ],
+          [
+            2.1735300846993504e-05,
+            5.387303451386265e-05
+          ]
+        ]
+      }
+    },
+    {
+      "fit": "IBM + public",
+      "n_train": 1283,
+      "n_validation": 264,
+      "train_rmse": [
+        5.201576479728939e-06,
+        2.851831553737869e-05
+      ],
+      "validation_rmse": [
+        0.0012636016024437382,
+        0.0061392062182957265
+      ],
+      "constant_validation_rmse": [
+        1.4262884349427142e-05,
+        3.253438935123499e-05
+      ],
+      "beats_constant": [
+        false,
+        false
+      ],
+      "holdout_outside_training_range": {
+        "mean_T1": 0,
+        "mean_T2": 0,
+        "mean_readout_error": 0
+      },
+      "parameters": {
+        "premise": 18,
+        "consequent": 216,
+        "total": 234
+      },
+      "diagnostics": {
+        "clip_binding_rate": 0.0,
+        "zero_firing_rows_dropped": 3,
+        "nonfinite_rows_rejected": 0,
+        "lse_condition_number": 25296.922372662462,
+        "premise_steps_rejected": 0,
+        "epochs_run": 0,
+        "early_stopped": false,
+        "standardization": [
+          [
+            138.44967603410268,
+            100.26527855597675,
+            0.02654270728723244
+          ],
+          [
+            13.763236932765636,
+            8.301512380601293,
+            0.012686163496998401
+          ],
+          [
+            0.00019994928448675028,
+            0.0006767632500901538
+          ],
+          [
+            2.1292494429272198e-05,
+            4.4976162231459526e-05
+          ]
+        ]
+      }
+    }
+  ]
+}
