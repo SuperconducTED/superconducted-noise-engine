@@ -1,6 +1,6 @@
 # Phase 4: Design-time predictor
 
-_Generated 2026-11-12 05:45 UTC · main at `667972c5` (2026-11-11) · day 12 since 2026-11-01 · milestone 2 due 2027-02-27 (107 days), 14 open and 12 closed_
+_Generated 2026-11-13 15:17 UTC · main at `667972c5` (2026-11-11) · day 13 since 2026-11-01 · milestone 2 due 2027-02-27 (106 days), 14 open and 12 closed_
 
 _Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, on main. Gates are ordered, not dated (plan §6)._
 
@@ -118,21 +118,21 @@ _Review requests not yet answered with a review, and unticked checkboxes that st
 
 **Mert Efe Şensoy** (@mertefesensoy), 1 owed
 
-- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (40 days); no post there since
+- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (41 days); no post there since
 
 **Burak Öztekin** (@BurakOztekin), 1 owed
 
-- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (70 days); no post there since
+- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (71 days); no post there since
 
 **Bengisu Cıvdı** (@bengisucvd), 1 owed
 
-- Review PR #145: requested by @mertefesensoy, since 2026-11-11 (1 day); no post there since
+- Review PR #145: requested by @mertefesensoy, since 2026-11-11 (2 days); no post there since
 
 **Baha Jarad** (@BahaJarad), 3 owed
 
-- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (40 days); no post there since
-- Review PR #143: requested by @bengisucvd, since 2026-11-07 (5 days); no post there since
-- Review PR #145: requested by @mertefesensoy, since 2026-11-09 (3 days); no post there since
+- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (41 days); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (6 days); no post there since
+- Review PR #145: requested by @mertefesensoy, since 2026-11-09 (4 days); no post there since
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -166,6 +166,7 @@ Nothing is blocked upstream.
 
 | Date | Gates | Conditions | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 2026-11-13 | 0/5 | 0/7 | 7 | 3 | 0 | nothing moved |
 | 2026-11-12 | 0/5 | 0/7 | 7 | 3 | 0 | #60 ADR-014 trainer: the first archive fit: in review to ready to start; Burak Öztekin owes 1 answer (was 3); main moved to 667972c5 |
 | 2026-11-11 | 0/5 | 0/7 | 6 | 4 | 0 | milestone 2: 14 open and 12 closed (was 16 and 10); #122 Public archive as a second training-set source (ADR-029): ready to start to in review; #75 Decide the LOCKED Kraus projector boundary: in review to done; Burak Öztekin owes 3 answers (was 1); Bengisu Cıvdı owes 1 answer (was 4); Mert Efe Şensoy owes 1 answer (was 3); main moved to cd277a64 |
 | 2026-11-10 | 0/5 | 0/7 | 7 | 4 | 0 | milestone 2: 16 open and 10 closed (was 16 and 7); #57 Training contract: ADR-027 accepted (PR #120): ready to start to done; #84 Close the #57 advisor loop: ready to start to done; Baha Jarad owes 3 answers (was 2); Burak Öztekin owes 1 answer (was 2); Bengisu Cıvdı owes 4 answers (was 2); Mert Efe Şensoy owes 3 answers (was 5); main moved to d929424a |
