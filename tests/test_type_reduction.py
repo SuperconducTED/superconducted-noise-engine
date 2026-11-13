@@ -797,6 +797,27 @@ def test_summary_reports_the_route_gap_over_tolerance() -> None:
     assert COLUMNS[-1] == "km_route_gap_over_tolerance_max"
 
 
+def test_summary_reports_the_largest_route_gap_over_tolerance() -> None:
+    """Second review, item a: the column is the worst point of the cell, not the best or the first."""
+
+    def gap(over: float) -> _Measurement:
+        return _Measurement(
+            y_l=0.0,
+            y_r=1.0,
+            y_bmm=0.5,
+            y_nt=0.5,
+            spread=1.0,
+            tolerance=1e-12,
+            passes_l=1,
+            passes_r=1,
+            guard_stops=0,
+            route_gap=over * 1e-12,
+        )
+
+    row = _bmm_row([gap(0.0), gap(5.0), None, gap(2.0)])
+    assert float(row["km_route_gap_over_tolerance_max"]) == pytest.approx(5.0)
+
+
 @pytest.mark.parametrize(
     ("side", "lower", "upper", "values"),
     [
@@ -867,3 +888,19 @@ def test_compare_sweep_fails_when_a_route_gap_exceeds_its_tolerance(
     bad.write_text(header + "g\t0.1\t1e-3\t3.0e9\n", encoding="utf-8")
     assert _compare_sweep(monkeypatch, good, committed) == 0
     assert _compare_sweep(monkeypatch, bad, committed) == 1
+
+
+def test_compare_sweep_fails_when_the_new_file_lacks_the_route_gap_column(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Second review, item b: a sweep without the column, or with it empty, fails the check."""
+    old_header = "grid\tD_max\tkm_route_gap_max\n"
+    committed = tmp_path / "committed.tsv"
+    committed.write_text(old_header + "g\t0.1\t1e-15\n", encoding="utf-8")
+    absent = tmp_path / "absent.tsv"
+    absent.write_text(old_header + "g\t0.1\t1e-15\n", encoding="utf-8")
+    assert _compare_sweep(monkeypatch, absent, committed) == 1
+    header = "grid\tD_max\tkm_route_gap_max\tkm_route_gap_over_tolerance_max\n"
+    empty = tmp_path / "empty.tsv"
+    empty.write_text(header + "g\t0.1\t1e-15\t\n", encoding="utf-8")
+    assert _compare_sweep(monkeypatch, empty, committed) == 1
