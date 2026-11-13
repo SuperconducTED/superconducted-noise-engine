@@ -393,12 +393,13 @@ so no figure of section 15 moves. Laptop, provisional. The record is
 `docs/implementations/2026-11-13-issue-61-pr143-second-review-gaps.md`.
 
 **16.1 The new column is pinned (item a).** `km_route_gap_over_tolerance_max` is the largest gap over tolerance among the
-cell's points. A test now gives a cell three points at 0, 5 and 2 tolerances and requires 5. With `max` replaced by `min` all
-259 earlier tests passed; that mutant (M11) now fails the new test.
+cell's points. A test now gives a cell three points at 0, 5 and 2 tolerances and requires 5. With `max` replaced by `min`
+(M11) every other test passes, 260 of them here, as the review found on `1b8f6089`'s 259; M11 now fails the new test.
 
 **16.2 A sweep without the column fails the comparison (item b).** `compare_sweep.py` exits 1 when the new file has no
 `km_route_gap_over_tolerance_max` column or leaves it empty in any row. On `1b8f6089` it read the column only where present,
-so a sweep from the older code compared with itself exited 0 and the check of 15.1 was skipped. The column is checked on the
+so a sweep from code that predates the column (`c8a1dd54` and earlier) compared with itself exited 0 and the check of 15.1
+was skipped. The column is checked on the
 new file only, so `2026-11-07-10e8174.tsv`, which predates it, is still accepted as the committed file. M12 puts back
 `1b8f6089`'s read and fails the new test. `mutate.py all`: 13 of 13 killed, each line naming the test that failed
 (`mutate.out.txt`).
@@ -411,7 +412,9 @@ laptop: `reducer_positions_and_cost.run3.out.txt`, its non-timing lines identica
 | `karnik_mendel_detailed`, through the public functions | 4.9 | 3.4 | 3.1 | 3.1 to 4.9 |
 | iterative KM, arithmetic, consequents sorted once | 13.9 | 9.6 | 11.5 | 9.6 to 13.9 |
 
-Review 5854006318 reports a run on the same laptop at 2.8 and 10.3. It is not committed, so it is cited as the reviewer's and
+Run 3's public ratio is below run 1 and run 2's range of 15.3 (3.4 to 4.9) and widens it, which confirms item c with a
+committed run; its arithmetic ratio is inside 9.6 to 13.9. Review 5854006318 reports a run on the same laptop at 2.8 and
+10.3. It is not committed, so it is cited as the reviewer's and
 does not set the range. Three runs show how far the laptop's load moved the ratio on those three runs; they do not bound it.
 The desktop batch gives the figure the ledger cites.
 

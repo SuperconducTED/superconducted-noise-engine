@@ -233,8 +233,8 @@ rows. What changed is the checking around it (findings section 16, record
 `docs/implementations/2026-11-13-issue-61-pr143-second-review-gaps.md`):
 
 - **`compare_sweep.py` fails on a new file without `km_route_gap_over_tolerance_max`**, or with it empty in any row, instead of
-  skipping the check. A sweep made by the code before `1b8f6089` no longer passes. The committed file may still predate the
-  column.
+  skipping the check. A sweep made by code that predates the column (`c8a1dd54` and earlier) no longer passes. The committed
+  file may still predate the column.
 - **`tests/test_type_reduction.py` has 261 tests**, two more: the column is the cell's largest gap, and the comparison fails
   without it.
 - **`mutate.py` runs thirteen mutants** and may target `compare_sweep.py` as well as the script; each killed mutant's line names
@@ -243,4 +243,4 @@ rows. What changed is the checking around it (findings section 16, record
 
 | Script or output | What it answers |
 | --- | --- |
-| `reducer_positions_and_cost.run3.out.txt` | A third run of the cost script, unchanged since `1b8f6089`, on the same laptop. Ratios 3.1 (public) and 11.5 (arithmetic); the findings quote the range over the three committed runs, 3.1 to 4.9 and 9.6 to 13.9. |
+| `reducer_positions_and_cost.run3.out.txt` | A third run of the cost script, unchanged since `1b8f6089`, on the same laptop. Ratios 3.1 (public), below the two earlier runs and widening their range, and 11.5 (arithmetic), inside theirs; the findings quote the range over the three committed runs, 3.1 to 4.9 and 9.6 to 13.9. |

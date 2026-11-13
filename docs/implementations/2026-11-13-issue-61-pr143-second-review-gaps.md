@@ -18,7 +18,7 @@ b. **A file without the column passes the check.** `compare_sweep.py` reads the 
 c. **The cost range rests on two runs.** Findings section 15.3 and the closure text in 15.8 give
    iterative KM at 3.4 to 4.9 times Nie-Tan through the public functions and 9.6 to 13.9 times on the
    arithmetic, "over two laptop runs". The reviewer's third run on the same laptop gave 2.8 and 10.3,
-   outside the first range. L-070 in the math skill: two runs do not bound a ratio.
+   outside the first range. Two runs do not bound a ratio.
 
 Not changed here: d (whether the comparator stays fatal on footprints where the iterative route is
 known to fail, `0.8` and `0.9`) is decision 2's, which @BahaJarad has not taken; and the request that
@@ -130,11 +130,13 @@ Machine: Mert's laptop, Windows 11, Python 3.12.10, numpy 2.4.4 (the pinned envi
 | `fab9306a` | `mutate.py`: a target per mutant, the killing test named, M11 and M12; its docstring's "aborts the run" corrected to what the code does (reports NOT APPLIED and goes on). |
 | `a507cecd` | `mutate.out.txt` from the committed `mutate.py`: 13 of 13 KILLED. |
 | `0c2eca4e` | `reducer_positions_and_cost.run3.out.txt`, findings section 16, the README's dated section. |
+| the commit after the results | Corrections made before the push, after a review pass: prediction 4's reading (the public ratio widens the range, it is not inside it), the README's "before `1b8f6089`" (the column dates from the 2026-11-11 fixes, so the older code is `c8a1dd54` and earlier), and findings 16.1's 259, re-measured instead of quoted from the review. |
 
 **The predictions.**
 
 1. Held. Test (a) passed and test (b) failed on `be79df7d`; both pass after the fix; 259 became 261.
-2. Held. The eleven earlier mutants are still killed. M11 is killed by
+2. Held. The eleven earlier mutants are still killed. M11 applied by hand with test (a) deselected: the other 260 tests
+   pass, so before test (a) nothing saw it, as the review found on `1b8f6089`'s 259. M11 is killed by
    `test_summary_reports_the_largest_route_gap_over_tolerance` and M12 by
    `test_compare_sweep_fails_when_the_new_file_lacks_the_route_gap_column`, the tests written for them. A first version of M12
    only set the missing count to 0; it was replaced before any run, because with the column absent the next line raises
@@ -144,8 +146,9 @@ Machine: Mert's laptop, Windows 11, Python 3.12.10, numpy 2.4.4 (the pinned envi
    uncompared `km_*` columns, the arithmetic difference section 15.6 describes). The 2026-11-07 TSV given as the new file
    now exits 1 ("absent or empty in 96 of 96 rows").
 4. The third cost run: 3.1 through the public functions, 11.5 on the arithmetic, its non-timing lines identical to run 1's.
-   Inside both earlier ranges, so the range over three committed runs is still 3.1 to 4.9 and 9.6 to 13.9; the closure
-   sentence keeps "3 to 5" and "10 to 14" and now names three runs.
+   The public ratio is below the two-run range of findings 15.3 (3.4 to 4.9) and widens it to 3.1 to 4.9, which confirms
+   item c with a committed run; the arithmetic ratio is inside 9.6 to 13.9. The closure sentence's "3 to 5" and "10 to 14"
+   still cover the three committed runs, and it now names three runs.
 
 **Gates.** `ruff check .` and `ruff format --check .` clean (109 files); `mypy --strict` clean (49 source files, the
 runbook's command); `scripts/check_ids.py`: no duplicate or colliding identifiers.
