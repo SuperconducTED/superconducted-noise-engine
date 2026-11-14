@@ -1,0 +1,36 @@
+Median position in the band, survey rows; 0.5 is the Karnik-Mendel midpoint
+grid  convention  output  |  rho  | Y_lo    Y_hi    BMM     NT     | straddle | Db BMM  Db NT   BMM closer | mutated
+0.1   unit-spread unit    |   1.5 | 0.4202  0.5422  0.4926  0.4975 | 0.995    | 0.0332  0.0192  0.242      | 0.497
+0.1   anchored    gamma   |   1.5 | 0.5062  0.4578  0.4841  0.4899 | 0.922    | 0.0332  0.0275  0.247      | 0.490
+0.1   anchored    lambda  |   1.5 | 0.5153  0.4713  0.4970  0.4933 | 0.911    | 0.0102  0.0117  0.469      | 0.493
+0.3   unit-spread unit    |   4.2 | 0.4107  0.4821  0.4772  0.4944 | 0.845    | 0.1036  0.0428  0.097      | 0.494
+0.3   anchored    gamma   |   4.2 | 0.4992  0.4943  0.4750  0.4780 | 0.601    | 0.1254  0.0425  0.187      | 0.478
+0.3   anchored    lambda  |   4.2 | 0.5195  0.4760  0.4901  0.4780 | 0.600    | 0.0369  0.0355  0.389      | 0.478
+0.6   unit-spread unit    |  46.5 | 0.4186  0.4941  0.4618  0.4945 | 0.518    | 0.1995  0.0275  0.014      | 0.494
+0.6   anchored    gamma   |  46.5 | 0.4608  0.4791  0.4698  0.4794 | 0.132    | 0.2606  0.0524  0.012      | 0.479
+0.6   anchored    lambda  |  46.5 | 0.5605  0.4972  0.5140  0.4961 | 0.575    | 0.0861  0.0252  0.229      | 0.496
+g59   unit-spread unit    |   7.4 | 0.4075  0.5232  0.4873  0.5143 | 0.999    | 0.0825  0.0465  0.301      | 0.514
+g59   anchored    gamma   |   7.4 | 0.5130  0.4732  0.4770  0.4684 | 0.650    | 0.0778  0.0316  0.291      | 0.468
+g59   anchored    lambda  |   7.4 | 0.5177  0.4405  0.4776  0.4517 | 0.595    | 0.0337  0.0483  0.763      | 0.452
+
+Identity, largest absolute error over all cells: 5.00e-16
+Correlation across 12 cells, share straddling, share BMM closer: 0.270
+
+Cost per point, 27 rules, fastest of 15 interleaved passes over 975 points
+G59 anchored lambda; python and numpy; laptop, provisional
+Through the public functions, each validating its input (ratio to nie_tan_reduce):
+  nie_tan_reduce                       24.3 us     1.0 x
+  bmm_half_reduce                      45.2 us     1.9 x
+  karnik_mendel_detailed              120.0 us     4.9 x
+  exhaustive_type_reduce              624.5 us    25.7 x
+Input validation alone, the part every public function shares:
+  _validated                           16.9 us     0.7 x
+Arithmetic alone, on validated arrays (ratio to Nie-Tan's arithmetic):
+  Nie-Tan                               4.5 us     1.0 x
+  BMM(1/2, 1/2)                        10.4 us     2.3 x
+  iterative KM, sorted once            62.7 us    13.9 x
+  iterative KM, sorting each point     89.5 us    19.9 x
+  exhaustive, sorted once             639.1 us   142.0 x
+  passes_l: mean 2.65, max 4
+  passes_r: mean 2.34, max 3
+  guard_stops: mean 0.00, max 0

@@ -1,0 +1,7 @@
+switch-point route against vertex enumeration, 300 random boxes n<=8: worst gap 4.44e-16
+G59 anchored lambda, survey rows: n=975
+median score: BMM 0.0337, Nie-Tan 0.0483
+closer: Nie-Tan 231, BMM 744, tie 0
+band width y_r - y_l: median 6.104e-05, max 1.106e-04
+|y_BMM - y_NT|: median 1.480e-06, max 1.508e-05
+distinct feature vectors among the 975 survey rows: 521

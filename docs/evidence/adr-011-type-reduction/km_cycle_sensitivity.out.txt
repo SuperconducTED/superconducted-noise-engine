@@ -1,0 +1,14 @@
+k tie convention searchsorted(side='right'):
+  lattice  {'left': 0, 'right': 0, 'either': 0, 'both': 0}
+  uniform  {'left': 0, 'right': 104, 'either': 104, 'both': 0}
+  survey   {'left': 0, 'right': 0, 'either': 0, 'both': 0}
+  total    {'left': 0, 'right': 104, 'either': 104, 'both': 0}
+  guarded result off the exhaustive route on cycling points: 0
+  points cycling with np.sum(w * c) / np.sum(w) in place of the script's Y: 102
+k tie convention searchsorted(side='left'):
+  lattice  {'left': 0, 'right': 0, 'either': 0, 'both': 0}
+  uniform  {'left': 0, 'right': 101, 'either': 101, 'both': 0}
+  survey   {'left': 0, 'right': 48, 'either': 48, 'both': 0}
+  total    {'left': 0, 'right': 149, 'either': 149, 'both': 0}
+  guarded result off the exhaustive route on cycling points: 0
+  points cycling with np.sum(w * c) / np.sum(w) in place of the script's Y: 126
