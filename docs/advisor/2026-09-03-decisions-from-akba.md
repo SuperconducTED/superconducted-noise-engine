@@ -472,3 +472,75 @@ The team's File 01 decision on D5 left owner approval as a separate requirement.
 | **Unblocks** | Issue #57's owner-read definition-of-done item, together with item 10. No ADR: this is an owner read under `docs/team.md`. |
 
 Before PR #69 the docstring said the trainer "lives in :mod:`superconducted.fuzzy.tsk`", which contradicted `fuzzy/tsk.py`'s own docstring: the trainer is intentionally not in that module. Since PR #69 it reads "hybrid LSE/SGD ANFIS trainer in :mod:`superconducted.training`", unchanged at `main` @ `c33e438e`. No brief file argued this item (the 2026-09-14 section records the gap); it was put to Dr. Akba in person with the rest.
+
+## Outstanding items, as of 2026-11-15
+
+Not a decision entry. Two ADR-025 amendments merged with no register item; Issue #109 (item 1) asks
+for them. They are numbered here, after item 15, and answered in the entries below.
+
+| # | Item | Class | Decision-by | Status |
+| --- | --- | --- | --- | --- |
+| 16 | ADR-025 amendment, 2026-09-17: the renderer records that it ran (the heartbeat; PR #102) | Ratify | n/a | Answered below, 2026-11-15 |
+| 17 | ADR-025 amendment, 2026-09-29: the capture record, `health/capture.tsv` (PR #105) | Ratify | n/a | Answered below, 2026-11-15 |
+
+## Decision, 2026-11-15: Dr. Akba's delegation extends to the pipeline ADRs
+
+| | |
+| --- | --- |
+| **Question** | Does the lead's signature, which is Dr. Akba's approval for the two fuzzy engines (the 2026-10-21 entry above), also cover the ADRs about the calibration pipeline? `docs/team.md` requires Dr. Akba's out-of-band sign-off for changes that touch ADR ledger semantics, and the 2026-10-21 entry left open, in Issue #109, whether its delegation reaches the ADR-025 amendments. |
+| **Answer** | Yes. For every ADR about the calibration pipeline and the `calibration-data` branch, @mertefesensoy's signature is Dr. Akba's approval. On 2026-11-15 these are ADR-020 and ADR-025, with their amendments. The deep-learning model stays excluded, as in the 2026-10-21 entry. |
+| **Approver** | Dr. Fırat Akba |
+| **Date given** | Together with the fuzzy-engine delegation of the 2026-10-21 entry; the exact day was not recorded. First stated on the record here, on 2026-11-15. Issue #57's comment 6140571135, where the fuzzy-engine delegation was first stated on 2026-10-13, names the fuzzy engines only. |
+| **Medium** | In person, with @mertefesensoy, who records it here. |
+| **Unblocks** | Items 2, 14, 16 and 17 below, which concern ADR-025. Tracked in Issue #109. |
+
+**The scope, stated exactly.**
+
+- This entry flips no `**Status**` line and answers no item by itself. Each item still closes through its own entry, naming this delegation, the decision, and the ADR it lands in.
+- Whether any other ADR is about the calibration pipeline is stated in that ADR's own entry, not inferred from this one.
+
+## Decision, 2026-11-15: Item 2, the `duplicate-partial` rule stands as ADR-025 states it
+
+| | |
+| --- | --- |
+| **Question** | Register item 2. Does Dr. Akba accept ADR-025's `duplicate-partial` rule (added 2026-09-02, PR #55)? A historical re-read of an archived stamp is recorded as `duplicate-partial`, with the archived copy kept untouched and nothing written to `collisions/`, only when the run swept a historical window, the incoming payload lacks the `configuration` the archived copy has, and the calibration payload matches. |
+| **Answer** | Yes, as ADR-025 states it. |
+| **Approver** | Dr. Fırat Akba; signed by @mertefesensoy under the delegation above. |
+| **Date given** | 2026-11-15, the lead's signature under the delegation above. Dr. Akba did not discuss the ADR-025 amendments when he approved the six brief files (the 2026-10-03 entry). |
+| **Medium** | Written: @mertefesensoy's decision of 2026-11-15, recorded here by him. |
+| **Unblocks** | ADR-025's `duplicate-partial` text; the PR #55 comment Issue #109 owes, which references this entry. |
+
+## Decision, 2026-11-15: Item 14, the pipeline-health amendment, with File 06's corrected wording
+
+| | |
+| --- | --- |
+| **Question** | Register item 14: ADR-025's 2026-09-05 pipeline-health amendment (PR #70, Issue #48), as the three questions of File 06's brief put it (`docs/advisor/2026-09-09-akba-brief/06-olcum-birimi.html`). Q1: is a device state defined by its measured values? Q2: may an append-only record have one permitted rewrite? Q3: is `is_new_state` an observation rather than a chronology? |
+| **Answer** | Yes on all three, as File 06's team decision states them (Issue #84, comment 5885407524, section 1). **Q1:** yes, with dates stripped, and with the corrected wording: a distinct `qubit_digest` is a device state; a row of `health/state-index.tsv` is one filed snapshot path, not a state; counts are distinct states observed at the project's polling cadence. **Q2:** one rule for the whole branch: primary observations (`snapshots/`, `ledger/`) are append-only at the tip and corrected only by appended, dated notes; derived views (`health/`) may be rebuilt deterministically under a named definition version; inboxes (`collisions/`) are cleared only with a dated note. **Q3:** confirmed; `is_new_state` is never overwritten, readers derive first sightings from `last_update_date`, and `--rebuild` is only for a digest-definition change or a malformed index. The wording and the rules are appended to ADR-025 as its 2026-11-15 amendment. |
+| **Approver** | Dr. Fırat Akba; signed by @mertefesensoy under the delegation above. |
+| **Date given** | 2026-11-15, the lead's signature under the delegation above. |
+| **Medium** | Written: @mertefesensoy's decision of 2026-11-15, recorded here by him. |
+| **Unblocks** | The ratification ADR-025's 2026-09-10 status note records as open; ADR-025's 2026-11-15 amendment. File 06's other follow-ups (a merge counter in `health/metrics.json`, NC-060's dependency on the stripped definition) stay with Issue #109. |
+
+File 06's figures were laptop measurements, provisional and not registered, as its comment says. This answer ratifies the rules, not those figures.
+
+## Decision, 2026-11-15: Item 16, the heartbeat amendment stands as written
+
+| | |
+| --- | --- |
+| **Question** | Register item 16. Does Dr. Akba accept ADR-025's 2026-09-17 amendment (PR #102)? `health/metrics.json` is written on every render, unconditionally, so that a quiet archive is distinguishable from a renderer that stopped. `health/progress.svg` keeps its commit-on-change guard, and the hourly poller reads the heartbeat against `DASHBOARD_MAX_AGE_HOURS` (NC-053). The amendment records the sign-off "as a question rather than assumed". |
+| **Answer** | Yes, as written. |
+| **Approver** | Dr. Fırat Akba; signed by @mertefesensoy under the delegation above. |
+| **Date given** | 2026-11-15, the lead's signature under the delegation above. |
+| **Medium** | Written: @mertefesensoy's decision of 2026-11-15, recorded here by him. |
+| **Unblocks** | The sign-off question the 2026-09-17 amendment records in ADR-025. |
+
+## Decision, 2026-11-15: Item 17, the capture-record amendment stands as written
+
+| | |
+| --- | --- |
+| **Question** | Register item 17. Does Dr. Akba accept ADR-025's 2026-09-29 amendment (PR #105)? `health/capture.tsv`, written only by the `capture` job, holds one row per document proven to exist on an enumerated settled day. It is append-only, measures what the unattended pipeline retrieved, and records without ever recovering what it measures. The amendment records the sign-off "as a question rather than assumed". |
+| **Answer** | Yes, as written. |
+| **Approver** | Dr. Fırat Akba; signed by @mertefesensoy under the delegation above. |
+| **Date given** | 2026-11-15, the lead's signature under the delegation above. |
+| **Medium** | Written: @mertefesensoy's decision of 2026-11-15, recorded here by him. |
+| **Unblocks** | The sign-off question the 2026-09-29 amendment records in ADR-025. |
