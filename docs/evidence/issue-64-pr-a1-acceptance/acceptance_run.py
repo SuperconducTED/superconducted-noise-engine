@@ -108,9 +108,10 @@ def dependencies(snapshot: CalibrationSnapshot, seed: int) -> dict[str, Any]:
         per_input_mfs.append(
             [GaussianMF(center=float(c), sigma=sigma) for c in np.linspace(lo, hi, 3)]
         )
-        print(
-            f"  grid {field}: centres {[float(c) for c in np.linspace(lo, hi, 3)]}, sigma {sigma:.6g} (from {len(values)} qubits)"
-        )
+        if seed == 0:  # the grid does not depend on the seed; print it once
+            print(
+                f"  grid {field}: centres {[float(c) for c in np.linspace(lo, hi, 3)]}, sigma {sigma:.6g} (from {len(values)} qubits)"
+            )
     return {
         "calibration": snapshot,
         "feature_extractor": BasicCalibrationVectorizer(),
@@ -143,7 +144,29 @@ def main() -> int:
         )
         return list(FuzzyNoiseModelEnsemble(**grid_cache[seed]))
 
-    _, seed = first_viable_seed(build, context="issue #64 PR-A1 acceptance run")
+    _, viable = first_viable_seed(build, context="issue #64 PR-A1 acceptance run")
+    print(f"  first_viable_seed: seed {viable}")
+
+    # Amendment 1, 2026-11-14, written after the first run stopped at its own check (seed 0
+    # clipped gamma at x) and before this run: the first seed, in order, whose model is not
+    # degenerate and whose raw outputs at x are both strictly inside (0, 1), so the clip does
+    # not bind at the operating point.
+    print("\nrule-base seed under amendment 1 (raw outputs at x both inside (0, 1)):")
+    x_at = BasicCalibrationVectorizer().extract(snapshot)
+    for seed in range(100):
+        if seed not in grid_cache:
+            grid_cache[seed] = dependencies(snapshot, seed)
+        candidate = grid_cache[seed]
+        raw_at = np.asarray(
+            candidate["defuzzifier"].defuzzify(candidate["rule_base"].evaluate(x_at)),
+            dtype=np.float64,
+        )
+        degenerate = FuzzyNoiseModel(**candidate).is_degenerate
+        print(f"  seed {seed}: raw at x {raw_at.tolist()}, degenerate {degenerate}")
+        if not degenerate and bool(np.all((raw_at > 0.0) & (raw_at < 1.0))):
+            break
+    else:
+        raise SystemExit("no seed in 0..99 keeps both outputs off the clip at x")
     deps = grid_cache[seed]
     print(f"  seed {seed}")
 

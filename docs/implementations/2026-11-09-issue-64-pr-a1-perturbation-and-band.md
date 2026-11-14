@@ -728,3 +728,22 @@ there and the cause is found (the consequents, the clip, or the jitter), as the 
 
 **Script.** `docs/evidence/issue-64-pr-a1-acceptance/acceptance_run.py`, committed with this section;
 its output comes from the committed copy. Laptop, provisional.
+
+### Amendment 1 to the step 6 plan, 2026-11-14, after the first run and before the second
+
+**What stopped the first run.** Run from `e62824dc` (output `acceptance_run.out.txt`, commit
+`81f1717b`): `first_viable_seed` picked seed 0, and at the snapshot's vector the raw defuzzified
+outputs are `(-0.0932, 0.0021)`. `ProbabilityClip` holds gamma at 0, so gamma's elasticity is
+undefined and the jitter cannot move it. The plan's stop rule fired at its first check, and the cause
+is the clip, acting on a seed whose consequents put gamma below 0 at `x`.
+
+**Why the seed search allowed it.** `first_viable_seed` calls a model viable when it is not the
+identity (`is_degenerate`), so a model with one output clipped to 0 passes. Over seeds 0 to 11 on this
+snapshot, 7 have at least one output at or below 0 at `x` (seed 5 is the one degenerate model), and
+seeds 1, 4, 6 and 9 have both inside `(0, 1)`. This is a finding for `aer_factory.py`'s owner (Burak,
+ADR-024), recorded here and in the PR's description; nothing in his module is changed.
+
+**The amendment, on the lead's choice.** The rule-base seed is the first seed, in order, whose model
+is not degenerate and whose raw outputs at `x` are both strictly inside `(0, 1)`. Everything else in
+the plan and the pass bar is unchanged. The first run's output stays as committed; the second run
+writes `acceptance_run.amended.out.txt`.
