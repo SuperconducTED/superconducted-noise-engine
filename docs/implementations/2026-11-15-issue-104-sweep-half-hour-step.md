@@ -1,0 +1,130 @@
+# 2026-11-15: issue-104-sweep-half-hour-step
+
+The plan is written first, with the prediction fixed before the change; the measured baseline and the
+results are appended below it in later commits. Decision by @mertefesensoy on 2026-11-15 (option B of
+issue #104).
+
+## Problem / Motivation
+
+Issue #104 asks whether the daily sweep's 1 h step is worth refining. The sweep (#49, PR #90) queries
+the trailing 48 h of IBM's calibration history at a 1 h step, so it cannot reliably see a document that
+IBM supersedes in under an hour. The issue was written on one week of September data (NC-058, capture
+at most 88.1%) and left the 0.5 h option deliberately unmeasured, because a replay of real 1 h sweeps
+against ground truth did not reproduce the ledger (IBM's history index lags publication).
+
+Since 2026-09-30 the capture job (`calibration-health.yml`, ADR-025 amendment of 2026-09-29) has
+enumerated every settled day at 0.25 h and written one row per document to `health/capture.tsv` on
+`calibration-data`. That record answers the question the issue's proposed 30 min probe was for, over
+six weeks instead of one, without a query to IBM. A scratch draft of this PR's script, run on the lead's
+laptop before this plan was written, showed: capture falling from about 86% to about 70% per week, every
+missed document living under one hour, and no document that lived an hour or more missed. Those scratch
+runs are not evidence; the committed script's output (next commits) is.
+
+## What changed (planned)
+
+| File | One-sentence description |
+| --- | --- |
+| `.github/workflows/calibration-poll.yml` | `SWEEP_STEP_HOURS` from `'1'` to `'0.5'`, and the comment block above it restated for the new step. |
+| `.github/workflows/calibration-health.yml` | The comment on `CAPTURE_STEP_HOURS` names the sweep's new step; the value stays `'0.25'`. |
+| `docs/evidence/capture-rate-2026-11/capture_lifetimes.py` | Reads `health/capture.tsv` by blob at a pinned `calibration-data` commit and reports capture by week and by document lifetime. |
+| `docs/evidence/capture-rate-2026-11/*.out.txt`, `README.md` | The committed script's output at the baseline anchor, and what it answers. |
+| `docs/numerical-claims.md` | New rows for the baseline (ids from NC-099, see Design decisions). |
+| `docs/implementations/2026-11-15-issue-104-sweep-half-hour-step.md` | This record. |
+
+## Implementation approach
+
+One configuration value changes. The sweep step derivation is unchanged: when the sweep cron fires,
+`HIST_START` is the run's clock minus `SWEEP_WINDOW_HOURS` and the query instants are `HIST_START + k *
+SWEEP_STEP_HOURS`. At 0.5 h a sweep makes 96 historical queries plus one current fetch (97), against 49
+at 1 h; #104's table estimates about 3.5 minutes at the measured 2 s per historical query, inside the
+job's 60 minute timeout for a sweep.
+
+The capture job's step stays at 0.25 h, so `TestWorkflowPins.test_the_capture_grid_is_strictly_finer_than_the_sweep`
+(capture strictly finer than the sweep) still holds and the instrument that measures capture does not
+change. That is what lets the week after the change be read the same way as the weeks before it.
+
+## Mathematical / Statistical details
+
+**Which document a query returns.** Order the documents by `last_update_date` `t_1 < t_2 < ...`. A
+historical query at instant `q` returns the latest document stamped at or before `q`, so document `d` is
+returned exactly for `q` in `[t_d, t_{d+1})`. Its **lifetime** is `L_d = t_{d+1} - t_d`.
+
+**The grid guarantee.** A grid `q_k = q_0 + k s` lands inside every half-open interval of length at
+least `s` that lies within its window. So a sweep at step `s` samples every document with `L_d >= s`
+inside its window; a document with `L_d < s` is sampled only if the grid's phase happens to fall in it.
+"Samples" is not "retrieves": it assumes IBM's history index returns at sweep time the document it
+returns later. The baseline tests that assumption at `s = 1 h`.
+
+**Capture.** Over a set of days, `capture = held / exist`, with `held` the documents the scheduled
+pipeline retrieved (`captured`, `archived_not_served`) and `missed` the rest (`MISSED`, `backfilled`),
+`exist = held + missed`, exactly as `scripts/capture_record.py` defines it. It is an upper bound, like
+NC-058: a document living less than 0.25 h can escape the capture enumeration too.
+
+**Unknown lifetimes.** A lifetime is unknown when any UTC day from `day(t_d)` to `day(t_{d+1})` is not
+in the record (the successor may be a document nobody enumerated), or when `d` is the last document.
+Such documents are counted, reported, and left out of every lifetime-stratified figure.
+
+## Prediction (fixed before the change)
+
+**Evaluation days E.** Let `S` be the UTC date of the first scheduled sweep whose log reads `every
+0.5h`. E is the 7 consecutive UTC days starting at `S - 1` (the first day a 0.5 h sweep's 48 h window
+covers entirely). A day that no scheduled 0.5 h sweep window covers entirely (both covering sweeps
+skipped) is reported and replaced by the next day. The capture job records a day three days after it,
+so E is complete about 9 days after `S`.
+
+**P1, the test.** Among the documents of E with a known lifetime of 0.5 h or more, **0 are missed**.
+The baseline (next commits) gives the same count before the change. P1 can fail cleanly: one missed
+document with `L >= 0.5 h` fails it.
+
+- If P1 holds: the history index serves sub-hour documents inside the live 48 h window, as the 1 h
+  grid's record suggests, and option C (a 0.25 h sweep with the capture step moved to 0.125 h, so the
+  quarter-hour instants stay a subset) is proposed on #104 with this result as its evidence.
+- If P1 fails: each missed document with `L >= 0.5 h` is listed with the sweep's query instants around
+  it, read from the ledger, before any further change. The step stays at 0.5 h meanwhile: from the same start, its
+  instants include every instant the 1 h grid would query, so it samples at least what 1 h did.
+
+**Reported, no bar:** capture over E, against the baseline's last weeks; misses among documents
+living 0.25 to 0.5 h and under 0.25 h; the 0.5 h sweeps' durations from the Actions runs, against the
+3.5 minute estimate; `capture_7d` from the dashboard. A weekly rate gets no bar because it has fallen
+on its own by about 3 points a week, so a before-and-after difference would confound the change with
+the trend.
+
+## Design decisions
+
+| Option | Chosen? | Why |
+| --- | --- | --- |
+| A. Keep 1 h | No | Capture is falling, and the misses are the sub-hour documents a 1 h grid cannot see by construction. |
+| **B. 0.5 h, capture stays at 0.25 h** | **Yes** | One value; the instrument is unchanged; P1 tests the one real unknown (the index in the live window) with a prediction that can fail; reversible. |
+| C. 0.25 h now | Not yet | Its guaranteed gain is larger, but the pin forces the capture step finer in the same change, so the sweep and its measurement would move together. It is the proposed next step if P1 holds. |
+| C with capture at 0.1 h, as #104 proposed | Replaced by 0.125 h | 0.125 h keeps today's quarter-hour instants as a subset (0.25 is a multiple of 0.125, not of 0.1), so the old capture figure stays computable from the new record. |
+
+**Call volume.** The 2026-09-10 sweep design (`docs/implementations/2026-09-10-scheduled-calibration-sweep.md`)
+rejected a scheduled 0.5 h step because "96 calls per day, sustained" was "above anything observed".
+Since 2026-09-30 the capture job has enumerated one settled day at 0.25 h (96 query instants) every day it
+ran, so that volume is now observed and sustained; the count of its runs goes in the baseline below.
+
+**`docs/decisions.md` is not edited.** ADR-025's amendment of 2026-09-29 says the capture step is "finer
+than the sweep's 1 h"; that was true on its date and stays true as a dated statement, and the rule it
+states (capture strictly finer than the sweep) still holds and is pinned by the test. Leaving the file
+alone also avoids the append conflict PR #145 and PR #150 already have there.
+
+**NC ids.** The new rows take NC-099 onward. PR #150's pending row is written as "ID pending", taking the
+next free id at its merge, so it does not collide; the PR description says so.
+
+## Verification
+
+```bash
+PYTHONPATH=src python -m pytest tests/test_calibration_poll_workflow.py tests/test_capture_record.py -q
+PYTHONPATH=. python docs/evidence/capture-rate-2026-11/capture_lifetimes.py --ref d08263a97a7524f49f9fe2841584188aa408d443
+ruff check . && ruff format --check . && mypy --strict && python scripts/check_ids.py
+```
+
+After the change, P1 is evaluated with the same script at a later `calibration-data` commit, `--from`
+and `--to` set to E's first and last day.
+
+## Related docs
+
+- Issue #104; #49 and PR #90 (the sweep); PR #105 and `docs/evidence/capture-rate-2026-09/` (the
+  capture measurement, NC-056 to NC-060); ADR-025's amendment of 2026-09-29 in `docs/decisions.md`.
+- `docs/implementations/2026-09-10-scheduled-calibration-sweep.md` and
+  `docs/implementations/2026-09-29-capture-rate-measurement-and-tracking.md`.
