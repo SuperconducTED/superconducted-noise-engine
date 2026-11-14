@@ -684,6 +684,10 @@ def test_a_bound_admits_its_closed_ends_and_nothing_non_finite() -> None:
     assert not UNIT_INTERVAL.contains(math.nextafter(1.0, 2.0))
     assert not UNIT_INTERVAL.contains(-5e-324)
     assert not UNIT_INTERVAL.contains(math.nan)
+    # The finiteness rule, not the open end, is what keeps inf out of a closed infinite end.
+    closed_to_infinity = FeatureBound(0.0, math.inf, low_open=False, high_open=False)
+    assert closed_to_infinity.contains(1.0e300)
+    assert not closed_to_infinity.contains(math.inf)
     with pytest.raises(ValueError, match="low <= high"):
         FeatureBound(1.0, 0.0, low_open=False, high_open=False)
 
@@ -860,6 +864,14 @@ def test_the_member_extractor_returns_its_vector_and_refuses_another_snapshot(
             array[0] = 1.0
     with pytest.raises(ValueError, match="serves the one feature vector"):
         member.extract(_other_snapshot(benchmark_snapshot))
+
+
+def test_a_directly_built_member_extractor_checks_its_shapes() -> None:
+    vectorizer = BasicCalibrationVectorizer()
+    with pytest.raises(ValueError, match="center has 2 entries"):
+        OffsetFeatureExtractor(vectorizer, center=[1.0e-4, 8.0e-5], offset=[0.0, 0.0])
+    with pytest.raises(ValueError, match="offset shape"):
+        OffsetFeatureExtractor(vectorizer, center=X, offset=[0.0, 0.0])
 
 
 def test_perturb_refuses_an_extractor_of_another_shape_or_names(
