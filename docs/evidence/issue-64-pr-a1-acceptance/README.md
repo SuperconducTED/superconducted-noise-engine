@@ -150,3 +150,30 @@ Re-run, 2026-11-14, from the same committed script at `3c9bbff0` (after a docstr
 assertion changed): `mutate_step3_input_jitter.at-3c9bbff0.out.txt`, every kill line identical to the
 first run apart from timings, both controls identical. V14 run alone fails on its message only, as
 predicted.
+
+## 7. Step 6, the acceptance run (criterion 8), added 2026-11-14
+
+`acceptance_run.py` reads `snapshots/2026-11/ibm_fez/20261113T162759000000Z.json` by blob
+(`b13ffe3c`) from `calibration-data` `b0482277`, builds the #58 grid on it in SI units, measures the
+elasticity of `gamma` and `lambda` to each feature at its vector `x`, and runs 32 members under
+`InputVectorPerturbation.relative(x, 0.05)` (a smoke value). Its pass bar and its stop rule were
+committed before it ran, in the implementation doc's "Plan, 2026-11-14: step 6".
+
+```bash
+PYTHONPATH=src python docs/evidence/issue-64-pr-a1-acceptance/acceptance_run.py
+```
+
+| Run | From | Output | Result |
+| --- | --- | --- | --- |
+| first | `e62824dc` | `acceptance_run.out.txt` | stopped at its own check: `first_viable_seed`'s seed 0 gives raw outputs `(-0.0932, 0.0021)` at `x`, so the clip holds gamma at 0 |
+| second, after amendment 1 | `7c5c319c` | `acceptance_run.amended.out.txt` | seed 1 (the first with both raw outputs inside `(0, 1)` at `x`); all five bars pass |
+
+Amendment 1, written between the two runs, changes only the seed rule; it is in the implementation
+doc beside the plan.
+
+**How much the gamma half of bar 3 says.** Seed 1 puts gamma at 0.00081, just above the clip, with an
+elasticity near 50 to `mean_T1`, so its first-order predicted spread at `r = 0.05` is 2.68: far outside
+where a linear prediction holds. Under the jitter the clip binds on gamma for 19 of the 32 members
+(their gamma is 0). The observed ratio, 0.57, is inside the bar but near its edge, and it rests on that
+clipped distribution. The lambda half (ratio 1.34, no member at 0) is the one that carries the check.
+These sensitivities belong to seeded random consequents (ADR-024), not to a fitted engine.

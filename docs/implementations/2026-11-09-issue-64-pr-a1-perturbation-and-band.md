@@ -747,3 +747,63 @@ ADR-024), recorded here and in the PR's description; nothing in his module is ch
 is not degenerate and whose raw outputs at `x` are both strictly inside `(0, 1)`. Everything else in
 the plan and the pass bar is unchanged. The first run's output stays as committed; the second run
 writes `acceptance_run.amended.out.txt`.
+
+## Results, 2026-11-14: step 6, the acceptance run (laptop, provisional)
+
+Script `docs/evidence/issue-64-pr-a1-acceptance/acceptance_run.py`; two runs, both from committed copies;
+details and both outputs in the evidence folder's README, section 7.
+
+**First run** (`e62824dc`): stopped at its own check, as recorded in amendment 1 above.
+
+**Second run** (`7c5c319c`, after amendment 1): seed 1, the first with both raw outputs inside `(0, 1)` at
+`x`. Snapshot `20261113T162759Z` by blob `b13ffe3c` at `calibration-data` `b0482277`;
+`x = (1.368e-4 s, 9.790e-5 s, 0.02774)`; `crisp_params` at `x` `(0.000810, 0.012044)`, clip not binding
+there.
+
+| Sensitivity at `x`, `d ln c / d ln x` (step `1e-4`; step `1e-3` agrees to 8.8e-4 relative) | `mean_T1` | `mean_T2` | `mean_readout_error` |
+| --- | ---: | ---: | ---: |
+| gamma | +50.59 | -14.87 | -9.99 |
+| lambda | +4.188 | +1.786 | +0.042 |
+
+| Bar | Result |
+| --- | --- |
+| 1, identity members bit-identical | pass: 1 distinct row of 32, equal to the model at `x` |
+| 2, jittered members pairwise distinct | pass: 32 of 32 |
+| 3, spread within `[0.5, 2]` of the first-order prediction at `r_smoke = 0.05` | pass: gamma 1.531 against 2.683 (ratio 0.57), lambda 0.305 against 0.228 (ratio 1.34); the control at `r = 0.005` gives 0.116 and 0.121, outside the bar as it must |
+| 4, one seed twice bit-identical, another seed changes every member | pass: identical; 32 of 32 changed |
+| 5, every member inside its bounds | pass: 32 of 32 replayed draws inside, 0 redraws, every replayed member equal to the ensemble's |
+
+**What the gamma half of bar 3 does not show.** Seed 1 leaves gamma 0.00081 above the clip with an
+elasticity near 50, so the first-order prediction (a relative spread of 2.68) is far outside its range,
+and under the jitter the clip binds on gamma for 19 of the 32 members. The ratio passes near the edge of
+the bar on a clipped distribution. The lambda half carries the check. Both sensitivities belong to
+seeded random consequents (ADR-024), not to a fitted engine; `r_smoke` is a smoke value, not a fitted
+one.
+
+**For `aer_factory.py`'s owner (Burak, ADR-024).** `first_viable_seed` accepts a model whose gamma or
+lambda is clipped to 0 at the operating point; on this snapshot 7 of seeds 0 to 11 do so. Recorded here
+for the PR's description; nothing in his module is changed.
+
+**Final gates** at `8d2c9c72`: `ruff check .` clean, `ruff format --check .` 140 files, `mypy --strict`
+50 source files, `scripts/check_ids.py` clean, criterion 9's six files untouched against `origin/main`
+`667972c5`. Full suite: 1370 collected, 1370 passed in 483 s, no skip (the commands of the step 3 gates).
+
+### Where the criteria stand at the end of PR-A1's build
+
+| # | Criterion | State |
+| --- | --- | --- |
+| 1 | identity pin | met, with the stated deviation |
+| 2 | `perturb` does not mutate, shapes kept | met |
+| 3 | repeat iteration, `build(seed)` pure, `len()`, unseeded raise | met |
+| 4 | `InputVectorPerturbation` | met, with three choices for the owner |
+| 5 | `interval_band` and `IntervalBand` | met |
+| 6 | ADR-022's six properties | met |
+| 7 | the `to_dict` guard | met |
+| 8 | the acceptance run | met on the second run, under amendment 1, with the gamma caveat above |
+| 9 | protected files untouched | holds |
+| 10 | D4's notes, D5's row, docstrings | met |
+| 11 | mutation checks and gates | met: steps 1 to 5 mutation-checked, gates and the full suite clean at `8d2c9c72` |
+
+All on the laptop. Owed before merge, as the plan lists: Bengisu's own review (D6's measurement and
+both build steps came from sessions on this laptop), Burak's read of `aer_factory.py`, the primary
+owner's read of `interfaces.py`, NC-021 at the merge commit, and Burak's desktop run.
