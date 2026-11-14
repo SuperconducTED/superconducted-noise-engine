@@ -191,3 +191,83 @@ two pytest commands with `PYTHONPATH=src` on the exact pins. The full run was ma
 - PRs #136, #144, #146, #150; Issues #75 and #58.
 - Reviews 5849593436 (the primary owner, PR #136) and 5822740472 (the lead, PR #136).
 - `docs/decisions/drafts/ADR-030-kraus-projector-boundary.md`; `docs/team.md` (ids are claimed at merge time).
+
+## Update, 2026-11-14: PR #137's merge, and the reviews that asked for it
+
+Everything above is left as written on 2026-11-09 and 2026-11-11. This section records the one change made
+after the first reviews.
+
+### Problem / Motivation
+
+PR #137 merged as `667972c5` on 2026-11-11 at 22:25 UTC, after the 2026-11-11 update above was pushed. It adds
+cases to `tests/test_anfis.py`, so `main` collects more tests than the 1177 this branch recorded at `cd277a64`.
+Both reviews asked for the row to follow: Burak Öztekin's CHANGES_REQUESTED (5866804903) asks for NC-021 to be
+re-measured at the latest merge commit, with 1177 kept as a past measurement and CI's skip stated apart from the
+local run; Bengisu Cıvdı's COMMENT (5903195666) agrees and finds nothing to change in ADR-030.
+
+### What changed
+
+| File | One-sentence description |
+| --- | --- |
+| `docs/numerical-claims.md` | NC-021 becomes 1203 at `667972c5` (PR #137's merge), with one clause appended to its Notes; the 1177 clause stays as the measurement of `cd277a64`. |
+| This document | This section. |
+
+The branch also carries a merge of `main` at `667972c5` (`a50be41d`). The merge was clean; its `src` and
+`tests` trees are the same objects as `667972c5`'s.
+
+### Implementation approach
+
+The row's own two commands were run at `667972c5` in a throwaway tree (`git worktree add --detach`) from the
+exact-pin interpreter (Python 3.12.10, NumPy 2.4.4, Qiskit 2.4.1, Aer 0.17.2, pytest 9.0.3, `PYTHONPATH=src`,
+`superconducted.__file__` checked to resolve inside the throwaway tree):
+
+| Commit | What merged | Collected | Passed (laptop) | CI on that commit |
+| --- | --- | --- | --- | --- |
+| `667972c5` | PR #137, `tests/test_anfis.py` | 1203 | 1203, 567 s | run 43111626183: 1202 passed, 1 skipped, both legs |
+
+The skip on CI is the archive-backed survey test, whose skip message asks for the `calibration-data` ref to be
+fetched first; the laptop run could read that ref, so the test ran. The value column, the commit in the command
+column and the Last verified date move to `667972c5` and 2026-11-14. The clause that listed the open PRs adding
+tests as of `cd277a64` names PR #137; it is left as written, and the new clause gives the list as of `667972c5`.
+
+### Mathematical / Statistical details
+
+N/A: records. No count is derived. 1177 + 26 = 1203 is written beside the value as a cross-check, and the row
+says the value is the direct collection.
+
+### Design decisions
+
+- **Measure `667972c5`, not this branch's merge.** NC-021 describes `main`. This branch changes only `docs/`, and
+  its merge `a50be41d` has the same `src` and `tests` trees as `667972c5`, so the two collect the same suite. The
+  row names `main`'s commit, which stays meaningful after this PR merges, as the earlier entries do.
+- **CI is cited, not adopted.** The row's value is the collected size. CI's 1202 passed and 1 skipped is written
+  as CI's, beside the laptop's run, as the review asked; neither replaces the other.
+
+### Verification
+
+```bash
+grep -c "^| NC-021 | Full test-suite size | 1203 |" docs/numerical-claims.md
+```
+
+Expected: `1`. This replaces the `1177` grep in the 2026-11-11 Verification above.
+
+```bash
+git rev-parse a50be41d:tests 667972c5:tests
+git rev-parse a50be41d:src 667972c5:src
+```
+
+Expected: each pair prints the same object id twice.
+
+```bash
+python scripts/check_ids.py
+```
+
+Expected: `No duplicate or colliding ADR / NC identifiers.`
+
+To reproduce the count: check out `667972c5` in a throwaway tree and run the row's two pytest commands with
+`PYTHONPATH=src` on the exact pins.
+
+### Related docs
+
+- PRs #137 and #145; Issue #60.
+- Reviews 5866804903 (Burak Öztekin) and 5903195666 (Bengisu Cıvdı) on PR #145.
