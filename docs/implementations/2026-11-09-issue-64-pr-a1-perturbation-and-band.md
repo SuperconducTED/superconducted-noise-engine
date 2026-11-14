@@ -588,3 +588,81 @@ statistical check: at `r = 1` the accepted `T1` draws follow the normal truncate
 **Mutation check.** A new script, committed with its predictions before it runs; its output comes from
 the committed copy. The step 2 script is re-run at the new head, because it asserts that each text it
 replaces occurs exactly once in `perturbation.py`, and step 3 adds a second `perturb`.
+
+## Results, 2026-11-14: step 3, the input-vector jitter (laptop, provisional)
+
+Environment as in the 2026-11-11 results (Python 3.12.10, NumPy 2.4.4, Qiskit 2.4.1, qiskit-aer 0.17.2,
+pytest 9.0.3, ruff 0.15.12, mypy 1.20.2, from the pins; `superconducted.__file__` printed from this
+worktree before each run). Nothing below has run on Burak's desktop.
+
+### What was built (commit `a2207ab2`, tests added at `d6251961`)
+
+Everything in the step 3 plan above, as planned, in `src/superconducted/integration/perturbation.py`:
+`FeatureBound`, `POSITIVE`, `UNIT_INTERVAL`, `bounds_for`, `OffsetFeatureExtractor` and
+`InputVectorPerturbation` with `relative`. No other source file changed: `interfaces.py` and
+`aer_factory.py` were not needed. The module's status list names the new classes.
+
+### Tests: section 4 of `tests/test_perturbation.py`, 45 cases
+
+Sections 1 to 3 are unchanged except for two import lines. Section 4 covers criterion 4 and, for this
+perturbation, criterion 2:
+
+| Criterion part | Tests |
+| --- | --- |
+| no default for `scale` or `r` | `test_the_scale_and_r_have_no_default` (signature and call) |
+| a first draw outside a bound gives a redraw, not a clipped value | four violations (T1, T2, readout below 0, readout above 1), the open end at 0 itself, the closed ends at 0 and 1 kept, a non-finite draw (three cases); each asserts the draw count and that every component of the kept offset is the second draw's |
+| `max_redraws` exhausted | `ValueError` after exactly `max_redraws + 1` draws, for 0 and 2 |
+| offset, scale and `r` read-only | assignment refused, arrays not writeable, copies that do not follow the caller's array |
+| the draw pattern D6 measured | a real seeded generator replayed on three seeds whose first draw is out of bounds and one whose first draw is kept: the offset is bit for bit the replayed draw, and the generator's state after `perturb` equals the replay's after `k + 1` draws |
+| her D6 note | a centre outside its bounds refused at construction (six cases), the error naming the centre |
+| criterion 2 | no input mutated; the rule base and defuzzifier returned as themselves; the member extractor keeps `output_dim` and `feature_names` |
+| D6 option A's guard | the member extractor returns `x + offset` twice, equal and fresh, inside the bounds, and refuses a snapshot whose vector differs; an ensemble over another snapshot fails at iteration |
+| the ensemble, through the fixture | four jittered members all differ; two passes and two constructions from one seed agree; another seed changes every member (`r = 0.05`, a smoke value) |
+
+**The second route.** At `center = 1`, `scale = 1` on `mean_T1` and no jitter elsewhere, a kept `z` is a
+standard normal truncated below at -1, whose mean is `phi(1) / Phi(1) = 0.28760` and standard
+deviation 0.7935. 20,000 members from one fixed seed agree within five standard errors (0.028), and no
+kept value reaches -1. Clipping would have piled 15.9% of the members on the bound.
+
+### Mutation check (criterion 11)
+
+`mutate_step3_input_jitter.py`, 25 mutants, predictions committed at `a46184eb` before the run: 23 of 23
+predicted kills killed, each by its named tests; V18 (`r * x` without `abs`) and V21 (`extract` returning
+`center + offset`) survived as predicted, and their controls show why: no admissible centre is negative,
+and after the guard the wrapped vector equals the centre, so on 100,000 vectors neither changes a single
+value (only the sign of some zeros), while both positive controls fire. V14 dies by its message only;
+the refusal is kept by the member extractor's own check. Writing the predictions found two guards no
+test reached (a closed infinite bound, the member extractor's own shape checks); their tests went in at
+`d6251961`, before the script was committed. The step 2 script, re-run at the new head, still kills 16
+of 16. Details in `docs/evidence/issue-64-pr-a1-acceptance/README.md`, section 6.
+
+### Gates
+
+`ruff check .`, `ruff format --check .` (138 files), `mypy --strict` (50 source files) and
+`scripts/check_ids.py` clean. Criterion 9: `git diff --stat origin/main` is empty for the six protected
+files at `origin/main` `667972c5`. Full suite at `ab42b8d3` (the branch with `main` `667972c5` merged in):
+`python -m pytest tests/ --collect-only -q -o addopts="" -p no:cacheprovider` collects 1370, and
+`python -m pytest tests/ -q -p no:cacheprovider` gives 1370 passed in 439 s, no skip (the archive-backed
+survey test ran). The value is the direct collection; it agrees with `main`'s 1203 plus this branch's
+122 earlier tests plus 45.
+
+### Where the criteria stand
+
+| # | Criterion | State |
+| --- | --- | --- |
+| 1 | identity pin | met, with the stated deviation |
+| 2 | `perturb` does not mutate, shapes kept | met, for both perturbations |
+| 3 | repeat iteration, `build(seed)` pure, `len()`, unseeded raise | met |
+| 4 | `InputVectorPerturbation` | met, with the two choices in the step 3 plan for the owner (the bound tested on `center + offset`; `r` reads `None` without `relative`) |
+| 5 | `interval_band` and `IntervalBand` | met |
+| 6 | ADR-022's six properties | met |
+| 7 | the `to_dict` guard | met |
+| 8 | the acceptance run | not run: step 6 |
+| 9 | protected files untouched | holds against `origin/main` `667972c5` |
+| 10 | D4's notes, D5's row, docstrings with units and contracts | met for every symbol so far |
+| 11 | mutation checks and gates | done for steps 1 to 5; gates and the full suite clean at `ab42b8d3`; to be repeated after step 6 |
+
+**Owed.** Step 6 (the acceptance run), then the final gates. Before merge, as the plan lists: the owner's
+approval (Bengisu), Burak's read of `aer_factory.py`, the primary owner's read of `interfaces.py`, NC-021 at
+the merge. D6's measurement was made in a session on this laptop that she ran, and this step was built in
+another session here, so her review of the PR is owed as her own read.

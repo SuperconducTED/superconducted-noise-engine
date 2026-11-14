@@ -110,3 +110,38 @@ Recorded because each says something about the tests or about the check.
 - `to_dict_probe.py` counts Python-level calls of one method. It says nothing about what the C++
   controller does per shot, and would not see a future Aer that read the model another way.
 - The ordering and nesting checks of `quantile_probe.py` were run for the `linear` method only.
+
+## 6. Step 3, added 2026-11-14
+
+Sections 1 to 5 are left as written on 2026-11-11. Since then D6 was answered (option A, #64 comment
+6863593077) and step 3 was built, so section 1's "waits on decision D6" is overtaken; the acceptance
+run of criterion 8 is still not here (it is step 6).
+
+| Script | Step | What it checks | A pass looks like |
+| --- | --- | --- | --- |
+| `mutate_step3_input_jitter.py` | 3 | 25 mutants of `InputVectorPerturbation`, `OffsetFeatureExtractor`, `FeatureBound` and `bounds_for`, and two controls for the two predicted equivalent | 23 killed by the tests the docstring names; V18 and V21 survive, with 0 value differences in their controls and both positive controls above 0 |
+| `mutate_step2_seeding.py`, again | 2 | that step 2's 16 replacements still apply exactly once and still die now that `perturbation.py` has a second `perturb` | 16 of 16 killed |
+
+Committed at `a46184eb` with no output; run from that commit on 2026-11-14 with the interpreter of
+section 3, each output redirected beside the script (the step 2 re-run to
+`mutate_step2_seeding.at-step3-head.out.txt`, so the 2026-11-11 output stays as it was).
+
+```bash
+E=docs/evidence/issue-64-pr-a1-acceptance
+python $E/mutate_step3_input_jitter.py <python> <backup dir>
+python $E/mutate_step2_seeding.py <python> <backup dir>
+```
+
+| Script | Result |
+| --- | --- |
+| `mutate_step3_input_jitter.py` | baseline 77 passed; 23 of 23 predicted kills killed, each by its named tests (V01 and V10 by more than named); V18 and V21 survived as predicted. Control 1: 0 of 100,000 admissible vectors where `r * abs(x)` and `r * x` differ as values (309 differ only in the sign of a zero), 0 members that differ; positive control 100,000. Control 2: 0 members that differ as values with 641 zeros flipped; positive control 252,562. |
+| `mutate_step2_seeding.py` at `0df7d6dd` | baseline 77 passed; 16 of 16 killed; the new section 4 tests now also kill W01, W04, W05, W07 and W12 |
+
+**V14 is killed by a message, not by behaviour.** With `perturb`'s own `output_dim` check removed, the
+member extractor's constructor still refuses a four-output extractor; the test fails only because it
+matches `perturb`'s wording. The refusal itself is kept twice, on purpose.
+
+**Two guards were found unpinned while the predictions were written, before any run**: a closed bound
+at `inf` admitting `inf` (the shipped bounds are open there, so V06 alone would have survived), and the
+member extractor's own shape checks when it is built directly (V22, V23). Their tests went in at
+`d6251961`, before the script was committed.
