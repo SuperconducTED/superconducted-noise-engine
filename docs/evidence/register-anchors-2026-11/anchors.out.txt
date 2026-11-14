@@ -1,0 +1,65 @@
+calibration-data tip: 3ba3e18b at 2026-11-14T07:05:48Z
+
+==============================================================================
+NC-011  Snapshot count, measured: 127
+==============================================================================
+  last commit at or before 2026-05-25T00:00:00Z: be07d8df  snapshots/*.json = 116
+  last commit at or before 2026-05-25T12:00:00Z: 07f49ade  snapshots/*.json = 118
+  last commit at or before 2026-05-25T23:59:59Z: 05ac491c  snapshots/*.json = 124
+  last commit at or before 2026-05-26T16:28:34Z: 6321e5f5  snapshots/*.json = 127
+  last commit at or before 2026-05-26T19:03:25Z: 6321e5f5  snapshots/*.json = 127
+  last commit at or before 2026-05-26T19:03:26Z: 0ecf2aa4  snapshots/*.json = 128
+  first commit holding 127: 6321e5f5 at 2026-05-26T16:28:34Z
+  first commit holding 128: 0ecf2aa4 at 2026-05-26T19:03:26Z
+
+==============================================================================
+NC-009  Calibration polling cadence, sustained measured: ~11.1 snapshots/day
+==============================================================================
+  first snapshot stamp 2026-05-13T12:13:22Z; NC-011 anchor 6321e5f5 at 2026-05-26T16:28:34Z
+  same-instant rate at the anchor: 127 / 13.177 d = 9.64 per day
+  same-instant search for a rate in [11.05, 11.15): 0 hits
+  control, the same search for [9.60, 9.70): 905 hits (must be > 0)
+  mixed instants: 127 (counted at 6321e5f5, 2026-05-26) / 11.491 d (first stamp to 2026-05-25T00:00:00Z) = 11.052 per day, which rounds to 11.1
+
+==============================================================================
+NC-026  Retention depth >= 60 days (Actions run 33260786341, 2026-08-29)
+==============================================================================
+  the ten-depth table lives in docs/implementations/2026-08-29-calibration-yield-and-poller-defects.md, added at 2f818961 2026-08-31T15:42:04+03:00
+  the run's head commit a529bd56 (branch probe/historical-check, since deleted) is present in this clone: False
+
+==============================================================================
+NC-029 / NC-030  2026-08-27..30 outage enumeration: 11 held of >= 57
+==============================================================================
+  docs/evidence/pr47-outage-enumeration/enumeration-2026-08-30.tsv statuses: {'MISSED': 46, 'captured': 9, 'archived_not_served': 2}; rows = 57
+  at the run (2026-08-30T08:18:11Z): calibration-data 7605c119 holds 11 files stamped 20260827T081847000000Z..20260830T081847000000Z
+  tip: calibration-data 3ba3e18b holds 11 files stamped 20260827T081847000000Z..20260830T081847000000Z
+  NC-030 mean interval: 72 h / 57 = 1.263 h; 57 / 3 d = 19.0 per day
+
+==============================================================================
+NC-031  1 h sweep recall, 2026-08-12T06:00..08-14T20:00: 29 of 33
+==============================================================================
+  docs/evidence/aug-gap-enumeration/control-2026-08-12_14.tsv statuses: {'MISSED': 14, 'captured': 29, 'archived_not_served': 4}
+  at the run (2026-09-02T18:51:00Z): calibration-data 242faa5a holds 33
+  the count first moves at ca5b23b6 (2026-09-06T20:47:12Z): 33 -> 50; 33 holds from 242faa5a through its parent bfeaab95 (2026-09-06T19:27:43Z)
+  tip 3ba3e18b: holds 50; the sweep's 43 in-window stamps are held: 43; the row's method at the tip gives 43 / 50 = 86.0%
+
+==============================================================================
+NC-033 / NC-034  2026-08-07..17 gaps: rounds and live-path stability
+==============================================================================
+  calibration-data at the evidence commit b16b8935 (2026-09-02T19:19:12Z): 242faa5a
+  W1 2026-08-07T03:21:59Z..2026-08-10T14:02:35Z edge 20260807T032159000000Z: 242faa5a: commits=70 edge revisions=69; 3ba3e18b: commits=70 edge revisions=69
+  W2 2026-08-10T14:02:35Z..2026-08-12T06:00:00Z edge 20260810T140235000000Z: 242faa5a: commits=30 edge revisions=30; 3ba3e18b: commits=30 edge revisions=30
+  W3 2026-08-14T20:18:59Z..2026-08-17T06:57:00Z edge 20260814T201859000000Z: 242faa5a: commits=55 edge revisions=55; 3ba3e18b: commits=55 edge revisions=55
+  edge revisions over the three windows: 154 (NC-034 says 154); the hashes need file contents and are not re-run here
+  NC-033's three gap-closing snapshots and NC-034's edge files, blob ids at the measurement ref and the tip:
+  20260810T140235000000Z.json: 242faa5a=4eea6ef3bd, 3ba3e18b=4eea6ef3bd (identical)
+  20260812T055918000000Z.json: 242faa5a=03812abc71, 3ba3e18b=03812abc71 (identical)
+  20260817T065740000000Z.json: 242faa5a=238c48b3a2, 3ba3e18b=238c48b3a2 (identical)
+  20260807T032159000000Z.json: 242faa5a=2d27dd2061, 3ba3e18b=2d27dd2061 (identical)
+  20260814T201859000000Z.json: 242faa5a=d19097b11e, 3ba3e18b=d19097b11e (identical)
+
+==============================================================================
+NC-035  sx gate length from two May snapshots at archive ref 1accf05
+==============================================================================
+  20260513T121322000000Z.json: 1accf05c=2cd2b270ef, 3ba3e18b=2cd2b270ef (identical)
+  20260513T143529000000Z.json: 1accf05c=32284450e6, 3ba3e18b=32284450e6 (identical)
