@@ -118,7 +118,8 @@ The sections above are left as written at `d7415002`.
 
 - Nothing under `src`, `scripts` or `tests` changed (`git diff --stat origin/main -- src scripts tests`
   is empty).
-- The branch diff has 358 added lines and 0 removed, so every edit is an append or a new file.
+- The branch diff removes no line (`git diff origin/main | grep -c '^-[^-]'` is 0), so every edit is
+  an append or a new file.
 - `scripts/check_ids.py`: no duplicate or colliding identifiers. `tests/test_check_ids.py`, the one test
   that reads `docs/decisions.md`: 22 passed.
 - `ruff check .` and `ruff format --check .` (0.15.12) are clean.
