@@ -145,3 +145,8 @@ matches `perturb`'s wording. The refusal itself is kept twice, on purpose.
 at `inf` admitting `inf` (the shipped bounds are open there, so V06 alone would have survived), and the
 member extractor's own shape checks when it is built directly (V22, V23). Their tests went in at
 `d6251961`, before the script was committed.
+
+Re-run, 2026-11-14, from the same committed script at `3c9bbff0` (after a docstring and one test
+assertion changed): `mutate_step3_input_jitter.at-3c9bbff0.out.txt`, every kill line identical to the
+first run apart from timings, both controls identical. V14 run alone fails on its message only, as
+predicted.

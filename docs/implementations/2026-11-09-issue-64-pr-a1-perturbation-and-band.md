@@ -666,3 +666,23 @@ survey test ran). The value is the direct collection; it agrees with `main`'s 12
 approval (Bengisu), Burak's read of `aer_factory.py`, the primary owner's read of `interfaces.py`, NC-021 at
 the merge. D6's measurement was made in a session on this laptop that she ran, and this step was built in
 another session here, so her review of the PR is owed as her own read.
+
+## Corrections, 2026-11-14, after the step 3 results above
+
+The section above is left as written. A review pass before the push found four things to correct:
+
+1. **`relative` has a `max_redraws` keyword** (default 64, passed to the constructor unchanged), which
+   D6's answer and the step 3 plan do not list. "As planned" above is wrong on that point. The docstring
+   now says so (`3c9bbff0`), and it is a third choice for the owner, beside the two in the plan.
+2. **"Four jittered members all differ"** was tested only against member 0; the test is now pairwise
+   (`3c9bbff0`).
+3. **The gates above were counted before the mutation script existed.** At `3c9bbff0`, on the whole
+   tree: `ruff check .` clean, `ruff format --check .` 139 files, `mypy --strict` 50 source files,
+   `scripts/check_ids.py` clean, `tests/test_perturbation.py` 77 passed.
+4. **V14 measured, not read.** Run alone, the test fails with "Regex pattern did not match" while the
+   member extractor raises "center has 3 entries but _Shifted returns 4": the kill is by the message.
+
+The step 3 mutation script was re-run from its committed copy at `3c9bbff0`
+(`mutate_step3_input_jitter.at-3c9bbff0.out.txt`): every kill line is identical to the first run,
+timings aside, and so are both controls. The full suite's 1370 at `ab42b8d3` predates the docstring and
+the one assertion; it is repeated after step 6, as criterion 11 asks.
