@@ -55,6 +55,28 @@ to make that failure mode structurally hard to repeat.
    name the commit it was measured at, so a stale row surfaces as a visible
    mismatch instead of a silent contradiction.
 
+7. **Claims measured from outside this repository's merge graph.**
+   A claim whose source is a data branch, an external service, or a workflow run
+   is invalidated by that source, not by any pull request, so Rule 6's mechanism
+   never fires for it and Rule 4's ninety days are far slower than the source
+   moves. Such a row must therefore:
+   (a) name an immutable ref, so it is a dated anchor and cannot go stale;
+   (b) name the live artifact that supersedes it, so a reader knows where the
+       current value lives; and
+   (c) say that it is not to be cited as the current value.
+   A row of this kind is never updated in place to track its source. When the
+   current figure is needed, add a new dated row and retire the old one under
+   Rule 5.
+
+   Added on 2026-11-14 from Issue #92, as the ticket wrote it. Rows registered while it was
+   proposed (NC-077 to NC-086 and NC-088 to NC-094, which cite the proposal in their notes;
+   NC-047 before them) describe themselves in its form and are not edited. The six rows #92
+   found without an immutable ref (NC-009, NC-011, NC-026, NC-029, NC-031, NC-034) do not
+   meet it yet. #92 classified the register as it stood at `48b8d747` (42 rows); the rows
+   added since that do not cite the proposal (NC-048 to NC-060, NC-067 to NC-076, NC-087,
+   NC-095 to NC-098) have not been checked against it. Both are a follow-up to #92: each
+   such row is anchored or retired under Rule 5, not left as it is.
+
 ## Active claims
 
 | ID | Claim | Value | Source | Last verified | Notes |
