@@ -128,3 +128,48 @@ and `--to` set to E's first and last day.
   capture measurement, NC-056 to NC-060); ADR-025's amendment of 2026-09-29 in `docs/decisions.md`.
 - `docs/implementations/2026-09-10-scheduled-calibration-sweep.md` and
   `docs/implementations/2026-09-29-capture-rate-measurement-and-tracking.md`.
+
+## Results, 2026-11-15: the baseline and the change (laptop, provisional)
+
+The sections above are left as written at `188dd17a`. Since then:
+
+| Commit | What it holds |
+| --- | --- |
+| `188dd17a` | This record's plan and prediction, before anything below. |
+| `f40e3d27` | `capture_lifetimes.py`, with no output beside it. |
+| `a46d7471` | Its output from the committed copy at `calibration-data` @ `d08263a9`, and the folder's README. |
+| the next commit | `SWEEP_STEP_HOURS` to `'0.5'`, both workflow comments, NC-099 to NC-101, and this section. |
+
+**The baseline** (`docs/evidence/capture-rate-2026-11/baseline-2026-09-30_11-11.out.txt`): 1,684
+documents over 42 recorded days (2026-09-30 to 2026-11-11, 2026-11-01 missing), capture 75.5% (NC-099),
+weekly from 86.0% down to 68.6% and 71.8%; 0 of 250 documents that lived 1 h or more missed (NC-100);
+44 of 789 that lived 0.5 h or more missed (NC-101, P1's baseline); all 413 misses lived under 1 h
+(longest 0.914 h). Two documents have no known lifetime and are left out. Against the scratch draft run
+before the plan, every figure is the same; two that this session quoted from the scratch run, "0 of 251"
+and "44 of 790", counted those two documents and are corrected here to 250 and 789.
+
+**Call volume, now measured.** The record names 38 distinct capture runs over its 42 days (a run catches
+up to three settled days), each enumerating at 0.25 h, so 96 query instants per settled day have been
+sustained since 2026-09-30. That is the volume the 2026-09-10 design called "above anything observed";
+a 0.5 h sweep adds 48 queries a day to the 49 the sweep makes now.
+
+**The change.** `.github/workflows/calibration-poll.yml`: `SWEEP_STEP_HOURS` from `'1'` to `'0.5'`, and
+its comment restated (the step, its call count, NC-100, NC-101, P1 and the pin). `.github/workflows/calibration-health.yml`:
+the comment on `CAPTURE_STEP_HOURS` names the sweep's step; the value stays `'0.25'`. `docs/numerical-claims.md`:
+NC-099 to NC-101, dated anchors on `calibration-data`.
+
+**Checks** (Python 3.12.10, the exact pins, `PYTHONPATH=src`):
+
+- `tests/test_calibration_poll_workflow.py` and `tests/test_capture_record.py`: 34 passed.
+- The pin is live: with `SWEEP_STEP_HOURS` set to `'0.25'` (equal to the capture step) in place,
+  `test_the_capture_grid_is_strictly_finer_than_the_sweep` fails; the file was restored from a backup
+  copy and its SHA-256 checked.
+- `ruff check .` and `ruff format --check .` (ruff 0.15.12): clean, 122 files. `mypy --strict`: clean,
+  49 source files. `scripts/check_ids.py`: no duplicate or colliding identifiers.
+- No test was added or removed, so NC-021 is not touched by this PR; the full suite was not run here
+  (CI runs it on the PR).
+
+**Not done here.** P1 is evaluated after the change, about 9 days after the first 0.5 h sweep. Burak's
+desktop run of this PR's checks is owed. Whether the missed documents carried new device states is not
+measured (it needs a backfill from IBM's history, and the oldest misses, from 2026-09-30, pass the 60-day
+retention of NC-026 about 2026-11-29).
