@@ -526,3 +526,65 @@ The folder does not hold the acceptance run of criterion 8, which is step 6.
 every commit of steps 1, 2, 4 and 5 and the edits to `scripts/feature_distribution.py` and its test, with the
 slow archive test included. The commit that carries this paragraph changes this document only. Criterion 11
 still needs the run repeated after steps 3 and 6.
+
+## Plan, 2026-11-14: step 3 after D6
+
+Written before any step 3 code. The branch first took `main` at `667972c5` (PR #137, which touches no
+file of this plan) as merge `4557e4ae`.
+
+**The answer.** D6 is option A (Bengisu, #64 comment 6863593077, 2026-11-13):
+`InputVectorPerturbation(center, scale, *, bounds, max_redraws=64)`, with `relative(x, r, *,
+feature_names)` setting `center = x` and `scale = r * abs(x)`. She adds one note: reject a non-finite
+or out-of-bounds `center` in the constructor, so the error names its cause instead of arriving as
+"redraws exhausted". Her measurement behind the answer (A and B give bit-identical members on 6,400 of
+6,400 in ten cases) was made in a session on this laptop that she ran; that is how the math skill's
+log of 2026-11-13 records it.
+
+**Files.** Only `src/superconducted/integration/perturbation.py`, a new section 4 of
+`tests/test_perturbation.py` (sections 1 to 3 untouched, because the committed mutation outputs name
+their tests), one new mutation script in `docs/evidence/issue-64-pr-a1-acceptance/`, and this document.
+No change to `interfaces.py` or `aer_factory.py`; if one turns out to be needed, the work stops for the
+lead's word.
+
+**What will be built.**
+
+| Symbol | Contract |
+| --- | --- |
+| `FeatureBound(low, high, *, low_open, high_open)` | A frozen interval on one feature; `contains(v)` is false for a non-finite `v`, so an upper bound of `inf` never admits `inf`. |
+| `POSITIVE`, `UNIT_INTERVAL` | `(0, inf)` open at 0, and `[0, 1]` closed, as D1 states them. |
+| `bounds_for(feature_names)` | `mean_T1`, `mean_T2` to `POSITIVE`; `mean_readout_error` to `UNIT_INTERVAL`; any other name raises `ValueError`. The units do not matter to these bounds, so the vectorizer's SI vector and the archive's microsecond vector get the same ones. |
+| `InputVectorPerturbation(center, scale, *, bounds, max_redraws=64)` | `center` and `scale` are copied and made read-only; `center` must be finite and inside its bounds (her note), `scale` finite and non-negative, one bound per feature, `max_redraws` an integer at least 0. No default for `scale`. |
+| `InputVectorPerturbation.relative(x, r, *, feature_names)` | `r` finite and positive, no default; `center = x` (a copy), `scale = r * abs(x)`, bounds from `bounds_for`. Stores `r` and the names. |
+| `perturb(index, rng, ...)` | Refuses an extractor whose `output_dim` differs from `len(center)`, or whose `feature_names` differ from the stored ones when `relative` stored them. Then up to `max_redraws + 1` attempts, each one `rng.standard_normal(d)`: `offset = scale * z`, and the attempt is kept when every component of `center + offset` is finite and inside its bound. The whole vector is redrawn on any violation, never clipped. After the last attempt, `ValueError` naming the member and the attempt count. Returns `(OffsetFeatureExtractor(...), rule_base, defuzzifier)`, the last two the inputs themselves. |
+| `OffsetFeatureExtractor(wrapped, *, center, offset)` | Holds no state that `extract` changes, because `FuzzyNoiseModel` extracts twice. `extract` raises `ValueError` unless the wrapped output equals `center` exactly, then returns `wrapped output + offset`. `output_dim` and `feature_names` are the wrapped extractor's; `center` and `offset` are read-only. |
+
+**Two choices the plan did not settle, for the owner.**
+
+1. **The bound is tested on `center + offset`, not on `x_i`.** The plan wrote the offset as `x_i - x`. In
+   floats `x + (x_i - x)` need not equal `x_i`, so a member could see a vector one ulp outside the
+   bound that was checked. With `offset = scale * z` and the bound tested on `center + offset`, the
+   vector tested is bit for bit the vector `extract` returns, because the guard makes the wrapped
+   output equal `center`.
+2. **`r` on an object built with an explicit `scale`.** `relative` sets `r`; the constructor has no `r`
+   to take. The property then reads `None`. The alternative is a constructor argument, which would
+   make `r` and `scale` two statements of one fact that can disagree.
+
+**The draw pattern is pinned.** One `standard_normal(d)` per attempt, the whole vector redrawn: the
+pattern D6's measurement modelled. A test replays a real seeded generator, including a seed whose
+first draw is out of bounds.
+
+**Tests, section 4** (criterion 4, and criterion 2 for this perturbation): no default for `scale` or
+`r`; the centre checks; `relative`'s arithmetic and its refusals; the bounds table and an unknown name;
+a scripted generator whose first draw breaks a bound gives the second draw unclipped, for each kind of
+violation, with the open and closed edges both tested at the edge itself; a non-finite candidate
+redrawn; `max_redraws` exhausted after exactly `max_redraws + 1` draws, including 0; the replay of a
+real generator; read-only `center`, `scale`, `r`, `offset`, and copies that do not follow the caller's
+array; the extractor guard on a different snapshot and its repeatability; no input mutated; the
+returned shapes; and, through the ensemble on the fixture, members that differ, two passes that agree,
+two constructions from one seed that agree, and an ensemble over another snapshot refused. One
+statistical check: at `r = 1` the accepted `T1` draws follow the normal truncated at `-1`, whose mean
+`phi(1) / Phi(1) = 0.2876` is the second route.
+
+**Mutation check.** A new script, committed with its predictions before it runs; its output comes from
+the committed copy. The step 2 script is re-run at the new head, because it asserts that each text it
+replaces occurs exactly once in `perturbation.py`, and step 3 adds a second `perturb`.
