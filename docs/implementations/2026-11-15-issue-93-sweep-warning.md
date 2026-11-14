@@ -97,3 +97,47 @@ PYTHONPATH=src python -m pytest tests/ -q
 - Issue #93; Issue #84 comment 5885407524 (File 06, Q3: "the 'dispatch a rebuild' warning in
   `file_snapshots.sh` is wrong and gets fixed (#93, option 1)"); PR #157 (ADR-025's 2026-11-15
   amendment); PR #70 (the pipeline-health tree); PR #90 (the daily sweep).
+
+## Results, 2026-11-15 (laptop, provisional)
+
+The sections above are left as written at `2d0d347c`. Python 3.12.10 with the exact pins,
+`PYTHONPATH=src`.
+
+| Commit | What it holds |
+| --- | --- |
+| `2d0d347c` | This plan and its predictions. |
+| `0ae3acbe` | The two tests, before the fix. |
+| `8b8ef72b` | The fix in `scripts/file_snapshots.sh` (mode `100755` kept). |
+| `f0fe48db` | `docs/evidence/issue-93-sweep-warning/mutate.py`, with no output beside it. |
+| `8a2c6906` | Its output from the committed copy. |
+| `62d7f727` | The ADR-025 note. |
+| the next commit | This section. |
+
+**The predictions.**
+
+1. **Held.** On the old script the sweep test failed: the second run printed two `::warning::` lines,
+   one per older document, each naming `rebuild=true`, and no summary line. A first reading of
+   pytest's assertion message suggested one warning; pytest had elided the middle of the list. The
+   full output, printed separately, shows two. After the fix: no `::warning::`, no "rebuild", one
+   summary line naming 2 documents, and the index rows as the old script wrote them (the July row,
+   then the two June rows, `is_new_state` 1, 0, 0).
+2. **Held.** On the old script the live test failed: its one `::warning::` named `rebuild=true` and
+   did not say "live poll". After the fix: one `::warning::`, naming the stem, saying "live poll", and
+   naming no rebuild.
+3. **Held.** `mutate.py`, run from the committed copy: all four mutants killed, M1 and M2 by the sweep
+   test, M3 and M4 by the live test. The script was restored from its backup each time, and its SHA-256
+   matched (`mutate.out.txt`).
+
+**Checks.**
+
+- `tests/test_file_snapshots.py`: 12 passed, and 12 passed again with
+  `GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.bareRepository GIT_CONFIG_VALUE_0=explicit` (Burak's setting).
+- Full suite: 1205 collected, 1205 passed, none skipped (the archive test ran; `calibration-data` is
+  present here), 420 s. That is `main`'s 1203 at `667972c5` plus the two new tests; NC-021 is
+  re-measured at the merge commit (Rule 6), not here.
+- `ruff check .`, `ruff format --check .` (0.15.12, 122 files), `mypy --strict` (49 source files) and
+  `scripts/check_ids.py`: clean.
+
+**Not done here.** #93's first criterion is shown in a sandbox; the first scheduled sweep after merge is
+where it is seen on the real workflow. The `calibration-data` README sentence is carried by #109.
+Burak's desktop run of these tests is not arranged.
