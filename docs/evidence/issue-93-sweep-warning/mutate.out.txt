@@ -1,0 +1,5 @@
+M1 summary printed per row: KILLED by ['test_a_sweep_behind_the_index_prints_one_line_and_owes_no_rebuild']
+M2 the sweep line is a warning: KILLED by ['test_a_sweep_behind_the_index_prints_one_line_and_owes_no_rebuild']
+M3 the live warning dropped: KILLED by ['test_a_live_poll_behind_the_index_still_warns_without_a_rebuild']
+M4 rebuild=true back in the live warning: KILLED by ['test_a_live_poll_behind_the_index_still_warns_without_a_rebuild']
+restored: True
