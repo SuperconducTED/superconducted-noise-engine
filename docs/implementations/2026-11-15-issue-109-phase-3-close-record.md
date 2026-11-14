@@ -90,3 +90,42 @@ git diff origin/main -- docs/decisions.md docs/advisor docs/roadmap | grep -c '^
   Issue #57 comment 6140571135, Issue #56.
 - `docs/advisor/2026-09-03-decisions-from-akba.md`, ADR-025 in `docs/decisions.md`,
   `docs/roadmap/2026-09-03-phase-3-plan.md`, `docs/roadmap/2026-10-23-phase-4-plan.md`, `docs/team.md`.
+
+## Results, 2026-11-15
+
+The sections above are left as written at `d7415002`.
+
+| Commit | What it holds |
+| --- | --- |
+| `d7415002` | This plan, before anything below. |
+| `ec8bf85d` | The register: items 16 and 17 added; the delegation-extension entry; items 2, 14, 16 and 17 answered under it. |
+| `ff103ef6` | ADR-025: the 2026-11-15 amendment (File 06's Q1 wording, Q2 rule and Q3 rebuild limit) and the status note for the four amendments. |
+| `65c7eb7f` | `docs/state-of-the-project/2026-11-15-phase-3-close.md`. |
+| `32ba26a2` | The phase-3 plan's M4 as-of section. |
+| the next commit | This section. |
+
+**What the close record found**, read against `main` @ `667972c5` and GitHub on 2026-11-15:
+
+- **Exit criteria:** three of the plan's eight met, one partly.
+- **Gates:** M0 five of six (counting the ADR-025 row this PR lands), M1 five of five, M2 two of five
+  with one partly, M3 two of six, M4 one of four.
+- **The milestone:** five of its fourteen issues open, and four open PRs.
+- **Two record gaps:** #65 and #76 carry no milestone, although #109's body calls them phase 4; and the
+  M2 row "trainer LSE stage passing on synthetic and anchored-baseline data" is met only on synthetic
+  data (`tests/test_anfis.py`), with no anchored-baseline run on `main`.
+
+**Checks:**
+
+- Nothing under `src`, `scripts` or `tests` changed (`git diff --stat origin/main -- src scripts tests`
+  is empty).
+- The branch diff has 358 added lines and 0 removed, so every edit is an append or a new file.
+- `scripts/check_ids.py`: no duplicate or colliding identifiers. `tests/test_check_ids.py`, the one test
+  that reads `docs/decisions.md`: 22 passed.
+- `ruff check .` and `ruff format --check .` (0.15.12) are clean.
+- No em dash added: `docs/decisions.md` has 76 on `main` and 76 here, and the phase-3 plan 2 and 2, all
+  in text above the appended sections.
+- NC-021 is not touched, since no test changed; the full suite was not run (CI runs it).
+
+**Not done here, on purpose** (each needs the lead's word after merge): the PR #55 comment referencing
+item 2's entry, ticking #109's box 3, and moving #109 to the phase-4 milestone with a dated comment
+listing what it carries.
