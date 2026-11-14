@@ -686,3 +686,45 @@ The step 3 mutation script was re-run from its committed copy at `3c9bbff0`
 (`mutate_step3_input_jitter.at-3c9bbff0.out.txt`): every kill line is identical to the first run,
 timings aside, and so are both controls. The full suite's 1370 at `ab42b8d3` predates the docstring and
 the one assertion; it is repeated after step 6, as criterion 11 asks.
+
+## Plan, 2026-11-14: step 6, the acceptance run (criterion 8)
+
+Written and committed before the run, with the script, on the lead's two choices of 2026-11-14 (asked
+in the session's question dialog): the snapshot, and how `r_smoke` and the pass bar are fixed.
+
+**Input.** `snapshots/2026-11/ibm_fez/20261113T162759000000Z.json` at `calibration-data`
+`b0482277ad54bc910b98445f75e5206f9b5baf30` (blob `b13ffe3c4821aac7b0d0844155acc2746acd0daf`), read
+with `git cat-file` and loaded through `CalibrationStorage.load`. It carries an `sx` gate length on
+all 156 qubits, and it is not the test fixture, so the run does not re-test the fixture.
+
+**Engine.** The ratified 3x3x3 Gaussian grid laid out as `tests/conftest.py` lays it out for #58, on
+this snapshot's per-qubit values in the vectorizer's SI seconds (three centres evenly over each
+feature's range, `sigma` a quarter of the range), random consequents seeded by `first_viable_seed`
+(ADR-024), `WeightedAverageDefuzzifier`, `ProbabilityClip`, `KrausChannelProjector`, post-gate
+fuzzification. `N = 32`.
+
+**Sensitivity, measured first.** At the snapshot's vector `x`, the elasticity of each output
+(`gamma`, `lambda`) with respect to each feature, `E[k][j] = d ln c_k / d ln x_j`, by central
+differences at relative steps `1e-3` and `1e-4` (the two must agree; that is the second route). The
+inputs reach the model through `OffsetFeatureExtractor`, so the measurement uses the step 3 code path.
+Whether `ProbabilityClip` binds is reported from the raw defuzzified outputs.
+
+**`r_smoke = 0.05`, a smoke value, not a fitted one.** It lies inside the range of `r` that #64's D1
+to D5 work measured (0.030 to 0.127; comment 6706908485). To first order, a relative jitter `r` with
+independent standard normals gives output `k` a relative spread `s_k = r * sqrt(sum_j E[k][j]^2)`.
+
+**Pass bar, fixed now.** All of:
+
+1. the identity ensemble's 32 members have bit-identical `crisp_params`;
+2. the jittered ensemble's 32 members are pairwise distinct;
+3. for each output, the observed relative spread across the 32 members (sample standard deviation over
+   the mean) is between half and twice `s_k`;
+4. two constructions from one seed agree bit for bit, and a second seed changes every member;
+5. every member's vector is inside its bounds, with the number of redraws reported.
+
+A control shows that bar 3 can fail: the same comparison at `r = 0.005` against the prediction for
+0.05 must fall outside it. If a sensitivity comes out near zero, or bar 2 or 3 fails, the run stops
+there and the cause is found (the consequents, the clip, or the jitter), as the PR-A plan asks.
+
+**Script.** `docs/evidence/issue-64-pr-a1-acceptance/acceptance_run.py`, committed with this section;
+its output comes from the committed copy. Laptop, provisional.
