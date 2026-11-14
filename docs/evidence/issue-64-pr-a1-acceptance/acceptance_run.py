@@ -175,24 +175,23 @@ def main() -> int:
     print("\nsensitivity: elasticity E[k][j] = d ln c_k / d ln x_j, central differences")
     elasticity: dict[float, np.ndarray] = {}
     for h in STEPS:
-        E = np.zeros((2, 3))
+        elast = np.zeros((2, 3))
         for j in range(3):
             step = np.zeros(3)
             step[j] = h * x[j]
             c_up, _, used_up = at_offset(step)
             c_down, _, used_down = at_offset(-step)
-            E[:, j] = (np.log(c_up) - np.log(c_down)) / math.log(used_up[j] / used_down[j])
-        elasticity[h] = E
+            elast[:, j] = (np.log(c_up) - np.log(c_down)) / math.log(used_up[j] / used_down[j])
+        elasticity[h] = elast
         for k, out in enumerate(OUTPUTS):
             print(
                 f"  h={h:g} {out:6s}: "
-                + ", ".join(f"{n} {E[k, j]:+.6f}" for j, n in enumerate(names))
+                + ", ".join(f"{n} {elast[k, j]:+.6f}" for j, n in enumerate(names))
             )
-    E_a, E_b = elasticity[STEPS[0]], elasticity[STEPS[1]]
-    agree = float(np.max(np.abs(E_a - E_b) / np.maximum(np.abs(E_b), 1e-12)))
+    elast_a, elast_b = elasticity[STEPS[0]], elasticity[STEPS[1]]
+    agree = float(np.max(np.abs(elast_a - elast_b) / np.maximum(np.abs(elast_b), 1e-12)))
     print(f"  largest relative difference between the two steps: {agree:.3e}")
-    E = E_b
-    norms = np.sqrt(np.sum(E**2, axis=1))
+    norms = np.sqrt(np.sum(elast_b**2, axis=1))
     predicted = R_SMOKE * norms
     for k, out in enumerate(OUTPUTS):
         print(
@@ -229,30 +228,32 @@ def main() -> int:
         f"\nbars 2, 3, 5: jittered ensemble, r_smoke = {R_SMOKE} (a smoke value), seed {RUN_SEED}"
     )
     members, perturbation = jittered(RUN_SEED, R_SMOKE)
-    C = np.array([m.crisp_params for m in members])
-    distinct = len(np.unique(C, axis=0))
+    jit = np.array([m.crisp_params for m in members])
+    distinct = len(np.unique(jit, axis=0))
     results["2 jittered members pairwise distinct"] = distinct == N
     print(f"  distinct members: {distinct} of {N}")
-    observed = C.std(axis=0, ddof=1) / C.mean(axis=0)
+    observed = jit.std(axis=0, ddof=1) / jit.mean(axis=0)
     ratio = observed / predicted
     results["3 spread within [0.5, 2] of the prediction"] = bool(
         np.all((ratio >= 0.5) & (ratio <= 2.0))
     )
     for k, out in enumerate(OUTPUTS):
         print(
-            f"  {out}: mean {C[:, k].mean():.6g}, observed relative spread {observed[k]:.6f}, predicted {predicted[k]:.6f}, ratio {ratio[k]:.3f}; members from {C[:, k].min():.6g} to {C[:, k].max():.6g}"
+            f"  {out}: mean {jit[:, k].mean():.6g}, observed relative spread {observed[k]:.6f}, predicted {predicted[k]:.6f}, ratio {ratio[k]:.3f}; members from {jit[:, k].min():.6g} to {jit[:, k].max():.6g}"
         )
 
     children = np.random.default_rng(RUN_SEED).bit_generator.seed_seq.spawn(N)
     redraws, inside, replay_equal, clip_binding = 0, 0, 0, 0
-    for child, member_params in zip(children, C, strict=True):
+    for child, member_params in zip(children, jit, strict=True):
         g = np.random.default_rng(child)
-        for attempt in range(perturbation.max_redraws + 1):
+        attempts = 0
+        for _ in range(perturbation.max_redraws + 1):
+            attempts += 1
             offset = perturbation.scale * g.standard_normal(3)
             v = perturbation.center + offset
             if all(b.contains(float(c)) for b, c in zip(perturbation.bounds, v, strict=True)):
                 break
-        redraws += attempt
+        redraws += attempts - 1
         inside += all(b.contains(float(c)) for b, c in zip(perturbation.bounds, v, strict=True))
         params, raw, _ = at_offset(offset)
         replay_equal += bool(np.array_equal(params, member_params))
@@ -265,8 +266,8 @@ def main() -> int:
     print(f"\nbar 4: reconstruction from seed {RUN_SEED}, and seed {OTHER_SEED}")
     again = np.array([m.crisp_params for m in jittered(RUN_SEED, R_SMOKE)[0]])
     other = np.array([m.crisp_params for m in jittered(OTHER_SEED, R_SMOKE)[0]])
-    same = bool(np.array_equal(again, C))
-    changed = int(sum(not np.array_equal(a, b) for a, b in zip(other, C, strict=True)))
+    same = bool(np.array_equal(again, jit))
+    changed = int(sum(not np.array_equal(a, b) for a, b in zip(other, jit, strict=True)))
     results["4 same seed bit-identical, other seed changes every member"] = same and changed == N
     print(
         f"  seed {RUN_SEED} twice bit-identical: {same}; members changed by seed {OTHER_SEED}: {changed} of {N}"
