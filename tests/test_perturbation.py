@@ -17,8 +17,10 @@ laptop and the desktop on another quantity).
 from __future__ import annotations
 
 import copy
+import dataclasses
+import inspect
 import math
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -39,7 +41,15 @@ from superconducted.integration.aer_factory import (
     FuzzyNoiseModelEnsemble,
     first_viable_seed,
 )
-from superconducted.integration.perturbation import IdentityPerturbation
+from superconducted.integration.perturbation import (
+    POSITIVE,
+    UNIT_INTERVAL,
+    FeatureBound,
+    IdentityPerturbation,
+    InputVectorPerturbation,
+    OffsetFeatureExtractor,
+    bounds_for,
+)
 from superconducted.interfaces import (
     CalibrationFeatureExtractor,
     Defuzzifier,
@@ -531,3 +541,448 @@ def test_a_perturbation_that_breaks_the_shape_contract_is_refused(
 
     with pytest.raises(ValueError, match=match):
         list(ensemble)
+
+
+# --------------------------------------------------------------------------
+# 4. Input-vector jitter (acceptance criterion 4, and criterion 2 for it; step 3,
+#    D6 option A, #64 comment 6863593077)
+# --------------------------------------------------------------------------
+
+NAMES = ("mean_T1", "mean_T2", "mean_readout_error")
+
+#: A typical ``ibm_fez`` vector in the vectorizer's units: T1 and T2 in SI
+#: seconds, the readout error dimensionless.
+X = np.array([1.0e-4, 8.0e-5, 0.015])
+
+#: Stand-ins for the rule base and defuzzifier, which the jitter passes through
+#: untouched and never calls.
+RULE_BASE = cast(RuleBase, object())
+DEFUZZIFIER = cast(Defuzzifier, object())
+
+
+class _ScriptedNormals:
+    """Stands in for numpy's ``Generator`` inside ``perturb``.
+
+    Hands out the given rows as successive ``standard_normal(size)`` results
+    and records each call's ``size``, so a test can see how many draws were
+    made and which one was kept.
+    """
+
+    def __init__(self, *rows: list[float]) -> None:
+        self._rows = [np.array(row, dtype=np.float64) for row in rows]
+        self.sizes: list[Any] = []
+
+    def standard_normal(self, size: Any) -> npt.NDArray[np.float64]:
+        self.sizes.append(size)
+        if len(self.sizes) > len(self._rows):
+            raise AssertionError(f"draw {len(self.sizes)} was not scripted")
+        return self._rows[len(self.sizes) - 1].copy()
+
+
+def _jitter(
+    perturbation: InputVectorPerturbation,
+    rng: Any,
+    extractor: CalibrationFeatureExtractor | None = None,
+) -> OffsetFeatureExtractor:
+    """Member 0's extractor under ``perturbation``, after checking the pass-through."""
+    out = perturbation.perturb(
+        0,
+        cast(np.random.Generator, rng),
+        feature_extractor=extractor or BasicCalibrationVectorizer(),
+        rule_base=RULE_BASE,
+        defuzzifier=DEFUZZIFIER,
+    )
+    assert out[1] is RULE_BASE and out[2] is DEFUZZIFIER
+    assert isinstance(out[0], OffsetFeatureExtractor)
+    return out[0]
+
+
+def _other_snapshot(snapshot: CalibrationSnapshot) -> CalibrationSnapshot:
+    """The same snapshot with qubit 0's T1 raised by half, so its feature vector differs."""
+    properties = copy.deepcopy(snapshot.properties)
+    for entry in properties["qubits"][0]:
+        if entry.get("name") == "T1":
+            entry["value"] = float(entry["value"]) * 1.5
+    return dataclasses.replace(snapshot, properties=properties)
+
+
+def test_the_scale_and_r_have_no_default() -> None:
+    """File 03 Q2a: no code path picks the scale, so neither entry point offers one."""
+    init = inspect.signature(InputVectorPerturbation.__init__).parameters
+    relative = inspect.signature(InputVectorPerturbation.relative).parameters
+    for parameter in (init["center"], init["scale"], init["bounds"], relative["r"]):
+        assert parameter.default is inspect.Parameter.empty
+    assert init["max_redraws"].default == 64
+    with pytest.raises(TypeError):
+        InputVectorPerturbation(X, bounds=bounds_for(NAMES))  # type: ignore[call-arg]
+    with pytest.raises(TypeError):
+        InputVectorPerturbation.relative(X, feature_names=NAMES)  # type: ignore[call-arg]
+
+
+def test_relative_sets_the_centre_the_scale_and_the_bounds() -> None:
+    perturbation = InputVectorPerturbation.relative(X, 0.1, feature_names=NAMES)
+
+    assert np.array_equal(perturbation.center, X)
+    assert np.array_equal(perturbation.scale, 0.1 * np.abs(X))
+    assert perturbation.bounds == (POSITIVE, POSITIVE, UNIT_INTERVAL)
+    assert perturbation.r == 0.1
+    assert perturbation.feature_names == NAMES
+    assert perturbation.max_redraws == 64
+
+
+def test_an_explicit_scale_records_no_r_and_no_names() -> None:
+    """The departure written in the step 3 plan: ``r`` reads ``None`` without ``relative``."""
+    perturbation = InputVectorPerturbation(X, [1e-6, 1e-6, 1e-3], bounds=bounds_for(NAMES))
+
+    assert perturbation.r is None
+    assert perturbation.feature_names is None
+
+
+def test_the_centre_and_scale_are_copies_and_read_only() -> None:
+    x = X.copy()
+    perturbation = InputVectorPerturbation.relative(x, 0.1, feature_names=NAMES)
+    x[0] = 5.0
+
+    assert perturbation.center[0] == 1.0e-4
+    assert perturbation.scale[0] == 0.1 * 1.0e-4
+    for array in (perturbation.center, perturbation.scale):
+        with pytest.raises(ValueError, match="read-only"):
+            array[0] = 1.0
+    for name in ("center", "scale", "r", "bounds", "max_redraws", "feature_names"):
+        with pytest.raises(AttributeError):
+            setattr(perturbation, name, None)
+
+
+@pytest.mark.parametrize("r", [0, 0.0, -0.1, math.nan, math.inf, True, "0.1"])
+def test_relative_refuses_an_r_that_is_not_a_finite_positive_number(r: Any) -> None:
+    with pytest.raises(ValueError, match="finite positive"):
+        InputVectorPerturbation.relative(X, r, feature_names=NAMES)
+
+
+def test_relative_needs_one_known_name_per_feature() -> None:
+    with pytest.raises(ValueError, match="2 feature names"):
+        InputVectorPerturbation.relative(X, 0.1, feature_names=NAMES[:2])
+    with pytest.raises(ValueError, match="no bound is defined"):
+        InputVectorPerturbation.relative(X, 0.1, feature_names=("mean_T1", "mean_T2", "gate"))
+
+
+def test_the_bounds_table_and_an_unknown_name() -> None:
+    assert bounds_for(NAMES) == (POSITIVE, POSITIVE, UNIT_INTERVAL)
+    assert bounds_for(()) == ()
+    with pytest.raises(ValueError, match="'foo'"):
+        bounds_for(("mean_T1", "foo"))
+
+
+def test_a_bound_admits_its_closed_ends_and_nothing_non_finite() -> None:
+    assert not POSITIVE.contains(0.0)
+    assert POSITIVE.contains(5e-324)
+    assert not POSITIVE.contains(-5e-324)
+    assert not POSITIVE.contains(math.inf)
+    assert not POSITIVE.contains(math.nan)
+    assert UNIT_INTERVAL.contains(0.0)
+    assert UNIT_INTERVAL.contains(1.0)
+    assert not UNIT_INTERVAL.contains(math.nextafter(1.0, 2.0))
+    assert not UNIT_INTERVAL.contains(-5e-324)
+    assert not UNIT_INTERVAL.contains(math.nan)
+    with pytest.raises(ValueError, match="low <= high"):
+        FeatureBound(1.0, 0.0, low_open=False, high_open=False)
+
+
+@pytest.mark.parametrize(
+    "center",
+    [
+        [0.0, 8.0e-5, 0.015],
+        [-1.0e-4, 8.0e-5, 0.015],
+        [1.0e-4, 8.0e-5, 1.5],
+        [1.0e-4, 8.0e-5, -0.01],
+        [math.nan, 8.0e-5, 0.015],
+        [1.0e-4, math.inf, 0.015],
+    ],
+    ids=["t1_zero", "t1_negative", "readout_above_1", "readout_below_0", "nan", "inf"],
+)
+def test_a_centre_outside_its_bounds_is_refused_at_construction(center: list[float]) -> None:
+    """Bengisu's D6 note: the error names the centre, not "redraws exhausted"."""
+    with pytest.raises(ValueError, match="center"):
+        InputVectorPerturbation(center, [1e-6, 1e-6, 1e-3], bounds=bounds_for(NAMES))
+
+
+@pytest.mark.parametrize(
+    ("scale", "bounds", "max_redraws", "match"),
+    [
+        ([1e-6, -1e-6, 1e-3], None, 64, "non-negative"),
+        ([1e-6, math.nan, 1e-3], None, 64, "finite"),
+        ([1e-6, 1e-6], None, 64, "shape"),
+        ([1e-6, 1e-6, 1e-3], (POSITIVE, POSITIVE), 64, "FeatureBound"),
+        ([1e-6, 1e-6, 1e-3], None, -1, "max_redraws"),
+        ([1e-6, 1e-6, 1e-3], None, 1.5, "max_redraws"),
+        ([1e-6, 1e-6, 1e-3], None, True, "max_redraws"),
+    ],
+    ids=[
+        "negative",
+        "nan",
+        "length",
+        "bounds",
+        "redraws_negative",
+        "redraws_float",
+        "redraws_bool",
+    ],
+)
+def test_the_constructor_refuses_a_bad_scale_bounds_or_redraw_count(
+    scale: list[float], bounds: Any, max_redraws: Any, match: str
+) -> None:
+    with pytest.raises(ValueError, match=match):
+        InputVectorPerturbation(
+            X,
+            scale,
+            bounds=bounds_for(NAMES) if bounds is None else bounds,
+            max_redraws=max_redraws,
+        )
+
+
+@pytest.mark.parametrize(
+    "first",
+    [[-11.0, 0.5, 0.0], [0.0, -13.0, 0.0], [0.0, 0.0, -11.0], [0.0, 0.0, 700.0]],
+    ids=["t1_below_0", "t2_below_0", "readout_below_0", "readout_above_1"],
+)
+def test_a_first_draw_outside_a_bound_is_redrawn_not_clipped(first: list[float]) -> None:
+    """D1: the whole vector is redrawn; every component of the kept offset is the second draw's."""
+    perturbation = InputVectorPerturbation.relative(X, 0.1, feature_names=NAMES)
+    second = [0.5, -0.3, 0.2]
+    rng = _ScriptedNormals(first, second)
+
+    member = _jitter(perturbation, rng)
+
+    assert rng.sizes == [3, 3]
+    assert np.array_equal(member.offset, perturbation.scale * np.array(second))
+    assert np.array_equal(member.center, X)
+
+
+def test_an_open_end_is_redrawn_at_the_end_itself_and_a_closed_end_is_kept() -> None:
+    """``center + scale * z`` lands exactly on 0 for T1 (open) and on 0 and 1 for the readout (closed)."""
+    perturbation = InputVectorPerturbation(
+        [1.0e-4, 1.0e-4, 0.5], [1.0e-4, 0.0, 0.5], bounds=bounds_for(NAMES)
+    )
+
+    at_open_end = _ScriptedNormals([-1.0, 0.0, 0.0], [0.0, 0.0, 0.0])
+    member = _jitter(perturbation, at_open_end)
+    assert at_open_end.sizes == [3, 3]
+    assert np.array_equal(member.offset, [0.0, 0.0, 0.0])
+
+    for z in (1.0, -1.0):
+        at_closed_end = _ScriptedNormals([0.0, 0.0, z])
+        member = _jitter(perturbation, at_closed_end)
+        assert at_closed_end.sizes == [3]
+        assert (member.center + member.offset)[2] == (1.0 if z > 0 else 0.0)
+
+
+@pytest.mark.parametrize("bad", [math.inf, -math.inf, math.nan], ids=["inf", "minus_inf", "nan"])
+def test_a_non_finite_draw_is_redrawn(bad: float) -> None:
+    perturbation = InputVectorPerturbation.relative(X, 0.1, feature_names=NAMES)
+    rng = _ScriptedNormals([bad, 0.0, 0.0], [0.1, 0.1, 0.1])
+
+    member = _jitter(perturbation, rng)
+
+    assert rng.sizes == [3, 3]
+    assert np.all(np.isfinite(member.offset))
+
+
+@pytest.mark.parametrize("max_redraws", [0, 2])
+def test_exhausted_redraws_raise_after_exactly_max_redraws_plus_one_draws(max_redraws: int) -> None:
+    perturbation = InputVectorPerturbation.relative(
+        X, 0.1, feature_names=NAMES, max_redraws=max_redraws
+    )
+    rng = _ScriptedNormals(*([[-11.0, 0.0, 0.0]] * (max_redraws + 1)))
+
+    with pytest.raises(
+        ValueError, match=f"member 0: no draw inside the bounds after {max_redraws + 1}"
+    ):
+        _jitter(perturbation, rng)
+    assert rng.sizes == [3] * (max_redraws + 1)
+
+
+def _first_inside(perturbation: InputVectorPerturbation, rows: list[Any]) -> int:
+    """Index of the first row whose candidate is inside every bound."""
+    for k, z in enumerate(rows):
+        candidate = perturbation.center + perturbation.scale * z
+        if all(b.contains(float(v)) for b, v in zip(perturbation.bounds, candidate, strict=True)):
+            return k
+    raise AssertionError("no row inside")
+
+
+def test_a_real_generator_is_read_one_vector_per_attempt() -> None:
+    """The draw pattern D6's measurement modelled: ``standard_normal(3)`` per attempt, nothing else.
+
+    Replayed against a second generator from the same seed, on seeds whose
+    first draw is out of bounds (so the redraw path runs) and on one whose
+    first draw is kept.
+    """
+    perturbation = InputVectorPerturbation.relative(X, 0.6, feature_names=NAMES)
+
+    def rows(seed: int) -> list[Any]:
+        replay = np.random.default_rng(seed)
+        return [replay.standard_normal(3) for _ in range(65)]
+
+    redrawn = [seed for seed in range(200) if _first_inside(perturbation, rows(seed)) > 0][:3]
+    kept = [seed for seed in range(200) if _first_inside(perturbation, rows(seed)) == 0][:1]
+    assert len(redrawn) == 3 and len(kept) == 1
+
+    for seed in redrawn + kept:
+        k = _first_inside(perturbation, rows(seed))
+        rng = np.random.default_rng(seed)
+        member = _jitter(perturbation, rng)
+        assert np.array_equal(member.offset, perturbation.scale * rows(seed)[k])
+        after = np.random.default_rng(seed)
+        for _ in range(k + 1):
+            after.standard_normal(3)
+        assert rng.bit_generator.state == after.bit_generator.state
+
+
+def test_the_member_extractor_returns_its_vector_and_refuses_another_snapshot(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    """D6 option A's guard: one object, one feature vector; stateless across calls."""
+    vectorizer = BasicCalibrationVectorizer()
+    x = vectorizer.extract(benchmark_snapshot)
+    perturbation = InputVectorPerturbation.relative(x, 0.05, feature_names=vectorizer.feature_names)
+    member = _jitter(perturbation, np.random.default_rng(1), vectorizer)
+
+    first = member.extract(benchmark_snapshot)
+    second = member.extract(benchmark_snapshot)
+
+    assert np.array_equal(first, x + member.offset)
+    assert np.array_equal(first, second) and first is not second
+    assert all(b.contains(float(v)) for b, v in zip(perturbation.bounds, first, strict=True))
+    assert member.wrapped is vectorizer
+    assert member.output_dim == vectorizer.output_dim
+    assert member.feature_names == vectorizer.feature_names
+    for array in (member.center, member.offset):
+        with pytest.raises(ValueError, match="read-only"):
+            array[0] = 1.0
+    with pytest.raises(ValueError, match="serves the one feature vector"):
+        member.extract(_other_snapshot(benchmark_snapshot))
+
+
+def test_perturb_refuses_an_extractor_of_another_shape_or_names(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    vectorizer = BasicCalibrationVectorizer()
+    renamed = _Shifted(vectorizer, np.zeros(3), names=("a", "b", "c"))
+    relative = InputVectorPerturbation.relative(X, 0.1, feature_names=NAMES)
+
+    with pytest.raises(ValueError, match="returns 4 features"):
+        _jitter(relative, np.random.default_rng(1), _Shifted(vectorizer, np.zeros(3), dim=4))
+    with pytest.raises(ValueError, match="names its features"):
+        _jitter(relative, np.random.default_rng(1), renamed)
+    # Built with an explicit scale, the object knows no names and checks none.
+    explicit = InputVectorPerturbation(X, relative.scale, bounds=relative.bounds)
+    assert _jitter(explicit, np.random.default_rng(1), renamed).feature_names == ("a", "b", "c")
+
+
+def test_perturb_mutates_nothing_and_reads_only_its_generator(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    deps = _dependencies(benchmark_snapshot, RULE_BASE_SEED)
+    vectorizer = deps["feature_extractor"]
+    rule_base = deps["rule_base"]
+    defuzzifier = deps["defuzzifier"]
+    consequents = [rule.consequent_params.copy() for rule in rule_base.rules]
+    x = vectorizer.extract(benchmark_snapshot)
+    perturbation = InputVectorPerturbation.relative(x, 0.05, feature_names=vectorizer.feature_names)
+    center, scale = perturbation.center.copy(), perturbation.scale.copy()
+
+    out = perturbation.perturb(
+        3,
+        np.random.default_rng(5),
+        feature_extractor=vectorizer,
+        rule_base=rule_base,
+        defuzzifier=defuzzifier,
+    )
+
+    assert out[1] is rule_base and out[2] is defuzzifier
+    assert isinstance(out[0], OffsetFeatureExtractor) and out[0].wrapped is vectorizer
+    assert out[0].output_dim == vectorizer.output_dim
+    assert out[0].feature_names == vectorizer.feature_names
+    assert np.array_equal(perturbation.center, center)
+    assert np.array_equal(perturbation.scale, scale)
+    assert np.array_equal(vectorizer.extract(benchmark_snapshot), x)
+    assert all(
+        np.array_equal(rule.consequent_params, before)
+        for rule, before in zip(rule_base.rules, consequents, strict=True)
+    )
+    again = perturbation.perturb(
+        3,
+        np.random.default_rng(5),
+        feature_extractor=vectorizer,
+        rule_base=rule_base,
+        defuzzifier=defuzzifier,
+    )
+    assert isinstance(again[0], OffsetFeatureExtractor)
+    assert np.array_equal(again[0].offset, out[0].offset)
+
+
+#: Dimensionless. A smoke value chosen only so that members differ; nothing
+#: reads it as a fitted scale (D2 fits ``r``; this PR does not).
+R_SMOKE_TEST = 0.05
+
+
+def _jittered_ensemble(
+    snapshot: CalibrationSnapshot, perturbed_at: CalibrationSnapshot, seed: int
+) -> FuzzyNoiseModelEnsemble:
+    """Four members over ``snapshot``, jittered around ``perturbed_at``'s vector."""
+    vectorizer = BasicCalibrationVectorizer()
+    perturbation = InputVectorPerturbation.relative(
+        vectorizer.extract(perturbed_at), R_SMOKE_TEST, feature_names=vectorizer.feature_names
+    )
+    return _ensemble(snapshot, 4, perturbation=perturbation, rng=np.random.default_rng(seed))
+
+
+def test_jittered_members_differ_repeat_and_follow_their_seed(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    ensemble = _jittered_ensemble(benchmark_snapshot, benchmark_snapshot, 64)
+
+    first = [member.crisp_params.copy() for member in ensemble]
+    second = [member.crisp_params.copy() for member in ensemble]
+    rebuilt = [
+        m.crisp_params for m in _jittered_ensemble(benchmark_snapshot, benchmark_snapshot, 64)
+    ]
+    other = [m.crisp_params for m in _jittered_ensemble(benchmark_snapshot, benchmark_snapshot, 65)]
+
+    assert all(not np.array_equal(first[0], p) for p in first[1:])
+    assert all(np.array_equal(a, b) for a, b in zip(first, second, strict=True))
+    assert all(np.array_equal(a, b) for a, b in zip(first, rebuilt, strict=True))
+    assert not any(np.array_equal(a, b) for a, b in zip(first, other, strict=True))
+
+
+def test_an_ensemble_over_another_snapshot_is_refused(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    """The perturbation was built at one snapshot's vector; members over another fail loudly."""
+    ensemble = _jittered_ensemble(_other_snapshot(benchmark_snapshot), benchmark_snapshot, 64)
+
+    with pytest.raises(ValueError, match="serves the one feature vector"):
+        list(ensemble)
+
+
+def test_accepted_draws_follow_the_normal_truncated_at_the_bound() -> None:
+    """The second route for D1: the redraw keeps a truncated Gaussian, not a clipped one.
+
+    With ``center = 1`` and ``scale = 1`` on ``mean_T1`` and no jitter
+    elsewhere, a draw is kept exactly when ``z > -1``, so the kept ``z`` is a
+    standard normal truncated below at -1: mean ``phi(1) / Phi(1) = 0.28760``,
+    standard deviation 0.7935. 20,000 members from one fixed seed; the
+    tolerance is five standard errors (0.028). Clipping would instead put
+    15.9% of the members exactly on 0.
+    """
+    perturbation = InputVectorPerturbation(
+        [1.0, 1.0, 0.5], [1.0, 0.0, 0.0], bounds=bounds_for(NAMES)
+    )
+    rng = np.random.default_rng(20261114)
+    z = np.array([_jitter(perturbation, rng).offset[0] for _ in range(20_000)])
+
+    phi = math.exp(-0.5) / math.sqrt(2.0 * math.pi)
+    big_phi = 0.5 * math.erfc(-1.0 / math.sqrt(2.0))
+    mean = phi / big_phi
+    sd = math.sqrt(1.0 - mean - mean**2)
+    assert z.min() > -1.0
+    assert abs(z.mean() - mean) < 5.0 * sd / math.sqrt(z.size)
