@@ -69,10 +69,13 @@ to make that failure mode structurally hard to repeat.
    Rule 5.
 
    Added on 2026-11-14 from Issue #92, as the ticket wrote it. Rows registered while it was
-   proposed (NC-077 to NC-086 and NC-088 to NC-091, which cite the proposal in their notes;
-   NC-047 before them) already follow it and are not edited. The six rows #92 found without
-   an immutable ref (NC-009, NC-011, NC-026, NC-029, NC-031, NC-034) do not meet it yet;
-   they are anchored or retired under Rule 5 in a follow-up to #92, not left as they are.
+   proposed (NC-077 to NC-086 and NC-088 to NC-094, which cite the proposal in their notes;
+   NC-047 before them) describe themselves in its form and are not edited. The six rows #92
+   found without an immutable ref (NC-009, NC-011, NC-026, NC-029, NC-031, NC-034) do not
+   meet it yet. #92 classified the register as it stood at `48b8d747` (42 rows); the rows
+   added since that do not cite the proposal (NC-048 to NC-060, NC-067 to NC-076, NC-087,
+   NC-095 to NC-098) have not been checked against it. Both are a follow-up to #92: each
+   such row is anchored or retired under Rule 5, not left as it is.
 
 ## Active claims
 
