@@ -22,7 +22,7 @@ were to follow from the ablation are open. Those are phase 4's lane 2, gates L3 
 | --- | --- | --- | --- |
 | 1 | ADR-014 Accepted: a `TSKTrainer` implementation in a new `training` package, pinned by tests | Not met | `training/anfis.py` is on `main` (PR #114, 2026-10-15; the premise stage in PR #137, 2026-11-11), but ADR-014 reads `**Status**: Deferred.` and Issue #60 is open |
 | 2 | A training target defined by an ADR, reviewed by Dr. Akba | Met | ADR-027 `**Status**: Accepted.` (PR #120, 2026-10-26), approved through the lead's signature (register entry of 2026-10-21, item 1) |
-| 3 | A training set built from the archive, committed with its archive ref | Met | PR #113 (2026-10-23): `training/dataset.py` and `docs/evidence/training-set/` at two refs. Issue #63 stays open for one unticked ask |
+| 3 | A training set built from the archive, committed with its archive ref | Met | PR #113 (2026-10-23): `training/dataset.py` and `docs/evidence/training-set/` at two refs. Issue #63 is still open, with 0 of the 15 checkboxes in its body ticked |
 | 4 | A trained model fit with a snapshot-boundary time split, its out-of-sample error registered | Not met | Issue #60: the first archive fit |
 | 5 | Trained model, manual baseline and reference compared on the four circuits with all four metrics | Not met | Needs criterion 4. The instruments are certified (#58, PR #79) |
 | 6 | ADR-019 executed and closed; ADR-009 decided on that evidence; ADR-011 follows | Not met | All three read `Open` on `main`. Issues #62 (the ablation) and #61 (PR #143, in review) |
@@ -54,7 +54,7 @@ time, and both stay.
 | M2 | Gradient derivations and `gradients.py` | Not met | Issue #61, open; no `training/gradients.py` on `main`. PR #143 (the Karnik-Mendel reference) is in review |
 | M2 | Dashboard live | Met, 2026-09-10 | PR #70 |
 | M2 | Sweep live | Met, 2026-09-10 | PR #90; its step moves to 0.5 h in PR #156 (Issue #104) |
-| M2 | Trainer LSE stage passing on synthetic and anchored-baseline data | Partly met | The LSE core recovers planted targets (`tests/test_anfis.py`, PR #114); no anchored-baseline run is on `main` |
+| M2 | Trainer LSE stage passing on synthetic and anchored-baseline data | Partly met | The LSE core recovers planted targets (`tests/test_anfis.py`, PR #114). A search of `tests/`, `scripts/`, `src/` and `docs/` for "anchored" finds no run of it on the anchored baseline, only `training/anfis.py`'s advice to warm-start from one |
 | M3 | ADR-019 closed with a winner | Not met | `**Status**: Open.`; Issue #62 |
 | M3 | ADR-009 decided | Not met | `**Status**: Open.`; needs File 02 Q1a's time-split test with #62's table, then the lead's entry (register item 3) |
 | M3 | ADR-011 follows | Not met | `**Status**: Open (effectively chosen for each path).`; Issue #61 |
@@ -85,9 +85,13 @@ Nine of the fourteen issues on the `Phase 3 · ANFIS results` milestone are clos
 
 Open PRs on the milestone: #147, #151, #152 and #156.
 
-**A record gap found here.** Issue #109's body (2026-10-03) says #65 and #76 "are phase 4". On
-2026-11-15 neither carries any milestone. They are not phase 3's, but no milestone records that they are
-phase 4's.
+**Two record gaps found here.**
+
+- **#65 and #76.** Issue #109's body (2026-10-03) says they "are phase 4". On 2026-11-15 neither carries
+  any milestone. They are not phase 3's, but no milestone records that they are phase 4's.
+- **#63.** PR #113 delivered the training-set builder (exit criterion 3), but none of the 15 checkboxes in
+  #63's body is ticked. That is for #63's owner to reconcile, and it does not change this record's
+  reading of criterion 3.
 
 ## 4. What phase 4 carries, and why
 

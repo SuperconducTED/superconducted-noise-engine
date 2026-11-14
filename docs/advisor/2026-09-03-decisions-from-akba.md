@@ -498,6 +498,7 @@ for them. They are numbered here, after item 15, and answered in the entries bel
 
 - This entry flips no `**Status**` line and answers no item by itself. Each item still closes through its own entry, naming this delegation, the decision, and the ADR it lands in.
 - Whether any other ADR is about the calibration pipeline is stated in that ADR's own entry, not inferred from this one.
+- **Against the 2026-10-21 entry.** That entry records as open, in Issue #109, whether its delegation reaches the ADR-025 amendments. That was the record's state on that date. The lead states that Dr. Akba gave the pipeline scope at the same time as the fuzzy-engine delegation, and that it was not written down until this entry.
 
 ## Decision, 2026-11-15: Item 2, the `duplicate-partial` rule stands as ADR-025 states it
 

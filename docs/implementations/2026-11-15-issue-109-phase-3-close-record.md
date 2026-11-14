@@ -110,9 +110,16 @@ The sections above are left as written at `d7415002`.
 - **Gates:** M0 five of six (counting the ADR-025 row this PR lands), M1 five of five, M2 two of five
   with one partly, M3 two of six, M4 one of four.
 - **The milestone:** five of its fourteen issues open, and four open PRs.
-- **Two record gaps:** #65 and #76 carry no milestone, although #109's body calls them phase 4; and the
-  M2 row "trainer LSE stage passing on synthetic and anchored-baseline data" is met only on synthetic
-  data (`tests/test_anfis.py`), with no anchored-baseline run on `main`.
+- **Record gaps:** #65 and #76 carry no milestone, although #109's body calls them phase 4; none of
+  the 15 checkboxes in #63's body is ticked, although PR #113 delivered its builder. The M2 row
+  "trainer LSE stage passing on synthetic and anchored-baseline data" is met only on synthetic data
+  (`tests/test_anfis.py`): a search of `tests/`, `scripts/`, `src/` and `docs/` for "anchored" finds no
+  anchored-baseline run, only `training/anfis.py`'s advice to warm-start from one.
+- **Re-read for this record** rather than carried from older text: the closing dates of #25, #45 and #53,
+  PR #81 closing #25, every PR merge date cited, and #63's checkboxes. The first draft said "#63 stays
+  open for one unticked ask", which came from the phase-4 dashboard's summary; the body has 15 unticked.
+- **Trial merges** (`git merge-tree`) against the heads of PR #145 and PR #150, which also append to
+  `docs/decisions.md`: both clean.
 
 **Checks:**
 
