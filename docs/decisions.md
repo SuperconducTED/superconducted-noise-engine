@@ -1731,11 +1731,13 @@ amendment allows into a rule for every tree on `calibration-data`:
 - derived views, `health/`, may be rebuilt deterministically under a named definition version;
 - inboxes, `collisions/`, are cleared only with a dated note.
 
-**`is_new_state` and `--rebuild` (File 06, Q3).** `is_new_state` records what the poller could see
-when it wrote the row, so it is an observation. It is never overwritten, and readers derive first
-sightings from `last_update_date`. A rebuild would overwrite it, so `--rebuild` is only for a
-digest-definition change or a malformed index. For `health/state-index.tsv` this is narrower than the
-derived-view rule above.
+**`is_new_state` and `--rebuild` (File 06, Q3).** In File 06's words: "Confirmed, and it is never
+overwritten. Readers derive first sightings from `last_update_date`. `--rebuild` is only for a
+digest-definition change or a malformed index." This replaces the 2026-09-05 amendment's "may
+regenerate it once in `last_update_date` order (`--rebuild`); this is the only permitted rewrite"
+with the two conditions under which `--rebuild` may run. For `health/state-index.tsv` it is narrower
+than the derived-view rule above, because `is_new_state` records what the poller could see when it
+wrote the row, an observation that a rebuild would overwrite (File 06, section 2.3).
 
 | | |
 | --- | --- |

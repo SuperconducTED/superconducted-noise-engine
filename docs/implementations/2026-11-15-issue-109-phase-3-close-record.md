@@ -121,6 +121,15 @@ The sections above are left as written at `d7415002`.
 - **Trial merges** (`git merge-tree`) against the heads of PR #145 and PR #150, which also append to
   `docs/decisions.md`: both clean.
 
+**Confirmed by the lead before the push** (2026-11-15, in this session's dialog):
+
+- The delegation entry's Answer, Date given, Medium and "Against the 2026-10-21 entry" rows were shown
+  to @mertefesensoy verbatim, and he approved them as written.
+- Asked separately whether Q3 belongs in item 14's answer and the amendment, he chose to keep it. Q3
+  replaces the 2026-09-05 rule that `--rebuild` may regenerate the index once, as the only permitted
+  rewrite. The amendment's Q3 paragraph now quotes File 06 word for word and names the sentence it
+  replaces.
+
 **Checks:**
 
 - Nothing under `src`, `scripts` or `tests` changed (`git diff --stat origin/main -- src scripts tests`
