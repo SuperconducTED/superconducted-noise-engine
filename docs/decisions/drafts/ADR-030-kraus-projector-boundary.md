@@ -37,3 +37,7 @@
 - `is_identity_damping` still reports a NaN vector as identity; when `prepare`
   encounters an eligible gate, the projector rejects that vector and
   `prepare` raises instead of installing or silently skipping its channel.
+
+**Status as of 2026-11-11**: Accepted. Both owners' approvals are in (PR #136, merged as
+`cd277a64`). The ledger entry in `docs/decisions.md` is the record from here on; this
+draft is left as written above.
