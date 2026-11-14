@@ -960,7 +960,7 @@ def test_jittered_members_differ_repeat_and_follow_their_seed(
     ]
     other = [m.crisp_params for m in _jittered_ensemble(benchmark_snapshot, benchmark_snapshot, 65)]
 
-    assert all(not np.array_equal(first[0], p) for p in first[1:])
+    assert all(not np.array_equal(first[i], first[j]) for i in range(4) for j in range(i + 1, 4))
     assert all(np.array_equal(a, b) for a, b in zip(first, second, strict=True))
     assert all(np.array_equal(a, b) for a, b in zip(first, rebuilt, strict=True))
     assert not any(np.array_equal(a, b) for a, b in zip(first, other, strict=True))

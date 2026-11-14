@@ -287,7 +287,11 @@ class InputVectorPerturbation(MemberPerturbation):
         dimensionless, finite and positive, with no default (File 03 Q2a: the
         scale is fitted, never chosen by code). The bounds come from
         :func:`bounds_for` on ``feature_names``, which must have one name per
-        entry of ``x``. The returned object records ``r`` and the names.
+        entry of ``x``. ``max_redraws`` is passed to the constructor
+        unchanged; D6's answer names no such argument here, and it is offered
+        so that a caller of ``relative`` can set the redraw limit the
+        constructor already takes. The returned object records ``r`` and the
+        names.
         """
         if isinstance(r, bool) or not isinstance(r, (int, float)) or not math.isfinite(r):
             raise ValueError(f"r must be a finite positive number, got {r!r}")
