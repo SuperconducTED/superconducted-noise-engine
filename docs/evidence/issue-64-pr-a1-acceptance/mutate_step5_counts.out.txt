@@ -1,0 +1,3 @@
+none      automatic 1 | density_matrix 1
+extra     automatic 2 | density_matrix 2
+per_shot  automatic 1025 | density_matrix 1025

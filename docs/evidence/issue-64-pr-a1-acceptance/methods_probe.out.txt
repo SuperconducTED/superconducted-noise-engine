@@ -1,0 +1,14 @@
+numpy 2.4.4
+inverted_cdf                 tables where the edges are not exactly min and max: 0 of 3000
+averaged_inverted_cdf        tables where the edges are not exactly min and max: 0 of 3000
+closest_observation          tables where the edges are not exactly min and max: 0 of 3000
+interpolated_inverted_cdf    tables where the edges are not exactly min and max: 0 of 3000
+hazen                        tables where the edges are not exactly min and max: 0 of 3000
+weibull                      tables where the edges are not exactly min and max: 0 of 3000
+linear                       tables where the edges are not exactly min and max: 0 of 3000
+median_unbiased              tables where the edges are not exactly min and max: 0 of 3000
+normal_unbiased              tables where the edges are not exactly min and max: 0 of 3000
+lower                        tables where the edges are not exactly min and max: 0 of 3000
+higher                       tables where the edges are not exactly min and max: 0 of 3000
+midpoint                     tables where the edges are not exactly min and max: 0 of 3000
+nearest                      tables where the edges are not exactly min and max: 0 of 3000

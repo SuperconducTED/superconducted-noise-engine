@@ -87,7 +87,12 @@ def test_compute_stats_single_value_has_no_spread() -> None:
 
 
 def test_compute_stats_uses_ddof_one_not_ddof_zero() -> None:
-    """The ddof choice is not free: #64's ``per_qubit_spread`` ships ddof=1."""
+    """The ddof choice is not free: #64's ``per_qubit_spread`` ships ddof=1.
+
+    Note, 2026-11-11 (Issue #64 decision D4): #64 does not add
+    ``per_qubit_spread``. The pin below stands on its own: this script's
+    spread is the sample standard deviation.
+    """
     values = [1.0, 2.0, 3.0, 4.0]
     _, std, _, _, _ = _compute_stats(values)
 
