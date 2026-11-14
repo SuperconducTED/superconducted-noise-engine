@@ -173,3 +173,44 @@ NC-099 to NC-101, dated anchors on `calibration-data`.
 desktop run of this PR's checks is owed. Whether the missed documents carried new device states is not
 measured (it needs a backfill from IBM's history, and the oldest misses, from 2026-09-30, pass the 60-day
 retention of NC-026 about 2026-11-29).
+
+## Amendment 1, 2026-11-15: before the push, and before any data after the change
+
+Written after a review pass on the local branch, before the branch was pushed and before any sweep ran
+at 0.5 h, so no figure after the change existed. The prediction section above is left as written; this
+section adds to it and corrects one sentence.
+
+**1a. A recorded lifetime is an upper bound.** A document that escaped both the 0.25 h capture
+enumeration and the archive appears nowhere in the record. If one sits between a document and its
+recorded successor, the document's true lifetime is shorter than the recorded one, and a 0.5 h grid is
+no longer guaranteed to land inside it. Such a document lived under 0.25 h, since the capture grid
+would otherwise have served it. **P1 counts misses by recorded lifetime, and no miss is excused by a
+document nobody saw.** Each miss with a recorded lifetime of 0.5 h or more counts against P1 and is
+reported with this caveat. This makes P1 harder to pass, not easier.
+
+**1b. When P1 is read, and what replaces a missing day.** A document stamped late on E's last day has
+an unknown lifetime until the next day is recorded, and would otherwise drop out of the count silently.
+So P1 is read at the first `calibration-data` commit whose capture record contains the day after E's
+last day, and the output's count of E documents with an unknown lifetime is reported beside the P1
+line. A day of E missing from the record is replaced by the next recorded day, so that E always holds
+7 recorded days; the reading then waits for the day after the new last day.
+
+**1c. A correction to the prediction section.** "As the 1 h grid's record suggests" credits the sweep.
+The record shows only that the pipeline as a whole (the hourly poll and the daily sweeps) missed no
+document that lived 1 h or more. It does not show which path retrieved each one. The ADR-025 ledger
+holds that, and it was not read here. NC-100, the evidence README and this PR's description say it
+that way.
+
+**The window, measured.** `_build_historical_window` in `src/superconducted/calibration/poller.py`,
+called with a 48 h window (`2026-11-12T07:59:13Z` to `2026-11-14T07:59:13Z`) and the step strings the
+workflow passes:
+
+| Step string | Instants | Spacing | Last instant |
+| --- | ---: | --- | --- |
+| `'1'` | 48 | 3,600 s | `2026-11-14T06:59:13Z` |
+| `'0.5'` | 96 | 1,800 s | `2026-11-14T07:29:13Z` |
+
+`poll_once` also fetches the current document once per backend, so a 0.5 h sweep makes 97 calls
+against 49. The value reaches the builder as the string `'0.5'` (`HIST_STEP="$SWEEP_STEP_HOURS"`),
+which it parses as a float; the 1 h fallback the 2026-09-02 record describes was fixed then and does
+not occur here.

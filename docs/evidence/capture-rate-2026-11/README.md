@@ -38,9 +38,10 @@ The anchor is `calibration-data` @ `d08263a9`, the branch tip on 2026-11-14; the
 | Missed lifetimes | median 0.286 h, longest 0.914 h |
 | Capture runs recorded | 38 distinct run ids (a run catches up to three days) |
 
-**What it says.** Every missed document lived under an hour, and none of the 250 that lived an hour or
-more was missed: the 1 h grid's guarantee held throughout, so IBM's history index has not cost the
-sweep a long-lived document in the live window over these six weeks. A 0.5 h grid would always sample
+**What it says.** Every missed document lived under an hour, and the pipeline as a whole (the hourly
+poll and the daily sweep) missed none of the 250 that lived an hour or more, as the 1 h grid's
+guarantee would have it. The record does not say which path retrieved each of them; the ADR-025 ledger
+does, and it was not read here. A 0.5 h grid would always sample
 44 of the 413 misses and a 0.25 h grid 247; no step under discussion guarantees the 166 that lived under
 0.25 h.
 
