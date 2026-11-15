@@ -1,6 +1,6 @@
 # Phase 4: Design-time predictor
 
-_Generated 2026-11-14 05:44 UTC · main at `667972c5` (2026-11-11) · day 14 since 2026-11-01 · milestone 2 due 2027-02-27 (105 days), 14 open and 12 closed_
+_Generated 2026-11-15 05:45 UTC · main at `667972c5` (2026-11-11) · day 15 since 2026-11-01 · milestone 2 due 2027-02-27 (104 days), 17 open and 12 closed_
 
 _Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, on main. Gates are ordered, not dated (plan §6)._
 
@@ -43,7 +43,7 @@ _Resumes at gate L1, job 1's report, or earlier for whoever is idle on lane 1 (p
   - ⬜ The ladder (persistence, shrinkage, rolling band, IT2 band, scored on change events) with the fuzzy band's row, registered
     - _No ticket yet (lane 2 item 6), so there is nothing on GitHub to read._
 
-1. ❌ #64 ADR-015 / ADR-016 ensemble and intervals (PR-A) (@bengisucvd): ready to start
+1. 🟡 #64 ADR-015 / ADR-016 ensemble and intervals (PR-A) (@bengisucvd): in review, PR #155
 2. ✅ #58 Certify the benchmark instruments (PR #79) (@bengisucvd): closed
 3. ❌ #60 ADR-014 trainer: the first archive fit (@BurakOztekin): ready to finish
 4. ❌ #62 ADR-019 ablation table, both modes (@BahaJarad): ready to start
@@ -56,13 +56,13 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 
 - ❌ **L5** Phase 3 closed: The phase-3 milestone closed with every item either done or moved to the phase-4 milestone with a reason. (0/1) · **next**
   - ❌ Milestone 1 (Phase 3) closed
-    - _Milestone 1 (Phase 3 · ANFIS results) is open: 6 open and 32 closed issues._
+    - _Milestone 1 (Phase 3 · ANFIS results) is open: 8 open and 32 closed issues._
 
 1. ✅ #57 Training contract: ADR-027 accepted (PR #120) (@mertefesensoy): closed
 2. ✅ #84 Close the #57 advisor loop (@mertefesensoy): closed
-3. ❌ #109 Phase-3 close record (@mertefesensoy): ready to start
-4. ❌ #92 Rule 7 for the NC register (@bengisucvd): ready to start
-5. ❌ #104 Decide the sweep step (@mertefesensoy): ready to start
+3. 🟡 #109 Phase-3 close record (@mertefesensoy): in review, PR #157
+4. 🟡 #92 Rule 7 for the NC register (@bengisucvd): in review, PR #152
+5. 🟡 #104 Decide the sweep step (@mertefesensoy): in review, PR #156
 6. ❌ #108 Owner read of PR #55's poller change (@BahaJarad): ready to start
 7. ✅ #75 Decide the LOCKED Kraus projector boundary (@bengisucvd): closed
 
@@ -73,12 +73,12 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 
 1. Unstick PR #142 for #125: Hardware test: reading versus level on ibm_fez (QPU side)
    - Still a draft: CI and reviewers will not treat it as ready.
-1. Re-review PR #150 (#122: Public archive as a second training-set source (ADR-029))
-   - Your CHANGES_REQUESTED from 2026-11-11 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
-1. Start #109: Phase-3 close record
-   - The phase-3 close record is its deliverable, with the ADR-025 amendments answered or explicitly carried (plan §2 lane 3).
-1. Start #104: Decide the sweep step
-   - Decide with NC-079's figures, then close (plan §2 lane 3).
+1. Unstick PR #157 for #109: Phase-3 close record
+   - No approving review yet: main's ruleset requires one.
+1. Unstick PR #156 for #104: Decide the sweep step
+   - No approving review yet: main's ruleset requires one.
+1. Unstick PR #155 for #64: Author #64's PR-A1 once Bengisu's D1 to D5 are answered
+   - No approving review yet: main's ruleset requires one. Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
 
 **Burak Öztekin** (@BurakOztekin)
 
@@ -95,8 +95,8 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 
 1. Review #125's decision rule and statistics before the pre-registration freezes them (#125)
    - The pre-registration commit waits on this review (plan §5.1).
-1. Start #92: Rule 7 for the NC register
-   - Adopt as written: nine rows already use its form (plan §2 lane 3).
+1. Unstick PR #152 for #92: Rule 7 for the NC register
+   - Awaiting merge.
 1. Start #64: ADR-015 / ADR-016 ensemble and intervals (PR-A)
    - Bengisu's D1 to D5, in the gaps of lane 1 (plan §5.1); PR-A is lane 2's first item when it resumes. Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
 1. Unstick PR #143 for #61: Nie-Tan versus Karnik-Mendel, premise gradients
@@ -105,7 +105,7 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 **Baha Jarad** (@BahaJarad)
 
 1. Unstick PR #150 for #122: Public archive as a second training-set source (ADR-029)
-   - CHANGES_REQUESTED standing from @BurakOztekin (2026-11-12), @mertefesensoy (2026-11-11). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+   - CHANGES_REQUESTED standing from @BurakOztekin (2026-11-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 1. Start #108: Owner read of PR #55's poller change
    - The read, then close (plan §2 lane 3).
 1. Start #62: ADR-019 ablation table, both modes
@@ -116,25 +116,34 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 _Review requests not yet answered with a review, and unticked checkboxes that start with the person (`- [ ] @login does X`), on every open issue and PR. Oldest first; "or earlier" marks a post edited after it was written, so the wait shown is the shortest it can be._
 
 
-**Mert Efe Şensoy** (@mertefesensoy), 2 owed
+**Mert Efe Şensoy** (@mertefesensoy), 1 owed
 
-- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (42 days); no post there since
-- Re-review PR #150: your CHANGES_REQUESTED from 2026-11-11 still stands: requested by @BahaJarad, since 2026-11-13 (1 day); no post there since
+- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (43 days); has posted there since, on 2026-11-14
 
-**Burak Öztekin** (@BurakOztekin), 2 owed
+**Burak Öztekin** (@BurakOztekin), 7 owed
 
-- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (72 days); no post there since
-- Re-review PR #150: your CHANGES_REQUESTED from 2026-11-12 still stands: requested by @BahaJarad, since 2026-11-13 (1 day); no post there since
+- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (73 days); no post there since
+- Re-review PR #150: your CHANGES_REQUESTED from 2026-11-12 still stands: requested by @BahaJarad, since 2026-11-13 (2 days); no post there since
+- Re-review PR #140: your CHANGES_REQUESTED from 2026-11-05 still stands: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
+- Re-review PR #143: your CHANGES_REQUESTED from 2026-11-09 still stands: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
+- Re-review PR #145: your CHANGES_REQUESTED from 2026-11-11 still stands: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
+- Review PR #151: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
+- Review PR #155: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
 
-**Bengisu Cıvdı** (@bengisucvd), 1 owed
+**Bengisu Cıvdı** (@bengisucvd), 2 owed
 
-- Review PR #145: requested by @mertefesensoy, since 2026-11-11 (3 days); no post there since
+- Re-review PR #145: asked again after your review of 2026-11-14: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
+- Review PR #155: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
 
-**Baha Jarad** (@BahaJarad), 3 owed
+**Baha Jarad** (@BahaJarad), 7 owed
 
-- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (42 days); no post there since
-- Review PR #143: requested by @bengisucvd, since 2026-11-07 (7 days); no post there since
-- Review PR #145: requested by @mertefesensoy, since 2026-11-09 (5 days); no post there since
+- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (43 days); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (8 days); no post there since
+- Review PR #145: requested by @mertefesensoy, since 2026-11-09 (6 days); no post there since
+- Review PR #152: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
+- Review PR #156: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
+- Review PR #157: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
+- Review PR #158: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -146,11 +155,23 @@ _Review requests not yet answered with a review, and unticked checkboxes that st
 
 **#122: Public archive as a second training-set source (ADR-029)** (@BahaJarad)
 
-- [critical] CHANGES_REQUESTED standing from @BurakOztekin (2026-11-12), @mertefesensoy (2026-11-11). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+- [critical] CHANGES_REQUESTED standing from @BurakOztekin (2026-11-12). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+
+**#64: ADR-015 / ADR-016 ensemble and intervals (PR-A)** (@bengisucvd)
+
+- [high] No approving review yet: main's ruleset requires one.
 
 **#61: Nie-Tan versus Karnik-Mendel, premise gradients** (@bengisucvd)
 
 - [critical] CHANGES_REQUESTED standing from @BurakOztekin (2026-11-09). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+
+**#109: Phase-3 close record** (@mertefesensoy)
+
+- [high] No approving review yet: main's ruleset requires one.
+
+**#104: Decide the sweep step** (@mertefesensoy)
+
+- [high] No approving review yet: main's ruleset requires one.
 
 ## Blocked upstream
 
@@ -168,6 +189,7 @@ Nothing is blocked upstream.
 
 | Date | Gates | Conditions | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 2026-11-15 | 0/5 | 0/7 | 3 | 7 | 0 | milestone 2: 17 open and 12 closed (was 14 and 12); #104 Decide the sweep step: ready to start to in review; #109 Phase-3 close record: ready to start to in review; #64 ADR-015 / ADR-016 ensemble and intervals (PR-A): ready to start to in review; #92 Rule 7 for the NC register: ready to start to in review; Baha Jarad owes 7 answers (was 3); Burak Öztekin owes 7 answers (was 2); Bengisu Cıvdı owes 2 answers (was 1); Mert Efe Şensoy owes 1 answer (was 2) |
 | 2026-11-14 | 0/5 | 0/7 | 7 | 3 | 0 | Burak Öztekin owes 2 answers (was 1); Mert Efe Şensoy owes 2 answers (was 1) |
 | 2026-11-13 | 0/5 | 0/7 | 7 | 3 | 0 | nothing moved |
 | 2026-11-12 | 0/5 | 0/7 | 7 | 3 | 0 | #60 ADR-014 trainer: the first archive fit: in review to ready to start; Burak Öztekin owes 1 answer (was 3); main moved to 667972c5 |
