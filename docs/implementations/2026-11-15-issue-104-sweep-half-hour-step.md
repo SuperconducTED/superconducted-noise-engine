@@ -214,3 +214,20 @@ workflow passes:
 against 49. The value reaches the builder as the string `'0.5'` (`HIST_STEP="$SWEEP_STEP_HOURS"`),
 which it parses as a float; the 1 h fallback the 2026-09-02 record describes was fixed then and does
 not occur here.
+
+## Note, 2026-11-15: Rule 7's clause (b) on NC-099 to NC-101
+
+Added after amendment 1. No data from after the change had been read. It changes no number, source,
+`Last verified` date or prediction.
+
+PR #151 adds Rule 7 to the register. A row measured from outside the merge graph must name an immutable
+ref (a), name the live artifact that supersedes it (b), and say it is not the current value (c). All
+three rows here are measured from `calibration-data`. Each met (a) and (c), but none met (b): each ended
+"Dated anchor, not a current value." PR #152's audit of the register stopped at its own tip, so it did
+not see these rows. This was found on 2026-11-15, while reading Issue #92's state.
+
+Each row's closing sentence is now a line in the form PR #152 uses, so that Issue #153's proposed
+exemption marker (`**Rule 7, YYYY-MM-DD`) finds it. NC-099's line names the live artifact, the same
+command run with `--ref` at a later `calibration-data` commit, and says the capture job extends
+`health/capture.tsv` each day (`calibration-health.yml`, `cron: '17 3 * * *'`). NC-100 and NC-101 say
+the same in short. The lead approved the wording in the session's question dialog.
