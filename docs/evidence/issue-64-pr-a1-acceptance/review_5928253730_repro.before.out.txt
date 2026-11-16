@@ -1,0 +1,11 @@
+1. non-finite diagonal entries
+  interval_band with one member's NaN real part: ValueError: IntervalBand lower and upper must be finite
+  IntervalCoverage of a reference with a NaN real part: returned nan
+  interval_band with one member's NaN imaginary part: returned 'band lower [0.5, 0.5], upper [0.5, 0.5]'
+  IntervalCoverage of a reference with a NaN imaginary part: returned 1.0
+  interval_band with one member's infinite imaginary part: ValueError: A density matrix's diagonal must be real and in [0, 1] to within 1e-12; got minimum 0.5, maximum 0.5
+  IntervalCoverage of a reference with a infinite imaginary part: ValueError: A density matrix's diagonal must be real and in [0, 1] to within 1e-12; got minimum 0.5, maximum 0.5
+  IntervalCoverage of a counts reference with a NaN count: returned nan
+
+2. a stochastic subclass of IdentityPerturbation, built without rng
+  construction without rng: accepted twice; first draws [-0.05370351329906028, -0.43987434463953334] and [-0.9797859013309328, -0.0063000178852158275]; equal: False
