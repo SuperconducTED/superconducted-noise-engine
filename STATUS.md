@@ -1,6 +1,6 @@
 # Phase 4: Design-time predictor
 
-_Generated 2026-11-15 05:45 UTC · main at `667972c5` (2026-11-11) · day 15 since 2026-11-01 · milestone 2 due 2027-02-27 (104 days), 17 open and 12 closed_
+_Generated 2026-11-16 07:18 UTC · main at `667972c5` (2026-11-11) · day 16 since 2026-11-01 · milestone 2 due 2027-02-27 (103 days), 17 open and 12 closed_
 
 _Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, on main. Gates are ordered, not dated (plan §6)._
 
@@ -118,32 +118,32 @@ _Review requests not yet answered with a review, and unticked checkboxes that st
 
 **Mert Efe Şensoy** (@mertefesensoy), 1 owed
 
-- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (43 days); has posted there since, on 2026-11-14
+- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (44 days); has posted there since, on 2026-11-14
 
 **Burak Öztekin** (@BurakOztekin), 7 owed
 
-- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (73 days); no post there since
-- Re-review PR #150: your CHANGES_REQUESTED from 2026-11-12 still stands: requested by @BahaJarad, since 2026-11-13 (2 days); no post there since
-- Re-review PR #140: your CHANGES_REQUESTED from 2026-11-05 still stands: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
-- Re-review PR #143: your CHANGES_REQUESTED from 2026-11-09 still stands: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
-- Re-review PR #145: your CHANGES_REQUESTED from 2026-11-11 still stands: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
-- Review PR #151: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
-- Review PR #155: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
+- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (74 days); no post there since
+- Re-review PR #150: your CHANGES_REQUESTED from 2026-11-12 still stands: requested by @BahaJarad, since 2026-11-13 (3 days); no post there since
+- Re-review PR #140: your CHANGES_REQUESTED from 2026-11-05 still stands: requested by @mertefesensoy, since 2026-11-14 (2 days); no post there since
+- Re-review PR #143: your CHANGES_REQUESTED from 2026-11-09 still stands: requested by @mertefesensoy, since 2026-11-14 (2 days); no post there since
+- Re-review PR #145: your CHANGES_REQUESTED from 2026-11-11 still stands: requested by @mertefesensoy, since 2026-11-14 (2 days); no post there since
+- Review PR #151: requested by @mertefesensoy, since 2026-11-14 (2 days); no post there since
+- Review PR #155: requested by @mertefesensoy, since 2026-11-14 (2 days); no post there since
 
 **Bengisu Cıvdı** (@bengisucvd), 2 owed
 
-- Re-review PR #145: asked again after your review of 2026-11-14: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
-- Review PR #155: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
+- Re-review PR #145: asked again after your review of 2026-11-14: requested by @mertefesensoy, since 2026-11-14 (2 days); no post there since
+- Review PR #155: requested by @mertefesensoy, since 2026-11-14 (2 days); no post there since
 
 **Baha Jarad** (@BahaJarad), 7 owed
 
-- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (43 days); no post there since
-- Review PR #143: requested by @bengisucvd, since 2026-11-07 (8 days); no post there since
-- Review PR #145: requested by @mertefesensoy, since 2026-11-09 (6 days); no post there since
-- Review PR #152: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
-- Review PR #156: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
-- Review PR #157: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
-- Review PR #158: requested by @mertefesensoy, since 2026-11-14 (1 day); no post there since
+- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (44 days); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (9 days); no post there since
+- Review PR #145: requested by @mertefesensoy, since 2026-11-09 (7 days); no post there since
+- Review PR #152: requested by @mertefesensoy, since 2026-11-14 (2 days); no post there since
+- Review PR #156: requested by @mertefesensoy, since 2026-11-14 (2 days); no post there since
+- Review PR #157: requested by @mertefesensoy, since 2026-11-14 (2 days); no post there since
+- Review PR #158: requested by @mertefesensoy, since 2026-11-14 (2 days); no post there since
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -189,6 +189,7 @@ Nothing is blocked upstream.
 
 | Date | Gates | Conditions | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 2026-11-16 | 0/5 | 0/7 | 3 | 7 | 0 | nothing moved |
 | 2026-11-15 | 0/5 | 0/7 | 3 | 7 | 0 | milestone 2: 17 open and 12 closed (was 14 and 12); #104 Decide the sweep step: ready to start to in review; #109 Phase-3 close record: ready to start to in review; #64 ADR-015 / ADR-016 ensemble and intervals (PR-A): ready to start to in review; #92 Rule 7 for the NC register: ready to start to in review; Baha Jarad owes 7 answers (was 3); Burak Öztekin owes 7 answers (was 2); Bengisu Cıvdı owes 2 answers (was 1); Mert Efe Şensoy owes 1 answer (was 2) |
 | 2026-11-14 | 0/5 | 0/7 | 7 | 3 | 0 | Burak Öztekin owes 2 answers (was 1); Mert Efe Şensoy owes 2 answers (was 1) |
 | 2026-11-13 | 0/5 | 0/7 | 7 | 3 | 0 | nothing moved |
