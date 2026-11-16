@@ -835,3 +835,39 @@ and reproducible with it; the existing tests keep the exact class seed-free.
 Then: the reproduction script re-run after the fix, a mutation script for the new guards committed with
 its predictions before it runs, the gates and the full suite, the push, a reply to the review, and an
 amendment note on the desktop runbook (comment 6883767379, which pins `f7fd365d`).
+
+## Results, 2026-11-17: the fixes for review 5928253730 (laptop, provisional)
+
+| Commit | What |
+| --- | --- |
+| `20ce7c6e` | the reproduction script and its output on `f7fd365d`, before any fix |
+| `be815582` | the plan above |
+| `91243786` | both fixes, 10 cases in `tests/test_interval_band.py`, 1 in `tests/test_perturbation.py`, the reproduction's output after the fix |
+| `962aba33`, `17aaacf5` | the mutation script with its predictions, then its run |
+| `5dc2a3d2` | step 2's W02 and W03 retargeted at the new exemption line |
+
+**After the fix** (`review_5928253730_repro.after.out.txt`): every case the reproduction shows is refused
+with a `ValueError` that names it: a NaN real part, a NaN imaginary part or an infinite imaginary part,
+as a member and as a reference, a NaN count, and the stochastic subclass built without `rng`.
+
+**Mutation check** (`mutate_review_5928253730.py`, 7 mutants): 7 of 7 killed. Two predictions missed on the
+side of more kills: with the finiteness check removed (R02), the `inf_imaginary` member is also killed,
+because the older imaginary-part check refuses it with a message the test does not match; and requiring
+`rng` even for the identity (R07) also fails the pinned-seed test, which builds identity ensembles
+unseeded.
+
+**The earlier mutation runs at the new head.** The fix replaced the line step 2's W02 and W03 edit, so the
+step 2 script was retargeted (`5dc2a3d2`, same two mutants) and re-run: 16 of 16 killed, the same
+verdicts as before (`mutate_step2_seeding.at-5dc2a3d2.out.txt`); W02 and W03 now also fail the new
+subclass test. Steps 3 and 4 re-run at `5dc2a3d2` from their committed scripts, outputs not committed: every
+verdict identical to the committed runs, step 3's controls identical. The baselines count the new tests
+(78 and 85). Step 5's scripts touch neither changed file and were not re-run.
+
+**Gates and suite.** `ruff check .`, `ruff format --check .`, `mypy --strict` (50 source files) and
+`scripts/check_ids.py` clean. Full suite at `17aaacf5`: 1381 collected, 1381 passed in 360 s, no skip;
+1370 plus the 11 new cases agrees, but the value is the direct collection.
+
+**For the desktop runbook** (comment 6883767379, which pins `f7fd365d`): its step 2 stops on the moved
+head, and its step 11 compares step 2's mutation output against `mutate_step2_seeding.at-step3-head.out.txt`,
+whose baseline predates the new test. Running steps 1 to 11 at `f7fd365d` stays valid; the review fixes
+need a short extra block at the new head. Both go in an amendment note.
