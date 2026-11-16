@@ -86,6 +86,9 @@ IDLE_FRACTION = 0.5
 SEED = 125
 POINT_PREDICTORS: tuple[str, ...] = ("reading", "level", "reading_at_execution")
 SOURCES: tuple[str, ...] = (*POINT_PREDICTORS, "band_lo", "band_hi")
+# The band in Arm B, scored from its two ends (``score_band``); not a source of its own.
+BAND = "band"
+BAND_PER_LAYOUT: tuple[str, ...] = ("interval", "midpoint", "covered", "width")
 _UNIT_SCALE = {"s": 1.0, "ms": 1e-3, "us": 1e-6, "µs": 1e-6, "ns": 1e-9}
 
 
@@ -830,7 +833,8 @@ def score_arm_a(
 def score_arm_b(
     job: Job, counts: Sequence[Mapping[str, int]], *, shots: int = ARM_B_SHOTS
 ) -> dict[str, Any]:
-    """Measured fidelity per layout; per predictor Spearman, best-pick and mean absolute error."""
+    """Measured fidelity per layout; per source Spearman, best-pick and mean absolute error; and
+    the band (amendment 4), scored by ``score_band``."""
     measured = [hellinger_fidelity(_counts_vector(c, 3) / shots, GHZ_IDEAL) for c in counts]
     best = int(np.argmax(measured))
     out: dict[str, Any] = {"layouts": [list(t) for t in job.layouts], "measured": measured}
@@ -853,7 +857,44 @@ def score_arm_b(
                 float(np.mean([abs(p - m) for p, m in pairs])) if pairs else math.nan
             ),
         }
+    out[BAND] = score_band(job.arm_b_predicted["band_lo"], job.arm_b_predicted["band_hi"], measured)
     return out
+
+
+def score_band(
+    lows: Sequence[float | None], highs: Sequence[float | None], measured: Sequence[float]
+) -> dict[str, Any]:
+    """The band in Arm B (amendment 4): per layout the interval from its two ends' predicted
+    fidelities, sorted (each end pairs a ``T1`` with a ``T2``, so their order is not fixed); its
+    midpoint, which ranks the layouts; whether it covers the measured fidelity, closed as in Arm A;
+    its width. A layout missing either end has no band (``None`` throughout), never one built from
+    the other end. Over the layouts with a band: their number, the midpoints' Spearman correlation
+    with the measured fidelities, whether the highest midpoint (the first on ties) is the measured
+    best, and the number and share covered. Coverage is reported, not judged: Arm B has no nominal
+    level and no widening (the 80% and its widening are Arm A's)."""
+    intervals: list[list[float] | None] = [
+        None if a is None or b is None else sorted((float(a), float(b)))
+        for a, b in zip(lows, highs, strict=True)
+    ]
+    midpoint = [None if v is None else (v[0] + v[1]) / 2.0 for v in intervals]
+    covered = [
+        None if v is None else int(v[0] <= m <= v[1])
+        for v, m in zip(intervals, measured, strict=True)
+    ]
+    mids = {i: m for i, m in enumerate(midpoint) if m is not None}
+    n_covered = sum(c for c in covered if c is not None)
+    best = int(np.argmax(measured))
+    return {
+        "interval": intervals,
+        "midpoint": midpoint,
+        "covered": covered,
+        "width": [None if v is None else v[1] - v[0] for v in intervals],
+        "n_predicted": len(mids),
+        "spearman": spearman(list(mids.values()), [measured[i] for i in mids]),
+        "best_pick_hit": int(max(mids, key=lambda i: mids[i]) == best) if mids else None,
+        "n_covered": n_covered,
+        "coverage": n_covered / len(mids) if mids else math.nan,
+    }
 
 
 # ---------------------------------------------------------------------------------------------
@@ -993,25 +1034,44 @@ def evaluate_criteria(
         f"{other}_minus_{matched}_90": [lo, hi],
         "bootstrap_unit": "row (smoke test of the code, not the decision rule's unit)",
     }
-    # 4. Arm B end to end.
+    # 4. Arm B end to end. "Every predictor scored" (2026-11-16): each source and the band has at
+    # least two layouts predicted and a finite Spearman, and the band a finite coverage. A layout
+    # a predictor cannot predict is allowed and listed under "unpredictable".
+    band = arm_b.get(BAND)
     out["4_arm_b"] = {
         "pass": bool(
             len(job.layouts) == N_LAYOUTS
-            and all(isinstance(arm_b[name], dict) for name in SOURCES)
+            and all(_scored(arm_b.get(name)) for name in (*SOURCES, BAND))
+            and isinstance(band, Mapping)
+            and math.isfinite(float(band.get("coverage", math.nan)))
             and out["1_sampling"]["arm_b_max_z"] <= 4.0
         ),
         "layouts": [list(t) for t in job.layouts],
         "measured": arm_b["measured"],
         "per_predictor": {
-            name: {k: v for k, v in arm_b[name].items() if k != "predicted"} for name in SOURCES
+            **{
+                name: {k: v for k, v in arm_b[name].items() if k != "predicted"} for name in SOURCES
+            },
+            **(
+                {BAND: {k: v for k, v in band.items() if k not in BAND_PER_LAYOUT}}
+                if isinstance(band, Mapping)
+                else {}
+            ),
         },
         "unpredictable": {
-            name: [
-                list(t)
-                for t, p in zip(job.layouts, arm_b[name]["predicted"], strict=True)
-                if p is None
-            ]
-            for name in SOURCES
+            **{
+                name: [
+                    list(t)
+                    for t, p in zip(job.layouts, arm_b[name]["predicted"], strict=True)
+                    if p is None
+                ]
+                for name in SOURCES
+            },
+            BAND: (
+                [list(t) for t, v in zip(job.layouts, band["interval"], strict=True) if v is None]
+                if isinstance(band, Mapping)
+                else None
+            ),
         },
     }
     # 5. Circuit timing: x end to measure start equals tau in every Arm A circuit.
@@ -1030,6 +1090,15 @@ def evaluate_criteria(
         out[k]["pass"] for k in ("1_sampling", "2_offset", "3_direction", "4_arm_b", "5_timing")
     )
     return out
+
+
+def _scored(entry: Any) -> bool:
+    """Criterion 4's "scored": at least two layouts predicted and a finite Spearman."""
+    return (
+        isinstance(entry, Mapping)
+        and int(entry.get("n_predicted", 0)) >= 2
+        and math.isfinite(float(entry.get("spearman", math.nan)))
+    )
 
 
 def write_json_lf(path: Path, payload: Any) -> None:
@@ -1127,11 +1196,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         criteria[name]["qubits_kept_at_reading"] = kept
         criteria[name]["t2_above_2t1_capped_by_aer"] = capped[name]
         _write_tsv(args.out / f"arm-a-{name}.tsv", a_rows)
+        band = b_score[BAND]
         b_rows = [
             {
                 "layout": "-".join(map(str, t)),
                 "measured_fidelity": m,
                 **{f"predicted_{s}": b_score[s]["predicted"][i] for s in SOURCES},
+                "band_lo": None if band["interval"][i] is None else band["interval"][i][0],
+                "band_hi": None if band["interval"][i] is None else band["interval"][i][1],
+                "band_midpoint": band["midpoint"][i],
+                "band_covered": band["covered"][i],
             }
             for i, (t, m) in enumerate(zip(job.layouts, b_score["measured"], strict=True))
         ]

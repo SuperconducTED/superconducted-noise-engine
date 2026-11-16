@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import copy
 import math
+from dataclasses import replace
 from datetime import UTC, date, datetime, timedelta
 from itertools import pairwise
 from pathlib import Path
@@ -21,7 +22,10 @@ from qiskit_ibm_runtime.fake_provider import FakeFez
 from qiskit_ibm_runtime.models import BackendProperties
 from scripts.hardware_reading_vs_level import (
     GHZ_IDEAL,
+    N_LAYOUTS,
+    POINT_PREDICTORS,
     SLOTS,
+    SOURCES,
     GateTable,
     Job,
     QubitSource,
@@ -37,6 +41,7 @@ from scripts.hardware_reading_vs_level import (
     connected_triples,
     coupled_pairs,
     delay_slots,
+    evaluate_criteria,
     gate_table,
     ghz_idle_circuit,
     hellinger_fidelity,
@@ -401,6 +406,135 @@ def test_score_arm_b_skips_missing_predictions_and_finds_the_best_pick() -> None
     assert out["level"]["best_pick_hit"] == 1
     assert out["reading_at_execution"]["n_predicted"] == 1
     assert out["band_hi"]["best_pick_hit"] is None
+    # band_hi predicts nothing, so no layout has a band, however band_lo looks on its own
+    assert out["band"]["interval"] == [None, None] and out["band"]["n_predicted"] == 0
+    assert out["band"]["best_pick_hit"] is None and math.isnan(out["band"]["coverage"])
+
+
+# --- the band in Arm B (amendment 4) and criterion 4 -----------------------------------------
+
+_IDEAL = {"000": 2048, "111": 2048}  # Hellinger fidelity 1 to the GHZ ideal
+_HALF = {"000": 4096}  # 0.5
+_NONE = {"011": 4096}  # 0
+
+
+def _arm_b_job(predicted: dict[str, list[float | None]], n_layouts: int) -> Job:
+    layouts = [(3 * i, 3 * i + 1, 3 * i + 2) for i in range(n_layouts)]
+    return replace(_job(controls=[]), layouts=layouts, arm_b_predicted=predicted)
+
+
+def test_band_in_arm_b_is_the_sorted_interval_with_midpoint_and_closed_coverage() -> None:
+    counts = [_IDEAL, _HALF, _NONE, {"000": 1500, "111": 1500, "011": 1096}]
+    probe = score_arm_b(_arm_b_job({n: [None] * 4 for n in SOURCES}, 4), counts, shots=4096)
+    m = probe["measured"]
+    predicted: dict[str, list[float | None]] = {n: [0.5, 0.4, 0.3, 0.2] for n in POINT_PREDICTORS}
+    # layout 0's ends come high first; layout 1's bottom end is its measured fidelity exactly;
+    # layout 3 has no band_lo, so no band
+    predicted["band_lo"] = [0.9, m[1], 0.2, None]
+    predicted["band_hi"] = [0.8, 0.7, 0.1, 0.6]
+    band = score_arm_b(_arm_b_job(predicted, 4), counts, shots=4096)["band"]
+    assert band["interval"] == [[0.8, 0.9], [m[1], 0.7], [0.1, 0.2], None]
+    assert band["midpoint"][:3] == pytest.approx([0.85, (m[1] + 0.7) / 2, 0.15])
+    assert band["width"][:3] == pytest.approx([0.1, 0.7 - m[1], 0.1])
+    assert band["midpoint"][3] is None and band["width"][3] is None
+    # measured 1 lies above [0.8, 0.9], m[1] on the closed bottom of [m[1], 0.7], 0 below [0.1, 0.2]
+    assert band["covered"] == [0, 1, 0, None]
+    assert band["n_predicted"] == 3 and band["n_covered"] == 1
+    assert band["coverage"] == pytest.approx(1 / 3)
+    assert band["spearman"] == pytest.approx(1.0) and band["best_pick_hit"] == 1
+
+
+def test_band_in_arm_b_picks_by_the_midpoint_not_by_either_end() -> None:
+    counts = [_HALF, _IDEAL, _NONE]  # layout 1 is the measured best
+    predicted: dict[str, list[float | None]] = {n: [0.5, 0.4, 0.3] for n in POINT_PREDICTORS}
+    # midpoints 0.625, 0.65, 0.63: band_lo alone picks layout 2, band_hi alone layout 0
+    predicted["band_lo"] = [0.30, 0.60, 0.62]
+    predicted["band_hi"] = [0.95, 0.70, 0.64]
+    out = score_arm_b(_arm_b_job(predicted, 3), counts, shots=4096)
+    assert out["band_lo"]["best_pick_hit"] == 0 and out["band_hi"]["best_pick_hit"] == 0
+    assert out["band"]["best_pick_hit"] == 1
+
+
+def _criteria_case(
+    missing_hi: int | None = None,
+) -> tuple[Job, list[dict[str, Any]], dict[str, Any], dict[str, Any]]:
+    """A complete synthetic input for ``evaluate_criteria``: six layouts with distinct measured
+    fidelities and every outcome observed, a truth equal to the frequencies, two Arm A rows."""
+    counts: list[dict[str, int]] = []
+    truth: list[list[float]] = []
+    for i in range(N_LAYOUTS):
+        c = 20 + 40 * i
+        a = (4096 - 6 * c) // 2
+        layout = {format(k, "03b"): c for k in range(8)} | {"000": a, "111": a}
+        counts.append(layout)
+        truth.append([layout[format(k, "03b")] / 4096 for k in range(8)])
+    fidelity = [0.9 - 0.1 * i for i in range(N_LAYOUTS)]
+    predicted: dict[str, list[float | None]] = {n: list(fidelity) for n in POINT_PREDICTORS}
+    predicted["band_lo"] = [f - 0.05 for f in fidelity]
+    predicted["band_hi"] = [f + 0.05 for f in fidelity]
+    if missing_hi is not None:
+        predicted["band_hi"][missing_hi] = None
+    job = _arm_b_job(predicted, N_LAYOUTS)
+    rows = [
+        {
+            "stratum": "discriminating",
+            "shots": 2048,
+            "p_hat": p,
+            "p_truth": p,
+            **{f"p_{n}": p for n in POINT_PREDICTORS},
+            **{f"abs_err_{n}": 0.0 for n in POINT_PREDICTORS},
+        }
+        for p in (0.3, 0.6)
+    ]
+    sim = {"arm_b_counts": counts, "arm_b_truth_p": truth}
+    return job, rows, score_arm_b(job, counts), sim
+
+
+def _criterion_4(
+    job: Job, rows: list[dict[str, Any]], arm_b: dict[str, Any], sim: dict[str, Any]
+) -> dict[str, Any]:
+    out = evaluate_criteria(job, rows, arm_b, sim, matched="reading", other="level", intervals={})
+    criterion: dict[str, Any] = out["4_arm_b"]
+    return criterion
+
+
+def test_criterion_4_passes_on_a_complete_score_and_reports_the_band() -> None:
+    job, rows, arm_b, sim = _criteria_case()
+    out = _criterion_4(job, rows, arm_b, sim)
+    assert out["pass"] is True
+    band = out["per_predictor"]["band"]
+    assert band["n_predicted"] == N_LAYOUTS and math.isfinite(band["coverage"])
+    assert set(band) == {"n_predicted", "spearman", "best_pick_hit", "n_covered", "coverage"}
+    assert out["unpredictable"]["band"] == []
+
+
+@pytest.mark.parametrize(
+    "change", ["no band", "band on one layout", "band NaN Spearman", "band NaN coverage", "level"]
+)
+def test_criterion_4_fails_when_a_score_is_missing(change: str) -> None:
+    job, rows, arm_b, sim = _criteria_case()
+    if change == "no band":
+        del arm_b["band"]
+    elif change == "band on one layout":
+        arm_b["band"]["n_predicted"] = 1
+    elif change == "band NaN Spearman":
+        arm_b["band"]["spearman"] = math.nan
+    elif change == "band NaN coverage":
+        arm_b["band"]["coverage"] = math.nan
+    else:
+        arm_b["level"]["n_predicted"] = 1
+    assert _criterion_4(job, rows, arm_b, sim)["pass"] is False
+
+
+def test_a_missing_band_end_is_listed_not_repaired_and_criterion_4_still_passes() -> None:
+    job, rows, arm_b, sim = _criteria_case(missing_hi=2)
+    band = arm_b["band"]
+    assert band["interval"][2] is None and band["midpoint"][2] is None
+    assert band["covered"][2] is None and band["n_predicted"] == N_LAYOUTS - 1
+    out = _criterion_4(job, rows, arm_b, sim)
+    assert out["unpredictable"]["band"] == [list(job.layouts[2])]
+    assert out["unpredictable"]["band_hi"] == [list(job.layouts[2])]
+    assert out["pass"] is True
 
 
 def test_spearman_uses_average_ranks() -> None:
