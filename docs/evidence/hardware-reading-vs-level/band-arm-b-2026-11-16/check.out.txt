@@ -1,0 +1,18 @@
+hold  arm-a-truth1.tsv identical to the reference
+hold  arm-a-truth2.tsv identical to the reference
+hold  selection.json identical to the reference
+hold  manifest.json identical to the reference
+hold  arm-b-truth1.tsv: the seven reference columns identical
+hold  arm-b-truth1.tsv: columns are the reference's plus band_lo, band_hi, band_midpoint, band_covered
+hold  arm-b-truth1.tsv: band columns equal the expectation
+hold  criteria.json truth1: the band's score equals the expectation
+hold  criteria.json truth1: no layout without a band
+hold  criteria.json truth1: all five criteria pass
+hold  arm-b-truth2.tsv: the seven reference columns identical
+hold  arm-b-truth2.tsv: columns are the reference's plus band_lo, band_hi, band_midpoint, band_covered
+hold  arm-b-truth2.tsv: band columns equal the expectation
+hold  criteria.json truth2: the band's score equals the expectation
+hold  criteria.json truth2: no layout without a band
+hold  criteria.json truth2: all five criteria pass
+hold  criteria.json identical to the reference once the band's keys are removed
+RESULT: every expectation holds
