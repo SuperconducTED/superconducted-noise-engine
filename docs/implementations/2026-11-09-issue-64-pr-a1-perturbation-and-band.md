@@ -807,3 +807,31 @@ for the PR's description; nothing in his module is changed.
 All on the laptop. Owed before merge, as the plan lists: Bengisu's own review (D6's measurement and
 both build steps came from sessions on this laptop), Burak's read of `aer_factory.py`, the primary
 owner's read of `interfaces.py`, NC-021 at the merge commit, and Burak's desktop run.
+
+## Plan, 2026-11-17: the fixes for review 5928253730
+
+Burak's review of PR #155 (CHANGES_REQUESTED at `f7fd365d`) names two defects. Both were reproduced on
+`f7fd365d` before any change (`docs/evidence/issue-64-pr-a1-acceptance/review_5928253730_repro.py`, output
+`review_5928253730_repro.before.out.txt`, commit `20ce7c6e`):
+
+1. **A non-finite density-matrix diagonal passes `_outcome_probabilities`.** NaN fails every `<` and `>`
+   test, so it slips past the range and trace checks. A member with a NaN real part is already refused,
+   but only later and by `IntervalBand`'s own finiteness check; a reference with a NaN real part gives
+   coverage `nan`; a NaN imaginary part passes everywhere, building a band silently and giving coverage
+   `1.0`. The same hole exists in the counts branch: a NaN count gives coverage `nan`.
+2. **The ensemble's seed exemption tests `isinstance(..., IdentityPerturbation)`.** A subclass that
+   overrides `perturb` with random behaviour is then built without `rng`, and two such ensembles differ.
+
+**Fix 1** (`benchmarks/metrics.py`, Bengisu's module, at the reviewer's request): `_outcome_probabilities`
+raises `ValueError` for a density-matrix diagonal with any non-finite real or imaginary part, and for a
+counts result with any non-finite count, before its other checks. Tests in `tests/test_interval_band.py`
+for band construction and for coverage, each with a NaN real part, a NaN imaginary part and a NaN count.
+
+**Fix 2** (`integration/aer_factory.py`, Burak's module): the exemption holds for an `IdentityPerturbation`
+itself and not for a subclass, which may override `perturb`; a subclass needs `rng` like any other
+perturbation. Tests in `tests/test_perturbation.py`: a stochastic subclass refused without `rng`, built
+and reproducible with it; the existing tests keep the exact class seed-free.
+
+Then: the reproduction script re-run after the fix, a mutation script for the new guards committed with
+its predictions before it runs, the gates and the full suite, the push, a reply to the review, and an
+amendment note on the desktop runbook (comment 6883767379, which pins `f7fd365d`).
