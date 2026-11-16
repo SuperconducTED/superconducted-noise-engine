@@ -169,16 +169,21 @@ def _outcome_probabilities(
     which is exactly 1 when everything is covered even where the
     probabilities themselves do not sum to 1.0 in floating point.
 
-    Raises ``ValueError`` for an empty counts distribution, for a negative
-    count (a ``Counter`` can hold one, and the coverage ratio is bounded by 1
-    only for non-negative masses), and for a density matrix that is not
-    square with a power-of-two dimension, whose diagonal leaves ``[0, 1]`` or
-    the real axis by more than ``_DIAGONAL_TOLERANCE``, or whose trace is
-    further than ``_TRACE_TOLERANCE`` from 1.
+    Raises ``ValueError`` for an empty counts distribution, for a non-finite
+    or negative count (a ``Counter`` can hold either, and the coverage ratio
+    is bounded by 1 only for finite non-negative masses), and for a density
+    matrix that is not square with a power-of-two dimension, whose diagonal
+    has a non-finite real or imaginary part, leaves ``[0, 1]`` or the real
+    axis by more than ``_DIAGONAL_TOLERANCE``, or whose trace is further than
+    ``_TRACE_TOLERANCE`` from 1. The finiteness checks come first because a
+    NaN fails every ``<`` and ``>`` test and would pass the others (review
+    5928253730 on PR #155).
     """
     if result.counts is not None:
         keys = tuple(sorted(result.counts))
         masses = np.array([result.counts[key] for key in keys], dtype=np.float64)
+        if not np.all(np.isfinite(masses)):
+            raise ValueError(f"Counts must be finite; got {masses.tolist()}")
         if masses.size and masses.min() < 0.0:
             raise ValueError(f"Counts must be non-negative; got a minimum of {masses.min()}")
         total = float(masses.sum())
@@ -194,6 +199,11 @@ def _outcome_probabilities(
             f"got shape {matrix.shape}"
         )
     diagonal = np.diagonal(matrix)
+    if not (np.all(np.isfinite(np.real(diagonal))) and np.all(np.isfinite(np.imag(diagonal)))):
+        raise ValueError(
+            f"A density matrix's diagonal must be finite in its real and imaginary parts; "
+            f"got {diagonal.tolist()}"
+        )
     real = np.real(diagonal).astype(np.float64)
     if (
         np.max(np.abs(np.imag(diagonal))) > _DIAGONAL_TOLERANCE

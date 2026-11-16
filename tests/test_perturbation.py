@@ -998,3 +998,46 @@ def test_accepted_draws_follow_the_normal_truncated_at_the_bound() -> None:
     sd = math.sqrt(1.0 - mean - mean**2)
     assert z.min() > -1.0
     assert abs(z.mean() - mean) < 5.0 * sd / math.sqrt(z.size)
+
+
+# --------------------------------------------------------------------------
+# 5. Review 5928253730 on PR #155: the seed exemption is for the identity itself
+# --------------------------------------------------------------------------
+
+
+class _NoisyIdentity(IdentityPerturbation):
+    """An identity in name only: it overrides ``perturb`` and reads one draw per member."""
+
+    def __init__(self) -> None:
+        self.draws: list[float] = []
+
+    def perturb(
+        self,
+        index: int,
+        rng: np.random.Generator,
+        *,
+        feature_extractor: CalibrationFeatureExtractor,
+        rule_base: RuleBase,
+        defuzzifier: Defuzzifier,
+    ) -> tuple[CalibrationFeatureExtractor, RuleBase, Defuzzifier]:
+        self.draws.append(float(rng.standard_normal()))
+        return feature_extractor, rule_base, defuzzifier
+
+
+def test_a_subclass_of_the_identity_needs_a_seed_like_any_perturbation(
+    benchmark_snapshot: CalibrationSnapshot,
+) -> None:
+    """On ``f7fd365d`` an ``isinstance`` test let this subclass in unseeded; two such ensembles differed."""
+    with pytest.raises(ValueError, match="needs a seeded rng"):
+        _ensemble(benchmark_snapshot, 3, perturbation=_NoisyIdentity())
+    with pytest.raises(ValueError, match="needs a seeded rng"):
+        _ensemble(benchmark_snapshot, 3, perturbation=_NoisyIdentity(), rng=None)
+
+    first, second = _NoisyIdentity(), _NoisyIdentity()
+    list(_ensemble(benchmark_snapshot, 3, perturbation=first, rng=np.random.default_rng(7)))
+    list(_ensemble(benchmark_snapshot, 3, perturbation=second, rng=np.random.default_rng(7)))
+    assert len(first.draws) == 3
+    assert first.draws == second.draws
+
+    # The class itself still needs no seed: it reads no randomness.
+    assert len(_ensemble(benchmark_snapshot, 3, perturbation=IdentityPerturbation())) == 3

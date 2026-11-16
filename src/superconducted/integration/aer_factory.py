@@ -407,6 +407,7 @@ class FuzzyNoiseModelEnsemble:
     Raises ``ValueError`` at construction for a non-positive
     ``ensemble_size``, for a perturbation other than
     :class:`~superconducted.integration.perturbation.IdentityPerturbation`
+    itself (a subclass counts as other, since it may override ``perturb``)
     given without ``rng`` (an unseeded perturbed ensemble cannot be
     reproduced; ADR-024 records what an implicit seed cost once), and for an
     ``rng`` whose bit generator has no spawnable seed sequence. Raises
@@ -436,8 +437,11 @@ class FuzzyNoiseModelEnsemble:
             perturbation if perturbation is not None else IdentityPerturbation()
         )
         # Decided on the argument, before the default generator below exists:
-        # afterwards a seeded and an unseeded ensemble look the same.
-        if rng is None and not isinstance(self._perturbation, IdentityPerturbation):
+        # afterwards a seeded and an unseeded ensemble look the same. The
+        # exemption is for the identity itself: a subclass may override
+        # ``perturb`` and draw (review 5928253730 on PR #155), so it needs a
+        # seed like any other perturbation.
+        if rng is None and type(self._perturbation) is not IdentityPerturbation:
             raise ValueError(
                 f"{type(self._perturbation).__name__} needs a seeded rng: an ensemble "
                 "perturbed from an unseeded generator cannot be reproduced. Pass "

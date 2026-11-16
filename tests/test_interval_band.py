@@ -270,6 +270,58 @@ def test_a_negative_count_is_refused() -> None:
         interval_band([negative, counts({"0": 1, "1": 1, "2": 1})], alpha=0.0)
 
 
+def _diagonal_state(entries: Sequence[complex]) -> SimulationResult:
+    """A density-matrix result whose diagonal holds these complex entries."""
+    return SimulationResult(
+        shots=1,
+        backend_label="test",
+        density_matrix=np.diag(np.array(entries, dtype=np.complex128)),
+    )
+
+
+#: Review 5928253730 on PR #155: NaN fails every ``<`` and ``>`` test, so on
+#: ``f7fd365d`` a NaN real part gave coverage NaN and a NaN imaginary part gave
+#: coverage 1.0 and a silent band.
+NON_FINITE_DIAGONALS = {
+    "nan_real": [complex(math.nan, 0.0), 0.5],
+    "nan_imaginary": [complex(0.5, math.nan), 0.5],
+    "inf_real": [complex(math.inf, 0.0), 0.5],
+    "inf_imaginary": [complex(0.5, math.inf), 0.5],
+}
+
+
+@pytest.mark.parametrize(
+    "diagonal", list(NON_FINITE_DIAGONALS.values()), ids=list(NON_FINITE_DIAGONALS)
+)
+def test_a_non_finite_diagonal_member_is_refused_by_name(diagonal: list[complex]) -> None:
+    with pytest.raises(ValueError, match="must be finite"):
+        interval_band([_diagonal_state(diagonal), state([0.5, 0.5])], alpha=0.0)
+
+
+@pytest.mark.parametrize(
+    "diagonal", list(NON_FINITE_DIAGONALS.values()), ids=list(NON_FINITE_DIAGONALS)
+)
+def test_a_non_finite_diagonal_reference_is_refused(diagonal: list[complex]) -> None:
+    band = interval_band([state([0.5, 0.5]), state([0.5, 0.5])], alpha=0.0)
+
+    with pytest.raises(ValueError, match="must be finite"):
+        IntervalCoverage().compute(band, _diagonal_state(diagonal))
+
+
+@pytest.mark.parametrize("bad", [math.nan, math.inf], ids=["nan", "inf"])
+def test_a_non_finite_count_is_refused_as_member_and_as_reference(bad: float) -> None:
+    """The same hole in the counts branch: a NaN count gave coverage NaN on ``f7fd365d``."""
+    non_finite = SimulationResult(
+        shots=10, backend_label="test", counts=Counter({"0": bad, "1": 5})
+    )
+    band = interval_band([counts({"0": 5, "1": 5}), counts({"0": 5, "1": 5})], alpha=0.0)
+
+    with pytest.raises(ValueError, match="must be finite"):
+        interval_band([non_finite, counts({"0": 5, "1": 5})], alpha=0.0)
+    with pytest.raises(ValueError, match="must be finite"):
+        IntervalCoverage().compute(band, non_finite)
+
+
 # --------------------------------------------------------------------------
 # 2. IntervalBand, the value (acceptance criterion 5)
 # --------------------------------------------------------------------------
