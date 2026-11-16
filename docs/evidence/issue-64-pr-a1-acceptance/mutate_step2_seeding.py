@@ -25,6 +25,11 @@ Predictions, written before the run (K = killed, the named test fails):
   W14 the identity draws once from rng .................................... K: identity draws nothing
   W15 one child too many spawned and the first skipped .................... K: spawned children
   W16 the no-spawn check removed .......................................... K: no-spawn refused
+
+Amended 2026-11-17: the fix for review 5928253730 replaced the exemption line, so W02 and W03 now
+edit `type(self._perturbation) is not IdentityPerturbation` instead of the old `isinstance` line;
+the mutants are the same (W02 removes the refusal, W03 extends it to the identity). The 2026-11-11
+and step 3 outputs were taken with the old line.
 """
 
 import os
@@ -59,8 +64,8 @@ MUTANTS = {
         AER,
         [
             (
-                "        if rng is None and not isinstance(self._perturbation, IdentityPerturbation):\n",
-                "        if False and rng is None and not isinstance(self._perturbation, IdentityPerturbation):\n",
+                "        if rng is None and type(self._perturbation) is not IdentityPerturbation:\n",
+                "        if False and rng is None and type(self._perturbation) is not IdentityPerturbation:\n",
             )
         ],
     ),
@@ -68,7 +73,7 @@ MUTANTS = {
         AER,
         [
             (
-                "        if rng is None and not isinstance(self._perturbation, IdentityPerturbation):\n",
+                "        if rng is None and type(self._perturbation) is not IdentityPerturbation:\n",
                 "        if rng is None:\n",
             )
         ],
