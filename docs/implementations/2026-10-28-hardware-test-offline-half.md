@@ -666,6 +666,65 @@ same snapshot the predictors read.
   `dry-run-2026-11-05/`. Re-verifying needs the new reference and an updated runbook, dry-run from
   GitHub before it is posted.
 
+### Result, 2026-11-16
+
+Laptop (Windows 11, Python 3.12.10, the exact pins), provisional until the desktop run. Commits:
+the plan above `fe22aa3d`, code and tests `a704f063`, mutation check `d4f3905c`, re-run output
+`81496dce`.
+
+**Tests.** The nine new tests, and the existing test with its added band assertions,
+`test_score_arm_b_skips_missing_predictions_and_finds_the_best_pick`, failed on `f97a6462`'s code
+(10 failures, all for the missing band), and pass at `a704f063`. `tests/test_hardware_reading_vs_level.py` collects 51,
+up from 42.
+
+**Mutants.** 13 of 13 killed (`band-arm-b-2026-11-16/mutation.out.txt`): the eight planned, plus
+the midpoint as the top end, criterion 4 skipping the band, criterion 4 ignoring the band's
+coverage, criterion 4 accepting a NaN Spearman, and the best pick taken as the first layout with a
+band. The file was restored from the backup copy, byte-identical. The first run's output file
+carried pytest's "±" in the console's code page, so the script now writes UTF-8; the re-run killed
+the same 13.
+
+**The re-run.** From `C:/t140full`, a worktree of the full clone at `d4f3905c` (the script and
+tests as at `a704f063`), 17:05:13 to 17:28:36 UTC, 23 min 23 s, exit 0, `truth1` and `truth2`
+true. The watchdog sampled every two minutes: CPU time rose at every sample, Python's private
+memory peaked at 6.98 GB and the machine's committed memory at 37.8 GB.
+
+| # | Expected | Found |
+| --- | --- | --- |
+| 1 | Arm A TSVs, `selection.json` and `manifest.json` identical | Held, all four. |
+| 2 | Seven reference columns identical; four new columns equal the table within `1e-9` | Held under both truths. The one last-digit difference is 135-134-139's midpoint, 0.5101128864 against the table's 0.5101128863: the script averages the ends at full precision before the ten-digit rounding. |
+| 3 | The band's score equals the table, `unpredictable.band` empty, five criteria pass, `criteria.json` equal once the band's keys are removed | Held. Truth 1: Spearman 0.3714285714, no best pick, 5 of 6 covered. Truth 2: 0.8285714286, no best pick, 6 of 6. 10 of 10 criteria pass. |
+| | `compare_dry_run.py` exits 0 | Held at the second invocation (below). |
+
+**One expectation failed at first, in the setup, not in the output.** `compare_dry_run.py` reads
+`controls.json` from both folders for its REPORTED rows. The re-run took the committed
+`dry-run-2026-11-05/controls.json` as its input, as written above, so the output folder had no
+`controls.json`, and the script raised `FileNotFoundError` after printing every MUST MATCH row as
+holding. The input file was copied into `dry-run-2026-11-16/` (byte-identical, SHA-256
+`b90a2f7a...`, the hash `manifest.json` records), as `dry-run-2026-11-05/` holds its own, and both
+comparisons were run again on the committed folder. `compare_dry_run.py` exits 0 ("all must-match
+rows hold"; REPORTED: the Arm A TSVs and `selection.json` identical, each Arm B TSV different in 7
+lines, its header and six rows, by the four new columns, `criteria.json` different by the new keys,
+no differing manifest or controls key). `band_rerun.py check` exits 0 with every expectation
+holding (`check.out.txt`). No output was changed.
+
+**Gates** at `81496dce`, in the full clone's worktree: `ruff check .`, `ruff format --check .`,
+`mypy --strict` (49 files) and `scripts/check_ids.py` clean; 1,104 tests collected, 1,104 passed in
+2 min 52 s, nothing skipped because the archive is present. That is the 1,095 of the 2026-11-05
+tree plus the nine new tests. NC-021 is re-measured at this PR's merge (Rule 6), not here.
+
+**Read with these notes.**
+
+- The coverage and ranking figures describe Aer truths built from the snapshot the predictors read,
+  nothing about the device.
+- Under both truths the band's midpoints order the six layouts exactly as `level` does, so the
+  band's Spearman equals `level`'s (0.371 and 0.829) and neither picks the measured best. The six
+  layouts were chosen by their rank under `level`, so this shows that the band's two ends move with
+  the level here, not that the band adds a ranking of its own; amendment 26 dropped "or band" from
+  Arm B's decision for the same reason.
+- The band missed one layout under truth 1 (85-77-86, measured 0.4878 below its interval
+  [0.5030, 0.6361]); there the device is the reading, which the band does not centre on.
+
 ## Related docs
 
 - `docs/roadmap/2026-10-23-hardware-reading-vs-level-test.md` (the design, §2 to §7)
