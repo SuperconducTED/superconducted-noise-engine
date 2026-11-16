@@ -220,7 +220,7 @@ def check(reference: Path, new: Path) -> int:
 def main(argv: list[str]) -> int:
     # LF on every platform, so a redirected output commits as the repository stores text
     if isinstance(sys.stdout, io.TextIOWrapper):
-        sys.stdout.reconfigure(newline="\n")
+        sys.stdout.reconfigure(encoding="utf-8", newline="\n")
     if len(argv) == 2 and argv[0] == "expect":
         return expect(Path(argv[1]))
     if len(argv) == 3 and argv[0] == "check":
