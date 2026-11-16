@@ -72,10 +72,12 @@ to make that failure mode structurally hard to repeat.
    proposed (NC-077 to NC-086 and NC-088 to NC-094, which cite the proposal in their notes;
    NC-047 before them) describe themselves in its form and are not edited. The six rows #92
    found without an immutable ref (NC-009, NC-011, NC-026, NC-029, NC-031, NC-034) do not
-   meet it yet. #92 classified the register as it stood at `48b8d747` (42 rows); the rows
-   added since that do not cite the proposal (NC-048 to NC-060, NC-067 to NC-076, NC-087,
-   NC-095 to NC-098) have not been checked against it. Both are a follow-up to #92: each
-   such row is anchored or retired under Rule 5, not left as it is.
+   meet it yet. #92's list at `48b8d747` also omitted externally measured NC-027, NC-028,
+   NC-030 and NC-033; NC-030 and NC-033 do not name an immutable ref. Rows added since
+   `48b8d747` that do not cite the proposal (NC-041 to NC-044, NC-048 to NC-060, NC-067
+   to NC-076, NC-087, NC-095 to NC-098) have not been classified against the rule.
+   The follow-up to #92 checks each row's scope and, where Rule 7 applies, its clauses;
+   applicable rows that do not meet it are brought into compliance or retired under Rule 5.
 
 ## Active claims
 
