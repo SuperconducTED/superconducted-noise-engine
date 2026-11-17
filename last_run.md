@@ -1,10 +1,10 @@
-run-token: 2026-11-16T07:18:02Z-1137
-outcome: ok: chore: phase-4 dashboard: state moved (2026-11-16)
+run-token: 2026-11-17T05:44:52Z-1711
+outcome: ok: chore: phase-4 dashboard: state moved (2026-11-17)
 
-**Phase 4: Design-time predictor** · day 16 since 2026-11-01 · milestone 2 due 2027-02-27 (103 days), 17 open and 12 closed.
+**Phase 4: Design-time predictor** · day 17 since 2026-11-01 · milestone 2 due 2027-02-27 (102 days), 17 open and 12 closed.
 **0/5 gates met** (0/7 conditions). Next: L1 (lane 1), L3 (lane 2), L5 (lane 3).
 
-**Since 2026-11-15:** nothing moved.
+**Since 2026-11-16:** Baha Jarad owes 6 answers (was 7); Burak Öztekin owes 1 answer (was 7).
 
 **Needs attention**
 - The plan document changed at 4beeb2e4 (2026-11-05) on main, after the 951258da plan.json was quoted from. Re-read it and update plan.json.
@@ -16,7 +16,7 @@ outcome: ok: chore: phase-4 dashboard: state moved (2026-11-16)
 - Baha Jarad: Unstick PR #150 for #122: Public archive as a second training-set source (ADR-029)
 
 **Waiting on an answer**
-- Mert Efe Şensoy: 1, oldest: links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (44 days); has posted there since, on 2026-11-14
-- Burak Öztekin: 7, oldest: confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (74 days); no post there since
-- Bengisu Cıvdı: 2, oldest: Re-review PR #145: asked again after your review of 2026-11-14: requested by @mertefesensoy, since 2026-11-14 (2 days); no post there since
-- Baha Jarad: 7, oldest: posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (44 days); no post there since
+- Mert Efe Şensoy: 1, oldest: links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (45 days); has posted there since, on 2026-11-14
+- Burak Öztekin: 1, oldest: confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (75 days); no post there since
+- Bengisu Cıvdı: 2, oldest: Re-review PR #145: asked again after your review of 2026-11-14: requested by @mertefesensoy, since 2026-11-14 (3 days); no post there since
+- Baha Jarad: 6, oldest: posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (45 days); no post there since
