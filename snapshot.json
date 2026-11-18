@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-17 05:45 UTC",
+  "generated": "2026-11-18 10:21 UTC",
   "main": {
     "sha": "667972c5",
     "date": "2026-11-11",
@@ -497,10 +497,10 @@
           "mergeable": "MERGEABLE",
           "mergedAt": null,
           "number": 155,
-          "reviewDecision": "CHANGES_REQUESTED",
+          "reviewDecision": "APPROVED",
           "state": "OPEN",
           "title": "feat: #64 PR-A1, member perturbation and seeding, input jitter, the interval band and its coverage metric",
-          "updatedAt": "2026-11-16T22:04:27Z",
+          "updatedAt": "2026-11-17T21:53:17Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/155",
           "headRefOid": "353412d74d1b63eaa67f35e0f06ba6c6e8ff2062",
           "additions": 6173,
@@ -509,9 +509,9 @@
           "latest_reviews": [
             {
               "who": "BurakOztekin",
-              "state": "CHANGES_REQUESTED",
-              "at": "2026-11-16",
-              "last_activity": "2026-11-16"
+              "state": "APPROVED",
+              "at": "2026-11-17",
+              "last_activity": "2026-11-17"
             }
           ],
           "looked_since": [],
@@ -556,12 +556,7 @@
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
-      "blockers": [
-        {
-          "severity": "critical",
-          "text": "CHANGES_REQUESTED standing from @BurakOztekin (2026-11-16). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
-        }
-      ],
+      "blockers": [],
       "declared_unblocks": [],
       "notes_info": [],
       "unblocks": [],
@@ -1610,7 +1605,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/108"
         },
         "former": false,
-        "days": 45,
+        "days": 46,
         "last_here": "2026-11-14",
         "kind": "checkbox",
         "text": "links the verdict from PR #55's thread so the PR record is complete.",
@@ -1630,7 +1625,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/63"
         },
         "former": false,
-        "days": 75,
+        "days": 76,
         "last_here": "",
         "kind": "checkbox",
         "text": "confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit`",
@@ -1650,7 +1645,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/145"
         },
         "former": false,
-        "days": 3,
+        "days": 4,
         "last_here": "2026-11-14",
         "kind": "re-review",
         "text": "Re-review PR #145: asked again after your review of 2026-11-14",
@@ -1670,7 +1665,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/155"
         },
         "former": false,
-        "days": 3,
+        "days": 4,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #155",
@@ -1690,7 +1685,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/108"
         },
         "former": false,
-        "days": 45,
+        "days": 46,
         "last_here": "",
         "kind": "checkbox",
         "text": "posts a verdict on this issue: approve, or the defects he finds.",
@@ -1710,7 +1705,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/143"
         },
         "former": false,
-        "days": 10,
+        "days": 11,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #143",
@@ -1730,7 +1725,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/145"
         },
         "former": false,
-        "days": 8,
+        "days": 9,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #145",
@@ -1750,7 +1745,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/152"
         },
         "former": false,
-        "days": 3,
+        "days": 4,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #152",
@@ -1770,7 +1765,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/157"
         },
         "former": false,
-        "days": 3,
+        "days": 4,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #157",
@@ -1790,7 +1785,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/158"
         },
         "former": false,
-        "days": 3,
+        "days": 4,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #158",

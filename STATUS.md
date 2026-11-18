@@ -1,6 +1,6 @@
 # Phase 4: Design-time predictor
 
-_Generated 2026-11-17 05:45 UTC · main at `667972c5` (2026-11-11) · day 17 since 2026-11-01 · milestone 2 due 2027-02-27 (102 days), 17 open and 12 closed_
+_Generated 2026-11-18 10:21 UTC · main at `667972c5` (2026-11-11) · day 18 since 2026-11-01 · milestone 2 due 2027-02-27 (101 days), 17 open and 12 closed_
 
 _Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, on main. Gates are ordered, not dated (plan §6)._
 
@@ -78,14 +78,12 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 1. Unstick PR #156 for #104: Decide the sweep step
    - CHANGES_REQUESTED standing from @BahaJarad (2026-11-16). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 1. Unstick PR #155 for #64: Author #64's PR-A1 once Bengisu's D1 to D5 are answered
-   - CHANGES_REQUESTED standing from @BurakOztekin (2026-11-16). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix. Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
+   - Awaiting merge. Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
 
 **Burak Öztekin** (@BurakOztekin)
 
 1. #125 offline half: selection rules, circuits for both arms, scoring, the dry run against Aer (#125)
    - The dry run gates the pre-registration commit, and job 1 cannot be submitted before that commit (plan §5.1).
-1. Re-review PR #155 (#64: ADR-015 / ADR-016 ensemble and intervals (PR-A))
-   - Your CHANGES_REQUESTED from 2026-11-16 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Finish #60: ADR-014 trainer: the first archive fit
    - A fitted model at a pinned ref with the snapshot-boundary split, so ADR-014 moves off Deferred (plan §2 lane 2 item 3). Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
 1. Re-review PR #143 (#61: Nie-Tan versus Karnik-Mendel, premise gradients)
@@ -120,25 +118,25 @@ _Review requests not yet answered with a review, and unticked checkboxes that st
 
 **Mert Efe Şensoy** (@mertefesensoy), 1 owed
 
-- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (45 days); has posted there since, on 2026-11-14
+- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (46 days); has posted there since, on 2026-11-14
 
 **Burak Öztekin** (@BurakOztekin), 1 owed
 
-- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (75 days); no post there since
+- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (76 days); no post there since
 
 **Bengisu Cıvdı** (@bengisucvd), 2 owed
 
-- Re-review PR #145: asked again after your review of 2026-11-14: requested by @mertefesensoy, since 2026-11-14 (3 days); no post there since
-- Review PR #155: requested by @mertefesensoy, since 2026-11-14 (3 days); no post there since
+- Re-review PR #145: asked again after your review of 2026-11-14: requested by @mertefesensoy, since 2026-11-14 (4 days); no post there since
+- Review PR #155: requested by @mertefesensoy, since 2026-11-14 (4 days); no post there since
 
 **Baha Jarad** (@BahaJarad), 6 owed
 
-- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (45 days); no post there since
-- Review PR #143: requested by @bengisucvd, since 2026-11-07 (10 days); no post there since
-- Review PR #145: requested by @mertefesensoy, since 2026-11-09 (8 days); no post there since
-- Review PR #152: requested by @mertefesensoy, since 2026-11-14 (3 days); no post there since
-- Review PR #157: requested by @mertefesensoy, since 2026-11-14 (3 days); no post there since
-- Review PR #158: requested by @mertefesensoy, since 2026-11-14 (3 days); no post there since
+- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (46 days); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (11 days); no post there since
+- Review PR #145: requested by @mertefesensoy, since 2026-11-09 (9 days); no post there since
+- Review PR #152: requested by @mertefesensoy, since 2026-11-14 (4 days); no post there since
+- Review PR #157: requested by @mertefesensoy, since 2026-11-14 (4 days); no post there since
+- Review PR #158: requested by @mertefesensoy, since 2026-11-14 (4 days); no post there since
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -147,10 +145,6 @@ _Review requests not yet answered with a review, and unticked checkboxes that st
 
 - [high] Still a draft: CI and reviewers will not treat it as ready.
 - [high] No approving review yet: main's ruleset requires one.
-
-**#64: ADR-015 / ADR-016 ensemble and intervals (PR-A)** (@bengisucvd)
-
-- [critical] CHANGES_REQUESTED standing from @BurakOztekin (2026-11-16). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **#61: Nie-Tan versus Karnik-Mendel, premise gradients** (@bengisucvd)
 
@@ -180,6 +174,7 @@ Nothing is blocked upstream.
 
 | Date | Gates | Conditions | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 2026-11-18 | 0/5 | 0/7 | 3 | 7 | 0 | nothing moved |
 | 2026-11-17 | 0/5 | 0/7 | 3 | 7 | 0 | Baha Jarad owes 6 answers (was 7); Burak Öztekin owes 1 answer (was 7) |
 | 2026-11-16 | 0/5 | 0/7 | 3 | 7 | 0 | nothing moved |
 | 2026-11-15 | 0/5 | 0/7 | 3 | 7 | 0 | milestone 2: 17 open and 12 closed (was 14 and 12); #104 Decide the sweep step: ready to start to in review; #109 Phase-3 close record: ready to start to in review; #64 ADR-015 / ADR-016 ensemble and intervals (PR-A): ready to start to in review; #92 Rule 7 for the NC register: ready to start to in review; Baha Jarad owes 7 answers (was 3); Burak Öztekin owes 7 answers (was 2); Bengisu Cıvdı owes 2 answers (was 1); Mert Efe Şensoy owes 1 answer (was 2) |
