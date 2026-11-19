@@ -227,9 +227,11 @@ def _validated(
         raise ValueError("lower firing bounds must be non-negative")
     if np.any(lo > hi):
         raise ValueError("lower firing bounds must not exceed upper firing bounds")
-    sum_low = float(lo.sum())
-    sum_high = float(hi.sum())
-    if sum_low == 0.0 or sum_high == 0.0:
+    # A sum of non-negative floats is zero exactly when every term is, so the zero-sum test
+    # reads the largest entry; the sums themselves can overflow near the largest double.
+    if float(lo.max()) == 0.0 or float(hi.max()) == 0.0:
+        sum_low = float(lo.sum())
+        sum_high = float(hi.sum())
         raise ZeroDivisionError(
             f"type reduction received a zero firing-strength sum (lower={sum_low}, "
             f"upper={sum_high})"
@@ -252,10 +254,27 @@ def _weighted_average(weights: FloatArray, values: FloatArray) -> float:
     largest scaled weight is 1, so the products and the sum cannot underflow together:
     lower weights near ``1e-322`` gave ``Y(lower) = 0.0``, below every consequent
     (PR #143 review, item 2).
+
+    The values are shifted by a power of two, ``2**-e`` with ``e`` the exponent of
+    ``max |values|``, and the quotient is shifted back. A power-of-two shift is exact in the
+    normal range, so the result is bit for bit the unshifted expression wherever that was
+    finite, and the products and the sum can no longer overflow on finite inputs: values
+    ``[1e308, 1e308]`` gave ``inf`` (review 5923434762). The true result lies in
+    ``[min values, max values]``; when it sits within a few ulps of the largest double the
+    last shift can round past it, and the largest double, which is then the nearest double
+    to the true result, is returned with the quotient's sign.
     """
     scale = float(weights.max())
     scaled = weights / scale
-    return float(scaled @ values) / float(scaled.sum())
+    largest = float(np.max(np.abs(values)))
+    if largest == 0.0:
+        return float(scaled @ values) / float(scaled.sum())
+    exponent = math.frexp(largest)[1]
+    quotient = float(scaled @ np.ldexp(values, -exponent)) / float(scaled.sum())
+    try:
+        return math.ldexp(quotient, exponent)
+    except OverflowError:
+        return math.copysign(sys.float_info.max, quotient)
 
 
 def _switch_vertex(
@@ -282,7 +301,7 @@ def _km_endpoint(
     production path passes it.
     """
     n_rules = int(values.size)
-    y = _weighted_average(0.5 * (lower + upper), values)
+    y = _weighted_average(0.5 * lower + 0.5 * upper, values)
     k_prev: int | None = None
     passes = 0
     while True:
@@ -369,13 +388,16 @@ def bmm_half_reduce(lower: npt.ArrayLike, upper: npt.ArrayLike, values: npt.Arra
 def nie_tan_reduce(lower: npt.ArrayLike, upper: npt.ArrayLike, values: npt.ArrayLike) -> float:
     """Textbook Nie-Tan: ``Y(lower + upper)`` (Wu & Mendel 2019, Eq. 10).
 
-    Equal to ``WeightedAverageDefuzzifier`` on an IT2 firing result, whose
-    ``firing_strengths`` is the midpoint. Linear in ``values`` for fixed
+    Computed as ``Y(0.5 lower + 0.5 upper)``, the same double for bounds in the normal
+    range, since ``Y`` divides its weights by their largest entry and halving is exact
+    there; the halves keep the sum finite when the bounds are near the largest double
+    (review 5923434762). Equal to ``WeightedAverageDefuzzifier`` on an IT2 firing
+    result, whose ``firing_strengths`` is the midpoint. Linear in ``values`` for fixed
     firing. Same contract, including the ``ZeroDivisionError`` on a zero lower
     sum, even though this formula alone would be defined there. Pure.
     """
     lo, hi, c = _validated(lower, upper, values)
-    return _weighted_average(lo + hi, c)
+    return _weighted_average(0.5 * lo + 0.5 * hi, c)
 
 
 # ---------------------------------------------------------------------------
