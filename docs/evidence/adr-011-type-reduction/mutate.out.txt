@@ -1,16 +1,21 @@
 target docs\evidence\adr-011-type-reduction\compare_sweep.py, sha256 8cb1e745154827ef
-target scripts\type_reduction_discrepancy.py, sha256 d2068925dce3089b
+target scripts\type_reduction_discrepancy.py, sha256 85292e4cb625d31d
 tests tests/test_type_reduction.py
-M1 route_gap=0.0                                     KILLED  (======================== 1 failed, 47 passed in 3.05s =========================) by test_sweep_endpoints_come_from_the_exhaustive_route
-M2 output column 0                                   KILLED  (======================== 1 failed, 258 passed in 4.90s ========================) by test_each_output_reads_its_own_consequent_column
-M3 mean and median swapped                           KILLED  (======================== 1 failed, 251 passed in 4.22s ========================) by test_stats_are_max_mean_median_p90
-M4 p90 is the median                                 KILLED  (======================== 1 failed, 251 passed in 4.17s ========================) by test_stats_are_max_mean_median_p90
-M5 Db clip removed                                   KILLED  (======================== 1 failed, 252 passed in 5.10s ========================) by test_band_position_is_clipped_at_one_half
-M6 degenerate tolerance 0                            KILLED  (======================== 1 failed, 253 passed in 5.35s ========================) by test_degenerate_band_uses_the_point_tolerance
-M7 degenerate tolerance x1000                        KILLED  (======================== 1 failed, 252 passed in 4.71s ========================) by test_band_position_is_clipped_at_one_half
-M8 left guard returns the worse value                KILLED  (======================== 1 failed, 256 passed in 3.93s ========================) by test_guard_returns_the_better_iterate[left-lower0-upper0-values0]
-M8b right guard returns the worse value              KILLED  (======================== 1 failed, 257 passed in 5.25s ========================) by test_guard_returns_the_better_iterate[right-lower1-upper1-values1]
-M9 distances from the iterative route                KILLED  (======================== 1 failed, 47 passed in 4.17s =========================) by test_sweep_endpoints_come_from_the_exhaustive_route
-M10 no rescale in _weighted_average                  KILLED  (======================== 1 failed, 30 passed in 2.15s =========================) by test_mutation_switch_point_stop_alone_cycles
-M11 column reports the smallest gap                  KILLED  (======================== 1 failed, 255 passed in 4.72s ========================) by test_summary_reports_the_largest_route_gap_over_tolerance
-M12 compare_sweep back to 1b8f6089's filtered read   KILLED  (======================== 1 failed, 260 passed in 8.44s ========================) by test_compare_sweep_fails_when_the_new_file_lacks_the_route_gap_column
+M1 route_gap=0.0                                     KILLED  (======================== 1 failed, 47 passed in 2.65s =========================) by test_sweep_endpoints_come_from_the_exhaustive_route
+M2 output column 0                                   KILLED  (======================== 1 failed, 258 passed in 3.31s ========================) by test_each_output_reads_its_own_consequent_column
+M3 mean and median swapped                           KILLED  (======================== 1 failed, 251 passed in 2.89s ========================) by test_stats_are_max_mean_median_p90
+M4 p90 is the median                                 KILLED  (======================== 1 failed, 251 passed in 3.36s ========================) by test_stats_are_max_mean_median_p90
+M5 Db clip removed                                   KILLED  (======================== 1 failed, 252 passed in 2.65s ========================) by test_band_position_is_clipped_at_one_half
+M6 degenerate tolerance 0                            KILLED  (======================== 1 failed, 253 passed in 3.50s ========================) by test_degenerate_band_uses_the_point_tolerance
+M7 degenerate tolerance x1000                        KILLED  (======================== 1 failed, 252 passed in 2.87s ========================) by test_band_position_is_clipped_at_one_half
+M8 left guard returns the worse value                KILLED  (======================== 1 failed, 256 passed in 2.83s ========================) by test_guard_returns_the_better_iterate[left-lower0-upper0-values0]
+M8b right guard returns the worse value              KILLED  (======================== 1 failed, 257 passed in 3.06s ========================) by test_guard_returns_the_better_iterate[right-lower1-upper1-values1]
+M9 distances from the iterative route                KILLED  (======================== 1 failed, 47 passed in 2.59s =========================) by test_sweep_endpoints_come_from_the_exhaustive_route
+M10 no rescale in _weighted_average                  KILLED  (======================== 1 failed, 30 passed in 1.09s =========================) by test_mutation_switch_point_stop_alone_cycles
+M11 column reports the smallest gap                  KILLED  (======================== 1 failed, 255 passed in 3.53s ========================) by test_summary_reports_the_largest_route_gap_over_tolerance
+M12 compare_sweep back to 1b8f6089's filtered read   KILLED  (======================== 1 failed, 260 passed in 3.52s ========================) by test_compare_sweep_fails_when_the_new_file_lacks_the_route_gap_column
+M13 values not shifted (0d53fc60's arithmetic)       KILLED  (================== 1 failed, 261 passed, 1 warning in 3.13s ===================) by test_large_finite_values_give_a_finite_result[bmm]
+M14 values divided by their largest, not a power of two KILLED  (======================== 1 failed, 30 passed in 1.00s =========================) by test_mutation_switch_point_stop_alone_cycles
+M15 Nie-Tan weights back to lower + upper            KILLED  (================== 1 failed, 273 passed, 2 warnings in 3.33s ==================) by test_scaling_the_firing_by_a_power_of_two_changes_nothing
+M16 iterative start back to 0.5 * (lower + upper)    KILLED  (================== 1 failed, 273 passed, 2 warnings in 3.59s ==================) by test_scaling_the_firing_by_a_power_of_two_changes_nothing
+M17 no saturation at the largest double              KILLED  (======================== 1 failed, 265 passed in 3.95s ========================) by test_equal_values_at_the_largest_double_return_that_value[bmm]
