@@ -215,3 +215,30 @@ would be caught by that test.
 **Checks for the final form:** the tests with `-W error::RuntimeWarning` apart from the one named filter; the sweep at the
 final form identical to the one at `47bdb0cc`; the step 5 scripts; `mutate.py all`; the cost script, whose ratios should
 fall back inside runs 1 to 3's range; the gates; the full suite.
+
+## Results, 2026-11-20: the final form (laptop, provisional)
+
+Built as amendment 1 describes (`8f6c5ee1`), with one addition it did not list: on the overflow path NumPy also prints
+"overflow encountered in matmul" before the value fallback, so the three value tests filter that warning by name, as the
+firing-scaling test filters "overflow encountered in add". No other warning is filtered.
+
+- **Tests:** `tests/test_type_reduction.py` 275 passed, also with `-W error::RuntimeWarning`.
+- **Sweep:** the runbook's step 4 sweep at the final form is identical to the one at `47bdb0cc` apart from the `# commit:`
+  line, every `km_*` column included.
+- **Step 5 scripts:** `file02_rule_by_point_set.py`, `survey_reversal_check.py` and `km_cycle_sensitivity.py` reproduce their
+  committed outputs; `second_route_reducers.py` prints `BMM 0.0337, Nie-Tan 0.0483` and `Nie-Tan 231, BMM 744, tie 0`.
+- **Mutation:** `mutate.py all`, 19 of 19 killed (`mutate.out.txt`; the first form's run kept as
+  `mutate.at-ae2b16d3.out.txt`). M1 to M12 and M8b by the same tests as at `0d53fc60`; M13 to M18 each by the test the
+  amendment predicted.
+- **Cost:** a fourth run of `reducer_positions_and_cost.py`, at the final form (`reducer_positions_and_cost.run4.out.txt`,
+  non-timing lines identical to run 3's): 3.4 through the public functions and 9.9 on the arithmetic, both inside runs 1 to
+  3's range (3.1 to 4.9 and 9.6 to 13.9). So the closure text's cost sentence and Burak's desktop ratios still describe the
+  code. The range over the four committed runs is the same as over three.
+- **Gates:** `ruff check .` clean, `ruff format --check .` 109 files, `mypy --strict` 49 source files, `scripts/check_ids.py`
+  clean.
+- **Full suite** at the final form: 1328 passed, 0 skipped (`pytest tests/ -q -rs`; this clone can read the
+  `calibration-data` ref, so the archive test ran).
+
+Not done here: Mert's hand-derivation request (6877022015), for a later session; the same unscaled sum in the shipped
+`fuzzy/defuzzification.py`, outside #143, an issue to be drafted; decision 2 (@BahaJarad). Burak's desktop run at
+`0d53fc60` stands for everything this round leaves unchanged; a short runbook addendum covers what changed.

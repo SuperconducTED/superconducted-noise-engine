@@ -431,3 +431,33 @@ exits 1, because the iterative route misses the exhaustive one there by far more
 it). The figures in such a file are right, since the band comes from the exhaustive route. If decision 2 widens the footprint
 set, the comparator must either stay fatal, so those footprints cannot be committed, or report the gap without failing on
 footprints where the iterative route is known to miss. That is decided with decision 2 (@BahaJarad), not here.
+
+## 17. 2026-11-20: finite inputs, finite result (desktop review 5923434762)
+
+@BurakOztekin's desktop review of `0d53fc60` (CHANGES_REQUESTED) reproduced the PR on WSL2 and found that the reference's
+weighted average broke its finite-input contract: `lower = upper = [1, 1]`, `values = [1e308, 1e308]` gave `inf` on every
+route, because the weights were rescaled and the values were not. It does not touch the survey range. Laptop, provisional.
+The record is `docs/implementations/2026-11-20-issue-61-pr143-overflow.md`.
+
+**17.1 The fix.** `_weighted_average` returns the plain quotient wherever it is finite, so the arithmetic is `0d53fc60`'s
+there. Otherwise it shifts the values by `2**-e`, `e` the exponent of `max |values|`, and shifts the quotient back; a
+power-of-two shift is exact in the normal range, so nothing overflows before the last step. At the very top of the range the
+last step can round past the largest double, and the largest double, the nearest double to the true result, is returned.
+A second overflow of the same kind was found while checking: firing bounds near the largest double made `lower + upper`
+overflow, so Nie-Tan returned `nan` and the iterative route started from `nan`; both now retry with `0.5 lower + 0.5 upper`,
+which `Y` treats the same way because it divides its weights by their largest entry. The first form shifted on every call,
+which doubled the weighted average's cost and moved the arithmetic cost ratio to 9.0, below the committed range; Bengisu
+chose the final form so the cost figures still describe the code.
+
+**17.2 What moved.** Nothing measured. The sweep is identical to `0d53fc60`'s apart from its commit line, every `km_*` column
+included; the step 5 scripts reproduce their committed outputs; a fourth cost run gives 3.4 and 9.9, inside 3.1 to 4.9 and
+9.6 to 13.9. Sections 15.8 and 16.4's closure text and the register rows of 15.9 and 16.5 stand as written.
+
+**17.3 Tests.** Five new tests, 14 cases, 275 in all: the review's example and equal values at the largest double on all four
+routes, values and firing scaled by powers of two (relational, bit for bit), and the plain arithmetic unchanged where it was
+finite. 13 of the new cases failed on `0d53fc60`'s code before the fix. `mutate.py all`: 19 of 19 killed, M13 to M18 for
+this round.
+
+**17.4 Outside this PR.** The shipped `fuzzy/defuzzification.py` forms the same unscaled `firing * consequents` sum, and the
+`1e-322` underflow that 15.2 fixed here. Real firing strengths and consequents are far from these magnitudes; it is noted for
+an issue of its own, not changed here.
