@@ -87,6 +87,35 @@ MUTANTS: dict[str, tuple[str, str]] = {
         '        float(a[GAP_OVER_TOLERANCE]) for a in new if a.get(GAP_OVER_TOLERANCE, "") != ""\n'
         "    ]\n",
     ),
+    # Desktop review of 2026-11-16 (5923434762): the weighted average's overflow on finite inputs.
+    "M13 values not shifted (0d53fc60's arithmetic)": (
+        "    quotient = float(scaled @ np.ldexp(values, -exponent)) / float(scaled.sum())\n"
+        "    try:\n"
+        "        return math.ldexp(quotient, exponent)\n",
+        "    quotient = float(scaled @ values) / float(scaled.sum())\n"
+        "    try:\n"
+        "        return quotient\n",
+    ),
+    "M14 values divided by their largest, not a power of two": (
+        "    quotient = float(scaled @ np.ldexp(values, -exponent)) / float(scaled.sum())\n"
+        "    try:\n"
+        "        return math.ldexp(quotient, exponent)\n",
+        "    quotient = float(scaled @ (values / largest)) / float(scaled.sum())\n"
+        "    try:\n"
+        "        return quotient * largest\n",
+    ),
+    "M15 Nie-Tan weights back to lower + upper": (
+        "    return _weighted_average(0.5 * lo + 0.5 * hi, c)\n",
+        "    return _weighted_average(lo + hi, c)\n",
+    ),
+    "M16 iterative start back to 0.5 * (lower + upper)": (
+        "    y = _weighted_average(0.5 * lower + 0.5 * upper, values)\n",
+        "    y = _weighted_average(0.5 * (lower + upper), values)\n",
+    ),
+    "M17 no saturation at the largest double": (
+        "    except OverflowError:\n        return math.copysign(sys.float_info.max, quotient)\n",
+        "    except OverflowError:\n        raise\n",
+    ),
 }
 
 # Mutants of a file other than TARGET. M12 puts back the read of the column that 1b8f6089 had,
