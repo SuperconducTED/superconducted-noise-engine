@@ -904,3 +904,91 @@ def test_compare_sweep_fails_when_the_new_file_lacks_the_route_gap_column(
     empty = tmp_path / "empty.tsv"
     empty.write_text(header + "g\t0.1\t1e-15\t\n", encoding="utf-8")
     assert _compare_sweep(monkeypatch, empty, committed) == 1
+
+
+# --------------------------------------------------------------------------
+# PR #143 review 5923434762 (2026-11-16): finite inputs, finite result
+# --------------------------------------------------------------------------
+
+DBL_MAX = sys.float_info.max
+ROUTES = {
+    "exhaustive": exhaustive_type_reduce,
+    "iterative": karnik_mendel_type_reduce,
+    "bmm": bmm_half_reduce,
+    "nie_tan": nie_tan_reduce,
+}
+
+
+@pytest.mark.parametrize("route", sorted(ROUTES))
+def test_large_finite_values_give_a_finite_result(route: str) -> None:
+    """The review's example: lower = upper = [1, 1], values = [1e308, 1e308] gives 1e308, not inf."""
+    result = ROUTES[route]([1.0, 1.0], [1.0, 1.0], [1e308, 1e308])
+    expected = (1e308, 1e308) if route in ("exhaustive", "iterative") else 1e308
+    assert result == expected
+
+
+@pytest.mark.parametrize("route", sorted(ROUTES))
+def test_equal_values_at_the_largest_double_return_that_value(route: str) -> None:
+    """At the top edge the last step can round past DBL_MAX; the true result is DBL_MAX itself."""
+    result = ROUTES[route]([1.0, 0.2], [1.0, 0.2], [DBL_MAX, DBL_MAX])
+    expected = (DBL_MAX, DBL_MAX) if route in ("exhaustive", "iterative") else DBL_MAX
+    assert result == expected
+
+
+def _scaling_boxes() -> list[tuple[FloatArray, FloatArray, FloatArray]]:
+    rng = np.random.default_rng(20261120)
+    boxes = []
+    for n_rules in (2, 3, 5, 9, 27):
+        for _ in range(8):
+            lower = rng.random(n_rules)
+            upper = lower + rng.random(n_rules)
+            boxes.append((lower, upper, rng.standard_normal(n_rules)))
+    return boxes
+
+
+@pytest.mark.parametrize("route", sorted(ROUTES))
+def test_scaling_the_values_by_a_power_of_two_scales_the_result_exactly(route: str) -> None:
+    """Positive values shifted so the largest sits just under 2**1023 overflowed the old sum.
+
+    The shift ``k`` puts ``max(values) * 2**k`` in ``[2**1022, 2**1023)``, so every input is
+    finite; the result must be the unshifted result times ``2**k``, bit for bit.
+    """
+    for lower, upper, values in _scaling_boxes():
+        positive = np.abs(values) + 0.5
+        k = 1023 - math.frexp(float(positive.max()))[1]
+        shifted = np.ldexp(positive, k)
+        assert np.all(np.isfinite(shifted))
+        small = np.atleast_1d(np.asarray(ROUTES[route](lower, upper, positive), dtype=np.float64))
+        large = np.atleast_1d(np.asarray(ROUTES[route](lower, upper, shifted), dtype=np.float64))
+        assert np.array_equal(large, np.ldexp(small, k))
+
+
+def test_scaling_the_firing_by_a_power_of_two_changes_nothing() -> None:
+    """Firing bounds near 2**1023: lower + upper overflowed (Nie-Tan gave nan, KM started from nan).
+
+    Every route, including the iterative route's pass counts, must give exactly what it
+    gives on the same bounds divided by 2**1023.
+    """
+    for lower, upper, values in _scaling_boxes():
+        big_lower, big_upper = np.ldexp(lower, 1023), np.ldexp(upper, 1023)
+        assert np.all(np.isfinite(big_upper))
+        assert karnik_mendel_detailed(big_lower, big_upper, values) == karnik_mendel_detailed(
+            lower, upper, values
+        )
+        for route in sorted(ROUTES):
+            assert ROUTES[route](big_lower, big_upper, values) == ROUTES[route](
+                lower, upper, values
+            ), route
+
+
+def test_weighted_average_is_unchanged_where_the_old_formula_was_finite() -> None:
+    """The fix must not move the sweep: bit for bit the 0d53fc60 arithmetic on normal-range inputs."""
+    rng = np.random.default_rng(5923434762)
+    for _ in range(2000):
+        n_rules = int(rng.integers(1, 40))
+        weights = rng.random(n_rules) * 10.0 ** int(rng.integers(-30, 30))
+        weights[0] = max(weights[0], 1e-300)
+        values = rng.standard_normal(n_rules) * 10.0 ** int(rng.integers(-150, 150))
+        scaled = weights / float(weights.max())
+        old = float(scaled @ values) / float(scaled.sum())
+        assert _weighted_average(weights, values) == old
