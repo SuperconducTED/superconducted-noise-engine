@@ -919,6 +919,11 @@ ROUTES = {
 }
 
 
+# NumPy warns when the plain weighted sum overflows; _weighted_average then shifts the values.
+MATMUL_OVERFLOW = pytest.mark.filterwarnings("ignore:overflow encountered in matmul:RuntimeWarning")
+
+
+@MATMUL_OVERFLOW
 @pytest.mark.parametrize("route", sorted(ROUTES))
 def test_large_finite_values_give_a_finite_result(route: str) -> None:
     """The review's example: lower = upper = [1, 1], values = [1e308, 1e308] gives 1e308, not inf."""
@@ -927,6 +932,7 @@ def test_large_finite_values_give_a_finite_result(route: str) -> None:
     assert result == expected
 
 
+@MATMUL_OVERFLOW
 @pytest.mark.parametrize("route", sorted(ROUTES))
 def test_equal_values_at_the_largest_double_return_that_value(route: str) -> None:
     """At the top edge the last step can round past DBL_MAX; the true result is DBL_MAX itself."""
@@ -946,6 +952,7 @@ def _scaling_boxes() -> list[tuple[FloatArray, FloatArray, FloatArray]]:
     return boxes
 
 
+@MATMUL_OVERFLOW
 @pytest.mark.parametrize("route", sorted(ROUTES))
 def test_scaling_the_values_by_a_power_of_two_scales_the_result_exactly(route: str) -> None:
     """Positive values shifted so the largest sits just under 2**1023 overflowed the old sum.
@@ -963,6 +970,8 @@ def test_scaling_the_values_by_a_power_of_two_scales_the_result_exactly(route: s
         assert np.array_equal(large, np.ldexp(small, k))
 
 
+# NumPy warns when lower + upper overflows; the reducers then retry with halved bounds.
+@pytest.mark.filterwarnings("ignore:overflow encountered in add:RuntimeWarning")
 def test_scaling_the_firing_by_a_power_of_two_changes_nothing() -> None:
     """Firing bounds near 2**1023: lower + upper overflowed (Nie-Tan gave nan, KM started from nan).
 

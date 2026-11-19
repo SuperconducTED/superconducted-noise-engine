@@ -255,22 +255,30 @@ def _weighted_average(weights: FloatArray, values: FloatArray) -> float:
     lower weights near ``1e-322`` gave ``Y(lower) = 0.0``, below every consequent
     (PR #143 review, item 2).
 
-    The values are shifted by a power of two, ``2**-e`` with ``e`` the exponent of
-    ``max |values|``, and the quotient is shifted back. A power-of-two shift is exact in the
-    normal range, so the result is bit for bit the unshifted expression wherever that was
-    finite, and the products and the sum can no longer overflow on finite inputs: values
-    ``[1e308, 1e308]`` gave ``inf`` (review 5923434762). The true result lies in
-    ``[min values, max values]``; when it sits within a few ulps of the largest double the
-    last shift can round past it, and the largest double, which is then the nearest double
-    to the true result, is returned with the quotient's sign.
+    Finite inputs give a finite result (review 5923434762). Where the plain quotient is
+    finite it is returned, so the arithmetic is ``0d53fc60``'s wherever that was finite.
+    Otherwise the values are shifted by ``2**-e``, with ``e`` the exponent of
+    ``max |values|``, and the quotient is shifted back; a power-of-two shift is exact in
+    the normal range, and the products and the sum can no longer overflow. Values
+    ``[1e308, 1e308]`` gave ``inf``. The true result lies in ``[min values, max values]``;
+    when it sits within a few ulps of the largest double the last shift can round past it,
+    and the largest double, then the nearest double to the true result, is returned with
+    the quotient's sign.
+
+    Raises ``OverflowError`` when the largest weight is infinite, which only a sum of two
+    firing bounds near the largest double produces; :func:`nie_tan_reduce` and the
+    iterative start catch it and retry with halved bounds.
     """
     scale = float(weights.max())
+    if scale == math.inf:
+        raise OverflowError("a weight overflowed to inf; retry with halved bounds")
     scaled = weights / scale
-    largest = float(np.max(np.abs(values)))
-    if largest == 0.0:
-        return float(scaled @ values) / float(scaled.sum())
-    exponent = math.frexp(largest)[1]
-    quotient = float(scaled @ np.ldexp(values, -exponent)) / float(scaled.sum())
+    total = float(scaled.sum())
+    plain = float(scaled @ values) / total
+    if math.isfinite(plain):
+        return plain
+    exponent = math.frexp(float(np.max(np.abs(values))))[1]
+    quotient = float(scaled @ np.ldexp(values, -exponent)) / total
     try:
         return math.ldexp(quotient, exponent)
     except OverflowError:
@@ -301,7 +309,11 @@ def _km_endpoint(
     production path passes it.
     """
     n_rules = int(values.size)
-    y = _weighted_average(0.5 * lower + 0.5 * upper, values)
+    try:
+        y = _weighted_average(0.5 * (lower + upper), values)
+    except OverflowError:
+        # lower + upper overflowed near the largest double (review 5923434762)
+        y = _weighted_average(0.5 * lower + 0.5 * upper, values)
     k_prev: int | None = None
     passes = 0
     while True:
@@ -388,16 +400,18 @@ def bmm_half_reduce(lower: npt.ArrayLike, upper: npt.ArrayLike, values: npt.Arra
 def nie_tan_reduce(lower: npt.ArrayLike, upper: npt.ArrayLike, values: npt.ArrayLike) -> float:
     """Textbook Nie-Tan: ``Y(lower + upper)`` (Wu & Mendel 2019, Eq. 10).
 
-    Computed as ``Y(0.5 lower + 0.5 upper)``, the same double for bounds in the normal
-    range, since ``Y`` divides its weights by their largest entry and halving is exact
-    there; the halves keep the sum finite when the bounds are near the largest double
-    (review 5923434762). Equal to ``WeightedAverageDefuzzifier`` on an IT2 firing
-    result, whose ``firing_strengths`` is the midpoint. Linear in ``values`` for fixed
-    firing. Same contract, including the ``ZeroDivisionError`` on a zero lower
+    When ``lower + upper`` overflows near the largest double, it is computed as
+    ``Y(0.5 lower + 0.5 upper)``, the same number since ``Y`` divides its weights by
+    their largest entry (review 5923434762). Equal to ``WeightedAverageDefuzzifier`` on
+    an IT2 firing result, whose ``firing_strengths`` is the midpoint. Linear in
+    ``values`` for fixed firing. Same contract, including the ``ZeroDivisionError`` on a zero lower
     sum, even though this formula alone would be defined there. Pure.
     """
     lo, hi, c = _validated(lower, upper, values)
-    return _weighted_average(0.5 * lo + 0.5 * hi, c)
+    try:
+        return _weighted_average(lo + hi, c)
+    except OverflowError:
+        return _weighted_average(0.5 * lo + 0.5 * hi, c)
 
 
 # ---------------------------------------------------------------------------
