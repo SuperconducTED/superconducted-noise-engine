@@ -119,3 +119,99 @@ PYTHONPATH=src python -m pytest tests/ -q -p no:cacheprovider
 - PR #143; review 5923434762 (@BurakOztekin); #61.
 - `docs/implementations/2026-11-11-issue-61-pr143-review-fixes.md` (the underflow fix this extends).
 - `docs/findings/2026-11-07-nie-tan-vs-karnik-mendel.md`, sections 15 and 16.
+
+## Results, 2026-11-20: the first form (laptop, provisional)
+
+Python 3.12.10, NumPy 2.4.4, from the pinned environment (`C:/pvci`), `PYTHONPATH=src`. Nothing below has run on Burak's
+desktop.
+
+**The defect reproduced first.** The new tests were committed before the fix (`1e567cbc`); on `0d53fc60`'s code 13 of the
+new cases fail and 262 pass: the review's example on all four routes, equal values at the largest double on all four, the
+value-scaling test on all four, and the firing-scaling test.
+
+**The fix** (`bede3887`) is as planned, plus one change the plan did not list: `_validated` tested for a zero firing sum by
+forming `lower.sum()` and `upper.sum()`, which overflow near the largest double (harmless, since the test is `== 0`, but it
+raised a `RuntimeWarning` in the firing-scaling test). It now reads the largest entry, which is zero exactly when the sum of
+non-negative terms is; the sums are formed only for the error message. Under the default warning filter no test can tell
+the two apart, so no mutant was added for it; with `-W error::RuntimeWarning` the firing-scaling test fails without it.
+
+**A correction to the plan's mathematics.** "`fl(0.5 a + 0.5 b) = 0.5 fl(a + b)`" holds for bounds in the normal range;
+halving a subnormal bound can drop its last bit. The sweep's bounds are normal, and the docstring of `nie_tan_reduce` says
+"for bounds in the normal range".
+
+**Tests.** `tests/test_type_reduction.py`: 275 passed (261 before, 14 new cases in five tests), also with
+`-W error::RuntimeWarning`.
+
+**The sweep is unchanged.** The runbook's step 4 sweep was run on this laptop at `47bdb0cc` (the plan commit, whose code is
+`0d53fc60`'s) and at the fix: the two files are identical apart from the `# commit:` header line, including every `km_*`
+column, and the first is identical, apart from the same line, to the committed `2026-11-11-35da0446.tsv`.
+`compare_sweep.py` against that file: 96 rows, largest relative difference `0.000e+00`, every uncompared `km_*` column 0
+rows differing, exit 0. So no figure in the findings or the closure text moves.
+
+**Mutation.** `mutate.py all` at the fix (`mutate.out.txt`; the `0d53fc60` run kept as `mutate.at-0d53fc60.out.txt`):
+18 of 18 killed. M1 to M12 by the same tests as at `0d53fc60`. M10 did not need retargeting: its text,
+`scale = float(weights.max())`, still occurs exactly once. M13, M15, M16 and M17 by the predicted tests. M14's line names
+`test_mutation_switch_point_stop_alone_cycles`, the first failure in file order: dividing by `max |values|` rounds every
+value, and that moves the rounding-level cycle fixture (the same family as L-063 of the math skill). Applied by hand, M14
+fails exactly two tests, that fixture and the predicted bit-identity test.
+
+**Gates.** `ruff check .` clean, `ruff format --check .` 109 files, `mypy --strict` 49 source files, `scripts/check_ids.py`
+clean.
+
+**Full suite** at the first form: 1328 passed, 0 skipped (`pytest tests/ -q -rs`; 1314 at `0d53fc60` plus the 14 new
+cases; this clone can read the `calibration-data` ref, so the archive test ran).
+
+**The first form moves the cost figures.** The evidence scripts of runbook step 5 give their committed outputs at the first
+form (`file02_rule_by_point_set.py` and `survey_reversal_check.py` with no diff, `second_route_reducers.py` printing
+`BMM 0.0337, Nie-Tan 0.0483` and `Nie-Tan 231, BMM 744, tie 0`, `km_cycle_sensitivity.py` with no diff). But
+`reducer_positions_and_cost.py` times `_weighted_average`, and the shift added work to every call. One run at the first
+form (`reducer_positions_and_cost.at-bede3887.out.txt`, non-timing lines identical to run 3's):
+
+| Ratio to Nie-Tan, per point, 27 rules | runs 1 to 3 (`0d53fc60`'s arithmetic) | first form, one run |
+| --- | ---: | ---: |
+| `karnik_mendel_detailed`, through the public functions | 3.1 to 4.9 | 3.7 |
+| iterative KM, arithmetic, consequents sorted once | 9.6 to 13.9 | 9.0 |
+
+Nie-Tan's arithmetic went from 3.8 us (run 3) to 6.1 us, so the arithmetic ratio fell below the committed range. The
+closure text's "10 to 14 times on the arithmetic" and Burak's desktop figures (3.5 and 10.8, review 5923434762) describe
+`0d53fc60`'s arithmetic, which the first form no longer runs. That led to amendment 1.
+
+## Amendment 1, 2026-11-20, before the final form
+
+**Decision (Bengisu, in the session's question dialog):** shift only on overflow. The arithmetic stays `0d53fc60`'s
+wherever it is finite, so the cost figures and Burak's desktop run still describe the code, and the power-of-two shift is the
+fallback when the plain quotient is not finite. The finite-input contract, the tests and the sweep are unchanged.
+
+**The final form.**
+
+1. `_weighted_average`: `s = weights / max(weights)` as before, but first, if `max(weights)` is infinite, raise
+   `OverflowError` (only a sum of two firing bounds near the largest double gets there). Then the plain quotient
+   `(s @ values) / sum(s)`; if it is finite, return it. Otherwise shift the values by `2**-e` and multiply back, with the
+   saturation at the largest double, as in the first form.
+2. `nie_tan_reduce` and the iterative start keep `lo + hi` and `0.5 * (lower + upper)`, and on `OverflowError` retry with
+   `0.5 * lo + 0.5 * hi`. On the normal path that costs one comparison; on the overflow path NumPy prints its
+   "overflow encountered in add" warning before the retry, so the firing-scaling test filters that one warning by name.
+3. `_validated` keeps the zero-sum test on the largest entry.
+
+**Why the result is the same double.** Where the plain quotient is finite, the code is `0d53fc60`'s, so nothing can move.
+Where it is not, the first form's argument holds for the shifted path. The halves retry is reached only when `lo + hi`
+overflowed, where `0d53fc60` returned `nan` or started from `nan`.
+
+**Mutation predictions for the final form (written before it is built).**
+
+| Mutant | Change | Predicted to be killed by |
+| --- | --- | --- |
+| M13 | the value fallback removed (the plain quotient always returned) | the review's example, the value-scaling test, the top-edge test |
+| M14 | the fallback divides by `max |values|` instead of a power of two | the value-scaling test (its relation is bit for bit) |
+| M15 | Nie-Tan's retry back to `lo + hi` | the firing-scaling test (`OverflowError`) |
+| M16 | the iterative start's retry back to `0.5 * (lower + upper)` | the firing-scaling test (`OverflowError`) |
+| M17 | no saturation at the largest double | the top-edge test (`OverflowError`) |
+| M18 | no `OverflowError` for infinite weights | the firing-scaling test (Nie-Tan gives `nan`, the iterative passes differ) |
+
+The bit-identity test now holds by construction; it stays as the pin against a later change to the plain path. M14 of the
+first form, which changed the plain path, is no longer a mutant of this code; under the final form a change to the plain path
+would be caught by that test.
+
+**Checks for the final form:** the tests with `-W error::RuntimeWarning` apart from the one named filter; the sweep at the
+final form identical to the one at `47bdb0cc`; the step 5 scripts; `mutate.py all`; the cost script, whose ratios should
+fall back inside runs 1 to 3's range; the gates; the full suite.
