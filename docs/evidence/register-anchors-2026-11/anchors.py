@@ -7,8 +7,10 @@ Run from the repository root, in PowerShell or any shell:
 It reads commits, trees and file names of the ``calibration-data`` branch through git and
 never a file's contents, so it downloads nothing in a ``blob:none`` partial clone (it sets
 ``GIT_NO_LAZY_FETCH=1`` for every git call). It also reads the committed evidence TSVs on
-the current checkout. Output is deterministic for a fixed ``calibration-data`` tip; the only
-lines that move with the tip are the ones labelled ``tip``.
+the current checkout. Output is deterministic for a fixed ``calibration-data`` tip. Every
+line that names the tip's short id changes with the tip even when no count or blob id does:
+the first line (which also gives the tip's time), the two other lines labelled ``tip``, and
+the lines that compare a measurement ref with the tip.
 
 Each section names the row, the immutable ref that reproduces the row's value, and the
 ref range over which the value holds. Written for Issue #92 on 2026-11-14.
