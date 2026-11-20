@@ -23,6 +23,7 @@ from superconducted.training.dataset import (
     dedup_by_qubit_block,
     hour_of_day_weights,
     iter_archive,
+    load_training_tsv,
     qubit_block_digest,
 )
 from superconducted.training.targets import gate_lengths, qubit_targets, snapshot_target
@@ -290,3 +291,70 @@ def test_cli_timestamp_tie_is_not_reported_as_no_usable_rows(tmp_path, capsys):
     assert main(["--repo", str(repo), "--ref", "HEAD", "--out", str(out)]) == 2
     assert "Distinct states share last_update_date" in capsys.readouterr().err
     assert not out.exists()
+
+
+@pytest.mark.parametrize("weighting", ["uniform", "hour_of_day"])
+def test_training_tsv_round_trip_and_snapshot_split(tmp_path, weighting):
+    repo = archive(tmp_path, [(path(1), document()), (path(2), document(2, 110))])
+    expected = build_training_set(repo, "HEAD", weighting=weighting)
+    out = tmp_path / "evidence"
+    assert main(["--repo", str(repo), "--ref", "HEAD", "--out", str(out)]) == 0
+    actual = load_training_tsv(
+        next(out.glob("*.tsv")), archive_ref=expected.archive_ref, weighting=weighting
+    )
+    np.testing.assert_array_equal(actual.features, expected.features)
+    np.testing.assert_array_equal(actual.targets, expected.targets)
+    np.testing.assert_array_equal(actual.weights, expected.weights)
+    assert actual.timestamps == expected.timestamps
+    assert actual.provenance == expected.provenance
+    assert actual.feature_names == expected.feature_names
+    assert actual.target_names == expected.target_names
+    assert actual.archive_ref == expected.archive_ref
+    train, validation = actual.time_split(actual.timestamps[1])
+    assert train.n_rows == validation.n_rows == 1
+    with pytest.raises(ValueError, match="both sides"):
+        actual.time_split(actual.timestamps[0])
+
+
+def test_training_tsv_rejects_bad_schema_and_unpinned_ref(tmp_path):
+    path = tmp_path / "data.tsv"
+    path.write_text("mean_T1\tmean_T1\n1\t2\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="full lowercase commit SHA"):
+        load_training_tsv(path, archive_ref="HEAD")
+    with pytest.raises(ValueError, match="unique header"):
+        load_training_tsv(path, archive_ref="a" * 40)
+    path.write_text("mean_T1\n1\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="missing required columns"):
+        load_training_tsv(path, archive_ref="a" * 40)
+
+
+@pytest.mark.parametrize(
+    "timestamp,feature,weight,error",
+    [
+        ("bad", "100", "1", "Invalid TSV row"),
+        ("2026-09-01T12:00:00", "100", "1", "tz-aware"),
+        ("2026-09-01T12:00:00+00:00", "nan", "1", "finite"),
+        ("2026-09-01T12:00:00+00:00", "100", "0", "positive"),
+    ],
+)
+def test_training_tsv_rejects_invalid_values(tmp_path, timestamp, feature, weight, error):
+    path = tmp_path / "data.tsv"
+    path.write_text(
+        "mean_T1\tmean_T2\tmean_readout_error\tgamma\tlambda\tlast_update_date\t"
+        "qubit_digest\tweight_uniform\n"
+        f"{feature}\t80\t0.02\t0.0001\t0.0002\t{timestamp}\tdigest\t{weight}\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match=error):
+        load_training_tsv(path, archive_ref="a" * 40)
+
+
+def test_training_tsv_loads_committed_evidence():
+    evidence = (
+        Path(__file__).resolve().parents[2] / "docs/evidence/training-set/2026-10-17-e5688d2f.tsv"
+    )
+    data = load_training_tsv(evidence, archive_ref="e5688d2f6a333e98bb01f1c1d81b694ff69574f5")
+    assert data.n_rows == 797
+    train, validation = data.time_split(datetime(2026, 9, 1, tzinfo=UTC))
+    assert train.n_rows > 0 and validation.n_rows > 0
+    assert max(train.timestamps) < min(validation.timestamps)
