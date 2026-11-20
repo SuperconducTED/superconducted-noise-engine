@@ -28,6 +28,7 @@ import itertools
 import re
 import statistics
 import subprocess
+import sys
 from collections import Counter
 from datetime import UTC, datetime, time, timedelta
 from pathlib import Path
@@ -291,10 +292,15 @@ def main() -> int:
     missing = [t for t in times if t not in added]
     if missing:
         raise SystemExit(f"{len(missing)} files have no adding commit in this clone's history")
+    # To stderr: this depends on how deep the clone's history goes, and stdout must not.
     print(
         "earliest commit that adds a file in this clone:"
-        f" {min(added.values()):%Y-%m-%d %H:%M:%S} UTC\n"
+        f" {min(added.values()):%Y-%m-%d %H:%M:%S} UTC",
+        file=sys.stderr,
     )
+    if min(added.values()) >= LAG_START:
+        raise SystemExit(f"this clone's history starts after {LAG_START:%Y-%m-%d}: lags unusable")
+    print()
     part_a(args.repo, args.sha, times, added)
     part_b(times, added, per_commit)
     part_c(times, added, paths, args.pairs_out)

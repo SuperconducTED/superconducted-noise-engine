@@ -1,5 +1,4 @@
 calibration-data commit: 5d958ab2af09a3c8ed8c7222ef823130fe6229f6
-earliest commit that adds a file in this clone: 2026-08-01 21:28:35 UTC
 
 A. Gaps in file time
 files 2980, 2026-05-13 12:13:22 to 2026-11-19 20:38:27 UTC,

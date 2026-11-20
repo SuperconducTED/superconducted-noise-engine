@@ -78,8 +78,13 @@ unknown until job 1.
   one commit can add many files, so that measured arrivals, not documents. File names give 112.4
   hours for the same event and nine gaps where the subjects gave one.
 - **The scoring condition copied from the code, not assumed.** The replay scores on the first
-  morning a later-dated file is held, because that is what `run_score` checks. Scoring on the next
-  morning unconditionally would have hidden the four days that slip.
+  morning a later-dated file is held, because that is what `run_score` checks in
+  `scripts/hardware_submit.py` on PR #142's branch at `1ec698f8` (not on `main` yet). Scoring on
+  the next morning unconditionally would have hidden the four days that slip.
+- **Nothing clone-dependent on stdout.** The clone used is shallow, with `calibration-data`
+  history from 2026-08-01. The earliest adding commit is printed to stderr, so the committed
+  outputs do not change with the depth of a reproducer's clone, and the script stops if the
+  history is too short for the lags to mean anything.
 - **A pinned commit id in `run.sh`.** The branch moves several times a day. A ref name would make
   every later run a different measurement.
 - **Under `docs/evidence`, not `scripts/`.** These are one measurement's record, not tools the
@@ -103,7 +108,10 @@ ruff format --check docs/evidence/hardware-reading-vs-level/archive-timing-2026-
 Expected: `run.sh` ends with `rows written for compare_readings.py: 43` and
 `files opened: 86; name time equal to last_update_date on 86`; `diff` prints nothing; both `ruff`
 commands pass. Run on the laptop on 2026-11-20 with the exact-pin environment and
-`PYTHONPATH=src`; Burak's desktop has not run it.
+`PYTHONPATH=src`, twice from the same shallow clone: that shows the scripts are deterministic, not
+that another machine agrees. Burak's desktop has not run it. From a checkout of PR #142's branch
+the parser's blob line in `compare_readings.out.txt` reads `7d10641d`, not `aac828e6`; the README's
+section 5 says why nothing else changes.
 
 ## Related docs
 
@@ -111,5 +119,6 @@ commands pass. Run on the laptop on 2026-11-20 with the exact-pin environment an
 - `docs/roadmap/2026-10-24-issue-125-preregistration.md`, amendments 18, 19, 25, 27 and 36, and
   section 2's row for `reading_at_execution`
 - `docs/implementations/2026-11-05-hardware-test-submission.md`, "One edge recorded, not changed"
+  (on PR #142's branch at `1ec698f8`; not on `main` yet)
 - Issue #125, comments 7047051597 and 7047937649; PR #142
 - `docs/status/2026-11-20-status.md`

@@ -8,10 +8,11 @@ This folder holds the scripts and outputs behind the figures in two comments on 
 - the day-15 rule question, comment 7047051597 (2026-11-20 18:09 UTC);
 - the addendum on `reading_at_execution`, comment 7047937649 (2026-11-20 18:52 UTC).
 
-Both comments say their scripts were not committed. This folder is that commit. The figures were
+Both comments say their scripts were not committed. This folder holds them. The figures were
 first produced by one-off commands; the scripts here were written afterwards to compute the same
 quantities from one pinned commit, and section 4 lists where the committed run differs from what
-was posted.
+was posted. The outputs were checked by a second run on the same laptop and the same clone, which
+shows the scripts are deterministic and nothing more; no other machine has run them.
 
 ## 1. What is measured, and on what
 
@@ -33,8 +34,9 @@ through `git` and never checked out.
   file at once).
 - **C, replay.** For each of 60 days and each queue delay, take `t_execute` as 03:45 UTC plus the
   delay. The job is scored at 04:00 UTC on the first morning after `t_execute` on which the
-  archive already holds a file dated after `t_execute`, which is the condition `score` waits for
-  in `scripts/hardware_submit.py`. *Held* is the latest file at or before `t_execute` among files
+  archive already holds a file dated after `t_execute`, which is the condition `run_score` waits
+  for in `scripts/hardware_submit.py` (PR #142 at `1ec698f8`; the file is not on `main` yet, so it
+  is absent from this tree). *Held* is the latest file at or before `t_execute` among files
   that had arrived by that morning; *tip* is the same among all files at the pinned commit. A day
   counts when the two are different files.
 
@@ -43,7 +45,8 @@ own parser and says whether any of the five quantities the predictors read diffe
 
 ## 2. Results
 
-Every line below is copied from `archive_timing.out.txt` or `compare_readings.out.txt`.
+Every figure below is copied from `archive_timing.out.txt` or `compare_readings.out.txt`, except
+the tip files' times in section C's closing paragraph, which are `pairs.tsv`'s `tip_time` column.
 
 **A.** 2,980 files from 2026-05-13 to 2026-11-19, a span of 190 days. Median gap 0.94 hours. Nine
 gaps of 24 hours or more, two of them starting in the last 60 days. The latest is 112.4 hours, from
@@ -102,9 +105,13 @@ diff -r <out dir> docs/evidence/hardware-reading-vs-level/archive-timing-2026-11
 
 `<python>` needs the repository's pins (NumPy and the package's dependencies). `<repo>` needs the
 pinned commit and the data branch's history back to 2026-09-01. Expected: `diff` prints nothing.
-`compare_readings.py` imports `scripts/hardware_test_predictors.py` from the checkout it is given;
-its blob id is printed in the output (`aac828e6` here), so a run from another checkout shows whether
-the parser changed.
+`compare_readings.py` imports `scripts/hardware_test_predictors.py` from the checkout it is given
+and prints its blob id, so a run from another checkout shows which parser it used. The committed
+run used `aac828e6` (`main` at `b9fcddea`). PR #142's version (`7d10641d` at `1ec698f8`) differs
+from it in three hunks: the module docstring, `freeze_controls` and `main`'s controls branch. None
+of them is called here, so the comparison is the same under either, but that line of the output
+will differ.
 
-A clone whose `calibration-data` history starts later than 2026-09-01 would report different lags.
-Section A needs only the tree; sections B and C need the history.
+The clone used here is shallow: its `calibration-data` history starts on 2026-08-01. The scripts
+print the clone's earliest adding commit to stderr, not to the output files, and stop if the
+history starts after 2026-09-01. Section A needs only the tree; sections B and C need the history.
