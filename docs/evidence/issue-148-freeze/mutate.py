@@ -114,7 +114,7 @@ def run_tests(python: str, root: Path) -> tuple[int, list[str]]:
             "pytest",
             *TESTS,
             "-q",
-            "--tb=no",
+            "--tb=line",
             "-rf",
             "-o",
             "addopts=",
@@ -129,9 +129,17 @@ def run_tests(python: str, root: Path) -> tuple[int, list[str]]:
         check=False,
     )
     text = done.stdout + done.stderr
-    # The short summary prints "FAILED <test id> - <what was raised>" once per failing test.
-    failures = re.findall(r"^FAILED (\S+)(?: - (.*))?$", text, flags=re.MULTILINE)
-    return done.returncode, [f"{test}: {how.strip()}"[:160] for test, how in failures]
+    # The short summary prints "FAILED <test id>" once per failing test, and --tb=line prints
+    # "<path>:<line>: <what was raised>" once per failing test, both in the order the tests ran.
+    tests = re.findall(r"^FAILED (\S+)", text, flags=re.MULTILINE)
+    raised = re.findall(r"^\S.*\.py:\d+: (.+)$", text, flags=re.MULTILINE)
+    if len(raised) != len(tests):
+        raised = ["(reason not parsed)"] * len(tests)
+    # "tests/training/test_types.py::test_x" is printed as "test_types.py::test_x".
+    return done.returncode, [
+        f"{test.rsplit('/', 1)[-1]}: {how.strip()}"[:170]
+        for test, how in zip(tests, raised, strict=True)
+    ]
 
 
 def main() -> int:

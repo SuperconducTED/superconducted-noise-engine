@@ -1,12 +1,31 @@
 baseline, no mutant: passes
-M1  _frozen_copy does not copy float64 input: predicted caught, caught | tests/training/test_types.py::test_diagnostics_copies_and_freezes_standardization: ValueError: assignment destination is read-only
-M2  _frozen_copy does not freeze: predicted caught, caught | tests/training/test_types.py::test_diagnostics_copies_and_freezes_standardization: Failed: DID NOT RAISE <class 'ValueError'>
-M3  _frozen_copy keeps the input dtype: predicted caught, caught | tests/training/test_types.py::test_result_and_diagnostics_arrays_are_float64: AssertionError: assert dtype('float32') == <class 'numpy.float64'>
-M4  standardization is built as a list: predicted caught, caught | tests/training/test_types.py::test_diagnostics_stores_standardization_as_a_tuple: assert False
-M5  standardization is not stored: predicted caught, caught | tests/training/test_types.py::test_diagnostics_copies_and_freezes_standardization: assert False
-M6  train_rmse is not stored: predicted caught, caught | tests/training/test_types.py::test_result_copies_and_freezes_rmse[train_rmse]: assert False
-M7  validation_rmse is not stored: predicted caught, caught | tests/training/test_types.py::test_result_copies_and_freezes_rmse[validation_rmse]: assert False
-M8  loss_history is not stored as a tuple: predicted caught, caught | tests/training/test_types.py::test_result_stores_loss_history_as_a_tuple: assert False
+M1  _frozen_copy does not copy float64 input: predicted caught, caught, 3 tests fail
+    test_types.py::test_diagnostics_copies_and_freezes_standardization: ValueError: assignment destination is read-only
+    test_types.py::test_result_copies_and_freezes_rmse[train_rmse]: ValueError: assignment destination is read-only
+    test_types.py::test_result_copies_and_freezes_rmse[validation_rmse]: ValueError: assignment destination is read-only
+M2  _frozen_copy does not freeze: predicted caught, caught, 4 tests fail
+    test_types.py::test_diagnostics_copies_and_freezes_standardization: Failed: DID NOT RAISE <class 'ValueError'>
+    test_types.py::test_result_copies_and_freezes_rmse[train_rmse]: Failed: DID NOT RAISE <class 'ValueError'>
+    test_types.py::test_result_copies_and_freezes_rmse[validation_rmse]: Failed: DID NOT RAISE <class 'ValueError'>
+    test_anfis.py::test_fit_returns_read_only_metrics_and_standardization: Failed: DID NOT RAISE <class 'ValueError'>
+M3  _frozen_copy keeps the input dtype: predicted caught, caught, 1 tests fail
+    test_types.py::test_result_and_diagnostics_arrays_are_float64: AssertionError: assert dtype('float32') == <class 'numpy.float64'>
+M4  standardization is built as a list: predicted caught, caught, 1 tests fail
+    test_types.py::test_diagnostics_stores_standardization_as_a_tuple: assert False
+M5  standardization is not stored: predicted caught, caught, 4 tests fail
+    test_types.py::test_diagnostics_copies_and_freezes_standardization: assert False
+    test_types.py::test_diagnostics_stores_standardization_as_a_tuple: assert False
+    test_types.py::test_result_and_diagnostics_arrays_are_float64: AssertionError: assert dtype('float32') == <class 'numpy.float64'>
+    test_anfis.py::test_fit_returns_read_only_metrics_and_standardization: Failed: DID NOT RAISE <class 'ValueError'>
+M6  train_rmse is not stored: predicted caught, caught, 3 tests fail
+    test_types.py::test_result_copies_and_freezes_rmse[train_rmse]: assert False
+    test_types.py::test_result_and_diagnostics_arrays_are_float64: AssertionError: assert dtype('float32') == <class 'numpy.float64'>
+    test_anfis.py::test_fit_returns_read_only_metrics_and_standardization: Failed: DID NOT RAISE <class 'ValueError'>
+M7  validation_rmse is not stored: predicted caught, caught, 2 tests fail
+    test_types.py::test_result_copies_and_freezes_rmse[validation_rmse]: assert False
+    test_types.py::test_result_and_diagnostics_arrays_are_float64: AssertionError: assert dtype('float32') == <class 'numpy.float64'>
+M8  loss_history is not stored as a tuple: predicted caught, caught, 1 tests fail
+    test_types.py::test_result_stores_loss_history_as_a_tuple: assert False
 M9  finiteness is checked on the caller's values, not the copies: predicted survives, survives
 baseline again, file restored: passes
 9 mutants: 8 caught, 1 survived, 0 against the prediction

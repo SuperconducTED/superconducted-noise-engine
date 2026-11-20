@@ -193,3 +193,62 @@ agrees with it; it is a measurement of this branch's tree and not the figure NC-
 Rule 6 has that row re-measured on the merge commit, in a commit that follows the merge.
 
 **Not done here:** no desktop run; nothing pushed; no PR. The Linux probe above is unrun.
+
+## Corrections after a review of this record, 2026-11-20, later
+
+Appended; nothing above is edited. Three statements above claimed more than the runs behind them
+showed. None needs a code change, and no figure moves.
+
+**1. The mutation run stopped at the first failure.** `mutate.py` first ran pytest with `-x`, so
+each mutant showed one failing test, and the criterion 8 row could not show that any mutant needs
+the criterion 6 test. The script now runs every test and lists each failure with what was raised.
+Re-run, `docs/evidence/issue-148-freeze/mutate.out.txt`:
+
+| Mutant | Tests that fail | Against the prediction |
+| --- | --- | --- |
+| M1 | 3: the criterion 1 tests for `standardization`, `train_rmse` and `validation_rmse`, each by the test's own write raising `ValueError` | no |
+| M2 | 4: the same three, by `DID NOT RAISE`, and the criterion 6 test in `tests/test_anfis.py` | no |
+| M3 | 1: the `float64` test | no |
+| M4 | 1: the tuple test for `standardization` | no |
+| M5 | 4: the copy test and the tuple test for `standardization`, the `float64` test, and the criterion 6 test | no |
+| M6 | 3: the copy test for `train_rmse`, the `float64` test, and the criterion 6 test | no |
+| M7 | 2: the copy test for `validation_rmse` and the `float64` test | no |
+| M8 | 1: the tuple test for `loss_history` | no |
+| M9 | none; it survives, as predicted | no |
+
+So the criterion 6 test is needed by M2, M5 and M6, and every one of the seven new test cases
+fails under at least one mutant. The earlier output, with one failure per mutant, is in history at
+`0581ab18`.
+
+**2. "No caller writes into these fields" described a narrower search than it claimed.** What ran
+first, at the open PR heads, was a list of which PRs touch the training files and which scripts
+use the types. What has now run, on `main` at `4f26881c` and at the heads of #142 (`1ec698f8`),
+#143 (`ae8d2bf9`), #150 (`f6b34c8f`), #152 (`8b66aa8d`), #156 (`72da61a6`) and #158 (`8d713126`),
+over `src`, `tests`, `scripts` and `docs/evidence`: a search for an assignment, an augmented
+assignment or an in-place method call on `.standardization`, `.train_rmse`, `.validation_rmse` or
+`.loss_history`, with or without subscripts. It finds none anywhere, and it does find its three
+planted lines in a self-test. Its limit: a write through an alias (`s = result.train_rmse`, then
+`s[0] = ...`) is not a match. For `main`'s own code the stronger evidence is the full suite, green
+on this branch. The open PRs' own new tests have not been run against this change.
+
+**3. The reproduction table rested on a probe that was not committed.** It is now
+`docs/evidence/issue-148-freeze/probe.py`, with its output on `main`'s `types.py`
+(`probe.main.out.txt`, from a `git archive` of `main`'s `src`, whose `types.py` blob was checked
+against `main`'s) and on this branch (`probe.head.out.txt`). Every row of the table reads off the
+first file.
+
+**Two notes for a reviewer.**
+
+- **CI will not print 1439 passed and 0 skipped.** The laptop run can read `calibration-data`, so
+  the archive-backed survey test in `tests/test_feature_distribution.py` runs and passes here. CI
+  on `ubuntu-latest` skips it, as it has on earlier PRs, so one skip there is expected and is not a
+  regression. That expectation comes from earlier PRs' CI runs, not from a run of this branch.
+- **Three dated documents on `main` cite #148 as open work:**
+  `docs/implementations/2026-11-09-issue-57-closure-followup.md`,
+  `docs/implementations/2026-11-09-issue-64-pr-a1-perturbation-and-band.md` (line 345) and
+  `docs/verification/2026-11-09-issue-57-followup-burak-desktop.md`. Each owes an appended as-of
+  line once this merges. Not done here.
+
+Commits since the results section: the probe and the script change `5143c875`; this record and
+the re-run in the commit that follows. `src`, `tests`, `scripts` and `pyproject.toml` are still the
+objects of `32b65ccb`, where the full suite ran.
