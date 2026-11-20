@@ -239,6 +239,40 @@ firing-scaling test filters "overflow encountered in add". No other warning is f
 - **Full suite** at the final form: 1328 passed, 0 skipped (`pytest tests/ -q -rs`; this clone can read the
   `calibration-data` ref, so the archive test ran).
 
+**Corrections before push.** A review pass before any outward step found these:
+
+1. **Two of the plan's figures came from uncommitted scratch probes**: "13,869 of 20,000" (the non-power-of-two control) and
+   "30,037 of 200,000" (the top edge). `overflow_probe.py` (`overflow_probe.out.txt`) now gives them from a committed
+   script on its own seeded inputs: the control differs on 145,138 of 200,000, and the shifted quotient reaches 1.0 or above
+   on 60,587 of 200,000 top-edge cases, where the final form saturates. Bit identity with `0d53fc60`'s expression holds
+   on 200,000 of 200,000 inputs whose plain quotient is finite.
+2. **The probe found an overstatement.** Equal values at the largest double are not always returned exactly: where the
+   shifted quotient rounds below 1.0, the result is the ordinary rounding, up to 6 ulps below in the probe. Only the case
+   that would overflow saturates. The top-edge test's case is one that saturates, and its docstring now says so; no code
+   changes.
+3. **The contract was stated only in a private helper.** The module docstring now says that every reducer returns a finite
+   result for any finite input the contract admits, and names NumPy's two overflow warnings on the fallback paths.
+4. **The eleven-mutant output of `1b8f6089`**, overwritten in the second round, is restored from history as
+   `mutate.at-1b8f6089.out.txt`, as @mertefesensoy's read note (6884276497) suggested.
+
+## What changed, as it ended
+
+The table near the top describes the plan; this one is every file as the round ended.
+
+| File | One-sentence description |
+| --- | --- |
+| `scripts/type_reduction_discrepancy.py` | `_weighted_average` returns the plain quotient where finite, else shifts the values by a power of two with saturation at the largest double, and raises `OverflowError` for an infinite weight; Nie-Tan and the iterative start retry with halved bounds on it; `_validated` tests for a zero sum on the largest entry; the module docstring states the finite-result contract. |
+| `tests/test_type_reduction.py` | Five tests, 14 cases (275 in all), two of them filtering one named NumPy overflow warning each. |
+| `docs/evidence/adr-011-type-reduction/mutate.py` | M13 to M18 for the final form; nineteen mutants in all. |
+| `docs/evidence/adr-011-type-reduction/mutate.out.txt` | The run at the final form, 19 of 19 killed. |
+| `docs/evidence/adr-011-type-reduction/mutate.at-1b8f6089.out.txt`, `mutate.at-0d53fc60.out.txt`, `mutate.at-ae2b16d3.out.txt` | The earlier runs, kept beside the current one. |
+| `docs/evidence/adr-011-type-reduction/overflow_probe.py`, `overflow_probe.out.txt` | The design's figures from a committed script. |
+| `docs/evidence/adr-011-type-reduction/reducer_positions_and_cost.at-bede3887.out.txt` | The cost run at the first form, which led to amendment 1. |
+| `docs/evidence/adr-011-type-reduction/reducer_positions_and_cost.run4.out.txt` | The fourth committed cost run, at the final form. |
+| `docs/evidence/adr-011-type-reduction/README.md` | A dated section. |
+| `docs/findings/2026-11-07-nie-tan-vs-karnik-mendel.md` | Section 17. |
+| `docs/implementations/2026-11-20-issue-61-pr143-overflow.md` | This record. |
+
 Not done here: Mert's hand-derivation request (6877022015), for a later session; the same unscaled sum in the shipped
 `fuzzy/defuzzification.py`, outside #143, an issue to be drafted; decision 2 (@BahaJarad). Burak's desktop run at
 `0d53fc60` stands for everything this round leaves unchanged; a short runbook addendum covers what changed.

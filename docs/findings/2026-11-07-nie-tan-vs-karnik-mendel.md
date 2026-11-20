@@ -446,8 +446,12 @@ last step can round past the largest double, and the largest double, the nearest
 A second overflow of the same kind was found while checking: firing bounds near the largest double made `lower + upper`
 overflow, so Nie-Tan returned `nan` and the iterative route started from `nan`; both now retry with `0.5 lower + 0.5 upper`,
 which `Y` treats the same way because it divides its weights by their largest entry. The first form shifted on every call,
-which doubled the weighted average's cost and moved the arithmetic cost ratio to 9.0, below the committed range; Bengisu
-chose the final form so the cost figures still describe the code.
+which raised Nie-Tan's arithmetic in the cost script from 3.8 to 6.1 us per point and moved the arithmetic cost ratio to
+9.0, below the committed range (`reducer_positions_and_cost.at-bede3887.out.txt`); Bengisu chose the final form so the
+cost figures still describe the code. `overflow_probe.py` gives the design's figures from a committed script: bit identity with
+`0d53fc60`'s expression on 200,000 of 200,000 inputs whose plain quotient is finite, a non-power-of-two control differing on
+145,138, and at the top edge the saturation reached on 60,587 of 200,000 cases, every result finite and at most 6 ulps
+from the true one.
 
 **17.2 What moved.** Nothing measured. The sweep is identical to `0d53fc60`'s apart from its commit line, every `km_*` column
 included; the step 5 scripts reproduce their committed outputs; a fourth cost run gives 3.4 and 9.9, inside 3.1 to 4.9 and

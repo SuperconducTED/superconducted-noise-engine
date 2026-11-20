@@ -10,6 +10,12 @@ interval ``[y_l, y_r]`` of every weighted average
 and its midpoint ``(y_l + y_r) / 2`` is what the two closed-form reducers are
 measured against.
 
+Every reducer here returns a finite result for any finite input this contract
+admits (review 5923434762 on PR #143). On inputs near the largest double, NumPy
+can print "overflow encountered in matmul" or "overflow encountered in add" from
+the plain first attempt before the fallback in :func:`_weighted_average` or the
+halved-bounds retry; the result does not depend on it.
+
 The module lives in ``scripts/`` and never in ``src/``: ADR-011's "no iterative
 numerical defuzzification at bootstrap" stands, and this is a reference that
 judges the shipped reducer, not a replacement for it. The FR-3 sweep that uses it

@@ -253,10 +253,12 @@ reference's weighted average, which now gives a finite result on every finite in
 
 - **`tests/test_type_reduction.py` has 275 tests**, fourteen more.
 - **`mutate.py` runs nineteen mutants**, M13 to M18 for this round, all killed (`mutate.out.txt`). The earlier runs are kept
-  beside it: `mutate.at-0d53fc60.out.txt` (thirteen mutants) and `mutate.at-ae2b16d3.out.txt` (the first form of this round's
+  beside it: `mutate.at-1b8f6089.out.txt` (eleven mutants, restored from history as @mertefesensoy's note on the second
+  round suggested), `mutate.at-0d53fc60.out.txt` (thirteen) and `mutate.at-ae2b16d3.out.txt` (the first form of this round's
   fix, which amendment 1 replaced).
 
 | Output | What it answers |
 | --- | --- |
 | `reducer_positions_and_cost.at-bede3887.out.txt` | The cost script at the first form of the fix, which shifted the values on every call: arithmetic ratio 9.0, below the committed range, so the final form shifts only on overflow. |
+| `overflow_probe.py` | The design's figures: bit identity with `0d53fc60`'s expression where it is finite, a control that can fire, and the top edge (`overflow_probe.out.txt`). |
 | `reducer_positions_and_cost.run4.out.txt` | A fourth run, at the final form: 3.4 (public) and 9.9 (arithmetic), inside runs 1 to 3's range. |

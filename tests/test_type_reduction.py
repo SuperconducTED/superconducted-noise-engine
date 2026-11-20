@@ -935,7 +935,11 @@ def test_large_finite_values_give_a_finite_result(route: str) -> None:
 @MATMUL_OVERFLOW
 @pytest.mark.parametrize("route", sorted(ROUTES))
 def test_equal_values_at_the_largest_double_return_that_value(route: str) -> None:
-    """At the top edge the last step can round past DBL_MAX; the true result is DBL_MAX itself."""
+    """On this case the shifted quotient rounds to 1.0, so multiplying back would overflow.
+
+    The true result is DBL_MAX itself, and the saturation returns it. Elsewhere at the top
+    edge the result is the ordinary rounding, a few ulps below (overflow_probe.py).
+    """
     result = ROUTES[route]([1.0, 0.2], [1.0, 0.2], [DBL_MAX, DBL_MAX])
     expected = (DBL_MAX, DBL_MAX) if route in ("exhaustive", "iterative") else DBL_MAX
     assert result == expected
