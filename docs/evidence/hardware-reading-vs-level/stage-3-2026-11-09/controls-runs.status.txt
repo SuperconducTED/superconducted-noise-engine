@@ -1,0 +1,13 @@
+13:12:32 code-old from e639cf86b71dbefc3ee86a02a8945090ae35fa5e
+13:12:33 code-new from b611e312274539c3bd1f070fc0c04c54c21ac6f0
+13:12:33 rehearsal-2026-10-28 old start (ref 7adda803, at 2026-10-28T18:40:46Z)
+13:17:55 rehearsal-2026-10-28 old exit 0
+13:17:55 rehearsal-2026-10-28 new start (ref 7adda803, at 2026-10-28T18:40:46Z)
+13:23:19 rehearsal-2026-10-28 new exit 0
+13:23:19 rehearsal-2026-10-28 compared
+13:23:19 tip-2026-11-09 old start (ref 60d082b0ea5f7b6678aec796357f7b7fcb99794e, at 2026-11-09T12:11:46Z)
+13:29:36 tip-2026-11-09 old exit 0
+13:29:36 tip-2026-11-09 new start (ref 60d082b0ea5f7b6678aec796357f7b7fcb99794e, at 2026-11-09T12:11:46Z)
+13:35:48 tip-2026-11-09 new exit 0
+13:35:48 tip-2026-11-09 compared
+13:35:48 RUN END

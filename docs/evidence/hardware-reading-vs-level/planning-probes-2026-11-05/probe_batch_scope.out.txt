@@ -1,0 +1,51 @@
+1. Job 1's shape: seven Arm A circuits, alone against one run (shot noise about 0.011 per rate)
+  slot 0 zero           12 qubits, largest rate gap 0.005
+  slot 1 level_x0.5     12 qubits, largest rate gap 0.036
+  slot 2 level_x1       12 qubits, largest rate gap 0.031
+  slot 3 level_x2       12 qubits, largest rate gap 0.018
+  slot 4 reading_x0.5   12 qubits, largest rate gap 0.029
+  slot 5 reading_x1     12 qubits, largest rate gap 0.012
+  slot 6 reading_x2     12 qubits, largest rate gap 0.026
+  worst 0.036
+2. The full job's shape, 13 circuits in one run, Arm A first: each Arm B result
+  layout [85, 77, 86]
+  alone                                      000 0.493  111 0.077
+  after 7 Arm A in one run                   000 0.949  111 0.000
+  layout [15, 14, 19]
+  alone                                      000 0.512  111 0.094
+  after 7 Arm A in one run                   000 0.962  111 0.000
+  layout [128, 127, 129]
+  alone                                      000 0.510  111 0.093
+  after 7 Arm A in one run                   000 0.955  111 0.000
+  layout [67, 57, 66]
+  alone                                      000 0.504  111 0.089
+  after 7 Arm A in one run                   000 0.952  111 0.000
+  layout [135, 134, 139]
+  alone                                      000 0.506  111 0.092
+  after 7 Arm A in one run                   000 0.956  111 0.000
+  layout [1, 0, 2]
+  alone                                      000 0.500  111 0.069
+  after 7 Arm A in one run                   000 0.928  111 0.000
+3. Six Arm B alone against one run
+  layout 0 alone                             000 0.506  111 0.072
+  layout 0 batched                           000 0.493  111 0.077
+  layout 1 alone                             000 0.521  111 0.111
+  layout 1 batched                           000 0.519  111 0.096
+  layout 2 alone                             000 0.515  111 0.105
+  layout 2 batched                           000 0.515  111 0.106
+  layout 3 alone                             000 0.502  111 0.108
+  layout 3 batched                           000 0.501  111 0.112
+  layout 4 alone                             000 0.499  111 0.101
+  layout 4 batched                           000 0.502  111 0.105
+  layout 5 alone                             000 0.514  111 0.076
+  layout 5 batched                           000 0.491  111 0.081
+4. Trigger: what Aer reports, and does the method explain it?
+  B alone  : {'method': 'density_matrix', 'active_input_qubits': [77, 85, 86], 'num_qubits': 3, 'noise': 'superop', 'batched_shots_optimization': False}
+  A then B : {'method': 'statevector', 'active_input_qubits': [10, 35, 39, 44, 48, 54, 105, 112, 132, 147, 148, 155], 'num_qubits': 12, 'noise': 'kraus', 'batched_shots_optimization': False}
+           : {'method': 'density_matrix', 'active_input_qubits': [77, 85, 86], 'num_qubits': 3, 'noise': 'superop', 'batched_shots_optimization': False}
+  B alone, method=density_matrix             000 0.493  111 0.077
+  B alone, method=statevector                000 0.499  111 0.091
+  A then B, method=statevector               000 0.478  111 0.091
+  A(zero delay) then B                       000 0.931  111 0.000
+  noiseless, A then B                        000 0.519  111 0.481
+  noise_model=from_backend, A then B         000 0.931  111 0.000

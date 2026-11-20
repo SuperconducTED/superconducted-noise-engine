@@ -1,0 +1,22 @@
+mutant	file	prediction	outcome	matches	seconds	pytest
+H01 no interval at three days	scripts/hardware_submit.py	caught	caught: assertion	True	12.3	1 failed, 15 passed in 7.53s
+H02 empty-points guard dropped	scripts/hardware_submit.py	equivalent: with no points every day's sum(x^2) is 0, and the next guard returns None	survived	True	14.1	56 passed in 9.13s
+H03 numerator without x	scripts/hardware_submit.py	caught	caught: assertion	True	12.3	1 failed, 13 passed in 7.22s
+H04 denominator without the square	scripts/hardware_submit.py	caught	caught: assertion	True	12.2	1 failed, 13 passed in 7.59s
+H05 undefined-c guard dropped	scripts/hardware_submit.py	caught	caught: timeout	True	120.0	
+H06 floor instead of ceil blocks	scripts/hardware_submit.py	caught	caught: assertion	True	11.1	1 failed, 12 passed in 6.90s
+H07 two-day blocks	scripts/hardware_submit.py	caught	caught: assertion	True	11.2	1 failed, 12 passed in 6.77s
+H08 blocks not circular	scripts/hardware_submit.py	caught	caught: crash	True	10.2	1 failed, 12 passed in 6.05s
+H09 empty draw not redrawn	scripts/hardware_submit.py	caught	caught: assertion	True	11.4	1 failed, 16 passed, 1 warning in 7.05s
+H10 80% instead of 90%	scripts/hardware_submit.py	caught	caught: assertion	True	11.0	1 failed, 12 passed in 6.58s
+H11 ends swapped	scripts/hardware_submit.py	caught	caught: assertion	True	10.6	1 failed, 12 passed in 6.47s
+H12 another seed	scripts/hardware_submit.py	caught	caught: assertion	True	10.7	1 failed, 12 passed in 6.65s
+H13 starts miss the last day	scripts/hardware_submit.py	caught	caught: assertion	True	10.8	1 failed, 12 passed in 6.61s
+H14 two seed words	scripts/hardware_submit.py	caught	caught: crash	True	11.5	1 failed, 35 passed in 7.15s
+H15 A1's seed for c	scripts/hardware_submit.py	caught	caught: assertion	True	13.2	1 failed, 53 passed in 8.85s
+H16 every point on the first day	scripts/hardware_submit.py	caught	caught: assertion	True	13.4	1 failed, 53 passed in 8.89s
+H17 block length reported wrong	scripts/hardware_submit.py	caught	caught: assertion	True	12.0	1 failed, 53 passed in 7.68s
+H18 x and y swapped for c	scripts/hardware_submit.py	caught	caught: assertion	True	12.0	1 failed, 35 passed in 7.51s
+H19 third row's old words	scripts/hardware_submit.py	caught	caught: assertion	True	13.9	1 failed, 54 passed in 9.25s
+H20 last row's old key in the table	scripts/hardware_submit.py	caught	caught: crash	True	11.9	1 failed, 33 passed in 7.60s
+H21 last row's old key in the chain	scripts/hardware_submit.py	caught	caught: crash	True	11.8	1 failed, 33 passed in 7.40s

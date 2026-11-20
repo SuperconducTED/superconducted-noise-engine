@@ -1,0 +1,14 @@
+# Criterion 41 at 20e7345d, throwaway worktree C:/t/g20, exact pins (C:/t/pin125), PYTHONPATH=src
+10:21:50 import from: C:\t\g20\src\superconducted\__init__.py
+10:21:50 GATE ruff check exit 0
+10:21:50 GATE ruff format --check exit 0
+10:21:50 GATE check_ids exit 0
+10:22:04 GATE mypy --strict exit 0: Success: no issues found in 54 source files
+10:29:54 GATE pytest exit 0: ================= 1742 passed, 2 skipped in 466.95s (0:07:46) =================
+10:29:55 tree after gates: [0] changed
+# pytest tail
+tests\training\test_types.py ..........................                  [100%]
+
+================= 1742 passed, 2 skipped in 466.95s (0:07:46) =================
+# pytest first line (the import check)
+C:\t\g20\src\superconducted\__init__.py

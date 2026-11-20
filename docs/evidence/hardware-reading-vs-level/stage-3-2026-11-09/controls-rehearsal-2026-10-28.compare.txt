@@ -1,0 +1,5 @@
+old controls: [144, 110, 140, 77]
+new controls: [144, 110, 140, 77]
+controls identical (qubits and every field): True
+other keys identical: True
+not_operational_at_freeze: {"file": "snapshots/2026-10/ibm_fez/20261028T184046000000Z.json", "time": "2026-10-28T18:40:46+00:00", "has_configuration": true, "qubits": [72], "skipped": []}
