@@ -1,0 +1,12 @@
+1 standardization after the caller writes nan: [nan  1.]
+1 the stored array is the caller's object: True
+2 train_rmse after the caller writes inf: [inf]
+2 validation_rmse after the caller writes nan: [nan]
+3 write into the stored train_rmse: accepted, now [nan]
+3 write into the stored standardization array: accepted, now [nan]
+4 standardization given as a list, then appended to: a list of length 3
+4 loss_history given as a list, then appended to: a list, [0.5, 0.4, nan]
+5 a float32 train_rmse is stored as float32
+5 a bare number for train_rmse is stored as a float
+5 empty standardization: ()
+5 absent validation_rmse: None

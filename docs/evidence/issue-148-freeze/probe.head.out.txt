@@ -1,0 +1,12 @@
+1 standardization after the caller writes nan: [0. 1.]
+1 the stored array is the caller's object: False
+2 train_rmse after the caller writes inf: [0.1]
+2 validation_rmse after the caller writes nan: [0.2]
+3 write into the stored train_rmse: refused (assignment destination is read-only)
+3 write into the stored standardization array: refused (assignment destination is read-only)
+4 standardization given as a list, then appended to: a tuple of length 2
+4 loss_history given as a list, then appended to: a tuple, (0.5, 0.4)
+5 a float32 train_rmse is stored as float64
+5 a bare number for train_rmse is stored as a ndarray
+5 empty standardization: ()
+5 absent validation_rmse: None

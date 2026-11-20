@@ -100,8 +100,12 @@ def unpack_head(repo: Path, into: Path) -> None:
         tar.extractall(into, filter="data")
 
 
-def run_tests(python: str, root: Path) -> tuple[int, str]:
-    """Exit status and the first failure, as ``test id: what was raised``."""
+def run_tests(python: str, root: Path) -> tuple[int, list[str]]:
+    """Exit status and every failing test, each as ``test id: what was raised``.
+
+    The run does not stop at the first failure, so a mutant's line shows every test that
+    needs the mutated line, not only the first one pytest reaches.
+    """
     env = {**os.environ, "PYTHONPATH": str(root / "src"), "PYTHONIOENCODING": "utf-8"}
     done = subprocess.run(
         [
@@ -109,9 +113,9 @@ def run_tests(python: str, root: Path) -> tuple[int, str]:
             "-m",
             "pytest",
             *TESTS,
-            "-x",
             "-q",
-            "--tb=line",
+            "--tb=no",
+            "-rf",
             "-o",
             "addopts=",
             "-p",
@@ -125,11 +129,9 @@ def run_tests(python: str, root: Path) -> tuple[int, str]:
         check=False,
     )
     text = done.stdout + done.stderr
-    failed = re.search(r"^FAILED (\S+)", text, flags=re.MULTILINE)
-    # --tb=line prints "<path>:<line>: <what was raised>" for the failing test.
-    raised = re.search(r"^.*\.py:\d+: (.+)$", text, flags=re.MULTILINE)
-    how = raised.group(1).strip() if raised else ""
-    return done.returncode, f"{failed.group(1) if failed else ''}: {how}"[:150]
+    # The short summary prints "FAILED <test id> - <what was raised>" once per failing test.
+    failures = re.findall(r"^FAILED (\S+)(?: - (.*))?$", text, flags=re.MULTILINE)
+    return done.returncode, [f"{test}: {how.strip()}"[:160] for test, how in failures]
 
 
 def main() -> int:
@@ -144,9 +146,10 @@ def main() -> int:
         target = root / TARGET
         pristine = target.read_text(encoding="utf-8")
 
-        status, first = run_tests(args.python, root)
-        print(f"baseline, no mutant: {'passes' if status == 0 else 'FAILS ' + first}")
+        status, failures = run_tests(args.python, root)
+        print(f"baseline, no mutant: {'passes' if status == 0 else 'FAILS'}")
         if status != 0:
+            print("\n".join(f"    {line}" for line in failures))
             return 1
 
         against = 0
@@ -159,21 +162,23 @@ def main() -> int:
                 mutated = mutated.replace(old, new)
             target.write_text(mutated, encoding="utf-8", newline="\n")
             try:
-                status, first = run_tests(args.python, root)
+                status, failures = run_tests(args.python, root)
             finally:
                 target.write_text(pristine, encoding="utf-8", newline="\n")
             outcome = "survives" if status == 0 else "caught"
             caught += outcome == "caught"
             agrees = outcome == prediction
             against += not agrees
-            detail = "" if outcome == "survives" else f" | {first}"
             print(
                 f"{name}  {what}: predicted {prediction}, {outcome}"
-                f"{'' if agrees else '  AGAINST THE PREDICTION'}{detail}"
+                f"{'' if agrees else '  AGAINST THE PREDICTION'}"
+                f"{'' if outcome == 'survives' else f', {len(failures)} tests fail'}"
             )
+            for line in failures:
+                print(f"    {line}")
 
-        status, first = run_tests(args.python, root)
-        print(f"baseline again, file restored: {'passes' if status == 0 else 'FAILS ' + first}")
+        status, failures = run_tests(args.python, root)
+        print(f"baseline again, file restored: {'passes' if status == 0 else 'FAILS'}")
         print(
             f"{len(MUTANTS)} mutants: {caught} caught, {len(MUTANTS) - caught} survived,"
             f" {against} against the prediction"
