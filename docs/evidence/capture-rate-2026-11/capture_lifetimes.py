@@ -14,9 +14,12 @@ the document's date to its successor's date is missing from the record, or when 
 successor; those documents are counted and left out of every lifetime figure.
 
 ``--from`` and ``--to`` select documents by the UTC date of their stamp (default: the whole
-record); lifetimes always use the successor in the whole record. The line starting ``P1`` is the
-count the prediction in ``docs/implementations/2026-11-15-issue-104-sweep-half-hour-step.md``
-reads. Prints only; exits 0.
+record); lifetimes always use the successor in the whole record. ``--exclude-day``, repeatable,
+drops a day of that selection whose covering sweep was skipped (amendment 2: the scheduled sweep
+dated the day after it did not run, read by ``sweep_days.py``): its documents leave the selection
+and the weekly table, but stay successors for lifetimes. An excluded day outside the selection, or
+given twice, is refused. The line starting ``P1`` is the count the prediction in
+``docs/implementations/2026-11-15-issue-104-sweep-half-hour-step.md`` reads. Prints only; exits 0.
 """
 
 from __future__ import annotations
@@ -62,6 +65,9 @@ def main() -> int:
     parser.add_argument("--ref", required=True, help="a calibration-data commit")
     parser.add_argument("--from", dest="first", type=date.fromisoformat, default=None)
     parser.add_argument("--to", dest="last", type=date.fromisoformat, default=None)
+    parser.add_argument(
+        "--exclude-day", dest="exclude", type=date.fromisoformat, action="append", default=[]
+    )
     args = parser.parse_args()
 
     commit = git("rev-parse", "--verify", f"{args.ref}^{{commit}}").decode().strip()
@@ -115,8 +121,24 @@ def main() -> int:
 
     lo = args.first or first_day
     hi = args.last or last_day
-    chosen = [stem for stem in order if lo <= when[stem].date() <= hi]
+    excluded = sorted(set(args.exclude))
+    if len(excluded) != len(args.exclude):
+        raise SystemExit("an --exclude-day is given twice")
+    outside = [d for d in excluded if not lo <= d <= hi]
+    if outside:
+        raise SystemExit(f"--exclude-day outside {lo} to {hi}: {', '.join(map(str, outside))}")
+    chosen = [
+        stem
+        for stem in order
+        if lo <= when[stem].date() <= hi and when[stem].date() not in excluded
+    ]
     print(f"\nselected documents stamped {lo} to {hi}: {len(chosen)}")
+    if excluded:
+        kept = sum(lo <= d <= hi and d not in excluded for d in recorded)
+        print(
+            f"excluded days (amendment 2, the D+1 sweep skipped): "
+            f"{', '.join(map(str, excluded))}; recorded days left: {kept}"
+        )
 
     weeks: dict[tuple[int, int], list[int]] = defaultdict(lambda: [0, 0])
     week_days: dict[tuple[int, int], set[date]] = defaultdict(set)
@@ -125,7 +147,7 @@ def main() -> int:
         weeks[(iso[0], iso[1])][0] += held[stem]
         weeks[(iso[0], iso[1])][1] += 1
     for d in recorded:
-        if lo <= d <= hi:
+        if lo <= d <= hi and d not in excluded:
             iso = d.isocalendar()
             week_days[(iso[0], iso[1])].add(d)
     print("\nweek       recorded days   held / exist   capture")
