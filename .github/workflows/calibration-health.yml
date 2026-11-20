@@ -159,9 +159,10 @@ jobs:
       actions: read
     env:
       DATA_BRANCH: ${{ inputs.data_branch || 'calibration-data' }}
-      # Finer than the sweep's 1 h, or the enumeration shares its blind spots and
-      # finds nothing the sweep missed. 15 min served 200 of 200 held documents
-      # over 2026-09-13..20 (NC-059).
+      # Strictly finer than the sweep's step (SWEEP_STEP_HOURS in
+      # calibration-poll.yml: 0.5 h since #104, 1 h before), or the enumeration
+      # shares its blind spots and finds nothing the sweep missed. 15 min served
+      # 200 of 200 held documents over 2026-09-13..20 (NC-059).
       CAPTURE_STEP_HOURS: '0.25'
     steps:
       - uses: actions/checkout@v4
