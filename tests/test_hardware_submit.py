@@ -34,6 +34,7 @@ from scripts.hardware_reading_vs_level import (
     circuit_seeds,
     ghz_idle_circuit,
     not_operational_qubits,
+    score_band,
     transpile_layout,
 )
 from scripts.hardware_test_predictors import collect, predictor_rows, select_balanced
@@ -1485,7 +1486,15 @@ def _scored_day(
 
 
 def _arm_b(measured: list[float], **predicted: list[float | None]) -> dict[str, Any]:
-    return {"measured": measured, **{k: {"predicted": v} for k, v in predicted.items()}}
+    """An ``arm-b.json`` as ``run_score`` writes it; the ``band`` entry comes from #140's own
+    ``score_band`` whenever both ends are given."""
+    out: dict[str, Any] = {
+        "measured": measured,
+        **{k: {"predicted": v} for k, v in predicted.items()},
+    }
+    if "band_lo" in predicted and "band_hi" in predicted:
+        out["band"] = score_band(predicted["band_lo"], predicted["band_hi"], measured)
+    return out
 
 
 FIRST = datetime(2026, 11, 10, tzinfo=UTC)
@@ -1806,6 +1815,63 @@ def test_arm_b_treats_a_missing_band_end_as_no_prediction() -> None:
     out = hs._arm_b_report(_jobs(job), first_day=FIRST.date())
     assert out["descriptive"]["best_pick_hits"]["band"] == 0
     assert out["descriptive"]["mean_spearman"]["band"] == pytest.approx(1.0)
+
+
+def _covered_jobs() -> list[tuple[date, dict[str, Any]]]:
+    """Two jobs whose band coverage is known by hand.
+
+    Day 1: the intervals [0.85, 0.95], [0.1, 0.6] and [0.4, 0.6] (ends given in either order)
+    against 0.9, 0.7 and 0.5 cover the first and the third: 3 layouts, 2 covered. Day 2: the first
+    layout misses an end, so it has no band; [0.5, 0.7] covers 0.6: 1 layout, 1 covered. Pooled,
+    3 of 4 (0.75); the mean of the two jobs' shares would be 0.8333.
+    """
+    day1 = _arm_b(
+        [0.9, 0.7, 0.5],
+        reading=[0.9, 0.7, 0.5],
+        level=[0.9, 0.5, 0.7],
+        band_lo=[0.85, 0.1, 0.6],
+        band_hi=[0.95, 0.6, 0.4],
+    )
+    day2 = _arm_b(
+        [0.8, 0.6], reading=[0.8, 0.6], level=[0.6, 0.8], band_lo=[None, 0.5], band_hi=[0.9, 0.7]
+    )
+    return _jobs(day1, day2)
+
+
+def test_arm_b_reports_the_bands_coverage_pooled_over_layouts() -> None:
+    out = hs._arm_b_report(_covered_jobs(), first_day=FIRST.date())
+    assert out["descriptive"]["band_coverage"] == {"layouts": 4, "covered": 3, "share": 0.75}
+
+
+def test_the_bands_coverage_has_no_share_without_a_banded_layout() -> None:
+    job = _arm_b(
+        [0.9, 0.7], reading=[0.9, 0.7], level=[0.9, 0.7], band_lo=[None, None], band_hi=[0.9, 0.7]
+    )
+    for jobs in (_jobs(job), []):
+        out = hs._arm_b_report(jobs, first_day=FIRST.date())
+        assert out["descriptive"]["band_coverage"] == {"layouts": 0, "covered": 0, "share": None}
+
+
+def test_a_job_scored_without_the_band_entry_is_refused_naming_its_day() -> None:
+    job = _arm_b([0.9, 0.7], reading=[0.9, 0.7], level=[0.7, 0.9])
+    assert "band" not in job
+    with pytest.raises(ValueError, match=f"{_day(1).date()}: arm-b.json has no band entry"):
+        hs._arm_b_report(_jobs(job), first_day=FIRST.date())
+
+
+def test_the_bands_coverage_does_not_reach_the_decision() -> None:
+    """The same jobs with every layout covered and with none: only ``band_coverage`` differs."""
+    jobs = _covered_jobs()
+    every = [
+        (d, {**j, "band": {**j["band"], "n_covered": j["band"]["n_predicted"]}}) for d, j in jobs
+    ]
+    none = [(d, {**j, "band": {**j["band"], "n_covered": 0}}) for d, j in jobs]
+    a = hs._arm_b_report(every, first_day=FIRST.date())
+    b = hs._arm_b_report(none, first_day=FIRST.date())
+    assert a["descriptive"].pop("band_coverage")["share"] == 1.0
+    assert b["descriptive"].pop("band_coverage")["share"] == 0.0
+    # JSON, because a NaN correlation is never equal to itself.
+    assert json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True)
 
 
 def test_arm_b_pairs_the_two_correlations_on_the_layouts_both_predicted() -> None:

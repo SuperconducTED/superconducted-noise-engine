@@ -841,14 +841,25 @@ def _arm_b_report(
     the midpoint of its two ends (amendment 4), for the descriptive figures only. A near tie is a
     best-to-second gap under two binomial standard errors at the best layout's fidelity, an
     approximation.
+
+    The band's coverage (amendment 26) is pooled over every job's layouts from the ``band`` entry
+    PR #140's ``score_band`` wrote, never recomputed here, so a covered layout has one definition.
+    Arm B has no nominal level: the share is reported, not judged. A job without that entry was
+    scored before #140's band in Arm B, and is refused rather than read as zero coverage.
     """
     deltas: list[tuple[float, int]] = []
     rho: dict[str, list[float]] = {"reading": [], "level": [], "band": []}
     hits: dict[str, int] = {"reading": 0, "level": 0, "band": 0}
     regret: dict[str, list[float]] = {"reading": [], "level": [], "band": []}
     near_ties = 0
+    band_layouts = 0
+    band_covered = 0
     for day, job in jobs:
         item = (day - first_day).days - 1
+        if "band" not in job:
+            raise ValueError(f"{day}: arm-b.json has no band entry (scored before PR #140's band)")
+        band_layouts += job["band"]["n_predicted"]
+        band_covered += job["band"]["n_covered"]
         measured = [float(m) for m in job["measured"]]
         order = sorted(range(len(measured)), key=lambda i: -measured[i])
         best = order[0]
@@ -903,6 +914,11 @@ def _arm_b_report(
             "best_pick_hits": hits,
             "mean_regret": {name: _mean(values) for name, values in regret.items()},
             "near_ties": near_ties,
+            "band_coverage": {
+                "layouts": band_layouts,
+                "covered": band_covered,
+                "share": band_covered / band_layouts if band_layouts else None,
+            },
         },
     }
 
