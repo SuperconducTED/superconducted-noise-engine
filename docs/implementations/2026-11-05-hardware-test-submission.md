@@ -807,3 +807,73 @@ does not import `scripts/hardware_submit.py`. So the plan's conclusion holds for
 reaches the dry run, and its 8 identical files show that those functions write what they wrote. That `--mode submission`
 and `--mode execution` themselves are unchanged rests on the definition comparison (`main` differs only in its controls
 branch), not on the dry run. Found in review before anything left the laptop.
+
+## After PR #140's merge, 2026-11-20, before the code: main merged in, the reference moved, the band's Arm B coverage
+
+Appended; nothing above is edited. PR #140 merged on 2026-11-20 as `0971c143`, and this PR was retargeted to `main`
+the same day on the lead's word. PR #140's record ("Owed elsewhere, not fixed here", 2026-11-16) leaves this PR three
+things: merge #140's head, move criteria 1 and 10 from `dry-run-2026-11-05/` to `dry-run-2026-11-16/`, and report the
+band's coverage in Arm B, which amendment 26 asks for ("The band is reported in Arm B with its coverage"). This section
+is the plan; the code follows it.
+
+**1. The merge.** `main` at `b9fcddea` is merged in by a merge commit (`213edfe3`), not rebased, so the branch's history
+and every SHA this record cites stay valid. Its tree is `99126ccc`, the same object `git merge-tree --write-tree` gave
+for `b9fcddea` and `bbb209bb` before the merge, with no conflict. Both sides edited
+`scripts/hardware_reading_vs_level.py` after `2aea1e18`: this PR in `Job`, `build_job` and the not-operational path,
+#140's `a704f063` in `score_arm_b` and the new `score_band`. Read after the merge: `build_job` still predicts every name
+in `SOURCES`, `band_lo` and `band_hi` included; `score_arm_b` keeps the five per-source entries this PR's report reads
+and adds `band` beside them; `with_execution` adds only `reading_at_execution`. Neither change edits the other's lines.
+
+**2. Criteria 1 and 10 move to the new reference.** The dry run's command does not change: the same `--ref`, `--at`,
+`--execution-ref` and controls, as `dry-run-2026-11-16/manifest.json` records them, and that folder's `controls.json`
+is byte-identical to `dry-run-2026-11-05/`'s. A copy of `rehearsal-2026-11-08/dry_run.sh` whose reference is
+`dry-run-2026-11-16` goes in a new folder, `docs/evidence/hardware-reading-vs-level/merge-2026-11-20/`. Criteria 1 and
+10 as written are not edited; criterion 37 restates them against the new reference.
+
+**3. The band's coverage in Arm B.** `_arm_b_report`'s `descriptive` gains `band_coverage`, with three fields:
+
+- `layouts`: the sum over every Arm B job in the report of `score_band`'s `n_predicted`.
+- `covered`: the sum of its `n_covered`.
+- `share`: `covered / layouts`, or `null` when no layout has a band.
+
+They are read from each job's `band` entry, the one `score_band` wrote into `arm-b.json`, and never recomputed here.
+That leaves one definition of a covered layout, #140's: the measured fidelity lies in the closed interval between the
+two ends' predicted fidelities, and a layout missing either end has no band. The figures are pooled over layouts, not
+averaged over jobs, because jobs keep different numbers of layouts. They are taken over every Arm B job, as the other
+descriptive figures are, not only over completed ones.
+
+A job whose `arm-b.json` has no `band` entry was scored before #140's change. It is refused with a `ValueError` naming
+the day, never read as zero coverage. Nothing compares the share with 80% or with any other level: Arm B has no nominal
+level (#140's record, "Coverage is reported, not judged").
+
+Unchanged: the paired Spearman test, `passes`, `inconclusive` and the band's midpoint ranking. The midpoint is still
+computed from `band_lo` and `band_hi`'s `predicted` lists. It equals `score_band`'s midpoint by construction, because
+the mean of the two ends does not depend on their order.
+
+The test helper `_arm_b` builds the `band` entry with the real `score_band` whenever both ends are given, so every
+existing Arm B test reads the shape `run_score` writes.
+
+**What is re-run, and why.**
+
+- The dry run: the merge brought #140's scoring into this branch, and its reference moved (criterion 37).
+- The rehearsal: it is the one end-to-end path through `score` and `report`, and `arm-b.json` now carries the `band`
+  entry the report reads (criterion 40).
+
+Both run from the full clone `C:/t1dfull`, one after the other, because the rehearsal peaked at 37.2 of 39.1 GB
+committed memory on 2026-11-08.
+
+| # | Criterion |
+| --- | --- |
+| 36 | The merge commit's tree equals `git merge-tree --write-tree` of `b9fcddea` and `bbb209bb`, with no conflict; `src/` equals `main`'s; none of this PR's commit messages carries a closing keyword. |
+| 37 | Criteria 1 and 10 against `dry-run-2026-11-16/`. At the head that carries this section's code, `compare_dry_run.py` exits 0, and the eight files the run writes are byte-identical to the reference's, line endings normalised. The ninth file, `dry-run.log`, is a hand copy of the 2026-11-16 run's log, not an output of the run, so the comparison loop reports it as differing. That is predicted, not a failure. |
+| 38 | `band_coverage` behaves as section 3 says. On hand-made jobs with known intervals, `layouts`, `covered` and `share` equal the counts made by hand. A layout missing an end counts in neither. A report with no banded layout gives `share` `null`. A job without `band` is refused, naming its day. The paired test's output is identical with and without the new entry. |
+| 39 | Every new line is mutation-checked, with predictions committed before the run. Each mutant is caught (by an assertion where it can be) or shown equivalent, with a reason. |
+| 40 | The rehearsal, re-run at the same head into `merge-2026-11-20/` with `rehearsal-2026-11-08/`'s days, archive commit and checker. Every check that held on 2026-11-08 holds, and the day-15 report's `arm_b.descriptive.band_coverage.layouts` equals the sum of `band.n_predicted` over the sealed `arm-b.json` files. |
+| 41 | ruff, `ruff format --check`, `check_ids.py`, `mypy --strict` and `pytest tests/` pass on the exact head, with the exact pins and `PYTHONPATH=src`, and the run prints a `superconducted.__file__` inside the head's own tree. |
+
+**Not in this section; each is owed on the lead's word.**
+
+- The push and the PR body.
+- Burak's runbook for criterion 9, now against `dry-run-2026-11-16/`, dry-run from GitHub before it is posted.
+- The team's rule for a job 14 that cannot be scored on day 15's morning.
+- The controls re-run at the freezing ref, after this PR merges.
