@@ -1762,6 +1762,31 @@ ADRs (the register's entries of that date).
 ADR-025's `**Status**` line, `Accepted.`, is unchanged. What was open was the ratification of these
 amendments, and it is answered here.
 
+### ADR-025 note, 2026-11-15: what a sweep filed out of order prints (Issue #93)
+
+Recorded here, beside the 2026-09-05 pipeline-health amendment it concerns, as Issue #93 asks. It
+follows the 2026-11-15 amendment's Q3 rule above and changes no ledger semantics: only messages.
+
+`scripts/file_snapshots.sh` used to print a `::warning::` for every document a historical sweep filed
+behind the newest row of `health/state-index.tsv`, telling the operator to dispatch the backfill with
+`rebuild=true`. Under Q3 no rebuild is owed for that, and readers derive first sightings from
+`last_update_date`. #93's option 1 (say what is owed) is taken, with option 3 (once per run) for
+sweeps. The lead decided it on 2026-11-15, following File 06's "#93, option 1" (Issue #84, comment
+5885407524).
+
+- **A sweep** (`IS_BACKFILL=1`) prints one plain line per run: how many documents it filed behind the
+  newest indexed row, and that nothing is owed. No `::warning::`.
+- **A live poll** (`IS_BACKFILL=0`) filing such a document still prints a `::warning::` per document,
+  because a current document cannot predate one already indexed unless something upstream is wrong.
+  It names no rebuild.
+- **What is filed and indexed is unchanged**, `is_new_state` included. Options 2 (decide the column
+  against the digest set) and 4 (retire the column) are not taken.
+
+| | |
+| --- | --- |
+| **Pinned by** | `tests/test_file_snapshots.py`: `test_a_sweep_behind_the_index_prints_one_line_and_owes_no_rebuild` and `test_a_live_poll_behind_the_index_still_warns_without_a_rebuild`, each shown red on the old script and mutation-checked (`docs/evidence/issue-93-sweep-warning/`) |
+| **Not changed here** | The `calibration-data` README's sentence that `--rebuild` "exists because a historical sweep files documents out of chronological order"; carried by Issue #109 |
+
 ---
 
 ## ADR-027 — Calibration training target
