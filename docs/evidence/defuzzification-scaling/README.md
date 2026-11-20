@@ -89,8 +89,8 @@ bash docs/evidence/defuzzification-scaling/defuzz_suite_by_variant.sh .
 Expected: the first prints `all as described` and exits 0; the second ends `112 passed, 0 failed` and
 exits 0; the third gives `1203 passed` for `shipped`, `A`, `B`, `C` and `D`, `2 failed` for `X12` (both
 `test_effective_weights_match_shipped_defuzzifier` cases) and `9 failed` for `X6`. Only the timing lines
-of section 8 and the suites' wall times change between runs. Not measured: open PR branches (#143, #152,
-#155) and Burak's desktop.
+of section 8, the suites' wall times and the object addresses (`at 0x...`) in the `X12` and `X6` failure
+tracebacks change between runs. Not measured: open PR branches (#143, #152, #155) and Burak's desktop.
 
 ## Related docs
 
