@@ -141,3 +141,55 @@ python -m pytest tests/ -q -p no:cacheprovider
 - `docs/verification/2026-11-02-issue-57-retroactive-read-burak.md`, findings 1 and 2
 - `docs/team.md`: `types.py` is Dr. Akba's module, with Mert Efe Şensoy as secondary reviewer
 - `docs/numerical-claims.md`, NC-021 and Rule 6: the test count is re-measured at the merge commit
+
+## Results, 2026-11-20 (laptop, provisional)
+
+Appended after the code; nothing above is edited. Commits on `mert/issue-148-freeze-training-results`,
+from `main` at `4f26881c`: plan `97c692fa`, tests `d843345b`, code `32b65ccb`, mutation script
+`79b639d7`, mutation run `0581ab18`.
+
+| # | Result |
+| --- | --- |
+| 1 to 4, 6 | **Hold.** The seven new test cases pass at `32b65ccb`: six in `tests/training/test_types.py` (one of them parametrised over `train_rmse` and `validation_rmse`) and one in `tests/test_anfis.py`. |
+| 5 | **Holds.** The existing tests for the empty `standardization`, `validation_rmse=None` and the four non-finite rejections are untouched and pass; `tests/test_interfaces.py`, whose stub trainer passes `standardization=()`, passes. |
+| 7 | **Holds.** All seven fail at `d843345b`, on `main`'s `types.py`: `docs/evidence/issue-148-freeze/red.out.txt`. |
+| 8 | **Holds.** Nine mutants, eight caught and one surviving, none against its prediction: `docs/evidence/issue-148-freeze/mutate.out.txt`. M1 is caught by the test's own write raising, as predicted; M2 to M8 by an assertion; M9 survives, as predicted. |
+
+**M9 is equivalent here, and not everywhere.** Found after the prediction was written. On this
+laptop NumPy's `longdouble` is 64 bits wide, so no numeric dtype holds a finite value that
+`float64` cannot. On a platform whose `longdouble` is wider (Linux on x86-64), a value beyond
+`float64`'s range is finite as given and infinite once cast. There the fix, which checks the copy,
+rejects it, and M9, which checks the caller's value, would store `inf`. So the design section's
+sentence that the two orders have "no observable effect" is too strong: copy-then-check is the
+stricter order on such a platform, and that case is **not tested**, because it cannot be built on
+Windows. A three-line probe for a Linux reviewer:
+
+```python
+import numpy as np
+from superconducted.training import TrainingDiagnostics
+TrainingDiagnostics(0.0, 0, 0, 1.0, 0, 1, False, (np.array([np.finfo(np.longdouble).max]),))
+```
+
+Expected with the fix: `ValueError: standardization values must be finite`, after NumPy's own
+overflow warning for the cast. On `main` the same call is accepted and keeps the `longdouble`.
+Whether to pin this as a test that skips where `longdouble` is not wider is the reviewer's and the
+lead's call.
+
+**Two behaviours changed on purpose**, as the plan said: non-`float64` input is stored as
+`float64`, and a bare number for `train_rmse` becomes a zero-dimensional array. One more follows
+from the tuple conversion and was not in the plan: a generator passed as `loss_history` used to be
+consumed by the finiteness check and stored exhausted; it is now stored as the tuple of its values.
+
+**Static gates** at `0581ab18`, exact pins (NumPy 2.4.4, pytest 9.0.3, mypy 1.20.2, ruff 0.15.12),
+`PYTHONPATH=src`: `ruff check .` clean, `ruff format --check .` clean (148 files), `mypy --strict`
+clean (51 source files), `check_ids.py` clean.
+
+| # | Result |
+| --- | --- |
+| 9 | **Holds, with one qualification.** `pytest tests/ -q -p no:cacheprovider` at the code commit `32b65ccb`: **1439 passed, 0 skipped, 0 failed** in 649.83 s, with `superconducted.__file__` inside that tree. The collect-only command NC-021 registers gives 1439 tests at the head. The qualification: the run was at `32b65ccb`, not at the head; every later commit touches only `docs/`, and `src`, `tests`, `scripts` and `pyproject.toml` at the head are the same objects as at `32b65ccb`, so the count holds by tree identity, not by a second run. The static gates above were run at `0581ab18`. |
+
+`main` registers 1432 (NC-021, at `b9fcddea`'s tree), and this branch adds seven test cases, so 1439
+agrees with it; it is a measurement of this branch's tree and not the figure NC-021 will carry.
+Rule 6 has that row re-measured on the merge commit, in a commit that follows the merge.
+
+**Not done here:** no desktop run; nothing pushed; no PR. The Linux probe above is unrun.
