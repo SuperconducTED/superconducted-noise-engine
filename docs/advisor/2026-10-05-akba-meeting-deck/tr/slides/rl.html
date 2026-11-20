@@ -1,0 +1,25 @@
+<section id="rl" style="background:#F6F4EF;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">NELERİ İNCELEDİK</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">Neden Pekiştirmeli Öğrenme Değil</h2>
+<div style="display:flex;gap:48px;align-items:start">
+<div style="width:640px;background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:24px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;font-weight:600;line-height:1.15;color:#14213D">Motor olarak: hayır</p>
+<p style="font-size:30px;line-height:1.3;color:#3A4558"><b>1.</b> IBM'in bir sonraki kalibrasyonu bizim ileriye tahminimize bağlı değil.</p>
+<p style="font-size:30px;line-height:1.3;color:#3A4558"><b>2.</b> Yani problem çevrimiçi denetimli öğrenmedir.</p>
+<p style="font-size:30px;line-height:1.3;color:#3A4558"><b>3.</b> RL yalnızca varyans ekler.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;font-weight:600;line-height:1.15;color:#14213D">Çevrimiçi kararların yeri</p>
+<table style="width:976px;font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#3A4558">
+<tr><th style="width:38%;text-align:left;color:#14213D">Çevrimiçi karar</th><th style="width:62%;text-align:left;color:#14213D">Yaklaşım</th></tr>
+<tr><td>1 · Bant kalibrasyonu</td><td>uyarlamalı konformal çıkarım (ACI)</td></tr>
+<tr><td>2 · Yeniden eğitim takvimi</td><td>çevrimdışı geriye dönük test</td></tr>
+<tr><td>3 · Yoklama / tarama adımı</td><td>ölçüm (Issue #104)</td></tr>
+<tr><td>4 · Donanım için devre seçimi</td><td>deney tasarımı (daha sonra)</td></tr>
+<tr><td>5 · Kübit kontrolü</td><td>RL, ama puls düzeyinde erişim gerekir; IBM bunu tüm işlemcilerinde kullanımdan kaldırdı</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.3;color:#5B6B82">1 ile 4 arası satırlar RL problemi değil. 5. satır RL'dir, ama IBM donanımında uygulanamaz.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">13 · Araştırma belgesi §1-§2 (PR #111); 5. satır: Baum vd. 2021; Sivak vd. 2022, 2025; IBM puls geçiş kılavuzu</p>
+</section>

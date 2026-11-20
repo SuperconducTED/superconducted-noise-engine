@@ -1,0 +1,14 @@
+arm A qubits [10, 35, 39, 44, 48, 54, 105, 112, 132, 147, 148, 155] creg ['c']
+Aer, alone                                   F 0.480  000 0.493  111 0.077  shots 2048
+Aer, [A, B] in one run                       F 0.466  000 0.931  111 0.000  shots 2048
+Aer, [B, A] in one run                       F 0.480  000 0.493  111 0.077  shots 2048
+Sampler, alone                               F 0.480  000 0.493  111 0.077  shots 2048
+Sampler, [A, B] in one job                   F 0.466  000 0.931  111 0.000  shots 2048
+Sampler, [B, A] in one job                   F 0.480  000 0.493  111 0.077  shots 2048
+
+same with job-style shots per pub, Arm A 2048 and Arm B 4096
+Sampler, per-pub shots                       F 0.501  000 0.507  111 0.083  shots 4096
+
+Arm A's own rates in the batched job against alone (first 4 qubits)
+  alone    [np.float64(0.141), np.float64(0.517), np.float64(0.517), np.float64(0.525)]
+  batched  [np.float64(0.141), np.float64(0.517), np.float64(0.517), np.float64(0.525)]

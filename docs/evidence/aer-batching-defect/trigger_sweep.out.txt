@@ -1,0 +1,83 @@
+qiskit 2.4.1, qiskit-aer 0.17.2, numpy 2.4.4
+2048 shots unless a row says otherwise, seed 97, sum tolerance 1e-09
+A. The trace law
+A1     met    [F_11, S_1]: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+A2     met    [F_11, S_2]: sum 4.000000000 (want 4); shots 2048; methods SV,DM; noise kraus,superop
+A3     met    [F_11, S_3]: sum 8.000000000 (want 8); shots 2048; methods SV,DM; noise kraus,superop
+A4     met    [F_11, S_0]: sum 1.000000000 (want 1); shots 2048; methods SV,DM; noise kraus,superop
+A5     met    [S_1, F_11]: sum 1.000000000 (want 1); shots 2048; methods DM,SV; noise superop,kraus
+A6     met    S_1 alone: sum 1.000000000 (want 1); shots 2048; methods DM; noise superop
+A7     met    density matrix after F_11 against 2 times alone: largest element gap 0.00e+00; trace alone 1.000000000, after 2.000000000; methods SV,DM
+A8     met    density matrix after F_11 against 4 times alone: largest element gap 0.00e+00; trace alone 1.000000000, after 4.000000000; methods SV,DM
+A9     met    gamma 0.05: P(0) alone 0.0552 (want 0.05), after F_11 0.1050 (want 0.1)
+A9     met    gamma 0.1: P(0) alone 0.1035 (want 0.1), after F_11 0.1973 (want 0.2)
+A9     met    gamma 0.2: P(0) alone 0.2031 (want 0.2), after F_11 0.3955 (want 0.4)
+B. Which noise
+B1     met    depolarizing: sum 1.000000000 (want 1); kraus in error False; methods SV,DM; noise circuit,superop
+B2     met    pauli X: sum 1.000000000 (want 1); kraus in error False; methods SV,DM; noise circuit,superop
+B3     met    reset: sum 1.000000000 (want 1); kraus in error False; methods SV,DM; noise circuit,superop
+B4     met    thermal T2<T1: sum 1.000000000 (want 1); kraus in error False; methods SV,DM; noise circuit,superop
+B5     met    mixed unitary: sum 1.000000000 (want 1); kraus in error False; methods SV,DM; noise circuit,superop
+B6     met    coherent unitary: sum 1.000000000 (want 1); kraus in error False; methods SV,DM; noise circuit,superop
+B7     met    amplitude damping: sum 2.000000000 (want 2); kraus in error True; methods SV,DM; noise kraus,superop
+B8     met    phase damping: sum 2.000000000 (want 2); kraus in error True; methods SV,DM; noise kraus,superop
+B9     met    thermal T2>T1: sum 2.000000000 (want 2); kraus in error True; methods SV,DM; noise kraus,superop
+B10    met    depolarizing on x, damping on unused cz: sum 2.000000000 (want 2); shots 2048; methods SV,DM (method not predicted); noise kraus,superop
+B11    met    readout error only: sum 1.000000000 (want 1); shots 2048; methods SV,ST (method not predicted); noise readout,readout
+B12    met    Pauli-Lindblad on x: sum 1.000000000 (want 1); shots 2048; methods SV,DM; noise circuit,superop
+B13    met    Pauli-Lindblad on x, damping on unused cz: sum 1.000000000 (want 1); shots 2048; methods SV,DM; noise kraus,superop
+B14    met    damping on x, Pauli-Lindblad on y, circuit x y: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+C. The first circuit
+C1     met    [F_1, S_1]: sum 1.000000000 (want 1); shots 2048; methods DM,DM; noise superop,superop
+C1     met    [F_2, S_1]: sum 1.000000000 (want 1); shots 2048; methods DM,DM; noise superop,superop
+C1     met    [F_3, S_1]: sum 1.000000000 (want 1); shots 2048; methods DM,DM; noise superop,superop
+C1     met    [F_4, S_1]: sum 1.000000000 (want 1); shots 2048; methods DM,DM; noise superop,superop
+C1     met    [F_5, S_1]: sum 1.000000000 (want 1); shots 2048; methods DM,DM; noise superop,superop
+C1     met    [F_6, S_1]: sum 1.000000000 (want 1); shots 2048; methods DM,DM; noise superop,superop
+C1     met    [F_7, S_1]: sum 1.000000000 (want 1); shots 2048; methods DM,DM; noise superop,superop
+C1     met    [F_8, S_1]: sum 1.000000000 (want 1); shots 2048; methods DM,DM; noise superop,superop
+C1     met    [F_9, S_1]: sum 1.000000000 (want 1); shots 2048; methods DM,DM; noise superop,superop
+C1     met    [F_10, S_1]: sum 1.000000000 (want 1); shots 2048; methods DM,DM; noise superop,superop
+C2     met    [F_11, S_1]: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+C2     met    [F_12, S_1]: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+C2     met    [F_13, S_1]: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+C3     met    11 qubits, measures only: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+C4     met    11 qubits, noisy x on each: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+C5     met    width 20, one used, one measured: sum 1.000000000 (want 1); shots 2048; methods DM,DM; noise superop,superop
+C6     met    width 20, 12 used, 12 measured: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+C7     met    width 20, 12 used, one measured: sum 1.000000000 (want 1); shots 2048; methods DM,DM; noise superop,superop
+C8     met    one qubit with a mid-circuit measure: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+D. Shots and the second circuit
+D1     met    [F_11, S_1]: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+D2     met    [F_11, S_1]: sum 1.000000000 (want 1); shots 2049; methods DM,DM; noise superop,superop
+D3     met    [F_3, S_1]: sum 2.000000000 (want 2); shots 8; methods SV,DM; noise kraus,superop
+D4     met    [F_3, S_1]: sum 1.000000000 (want 1); shots 9; methods DM,DM; noise superop,superop
+D5     met    [F_2, S_1]: sum 1.000000000 (want 1); shots 2; methods SV,SV; noise kraus,kraus
+D6     met    [F_2, S_1]: sum 2.000000000 (want 2); shots 3; methods SV,DM; noise kraus,superop
+D7     met    [F_2, S_1]: sum 2.000000000 (want 2); shots 4; methods SV,DM; noise kraus,superop
+D8     met    [F_2, S_1]: sum 1.000000000 (want 1); shots 5; methods DM,DM; noise superop,superop
+D9     met    [F_12, ten-qubit S_1]: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+D10    met    [F_12, eleven-qubit S_1]: sum 1.000000000 (want 1); shots 2048; methods SV,SV; noise kraus,kraus
+E. Order, scope and escapes
+E1     met    [S_1, F_11, S_2]: sum 1.000000000 (want 1), 1.000000000 (want 1); shots 2048; methods DM,SV,DM; noise superop,kraus,superop
+E2     met    [F_11, S_1, S_2]: sum 2.000000000 (want 2), 4.000000000 (want 4); shots 2048; methods SV,DM,DM; noise kraus,superop,superop
+E3     met    S_1 alone, same simulator, after a batched run: sum 1.000000000 (want 1); shots 2048; methods DM; noise superop
+E4     met    11 noisy qubits, alone against first in a batch: counts identical True, 196 distinct outcomes
+E5     met    method=statevector: sum 1.000000000 (want 1); shots 2048; methods SV,SV; noise kraus,kraus
+E6     met    method=density_matrix: sum 1.000000000 (want 1); shots 2048; methods DM,DM; noise superop,superop
+E7     met    method=automatic, explicit: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+E8     met    no noise model: sum 1.000000000 (want 1); shots 2048; methods SV,ST (method not predicted); noise ideal,ideal
+E9     met    max_parallel_threads=1: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+E10    met    error local to qubit 0: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+E11    met    12 local errors: sum 2.000000000 (want 2); shots 2048; methods SV,DM; noise kraus,superop
+F. Primitives
+F1     met    BackendSamplerV2, same shots: P(0) 0.1973 (want 0.2), 2048 shots
+F2     met    BackendSamplerV2, 2048 and 4096: P(0) 0.1042 (want 0.1), 4096 shots
+F3     met    qiskit_aer SamplerV2, same shots: P(0) 0.1973 (want 0.2), 2048 shots
+F4     met    qiskit_aer SamplerV2, 2048 and 4096: P(0) 0.1042 (want 0.1), 4096 shots
+G. The original symptom
+G1     met    alone, automatic against forced density matrix: identical True; method DM; 000 0.4902, 111 0.3633, Hellinger fidelity 0.8488
+G2     met    after F_12: 000 0.9429, 111 0.0000, Hellinger fidelity 0.4714; 000 wanted 0.9412; 111 counts 0
+G3     met    after F_12, no readout error: 000 1.0000, 111 0.0000, Hellinger fidelity 0.5000; counts {'000': 2048}
+
+rows 72, met 72, missed 0: []

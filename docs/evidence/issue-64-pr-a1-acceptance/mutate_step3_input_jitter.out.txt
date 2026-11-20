@@ -1,0 +1,34 @@
+baseline: ============================= 77 passed in 1.78s ==============================
+V01: KILLED | 12 failed, 65 passed in 2.05s | ['test_a_first_draw_outside_a_bound_is_redrawn_not_clipped', 'test_a_non_finite_draw_is_redrawn', 'test_a_real_generator_is_read_one_vector_per_attempt', 'test_accepted_draws_follow_the_normal_truncated_at_the_bound', 'test_an_open_end_is_redrawn_at_the_end_itself_and_a_closed_end_is_kept', 'test_exhausted_redraws_raise_after_exactly_max_redraws_plus_one_draws']
+V02: KILLED | 2 failed, 75 passed in 2.02s | ['test_exhausted_redraws_raise_after_exactly_max_redraws_plus_one_draws']
+V03: KILLED | 2 failed, 75 passed in 1.85s | ['test_exhausted_redraws_raise_after_exactly_max_redraws_plus_one_draws']
+V04: KILLED | 3 failed, 74 passed in 2.06s | ['test_a_bound_admits_its_closed_ends_and_nothing_non_finite', 'test_a_centre_outside_its_bounds_is_refused_at_construction', 'test_an_open_end_is_redrawn_at_the_end_itself_and_a_closed_end_is_kept']
+V05: KILLED | 2 failed, 75 passed in 2.08s | ['test_a_bound_admits_its_closed_ends_and_nothing_non_finite', 'test_an_open_end_is_redrawn_at_the_end_itself_and_a_closed_end_is_kept']
+V06: KILLED | 1 failed, 76 passed in 2.54s | ['test_a_bound_admits_its_closed_ends_and_nothing_non_finite']
+V07: KILLED | 6 failed, 71 passed in 2.76s | ['test_a_centre_outside_its_bounds_is_refused_at_construction']
+V08: KILLED | 2 failed, 75 passed in 3.06s | ['test_an_ensemble_over_another_snapshot_is_refused', 'test_the_member_extractor_returns_its_vector_and_refuses_another_snapshot']
+V09: KILLED | 5 failed, 72 passed in 2.38s | ['test_a_first_draw_outside_a_bound_is_redrawn_not_clipped', 'test_a_real_generator_is_read_one_vector_per_attempt']
+V10: KILLED | 11 failed, 66 passed in 2.35s | ['test_a_first_draw_outside_a_bound_is_redrawn_not_clipped', 'test_a_non_finite_draw_is_redrawn', 'test_a_real_generator_is_read_one_vector_per_attempt', 'test_an_open_end_is_redrawn_at_the_end_itself_and_a_closed_end_is_kept', 'test_exhausted_redraws_raise_after_exactly_max_redraws_plus_one_draws']
+V11: KILLED | 3 failed, 74 passed in 3.25s | ['test_relative_refuses_an_r_that_is_not_a_finite_positive_number']
+V12: KILLED | 2 failed, 75 passed in 4.33s | ['test_relative_needs_one_known_name_per_feature', 'test_the_bounds_table_and_an_unknown_name']
+V13: KILLED | 1 failed, 76 passed in 3.56s | ['test_perturb_refuses_an_extractor_of_another_shape_or_names']
+V14: KILLED | 1 failed, 76 passed in 3.83s | ['test_perturb_refuses_an_extractor_of_another_shape_or_names']
+V15: KILLED | 1 failed, 76 passed in 3.39s | ['test_the_centre_and_scale_are_copies_and_read_only']
+V16: KILLED | 2 failed, 75 passed in 2.89s | ['test_the_centre_and_scale_are_copies_and_read_only', 'test_the_member_extractor_returns_its_vector_and_refuses_another_snapshot']
+V17: KILLED | 1 failed, 76 passed in 3.33s | ['test_the_constructor_refuses_a_bad_scale_bounds_or_redraw_count']
+V18: SURVIVED | 77 passed in 2.92s | []
+V19: KILLED | 1 failed, 76 passed in 2.30s | ['test_a_bound_admits_its_closed_ends_and_nothing_non_finite']
+V20: KILLED | 3 failed, 74 passed in 2.19s | ['test_the_constructor_refuses_a_bad_scale_bounds_or_redraw_count']
+V21: SURVIVED | 77 passed in 2.36s | []
+V22: KILLED | 1 failed, 76 passed in 2.04s | ['test_a_directly_built_member_extractor_checks_its_shapes']
+V23: KILLED | 1 failed, 76 passed in 2.31s | ['test_a_directly_built_member_extractor_checks_its_shapes']
+V24: KILLED | 4 failed, 73 passed in 2.41s | ['test_relative_refuses_an_r_that_is_not_a_finite_positive_number']
+V25: KILLED | 15 failed, 62 passed in 2.82s | ['test_a_first_draw_outside_a_bound_is_redrawn_not_clipped', 'test_a_non_finite_draw_is_redrawn', 'test_a_real_generator_is_read_one_vector_per_attempt', 'test_accepted_draws_follow_the_normal_truncated_at_the_bound', 'test_an_ensemble_over_another_snapshot_is_refused', 'test_an_open_end_is_redrawn_at_the_end_itself_and_a_closed_end_is_kept', 'test_jittered_members_differ_repeat_and_follow_their_seed', 'test_perturb_mutates_nothing_and_reads_only_its_generator', 'test_perturb_refuses_an_extractor_of_another_shape_or_names', 'test_the_member_extractor_returns_its_vector_and_refuses_another_snapshot']
+restored: True
+control 1: admissible vectors where r*|x| and r*x differ as values: 0
+control 1: of those that differ only in the sign of a zero: 309
+control 1: members (center + scale z) that differ as values: 0
+control 1, positive: vectors with a negative T1 where they differ (must be > 0): 100000
+control 2: wrapped vectors equal to the centre with a flipped zero: 641
+control 2: members that differ as values: 0
+control 2, positive: one ulp away, differing sums (must be > 0): 252562

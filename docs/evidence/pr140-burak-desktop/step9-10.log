@@ -1,0 +1,28 @@
+MUST MATCH
+  manifest.discriminating: same
+  manifest.controls: same
+  manifest.slots_dt: same
+  manifest.layouts: same
+  manifest.selection_log: same
+  truth1.1_sampling: pass
+  truth1.2_offset: pass
+  truth1.3_direction: pass
+  truth1.4_arm_b: pass
+  truth1.5_timing: pass
+  truth2.1_sampling: pass
+  truth2.2_offset: pass
+  truth2.3_direction: pass
+  truth2.4_arm_b: pass
+  truth2.5_timing: pass
+REPORTED
+  arm-a-truth1.tsv: identical
+  arm-a-truth2.tsv: identical
+  arm-b-truth1.tsv: identical
+  arm-b-truth2.tsv: identical
+  criteria.json: differs, 13 lines changed, 0 lines added or removed
+  selection.json: identical
+  manifest keys that differ: ['versions']
+  controls.json keys that differ: []
+RESULT: all must-match rows hold
+compare exit 0
+## step10

@@ -1,0 +1,23 @@
+<section id="archive" style="background:#EEF3F5;color:#2E3E46;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<p style="font-family:'Space Mono', 'Courier New', monospace;font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#0A6C7C">What the archive established</p>
+<h2 style="font-size:56px;font-weight:600;line-height:1.2;color:#0A1B24">The Level Beats the Latest Reading</h2>
+<p style="font-size:28px;font-weight:700;line-height:1.35;color:#0A1B24;border-left:6px solid #0A6C7C;padding-left:20px">On the archive, shrinking to each qubit’s 30-day level explains the next change; the latest reading explains none of it.</p>
+<div style="display:flex;gap:40px">
+<div style="width:690px;display:flex;flex-direction:column;gap:8px">
+<img src="/_blob/9347f5a39ae571be05b00d5e0f5edb0a" alt="Bar chart of NC-085’s interval scores for gamma at 24 hours: persistence 1.495, shrinkage 1.090, ridge 1.095, rolling 30-day band 1.081; lower is better" style="width:690px;height:420px;object-fit:contain;border-radius:12px">
+<p style="font-size:24px;line-height:1.35;color:#45535A">Interval score of 80% bands, gamma, 24 h; lower is better (NC-085)</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<ul style="font-size:24px;line-height:1.45;padding-left:28px">
+<li><b>Level plus scatter:</b> lag-1 autocorrelation -0.486 (gamma); -0.5 is pure noise around a level (NC-084)</li>
+<li><b>The bar:</b> the rolling 30-day band beats the fitted persistence band in all four cases (NC-081)</li>
+<li><b>Per qubit wins:</b> 168 h stale per qubit beats fresh uniform, 0.232 against 0.266 median relative error (NC-083)</li>
+<li><b>The level explains:</b> R² 0.438 for shrinkage, 0.000 for persistence (NC-085)</li>
+<li><b>No forecaster:</b> a ridge adds -0.002 to +0.001 (NC-085)</li>
+</ul>
+<p style="font-size:24px;line-height:1.35;color:#45535A">calibration-data 5828b4a2, 924 distinct states, test from 2026-09-01. Laptop, provisional; desktop reproduction owed.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#45535A">3 · NC-081, NC-083, NC-084, NC-085 · dated anchors (Rule 7 form, Issue #92, proposed)</p>
+<aside>Four facts from the archive, measured on 2026-10-23 and still provisional. A qubit’s calibration moves slowly around a level with independent scatter on top. A simple rolling band is the bar any band has to beat. A per-qubit model a week old beats a fresh model that treats the chip as uniform. And on the chart: every level-based method sits near the rolling band, while the latest reading, persistence, is far worse.</aside>
+</section>

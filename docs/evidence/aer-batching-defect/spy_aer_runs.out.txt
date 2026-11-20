@@ -1,0 +1,59 @@
+Ran at 617c7954; tests/, src/ and scripts/ identical to main at 5c98f264. Header lines trimmed.
+collected 1053 items
+
+tests\calibration\test_features_missing_fields.py ..........             [  0%]
+tests\calibration\test_loader.py ..................                      [  2%]
+tests\calibration\test_vectorizer_units.py ............................. [  5%]
+...                                                                      [  5%]
+tests\test_anfis.py ......................................               [  9%]
+tests\test_backfill_state_index.py ..............                        [ 10%]
+tests\test_calibration.py .............................................. [ 15%]
+...                                                                      [ 15%]
+tests\test_calibration_poll_workflow.py .....                            [ 15%]
+tests\test_canonical_snapshot_digest.py ................................ [ 18%]
+.............                                                            [ 20%]
+tests\test_capture_rate_analysis.py .............                        [ 21%]
+tests\test_capture_record.py .............................               [ 24%]
+tests\test_channel_viability.py .....................                    [ 26%]
+tests\test_check_dashboard_freshness.py ................................ [ 29%]
+....                                                                     [ 29%]
+tests\test_check_ids.py ......................                           [ 31%]
+tests\test_feature_distribution.py ............................          [ 34%]
+tests\test_figures.py .................................................. [ 38%]
+                                                                         [ 38%]
+tests\test_file_snapshots.py ..........                                  [ 39%]
+tests\test_first_ensemble_run.py .............................           [ 42%]
+tests\test_hardware_test_predictors.py ................................. [ 45%]
+........................................                                 [ 49%]
+tests\test_harness.py ..............................................     [ 53%]
+tests\test_init_error_analysis.py .......                                [ 54%]
+tests\test_interfaces.py ....................................            [ 58%]
+tests\test_membership.py .....................................           [ 61%]
+tests\test_metrics.py .........................                          [ 63%]
+tests\test_noise_gate_eligibility.py ..........                          [ 64%]
+tests\test_parameterization.py ......................................... [ 68%]
+........................................................................ [ 75%]
+..........                                                               [ 76%]
+tests\test_pipeline_health.py .......................................... [ 80%]
+..............                                                           [ 81%]
+tests\test_probe_historical_properties.py .............................. [ 84%]
+......                                                                   [ 85%]
+tests\test_reference.py .........................................        [ 89%]
+tests\test_resolution_measurement.py ........                            [ 89%]
+tests\test_threshold_distributions.py ..................                 [ 91%]
+tests\test_tsk.py ...............                                        [ 93%]
+tests\training\test_aer_pin.py .........                                 [ 93%]
+tests\training\test_dataset.py ................                          [ 95%]
+tests\training\test_parameters.py ...                                    [ 95%]
+tests\training\test_targets.py ...................                       [ 97%]
+tests\training\test_types.py ..........................                  [100%]
+
+
+=== Aer executions seen by spy_aer_runs ===
+executions 1131
+tests with at least one 45
+circuits per execution {1: 1131}
+method option {'automatic': 1035, 'density_matrix': 96}
+with a noise model 1131
+executions with more than one circuit 0
+====================== 1053 passed in 324.58s (0:05:24) =======================

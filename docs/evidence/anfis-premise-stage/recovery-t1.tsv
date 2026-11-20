@@ -1,0 +1,4 @@
+type	premise_lr	epochs_run	premise_steps_rejected	seconds_per_epoch	loss_initial	loss_final	premise_l2_error_start	premise_l2_error_end	premise_max_error_start	premise_max_error_end	held_out_max_error_lse_only	held_out_max_error_trained	held_out_max_abs_target
+t1	100.0	40	0	9.92	5.965662e-06	3.319290e-06	0.839526	0.774002	0.361188	0.357090	1.222619e-02	9.118355e-03	3.564089e+01
+t1	1000.0	40	0	9.74	5.965662e-06	1.371012e-07	0.839526	0.657680	0.361188	0.343450	1.222619e-02	2.980243e-03	3.564089e+01
+t1	10000.0	40	0	9.25	5.965662e-06	3.121782e-08	0.839526	0.551364	0.361188	0.289423	1.222619e-02	1.179493e-03	3.564089e+01

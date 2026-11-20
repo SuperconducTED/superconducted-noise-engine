@@ -1,0 +1,21 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.0.3, pluggy-1.7.0
+rootdir: /tmp/pr141-verify/true-clean
+configfile: pyproject.toml
+plugins: cov-7.1.0, platformdirs-4.14.5
+collected 4 items
+
+docs/evidence/aer-batching-defect/spy_positive_control.py ....           [100%]
+
+
+=== Aer executions seen by spy_aer_runs ===
+executions 5
+tests with at least one 4
+circuits per execution {1: 2, 2: 3}
+method option {'automatic': 5}
+with a noise model 0
+executions with more than one circuit 3
+  docs/evidence/aer-batching-defect/spy_positive_control.py::test_simulator_run: 2 circuits, method automatic, noise False, kraus or superop in model False
+  docs/evidence/aer-batching-defect/spy_positive_control.py::test_backend_sampler: 2 circuits, method automatic, noise False, kraus or superop in model False
+  docs/evidence/aer-batching-defect/spy_positive_control.py::test_aer_sampler: 2 circuits, method automatic, noise False, kraus or superop in model False
+============================== 4 passed in 0.06s ===============================

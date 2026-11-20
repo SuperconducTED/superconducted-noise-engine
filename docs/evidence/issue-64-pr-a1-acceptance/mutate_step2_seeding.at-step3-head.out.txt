@@ -1,0 +1,18 @@
+baseline: ============================= 77 passed in 2.24s ==============================
+W01: KILLED | 2 failed, 75 passed in 2.17s | ['test_iterating_a_perturbed_ensemble_twice_gives_identical_members', 'test_jittered_members_differ_repeat_and_follow_their_seed']
+W02: KILLED | 1 failed, 76 passed in 2.23s | ['test_an_unseeded_non_identity_perturbation_is_refused']
+W03: KILLED | 14 failed, 63 passed in 1.83s | ['test_an_unseeded_non_identity_perturbation_is_refused', 'test_every_member_equals_a_directly_built_model', 'test_identical_members_preserve_the_density_matrix_exactly', 'test_iterating_twice_gives_the_same_members', 'test_members_match_the_values_captured_before_the_wiring_changed', 'test_the_pinned_seed_is_the_first_viable_one']
+W04: KILLED | 4 failed, 73 passed in 2.13s | ['test_each_member_gets_its_index_the_base_objects_and_its_own_stream', 'test_iterating_a_perturbed_ensemble_twice_gives_identical_members', 'test_jittered_members_differ_repeat_and_follow_their_seed', 'test_perturbed_members_differ_and_the_returned_tuple_is_what_builds_them']
+W05: KILLED | 4 failed, 73 passed in 2.44s | ['test_an_ensemble_over_another_snapshot_is_refused', 'test_jittered_members_differ_repeat_and_follow_their_seed', 'test_perturbed_members_differ_and_the_returned_tuple_is_what_builds_them', 'test_two_constructions_from_one_seed_agree_and_another_seed_differs']
+W06: KILLED | 4 failed, 73 passed in 2.31s | ['test_construction_and_iteration_leave_the_callers_stream_untouched', 'test_iterating_a_perturbed_ensemble_twice_gives_identical_members', 'test_jittered_members_differ_repeat_and_follow_their_seed', 'test_member_streams_are_the_spawned_children_of_the_callers_seed_sequence']
+W07: KILLED | 4 failed, 73 passed in 2.05s | ['test_each_member_gets_its_index_the_base_objects_and_its_own_stream', 'test_jittered_members_differ_repeat_and_follow_their_seed', 'test_member_streams_are_the_spawned_children_of_the_callers_seed_sequence', 'test_perturbed_members_differ_and_the_returned_tuple_is_what_builds_them']
+W08: KILLED | 1 failed, 76 passed in 1.94s | ['test_a_perturbation_that_breaks_the_shape_contract_is_refused']
+W09: KILLED | 1 failed, 76 passed in 2.44s | ['test_a_perturbation_that_breaks_the_shape_contract_is_refused']
+W10: KILLED | 1 failed, 76 passed in 2.70s | ['test_a_perturbation_that_breaks_the_shape_contract_is_refused']
+W11: KILLED | 1 failed, 76 passed in 3.24s | ['test_a_perturbation_that_breaks_the_shape_contract_is_refused']
+W12: KILLED | 4 failed, 73 passed in 2.42s | ['test_build_stays_a_pure_function_of_the_seed_under_a_perturbation', 'test_jittered_members_differ_repeat_and_follow_their_seed', 'test_member_streams_are_the_spawned_children_of_the_callers_seed_sequence', 'test_two_constructions_from_one_seed_agree_and_another_seed_differs']
+W13: KILLED | 1 failed, 76 passed in 2.27s | ['test_each_member_gets_its_index_the_base_objects_and_its_own_stream']
+W14: KILLED | 1 failed, 76 passed in 2.22s | ['test_identity_returns_the_same_objects_and_draws_nothing']
+W15: KILLED | 1 failed, 76 passed in 2.59s | ['test_member_streams_are_the_spawned_children_of_the_callers_seed_sequence']
+W16: KILLED | 1 failed, 76 passed in 2.15s | ['test_a_generator_whose_seed_sequence_cannot_spawn_is_refused']
+restored: True

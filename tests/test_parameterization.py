@@ -753,7 +753,7 @@ def test_anchor_length_mismatch_is_rejected() -> None:
 
 @pytest.mark.parametrize("bad", [np.nan, np.inf, -np.inf])
 def test_non_finite_target_is_rejected(bad: float) -> None:
-    """NFR-5: a NaN bias would install maximal damping and still pass every check."""
+    """NFR-5: reject a NaN bias before it reaches channel projection."""
     mfs, anchors, _ = _three_feature_grid()
 
     with pytest.raises(ValueError, match="non-finite"):
@@ -880,10 +880,9 @@ def test_a_non_finite_feature_is_rejected_rather_than_clamped(bad: float) -> Non
 
     ``np.clip`` preserves NaN, so passing it through makes every firing strength
     NaN; the defuzzifier does not raise (the sum is NaN, not zero),
-    ``KrausChannelProjector`` maps NaN to maximal damping, and
-    ``is_identity_damping`` simultaneously reports the vector as the identity
-    channel. Wrong in both directions with every check green -- exactly the
-    failure mode NFR-5 exists to kill.
+    ``is_identity_damping`` can report the vector as identity, while the
+    projector rejects it later. The feature guard surfaces the defect earlier,
+    as required by NFR-5.
     """
 
     class NonFinite(BasicCalibrationVectorizer):

@@ -541,6 +541,190 @@ and it says which of its steps the rehearsal skipped. Its steps:
 11. The usual four-way report: the transcript as a PR comment, a committed record under
     `docs/evidence/`, the tested SHA and the machine fingerprint.
 
+## 2026-11-16: the band in Arm B, after Burak's review
+
+### The finding, reproduced (written before any change)
+
+Burak's review 5923046322 at `f97a6462` (CHANGES_REQUESTED, 2026-11-16): the desktop dry run and the
+reference comparison hold, but the band's Arm B score is missing. This record's "Band in Arm B"
+bullet and its owed amendment 4, the pre-registration's amendment 4 (on `main` since #135 merged)
+and its amendment 26 ("The band is reported in Arm B with its coverage") all say the band gets the
+fidelity interval from its two ends, is ranked by the interval's midpoint and is scored for coverage
+of the measured fidelity. `score_arm_b` never forms that interval: it scores `band_lo` and `band_hi`
+as two separate point predictors (each with its own Spearman, best pick and mean absolute error).
+Criterion 4 still passes, because its check is `isinstance(arm_b[name], dict)` for every source,
+which no score can fail.
+
+Reproduced on the committed reference: `dry-run-2026-11-05/criteria.json` has, under both truths,
+`4_arm_b.pass = true` and `per_predictor` keys `band_hi`, `band_lo`, `level`, `reading`,
+`reading_at_execution`, with no band entry; `arm-b-truth1.tsv` and `arm-b-truth2.tsv` carry only the
+two ends' predicted fidelities. `evaluate_criteria` has no test at all.
+
+### The change
+
+- **`score_arm_b` gains an entry `band`** beside the five sources, which stay exactly as they are
+  (#142's report reads `band_lo` and `band_hi`'s `predicted` lists, and a test pins `band_hi`). Per
+  layout: `interval`, the two ends' predicted fidelities sorted (each end pairs a `T1` with a `T2`,
+  so `F(band_lo) <= F(band_hi)` is not guaranteed); `midpoint`; `covered`, 1 when the measured
+  fidelity lies in the closed interval, the same convention as Arm A's `band_covered`; `width`. A
+  layout where either end has no prediction has no band: `None` in every per-layout list, never
+  built from the other end alone (the "never silently repaired" rule above). Over the layouts with a
+  band: `n_predicted`, `spearman` of the midpoints with the measured fidelities, `best_pick_hit`
+  (the highest midpoint, the first on ties, as for the point predictors), `n_covered`, and
+  `coverage = n_covered / n_predicted` (NaN when no layout has a band).
+- **Coverage is reported, not judged.** Amendment 4 names no nominal level for Arm B and no
+  widening, and Arm B's measured fidelity has no binomial standard error to widen by. Arm A's 80%
+  and its one-standard-error widening belong to A4 and Arm A only. Nothing in the code, the JSON or
+  this record compares the Arm B share with 80%. Since amendment 26 the band is out of Arm B's
+  decision, so the whole entry is descriptive.
+- **Criterion 4, "every predictor scored", gets the definition its check lacked:** each of the five
+  sources and the band has at least two layouts predicted and a finite Spearman, and the band also
+  has a finite `coverage`. A layout a predictor cannot predict is still allowed, as before: it is
+  listed under `unpredictable`, which gains `band`. A missing `band` entry fails the criterion
+  instead of raising. This defines the criterion as written; the list in "The dry run's protocol"
+  and the 2026-10-28 and 2026-11-05 results stay as they were written.
+- **The dry run's `arm-b-<truth>.tsv`** gains four columns after the existing seven: `band_lo`,
+  `band_hi` (sorted), `band_midpoint`, `band_covered`; empty cells for a layout with no band.
+- **No pre-registration amendment.** Amendment 4 on `main` is what this implements; nothing in the
+  pre-registration changes.
+
+### Mathematical details
+
+For a layout `l`, let `F_a(l)` and `F_b(l)` be the Hellinger fidelities predicted from `band_lo`'s
+and `band_hi`'s sources (unchanged code), and `F(l)` the measured one. Then
+`lo(l) = min(F_a, F_b)`, `hi(l) = max(F_a, F_b)`, `m(l) = (lo + hi) / 2`, `w(l) = hi - lo` and
+`c(l) = 1[lo(l) <= F(l) <= hi(l)]`. Over the `n` layouts with both ends,
+`coverage = (1 / n) sum c(l)`, and the band's Spearman is the Pearson correlation of the average
+ranks of `m(l)` and `F(l)`, the same `spearman` function as every point predictor. The best pick is
+`argmax_l m(l)`, compared with `argmax_l F(l)`.
+
+### Expected, written before the re-run
+
+Computed from the committed `dry-run-2026-11-05/arm-b-truth1.tsv` and `arm-b-truth2.tsv` alone, by
+`docs/evidence/hardware-reading-vs-level/band-arm-b-2026-11-16/band_rerun.py expect`, which shares
+no code with the script (its own parsing and its own average-rank Spearman); output beside it in
+`expect.out.txt`. Both truths use the same six layouts and the same predictions, so the intervals
+are the same; only the measured fidelities differ.
+
+| Layout | `lo` | `hi` | `midpoint` | covered, truth 1 | covered, truth 2 |
+| --- | --- | --- | --- | --- | --- |
+| 85-77-86 | 0.5029592138 | 0.6360495765 | 0.5695043952 | 0 (measured 0.4878) | 1 |
+| 15-14-19 | 0.4750500578 | 0.6134608425 | 0.5442554501 | 1 | 1 |
+| 128-127-129 | 0.4876508647 | 0.6001233682 | 0.5438871164 | 1 | 1 |
+| 67-57-66 | 0.4717488622 | 0.5828788632 | 0.5273138627 | 1 | 1 |
+| 135-134-139 | 0.4492411938 | 0.5709845789 | 0.5101128863 | 1 | 1 |
+| 1-0-2 | 0.4075883323 | 0.4461425222 | 0.4268654272 | 1 | 1 |
+
+| | Truth 1 | Truth 2 |
+| --- | --- | --- |
+| layouts with a band | 6 | 6 |
+| midpoint Spearman | 0.3714285714 | 0.8285714286 |
+| midpoint picks the measured best | no | no |
+| covered | 5 of 6 | 6 of 6 |
+
+**The re-run.** The 2026-11-05 dry-run command, unchanged, with
+`--controls docs/evidence/hardware-reading-vs-level/dry-run-2026-11-05/controls.json` (the committed
+file, not regenerated), from a worktree of the full clone at the fix commit, on this laptop, into
+`docs/evidence/hardware-reading-vs-level/dry-run-2026-11-16/`, with a stall watchdog beside it.
+`band_rerun.py check dry-run-2026-11-05 dry-run-2026-11-16` decides:
+
+1. `arm-a-truth1.tsv`, `arm-a-truth2.tsv`, `selection.json` and `manifest.json` are identical to
+   `dry-run-2026-11-05/` once line endings are normalised (the same machine and the same controls
+   file, so `versions` and `controls_file_sha256` match too).
+2. In both `arm-b-<truth>.tsv`, the seven reference columns are identical, and the four new columns
+   equal the table above within `1e-9` (the TSVs carry ten significant digits).
+3. In `criteria.json`, the band's `n_predicted`, `spearman`, `best_pick_hit`, `n_covered` and
+   `coverage` equal the table above; `unpredictable.band` is empty; all five criteria pass under both
+   truths; and the file equals the reference once the two new `band` keys are removed.
+
+`compare_dry_run.py dry-run-2026-11-05 dry-run-2026-11-16` also exits 0. If any expectation fails,
+the output is not committed as a result: the difference goes to the lead, its cause is found first,
+and the failed run is disclosed here.
+
+**Tests**, each red on `f97a6462` or tied to a mutant: the band's interval is sorted, its midpoint
+and width follow from the ends, and its coverage uses the closed interval; a missing end gives no
+band and lists the layout under `unpredictable`, without building one from the other end; the
+midpoint ranks and picks; criterion 4 fails without the band entry, with fewer than two predicted
+layouts or a NaN Spearman, and passes on a complete score.
+
+**Mutants**, from a script that asserts each pattern is found and restores from a backup copy:
+ends unsorted; open instead of closed interval; midpoint replaced by one end; a band built from one
+end when the other is missing; `band` dropped from `unpredictable`; criterion 4 back to the
+`isinstance` check; criterion 4 accepting one predicted layout; coverage divided by `N_LAYOUTS`
+instead of `n_predicted`.
+
+**What the output is.** As before: pipeline acceptance on Aer, not a measurement of the device, no
+NC row and no sentence about `ibm_fez`. The coverage figures describe Aer truths built from the
+same snapshot the predictors read.
+
+### Owed elsewhere, not fixed here
+
+- #142, stacked on this branch, must merge this head. Its criteria 1 and 10 move their reference
+  from `dry-run-2026-11-05/` to `dry-run-2026-11-16/`. Its report already ranks the band by midpoint,
+  but it does not report the band's coverage, which amendment 26 asks for.
+- Burak's verification (`docs/evidence/pr140-burak-desktop/`) compared against
+  `dry-run-2026-11-05/`. Re-verifying needs the new reference and an updated runbook, dry-run from
+  GitHub before it is posted.
+
+### Result, 2026-11-16
+
+Laptop (Windows 11, Python 3.12.10, the exact pins), provisional until the desktop run. Commits:
+the plan above `fe22aa3d`, code and tests `a704f063`, mutation check `d4f3905c`, re-run output
+`81496dce`.
+
+**Tests.** The nine new tests, and the existing test with its added band assertions,
+`test_score_arm_b_skips_missing_predictions_and_finds_the_best_pick`, failed on `f97a6462`'s code
+(10 failures, all for the missing band), and pass at `a704f063`. `tests/test_hardware_reading_vs_level.py` collects 51,
+up from 42.
+
+**Mutants.** 13 of 13 killed (`band-arm-b-2026-11-16/mutation.out.txt`): the eight planned, plus
+the midpoint as the top end, criterion 4 skipping the band, criterion 4 ignoring the band's
+coverage, criterion 4 accepting a NaN Spearman, and the best pick taken as the first layout with a
+band. The file was restored from the backup copy, byte-identical. The first run's output file
+carried pytest's "±" in the console's code page, so the script now writes UTF-8; the re-run killed
+the same 13.
+
+**The re-run.** From `C:/t140full`, a worktree of the full clone at `d4f3905c` (the script and
+tests as at `a704f063`), 17:05:13 to 17:28:36 UTC, 23 min 23 s, exit 0, `truth1` and `truth2`
+true. The watchdog sampled every two minutes: CPU time rose at every sample, Python's private
+memory peaked at 6.98 GB and the machine's committed memory at 37.8 GB.
+
+| # | Expected | Found |
+| --- | --- | --- |
+| 1 | Arm A TSVs, `selection.json` and `manifest.json` identical | Held, all four. |
+| 2 | Seven reference columns identical; four new columns equal the table within `1e-9` | Held under both truths. The one last-digit difference is 135-134-139's midpoint, 0.5101128864 against the table's 0.5101128863: the script averages the ends at full precision before the ten-digit rounding. |
+| 3 | The band's score equals the table, `unpredictable.band` empty, five criteria pass, `criteria.json` equal once the band's keys are removed | Held. Truth 1: Spearman 0.3714285714, no best pick, 5 of 6 covered. Truth 2: 0.8285714286, no best pick, 6 of 6. 10 of 10 criteria pass. |
+| | `compare_dry_run.py` exits 0 | Held at the second invocation (below). |
+
+**One expectation failed at first, in the setup, not in the output.** `compare_dry_run.py` reads
+`controls.json` from both folders for its REPORTED rows. The re-run took the committed
+`dry-run-2026-11-05/controls.json` as its input, as written above, so the output folder had no
+`controls.json`, and the script raised `FileNotFoundError` after printing every MUST MATCH row as
+holding. The input file was copied into `dry-run-2026-11-16/` (byte-identical, SHA-256
+`b90a2f7a...`, the hash `manifest.json` records), as `dry-run-2026-11-05/` holds its own, and both
+comparisons were run again on the committed folder. `compare_dry_run.py` exits 0 ("all must-match
+rows hold"; REPORTED: the Arm A TSVs and `selection.json` identical, each Arm B TSV different in 7
+lines, its header and six rows, by the four new columns, `criteria.json` different by the new keys,
+no differing manifest or controls key). `band_rerun.py check` exits 0 with every expectation
+holding (`check.out.txt`). No output was changed.
+
+**Gates** at `81496dce`, in the full clone's worktree: `ruff check .`, `ruff format --check .`,
+`mypy --strict` (49 files) and `scripts/check_ids.py` clean; 1,104 tests collected, 1,104 passed in
+2 min 52 s, nothing skipped because the archive is present. That is the 1,095 of the 2026-11-05
+tree plus the nine new tests. NC-021 is re-measured at this PR's merge (Rule 6), not here.
+
+**Read with these notes.**
+
+- The coverage and ranking figures describe Aer truths built from the snapshot the predictors read,
+  nothing about the device.
+- Under both truths the band's midpoints order the six layouts exactly as `level` does, so the
+  band's Spearman equals `level`'s (0.371 and 0.829) and neither picks the measured best. The six
+  layouts were chosen by their rank under `level`, so this shows that the band's two ends move with
+  the level here, not that the band adds a ranking of its own; amendment 26 dropped "or band" from
+  Arm B's decision for the same reason.
+- The band missed one layout under truth 1 (85-77-86, measured 0.4878 below its interval
+  [0.5030, 0.6361]); there the device is the reading, which the band does not centre on.
+
 ## Related docs
 
 - `docs/roadmap/2026-10-23-hardware-reading-vs-level-test.md` (the design, §2 to §7)

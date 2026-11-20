@@ -1,0 +1,14 @@
+killed    ends unsorted  FAILED tests/test_hardware_reading_vs_level.py::test_band_in_arm_b_is_the_sorted_interval_with_midpoint_and_closed_coverage - assert [[0.9, 0.8], ...2, 0.1], None] == [[0.8, 0.9], ...1, 0.2], None]
+killed    open interval  FAILED tests/test_hardware_reading_vs_level.py::test_band_in_arm_b_is_the_sorted_interval_with_midpoint_and_closed_coverage - assert [0, 0, 0, None] == [0, 1, 0, None]
+killed    midpoint is the bottom end  FAILED tests/test_hardware_reading_vs_level.py::test_band_in_arm_b_is_the_sorted_interval_with_midpoint_and_closed_coverage - assert [0.8, 0.5000000000000001, 0.1] == approx([0.85 ...15 ± 1.5e-07])
+killed    midpoint is the top end  FAILED tests/test_hardware_reading_vs_level.py::test_band_in_arm_b_is_the_sorted_interval_with_midpoint_and_closed_coverage - assert [0.9, 0.7, 0.2] == approx([0.85 ...15 ± 1.5e-07])
+killed    a band built from one end  FAILED tests/test_hardware_reading_vs_level.py::test_score_arm_b_skips_missing_predictions_and_finds_the_best_pick - assert ([[0.6, 0.6], [0.6, 0.6]] == [None, None]
+killed    band dropped from unpredictable  FAILED tests/test_hardware_reading_vs_level.py::test_a_missing_band_end_is_listed_not_repaired_and_criterion_4_still_passes - assert [] == [[6, 7, 8]]
+killed    criterion 4 back to the isinstance check  FAILED tests/test_hardware_reading_vs_level.py::test_criterion_4_fails_when_a_score_is_missing[no band] - assert True is False
+killed    criterion 4 skips the band  FAILED tests/test_hardware_reading_vs_level.py::test_criterion_4_fails_when_a_score_is_missing[band on one layout] - assert True is False
+killed    criterion 4 ignores the band's coverage  FAILED tests/test_hardware_reading_vs_level.py::test_criterion_4_fails_when_a_score_is_missing[band NaN coverage] - assert True is False
+killed    criterion 4 accepts one predicted layout  FAILED tests/test_hardware_reading_vs_level.py::test_criterion_4_fails_when_a_score_is_missing[band on one layout] - assert True is False
+killed    criterion 4 accepts a NaN Spearman  FAILED tests/test_hardware_reading_vs_level.py::test_criterion_4_fails_when_a_score_is_missing[band NaN Spearman] - assert True is False
+killed    coverage over N_LAYOUTS  FAILED tests/test_hardware_reading_vs_level.py::test_band_in_arm_b_is_the_sorted_interval_with_midpoint_and_closed_coverage - assert 0.16666666666666666 == 0.3333333333333333 ± 3.3e-07
+killed    best pick by the first layout with a band  FAILED tests/test_hardware_reading_vs_level.py::test_band_in_arm_b_picks_by_the_midpoint_not_by_either_end - assert 0 == 1
+13 of 13 killed; file restored: True

@@ -1,0 +1,49 @@
+<section id="schedule" style="background:#EEF3F5;color:#2E3E46;font-family:'Space Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<p style="font-family:'Space Mono', 'Courier New', monospace;font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#0A6C7C">Method · schedule and controls</p>
+<h2 style="font-size:56px;font-weight:600;line-height:1.2;color:#0A1B24">14 Daily Jobs at 03:45 UTC (06:45 Istanbul)</h2>
+<p style="font-size:28px;font-weight:700;line-height:1.35;color:#0A1B24;border-left:6px solid #0A6C7C;padding-left:20px">One job a day at an hour chosen from the archive, so a job rarely lands just after a fresh calibration sweep.</p>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:8px">
+<div style="flex:1;height:48px;background:#0A6C7C;border-radius:6px"></div>
+<div style="flex:1;height:48px;background:#9CC7CE;border-radius:6px"></div>
+<div style="flex:1;height:48px;background:#9CC7CE;border-radius:6px"></div>
+<div style="flex:1;height:48px;background:#9CC7CE;border-radius:6px"></div>
+<div style="flex:1;height:48px;background:#9CC7CE;border-radius:6px"></div>
+<div style="flex:1;height:48px;background:#9CC7CE;border-radius:6px"></div>
+<div style="flex:1;height:48px;background:#9CC7CE;border-radius:6px"></div>
+<div style="flex:1;height:48px;background:#9CC7CE;border-radius:6px"></div>
+<div style="flex:1;height:48px;background:#9CC7CE;border-radius:6px"></div>
+<div style="flex:1;height:48px;background:#9CC7CE;border-radius:6px"></div>
+<div style="flex:1;height:48px;background:#9CC7CE;border-radius:6px"></div>
+<div style="flex:1;height:48px;background:#9CC7CE;border-radius:6px"></div>
+<div style="flex:1;height:48px;background:#9CC7CE;border-radius:6px"></div>
+<div style="flex:1;height:48px;background:#9CC7CE;border-radius:6px"></div>
+</div>
+<div style="display:flex;justify-content:space-between">
+<p style="font-size:24px;color:#0A1B24"><b>job 1:</b> Arm A only, the first contact with the hardware</p>
+<p style="font-size:24px;color:#0A1B24">both arms from job 2; 14 consecutive days in all</p>
+</div>
+</div>
+<div style="position:relative;width:1664px;height:132px">
+<div style="position:absolute;left:0;top:44px;width:1664px;height:40px;background:#DCE6EA;border-radius:6px"></div>
+<div style="position:absolute;left:1317px;top:44px;width:278px;height:40px;background:#A34A12;opacity:0.55"></div>
+<div style="position:absolute;left:258px;top:32px;width:8px;height:64px;background:#0A6C7C"></div>
+<p style="position:absolute;left:0;top:96px;width:400px;font-size:24px;color:#0A1B24"><b>03:45 UTC</b>, submission</p>
+<p style="position:absolute;left:1060px;top:0;width:604px;font-size:24px;text-align:right;color:#A34A12">19:00 to 23:00 UTC: 29% of sweeps</p>
+<p style="position:absolute;left:1264px;top:96px;width:400px;font-size:24px;text-align:right;color:#45535A">one UTC day</p>
+</div>
+<div style="display:flex;gap:32px">
+<ul style="flex:1;font-size:24px;line-height:1.45;padding-left:28px">
+<li>151 chip-wide T1 recalibrations, median gap 24.7 h (NC-091)</li>
+<li>In October, 15 of 22 published between 21:00 and 03:00 UTC</li>
+<li>Best of the seven hours in the lead’s 00:00 to 07:00 Istanbul window</li>
+</ul>
+<ul style="flex:1;font-size:24px;line-height:1.45;padding-left:28px">
+<li>Properties archived at submission and at execution</li>
+<li>reading_at_execution separates noise from staleness</li>
+<li>Budget not a constraint; second account named before job 2</li>
+</ul>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#45535A">11 · design §2, §5 · pre-registration §2, §3.6, §4 · NC-091 (pre-registration branch, 5828b4a2)</p>
+<aside>Fourteen jobs, one a day, at a fixed hour. The bar below the job strip is one UTC day: most chip-wide recalibrations land in the evening, and the submission at 03:45 UTC sits well clear of them, the best of the seven hours the lead allowed. That is a property of IBM’s schedule from May to October and may move. The fourth predictor, the reading at execution time, is there so that we can tell noise from staleness.</aside>
+</section>

@@ -1,0 +1,11 @@
+1. non-finite diagonal entries
+  interval_band with one member's NaN real part: ValueError: A density matrix's diagonal must be finite in its real and imaginary parts; got [(nan+0j), (0.5+0j)]
+  IntervalCoverage of a reference with a NaN real part: ValueError: A density matrix's diagonal must be finite in its real and imaginary parts; got [(nan+0j), (0.5+0j)]
+  interval_band with one member's NaN imaginary part: ValueError: A density matrix's diagonal must be finite in its real and imaginary parts; got [(0.5+nanj), (0.5+0j)]
+  IntervalCoverage of a reference with a NaN imaginary part: ValueError: A density matrix's diagonal must be finite in its real and imaginary parts; got [(0.5+nanj), (0.5+0j)]
+  interval_band with one member's infinite imaginary part: ValueError: A density matrix's diagonal must be finite in its real and imaginary parts; got [(0.5+infj), (0.5+0j)]
+  IntervalCoverage of a reference with a infinite imaginary part: ValueError: A density matrix's diagonal must be finite in its real and imaginary parts; got [(0.5+infj), (0.5+0j)]
+  IntervalCoverage of a counts reference with a NaN count: ValueError: Counts must be finite; got [nan, 5.0]
+
+2. a stochastic subclass of IdentityPerturbation, built without rng
+  construction without rng: ValueError: NoisyIdentity needs a seeded rng: an ensemble perturbed from an unseeded generator cannot be reproduced. Pass 

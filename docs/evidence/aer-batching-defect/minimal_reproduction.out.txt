@@ -1,0 +1,6 @@
+qiskit 2.4.1, qiskit-aer 0.17.2, 2048 shots
+alone                              P(0) 0.104  sum of probabilities 1.000000  [density_matrix]
+after an 11-qubit circuit          P(0) 0.197  sum of probabilities 2.000000  [statevector, density_matrix]
+before it                          P(0) 0.104  sum of probabilities 1.000000  [density_matrix, statevector]
+after a one-qubit mid-circuit one  P(0) 0.197  sum of probabilities 2.000000  [statevector, density_matrix]
+before it                          P(0) 0.104  sum of probabilities 1.000000  [density_matrix, statevector]

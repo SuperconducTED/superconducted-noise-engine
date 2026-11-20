@@ -1,0 +1,25 @@
+<section id="rl" style="background:#F6F4EF;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">WHAT WE EXAMINED</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">Why Not Reinforcement Learning</h2>
+<div style="display:flex;gap:48px;align-items:start">
+<div style="width:640px;background:#FCFBF8;border:1px solid #D5DAE1;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:24px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;font-weight:600;line-height:1.15;color:#14213D">As the engine: no</p>
+<p style="font-size:30px;line-height:1.3;color:#3A4558"><b>1.</b> IBM's next calibration does not depend on our forecast.</p>
+<p style="font-size:30px;line-height:1.3;color:#3A4558"><b>2.</b> So the problem is online supervised learning.</p>
+<p style="font-size:30px;line-height:1.3;color:#3A4558"><b>3.</b> RL would only add variance.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;font-weight:600;line-height:1.15;color:#14213D">Where an online decision fits</p>
+<table style="width:976px;font-family:'IBM Plex Sans', Arial, sans-serif;font-size:24px;color:#3A4558">
+<tr><th style="width:38%;text-align:left;color:#14213D">Online decision</th><th style="width:62%;text-align:left;color:#14213D">Approach</th></tr>
+<tr><td>1 · Band calibration</td><td>adaptive conformal inference (ACI)</td></tr>
+<tr><td>2 · Refit schedule</td><td>offline backtest</td></tr>
+<tr><td>3 · Poll / sweep step</td><td>measurement (Issue #104)</td></tr>
+<tr><td>4 · Circuit choice for hardware</td><td>experimental design (later)</td></tr>
+<tr><td>5 · Qubit control</td><td>RL, but it needs pulse-level access, which IBM has deprecated on all its processors</td></tr>
+</table>
+<p style="font-size:24px;line-height:1.3;color:#5B6B82">Rows 1 to 4 are not RL problems. Row 5 is RL, out of reach on IBM hardware.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">13 · Research doc §1-§2 (PR #111); row 5: Baum et al. 2021; Sivak et al. 2022, 2025; IBM pulse-migration guide</p>
+</section>

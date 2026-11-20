@@ -1,0 +1,56 @@
+<section id="optionb" style="background:#E8EDF2;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">MOTOR 3: İKİ TASARIM</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">Motor 3, Seçenek B: Araştırmanın Önerisi</h2>
+<p style="position:absolute;right:128px;top:128px;width:440px;padding:8px 24px;border-radius:999px;border:2px dashed #6B3FA0;background:#FCFBF8;color:#6B3FA0;font-size:24px;font-weight:700;text-align:center">Önerildi, benimsenmedi</p>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between">
+<!-- host 1664x512. Nodes: IN 0,0,380,232  S0 428,0,380,232  S1 856,0,380,232  S2 1284,0,380,232  S3 1284,280,380,232  S4 856,280,380,232  S5 428,280,380,232  OUT 0,280,380,232. Row 1 left to right, row 2 right to left. -->
+<div style="position:relative;width:1664px;height:512px">
+<div style="position:absolute;left:0px;top:0px;width:380px;height:232px;background:#FCFBF8;border:2px solid #5B6B82;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#14213D">Girdi</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">t anındaki IBM kalibrasyonu</p>
+</div>
+<div style="position:absolute;left:428px;top:0px;width:380px;height:232px;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#6B3FA0">0 · Satırlar: yeniden ölçüm dönemleri</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">h dönem olarak sayılır; kapsama değişim olaylarında ölçülür</p>
+</div>
+<div style="position:absolute;left:856px;top:0px;width:380px;height:232px;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#6B3FA0">1 · Log bozunma hızları</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">z = (log 1/T1, log 1/T2)</p>
+</div>
+<div style="position:absolute;left:1284px;top:0px;width:380px;height:232px;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#6B3FA0">2 · Taban + düzeltme</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">son değeri koruma ya da ortalamaya çekme; önce kübitler arası ortak doğrusal (yaklaşık 26 parametre), 243 içinde MLP rakip</p>
+</div>
+<div style="position:absolute;left:1284px;top:280px;width:380px;height:232px;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#6B3FA0">3 · Fizik sabit tutulur</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">1/T2 = 1/(2·T1) + softplus(u), böylece yapı gereği T2 ≤ 2·T1</p>
+</div>
+<div style="position:absolute;left:856px;top:280px;width:380px;height:232px;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#6B3FA0">4 · ADR-027 formülü</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">ileriye tahmin edilen T1, T2'den t + h anında (γ, λ)</p>
+</div>
+<div style="position:absolute;left:428px;top:280px;width:380px;height:232px;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#6B3FA0">5 · ACI bandı</p>
+<p style="font-size:24px;line-height:1.3;color:#3A4558">asimetrik skorlar; bölünmüş konformal kontrol olarak kalır</p>
+</div>
+<div style="position:absolute;left:0px;top:280px;width:380px;height:232px;background:#6B3FA0;border:2px solid #6B3FA0;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:24px;font-weight:700;line-height:1.25;color:#FCFBF8">M3 çıktısı</p>
+<p style="font-size:24px;line-height:1.3;color:#FCFBF8">t + h anında (γ, λ), bantla birlikte</p>
+</div>
+<x-connector x1="380" y1="116" x2="428" y2="116" style="color:#5B6B82;border-width:3px"></x-connector>
+<x-connector x1="808" y1="116" x2="856" y2="116" style="color:#5B6B82;border-width:3px"></x-connector>
+<x-connector x1="1236" y1="116" x2="1284" y2="116" style="color:#5B6B82;border-width:3px"></x-connector>
+<x-connector x1="1474" y1="232" x2="1474" y2="280" style="color:#5B6B82;border-width:3px"></x-connector>
+<x-connector x1="1284" y1="396" x2="1236" y2="396" style="color:#5B6B82;border-width:3px"></x-connector>
+<x-connector x1="856" y1="396" x2="808" y2="396" style="color:#5B6B82;border-width:3px"></x-connector>
+<x-connector x1="428" y1="396" x2="380" y2="396" style="color:#5B6B82;border-width:3px"></x-connector>
+</div>
+<div style="display:flex;gap:16px;align-items:center">
+<p style="font-size:24px;font-weight:700;color:#5B6B82">Her motor bunları geçmeli:</p>
+<p style="font-size:24px;color:#14213D;background:#FCFBF8;border:2px solid #D5DAE1;border-radius:999px;padding:10px 24px;white-space:nowrap">son değeri koruma (persistence)</p>
+<p style="font-size:24px;color:#14213D;background:#FCFBF8;border:2px solid #D5DAE1;border-radius:999px;padding:10px 24px;white-space:nowrap">üstel düzleştirme</p>
+<p style="font-size:24px;color:#14213D;background:#FCFBF8;border:2px solid #D5DAE1;border-radius:999px;padding:10px 24px;white-space:nowrap">kübit başına Gauss süreci</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">10 · Araştırma belgesi, 4 Ekim 2026 (PR #111), belgelendi, benimsenmedi · yaklaşık 26 parametre, softplus biçimi, ACI: araştırma belgesi · 243: NC-046</p>
+</section>

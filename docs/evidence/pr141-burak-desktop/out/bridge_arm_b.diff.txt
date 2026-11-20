@@ -1,0 +1,36 @@
+--- docs/evidence/aer-batching-defect/bridge_arm_b.out.txt	2026-11-09 04:57:09.451199821 +0300
++++ /tmp/pr141-verify/out/bridge_arm_b.out.txt	2026-11-09 05:18:17.938439481 +0300
+@@ -3,27 +3,27 @@
+  layout [85, 77, 86]: noisy gates 7, delay channels 3
+   alone              sum of probabilities 0.999999997178  log2 -0.000000004  method density_matrix  noise superop
+   before Arm A       sum of probabilities 0.999999997178  log2 -0.000000004  method density_matrix  noise superop  ratio to alone 1.000000000000
+-  after Arm A        sum of probabilities 1023.999997110074  log2 9.999999996  method density_matrix  noise superop  ratio to alone 1024.000000000000
++  after Arm A        sum of probabilities 1023.999997110072  log2 9.999999996  method density_matrix  noise superop  ratio to alone 1024.000000000000
+  layout [15, 14, 19]: noisy gates 7, delay channels 3
+   alone              sum of probabilities 0.999999999066  log2 -0.000000001  method density_matrix  noise superop
+   before Arm A       sum of probabilities 0.999999999066  log2 -0.000000001  method density_matrix  noise superop  ratio to alone 1.000000000000
+-  after Arm A        sum of probabilities 1023.999999043652  log2 9.999999999  method density_matrix  noise superop  ratio to alone 1024.000000000000
++  after Arm A        sum of probabilities 1023.999999043649  log2 9.999999999  method density_matrix  noise superop  ratio to alone 1024.000000000000
+  layout [128, 127, 129]: noisy gates 7, delay channels 3
+   alone              sum of probabilities 0.999999998029  log2 -0.000000003  method density_matrix  noise superop
+   before Arm A       sum of probabilities 0.999999998029  log2 -0.000000003  method density_matrix  noise superop  ratio to alone 1.000000000000
+-  after Arm A        sum of probabilities 1023.999997981249  log2 9.999999997  method density_matrix  noise superop  ratio to alone 1024.000000000000
++  after Arm A        sum of probabilities 1023.999997981247  log2 9.999999997  method density_matrix  noise superop  ratio to alone 1024.000000000000
+  layout [67, 57, 66]: noisy gates 7, delay channels 3
+   alone              sum of probabilities 0.999999997033  log2 -0.000000004  method density_matrix  noise superop
+   before Arm A       sum of probabilities 0.999999997033  log2 -0.000000004  method density_matrix  noise superop  ratio to alone 1.000000000000
+-  after Arm A        sum of probabilities 1023.999996962090  log2 9.999999996  method density_matrix  noise superop  ratio to alone 1024.000000000000
++  after Arm A        sum of probabilities 1023.999996962088  log2 9.999999996  method density_matrix  noise superop  ratio to alone 1024.000000000000
+  layout [135, 134, 139]: noisy gates 7, delay channels 3
+   alone              sum of probabilities 1.000000000000  log2 0.000000000  method density_matrix  noise superop
+   before Arm A       sum of probabilities 1.000000000000  log2 0.000000000  method density_matrix  noise superop  ratio to alone 1.000000000000
+-  after Arm A        sum of probabilities 1024.000000000003  log2 10.000000000  method density_matrix  noise superop  ratio to alone 1024.000000000000
++  after Arm A        sum of probabilities 1024.000000000001  log2 10.000000000  method density_matrix  noise superop  ratio to alone 1024.000000000000
+  layout [1, 0, 2]: noisy gates 7, delay channels 3
+   alone              sum of probabilities 1.000000000000  log2 0.000000000  method density_matrix  noise superop
+   before Arm A       sum of probabilities 1.000000000000  log2 0.000000000  method density_matrix  noise superop  ratio to alone 1.000000000000
+-  after Arm A        sum of probabilities 1024.000000000005  log2 10.000000000  method density_matrix  noise superop  ratio to alone 1024.000000000000
++  after Arm A        sum of probabilities 1024.000000000002  log2 10.000000000  method density_matrix  noise superop  ratio to alone 1024.000000000000
+ H3. A public fake backend, no project circuits
+  from_backend, 2048 shots
+   alone                        000 0.483  111 0.477

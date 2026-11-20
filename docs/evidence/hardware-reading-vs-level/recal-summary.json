@@ -1,0 +1,43 @@
+{
+  "ref": "5828b4a29fabc245aa096e530852249a3496dc5b",
+  "backend": "ibm_fez",
+  "guard": {
+    "passed": true,
+    "files": {
+      "expected": 2249,
+      "observed": 2249
+    },
+    "events": {
+      "expected": 151,
+      "observed": 151
+    },
+    "identical_to_recal_times": true
+  },
+  "python": "3.12.10",
+  "numpy": "2.4.4",
+  "files": 2249,
+  "first_file": "2026-05-13T12:13:22+00:00",
+  "last_file": "2026-10-23T09:34:56+00:00",
+  "events": 151,
+  "hours_between_events": {
+    "median": 24.655,
+    "p10": 17.737,
+    "p90": 30.925999999999995
+  },
+  "busiest_published_window": {
+    "start_hour_utc": 19,
+    "hours": 4,
+    "events": 44,
+    "share": 0.2914
+  },
+  "busiest_measured_window": {
+    "start_hour_utc": 20,
+    "hours": 4,
+    "events": 51,
+    "share": 0.3377
+  },
+  "submission_days": {
+    "first": "2026-05-14",
+    "last": "2026-10-22"
+  }
+}

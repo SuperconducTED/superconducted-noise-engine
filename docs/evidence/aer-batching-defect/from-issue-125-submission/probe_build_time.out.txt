@@ -1,0 +1,27 @@
+controls and ref                          0.3 s
+archive walk                            516.7 s
+predictors and selection                  0.5 s
+snapshot                                  0.3 s
+build_job (circuits, predictions)        12.1 s
+layout log {'eligible_qubits': 152, 'triples': 221}; layouts [(85, 77, 86), (15, 14, 19), (128, 127, 129), (67, 57, 66), (135, 134, 139), (1, 0, 2)]
+BUILD TOTAL 529.8 s
+
+--- live path
+rows 780, differing with the same state fed as live: 0
+live path                                 0.5 s
+
+--- ISA, both arms, against the archived target
+arm_a: accepted, 7 circuits
+arm_b: accepted, 6 circuits
+ISA checks                                0.1 s
+
+--- local mode on AerSimulator.from_backend(archived snapshot)
+local mode run                            8.1 s
+arm A registers ['c'] distinct outcomes 211
+arm B registers ['meas'] counts {'000': 242, '001': 1, '010': 12, '100': 1}
+arm B fidelity at 256 shots 0.473
+metrics() in local mode: {'bss': {'seconds': 0}, 'usage': {'quantum_seconds': 0, 'seconds': 0}, 'timestamps': {'created': datetime.datetime(2026, 11, 5, 22, 55, 31, 433249), 'running': datetime.datetime(2026, 11, 5, 22, 55, 31, 433249), 'finished': datetime.datetime(2026, 11, 5, 22, 55, 31, 433249)}}
+usage() in local mode: 0
+job methods: ['backend', 'cancel', 'cancelled', 'creation_date', 'done', 'error_message', 'in_final_state', 'inputs', 'job_id', 'metadata', 'metrics', 'primitive_id', 'properties', 'result', 'running', 'session_id', 'status', 'usage']
+
+TOTAL 538.5 s; numpy 2.4.4; RUN END

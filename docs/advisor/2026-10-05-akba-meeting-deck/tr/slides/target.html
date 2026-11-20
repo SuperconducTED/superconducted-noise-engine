@@ -1,0 +1,27 @@
+<section id="target" style="background:#F6F4EF;color:#3A4558;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<p style="font-size:24px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5B6B82">PROBLEM VE VERİ</p>
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#14213D">Derin Motor Neden İleriye Tahmin Yapar</h2>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:32px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:40px;line-height:1.3;color:#14213D">γ = 1 − exp(−t / T1)&#160;&#160;&#160;&#160;λ = 1 − exp(−t (2/T2 − 1/T1))</p>
+<p style="font-size:30px;line-height:1.4;color:#3A4558">t = sx kapı süresi (24 ns); T1 ve T2 AYNI anlık görüntüden gelir (ADR-027)</p>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:1;background:#FCFBF8;border:2px solid #5B6B82;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;font-weight:600;line-height:1.2;color:#14213D">Aynı anlık görüntü</p>
+<p style="font-size:30px;line-height:1.4;color:#3A4558">Bilinen bir formülü yeniden öğrenir</p>
+<p style="font-size:30px;line-height:1.4;color:#3A4558">Hata ≈ 0 ve bant ≈ 0</p>
+<p style="font-size:30px;line-height:1.4;color:#3A4558">Önem yalnızca T1, T2'yi yeniden bulur</p>
+</div>
+<div style="flex:1;background:#FCFBF8;border:2px solid #6B3FA0;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px">
+<p style="font-family:'Source Serif 4', Georgia, serif;font-size:40px;font-weight:600;line-height:1.2;color:#14213D">İleriye tahmin t + h</p>
+<p style="font-size:30px;line-height:1.4;color:#3A4558">Girdi: t anı (isteğe bağlı geçmiş penceresi)</p>
+<p style="font-size:30px;line-height:1.4;color:#3A4558">Hedef: daha sonraki bir t + h anı</p>
+<p style="font-size:30px;line-height:1.4;color:#3A4558">Öğrenilebilir sinyal: kayma</p>
+<p style="font-size:24px;font-weight:700;color:#FCFBF8;background:#6B3FA0;padding:8px 20px;border-radius:999px;white-space:nowrap;align-self:flex-start">M3 · Karar A7</p>
+</div>
+</div>
+<p style="font-size:30px;line-height:1.4;color:#3A4558">M1 ve M2, t anına bağlı olup sonraki durumlarda değerlendirildikleri için fiilen son değeri koruma (persistence) ile ileriye tahmin yapar (t + h'deki gürültü = t'deki gürültü) ve bunun etrafına bir bant koyar.</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#5B6B82">4 · Hedef formülü ve t = 24 ns: ADR-027. İleriye tahmin: karar A7 (4 Ekim 2026).</p>
+</section>

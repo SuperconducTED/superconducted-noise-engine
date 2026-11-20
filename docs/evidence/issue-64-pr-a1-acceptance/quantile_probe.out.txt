@@ -1,0 +1,7 @@
+numpy 2.4.4
+alpha=0 lower != min: 0 upper != max: 0 order or nesting violations: 0
+numpy.sum of seven sevenths: 0.9999999999999998
+math.fsum of seven sevenths: 1.0
+built-in sum of seven sevenths: 1.0
+identical members, alpha 0.1, give their own values: True
+65 / 100 == 0.65: True

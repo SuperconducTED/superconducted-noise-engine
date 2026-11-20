@@ -1,0 +1,3 @@
+baseline: 75 passed in 2.81s
+N01: KILLED | 2 failed, 73 passed in 2.84s | ['test_a_negative_count_is_refused', 'test_a_reference_with_a_negative_count_is_refused']
+restored: True

@@ -1709,6 +1709,59 @@ became vacuous.
 | **Advisor sign-off** | Not sought, on the same reading as the 2026-09-17 amendment above, and **recorded as a question rather than assumed** for the same reason: the 2026-09-05 amendment is still Open on this test. If the reviewer reads a new `health/` file as ledger semantics, this needs that amendment's routing and must not merge before it. |
 | **Reversal cost** | Remove the `capture` job and the `needs` entry. `health/capture.tsv` stays on the branch as history; the renderer reads a missing or stale file as "not yet measured", never as zero. |
 
+### ADR-025 amendment, 2026-11-15: primary and derived records, and what a state is
+
+Appended rather than folded into the 2026-09-05 amendment, which is left exactly as written. This
+records the answer to register item 14 (`docs/advisor/2026-09-03-decisions-from-akba.md`, entry of
+2026-11-15): File 06's team decision on Issue #84 (comment 5885407524, section 1), signed under Dr.
+Akba's delegation for the pipeline ADRs.
+
+**What a state is (File 06, Q1).** A distinct `qubit_digest` is a device state. A row of
+`health/state-index.tsv` is one filed snapshot path, not a state, and a count of states is the number
+of distinct states observed at the project's polling cadence. The digest definition (each parameter
+record's `date` stripped) is unchanged. In meaning this replaces the 2026-09-05 amendment's sentence
+"One row of this index therefore means 'a device state distinct in its measured values'"; that
+sentence stays above as written.
+
+**One rule for the whole branch (File 06, Q2).** This broadens the single rewrite the 2026-09-05
+amendment allows into a rule for every tree on `calibration-data`:
+
+- primary observations, `snapshots/` and `ledger/`, are append-only at the tip and corrected only by
+  appended, dated notes;
+- derived views, `health/`, may be rebuilt deterministically under a named definition version;
+- inboxes, `collisions/`, are cleared only with a dated note.
+
+**`is_new_state` and `--rebuild` (File 06, Q3).** In File 06's words: "Confirmed, and it is never
+overwritten. Readers derive first sightings from `last_update_date`. `--rebuild` is only for a
+digest-definition change or a malformed index." This replaces the 2026-09-05 amendment's "may
+regenerate it once in `last_update_date` order (`--rebuild`); this is the only permitted rewrite"
+with the two conditions under which `--rebuild` may run. For `health/state-index.tsv` it is narrower
+than the derived-view rule above, because `is_new_state` records what the poller could see when it
+wrote the row, an observation that a rebuild would overwrite (File 06, section 2.3).
+
+| | |
+| --- | --- |
+| **Ledger semantics** | Changed in wording and in rule: it restates what a `health/state-index.tsv` row means and sets the rewrite rule for every tree on the branch. No file, row, column or digest changes. |
+| **Advisor sign-off** | Given: register item 14, signed by @mertefesensoy on 2026-11-15 under Dr. Akba's delegation for the pipeline ADRs (the register's entries of 2026-11-15). |
+| **Not yet built** | File 06's merge counter in `health/metrics.json`, and NC-060's dependency on the stripped definition; both are carried by Issue #109. The `file_snapshots.sh` warning that Q3 contradicts is Issue #93. |
+
+### ADR-025 amendment status, 2026-11-15: the four amendments signed
+
+The 2026-09-10 status note above, and the advisor sign-off rows of the 2026-09-17 and 2026-09-29
+amendments, are left as written. Each asked for an answer in the decisions register. The answers are
+there now, each signed on 2026-11-15 by @mertefesensoy under Dr. Akba's delegation for the pipeline
+ADRs (the register's entries of that date).
+
+| Amendment | Register item | Answer |
+| --- | --- | --- |
+| The `duplicate-partial` rule (added 2026-09-02, PR #55) | 2 | Stands as written |
+| The pipeline-health tree (2026-09-05, PR #70) | 14 | Stands, with File 06's corrected wording, appended above as the 2026-11-15 amendment |
+| The renderer records that it ran (2026-09-17, PR #102) | 16 | Stands as written |
+| The capture record (2026-09-29, PR #105) | 17 | Stands as written |
+
+ADR-025's `**Status**` line, `Accepted.`, is unchanged. What was open was the ratification of these
+amendments, and it is answered here.
+
 ---
 
 ## ADR-027 — Calibration training target
@@ -1920,3 +1973,71 @@ what the ABC is for and what
 Related: ADR-002 and ADR-021 (the DI contract), ADR-007 (fuzzification
 placement), ADR-013 (per-qubit features), Issues #58 and #74 (where the circuit
 is compiled).
+
+## ADR-030 — Kraus projector boundary: gate-name agnostic, parameters rejected not clipped
+
+**Status**: Accepted.
+
+> **NOTE ·** Accepted on 2026-11-11 by the condition its draft set: approval from both
+> owners of the LOCKED module `channels/kraus.py`. @bengisucvd, primary owner, approved
+> PR #136 at `76ab3950` (review 5849593436). @BurakOztekin, secondary owner, wrote the
+> draft and the change. The lead approved the same commit (review 5822740472). PR #136
+> merged as `cd277a64`. The Context, Decision and Consequences below are the draft's,
+> copied as written, with one Consequences bullet added from the primary owner's review
+> and marked as added.
+
+> **NOTE ·** There is no ADR-029 in this ledger yet. That id is held by the draft
+> `docs/decisions/drafts/ADR-029-public-calibration-archive-as-training-source.md`, on
+> `main` since PR #121, and PR #150 proposes its ledger entry as Open. ADR-030 therefore
+> lands before ADR-029. `scripts/check_ids.py` reports no collision.
+
+**Context**: Issue #58 found two unresolved contracts in
+`KrausChannelProjector`:
+
+1. `_SINGLE_QUBIT_GATES` was declared but never consulted; `project()` took
+   `gate_name` and behaved identically for every name.
+2. `_amplitude_damping_kraus` / `_phase_damping_kraus` clamped `gamma` and
+   `lambda` into `[0, 1]`. That duplicates ADR-012's pipeline-level
+   `ProbabilityClip`, changes values when a caller deliberately chooses
+   `IdentitySquashing`, and mapped NaN to `1.0` (maximal damping) while
+   `integration.aer_factory.is_identity_damping` classifies the same NaN vector
+   as degenerate.
+
+**Decision**:
+
+- *Gate names*: the unused constant is deleted. The projector is documented as
+  name-agnostic. Gate eligibility lives exclusively in
+  `FuzzyNoiseModel.prepare()` through the injected policy (#73, ADR-028), so
+  there is one filter, not two.
+- *Parameter domain*: `gamma` and `lambda` must be finite and in `[0, 1]`;
+  anything else raises `ValueError`. The channel boundary never repairs input.
+  Clipping remains the squashing stage's responsibility (ADR-012).
+
+**Consequences**:
+
+- Every in-range channel is unchanged (SuperOp difference < `1e-12`, pinned in
+  `tests/test_kraus_boundary.py`).
+- A pipeline using `IdentitySquashing` that emits values outside `[0, 1]` now
+  fails loudly at `project()` instead of silently clipping. For an eligible
+  gate, `FuzzyNoiseModel.prepare()` propagates that `ValueError`.
+- ADR-008's normalization strategies still see only valid CPTP-by-construction
+  candidate sets.
+- `is_identity_damping` still reports a NaN vector as identity; when `prepare`
+  encounters an eligible gate, the projector rejects that vector and
+  `prepare` raises instead of installing or silently skipping its channel.
+- A vector with fewer than two entries is rejected too. `project()` already raised
+  `ValueError` for it (`crisp_params must contain at least 2 entries`), and `prepare()`
+  used to swallow that, because it caught `ValueError` beside `NotImplementedError`. It
+  now catches only `NotImplementedError`, so a short vector on an eligible gate stops
+  `prepare()`. Pinned by `test_prepare_propagates_invalid_projector_parameters` (the
+  `[0.1]` case) in `tests/test_noise_gate_eligibility.py`. *Added on 2026-11-11 from the
+  primary owner's review (5849593436); not in the draft.*
+
+**Source**: Issue #75, raised by Issue #58; PR #136 (`f692d85e` the tests first, then
+`a5d74612` and `76ab3950`); `src/superconducted/channels/kraus.py`
+(`KrausChannelProjector`); `src/superconducted/integration/aer_factory.py`
+(`FuzzyNoiseModel.prepare`); `tests/test_kraus_boundary.py`;
+`tests/test_noise_gate_eligibility.py`; the draft
+`docs/decisions/drafts/ADR-030-kraus-projector-boundary.md`.
+Related: ADR-012 (the squashing stage owns clipping), ADR-008 (normalization), ADR-028
+(gate eligibility), ADR-021 (the factory).
