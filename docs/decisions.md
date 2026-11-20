@@ -1709,6 +1709,59 @@ became vacuous.
 | **Advisor sign-off** | Not sought, on the same reading as the 2026-09-17 amendment above, and **recorded as a question rather than assumed** for the same reason: the 2026-09-05 amendment is still Open on this test. If the reviewer reads a new `health/` file as ledger semantics, this needs that amendment's routing and must not merge before it. |
 | **Reversal cost** | Remove the `capture` job and the `needs` entry. `health/capture.tsv` stays on the branch as history; the renderer reads a missing or stale file as "not yet measured", never as zero. |
 
+### ADR-025 amendment, 2026-11-15: primary and derived records, and what a state is
+
+Appended rather than folded into the 2026-09-05 amendment, which is left exactly as written. This
+records the answer to register item 14 (`docs/advisor/2026-09-03-decisions-from-akba.md`, entry of
+2026-11-15): File 06's team decision on Issue #84 (comment 5885407524, section 1), signed under Dr.
+Akba's delegation for the pipeline ADRs.
+
+**What a state is (File 06, Q1).** A distinct `qubit_digest` is a device state. A row of
+`health/state-index.tsv` is one filed snapshot path, not a state, and a count of states is the number
+of distinct states observed at the project's polling cadence. The digest definition (each parameter
+record's `date` stripped) is unchanged. In meaning this replaces the 2026-09-05 amendment's sentence
+"One row of this index therefore means 'a device state distinct in its measured values'"; that
+sentence stays above as written.
+
+**One rule for the whole branch (File 06, Q2).** This broadens the single rewrite the 2026-09-05
+amendment allows into a rule for every tree on `calibration-data`:
+
+- primary observations, `snapshots/` and `ledger/`, are append-only at the tip and corrected only by
+  appended, dated notes;
+- derived views, `health/`, may be rebuilt deterministically under a named definition version;
+- inboxes, `collisions/`, are cleared only with a dated note.
+
+**`is_new_state` and `--rebuild` (File 06, Q3).** In File 06's words: "Confirmed, and it is never
+overwritten. Readers derive first sightings from `last_update_date`. `--rebuild` is only for a
+digest-definition change or a malformed index." This replaces the 2026-09-05 amendment's "may
+regenerate it once in `last_update_date` order (`--rebuild`); this is the only permitted rewrite"
+with the two conditions under which `--rebuild` may run. For `health/state-index.tsv` it is narrower
+than the derived-view rule above, because `is_new_state` records what the poller could see when it
+wrote the row, an observation that a rebuild would overwrite (File 06, section 2.3).
+
+| | |
+| --- | --- |
+| **Ledger semantics** | Changed in wording and in rule: it restates what a `health/state-index.tsv` row means and sets the rewrite rule for every tree on the branch. No file, row, column or digest changes. |
+| **Advisor sign-off** | Given: register item 14, signed by @mertefesensoy on 2026-11-15 under Dr. Akba's delegation for the pipeline ADRs (the register's entries of 2026-11-15). |
+| **Not yet built** | File 06's merge counter in `health/metrics.json`, and NC-060's dependency on the stripped definition; both are carried by Issue #109. The `file_snapshots.sh` warning that Q3 contradicts is Issue #93. |
+
+### ADR-025 amendment status, 2026-11-15: the four amendments signed
+
+The 2026-09-10 status note above, and the advisor sign-off rows of the 2026-09-17 and 2026-09-29
+amendments, are left as written. Each asked for an answer in the decisions register. The answers are
+there now, each signed on 2026-11-15 by @mertefesensoy under Dr. Akba's delegation for the pipeline
+ADRs (the register's entries of that date).
+
+| Amendment | Register item | Answer |
+| --- | --- | --- |
+| The `duplicate-partial` rule (added 2026-09-02, PR #55) | 2 | Stands as written |
+| The pipeline-health tree (2026-09-05, PR #70) | 14 | Stands, with File 06's corrected wording, appended above as the 2026-11-15 amendment |
+| The renderer records that it ran (2026-09-17, PR #102) | 16 | Stands as written |
+| The capture record (2026-09-29, PR #105) | 17 | Stands as written |
+
+ADR-025's `**Status**` line, `Accepted.`, is unchanged. What was open was the ratification of these
+amendments, and it is answered here.
+
 ---
 
 ## ADR-027 — Calibration training target
