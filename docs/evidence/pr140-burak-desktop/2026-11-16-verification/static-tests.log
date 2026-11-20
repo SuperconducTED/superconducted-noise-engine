@@ -1,0 +1,66 @@
+$ python -m ruff check .
+All checks passed!
+$ python -m ruff format --check .
+105 files already formatted
+$ python -m mypy --strict
+Success: no issues found in 49 source files
+$ python scripts/check_ids.py
+No duplicate or colliding ADR / NC identifiers.
+$ python -m pytest -q
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.0.3, pluggy-1.6.0
+configfile: pyproject.toml
+testpaths: tests
+plugins: cov-7.1.0
+collected 1104 items
+
+tests/calibration/test_features_missing_fields.py ..........             [  0%]
+tests/calibration/test_loader.py ..................                      [  2%]
+tests/calibration/test_vectorizer_units.py ............................. [  5%]
+...                                                                      [  5%]
+tests/test_anfis.py ......................................               [  8%]
+tests/test_backfill_state_index.py ..............                        [ 10%]
+tests/test_calibration.py .............................................. [ 14%]
+...                                                                      [ 14%]
+tests/test_calibration_poll_workflow.py .....                            [ 15%]
+tests/test_canonical_snapshot_digest.py ................................ [ 17%]
+.............                                                            [ 19%]
+tests/test_capture_rate_analysis.py .............                        [ 20%]
+tests/test_capture_record.py .............................               [ 22%]
+tests/test_channel_viability.py .....................                    [ 24%]
+tests/test_check_dashboard_freshness.py ................................ [ 27%]
+....                                                                     [ 28%]
+tests/test_check_ids.py ......................                           [ 30%]
+tests/test_feature_distribution.py ............................          [ 32%]
+tests/test_figures.py .................................................. [ 37%]
+                                                                         [ 37%]
+tests/test_file_snapshots.py ..........                                  [ 38%]
+tests/test_first_ensemble_run.py .............................           [ 40%]
+tests/test_hardware_reading_vs_level.py ................................ [ 43%]
+...................                                                      [ 45%]
+tests/test_hardware_test_predictors.py ................................. [ 48%]
+........................................                                 [ 51%]
+tests/test_harness.py ..............................................     [ 56%]
+tests/test_init_error_analysis.py .......                                [ 56%]
+tests/test_interfaces.py ....................................            [ 59%]
+tests/test_membership.py .....................................           [ 63%]
+tests/test_metrics.py .........................                          [ 65%]
+tests/test_noise_gate_eligibility.py ..........                          [ 66%]
+tests/test_parameterization.py ......................................... [ 70%]
+........................................................................ [ 76%]
+..........                                                               [ 77%]
+tests/test_pipeline_health.py .......................................... [ 81%]
+..............                                                           [ 82%]
+tests/test_probe_historical_properties.py .............................. [ 85%]
+......                                                                   [ 85%]
+tests/test_reference.py .........................................        [ 89%]
+tests/test_resolution_measurement.py ........                            [ 90%]
+tests/test_threshold_distributions.py ..................                 [ 92%]
+tests/test_tsk.py ...............                                        [ 93%]
+tests/training/test_aer_pin.py .........                                 [ 94%]
+tests/training/test_dataset.py ................                          [ 95%]
+tests/training/test_parameters.py ...                                    [ 95%]
+tests/training/test_targets.py ...................                       [ 97%]
+tests/training/test_types.py ..........................                  [100%]
+
+======================= 1104 passed in 178.80s (0:02:58) =======================

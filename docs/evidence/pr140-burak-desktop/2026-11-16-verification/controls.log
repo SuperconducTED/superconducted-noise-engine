@@ -1,0 +1,39 @@
+{
+  "mode": "controls",
+  "ref": "5828b4a29fabc245aa096e530852249a3496dc5b",
+  "ref_sha": "5828b4a29fabc245aa096e530852249a3496dc5b",
+  "backend": "ibm_fez",
+  "at": "2026-10-23T09:34:56+00:00",
+  "window_days": 30.0,
+  "min_window_states": 5,
+  "min_distinct_values": 20,
+  "min_window_distinct": 15,
+  "files_used": 2249,
+  "states_used": 924,
+  "skipped": {},
+  "live_properties_sha256": null,
+  "python": "3.12.3",
+  "numpy": "2.4.4"
+}
+	User time (seconds): 57.94
+	System time (seconds): 48.40
+	Percent of CPU this job got: 32%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:26.90
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 108300
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 58647
+	Minor (reclaiming a frame) page faults: 5924127
+	Voluntary context switches: 2090873
+	Involuntary context switches: 1685
+	Swaps: 0
+	File system inputs: 89630
+	File system outputs: 272
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

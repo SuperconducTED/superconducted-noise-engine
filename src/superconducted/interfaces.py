@@ -248,6 +248,58 @@ class Defuzzifier(abc.ABC):
         """Return the crisp output (shape ``(firing.output_dim,)``)."""
 
 
+class MemberPerturbation(abc.ABC):
+    """Make one ensemble member differ from the others, for a stated reason.
+
+    ADR-015's open question is how members of a
+    :class:`~superconducted.integration.aer_factory.FuzzyNoiseModelEnsemble`
+    come to differ. ADR-021 names three plug-in points (the input vector, the
+    premise membership functions, the IT2 footprint), and this one method
+    covers all three: a perturbation of the input returns a wrapped extractor
+    and passes the other two through; one of the premises returns a rebuilt
+    rule base; one that leaves the footprint returns a rebuilt rule base and
+    the defuzzifier that accepts its firing type. The ensemble never learns
+    which (Issue #64 FR-1).
+    """
+
+    @abc.abstractmethod
+    def perturb(
+        self,
+        index: int,
+        rng: np.random.Generator,
+        *,
+        feature_extractor: CalibrationFeatureExtractor,
+        rule_base: RuleBase,
+        defuzzifier: Defuzzifier,
+    ) -> tuple[CalibrationFeatureExtractor, RuleBase, Defuzzifier]:
+        """Return the three dependencies member ``index`` is built from.
+
+        Inputs: ``index`` is the member's position, ``0 <= index <
+        ensemble_size``. ``rng`` is that member's own generator, freshly
+        seeded on every iteration of the ensemble; it is the only source of
+        randomness an implementation may read. The three keyword arguments
+        are the ensemble's base dependencies, shared by every member and by
+        the caller.
+
+        Output: the extractor, rule base and defuzzifier for this member.
+
+        Contract:
+
+        - Pure in ``(index, the state of rng, the inputs)``: equal arguments
+          give equal results, with no global or hidden state. This is what
+          makes two iterations of one ensemble yield identical members.
+        - Must not mutate any input. Build a new object or return the input
+          itself.
+        - The returned extractor has the same ``output_dim`` and
+          ``feature_names`` as ``feature_extractor``; the returned rule base
+          has the same ``input_dim`` and ``output_dim`` as ``rule_base``. The
+          ensemble checks these four and raises ``ValueError`` otherwise.
+        - The returned defuzzifier must accept the returned rule base's
+          firing type. That pairing is why the defuzzifier travels in the
+          tuple; the ensemble does not check it.
+        """
+
+
 class SquashingStrategy(abc.ABC):
     """Map raw defuzzified output to constraint-respecting noise parameters.
 

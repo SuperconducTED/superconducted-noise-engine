@@ -1,0 +1,15 @@
+superconducted imported from C:\t64a1\src\superconducted\__init__.py
+numpy 2.4.4
+calibration-data b0482277  snapshots/2026-11/ibm_fez/20261113T162759000000Z.json
+  blob b13ffe3c4821aac7b0d0844155acc2746acd0daf (expected b13ffe3c4821aac7b0d0844155acc2746acd0daf: True); sha256 of the blob c261ce1aa93bf8c38e4a995bf8e11ff8384a9b7a4b6e31f0201efd8ca571457d
+  loaded: backend ibm_fez, timestamp 2026-11-13T16:27:59+00:00, 156 qubits
+
+rule-base seed (first_viable_seed over identity ensembles of 32):
+  grid T1: centres [3.7840306195713135e-06, 0.00017789392703968976, 0.00035200382345980825], sigma 8.70549e-05 (from 156 qubits)
+  grid T2: centres [5.531818934471098e-06, 0.00013444474039126073, 0.00026335766184805036], sigma 6.44565e-05 (from 155 qubits)
+  grid readout_error: centres [0.0009765625, 0.248779296875, 0.49658203125], sigma 0.123901 (from 156 qubits)
+  seed 0
+
+x = {'mean_T1': 0.0001367959446990823, 'mean_T2': 9.789519336109787e-05, 'mean_readout_error': 0.027741261017628204}  (T1, T2 in s; readout dimensionless)
+crisp_params at x: {'gamma': 0.0, 'lambda': 0.002143576205663847}; raw before the clip [-0.09324852724701166, 0.002143576205663847]; clip binding at x: True
+STOP: an output is 0 at x, so its elasticity is undefined; find the cause (consequents, clip)

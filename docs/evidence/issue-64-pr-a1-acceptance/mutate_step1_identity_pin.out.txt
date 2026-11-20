@@ -1,0 +1,4 @@
+baseline: 5 passed in 1.80s
+M1: KILLED | 1 failed, 4 passed in 1.63s | ['test_members_match_the_values_captured_before_the_wiring_changed[no_keyword]']
+M2: KILLED | 3 failed, 2 passed in 1.68s | ['test_every_member_equals_a_directly_built_model[no_keyword]', 'test_identical_members_preserve_the_density_matrix_exactly[no_keyword]', 'test_members_match_the_values_captured_before_the_wiring_changed[no_keyword]']
+restored: True

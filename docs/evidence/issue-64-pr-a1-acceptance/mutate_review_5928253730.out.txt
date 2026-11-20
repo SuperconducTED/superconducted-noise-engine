@@ -1,0 +1,43 @@
+baseline: ============================= 163 passed in 3.59s =============================
+R01: KILLED | 2 failed, 161 passed, 1 warning in 3.64s
+    test_a_non_finite_count_is_refused_as_member_and_as_reference[inf]
+    test_a_non_finite_count_is_refused_as_member_and_as_reference[nan]
+R02: KILLED | 7 failed, 156 passed in 3.76s
+    test_a_non_finite_diagonal_member_is_refused_by_name[inf_imaginary]
+    test_a_non_finite_diagonal_member_is_refused_by_name[inf_real]
+    test_a_non_finite_diagonal_member_is_refused_by_name[nan_imaginary]
+    test_a_non_finite_diagonal_reference_is_refused[inf_imaginary]
+    test_a_non_finite_diagonal_reference_is_refused[inf_real]
+    test_a_non_finite_diagonal_reference_is_refused[nan_imaginary]
+    test_a_non_finite_diagonal_reference_is_refused[nan_real]
+R03: KILLED | 4 failed, 159 passed in 3.85s
+    test_a_non_finite_diagonal_member_is_refused_by_name[inf_imaginary]
+    test_a_non_finite_diagonal_member_is_refused_by_name[nan_imaginary]
+    test_a_non_finite_diagonal_reference_is_refused[inf_imaginary]
+    test_a_non_finite_diagonal_reference_is_refused[nan_imaginary]
+R04: KILLED | 3 failed, 160 passed in 3.68s
+    test_a_non_finite_diagonal_member_is_refused_by_name[inf_real]
+    test_a_non_finite_diagonal_reference_is_refused[inf_real]
+    test_a_non_finite_diagonal_reference_is_refused[nan_real]
+R05: KILLED | 1 failed, 162 passed in 3.70s
+    test_a_subclass_of_the_identity_needs_a_seed_like_any_perturbation
+R06: KILLED | 2 failed, 161 passed in 3.61s
+    test_a_subclass_of_the_identity_needs_a_seed_like_any_perturbation
+    test_an_unseeded_non_identity_perturbation_is_refused
+R07: KILLED | 15 failed, 148 passed in 3.36s
+    test_a_subclass_of_the_identity_needs_a_seed_like_any_perturbation
+    test_an_unseeded_non_identity_perturbation_is_refused
+    test_every_member_equals_a_directly_built_model[identity]
+    test_every_member_equals_a_directly_built_model[no_keyword]
+    test_every_member_equals_a_directly_built_model[none]
+    test_identical_members_preserve_the_density_matrix_exactly[identity]
+    test_identical_members_preserve_the_density_matrix_exactly[no_keyword]
+    test_identical_members_preserve_the_density_matrix_exactly[none]
+    test_iterating_twice_gives_the_same_members[identity]
+    test_iterating_twice_gives_the_same_members[no_keyword]
+    test_iterating_twice_gives_the_same_members[none]
+    test_members_match_the_values_captured_before_the_wiring_changed[identity]
+    test_members_match_the_values_captured_before_the_wiring_changed[no_keyword]
+    test_members_match_the_values_captured_before_the_wiring_changed[none]
+    test_the_pinned_seed_is_the_first_viable_one
+restored: True

@@ -1,0 +1,12 @@
+engine ghz2 N=1        dim  4  min diag 2.430e-03  max diag 0.498102  max |imag| 0.0e+00  |trace - 1| 1.6e-15
+engine ghz2 N=3        dim  4  min diag 2.430e-03  max diag 0.498102  max |imag| 0.0e+00  |trace - 1| 1.6e-15
+engine ghz3 N=1        dim  8  min diag 1.179e-05  max diag 0.495684  max |imag| 0.0e+00  |trace - 1| 2.4e-15
+engine ghz3 N=3        dim  8  min diag 1.179e-05  max diag 0.495684  max |imag| 0.0e+00  |trace - 1| 2.4e-15
+engine qft3 N=1        dim  8  min diag 1.244e-01  max diag 0.126225  max |imag| 9.4e-18  |trace - 1| 2.0e-15
+engine qft3 N=3        dim  8  min diag 1.244e-01  max diag 0.126225  max |imag| 9.4e-18  |trace - 1| 2.0e-15
+depolarizing p=0.0     dim  2  min diag 0.000e+00  max diag 1.000000  max |imag| 0.0e+00  |trace - 1| 0.0e+00
+depolarizing p=0.1     dim  2  min diag 5.000e-02  max diag 0.950000  max |imag| 0.0e+00  |trace - 1| 0.0e+00
+depolarizing p=0.3     dim  2  min diag 1.500e-01  max diag 0.850000  max |imag| 0.0e+00  |trace - 1| 0.0e+00
+depolarizing p=0.9     dim  2  min diag 4.500e-01  max diag 0.550000  max |imag| 0.0e+00  |trace - 1| 0.0e+00
+
+10 matrices: most negative diagonal entry 0.000e+00, largest |imag| 9.4e-18, largest |trace - 1| 2.4e-15

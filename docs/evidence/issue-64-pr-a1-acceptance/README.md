@@ -1,0 +1,179 @@
+# Issue #64 PR-A1: check scripts and their runs
+
+These scripts were first written and run in a session scratch folder on 2026-11-11, while steps
+1, 2, 4 and 5 of the plan were built. Those runs are not evidence. The scripts were committed at
+`95c2d69f` with no output beside them, and every `*.out.txt` in this folder comes from a run of the
+committed copy made after that commit. The plan and the results they support are in
+`docs/implementations/2026-11-09-issue-64-pr-a1-perturbation-and-band.md`.
+
+Laptop, provisional: nothing here has run on Burak's desktop.
+
+## 1. What this folder answers
+
+Criterion 11 of the plan: every new guard is mutation-checked, with predictions written before the
+run and each mutant caught or shown equivalent. It also holds the measurements behind three choices
+the code makes (numpy's quantile at `alpha = 0`, the density-matrix tolerances, how often Aer
+serialises a noise model).
+
+It does **not** yet hold the acceptance run of criterion 8. That run needs
+`InputVectorPerturbation` (step 3), which waits on decision D6 (#64 comment 6789691655).
+
+## 2. Scripts and what each must show
+
+A mutation script applies one exact, asserted text replacement at a time to a source file, runs one
+test file, and restores the source from a backup copy outside the repository, never with git. Its
+predictions are in its docstring. "Killed" means the test file failed.
+
+| Script | Step | What it checks | A pass looks like |
+| --- | --- | --- | --- |
+| `capture_identity_pin.py` | 1 | prints the values the identity pin holds, and that spawning seed sequences draws nothing from the caller's stream | seed 1; three identical `crisp_params`; `stream untouched by spawn: True` |
+| `mutate_step1_identity_pin.py` | 1 | 2 mutants, on a checkout of `75b86dbb`: M1 scales every model's `crisp_params` in `_compute_crisp_params`; M2 scales members 1 and later inside the old `__iter__`, which step 2 replaced (the script's docstring says both edit `__iter__`; only M2 does) | M1 fails the literal pin only; M2 fails the relational, literal and density-matrix pins |
+| `mutate_step2_seeding.py` | 2 | 16 mutants of the ensemble's seeding and of `IdentityPerturbation` | all killed |
+| `quantile_probe.py` | 4 | 20,000 random tables: the 0 and 1 quantiles are exactly min and max under `linear`; no disorder; three summations of seven sevenths | zeros on the first line; `numpy.sum` below 1.0, `math.fsum` exactly 1.0 |
+| `methods_probe.py` | 4 | the same min/max equality for each of numpy's 13 methods, 3,000 tables each | `0 of 3000` thirteen times |
+| `tolerance_probe.py` | 4 | how close 10 real Aer density matrices come to the two tolerances in `metrics.py` (`1e-12`, `1e-9`) | a worst case far below both |
+| `mutate_step4_band_and_coverage.py` | 4 | 32 mutants of `interval_band`, `IntervalBand` and `IntervalCoverage` | all killed |
+| `mutate_step4_c05b.py` | 4 | the mutant C05 was meant to be: a plain `numpy.sum` of covered probabilities | killed by the sevenths identity case |
+| `mutate_step4_negative_count.py` | 4 | the negative-count refusal removed | killed by both negative-count tests |
+| `to_dict_probe.py` | 5 | how many times one Aer run calls `NoiseModel.to_dict`, over methods, shot counts and ways of passing the model | 1 everywhere with a noise model, 0 without |
+| `aer_mutant_plugin.py` | 5 | not run directly: a pytest plugin that makes Aer serialise once more per run, or once more per shot, for one session | |
+| `mutate_step5_guard.py` | 5 | the guard tests against those two simulated behaviours | 13 pass unchanged; 10 of 13 fail under each |
+| `mutate_step5_counts.py` | 5 | that the two simulated behaviours differ: the call count in a 1024-shot run | 1, 2 and 1025 |
+
+## 3. Runs
+
+Interpreter `C:/t/pin125/Scripts/python.exe` (Python 3.12.10, NumPy 2.4.4, Qiskit 2.4.1, qiskit-aer
+0.17.2, pytest 9.0.3), installed from the pins. Run on 2026-11-11 from commit `95c2d69f`, from the
+repository root unless stated, each output redirected to `<script>.out.txt`. All exited 0, and
+`git status` showed no modified source file afterwards.
+
+```bash
+E=docs/evidence/issue-64-pr-a1-acceptance
+PYTHONPATH=".;src" python $E/capture_identity_pin.py
+python $E/quantile_probe.py
+python $E/methods_probe.py
+PYTHONPATH=".;src" python $E/tolerance_probe.py
+python $E/to_dict_probe.py
+python $E/mutate_step2_seeding.py <python> <backup dir>
+python $E/mutate_step4_band_and_coverage.py <python> <backup dir>
+python $E/mutate_step4_c05b.py <python> <backup dir>
+python $E/mutate_step4_negative_count.py <python> <backup dir>
+python $E/mutate_step5_guard.py <python> $E
+python $E/mutate_step5_counts.py <python> $E
+# in a checkout of 75b86dbb, with this folder's script given by its full path:
+python <repository>/$E/mutate_step1_identity_pin.py <python> <backup dir>
+```
+
+`<python>` is the interpreter's path, `<backup dir>` any directory outside the repository. On Linux
+or macOS write `PYTHONPATH=".:src"`.
+
+| Script | Result |
+| --- | --- |
+| `capture_identity_pin.py` | viable seed 1; three members at `(0.0010631876854835232, 0.018299147946441743)`; stream untouched |
+| `mutate_step1_identity_pin.py` | baseline 5 passed; M1 killed by the literal pin only; M2 killed by the relational, literal and density-matrix pins. Both as predicted. |
+| `mutate_step2_seeding.py` | baseline 32 passed; 16 of 16 killed |
+| `quantile_probe.py` | 0 tables off min, 0 off max, 0 disordered; `numpy.sum` 0.9999999999999998, `math.fsum` 1.0, built-in `sum` 1.0 |
+| `methods_probe.py` | `0 of 3000` for all 13 methods |
+| `tolerance_probe.py` | most negative diagonal entry 0; largest imaginary part 9.4e-18; largest distance of the trace from 1, 2.4e-15 |
+| `mutate_step4_band_and_coverage.py` | baseline 75 passed; 32 of 32 killed |
+| `mutate_step4_c05b.py` | killed, by the sevenths identity case among others |
+| `mutate_step4_negative_count.py` | baseline 75 passed; killed by both negative-count tests |
+| `to_dict_probe.py` | 1 call in each of the 12 runs, in the state-mode run and in the two-circuit run; 0 without a noise model |
+| `mutate_step5_guard.py` | 13 passed unchanged; 10 failed under `extra`; 10 failed under `per_shot` |
+| `mutate_step5_counts.py` | 1, 2 and 1025 calls, under both methods |
+
+The step 4 mutation run here is on the test file as it stands at `95c2d69f` (75 cases). Its first,
+scratch run was on 61 cases, before a negative count was refused and before the min/max test ran
+for every method.
+
+## 4. Predictions that missed, and one check that was wrong
+
+Recorded because each says something about the tests or about the check.
+
+- **C05** (step 4). Predicted: summing the covered probabilities fails the seven-sevenths identity
+  case. It did not: the mutant used Python's built-in `sum`, which on Python 3.12 is a compensated
+  sum for floats and returns 1.0 there. The mutant died on the case whose trace is `1 + 1e-10`.
+  `mutate_step4_c05b.py` is the mutant that was meant, and it fails the predicted case.
+- **B05** (step 4). Predicted: removing `interval_band`'s member-count check survives for a single
+  member, because `IntervalBand` repeats the check with the same message. It was killed, by the
+  empty-list half of the same test. The one-member half is covered twice on purpose.
+- **The per-shot simulation** (step 5). Its first version read the shot count from the assembled
+  circuits, where it is 1, so it made one extra call per run and was the same mutant as `extra`.
+  Both failed the same ten tests, which hid it. `mutate_step5_counts.py` was written to print the
+  counts and showed 2 where 1025 was claimed. The plugin in this folder is the corrected one.
+
+## 5. Limits
+
+- Laptop only. The figures are provisional until the desktop repeats them.
+- `tolerance_probe.py` looks at 10 matrices. It shows the two tolerances are not tight on those; it
+  does not show that nothing can reach them.
+- `to_dict_probe.py` counts Python-level calls of one method. It says nothing about what the C++
+  controller does per shot, and would not see a future Aer that read the model another way.
+- The ordering and nesting checks of `quantile_probe.py` were run for the `linear` method only.
+
+## 6. Step 3, added 2026-11-14
+
+Sections 1 to 5 are left as written on 2026-11-11. Since then D6 was answered (option A, #64 comment
+6863593077) and step 3 was built, so section 1's "waits on decision D6" is overtaken; the acceptance
+run of criterion 8 is still not here (it is step 6).
+
+| Script | Step | What it checks | A pass looks like |
+| --- | --- | --- | --- |
+| `mutate_step3_input_jitter.py` | 3 | 25 mutants of `InputVectorPerturbation`, `OffsetFeatureExtractor`, `FeatureBound` and `bounds_for`, and two controls for the two predicted equivalent | 23 killed by the tests the docstring names; V18 and V21 survive, with 0 value differences in their controls and both positive controls above 0 |
+| `mutate_step2_seeding.py`, again | 2 | that step 2's 16 replacements still apply exactly once and still die now that `perturbation.py` has a second `perturb` | 16 of 16 killed |
+
+Committed at `a46184eb` with no output; run from that commit on 2026-11-14 with the interpreter of
+section 3, each output redirected beside the script (the step 2 re-run to
+`mutate_step2_seeding.at-step3-head.out.txt`, so the 2026-11-11 output stays as it was).
+
+```bash
+E=docs/evidence/issue-64-pr-a1-acceptance
+python $E/mutate_step3_input_jitter.py <python> <backup dir>
+python $E/mutate_step2_seeding.py <python> <backup dir>
+```
+
+| Script | Result |
+| --- | --- |
+| `mutate_step3_input_jitter.py` | baseline 77 passed; 23 of 23 predicted kills killed, each by its named tests (V01 and V10 by more than named); V18 and V21 survived as predicted. Control 1: 0 of 100,000 admissible vectors where `r * abs(x)` and `r * x` differ as values (309 differ only in the sign of a zero), 0 members that differ; positive control 100,000. Control 2: 0 members that differ as values with 641 zeros flipped; positive control 252,562. |
+| `mutate_step2_seeding.py` at `0df7d6dd` | baseline 77 passed; 16 of 16 killed; the new section 4 tests now also kill W01, W04, W05, W07 and W12 |
+
+**V14 is killed by a message, not by behaviour.** With `perturb`'s own `output_dim` check removed, the
+member extractor's constructor still refuses a four-output extractor; the test fails only because it
+matches `perturb`'s wording. The refusal itself is kept twice, on purpose.
+
+**Two guards were found unpinned while the predictions were written, before any run**: a closed bound
+at `inf` admitting `inf` (the shipped bounds are open there, so V06 alone would have survived), and the
+member extractor's own shape checks when it is built directly (V22, V23). Their tests went in at
+`d6251961`, before the script was committed.
+
+Re-run, 2026-11-14, from the same committed script at `3c9bbff0` (after a docstring and one test
+assertion changed): `mutate_step3_input_jitter.at-3c9bbff0.out.txt`, every kill line identical to the
+first run apart from timings, both controls identical. V14 run alone fails on its message only, as
+predicted.
+
+## 7. Step 6, the acceptance run (criterion 8), added 2026-11-14
+
+`acceptance_run.py` reads `snapshots/2026-11/ibm_fez/20261113T162759000000Z.json` by blob
+(`b13ffe3c`) from `calibration-data` `b0482277`, builds the #58 grid on it in SI units, measures the
+elasticity of `gamma` and `lambda` to each feature at its vector `x`, and runs 32 members under
+`InputVectorPerturbation.relative(x, 0.05)` (a smoke value). Its pass bar and its stop rule were
+committed before it ran, in the implementation doc's "Plan, 2026-11-14: step 6".
+
+```bash
+PYTHONPATH=src python docs/evidence/issue-64-pr-a1-acceptance/acceptance_run.py
+```
+
+| Run | From | Output | Result |
+| --- | --- | --- | --- |
+| first | `e62824dc` | `acceptance_run.out.txt` | stopped at its own check: `first_viable_seed`'s seed 0 gives raw outputs `(-0.0932, 0.0021)` at `x`, so the clip holds gamma at 0 |
+| second, after amendment 1 | `7c5c319c` | `acceptance_run.amended.out.txt` | seed 1 (the first with both raw outputs inside `(0, 1)` at `x`); all five bars pass |
+
+Amendment 1, written between the two runs, changes only the seed rule; it is in the implementation
+doc beside the plan.
+
+**How much the gamma half of bar 3 says.** Seed 1 puts gamma at 0.00081, just above the clip, with an
+elasticity near 50 to `mean_T1`, so its first-order predicted spread at `r = 0.05` is 2.68: far outside
+where a linear prediction holds. Under the jitter the clip binds on gamma for 19 of the 32 members
+(their gamma is 0). The observed ratio, 0.57, is inside the bar but near its edge, and it rests on that
+clipped distribution. The lambda half (ratio 1.34, no member at 0) is the one that carries the check.
+These sensitivities belong to seeded random consequents (ADR-024), not to a fitted engine.
