@@ -1,0 +1,87 @@
+
+[defuzz_variant_plugin] variant=X12 superconducted=<cwd>/src/superconducted/__init__.py
+........................................................................ [  5%]
+............FF.......................................................... [ 11%]
+........................................................................ [ 17%]
+........................................................................ [ 23%]
+........................................................................ [ 29%]
+........................................................................ [ 35%]
+........................................................................ [ 41%]
+........................................................................ [ 47%]
+........................................................................ [ 53%]
+........................................................................ [ 59%]
+........................................................................ [ 65%]
+........................................................................ [ 71%]
+........................................................................ [ 77%]
+........................................................................ [ 83%]
+........................................................................ [ 89%]
+........................................................................ [ 95%]
+...................................................                      [100%]
+================================== FAILURES ===================================
+____________ test_effective_weights_match_shipped_defuzzifier[t1] _____________
+
+interval = False
+
+    @pytest.mark.parametrize("interval", [False, True], ids=("t1", "it2"))
+    def test_effective_weights_match_shipped_defuzzifier(interval: bool) -> None:
+        rule_base = _planted_grid(interval, warm=False)
+        defuzzifier = NieTanDefuzzifier() if interval else WeightedAverageDefuzzifier()
+    
+        # FR-3's bound is scale-aware: 8 eps of sum_r |w_r| |c_r|. Measured worst over this
+        # grid on 2026-10-15: 3.6 eps (T1) and 2.7 eps (IT2).
+        for row in _planted_box_features():
+            firing = rule_base.evaluate(row)
+            weights = _effective_weights(firing)
+            assert weights is not None
+            prediction = weights @ firing.consequent_outputs
+            expected = defuzzifier.defuzzify(firing)
+            scale = np.sum(np.abs(weights)[:, None] * np.abs(firing.consequent_outputs), axis=0)
+>           assert np.all(np.abs(prediction - expected) <= np.finfo(np.float64).eps * 8.0 * scale)
+E           AssertionError: assert np.False_
+E            +  where np.False_ = <function all at 0x0000022C7F2AA3B0>(array([2.27728947e-11, 2.15152340e-11]) <= ((np.float64(2.220446049250313e-16) * 8.0) * array([22.76629886, 21.51654951])))
+E            +    where <function all at 0x0000022C7F2AA3B0> = np.all
+E            +    and   array([2.27728947e-11, 2.15152340e-11]) = <ufunc 'absolute'>((array([22.76629886, 21.51654951]) - array([22.76629886, 21.51654951])))
+E            +      where <ufunc 'absolute'> = np.abs
+E            +    and   np.float64(2.220446049250313e-16) = finfo(resolution=1e-15, min=-1.7976931348623157e+308, max=1.7976931348623157e+308, dtype=float64).eps
+E            +      where finfo(resolution=1e-15, min=-1.7976931348623157e+308, max=1.7976931348623157e+308, dtype=float64) = <class 'numpy.finfo'>(<class 'numpy.float64'>)
+E            +        where <class 'numpy.finfo'> = np.finfo
+E            +        and   <class 'numpy.float64'> = np.float64
+
+tests\test_anfis.py:418: AssertionError
+____________ test_effective_weights_match_shipped_defuzzifier[it2] ____________
+
+interval = True
+
+    @pytest.mark.parametrize("interval", [False, True], ids=("t1", "it2"))
+    def test_effective_weights_match_shipped_defuzzifier(interval: bool) -> None:
+        rule_base = _planted_grid(interval, warm=False)
+        defuzzifier = NieTanDefuzzifier() if interval else WeightedAverageDefuzzifier()
+    
+        # FR-3's bound is scale-aware: 8 eps of sum_r |w_r| |c_r|. Measured worst over this
+        # grid on 2026-10-15: 3.6 eps (T1) and 2.7 eps (IT2).
+        for row in _planted_box_features():
+            firing = rule_base.evaluate(row)
+            weights = _effective_weights(firing)
+            assert weights is not None
+            prediction = weights @ firing.consequent_outputs
+            expected = defuzzifier.defuzzify(firing)
+            scale = np.sum(np.abs(weights)[:, None] * np.abs(firing.consequent_outputs), axis=0)
+>           assert np.all(np.abs(prediction - expected) <= np.finfo(np.float64).eps * 8.0 * scale)
+E           AssertionError: assert np.False_
+E            +  where np.False_ = <function all at 0x0000022C7F2AA3B0>(array([2.38458142e-11, 2.12700968e-11]) <= ((np.float64(2.220446049250313e-16) * 8.0) * array([23.84749006, 21.2626395 ])))
+E            +    where <function all at 0x0000022C7F2AA3B0> = np.all
+E            +    and   array([2.38458142e-11, 2.12700968e-11]) = <ufunc 'absolute'>((array([23.84749006, 21.2626395 ]) - array([23.84749006, 21.2626395 ])))
+E            +      where <ufunc 'absolute'> = np.abs
+E            +    and   np.float64(2.220446049250313e-16) = finfo(resolution=1e-15, min=-1.7976931348623157e+308, max=1.7976931348623157e+308, dtype=float64).eps
+E            +      where finfo(resolution=1e-15, min=-1.7976931348623157e+308, max=1.7976931348623157e+308, dtype=float64) = <class 'numpy.finfo'>(<class 'numpy.float64'>)
+E            +        where <class 'numpy.finfo'> = np.finfo
+E            +        and   <class 'numpy.float64'> = np.float64
+
+tests\test_anfis.py:418: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_anfis.py::test_effective_weights_match_shipped_defuzzifier[t1]
+FAILED tests/test_anfis.py::test_effective_weights_match_shipped_defuzzifier[it2]
+2 failed, 1201 passed in 250.17s (0:04:10)
+
+[defuzz_variant_plugin] variant=X12 patched calls: {'wa': 15225, 'nt': 1777}
+variant X12 exit 1

@@ -1,0 +1,323 @@
+
+====================================================================================================
+0  provenance
+====================================================================================================
+tree                 <tree> (the argument); imports checked to resolve inside it
+superconducted       <tree>/src/superconducted/__init__.py
+scripts module       <tree>/scripts/first_ensemble_run.py
+python               3.12.10  numpy 2.4.4  Windows-11-10.0.26300-SP0
+numpy error state    {'divide': 'warn', 'over': 'warn', 'under': 'ignore', 'invalid': 'warn'}  (underflow is ignored: it never warns)
+blob ok              src/superconducted/fuzzy/defuzzification.py = 61478440
+blob ok              src/superconducted/training/anfis.py = db237241
+blob ok              scripts/first_ensemble_run.py = a5fa4c31
+blob ok              docs/evidence/feature-distribution/2026-09-08-3d1569d.tsv = e1291ebb
+
+====================================================================================================
+1  overflow: finite consequents give inf (inputs built so the sum must pass DBL_MAX)
+====================================================================================================
+-- O1 T1, f=[1,1], c=[1e308,1e308] (review 5923434762's values)
+   exact ['1.000000e+308']   consequent hull per output [1.000000e+308, 1.000000e+308]
+   shipped         ['inf']  rel_err inf  outside_hull True  ProbabilityClip -> ['1.000000e+00']  warnings: RuntimeWarning: overflow encountered in reduce
+   A port143       ['1.000000e+308']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['1.000000e+00']  warnings: RuntimeWarning: overflow encountered in matmul
+   B fallback      ['1.000000e+308']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['1.000000e+00']  warnings: RuntimeWarning: overflow encountered in matmul; RuntimeWarning: overflow encountered in reduce
+   C contract      raises OverflowError: defuzzified output is not finite
+   D anfis_route   ['1.000000e+308']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['1.000000e+00']  warnings: none
+-- O2 IT2, lower=[0.5,0.5], upper=[1,1], c=[1e308,1e308]: y_low finite, y_high inf
+   exact ['1.000000e+308']   consequent hull per output [1.000000e+308, 1.000000e+308]
+   shipped         ['inf']  rel_err inf  outside_hull True  ProbabilityClip -> ['1.000000e+00']  warnings: RuntimeWarning: overflow encountered in reduce
+   A port143       ['1.000000e+308']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['1.000000e+00']  warnings: RuntimeWarning: overflow encountered in matmul
+   B fallback      ['1.000000e+308']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['1.000000e+00']  warnings: RuntimeWarning: overflow encountered in matmul; RuntimeWarning: overflow encountered in reduce
+   C contract      raises OverflowError: defuzzified output is not finite
+   D anfis_route   ['1.000000e+308']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['1.000000e+00']  warnings: none
+   the class's last line on two finite bounds of 1e308: 0.5*(a+b) = inf; 0.5*a + 0.5*b = 1.000000e+308
+-- O3 bound: 27 rules at f=1 (the largest a product of degrees in [0,1] can be):
+   every c = DBL_MAX/27*(1+1e-3) = 6.664781e+306: shipped inf;  every c = DBL_MAX/27*(1-1e-3): shipped 6.651465e+306
+   so with firing in [0,1] overflow needs sum_r f_r |c_r| > DBL_MAX, i.e. some |c_r| > DBL_MAX/n_rules.
+
+====================================================================================================
+2  underflow: firing near the subnormal floor gives Y(lower) = 0.0
+====================================================================================================
+   1e-322 as a double = 9.881313e-323 = 20 x 2**-1074, so f*|c| < 2**-1075 (rounds to 0.0) for |c| < 1/40
+   Built so every product must round to 0.0: f = 1e-322 and every |c| < 0.025. (With c = 0.03 one product
+   rounds up to 1 x 2**-1074 and the quotient happens to come out right, which is why the inputs are built.)
+-- U1 T1, f=[1e-322,1e-322], c=[0.01,0.02]
+   exact ['1.500000e-02']   consequent hull per output [1.000000e-02, 2.000000e-02]
+   shipped         ['0.000000e+00']  rel_err 1.000000e+00  outside_hull True  ProbabilityClip -> ['0.000000e+00']  warnings: none
+   A port143       ['1.500000e-02']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['1.500000e-02']  warnings: none
+   B fallback      ['1.500000e-02']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['1.500000e-02']  warnings: none
+   C contract      raises ZeroDivisionError: largest firing strength 1e-322 is subnormal
+   D anfis_route   ['1.500000e-02']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['1.500000e-02']  warnings: none
+-- U2 IT2, lower=[1e-322,1e-322], upper=[0.5,0.5], c=[0.01,0.02]: Y(lower)=0, output below every consequent
+   exact ['1.500000e-02']   consequent hull per output [1.000000e-02, 2.000000e-02]
+   shipped         ['7.500000e-03']  rel_err 5.000000e-01  outside_hull True  ProbabilityClip -> ['7.500000e-03']  warnings: none
+   A port143       ['1.500000e-02']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['1.500000e-02']  warnings: none
+   B fallback      ['1.500000e-02']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['1.500000e-02']  warnings: none
+   C contract      raises ZeroDivisionError: largest firing strength 1e-322 is subnormal
+   D anfis_route   ['1.500000e-02']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['1.500000e-02']  warnings: none
+-- U3 IT2, lower=[1e-322,1e-322], upper=[1e-3,1], c=[0.01,0.024]: Y(lower)=0, output wrong but INSIDE the hull
+   exact ['2.049301e-02']   consequent hull per output [1.000000e-02, 2.400000e-02]
+   shipped         ['1.199301e-02']  rel_err 4.147756e-01  outside_hull False  ProbabilityClip -> ['1.199301e-02']  warnings: none
+   A port143       ['2.049301e-02']  rel_err 1.692991e-16  outside_hull False  ProbabilityClip -> ['2.049301e-02']  warnings: none
+   B fallback      ['2.049301e-02']  rel_err 1.692991e-16  outside_hull False  ProbabilityClip -> ['2.049301e-02']  warnings: none
+   C contract      raises ZeroDivisionError: largest firing strength 1e-322 is subnormal
+   D anfis_route   ['2.049301e-02']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['2.049301e-02']  warnings: none
+-- U4 IT2 control, c=[0.02,0.03] (one product rounds up): shipped happens to be right
+   exact ['2.500000e-02']   consequent hull per output [2.000000e-02, 3.000000e-02]
+   shipped         ['2.500000e-02']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['2.500000e-02']  warnings: none
+   A port143       ['2.500000e-02']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['2.500000e-02']  warnings: none
+   B fallback      ['2.500000e-02']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['2.500000e-02']  warnings: none
+   C contract      raises ZeroDivisionError: largest firing strength 1e-322 is subnormal
+   D anfis_route   ['2.500000e-02']  rel_err 0.000000e+00  outside_hull False  ProbabilityClip -> ['2.500000e-02']  warnings: none
+   U2's Y(lower) by the class's own expression: 0.000000e+00
+
+====================================================================================================
+3  graded loss by decade (T1 class; f = s*[1,0.7,0.4], c = scale*[1,1.3,1.7])
+====================================================================================================
+   s        rel_err c~1e-1   rel_err c~2e-4   (0 means rounding-level is not exceeded; 1.0 means Y = 0.0)
+   1e-296   1.125e-16        2.198e-16       
+   1e-297   2.250e-16        0.000e+00       
+   1e-298   1.125e-16        0.000e+00       
+   1e-299   1.125e-16        0.000e+00       
+   1e-300   0.000e+00        2.198e-16       
+   1e-301   0.000e+00        2.198e-16       
+   1e-302   1.125e-16        0.000e+00       
+   1e-303   2.250e-16        0.000e+00       
+   1e-304   0.000e+00        0.000e+00       
+   1e-305   1.125e-16        1.099e-15       
+   1e-306   0.000e+00        8.791e-16       
+   1e-307   1.125e-16        6.571e-14       
+   1e-308   1.125e-15        1.250e-13       
+   1e-309   9.902e-15        1.784e-12       
+   1e-310   1.335e-13        3.039e-11       
+   1e-311   2.670e-13        1.256e-10       
+   1e-312   8.393e-12        2.033e-09       
+   1e-313   1.335e-10        2.657e-08       
+   1e-314   1.908e-09        3.128e-07       
+   1e-315   9.156e-09        3.500e-06       
+   1e-316   4.006e-08        5.375e-05       
+   1e-317   1.717e-07        4.233e-04       
+   1e-318   1.908e-06        1.486e-03       
+   1e-319   3.052e-05        4.919e-02       
+   1e-320   5.913e-04        1.000e+00       
+   1e-321   5.736e-03        1.000e+00       
+   1e-322   3.475e-02        1.000e+00       
+   1e-323   1.000e+00        1.000e+00       
+
+   Thresholds for the shipped quotient sum_r f_r c_r / sum_r f_r, with f_max = exp(-S):
+     products are rounding-level while max_r f_r |c_r| >= 2**-1022, i.e. S <= 1022 ln2 + ln|c|
+     a product rounds to 0.0 when f_r |c_r| <= 2**-1075, i.e. S >= 1075 ln2 + ln|c|
+     the firing itself is 0.0 (ZeroDivisionError, already caught) for S > 745.1332 (math.exp)
+     1022 ln2 = 708.3964   1075 ln2 = 745.1332
+     |c| = 0.1: silent band S in (706.09, 745.13], of which Y = 0.0 for S >= 742.83; as a distance ||z|| = sqrt(2 S) in widths: (37.58, 38.60]
+     |c| = 0.0002: silent band S in (699.88, 745.13], of which Y = 0.0 for S >= 736.62; as a distance ||z|| = sqrt(2 S) in widths: (37.41, 38.60]
+
+====================================================================================================
+4  reach: scripts/first_ensemble_run.py (the one shipped builder of a defuzzifier on main)
+====================================================================================================
+   defuzzifier: WeightedAverageDefuzzifier (1 construction); 'Clamp' in source: False; NieTanDefuzzifier in source: False
+   FEATURE_SCALES {'mean_T1': (0.0, 0.0001), 'mean_T2': (0.0, 0.0001), 'mean_readout_error': (0.0, 0.1)}  sigma = span/4; placements ('endpoint', 'interior')
+   survey rows with all three means: 975; T1 [98.26, 157.88] us, T2 [67.25, 111.85] us, readout [0.01654, 0.04008]
+   units check: extract(fixture) = ['1.551924e-04', '1.095954e-04', '3.532605e-02']; survey row x 1e-6 = ['1.551924e-04', '1.095954e-04', '3.532605e-02']; max rel diff 2.220446e-16
+   [endpoint] worst point: S = 2.999 (||z|| = 2.449 widths), min max_r f_r = 4.984402e-02 (log-space exp(-S) 4.984402e-02)
+   [endpoint] |c| over 976 points x 27 rules x 2 outputs x seeds 0..63: [2.076015e-09, 3.586805e-01]
+   [endpoint] seeds 0..3: min over points and outputs of log10(max_r f_r|c_r| / 2**-1022) = 305.1 decades; worst error vs exact 1.77 eps of sum f|c|/sum f
+   [endpoint] seeds 0..63, lower bound log10(min max_r f_r * min |c| / 2**-1022) = 297.7 decades
+   [endpoint] loss needs S > 707.37: ||z|| > 37.61 widths, 15.4x the worst point's distance
+   [endpoint] T1 alone (others at their centres): loss from T1 > 1040.3 us (survey max 157.9 us); readout error <= 1 can contribute at most S = 648.0
+   [interior] worst point: S = 5.303 (||z|| = 3.257 widths), min max_r f_r = 4.977277e-03 (log-space exp(-S) 4.977277e-03)
+   [interior] |c| over 976 points x 27 rules x 2 outputs x seeds 0..63: [2.076015e-09, 3.586805e-01]
+   [interior] seeds 0..3: min over points and outputs of log10(max_r f_r|c_r| / 2**-1022) = 304.1 decades; worst error vs exact 1.70 eps of sum f|c|/sum f
+   [interior] seeds 0..63, lower bound log10(min max_r f_r * min |c| / 2**-1022) = 296.7 decades
+   [interior] loss needs S > 707.37: ||z|| > 37.61 widths, 11.5x the worst point's distance
+   [interior] T1 alone (others at their centres): loss from T1 > 1023.7 us (survey max 157.9 us); readout error <= 1 can contribute at most S = 672.2
+   mutation check (endpoint, seed 0, T2 = 50 us and readout = 0.05 at centres, T1 scanned):
+     first T1 with error > 1e4 eps: (1045.5, 14485.589690721668) (us, eps); first with an output exactly 0.0: 1063.0 us; first ZeroDivisionError: 1065.25 us
+     max f at 1040 us: 1.013717e-307; the scan's band is [1045.5, 1065.25) us against a survey max of 157.9 us
+
+====================================================================================================
+5  reach: IT2 grids buildable on main (NieTanDefuzzifier has no shipped caller), survey units (us)
+====================================================================================================
+   s_i (NC-042 medians of *_qubit_std): {'mean_T1': 45.77560415588844, 'mean_T2': 54.90837978993332, 'mean_readout_error': 0.04069462675923896}
+   domain box [p1, p99]: lo ['9.881910e+01', '6.744106e+01', '1.713258e-02'] hi ['1.543887e+02', '1.105429e+02', '3.742228e-02']; uniform draws: 1000, seed 20261120 (not #143's point set)
+   max_r f_lo is the largest lower firing strength at a point; 'zero' points raise ZeroDivisionError (loud),
+   'band' points have 0 < max_r f_lo < 2**-1022 (the silent band), 'wrong' counts rel_err > 1e-9 against exact.
+   grid    set      n     min max_r f_lo   zero  band  wrong  outside_hull  worst rel_err   margin(decades)  |c| range
+   g59     survey   975   8.878242e-02     0     0     0      0             5.106898e-16    302.8            [1.683295e-04, 3.810581e-04]
+   g59     uniform  1000  1.812431e-01     0     0     0      0             5.273347e-16    303.1            [1.683295e-04, 3.810581e-04]
+   w=0.1   survey   975   5.030814e-02     0     0     0      0             5.462119e-16    302.6            [1.683295e-04, 3.810581e-04]
+   w=0.1   uniform  1000  1.214153e-01     0     0     0      0             5.507566e-16    303.0            [1.683295e-04, 3.810581e-04]
+   w=0.3   survey   975   7.140499e-03     0     0     0      0             5.894147e-16    301.7            [1.683295e-04, 3.810581e-04]
+   w=0.3   uniform  1000  3.063710e-02     0     0     0      0             6.730742e-16    302.4            [1.683295e-04, 3.810581e-04]
+   w=0.6   survey   975   2.673276e-07     0     0     0      0             5.030158e-16    297.3            [1.683295e-04, 3.810581e-04]
+   w=0.6   uniform  1000  2.312776e-05     0     0     0      0             4.716527e-16    299.2            [1.683295e-04, 3.810581e-04]
+   w=0.9   survey   975   6.802992e-106    0     0     0      0             4.674794e-16    198.7            [1.683295e-04, 3.810581e-04]
+   w=0.9   uniform  1000  6.700959e-75     0     0     0      0             4.696584e-16    229.7            [1.683295e-04, 3.810581e-04]
+   w=0.99  survey   975   0.000000e+00     907   0     0      0             1.762380e-16    11.4             [1.683295e-04, 3.810581e-04]
+   w=0.99  uniform  1000  0.000000e+00     960   3     3      1             5.196910e-01    -18.3            [1.683295e-04, 3.810581e-04]
+
+====================================================================================================
+6  options: repro inputs (sections 1 and 2 print every variant) and bit changes on ordinary inputs
+====================================================================================================
+   A port143 = #143's helper per output, bmm_half_reduce's 0.5*a + 0.5*b;  B fallback = shipped bits unless
+   the numerator is subnormal or the quotient is not finite, then A;  C contract = shipped, but raise for a
+   subnormal largest firing strength or a non-finite result;  D anfis_route = _effective_weights(firing) @ c
+   set                                                outputs  variant         differ from shipped  raise  max error vs exact, eps of sum f|c|/sum f (shipped -> variant)
+   first_ensemble_run endpoint seeds 0..3 (T1)         7808     A port143       5427                 0      1.77 -> 2.20
+   first_ensemble_run endpoint seeds 0..3 (T1)         7808     B fallback      0                    0      1.77 -> 1.77
+   first_ensemble_run endpoint seeds 0..3 (T1)         7808     C contract      0                    0      1.77 -> 1.77
+   first_ensemble_run endpoint seeds 0..3 (T1)         7808     D anfis_route   5047                 0      1.77 -> 1.72
+   zero consequents (consequent_init='zeros', T1)      1952     A port143       0                    0      all outputs exactly 0.0 by construction
+   zero consequents (consequent_init='zeros', T1)      1952     B fallback      0                    0      all outputs exactly 0.0 by construction
+   zero consequents (consequent_init='zeros', T1)      1952     C contract      0                    0      all outputs exactly 0.0 by construction
+   zero consequents (consequent_init='zeros', T1)      1952     D anfis_route   0                    0      all outputs exactly 0.0 by construction
+   g59 anchored, survey rows (IT2)                     1950     A port143       1175                 0      2.30 -> 2.20
+   g59 anchored, survey rows (IT2)                     1950     B fallback      0                    0      2.30 -> 2.30
+   g59 anchored, survey rows (IT2)                     1950     C contract      0                    0      2.30 -> 2.30
+   g59 anchored, survey rows (IT2)                     1950     D anfis_route   1252                 0      2.30 -> 2.30
+   tests' _planted_grid T1 on _planted_box_features    1024     A port143       784                  0      3.16 -> 2.51
+   tests' _planted_grid T1 on _planted_box_features    1024     B fallback      0                    0      3.16 -> 3.16
+   tests' _planted_grid T1 on _planted_box_features    1024     C contract      0                    0      3.16 -> 3.16
+   tests' _planted_grid T1 on _planted_box_features    1024     D anfis_route   700                  0      3.16 -> 2.36
+   tests' _planted_grid IT2 on _planted_box_features   1024     A port143       653                  0      3.05 -> 1.91
+   tests' _planted_grid IT2 on _planted_box_features   1024     B fallback      0                    0      3.05 -> 3.05
+   tests' _planted_grid IT2 on _planted_box_features   1024     C contract      0                    0      3.05 -> 3.05
+   tests' _planted_grid IT2 on _planted_box_features   1024     D anfis_route   683                  0      3.05 -> 2.59
+
+====================================================================================================
+7  tests/test_anfis.py::test_effective_weights_match_shipped_defuzzifier: |anfis - class| / (eps * sum|w||c|), bound 8
+====================================================================================================
+   (the test's comment: measured worst 3.6 (T1) and 2.7 (IT2) on 2026-10-15)
+   T1  class computed as shipped    : worst 3.57 eps of sum|w||c|
+   T1  class computed as A port143  : worst 3.41 eps of sum|w||c|
+   T1  class computed as B fallback : worst 3.57 eps of sum|w||c|
+   T1  class computed as C contract : worst 3.57 eps of sum|w||c|
+   IT2 class computed as shipped    : worst 2.73 eps of sum|w||c|
+   IT2 class computed as A port143  : worst 3.36 eps of sum|w||c|
+   IT2 class computed as B fallback : worst 2.73 eps of sum|w||c|
+   IT2 class computed as C contract : worst 2.73 eps of sum|w||c|
+
+====================================================================================================
+8  timing per call, one run on this laptop (provisional): interleaved passes, fastest pass kept
+====================================================================================================
+   T1 27 rules, 2 outputs: shipped 3.72 us  A port143 6.87 us  B fallback 6.85 us  C contract 6.63 us  D anfis_route 2.43 us
+   IT2 27 rules, 2 outputs: shipped 8.15 us  A port143 15.03 us  B fallback 15.00 us  C contract 12.09 us  D anfis_route 4.70 us
+   machine: Intel64 Family 6 Model 183 Stepping 1, GenuineIntel; 2000 calls x 15 passes
+   B and C are prototypes in Python around the class's expression; their extra cost is the checks'
+   numpy calls, not a property of the arithmetic.
+
+====================================================================================================
+checks (every claim the draft cites)
+====================================================================================================
+   [PASS] O1: shipped returns inf for finite inputs
+   [PASS] O1: A port143 returns the exact value
+   [PASS] O1: B fallback returns the exact value
+   [PASS] O1: D anfis_route returns the exact value
+   [PASS] O1: C contract raises
+   [PASS] O2: shipped returns inf for finite inputs
+   [PASS] O2: A port143 returns the exact value
+   [PASS] O2: B fallback returns the exact value
+   [PASS] O2: D anfis_route returns the exact value
+   [PASS] O2: C contract raises
+   [PASS] O2: 0.5*(a+b) overflows where 0.5*a + 0.5*b does not
+   [PASS] O3: 27 rules at f=1 overflow just above DBL_MAX/27
+   [PASS] O3: and stay finite just below it
+   [PASS] U1: shipped T1 returns exactly 0.0
+   [PASS] U2: Y(lower) is exactly 0.0 by the class's expression
+   [PASS] U2: shipped IT2 output is below every consequent
+   [PASS] U3: shipped IT2 output is inside the hull and more than 10% wrong
+   [PASS] U4: control comes out right in shipped
+   [PASS] U1: A port143 returns the exact value
+   [PASS] U1: B fallback returns the exact value
+   [PASS] U1: D anfis_route returns the exact value
+   [PASS] U1: C contract raises ZeroDivisionError
+   [PASS] U2: A port143 returns the exact value
+   [PASS] U2: B fallback returns the exact value
+   [PASS] U2: D anfis_route returns the exact value
+   [PASS] U2: C contract raises ZeroDivisionError
+   [PASS] U3: A port143 returns the exact value
+   [PASS] U3: B fallback returns the exact value
+   [PASS] U3: D anfis_route returns the exact value
+   [PASS] U3: C contract raises ZeroDivisionError
+   [PASS] 4 [endpoint]: the 64-seed lower bound is above 290 decades
+   [PASS] 4 [endpoint]: every survey point and the fixture sit more than 290 decades above the loss onset
+   [PASS] 4 [endpoint]: the worst point's S is below the loss threshold
+   [PASS] 4 [endpoint]: evaluated max firing agrees with the log-space value
+   [PASS] 4 [endpoint]: ordinary error is rounding-level (< 64 eps of sum f|c|/sum f)
+   [PASS] 4 [interior]: the 64-seed lower bound is above 290 decades
+   [PASS] 4 [interior]: every survey point and the fixture sit more than 290 decades above the loss onset
+   [PASS] 4 [interior]: the worst point's S is below the loss threshold
+   [PASS] 4 [interior]: evaluated max firing agrees with the log-space value
+   [PASS] 4 [interior]: ordinary error is rounding-level (< 64 eps of sum f|c|/sum f)
+   [PASS] 4 mutation: the same pipeline and detector fire inside the band
+   [PASS] 4 mutation: the band ends in the ZeroDivisionError the class already raises
+   [PASS] 5 g59 survey: no zero, band or wrong point
+   [PASS] 5 g59 survey: anchored |c| is of order 1e-4
+   [PASS] 5 g59 uniform: no zero, band or wrong point
+   [PASS] 5 g59 uniform: anchored |c| is of order 1e-4
+   [PASS] 5 w=0.1 survey: no zero, band or wrong point
+   [PASS] 5 w=0.1 survey: anchored |c| is of order 1e-4
+   [PASS] 5 w=0.1 uniform: no zero, band or wrong point
+   [PASS] 5 w=0.1 uniform: anchored |c| is of order 1e-4
+   [PASS] 5 w=0.3 survey: no zero, band or wrong point
+   [PASS] 5 w=0.3 survey: anchored |c| is of order 1e-4
+   [PASS] 5 w=0.3 uniform: no zero, band or wrong point
+   [PASS] 5 w=0.3 uniform: anchored |c| is of order 1e-4
+   [PASS] 5 w=0.6 survey: no zero, band or wrong point
+   [PASS] 5 w=0.6 survey: anchored |c| is of order 1e-4
+   [PASS] 5 w=0.6 uniform: no zero, band or wrong point
+   [PASS] 5 w=0.6 uniform: anchored |c| is of order 1e-4
+   [PASS] 5 w=0.9 survey: no zero, band or wrong point
+   [PASS] 5 w=0.9 survey: anchored |c| is of order 1e-4
+   [PASS] 5 w=0.9 uniform: no zero, band or wrong point
+   [PASS] 5 w=0.9 uniform: anchored |c| is of order 1e-4
+   [PASS] 5 w=0.99 survey: anchored |c| is of order 1e-4
+   [PASS] 5 w=0.99 uniform: the band is reached and gives wrong values
+   [PASS] 5 w=0.99 uniform: the hull test misses some of them
+   [PASS] 5 w=0.99 uniform: anchored |c| is of order 1e-4
+   [PASS] 6 first_ensemble_run endpoint seeds 0..3 (T1): A port143 moves some bits
+   [PASS] 6 first_ensemble_run endpoint seeds 0..3 (T1): A port143 stays rounding-level (< 64 eps)
+   [PASS] 6 first_ensemble_run endpoint seeds 0..3 (T1): B fallback keeps every shipped bit and raises nowhere
+   [PASS] 6 first_ensemble_run endpoint seeds 0..3 (T1): B fallback stays rounding-level (< 64 eps)
+   [PASS] 6 first_ensemble_run endpoint seeds 0..3 (T1): C contract keeps every shipped bit and raises nowhere
+   [PASS] 6 first_ensemble_run endpoint seeds 0..3 (T1): C contract stays rounding-level (< 64 eps)
+   [PASS] 6 first_ensemble_run endpoint seeds 0..3 (T1): D anfis_route moves some bits
+   [PASS] 6 first_ensemble_run endpoint seeds 0..3 (T1): D anfis_route stays rounding-level (< 64 eps)
+   [PASS] 6 zero consequents (consequent_init='zeros', T1): A port143 stays rounding-level (< 64 eps)
+   [PASS] 6 zero consequents (consequent_init='zeros', T1): B fallback keeps every shipped bit and raises nowhere
+   [PASS] 6 zero consequents (consequent_init='zeros', T1): B fallback stays rounding-level (< 64 eps)
+   [PASS] 6 zero consequents (consequent_init='zeros', T1): C contract keeps every shipped bit and raises nowhere
+   [PASS] 6 zero consequents (consequent_init='zeros', T1): C contract stays rounding-level (< 64 eps)
+   [PASS] 6 zero consequents (consequent_init='zeros', T1): D anfis_route stays rounding-level (< 64 eps)
+   [PASS] 6 g59 anchored, survey rows (IT2): A port143 moves some bits
+   [PASS] 6 g59 anchored, survey rows (IT2): A port143 stays rounding-level (< 64 eps)
+   [PASS] 6 g59 anchored, survey rows (IT2): B fallback keeps every shipped bit and raises nowhere
+   [PASS] 6 g59 anchored, survey rows (IT2): B fallback stays rounding-level (< 64 eps)
+   [PASS] 6 g59 anchored, survey rows (IT2): C contract keeps every shipped bit and raises nowhere
+   [PASS] 6 g59 anchored, survey rows (IT2): C contract stays rounding-level (< 64 eps)
+   [PASS] 6 g59 anchored, survey rows (IT2): D anfis_route moves some bits
+   [PASS] 6 g59 anchored, survey rows (IT2): D anfis_route stays rounding-level (< 64 eps)
+   [PASS] 6 tests' _planted_grid T1 on _planted_box_features: A port143 moves some bits
+   [PASS] 6 tests' _planted_grid T1 on _planted_box_features: A port143 stays rounding-level (< 64 eps)
+   [PASS] 6 tests' _planted_grid T1 on _planted_box_features: B fallback keeps every shipped bit and raises nowhere
+   [PASS] 6 tests' _planted_grid T1 on _planted_box_features: B fallback stays rounding-level (< 64 eps)
+   [PASS] 6 tests' _planted_grid T1 on _planted_box_features: C contract keeps every shipped bit and raises nowhere
+   [PASS] 6 tests' _planted_grid T1 on _planted_box_features: C contract stays rounding-level (< 64 eps)
+   [PASS] 6 tests' _planted_grid T1 on _planted_box_features: D anfis_route moves some bits
+   [PASS] 6 tests' _planted_grid T1 on _planted_box_features: D anfis_route stays rounding-level (< 64 eps)
+   [PASS] 6 tests' _planted_grid IT2 on _planted_box_features: A port143 moves some bits
+   [PASS] 6 tests' _planted_grid IT2 on _planted_box_features: A port143 stays rounding-level (< 64 eps)
+   [PASS] 6 tests' _planted_grid IT2 on _planted_box_features: B fallback keeps every shipped bit and raises nowhere
+   [PASS] 6 tests' _planted_grid IT2 on _planted_box_features: B fallback stays rounding-level (< 64 eps)
+   [PASS] 6 tests' _planted_grid IT2 on _planted_box_features: C contract keeps every shipped bit and raises nowhere
+   [PASS] 6 tests' _planted_grid IT2 on _planted_box_features: C contract stays rounding-level (< 64 eps)
+   [PASS] 6 tests' _planted_grid IT2 on _planted_box_features: D anfis_route moves some bits
+   [PASS] 6 tests' _planted_grid IT2 on _planted_box_features: D anfis_route stays rounding-level (< 64 eps)
+   [PASS] 7 T1 shipped: inside the test's 8 eps
+   [PASS] 7 T1 A port143: inside the test's 8 eps
+   [PASS] 7 T1 B fallback: inside the test's 8 eps
+   [PASS] 7 T1 C contract: inside the test's 8 eps
+   [PASS] 7 IT2 shipped: inside the test's 8 eps
+   [PASS] 7 IT2 A port143: inside the test's 8 eps
+   [PASS] 7 IT2 B fallback: inside the test's 8 eps
+   [PASS] 7 IT2 C contract: inside the test's 8 eps
+   112 passed, 0 failed

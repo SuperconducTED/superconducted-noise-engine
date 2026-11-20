@@ -1,0 +1,424 @@
+
+[defuzz_variant_plugin] variant=X6 superconducted=<cwd>/src/superconducted/__init__.py
+........................................................................ [  5%]
+..........FFFF.......................................................... [ 11%]
+........................................................................ [ 17%]
+........................................................................ [ 23%]
+........................................................................ [ 29%]
+........................................................................ [ 35%]
+........................................................................ [ 41%]
+........................................................................ [ 47%]
+........................................................................ [ 53%]
+........................................................................ [ 59%]
+........................................................................ [ 65%]
+........................................................................ [ 71%]
+........................................................................ [ 77%]
+........FF.FFF.......................................................... [ 83%]
+........................................................................ [ 89%]
+........................................................................ [ 95%]
+...................................................                      [100%]
+================================== FAILURES ===================================
+___________ test_m2_planted_3x3x3_grid_recovers_each_consequent[t1] ___________
+
+interval = False
+
+    @pytest.mark.parametrize("interval", [False, True], ids=("t1", "it2"))
+    def test_m2_planted_3x3x3_grid_recovers_each_consequent(interval: bool) -> None:
+        planted = _planted_grid(interval, warm=False)
+        warm = _planted_grid(interval, warm=True)
+        defuzzifier = NieTanDefuzzifier() if interval else WeightedAverageDefuzzifier()
+        features = _planted_box_features()
+        data = _data(
+            features,
+            np.array([defuzzifier.defuzzify(planted.evaluate(row)) for row in features]),
+        )
+    
+        result = HybridANFISTrainer(ridge=0.0).fit(warm, data)
+    
+        assert isinstance(result.rule_base, TSKRuleBase)
+        # Compare in the standardized units the solve runs in, where a backward-stable
+        # least-squares solve bounds the error by a small multiple of cond * eps. Raw units
+        # divide each slope by its feature spread (0.0066 for readout error here), so a
+        # raw-unit bound would depend on the planting box. Measured worst error on
+        # 2026-10-15: 0.17 (T1) and 0.18 (IT2) of cond * eps * max|B|.
+        feature_mean, feature_scale, target_mean, target_scale = result.diagnostics.standardization
+        fitted_std = _to_standardized_rule_base(
+            result.rule_base, feature_mean, feature_scale, target_mean, target_scale
+        )
+        planted_std = _to_standardized_rule_base(
+            planted, feature_mean, feature_scale, target_mean, target_scale
+        )
+        got = np.stack([rule.consequent_params for rule in fitted_std.rules])
+        expected = np.stack([rule.consequent_params for rule in planted_std.rules])
+        bound = 8.0 * result.diagnostics.lse_condition_number * np.finfo(np.float64).eps
+>       assert np.max(np.abs(got - expected)) <= bound * np.max(np.abs(expected))
+E       AssertionError: assert np.float64(1.4483622354788395e-05) <= (np.float64(1.7962552965078824e-09) * np.float64(4.728076351372805))
+E        +  where np.float64(1.4483622354788395e-05) = <function max at 0x000001E065C6AEF0>(array([[[7.79291722e-07, 7.75607683e-07, 3.43614094e-10, 1.03376084e-05],\n        [6.13038210e-07, 9.05340091e-07, 9.4...61505e-07, 2.11602124e-10, 8.27178035e-06],\n        [4.31643229e-07, 7.20097724e-07, 3.98307066e-10, 7.57892311e-06]]]))
+E        +    where <function max at 0x000001E065C6AEF0> = np.max
+E        +    and   array([[[7.79291722e-07, 7.75607683e-07, 3.43614094e-10, 1.03376084e-05],\n        [6.13038210e-07, 9.05340091e-07, 9.4...61505e-07, 2.11602124e-10, 8.27178035e-06],\n        [4.31643229e-07, 7.20097724e-07, 3.98307066e-10, 7.57892311e-06]]]) = <ufunc 'absolute'>((array([[[ 7.79294054e-01,  7.75607927e-01,  3.29231794e-04,\n          2.14734764e+00],\n        [ 6.13040019e-01,  9.05...04,\n          8.16925850e-02],\n        [ 4.31644616e-01,  7.20097606e-01,  3.99527108e-04,\n         -2.17646322e+00]]]) - array([[[ 7.79293275e-01,  7.75607151e-01,  3.29231450e-04,\n          2.14733730e+00],\n        [ 6.13039406e-01,  9.05...04,\n          8.16843132e-02],\n        [ 4.31644185e-01,  7.20096885e-01,  3.99526710e-04,\n         -2.17647080e+00]]])))
+E        +      where <ufunc 'absolute'> = np.abs
+E        +  and   np.float64(4.728076351372805) = <function max at 0x000001E065C6AEF0>(array([[[7.79293275e-01, 7.75607151e-01, 3.29231450e-04, 2.14733730e+00],\n        [6.13039406e-01, 9.05338610e-01, 1.1...60197e-01, 1.99492851e-04, 8.16843132e-02],\n        [4.31644185e-01, 7.20096885e-01, 3.99526710e-04, 2.17647080e+00]]]))
+E        +    where <function max at 0x000001E065C6AEF0> = np.max
+E        +    and   array([[[7.79293275e-01, 7.75607151e-01, 3.29231450e-04, 2.14733730e+00],\n        [6.13039406e-01, 9.05338610e-01, 1.1...60197e-01, 1.99492851e-04, 8.16843132e-02],\n        [4.31644185e-01, 7.20096885e-01, 3.99526710e-04, 2.17647080e+00]]]) = <ufunc 'absolute'>(array([[[ 7.79293275e-01,  7.75607151e-01,  3.29231450e-04,\n          2.14733730e+00],\n        [ 6.13039406e-01,  9.05...04,\n          8.16843132e-02],\n        [ 4.31644185e-01,  7.20096885e-01,  3.99526710e-04,\n         -2.17647080e+00]]]))
+E        +      where <ufunc 'absolute'> = np.abs
+
+tests\test_anfis.py:398: AssertionError
+__________ test_m2_planted_3x3x3_grid_recovers_each_consequent[it2] ___________
+
+interval = True
+
+    @pytest.mark.parametrize("interval", [False, True], ids=("t1", "it2"))
+    def test_m2_planted_3x3x3_grid_recovers_each_consequent(interval: bool) -> None:
+        planted = _planted_grid(interval, warm=False)
+        warm = _planted_grid(interval, warm=True)
+        defuzzifier = NieTanDefuzzifier() if interval else WeightedAverageDefuzzifier()
+        features = _planted_box_features()
+        data = _data(
+            features,
+            np.array([defuzzifier.defuzzify(planted.evaluate(row)) for row in features]),
+        )
+    
+        result = HybridANFISTrainer(ridge=0.0).fit(warm, data)
+    
+        assert isinstance(result.rule_base, TSKRuleBase)
+        # Compare in the standardized units the solve runs in, where a backward-stable
+        # least-squares solve bounds the error by a small multiple of cond * eps. Raw units
+        # divide each slope by its feature spread (0.0066 for readout error here), so a
+        # raw-unit bound would depend on the planting box. Measured worst error on
+        # 2026-10-15: 0.17 (T1) and 0.18 (IT2) of cond * eps * max|B|.
+        feature_mean, feature_scale, target_mean, target_scale = result.diagnostics.standardization
+        fitted_std = _to_standardized_rule_base(
+            result.rule_base, feature_mean, feature_scale, target_mean, target_scale
+        )
+        planted_std = _to_standardized_rule_base(
+            planted, feature_mean, feature_scale, target_mean, target_scale
+        )
+        got = np.stack([rule.consequent_params for rule in fitted_std.rules])
+        expected = np.stack([rule.consequent_params for rule in planted_std.rules])
+        bound = 8.0 * result.diagnostics.lse_condition_number * np.finfo(np.float64).eps
+>       assert np.max(np.abs(got - expected)) <= bound * np.max(np.abs(expected))
+E       AssertionError: assert np.float64(1.3052535175361868e-05) <= (np.float64(1.0909516447572145e-11) * np.float64(4.2649244783374))
+E        +  where np.float64(1.3052535175361868e-05) = <function max at 0x000001E065C6AEF0>(array([[[6.97113151e-07, 6.93815756e-07, 2.94700422e-10, 9.24737632e-06],\n        [5.52472864e-07, 8.15893598e-07, 1.0...33778e-07, 1.78490973e-10, 7.39955514e-06],\n        [3.88998851e-07, 6.48953205e-07, 3.60178851e-10, 6.83013764e-06]]]))
+E        +    where <function max at 0x000001E065C6AEF0> = np.max
+E        +    and   array([[[6.97113151e-07, 6.93815756e-07, 2.94700422e-10, 9.24737632e-06],\n        [5.52472864e-07, 8.15893598e-07, 1.0...33778e-07, 1.78490973e-10, 7.39955514e-06],\n        [3.88998851e-07, 6.48953205e-07, 3.60178851e-10, 6.83013764e-06]]]) = <ufunc 'absolute'>((array([[[ 6.97113846e-01,  6.93816438e-01,  2.94512746e-04,\n          1.92240277e+00],\n        [ 5.52473272e-01,  8.15...04,\n          7.45807185e-02],\n        [ 3.88999260e-01,  6.48953850e-01,  3.60054878e-04,\n         -1.95746468e+00]]]) - array([[[ 6.97113149e-01,  6.93815744e-01,  2.94512452e-04,\n          1.92239352e+00],\n        [ 5.52472719e-01,  8.15...04,\n          7.45733189e-02],\n        [ 3.88998871e-01,  6.48953201e-01,  3.60054518e-04,\n         -1.95747151e+00]]])))
+E        +      where <ufunc 'absolute'> = np.abs
+E        +  and   np.float64(4.2649244783374) = <function max at 0x000001E065C6AEF0>(array([[[6.97113149e-01, 6.93815744e-01, 2.94512452e-04, 1.92239352e+00],\n        [5.52472719e-01, 8.15893529e-01, 1.0...33815e-01, 1.78455396e-04, 7.45733189e-02],\n        [3.88998871e-01, 6.48953201e-01, 3.60054518e-04, 1.95747151e+00]]]))
+E        +    where <function max at 0x000001E065C6AEF0> = np.max
+E        +    and   array([[[6.97113149e-01, 6.93815744e-01, 2.94512452e-04, 1.92239352e+00],\n        [5.52472719e-01, 8.15893529e-01, 1.0...33815e-01, 1.78455396e-04, 7.45733189e-02],\n        [3.88998871e-01, 6.48953201e-01, 3.60054518e-04, 1.95747151e+00]]]) = <ufunc 'absolute'>(array([[[ 6.97113149e-01,  6.93815744e-01,  2.94512452e-04,\n          1.92239352e+00],\n        [ 5.52472719e-01,  8.15...04,\n          7.45733189e-02],\n        [ 3.88998871e-01,  6.48953201e-01,  3.60054518e-04,\n         -1.95747151e+00]]]))
+E        +      where <ufunc 'absolute'> = np.abs
+
+tests\test_anfis.py:398: AssertionError
+____________ test_effective_weights_match_shipped_defuzzifier[t1] _____________
+
+interval = False
+
+    @pytest.mark.parametrize("interval", [False, True], ids=("t1", "it2"))
+    def test_effective_weights_match_shipped_defuzzifier(interval: bool) -> None:
+        rule_base = _planted_grid(interval, warm=False)
+        defuzzifier = NieTanDefuzzifier() if interval else WeightedAverageDefuzzifier()
+    
+        # FR-3's bound is scale-aware: 8 eps of sum_r |w_r| |c_r|. Measured worst over this
+        # grid on 2026-10-15: 3.6 eps (T1) and 2.7 eps (IT2).
+        for row in _planted_box_features():
+            firing = rule_base.evaluate(row)
+            weights = _effective_weights(firing)
+            assert weights is not None
+            prediction = weights @ firing.consequent_outputs
+            expected = defuzzifier.defuzzify(firing)
+            scale = np.sum(np.abs(weights)[:, None] * np.abs(firing.consequent_outputs), axis=0)
+>           assert np.all(np.abs(prediction - expected) <= np.finfo(np.float64).eps * 8.0 * scale)
+E           AssertionError: assert np.False_
+E            +  where np.False_ = <function all at 0x000001E065C6A3B0>(array([2.27662989e-05, 2.15165495e-05]) <= ((np.float64(2.220446049250313e-16) * 8.0) * array([22.76629886, 21.51654951])))
+E            +    where <function all at 0x000001E065C6A3B0> = np.all
+E            +    and   array([2.27662989e-05, 2.15165495e-05]) = <ufunc 'absolute'>((array([22.76629886, 21.51654951]) - array([22.76632163, 21.51657103])))
+E            +      where <ufunc 'absolute'> = np.abs
+E            +    and   np.float64(2.220446049250313e-16) = finfo(resolution=1e-15, min=-1.7976931348623157e+308, max=1.7976931348623157e+308, dtype=float64).eps
+E            +      where finfo(resolution=1e-15, min=-1.7976931348623157e+308, max=1.7976931348623157e+308, dtype=float64) = <class 'numpy.finfo'>(<class 'numpy.float64'>)
+E            +        where <class 'numpy.finfo'> = np.finfo
+E            +        and   <class 'numpy.float64'> = np.float64
+
+tests\test_anfis.py:418: AssertionError
+____________ test_effective_weights_match_shipped_defuzzifier[it2] ____________
+
+interval = True
+
+    @pytest.mark.parametrize("interval", [False, True], ids=("t1", "it2"))
+    def test_effective_weights_match_shipped_defuzzifier(interval: bool) -> None:
+        rule_base = _planted_grid(interval, warm=False)
+        defuzzifier = NieTanDefuzzifier() if interval else WeightedAverageDefuzzifier()
+    
+        # FR-3's bound is scale-aware: 8 eps of sum_r |w_r| |c_r|. Measured worst over this
+        # grid on 2026-10-15: 3.6 eps (T1) and 2.7 eps (IT2).
+        for row in _planted_box_features():
+            firing = rule_base.evaluate(row)
+            weights = _effective_weights(firing)
+            assert weights is not None
+            prediction = weights @ firing.consequent_outputs
+            expected = defuzzifier.defuzzify(firing)
+            scale = np.sum(np.abs(weights)[:, None] * np.abs(firing.consequent_outputs), axis=0)
+>           assert np.all(np.abs(prediction - expected) <= np.finfo(np.float64).eps * 8.0 * scale)
+E           AssertionError: assert np.False_
+E            +  where np.False_ = <function all at 0x000001E065C6A3B0>(array([2.38474901e-05, 2.12626395e-05]) <= ((np.float64(2.220446049250313e-16) * 8.0) * array([23.84749006, 21.2626395 ])))
+E            +    where <function all at 0x000001E065C6A3B0> = np.all
+E            +    and   array([2.38474901e-05, 2.12626395e-05]) = <ufunc 'absolute'>((array([23.84749006, 21.2626395 ]) - array([23.84751391, 21.26266076])))
+E            +      where <ufunc 'absolute'> = np.abs
+E            +    and   np.float64(2.220446049250313e-16) = finfo(resolution=1e-15, min=-1.7976931348623157e+308, max=1.7976931348623157e+308, dtype=float64).eps
+E            +      where finfo(resolution=1e-15, min=-1.7976931348623157e+308, max=1.7976931348623157e+308, dtype=float64) = <class 'numpy.finfo'>(<class 'numpy.float64'>)
+E            +        where <class 'numpy.finfo'> = np.finfo
+E            +        and   <class 'numpy.float64'> = np.float64
+
+tests\test_anfis.py:418: AssertionError
+_ test_anchored_base_is_never_degenerate_on_the_archive[TanhMF-WeightedAverageDefuzzifier] _
+
+shape = <class 'superconducted.fuzzy.membership.TanhMF'>
+defuzzifier = <class 'superconducted.fuzzy.defuzzification.WeightedAverageDefuzzifier'>
+
+    @pytest.mark.parametrize(("shape", "defuzzifier"), ARCHIVE_ACCEPTANCE_CASES)
+    def test_anchored_base_is_never_degenerate_on_the_archive(shape: type, defuzzifier: type) -> None:
+        """FR-11, step 9: every surveyed vector, through the clamp, real target, every landed shape.
+    
+        Every shape, not the Gaussian alone: step 5c repeats this run after the M2
+        commit precisely because the Gaussian has unbounded support and would pass
+        while the two compact-support rows crashed.
+    
+        The clamp here is the real ``ClampingFeatureExtractor``, not a bare
+        ``np.clip``: step 9 says this is "the exact object the ablation will hand to
+        the harness, evaluated on the exact inputs the archive produces", and an
+        inlined clip would leave FR-12's wrapper -- the only place the out-of-range
+        policy is applied -- unexercised on the archive.
+    
+        Not luck but a theorem (section 6.5): with zero-order consequents the
+        defuzzified output is a convex combination of the anchor targets, so it
+        stays inside their range and ``is_identity_damping`` is False wherever some
+        rule fires -- which the bin-cover rule guarantees inside ``[lo, hi]``.
+        """
+        samples, spreads = _committed_survey()
+        mfs, anchors = _archive_partition(shape, samples, spreads)
+        target = functools.partial(feature_target_fn, t_seconds=SX_SECONDS, coherence_unit="us")
+        rb = anchored_rule_base(mfs, target, anchors=anchors)
+    
+        lo, hi = _domain_box(samples)
+        clamp = ClampingFeatureExtractor(ArchiveUnitFeatureExtractor(), lo, hi)
+        raw_vectors = _committed_feature_vectors()
+    
+        biases = np.array([rule.consequent_params[:, -1] for rule in rb.rules])
+        engine = defuzzifier()
+        for row in raw_vectors:
+            x = clamp.extract(_synthetic_snapshot(*row))
+            crisp = np.asarray(engine.defuzzify(rb.evaluate(x))).reshape(-1)
+            assert not is_identity_damping(crisp)
+            assert np.all(crisp >= biases.min(axis=0) - 1e-12)
+>           assert np.all(crisp <= biases.max(axis=0) + 1e-12)
+E           assert np.False_
+E            +  where np.False_ = <function all at 0x000001E065C6A3B0>(array([0.00020254, 0.00034686]) <= (array([0.00020254, 0.00038106]) + 1e-12))
+E            +    where <function all at 0x000001E065C6A3B0> = np.all
+E            +    and   array([0.00020254, 0.00038106]) = <built-in method max of numpy.ndarray object at 0x000001E0F6AF3510>(axis=0)
+E            +      where <built-in method max of numpy.ndarray object at 0x000001E0F6AF3510> = array([[0.00020254, 0.00034686],\n       [0.00020254, 0.00034686],\n       [0.00020254, 0.00034686],\n       [0.00020254,...16833, 0.00032626],\n       [0.00016833, 0.00029555],\n       [0.00016833, 0.00029555],\n       [0.00016833, 0.00029555]]).max
+
+tests\test_parameterization.py:1173: AssertionError
+_ test_anchored_base_is_never_degenerate_on_the_archive[TanhSigmoidMF-WeightedAverageDefuzzifier] _
+
+shape = <class 'superconducted.fuzzy.membership.TanhSigmoidMF'>
+defuzzifier = <class 'superconducted.fuzzy.defuzzification.WeightedAverageDefuzzifier'>
+
+    @pytest.mark.parametrize(("shape", "defuzzifier"), ARCHIVE_ACCEPTANCE_CASES)
+    def test_anchored_base_is_never_degenerate_on_the_archive(shape: type, defuzzifier: type) -> None:
+        """FR-11, step 9: every surveyed vector, through the clamp, real target, every landed shape.
+    
+        Every shape, not the Gaussian alone: step 5c repeats this run after the M2
+        commit precisely because the Gaussian has unbounded support and would pass
+        while the two compact-support rows crashed.
+    
+        The clamp here is the real ``ClampingFeatureExtractor``, not a bare
+        ``np.clip``: step 9 says this is "the exact object the ablation will hand to
+        the harness, evaluated on the exact inputs the archive produces", and an
+        inlined clip would leave FR-12's wrapper -- the only place the out-of-range
+        policy is applied -- unexercised on the archive.
+    
+        Not luck but a theorem (section 6.5): with zero-order consequents the
+        defuzzified output is a convex combination of the anchor targets, so it
+        stays inside their range and ``is_identity_damping`` is False wherever some
+        rule fires -- which the bin-cover rule guarantees inside ``[lo, hi]``.
+        """
+        samples, spreads = _committed_survey()
+        mfs, anchors = _archive_partition(shape, samples, spreads)
+        target = functools.partial(feature_target_fn, t_seconds=SX_SECONDS, coherence_unit="us")
+        rb = anchored_rule_base(mfs, target, anchors=anchors)
+    
+        lo, hi = _domain_box(samples)
+        clamp = ClampingFeatureExtractor(ArchiveUnitFeatureExtractor(), lo, hi)
+        raw_vectors = _committed_feature_vectors()
+    
+        biases = np.array([rule.consequent_params[:, -1] for rule in rb.rules])
+        engine = defuzzifier()
+        for row in raw_vectors:
+            x = clamp.extract(_synthetic_snapshot(*row))
+            crisp = np.asarray(engine.defuzzify(rb.evaluate(x))).reshape(-1)
+            assert not is_identity_damping(crisp)
+            assert np.all(crisp >= biases.min(axis=0) - 1e-12)
+>           assert np.all(crisp <= biases.max(axis=0) + 1e-12)
+E           assert np.False_
+E            +  where np.False_ = <function all at 0x000001E065C6A3B0>(array([0.00020254, 0.00034686]) <= (array([0.00020254, 0.00038106]) + 1e-12))
+E            +    where <function all at 0x000001E065C6A3B0> = np.all
+E            +    and   array([0.00020254, 0.00038106]) = <built-in method max of numpy.ndarray object at 0x000001E0F6B0A130>(axis=0)
+E            +      where <built-in method max of numpy.ndarray object at 0x000001E0F6B0A130> = array([[0.00020254, 0.00034686],\n       [0.00020254, 0.00034686],\n       [0.00020254, 0.00034686],\n       [0.00020254,...16833, 0.00032626],\n       [0.00016833, 0.00029555],\n       [0.00016833, 0.00029555],\n       [0.00016833, 0.00029555]]).max
+
+tests\test_parameterization.py:1173: AssertionError
+_ test_anchored_base_is_never_degenerate_on_the_archive[TriangularMF-WeightedAverageDefuzzifier] _
+
+shape = <class 'superconducted.fuzzy.membership.TriangularMF'>
+defuzzifier = <class 'superconducted.fuzzy.defuzzification.WeightedAverageDefuzzifier'>
+
+    @pytest.mark.parametrize(("shape", "defuzzifier"), ARCHIVE_ACCEPTANCE_CASES)
+    def test_anchored_base_is_never_degenerate_on_the_archive(shape: type, defuzzifier: type) -> None:
+        """FR-11, step 9: every surveyed vector, through the clamp, real target, every landed shape.
+    
+        Every shape, not the Gaussian alone: step 5c repeats this run after the M2
+        commit precisely because the Gaussian has unbounded support and would pass
+        while the two compact-support rows crashed.
+    
+        The clamp here is the real ``ClampingFeatureExtractor``, not a bare
+        ``np.clip``: step 9 says this is "the exact object the ablation will hand to
+        the harness, evaluated on the exact inputs the archive produces", and an
+        inlined clip would leave FR-12's wrapper -- the only place the out-of-range
+        policy is applied -- unexercised on the archive.
+    
+        Not luck but a theorem (section 6.5): with zero-order consequents the
+        defuzzified output is a convex combination of the anchor targets, so it
+        stays inside their range and ``is_identity_damping`` is False wherever some
+        rule fires -- which the bin-cover rule guarantees inside ``[lo, hi]``.
+        """
+        samples, spreads = _committed_survey()
+        mfs, anchors = _archive_partition(shape, samples, spreads)
+        target = functools.partial(feature_target_fn, t_seconds=SX_SECONDS, coherence_unit="us")
+        rb = anchored_rule_base(mfs, target, anchors=anchors)
+    
+        lo, hi = _domain_box(samples)
+        clamp = ClampingFeatureExtractor(ArchiveUnitFeatureExtractor(), lo, hi)
+        raw_vectors = _committed_feature_vectors()
+    
+        biases = np.array([rule.consequent_params[:, -1] for rule in rb.rules])
+        engine = defuzzifier()
+        for row in raw_vectors:
+            x = clamp.extract(_synthetic_snapshot(*row))
+            crisp = np.asarray(engine.defuzzify(rb.evaluate(x))).reshape(-1)
+            assert not is_identity_damping(crisp)
+            assert np.all(crisp >= biases.min(axis=0) - 1e-12)
+>           assert np.all(crisp <= biases.max(axis=0) + 1e-12)
+E           assert np.False_
+E            +  where np.False_ = <function all at 0x000001E065C6A3B0>(array([0.00020254, 0.00034686]) <= (array([0.00020254, 0.00038106]) + 1e-12))
+E            +    where <function all at 0x000001E065C6A3B0> = np.all
+E            +    and   array([0.00020254, 0.00038106]) = <built-in method max of numpy.ndarray object at 0x000001E0F6B08F30>(axis=0)
+E            +      where <built-in method max of numpy.ndarray object at 0x000001E0F6B08F30> = array([[0.00020254, 0.00034686],\n       [0.00020254, 0.00034686],\n       [0.00020254, 0.00034686],\n       [0.00020254,...16833, 0.00032626],\n       [0.00016833, 0.00029555],\n       [0.00016833, 0.00029555],\n       [0.00016833, 0.00029555]]).max
+
+tests\test_parameterization.py:1173: AssertionError
+_ test_anchored_base_is_never_degenerate_on_the_archive[TrapezoidalMF-WeightedAverageDefuzzifier] _
+
+shape = <class 'superconducted.fuzzy.membership.TrapezoidalMF'>
+defuzzifier = <class 'superconducted.fuzzy.defuzzification.WeightedAverageDefuzzifier'>
+
+    @pytest.mark.parametrize(("shape", "defuzzifier"), ARCHIVE_ACCEPTANCE_CASES)
+    def test_anchored_base_is_never_degenerate_on_the_archive(shape: type, defuzzifier: type) -> None:
+        """FR-11, step 9: every surveyed vector, through the clamp, real target, every landed shape.
+    
+        Every shape, not the Gaussian alone: step 5c repeats this run after the M2
+        commit precisely because the Gaussian has unbounded support and would pass
+        while the two compact-support rows crashed.
+    
+        The clamp here is the real ``ClampingFeatureExtractor``, not a bare
+        ``np.clip``: step 9 says this is "the exact object the ablation will hand to
+        the harness, evaluated on the exact inputs the archive produces", and an
+        inlined clip would leave FR-12's wrapper -- the only place the out-of-range
+        policy is applied -- unexercised on the archive.
+    
+        Not luck but a theorem (section 6.5): with zero-order consequents the
+        defuzzified output is a convex combination of the anchor targets, so it
+        stays inside their range and ``is_identity_damping`` is False wherever some
+        rule fires -- which the bin-cover rule guarantees inside ``[lo, hi]``.
+        """
+        samples, spreads = _committed_survey()
+        mfs, anchors = _archive_partition(shape, samples, spreads)
+        target = functools.partial(feature_target_fn, t_seconds=SX_SECONDS, coherence_unit="us")
+        rb = anchored_rule_base(mfs, target, anchors=anchors)
+    
+        lo, hi = _domain_box(samples)
+        clamp = ClampingFeatureExtractor(ArchiveUnitFeatureExtractor(), lo, hi)
+        raw_vectors = _committed_feature_vectors()
+    
+        biases = np.array([rule.consequent_params[:, -1] for rule in rb.rules])
+        engine = defuzzifier()
+        for row in raw_vectors:
+            x = clamp.extract(_synthetic_snapshot(*row))
+            crisp = np.asarray(engine.defuzzify(rb.evaluate(x))).reshape(-1)
+            assert not is_identity_damping(crisp)
+            assert np.all(crisp >= biases.min(axis=0) - 1e-12)
+>           assert np.all(crisp <= biases.max(axis=0) + 1e-12)
+E           assert np.False_
+E            +  where np.False_ = <function all at 0x000001E065C6A3B0>(array([0.00020254, 0.00034686]) <= (array([0.00020254, 0.00038106]) + 1e-12))
+E            +    where <function all at 0x000001E065C6A3B0> = np.all
+E            +    and   array([0.00020254, 0.00038106]) = <built-in method max of numpy.ndarray object at 0x000001E0F6B08630>(axis=0)
+E            +      where <built-in method max of numpy.ndarray object at 0x000001E0F6B08630> = array([[0.00020254, 0.00034686],\n       [0.00020254, 0.00034686],\n       [0.00020254, 0.00034686],\n       [0.00020254,...16833, 0.00032626],\n       [0.00016833, 0.00029555],\n       [0.00016833, 0.00029555],\n       [0.00016833, 0.00029555]]).max
+
+tests\test_parameterization.py:1173: AssertionError
+_ test_anchored_base_is_never_degenerate_on_the_archive[TanhBellMF-WeightedAverageDefuzzifier] _
+
+shape = <class 'superconducted.fuzzy.membership.TanhBellMF'>
+defuzzifier = <class 'superconducted.fuzzy.defuzzification.WeightedAverageDefuzzifier'>
+
+    @pytest.mark.parametrize(("shape", "defuzzifier"), ARCHIVE_ACCEPTANCE_CASES)
+    def test_anchored_base_is_never_degenerate_on_the_archive(shape: type, defuzzifier: type) -> None:
+        """FR-11, step 9: every surveyed vector, through the clamp, real target, every landed shape.
+    
+        Every shape, not the Gaussian alone: step 5c repeats this run after the M2
+        commit precisely because the Gaussian has unbounded support and would pass
+        while the two compact-support rows crashed.
+    
+        The clamp here is the real ``ClampingFeatureExtractor``, not a bare
+        ``np.clip``: step 9 says this is "the exact object the ablation will hand to
+        the harness, evaluated on the exact inputs the archive produces", and an
+        inlined clip would leave FR-12's wrapper -- the only place the out-of-range
+        policy is applied -- unexercised on the archive.
+    
+        Not luck but a theorem (section 6.5): with zero-order consequents the
+        defuzzified output is a convex combination of the anchor targets, so it
+        stays inside their range and ``is_identity_damping`` is False wherever some
+        rule fires -- which the bin-cover rule guarantees inside ``[lo, hi]``.
+        """
+        samples, spreads = _committed_survey()
+        mfs, anchors = _archive_partition(shape, samples, spreads)
+        target = functools.partial(feature_target_fn, t_seconds=SX_SECONDS, coherence_unit="us")
+        rb = anchored_rule_base(mfs, target, anchors=anchors)
+    
+        lo, hi = _domain_box(samples)
+        clamp = ClampingFeatureExtractor(ArchiveUnitFeatureExtractor(), lo, hi)
+        raw_vectors = _committed_feature_vectors()
+    
+        biases = np.array([rule.consequent_params[:, -1] for rule in rb.rules])
+        engine = defuzzifier()
+        for row in raw_vectors:
+            x = clamp.extract(_synthetic_snapshot(*row))
+            crisp = np.asarray(engine.defuzzify(rb.evaluate(x))).reshape(-1)
+            assert not is_identity_damping(crisp)
+            assert np.all(crisp >= biases.min(axis=0) - 1e-12)
+>           assert np.all(crisp <= biases.max(axis=0) + 1e-12)
+E           assert np.False_
+E            +  where np.False_ = <function all at 0x000001E065C6A3B0>(array([0.00020254, 0.00034686]) <= (array([0.00020254, 0.00038106]) + 1e-12))
+E            +    where <function all at 0x000001E065C6A3B0> = np.all
+E            +    and   array([0.00020254, 0.00038106]) = <built-in method max of numpy.ndarray object at 0x000001E0F6B09890>(axis=0)
+E            +      where <built-in method max of numpy.ndarray object at 0x000001E0F6B09890> = array([[0.00020254, 0.00034686],\n       [0.00020254, 0.00034686],\n       [0.00020254, 0.00034686],\n       [0.00020254,...16833, 0.00032626],\n       [0.00016833, 0.00029555],\n       [0.00016833, 0.00029555],\n       [0.00016833, 0.00029555]]).max
+
+tests\test_parameterization.py:1173: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_anfis.py::test_m2_planted_3x3x3_grid_recovers_each_consequent[t1]
+FAILED tests/test_anfis.py::test_m2_planted_3x3x3_grid_recovers_each_consequent[it2]
+FAILED tests/test_anfis.py::test_effective_weights_match_shipped_defuzzifier[t1]
+FAILED tests/test_anfis.py::test_effective_weights_match_shipped_defuzzifier[it2]
+FAILED tests/test_parameterization.py::test_anchored_base_is_never_degenerate_on_the_archive[TanhMF-WeightedAverageDefuzzifier]
+FAILED tests/test_parameterization.py::test_anchored_base_is_never_degenerate_on_the_archive[TanhSigmoidMF-WeightedAverageDefuzzifier]
+FAILED tests/test_parameterization.py::test_anchored_base_is_never_degenerate_on_the_archive[TriangularMF-WeightedAverageDefuzzifier]
+FAILED tests/test_parameterization.py::test_anchored_base_is_never_degenerate_on_the_archive[TrapezoidalMF-WeightedAverageDefuzzifier]
+FAILED tests/test_parameterization.py::test_anchored_base_is_never_degenerate_on_the_archive[TanhBellMF-WeightedAverageDefuzzifier]
+9 failed, 1194 passed in 248.65s (0:04:08)
+
+[defuzz_variant_plugin] variant=X6 patched calls: {'wa': 10445, 'nt': 1777}
+variant X6 exit 1

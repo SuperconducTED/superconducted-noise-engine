@@ -1,0 +1,9 @@
+superconducted from <tree>/src/superconducted/__init__.py
+O1 T1  f=[1,1] c=[1e308]*2 shipped inf exact 1e+308
+O2 IT2 lo=[.5,.5] hi=[1,1] c=[1e308]*2 shipped inf exact 1e+308
+   the last line alone: 0.5*(1e308 + 1e308) = inf
+U1 T1  f=[1e-322]*2 c=[0.01,0.02] shipped 0.0 exact 0.015
+U2 IT2 lo=[1e-322]*2 hi=[.5,.5] shipped 0.0075 exact 0.015 (below every consequent)
+U3 IT2 lo=[1e-322]*2 hi=[1e-3,1] c=[0.01,0.024] shipped 0.011993006993006995 exact 0.020493006993006994
+   (inside the hull, still wrong)
+all as described

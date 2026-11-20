@@ -1,0 +1,16 @@
+tree <arg> at 58f7f63c
+shipped  1203 passed in 250.37s (0:04:10)
+[defuzz_variant_plugin] variant=shipped patched calls: {'wa': 15736, 'nt': 2288} variant shipped exit 0 
+A        1203 passed in 249.72s (0:04:09)
+[defuzz_variant_plugin] variant=A patched calls: {'wa': 15736, 'nt': 2288} variant A exit 0 
+B        1203 passed in 250.09s (0:04:10)
+[defuzz_variant_plugin] variant=B patched calls: {'wa': 15736, 'nt': 2288} variant B exit 0 
+C        1203 passed in 250.16s (0:04:10)
+[defuzz_variant_plugin] variant=C patched calls: {'wa': 15736, 'nt': 2288} variant C exit 0 
+D        1203 passed in 249.38s (0:04:09)
+[defuzz_variant_plugin] variant=D patched calls: {'wa': 15736, 'nt': 2288} variant D exit 0 
+X12      2 failed, 1201 passed in 250.17s (0:04:10)
+[defuzz_variant_plugin] variant=X12 patched calls: {'wa': 15225, 'nt': 1777} variant X12 exit 1 
+X6       9 failed, 1194 passed in 248.65s (0:04:08)
+[defuzz_variant_plugin] variant=X6 patched calls: {'wa': 10445, 'nt': 1777} variant X6 exit 1 
+runner exit 0
