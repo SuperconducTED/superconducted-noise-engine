@@ -1,0 +1,14 @@
+mutant	file	prediction	outcome	matches	seconds	pytest
+N01 exclusions neither sorted nor deduplicated	docs/evidence/capture-rate-2026-11/capture_lifetimes.py	caught	caught: assertion	True	3.3	1 failed, 2 passed in 1.37s
+N02 repeat check dropped	docs/evidence/capture-rate-2026-11/capture_lifetimes.py	caught	caught: assertion	True	5.6	1 failed, 5 passed in 1.89s
+N03 last day not excludable	docs/evidence/capture-rate-2026-11/capture_lifetimes.py	caught	caught: assertion	True	2.9	1 failed, 2 passed in 1.22s
+N04 first day not excludable	docs/evidence/capture-rate-2026-11/capture_lifetimes.py	caught	caught: assertion	True	2.9	1 failed, 2 passed in 1.26s
+N05 outside check dropped	docs/evidence/capture-rate-2026-11/capture_lifetimes.py	caught	caught: assertion	True	3.0	1 failed, 3 passed in 1.40s
+N06 excluded day kept in the selection	docs/evidence/capture-rate-2026-11/capture_lifetimes.py	caught	caught: assertion	True	2.4	1 failed, 1 passed in 0.89s
+N07 line always printed	docs/evidence/capture-rate-2026-11/capture_lifetimes.py	caught	caught: assertion	True	2.5	1 failed in 0.67s
+N08 line never printed	docs/evidence/capture-rate-2026-11/capture_lifetimes.py	caught	caught: assertion	True	2.4	1 failed, 1 passed in 0.89s
+N09 days left count the excluded	docs/evidence/capture-rate-2026-11/capture_lifetimes.py	caught	caught: assertion	True	2.4	1 failed, 1 passed in 0.94s
+N10 excluded day kept in the week	docs/evidence/capture-rate-2026-11/capture_lifetimes.py	caught	caught: assertion	True	2.5	1 failed, 1 passed in 0.93s
+N11 repeat message	docs/evidence/capture-rate-2026-11/capture_lifetimes.py	caught	caught: assertion	True	3.5	1 failed, 5 passed in 2.02s
+N12 outside message without the days	docs/evidence/capture-rate-2026-11/capture_lifetimes.py	caught	caught: assertion	True	3.4	1 failed, 3 passed in 1.42s
+N13 the flag is not repeatable	docs/evidence/capture-rate-2026-11/capture_lifetimes.py	caught	caught: assertion	True	2.5	1 failed, 1 passed in 0.93s

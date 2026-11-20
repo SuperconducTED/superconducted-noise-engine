@@ -285,3 +285,21 @@ and its effect on the baseline is measured, before anything else changes.
 | A4 | A test pins A2 and A3, running the script on a synthetic record in a temporary git repository. Each new line is mutation-checked, with predictions written first. |
 | A5 | `sweep_days.py`, from its committed copy at `d08263a9` with the committed runs file: a scheduled sweep on every day from 2026-09-30 to 2026-11-14. |
 | A6 | ruff, `ruff format --check`, `check_ids.py`, `mypy --strict` and `pytest tests/` pass on the exact head, with the exact pins. |
+
+### Results of amendment 2, 2026-11-20 (laptop, provisional)
+
+Run with the exact pins (`C:/t/pin125`). The code and test are at `aa044285`, and the mutation script at `8e0c7dd4`.
+This results commit changes only `docs/`.
+
+| # | Result |
+| --- | --- |
+| A1 | **Holds.** With the new code, the baseline command at `d08263a9` gives output identical to the committed `baseline-2026-09-30_11-11.out.txt`, line endings normalised. The committed file is LF; Windows stdout writes CRLF. |
+| A2 | **Holds.** On the synthetic record, `--exclude-day 2026-11-21` selects 16 documents, P1 reads "0 of 15", and the output names 2026-11-21 with 8 recorded days left. Without the flag: 18 documents and "1 of 17", which is the reproduction on `6dcfea3d`'s code. |
+| A3 | **Holds.** 2026-11-25 and 2026-11-15 are refused as outside 2026-11-16 to 2026-11-24, naming the day. 2026-11-21 given twice is refused as given twice. Each refusal exits nonzero and prints no selection. |
+| A4 | **Holds.** `tests/test_capture_lifetimes.py` (6 tests) re-makes the record in a temporary git repository. The 13 mutants of the new lines were run in a `git archive` copy: 13 caught, all by an assertion, none against the prediction (`mutation-amendment-2.tsv`). N13 (`action="store"`) was expected to crash, and it does, in the subprocess; the test's exit-code assertion is what catches it. |
+| A5 | **Holds.** `sweep_days.py`, run from its committed copy at `d08263a9` with the committed runs file, finds a scheduled sweep on 46 of 46 days from 2026-09-30 to 2026-11-14 (`sweep-days-2026-09-30_11-14.out.txt`). No baseline day would be excluded, so NC-099 to NC-101 stand. An earlier one-off look, before the script existed, gave the same answer over 2026-09-27 to 2026-11-14 with a stricter burst size (at least 5 rows); it is not cited as evidence. |
+| A6 | **Holds**, on a throwaway merge of `8e0c7dd4` with `main` at `b9fcddea`. The merge's tree is `b0d9f5ec`, the same object as the trial merge's, and `superconducted.__file__` is the merge worktree's own `src`. ruff, `ruff format --check` and `check_ids.py` are clean, and `mypy --strict` finds no issues in 51 source files. `pytest tests/`: 1,438 passed, 0 skipped, in 5 min 50 s. |
+
+**Not changed by this section.** NC-021: the merge measures 1,438 against `main`'s 1,432 (the 6 new tests). That is a
+trial merge, not a merge commit, so the register is re-measured at this PR's merge under Rule 6. Burak's desktop run
+is still owed.
