@@ -231,3 +231,57 @@ exemption marker (`**Rule 7, YYYY-MM-DD`) finds it. NC-099's line names the live
 command run with `--ref` at a later `calibration-data` commit, and says the capture job extends
 `health/capture.tsv` each day (`calibration-health.yml`, `cron: '17 3 * * *'`). NC-100 and NC-101 say
 the same in short. The lead approved the wording in the session's question dialog.
+
+## Amendment 2, 2026-11-20: a day of E whose covering sweep was skipped (Baha's review)
+
+Appended; nothing above is edited. Written before this PR merged, so every sweep so far ran at 1 h and no figure
+after the change exists. This section is the plan; the code follows it.
+
+**The finding.** Baha's review 5927517413 (CHANGES_REQUESTED, 2026-11-16) is about `capture_lifetimes.py`, lines 116
+to 118. `chosen` keeps every document stamped in `lo..hi`. So a day of E whose sweep was skipped, but which still has
+captured documents, stays in E. Yet the prediction section says such a day "is reported and replaced by the next
+day". The script has no input that names such a day, and `--from` and `--to` cannot express an E with a gap in it.
+
+**Reproduced first, on the code as it is.** The synthetic record covers 2026-11-16 to 2026-11-24, with two documents a
+day, at 06:00 and 18:00. All are captured except 2026-11-21 06:00, which is missed: that day's sweep was skipped, and
+the hourly poll caught only the 18:00 document. `--from 2026-11-16 --to 2026-11-24` selects all 18 documents, and P1
+reads "1 of 17". So P1 fails on a day the protocol removes. The test below re-makes this record.
+
+**The lead's decision, 2026-11-20: which skipped sweep makes a day uncovered.** Day D of E is uncovered when the
+scheduled sweep dated D+1 did not run.
+
+- Only D+1's 48 h window covers D entirely. The sweeps dated D and D+2 each cover part of D. They meet near the sweep
+  hour, with a gap of up to about 2 h when their dispatch times differ (09:00 to 11:15 UTC).
+- This is the prediction section's "no scheduled 0.5 h sweep window covers [it] entirely". Its bracket, "(both
+  covering sweeps skipped)", is corrected: one skipped sweep, D+1's, is enough. Under the bracket's reading, a miss in
+  that gap would count against P1, although no 0.5 h grid could have guaranteed it.
+- An uncovered day is reported and replaced by the next day, as written. Amendment 1b still holds: E keeps 7
+  recorded, covered days, and P1 is read at the first commit whose record holds the day after E's new last day.
+- "Ran" is read by `sweep_days.py` (this folder). D+1 had a scheduled sweep when some ledger poll time dated D+1
+  holds more than one row, which is `classify_polls`' rule in `scripts/capture_rate_analysis.py`, and falls inside a
+  scheduled run of `calibration-poll.yml`. The scheduled runs are listed from the Actions runs API (`event=schedule`)
+  and saved beside the script, so the reading survives GitHub's 90-day expiry.
+
+**The script.** `capture_lifetimes.py` gains `--exclude-day YYYY-MM-DD`, repeatable, for the uncovered days found by
+the rule above.
+
+- An excluded day's documents leave `chosen`, and the day leaves the weekly table.
+- Lifetimes still use the whole record: an excluded day's documents remain successors of earlier ones.
+- The output names the excluded days and counts the recorded days left in `lo..hi`, so a reader can see that E holds
+  7.
+- An excluded day outside `lo..hi`, or the same day given twice, is refused.
+- Without the flag, the output does not change.
+
+**The baseline is checked the same way.** `sweep_days.py`, run from its committed copy, must find a scheduled sweep on
+every day from 2026-09-30 to 2026-11-14. That span covers each day of the record (2026-09-30 to 2026-11-11) and the
+day after it. If it does, no baseline day would be excluded, and NC-099 to NC-101 stand. A day without one is reported,
+and its effect on the baseline is measured, before anything else changes.
+
+| # | Criterion |
+| --- | --- |
+| A1 | Without `--exclude-day`, the baseline command at `d08263a9` gives output byte-identical to the committed `baseline-2026-09-30_11-11.out.txt`. |
+| A2 | On the synthetic record, `--exclude-day 2026-11-21` leaves 16 documents selected, P1 reads "0 of 15", and the output names 2026-11-21. Without the flag: 18 documents and "1 of 17", as reproduced. |
+| A3 | An excluded day outside `lo..hi`, or the same day twice, is refused with a message and a nonzero exit. |
+| A4 | A test pins A2 and A3, running the script on a synthetic record in a temporary git repository. Each new line is mutation-checked, with predictions written first. |
+| A5 | `sweep_days.py`, from its committed copy at `d08263a9` with the committed runs file: a scheduled sweep on every day from 2026-09-30 to 2026-11-14. |
+| A6 | ruff, `ruff format --check`, `check_ids.py`, `mypy --strict` and `pytest tests/` pass on the exact head, with the exact pins. |
