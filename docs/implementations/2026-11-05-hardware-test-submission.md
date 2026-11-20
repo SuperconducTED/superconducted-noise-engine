@@ -877,3 +877,27 @@ committed memory on 2026-11-08.
 - Burak's runbook for criterion 9, now against `dry-run-2026-11-16/`, dry-run from GitHub before it is posted.
 - The team's rule for a job 14 that cannot be scored on day 15's morning.
 - The controls re-run at the freezing ref, after this PR merges.
+
+### Results, 2026-11-20 (laptop, provisional)
+
+Every run was at `20e7345d`, from the exact pins (`C:/t/pin125`). This results commit changes only `docs/`, so its
+`scripts/`, `tests/` and `src/` trees are the ones measured. The outputs are in
+`docs/evidence/hardware-reading-vs-level/merge-2026-11-20/`.
+
+| # | Result |
+| --- | --- |
+| 36 | **Holds.** Merge `213edfe3`, parents `bbb209bb` and `b9fcddea`. Its tree is `99126ccc`, the object `git merge-tree --write-tree` gave before the merge, with no conflict. `src/` equals `main`'s. No commit message on `origin/main..HEAD` carries a closing keyword. |
+| 37 | **Holds, as predicted.** From the full clone `C:/t1dfull`, the dry run exits 0 in 14 min 28 s (10:37:40 to 10:52:08 UTC). `compare_dry_run.py` exits 0. The eight outputs are byte-identical to `dry-run-2026-11-16/`'s, line endings normalised. `dry-run.log`, the reference's hand copy of its log, is reported as differing. |
+| 38 | **Holds.** Four new tests in `tests/test_hardware_submit.py` cover four cases. Two hand-made jobs pool to 4 layouts, 3 covered, a share of 0.75 (the mean of the two jobs' shares would be 0.8333). There is no share without a banded layout, with one job or with none. A job without a `band` entry is refused, naming its day. The decision is identical with every layout covered and with none. The file: 143 passed. |
+| 39 | **Holds.** 16 mutants, with predictions committed first (`20e7345d`), run in a `git archive` copy. All 16 are caught, 13 by an assertion and 3 by a crash, each as its comment predicted; none goes against the prediction. |
+| 40 | **Holds.** The rehearsal ran from 10:52:10 to 11:07:09, with every stage exiting 0, and the checker reads "all checks pass", the same 66 checks as on 2026-11-08. The interim and day-15 reports both give `band_coverage` 6 layouts, 5 covered, share 0.8333. The one sealed `arm-b.json` (day 3) has `band.n_predicted` 6 and `band.n_covered` 5. Day 15 copies the sealed folder into `jobs/sealed`, and the two copies are byte-identical. These are Aer truths built from the same snapshot, not a figure about the device. |
+| 41 | **Holds.** The gates ran in a throwaway worktree with `PYTHONPATH=src`, and `superconducted.__file__` was the worktree's own `src`. ruff, `ruff format --check` and `check_ids.py` are clean, and `mypy --strict` finds no issues in 54 source files. `pytest tests/`: 1,742 passed and 2 skipped (the two that need the `T1` library), in 7 min 47 s. |
+
+**Found while running.** The first attempt of the dry run and the rehearsal stopped at its fetch. The full clone could
+not fetch this branch from `C:/t1d`, a worktree of a `blob:none` clone, which cannot serve blobs it never downloaded.
+Updating the full clone's refs from GitHub first fixed it. Nothing had run, and nothing in the results comes from that
+attempt.
+
+**Not changed by this section.** NC-021: this branch measures 1,742 at `20e7345d`, a branch tip, not a merge commit.
+The register is re-measured at this PR's merge under Rule 6. Criterion 9 is still open: it is Burak's desktop run,
+against `dry-run-2026-11-16/`, with a runbook dry-run from GitHub before it is posted.

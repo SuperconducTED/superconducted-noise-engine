@@ -1,0 +1,7 @@
+10:37:40 at 20e7345d4d58b67dd48ff1af302dcc41fdb7e7dc, tree: [0] changed
+10:37:40 dry run start
+10:52:08 dry run exit 0
+10:52:08 compare_dry_run exit 0
+10:52:09 byte comparison: 8 identical, 1 differ
+10:52:09 tree after the run: [0] changed
+10:52:09 RUN END
