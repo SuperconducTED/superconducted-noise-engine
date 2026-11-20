@@ -1,0 +1,53 @@
+calibration-data commit: 5d958ab2af09a3c8ed8c7222ef823130fe6229f6
+earliest commit that adds a file in this clone: 2026-08-01 21:28:35 UTC
+
+A. Gaps in file time
+files 2980, 2026-05-13 12:13:22 to 2026-11-19 20:38:27 UTC,
+span 190 days
+median gap between consecutive files: 0.94 h
+gaps of 24 h or more: 9; starting in the last 60 days: 2
+    31.5 h  2026-06-20 10:41:25 -> 2026-06-21 18:09:01
+    61.8 h  2026-06-27 01:56:12 -> 2026-06-29 15:43:14
+    32.0 h  2026-07-05 18:59:51 -> 2026-07-07 02:57:34
+    39.6 h  2026-07-16 03:00:13 -> 2026-07-17 18:33:27
+    82.7 h  2026-08-07 03:21:59 -> 2026-08-10 14:02:35
+    39.9 h  2026-08-10 14:02:35 -> 2026-08-12 05:59:18
+    58.6 h  2026-08-14 20:18:59 -> 2026-08-17 06:57:40
+    26.7 h  2026-09-22 14:00:30 -> 2026-09-23 16:44:52
+   112.4 h  2026-11-13 16:27:59 -> 2026-11-18 08:49:20
+
+the latest of them: 112.4 h, 2026-11-13 16:27:59 to 2026-11-18 08:49:20
+  last file before it entered the archive at 2026-11-13 18:00:29
+  first file after it, by file time, entered at 2026-11-18 13:25:31
+  first file dated after it to enter the archive: 2026-11-18 10:42:53, at 2026-11-18 12:56:49
+  polls between the last file before the gap entered (11-13 18:00:29) and that arrival: 68, of which 'no new document': 68
+  polls between the last calibration commit before that arrival (11-14 11:45:09) and that arrival: 57, of which 'no new document': 57
+
+B. Arrival lag (add commit time minus file time)
+files dated from 2026-09-01: 2042
+lag in hours: median 4.25, 90th percentile 35.5, max 386.9
+  within  1 h: 799 (39.1%)
+  within  3 h: 985 (48.2%)
+  within  6 h: 1068 (52.3%)
+  within 12 h: 1271 (62.2%)
+  within 24 h: 1670 (81.8%)
+  within 48 h: 2000 (97.9%)
+  over 24 h: 372 (18.2%); over 48 h: 42 (2.1%)
+  archived before its own file time: 2026-11-01 06:56:05, added 06:45:08
+files later than 6 h: 974; in a commit adding 3 or more files: 971
+  by add hour (UTC): {4: 27, 8: 27, 9: 259, 10: 213, 11: 195, 12: 196, 13: 56, 14: 1}
+commits adding 3 or more files since 2026-09-01: 70;
+  landing 08:00 to 14:00 UTC: 66; by hour: {4: 1, 8: 2, 9: 23, 10: 14, 11: 13, 12: 10, 13: 4, 19: 1, 20: 2}
+
+C. Replay of 60 days, 2026-09-19 to 2026-11-17
+t_execute = 03:45 UTC plus the queue delay; scored at 04:00 UTC on the first morning
+after t_execute on which the archive holds a file dated after t_execute
+  queue  0.02 h: a different file on 4 of 60 days; scored later than the next morning on 4; not within 7 mornings on 0; the newer file is later by median 0.9 h, max 1.1 h
+      scored late: 2026-11-14 (+5), 2026-11-15 (+4), 2026-11-16 (+3), 2026-11-17 (+2)
+  queue   2.0 h: a different file on 5 of 60 days; scored later than the next morning on 4; not within 7 mornings on 0; the newer file is later by median 0.7 h, max 1.5 h
+      scored late: 2026-11-14 (+5), 2026-11-15 (+4), 2026-11-16 (+3), 2026-11-17 (+2)
+  queue   6.0 h: a different file on 9 of 60 days; scored later than the next morning on 4; not within 7 mornings on 0; the newer file is later by median 0.5 h, max 1.2 h
+      scored late: 2026-11-14 (+5), 2026-11-15 (+4), 2026-11-16 (+3), 2026-11-17 (+2)
+  queue  12.0 h: a different file on 25 of 60 days; scored later than the next morning on 6; not within 7 mornings on 0; the newer file is later by median 1.6 h, max 4.5 h
+      scored late: 2026-09-22 (+2), 2026-10-14 (+2), 2026-11-14 (+5), 2026-11-15 (+4), 2026-11-16 (+3), 2026-11-17 (+2)
+rows written for compare_readings.py: 43

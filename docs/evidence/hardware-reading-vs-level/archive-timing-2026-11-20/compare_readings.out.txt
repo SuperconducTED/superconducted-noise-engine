@@ -1,0 +1,56 @@
+superconducted imported from the repository's src: True
+scripts/hardware_test_predictors.py blob: aac828e60f22e9e87e54587d91ee8dff29db6d73
+quantities: T1, T2, readout_error, prob_meas0_prep1, prob_meas1_prep0
+
+queue 0.02 h: a different file on 4 days; same device state on 3; one of the five quantities differs on 1 (T1 or T2 on 0, a readout quantity on 1)
+    2026-10-11: T1 0 of 156, T2 0 of 155, readout_error 155 of 156, prob_meas0_prep1 144 of 156, prob_meas1_prep0 148 of 156
+    2026-10-27: same device state (equal qubit digest)
+    2026-11-01: same device state (equal qubit digest)
+    2026-11-04: same device state (equal qubit digest)
+
+queue 2.0 h: a different file on 5 days; same device state on 4; one of the five quantities differs on 0 (T1 or T2 on 0, a readout quantity on 0)
+    2026-09-28: same device state (equal qubit digest)
+    2026-10-06: same device state (equal qubit digest)
+    2026-10-16: same device state (equal qubit digest)
+    2026-11-02: same device state (equal qubit digest)
+    2026-11-10: T1 0 of 156, T2 0 of 155, readout_error 0 of 156, prob_meas0_prep1 0 of 156, prob_meas1_prep0 0 of 156
+
+queue 6.0 h: a different file on 9 days; same device state on 4; one of the five quantities differs on 3 (T1 or T2 on 1, a readout quantity on 2)
+    2026-09-20: T1 149 of 156, T2 154 of 155, readout_error 0 of 156, prob_meas0_prep1 0 of 156, prob_meas1_prep0 0 of 156
+    2026-09-25: same device state (equal qubit digest)
+    2026-09-26: same device state (equal qubit digest)
+    2026-10-17: T1 0 of 156, T2 0 of 155, readout_error 155 of 156, prob_meas0_prep1 154 of 156, prob_meas1_prep0 153 of 156
+    2026-10-19: same device state (equal qubit digest)
+    2026-10-26: T1 0 of 156, T2 0 of 155, readout_error 153 of 156, prob_meas0_prep1 147 of 156, prob_meas1_prep0 149 of 156
+    2026-11-01: T1 0 of 156, T2 0 of 155, readout_error 0 of 156, prob_meas0_prep1 0 of 156, prob_meas1_prep0 0 of 156
+    2026-11-03: T1 0 of 156, T2 0 of 155, readout_error 0 of 156, prob_meas0_prep1 0 of 156, prob_meas1_prep0 0 of 156
+    2026-11-04: same device state (equal qubit digest)
+
+queue 12.0 h: a different file on 25 days; same device state on 13; one of the five quantities differs on 5 (T1 or T2 on 0, a readout quantity on 5)
+    2026-09-19: T1 0 of 156, T2 0 of 155, readout_error 156 of 156, prob_meas0_prep1 140 of 156, prob_meas1_prep0 154 of 156
+    2026-09-25: T1 0 of 156, T2 0 of 155, readout_error 152 of 156, prob_meas0_prep1 145 of 156, prob_meas1_prep0 150 of 156
+    2026-09-26: T1 0 of 156, T2 0 of 155, readout_error 0 of 156, prob_meas0_prep1 0 of 156, prob_meas1_prep0 0 of 156
+    2026-09-30: T1 0 of 156, T2 0 of 155, readout_error 0 of 156, prob_meas0_prep1 0 of 156, prob_meas1_prep0 0 of 156
+    2026-10-03: same device state (equal qubit digest)
+    2026-10-06: T1 0 of 156, T2 0 of 155, readout_error 153 of 156, prob_meas0_prep1 143 of 156, prob_meas1_prep0 150 of 156
+    2026-10-07: same device state (equal qubit digest)
+    2026-10-08: same device state (equal qubit digest)
+    2026-10-09: same device state (equal qubit digest)
+    2026-10-10: T1 0 of 156, T2 0 of 155, readout_error 153 of 156, prob_meas0_prep1 144 of 156, prob_meas1_prep0 147 of 156
+    2026-10-16: T1 0 of 156, T2 0 of 155, readout_error 153 of 156, prob_meas0_prep1 143 of 156, prob_meas1_prep0 151 of 156
+    2026-10-17: same device state (equal qubit digest)
+    2026-10-18: same device state (equal qubit digest)
+    2026-10-23: same device state (equal qubit digest)
+    2026-10-26: same device state (equal qubit digest)
+    2026-10-29: same device state (equal qubit digest)
+    2026-10-30: T1 0 of 156, T2 0 of 155, readout_error 0 of 156, prob_meas0_prep1 0 of 156, prob_meas1_prep0 0 of 156
+    2026-11-01: same device state (equal qubit digest)
+    2026-11-02: T1 0 of 156, T2 0 of 155, readout_error 0 of 156, prob_meas0_prep1 0 of 156, prob_meas1_prep0 0 of 156
+    2026-11-03: same device state (equal qubit digest)
+    2026-11-05: T1 0 of 156, T2 0 of 155, readout_error 0 of 156, prob_meas0_prep1 0 of 156, prob_meas1_prep0 0 of 156
+    2026-11-07: same device state (equal qubit digest)
+    2026-11-09: T1 0 of 156, T2 0 of 155, readout_error 0 of 156, prob_meas0_prep1 0 of 156, prob_meas1_prep0 0 of 156
+    2026-11-10: T1 0 of 156, T2 0 of 155, readout_error 0 of 156, prob_meas0_prep1 0 of 156, prob_meas1_prep0 0 of 156
+    2026-11-12: same device state (equal qubit digest)
+
+files opened: 86; name time equal to last_update_date on 86
