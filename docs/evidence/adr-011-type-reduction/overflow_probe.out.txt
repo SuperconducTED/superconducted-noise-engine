@@ -1,0 +1,7 @@
+1. bit identity with 0d53fc60's expression: 200000 of 200000 identical
+2. control, divided by max |values|: 145138 of 200000 differ
+3. equal values at the largest double, 200000 cases:
+   shifted quotient >= 1.0 (multiplying back would overflow): 60587
+   of those, the largest double returned: 60587
+   finite results: 200000 of 200000
+   largest distance below the largest double (the true result): 6 ulps
