@@ -1,0 +1,8 @@
+FAILED tests/training/test_types.py::test_diagnostics_copies_and_freezes_standardization
+FAILED tests/training/test_types.py::test_diagnostics_stores_standardization_as_a_tuple
+FAILED tests/training/test_types.py::test_result_copies_and_freezes_rmse[train_rmse]
+FAILED tests/training/test_types.py::test_result_copies_and_freezes_rmse[validation_rmse]
+FAILED tests/training/test_types.py::test_result_stores_loss_history_as_a_tuple
+FAILED tests/training/test_types.py::test_result_and_diagnostics_arrays_are_float64
+FAILED tests/test_anfis.py::test_fit_returns_read_only_metrics_and_standardization
+7 failed, 90 deselected in 0.54s
