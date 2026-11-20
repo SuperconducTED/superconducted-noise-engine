@@ -19,6 +19,19 @@ if TYPE_CHECKING:
     from .interfaces import RuleBase
 
 
+def _frozen_copy(values: npt.ArrayLike) -> npt.NDArray[np.float64]:
+    """Return a private, read-only ``float64`` copy of ``values``.
+
+    The result is always a new array that owns its data, so a later write to the caller's
+    object cannot reach it, and any in-place write to the result raises ``ValueError``. The
+    input is not modified. This guards against accidental mutation, not against intent: the
+    holder of an array that owns its data can set ``flags.writeable`` back to True.
+    """
+    copy = np.array(values, dtype=np.float64)
+    copy.flags.writeable = False
+    return copy
+
+
 @dataclass(frozen=True, slots=True)
 class MembershipDegree:
     """A fuzzy membership degree.
@@ -311,6 +324,10 @@ class ParameterCount:
 class TrainingDiagnostics:
     """Diagnostics collected during a training run.
 
+    ``standardization`` is stored as a tuple of private, read-only ``float64`` copies, checked
+    for finiteness as copies: the arrays that were validated are the arrays that are kept, and
+    the caller's later writes do not reach them (issue #148).
+
     ``eq=False`` avoids generated equality and hashing over ndarray fields.
     """
 
@@ -338,13 +355,19 @@ class TrainingDiagnostics:
             raise ValueError("TrainingDiagnostics counts must be non-negative")
         if self.lse_condition_number < 0.0 or np.isnan(self.lse_condition_number):
             raise ValueError("lse_condition_number must be non-negative and not NaN")
-        if any(not np.all(np.isfinite(values)) for values in self.standardization):
+        standardization = tuple(_frozen_copy(values) for values in self.standardization)
+        if any(not np.all(np.isfinite(values)) for values in standardization):
             raise ValueError("standardization values must be finite")
+        object.__setattr__(self, "standardization", standardization)
 
 
 @dataclass(frozen=True, slots=True, eq=False)
 class TrainingResult:
     """Fitted rule base, metrics, and diagnostics.
+
+    ``train_rmse`` and ``validation_rmse`` are stored as private, read-only ``float64`` copies
+    and ``loss_history`` as a tuple, each checked for finiteness in the form that is kept, so
+    the caller's later writes do not reach them (issue #148).
 
     ``eq=False`` avoids generated equality and hashing over RMSE ndarray fields.
     """
@@ -358,9 +381,16 @@ class TrainingResult:
     seed: int | None = None
 
     def __post_init__(self) -> None:
-        if any(not isfinite(loss) for loss in self.loss_history):
+        loss_history = tuple(self.loss_history)
+        if any(not isfinite(loss) for loss in loss_history):
             raise ValueError("TrainingResult loss_history must be finite")
-        if not np.all(np.isfinite(self.train_rmse)):
+        object.__setattr__(self, "loss_history", loss_history)
+        train_rmse = _frozen_copy(self.train_rmse)
+        if not np.all(np.isfinite(train_rmse)):
             raise ValueError("TrainingResult train_rmse must be finite")
-        if self.validation_rmse is not None and not np.all(np.isfinite(self.validation_rmse)):
-            raise ValueError("TrainingResult validation_rmse must be finite")
+        object.__setattr__(self, "train_rmse", train_rmse)
+        if self.validation_rmse is not None:
+            validation_rmse = _frozen_copy(self.validation_rmse)
+            if not np.all(np.isfinite(validation_rmse)):
+                raise ValueError("TrainingResult validation_rmse must be finite")
+            object.__setattr__(self, "validation_rmse", validation_rmse)
