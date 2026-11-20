@@ -1,9 +1,9 @@
 {
-  "generated": "2026-11-19 05:44 UTC",
+  "generated": "2026-11-20 05:44 UTC",
   "main": {
-    "sha": "667972c5",
-    "date": "2026-11-11",
-    "msg": "Merge pull request #137 from SuperconducTED/feature/issue-60-anfis-premise-stage-v2",
+    "sha": "eda10288",
+    "date": "2026-11-20",
+    "msg": "Merge pull request #157 from SuperconducTED/mert/issue-109-phase-3-close",
     "adr": {
       "ADR-001": "Accepted",
       "ADR-002": "Accepted",
@@ -31,7 +31,8 @@
       "ADR-024": "Open",
       "ADR-025": "Accepted",
       "ADR-027": "Accepted",
-      "ADR-028": "Open"
+      "ADR-028": "Open",
+      "ADR-030": "Accepted"
     },
     "adr_title": {
       "ADR-001": "TSK over Mamdani",
@@ -60,7 +61,8 @@
       "ADR-024": "Degeneracy of random TSK consequent initialization",
       "ADR-025": "`calibration-data` branch: ledger and collision trees",
       "ADR-027": "Calibration training target",
-      "ADR-028": "Physical-gate eligibility as an injected policy"
+      "ADR-028": "Physical-gate eligibility as an injected policy",
+      "ADR-030": "Kraus projector boundary: gate-name agnostic, parameters rejected not clipped"
     },
     "paths": {
       "docs/roadmap/2026-10-23-phase-4-plan.md": true
@@ -70,22 +72,22 @@
         "title": "Phase 3 · ANFIS results",
         "state": "open",
         "due": "2026-10-31",
-        "open": 8,
-        "closed": 32,
+        "open": 9,
+        "closed": 34,
         "url": "https://github.com/SuperconducTED/superconducted-noise-engine/milestone/1"
       },
       "2": {
         "title": "Phase 4 · Design-time predictor",
         "state": "open",
         "due": "2027-02-27",
-        "open": 17,
-        "closed": 12,
+        "open": 16,
+        "closed": 13,
         "url": "https://github.com/SuperconducTED/superconducted-noise-engine/milestone/2"
       }
     },
     "plan_doc": {
-      "sha": "4beeb2e49b3d041c527ae4d8d7c63c9b7188d899",
-      "date": "2026-11-05",
+      "sha": "410ec92779797c2594fa63a605ac19e890ccb8ca",
+      "date": "2026-11-09",
       "ref": "main"
     }
   },
@@ -371,7 +373,7 @@
           "createdAt": "2026-11-10T21:45:46Z",
           "headRefName": "feature/issue-122-second-training-set-source",
           "isDraft": false,
-          "mergeable": "MERGEABLE",
+          "mergeable": "CONFLICTING",
           "mergedAt": null,
           "number": 150,
           "reviewDecision": "APPROVED",
@@ -432,7 +434,7 @@
           ],
           "checks_newest": "2026-11-13T19:53",
           "checks_failing": [],
-          "checks_stale_vs_main": false
+          "checks_stale_vs_main": true
         }
       ],
       "merged_pr": null,
@@ -445,7 +447,16 @@
           "what": "Rule 7's form, followed in the three NC rows while the rule is still proposed"
         }
       ],
-      "blockers": [],
+      "blockers": [
+        {
+          "severity": "critical",
+          "text": "Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean."
+        },
+        {
+          "severity": "high",
+          "text": "Its green checks last ran 2026-11-13T19:53 against a main that has moved since; they are not evidence about the merge result."
+        }
+      ],
       "declared_unblocks": [],
       "notes_info": [],
       "unblocks": [],
@@ -500,7 +511,7 @@
           "reviewDecision": "APPROVED",
           "state": "OPEN",
           "title": "feat: #64 PR-A1, member perturbation and seeding, input jitter, the interval band and its coverage metric",
-          "updatedAt": "2026-11-17T21:53:17Z",
+          "updatedAt": "2026-11-19T21:23:58Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/155",
           "headRefOid": "353412d74d1b63eaa67f35e0f06ba6c6e8ff2062",
           "additions": 6173,
@@ -512,6 +523,12 @@
               "state": "APPROVED",
               "at": "2026-11-17",
               "last_activity": "2026-11-17"
+            },
+            {
+              "who": "bengisucvd",
+              "state": "APPROVED",
+              "at": "2026-11-19",
+              "last_activity": "2026-11-19"
             }
           ],
           "looked_since": [],
@@ -750,12 +767,12 @@
           "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "feat(scripts): #61 Part A, the Karnik-Mendel reference, the reducer sweep and the findings for ADR-011",
-          "updatedAt": "2026-11-16T16:23:02Z",
+          "updatedAt": "2026-11-20T03:24:11Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/143",
-          "headRefOid": "0d53fc604f86abd198a83b984271873148046b98",
-          "additions": 4857,
+          "headRefOid": "ae8d2bf99fcd56e63663025a3088fca47b28944e",
+          "additions": 5577,
           "deletions": 0,
-          "file_count": 26,
+          "file_count": 34,
           "latest_reviews": [
             {
               "who": "BurakOztekin",
@@ -769,35 +786,35 @@
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-14T07:46"
+              "started": "2026-11-20T03:17"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-14T07:46"
+              "started": "2026-11-20T03:17"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-14T07:46"
+              "started": "2026-11-20T03:17"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-14T07:46"
+              "started": "2026-11-20T03:17"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-14T07:46"
+              "started": "2026-11-20T03:17"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-11-14T07:47"
+              "started": "2026-11-20T03:18"
             }
           ],
-          "checks_newest": "2026-11-14T07:47",
+          "checks_newest": "2026-11-20T03:18",
           "checks_failing": [],
           "checks_stale_vs_main": false
         }
@@ -837,77 +854,27 @@
       "delivered_open": false,
       "delivered_pr": null,
       "state": "done",
-      "all_prs": [
-        {
-          "author": {
-            "id": "U_kgDOENjDJQ",
-            "is_bot": false,
-            "login": "BurakOztekin",
-            "name": ""
-          },
-          "closingIssuesReferences": [],
-          "createdAt": "2026-11-09T20:20:18Z",
-          "headRefName": "feature/issue-57-closure-followup-2026-11-09",
-          "isDraft": false,
-          "mergeable": "MERGEABLE",
-          "mergedAt": null,
-          "number": 147,
-          "reviewDecision": "APPROVED",
-          "state": "OPEN",
-          "title": "Issue #57 follow-up: refresh verification after ADR-027 acceptance",
-          "updatedAt": "2026-11-14T12:16:36Z",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/147",
-          "headRefOid": "d81677f2bc4574e640632d9403410350acc59a65",
-          "additions": 108,
-          "deletions": 0,
-          "file_count": 2,
-          "latest_reviews": [
-            {
-              "who": "mertefesensoy",
-              "state": "APPROVED",
-              "at": "2026-11-11",
-              "last_activity": "2026-11-11"
-            }
-          ],
-          "looked_since": [],
-          "checks": [
-            {
-              "name": "test (3.11)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-11T23:59"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-11T23:59"
-            },
-            {
-              "name": "Analyze (actions)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-11T23:59"
-            },
-            {
-              "name": "test (3.12)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-11T23:59"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-11T23:59"
-            },
-            {
-              "name": "CodeQL",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-11T23:59"
-            }
-          ],
-          "checks_newest": "2026-11-11T23:59",
-          "checks_failing": [],
-          "checks_stale_vs_main": false
-        }
-      ],
-      "merged_pr": null,
+      "all_prs": [],
+      "merged_pr": {
+        "author": {
+          "id": "U_kgDOENjDJQ",
+          "is_bot": false,
+          "login": "BurakOztekin",
+          "name": ""
+        },
+        "closingIssuesReferences": [],
+        "createdAt": "2026-11-09T20:20:18Z",
+        "headRefName": "feature/issue-57-closure-followup-2026-11-09",
+        "isDraft": false,
+        "mergeable": "UNKNOWN",
+        "mergedAt": "2026-11-20T04:28:44Z",
+        "number": 147,
+        "reviewDecision": "APPROVED",
+        "state": "MERGED",
+        "title": "Issue #57 follow-up: refresh verification after ADR-027 acceptance",
+        "updatedAt": "2026-11-20T04:28:44Z",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/147"
+      },
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
@@ -915,7 +882,7 @@
       "declared_unblocks": [],
       "notes_info": [],
       "unblocks": [],
-      "pr": 147
+      "pr": null
     },
     {
       "id": 84,
@@ -983,84 +950,36 @@
       "priority": "high",
       "delivered_open": false,
       "delivered_pr": null,
-      "state": "in_review",
-      "all_prs": [
-        {
-          "author": {
-            "id": "U_kgDOCJLpDw",
-            "is_bot": false,
-            "login": "mertefesensoy",
-            "name": "Mert Efe Şensoy"
-          },
-          "closingIssuesReferences": [],
-          "createdAt": "2026-11-14T22:44:42Z",
-          "headRefName": "mert/issue-109-phase-3-close",
-          "isDraft": false,
-          "mergeable": "MERGEABLE",
-          "mergedAt": null,
-          "number": 157,
-          "reviewDecision": "REVIEW_REQUIRED",
-          "state": "OPEN",
-          "title": "docs: #109 the phase-3 close record, the M4 as-of, and ADR-025's four amendments answered under the pipeline delegation",
-          "updatedAt": "2026-11-14T22:44:46Z",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/157",
-          "headRefOid": "aa3dd25a96db64d692a75eaa5db6e2c08b54343d",
-          "additions": 421,
-          "deletions": 0,
-          "file_count": 5,
-          "latest_reviews": [],
-          "looked_since": [],
-          "checks": [
-            {
-              "name": "test (3.11)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-14T22:44"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-14T22:44"
-            },
-            {
-              "name": "Analyze (actions)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-14T22:44"
-            },
-            {
-              "name": "test (3.12)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-14T22:44"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-14T22:44"
-            },
-            {
-              "name": "CodeQL",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-14T22:45"
-            }
-          ],
-          "checks_newest": "2026-11-14T22:45",
-          "checks_failing": [],
-          "checks_stale_vs_main": false
-        }
-      ],
-      "merged_pr": null,
+      "state": "ready",
+      "all_prs": [],
+      "merged_pr": {
+        "author": {
+          "id": "U_kgDOCJLpDw",
+          "is_bot": false,
+          "login": "mertefesensoy",
+          "name": "Mert Efe Şensoy"
+        },
+        "closingIssuesReferences": [],
+        "createdAt": "2026-11-14T22:44:42Z",
+        "headRefName": "mert/issue-109-phase-3-close",
+        "isDraft": false,
+        "mergeable": "UNKNOWN",
+        "mergedAt": "2026-11-20T05:24:03Z",
+        "number": 157,
+        "reviewDecision": "APPROVED",
+        "state": "MERGED",
+        "title": "docs: #109 the phase-3 close record, the M4 as-of, and ADR-025's four amendments answered under the pipeline delegation",
+        "updatedAt": "2026-11-20T05:24:04Z",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/157"
+      },
       "unmet_hard": [],
       "unmet_partial": [],
       "unmet_soft": [],
-      "blockers": [
-        {
-          "severity": "high",
-          "text": "No approving review yet: main's ruleset requires one."
-        }
-      ],
+      "blockers": [],
       "declared_unblocks": [],
       "notes_info": [],
       "unblocks": [],
-      "pr": 157
+      "pr": null
     },
     {
       "id": 92,
@@ -1080,6 +999,74 @@
       "delivered_pr": null,
       "state": "in_review",
       "all_prs": [
+        {
+          "author": {
+            "id": "U_kgDOD4LQXA",
+            "is_bot": false,
+            "login": "bengisucvd",
+            "name": "bengisucvd"
+          },
+          "closingIssuesReferences": [],
+          "createdAt": "2026-11-14T10:59:52Z",
+          "headRefName": "bengisu/issue-92-rows",
+          "isDraft": false,
+          "mergeable": "MERGEABLE",
+          "mergedAt": null,
+          "number": 152,
+          "reviewDecision": "APPROVED",
+          "state": "OPEN",
+          "title": "docs(register): #92 rows under Rule 7: NC-009 retired, seven rows re-sourced, pinned rows given clauses (b) and (c)",
+          "updatedAt": "2026-11-19T21:12:17Z",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/152",
+          "headRefOid": "6189d102bb352a276392b9b3a0d7446515622d59",
+          "additions": 839,
+          "deletions": 36,
+          "file_count": 4,
+          "latest_reviews": [
+            {
+              "who": "mertefesensoy",
+              "state": "APPROVED",
+              "at": "2026-11-14",
+              "last_activity": "2026-11-14"
+            }
+          ],
+          "looked_since": [],
+          "checks": [
+            {
+              "name": "test (3.11)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-19T21:12"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-19T21:12"
+            },
+            {
+              "name": "Analyze (actions)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-19T21:12"
+            },
+            {
+              "name": "test (3.12)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-19T21:12"
+            },
+            {
+              "name": "Analyze (python)",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-19T21:12"
+            },
+            {
+              "name": "CodeQL",
+              "conclusion": "SUCCESS",
+              "started": "2026-11-19T21:12"
+            }
+          ],
+          "checks_newest": "2026-11-19T21:12",
+          "checks_failing": [],
+          "checks_stale_vs_main": false
+        },
         {
           "author": {
             "id": "U_kgDOD4LQXA",
@@ -1153,74 +1140,6 @@
           "checks_newest": "2026-11-16T20:55",
           "checks_failing": [],
           "checks_stale_vs_main": false
-        },
-        {
-          "author": {
-            "id": "U_kgDOD4LQXA",
-            "is_bot": false,
-            "login": "bengisucvd",
-            "name": "bengisucvd"
-          },
-          "closingIssuesReferences": [],
-          "createdAt": "2026-11-14T10:59:52Z",
-          "headRefName": "bengisu/issue-92-rows",
-          "isDraft": false,
-          "mergeable": "MERGEABLE",
-          "mergedAt": null,
-          "number": 152,
-          "reviewDecision": "APPROVED",
-          "state": "OPEN",
-          "title": "docs(register): #92 rows under Rule 7: NC-009 retired, seven rows re-sourced, pinned rows given clauses (b) and (c)",
-          "updatedAt": "2026-11-14T14:28:54Z",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/152",
-          "headRefOid": "6994b406945f179f38d0c8354f7b920efd13792c",
-          "additions": 788,
-          "deletions": 36,
-          "file_count": 4,
-          "latest_reviews": [
-            {
-              "who": "mertefesensoy",
-              "state": "APPROVED",
-              "at": "2026-11-14",
-              "last_activity": "2026-11-14"
-            }
-          ],
-          "looked_since": [],
-          "checks": [
-            {
-              "name": "test (3.11)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-14T10:59"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-14T11:08"
-            },
-            {
-              "name": "Analyze (actions)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-14T11:08"
-            },
-            {
-              "name": "test (3.12)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-14T10:59"
-            },
-            {
-              "name": "Analyze (python)",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-14T11:08"
-            },
-            {
-              "name": "CodeQL",
-              "conclusion": "SUCCESS",
-              "started": "2026-11-14T11:09"
-            }
-          ],
-          "checks_newest": "2026-11-14T11:09",
-          "checks_failing": [],
-          "checks_stale_vs_main": false
         }
       ],
       "merged_pr": null,
@@ -1231,7 +1150,7 @@
       "declared_unblocks": [],
       "notes_info": [],
       "unblocks": [],
-      "pr": 151
+      "pr": 152
     },
     {
       "id": 104,
@@ -1537,7 +1456,7 @@
         {
           "text": "Milestone 1 (Phase 3) closed",
           "status": "not_done",
-          "note": "Milestone 1 (Phase 3 · ANFIS results) is open: 8 open and 32 closed issues."
+          "note": "Milestone 1 (Phase 3 · ANFIS results) is open: 9 open and 34 closed issues."
         }
       ],
       "done": 0,
@@ -1592,7 +1511,7 @@
     }
   ],
   "warnings": [
-    "The plan document changed at 4beeb2e4 (2026-11-05) on main, after the 951258da plan.json was quoted from. Re-read it and update plan.json."
+    "The plan document changed at 410ec927 (2026-11-09) on main, after the 951258da plan.json was quoted from. Re-read it and update plan.json."
   ],
   "owed": {
     "asks": [
@@ -1605,7 +1524,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/108"
         },
         "former": false,
-        "days": 47,
+        "days": 48,
         "last_here": "2026-11-14",
         "kind": "checkbox",
         "text": "links the verdict from PR #55's thread so the PR record is complete.",
@@ -1625,7 +1544,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/63"
         },
         "former": false,
-        "days": 77,
+        "days": 78,
         "last_here": "",
         "kind": "checkbox",
         "text": "confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit`",
@@ -1637,42 +1556,22 @@
         "others": []
       },
       {
-        "who": "bengisucvd",
+        "who": "BurakOztekin",
         "thread": {
           "kind": "PR",
-          "number": 145,
-          "title": "docs: NC-021 = 1203 at PR #137's merge (Rule 6), ADR-030 accepted into the ledger, three status snapshots, L1 tied to the freeze, phase 3's triage",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/145"
+          "number": 143,
+          "title": "feat(scripts): #61 Part A, the Karnik-Mendel reference, the reducer sweep and the findings for ADR-011",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/143"
         },
         "former": false,
-        "days": 5,
-        "last_here": "2026-11-14",
+        "days": 0,
+        "last_here": "2026-11-16",
         "kind": "re-review",
-        "text": "Re-review PR #145: asked again after your review of 2026-11-14",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/145",
-        "by": "mertefesensoy",
-        "since": "2026-11-14",
-        "posted": "2026-11-14",
-        "lower_bound": false,
-        "others": []
-      },
-      {
-        "who": "bengisucvd",
-        "thread": {
-          "kind": "PR",
-          "number": 155,
-          "title": "feat: #64 PR-A1, member perturbation and seeding, input jitter, the interval band and its coverage metric",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/155"
-        },
-        "former": false,
-        "days": 5,
-        "last_here": "",
-        "kind": "review",
-        "text": "Review PR #155",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/155",
-        "by": "mertefesensoy",
-        "since": "2026-11-14",
-        "posted": "2026-11-14",
+        "text": "Re-review PR #143: your CHANGES_REQUESTED from 2026-11-16 still stands",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/143",
+        "by": "bengisucvd",
+        "since": "2026-11-20",
+        "posted": "2026-11-20",
         "lower_bound": false,
         "others": []
       },
@@ -1685,7 +1584,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/108"
         },
         "former": false,
-        "days": 47,
+        "days": 48,
         "last_here": "",
         "kind": "checkbox",
         "text": "posts a verdict on this issue: approve, or the defects he finds.",
@@ -1705,7 +1604,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/143"
         },
         "former": false,
-        "days": 12,
+        "days": 13,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #143",
@@ -1720,56 +1619,16 @@
         "who": "BahaJarad",
         "thread": {
           "kind": "PR",
-          "number": 145,
-          "title": "docs: NC-021 = 1203 at PR #137's merge (Rule 6), ADR-030 accepted into the ledger, three status snapshots, L1 tied to the freeze, phase 3's triage",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/145"
-        },
-        "former": false,
-        "days": 10,
-        "last_here": "",
-        "kind": "review",
-        "text": "Review PR #145",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/145",
-        "by": "mertefesensoy",
-        "since": "2026-11-09",
-        "posted": "2026-11-09",
-        "lower_bound": false,
-        "others": []
-      },
-      {
-        "who": "BahaJarad",
-        "thread": {
-          "kind": "PR",
           "number": 152,
           "title": "docs(register): #92 rows under Rule 7: NC-009 retired, seven rows re-sourced, pinned rows given clauses (b) and (c)",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/152"
         },
         "former": false,
-        "days": 5,
+        "days": 6,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #152",
         "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/152",
-        "by": "mertefesensoy",
-        "since": "2026-11-14",
-        "posted": "2026-11-14",
-        "lower_bound": false,
-        "others": []
-      },
-      {
-        "who": "BahaJarad",
-        "thread": {
-          "kind": "PR",
-          "number": 157,
-          "title": "docs: #109 the phase-3 close record, the M4 as-of, and ADR-025's four amendments answered under the pipeline delegation",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/157"
-        },
-        "former": false,
-        "days": 5,
-        "last_here": "",
-        "kind": "review",
-        "text": "Review PR #157",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/157",
         "by": "mertefesensoy",
         "since": "2026-11-14",
         "posted": "2026-11-14",
@@ -1785,7 +1644,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/158"
         },
         "former": false,
-        "days": 5,
+        "days": 6,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #158",
