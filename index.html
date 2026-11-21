@@ -185,17 +185,17 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <div class="wrap"><header class="hero">
 <div class="eyebrow">SuperconducTED/superconducted-noise-engine</div>
 <h1>Phase 4 <span class="goal">: Design-time predictor</span></h1>
-<div class="sub">Generated 2026-11-20 05:44 UTC from live GitHub state · main at <code>eda10288</code> (2026-11-20) · plan of 2026-10-23 at <code>951258da</code> on <code>mert/predictability</code>, on main</div>
+<div class="sub">Generated 2026-11-21 05:45 UTC from live GitHub state · main at <code>4f26881c</code> (2026-11-20) · plan of 2026-10-23 at <code>951258da</code> on <code>mert/predictability</code>, on main</div>
 <div class="readout">
-<div><div class="v">99</div><div class="k">days to 2027-02-27</div></div>
+<div><div class="v">98</div><div class="k">days to 2027-02-27</div></div>
 <div><div class="v">0<span>/5</span></div><div class="k">gates met</div></div>
 <div><div class="v">0<span>/7</span></div><div class="k">conditions met</div></div>
 <div><div class="v">4</div><div class="k">ready to start</div></div>
 <div><div class="v">6</div><div class="k">in review</div></div>
 <div><div class="v">0</div><div class="k">blocked upstream</div></div>
-<div><div class="v">13<span>/29</span></div><div class="k">milestone 2 closed</div></div>
+<div><div class="v">16<span>/34</span></div><div class="k">milestone 2 closed</div></div>
 <div class="calendar">
-<div class="sub">Phase 4 day 20 since 2026-11-01. Next gate per lane: lane 1: <b class="mono">L1</b> · lane 2: <b class="mono">L3</b> · lane 3: <b class="mono">L5</b>. Gates are ordered, not dated (plan §6), so this page shows no pace figure.</div>
+<div class="sub">Phase 4 day 21 since 2026-11-01. Next gate per lane: lane 1: <b class="mono">L1</b> · lane 2: <b class="mono">L3</b> · lane 3: <b class="mono">L5</b>. Gates are ordered, not dated (plan §6), so this page shows no pace figure.</div>
 </div>
 </div></header>
 <div class="warnbox"><b>Plan warnings.</b> plan.json and GitHub disagree, or plan.json may be stale. Each line says what to check.<ul>
@@ -206,11 +206,11 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <div class="grid two">
 <div class="card person" style="--pc:var(--s3)">
 <h3>Mert Efe Şensoy</h3><div class="role">@mertefesensoy · Lead: #125&#x27;s QPU side, then lane 3&#x27;s close</div>
-<a class="pill warn owes" href="#owed-mertefesensoy">owes 1 answer · oldest since 2026-10-03</a>
+<a class="pill warn owes" href="#owed-mertefesensoy">owes 2 answers · oldest since 2026-10-03</a>
 <ol class="acts">
 <li>
 <span class="act">Unstick PR #142 for #125: Hardware test: reading versus level on ibm_fez (QPU side)</span>
-<span class="why">Still a draft: CI and reviewers will not treat it as ready.</span>
+<span class="why">CHANGES_REQUESTED standing from @BurakOztekin (2026-11-20). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.</span>
 <span class="tags">
 <span class="pill warn">in review</span>
 <span class="pill idle">high</span>
@@ -232,10 +232,10 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <span class="pill idle">lane 3</span>
 </span></li>
 <li>
-<span class="act">Unstick PR #155 for #64: Author #64&#x27;s PR-A1 once Bengisu&#x27;s D1 to D5 are answered</span>
-<span class="why">Awaiting merge. Lane 2 resumes at gate L1 (job 1&#x27;s report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).</span>
+<span class="act">Author #64&#x27;s PR-A1 once Bengisu&#x27;s D1 to D5 are answered (#64)</span>
+<span class="why">Mert authors PR-A, Bengisu owns and approves it; PR-A1 needs no harness (plan §2 lane 2 item 1). Lane 2 resumes at gate L1 (job 1&#x27;s report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).</span>
 <span class="tags">
-<span class="pill warn">in review</span>
+<span class="pill ready">ready to start</span>
 <span class="pill idle">high</span>
 <span class="pill idle">lane 2</span>
 <span class="pill idle">after L1</span>
@@ -244,7 +244,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </div>
 <div class="card person" style="--pc:var(--s5)">
 <h3>Burak Öztekin</h3><div class="role">@BurakOztekin · #125&#x27;s offline half, then the first fit</div>
-<a class="pill warn owes" href="#owed-BurakOztekin">owes 2 answers · oldest since 2026-09-03</a>
+<a class="pill warn owes" href="#owed-BurakOztekin">owes 1 answer · oldest since 2026-09-03</a>
 <ol class="acts">
 <li>
 <span class="act">#125 offline half: selection rules, circuits for both arms, scoring, the dry run against Aer (#125)</span>
@@ -255,17 +255,25 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <span class="pill idle">lane 1</span>
 </span></li>
 <li>
-<span class="act">Finish #60: ADR-014 trainer: the first archive fit</span>
-<span class="why">A fitted model at a pinned ref with the snapshot-boundary split, so ADR-014 moves off Deferred (plan §2 lane 2 item 3). Lane 2 resumes at gate L1 (job 1&#x27;s report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).</span>
+<span class="act">Re-review PR #142 (#125: Hardware test: reading versus level on ibm_fez)</span>
+<span class="why">Your CHANGES_REQUESTED from 2026-11-20 is the standing block. main&#x27;s ruleset does not dismiss it on push, so only you can clear it.</span>
 <span class="tags">
-<span class="pill ready">ready to start</span>
+<span class="pill bad">you are the blocker</span>
+<span class="pill idle">high</span>
+<span class="pill idle">lane 1</span>
+</span></li>
+<li>
+<span class="act">Unstick PR #163 for #60: ADR-014 trainer: the first archive fit</span>
+<span class="why">No approving review yet: main&#x27;s ruleset requires one. Lane 2 resumes at gate L1 (job 1&#x27;s report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).</span>
+<span class="tags">
+<span class="pill warn">in review</span>
 <span class="pill idle">high</span>
 <span class="pill idle">lane 2</span>
 <span class="pill idle">after L1</span>
 </span></li>
 <li>
 <span class="act">Re-review PR #143 (#61: Nie-Tan versus Karnik-Mendel, premise gradients)</span>
-<span class="why">Your CHANGES_REQUESTED from 2026-11-16 is the standing block. main&#x27;s ruleset does not dismiss it on push, so only you can clear it.</span>
+<span class="why">Your CHANGES_REQUESTED from 2026-11-20 is the standing block. main&#x27;s ruleset does not dismiss it on push, so only you can clear it.</span>
 <span class="tags">
 <span class="pill bad">you are the blocker</span>
 <span class="pill idle">high</span>
@@ -294,7 +302,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <span class="pill idle">lane 3</span>
 </span></li>
 <li>
-<span class="act">Start #64: ADR-015 / ADR-016 ensemble and intervals (PR-A)</span>
+<span class="act">Finish #64: ADR-015 / ADR-016 ensemble and intervals (PR-A)</span>
 <span class="why">Bengisu&#x27;s D1 to D5, in the gaps of lane 1 (plan §5.1); PR-A is lane 2&#x27;s first item when it resumes. Lane 2 resumes at gate L1 (job 1&#x27;s report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).</span>
 <span class="tags">
 <span class="pill ready">ready to start</span>
@@ -304,7 +312,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </span></li>
 <li>
 <span class="act">Unstick PR #143 for #61: Nie-Tan versus Karnik-Mendel, premise gradients</span>
-<span class="why">CHANGES_REQUESTED standing from @BurakOztekin (2026-11-16). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix. Lane 2 resumes at gate L1 (job 1&#x27;s report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).</span>
+<span class="why">CHANGES_REQUESTED standing from @BurakOztekin (2026-11-20). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix. Lane 2 resumes at gate L1 (job 1&#x27;s report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).</span>
 <span class="tags">
 <span class="pill warn">in review</span>
 <span class="pill idle">high</span>
@@ -315,7 +323,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </div>
 <div class="card person" style="--pc:var(--s2)">
 <h3>Baha Jarad</h3><div class="role">@BahaJarad · #122, then the per-qubit extractor</div>
-<a class="pill warn owes" href="#owed-BahaJarad">owes 4 answers · oldest since 2026-10-03</a>
+<a class="pill warn owes" href="#owed-BahaJarad">owes 6 answers · oldest since 2026-10-03</a>
 <ol class="acts">
 <li>
 <span class="act">Unstick PR #150 for #122: Public archive as a second training-set source (ADR-029)</span>
@@ -355,30 +363,36 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <div class="lede">Everything a teammate has been asked for on an open issue or PR and has not delivered yet, oldest first. Two sources, both closed by GitHub itself: a <b>review request</b> not yet answered with a review, and an <b>unticked checkbox that starts with the person</b>, such as <code>- [ ] @BurakOztekin runs the desktop runbook</code>, which stays here until someone ticks it. A plain @mention elsewhere in a sentence is not tracked. "Or earlier" marks a post edited after it was written: the box may have arrived with the edit, so the wait shown is the shortest it can be.</div>
 <div class="card"><div class="scroll"><table>
 <tr><th>What they were asked</th><th>Where</th><th>Waiting since</th></tr>
-<tr class="grp" id="owed-mertefesensoy"><td colspan="3"><span class="pdot" style="background:var(--s3)"></span><b>Mert Efe Şensoy</b> <span class="sub">@mertefesensoy · owes 1</span></td></tr>
+<tr class="grp" id="owed-mertefesensoy"><td colspan="3"><span class="pdot" style="background:var(--s3)"></span><b>Mert Efe Şensoy</b> <span class="sub">@mertefesensoy · owes 2</span></td></tr>
 <tr><td><span class="pill idle">checkbox</span> <span class="ask">links the verdict from PR #55&#x27;s thread so the PR record is complete.</span><div class="sub">own checklist</div></td>
 <td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/108">issue #108</a><span class="cap">Owner read of PR #55&#x27;s poller.py change: fractional step pars...</span></td>
-<td class="num">2026-10-03<span class="cap">48 days<br>has posted there since, on 2026-11-14</span></td></tr>
-<tr class="grp" id="owed-BurakOztekin"><td colspan="3"><span class="pdot" style="background:var(--s5)"></span><b>Burak Öztekin</b> <span class="sub">@BurakOztekin · owes 2</span></td></tr>
+<td class="num">2026-10-03<span class="cap">49 days<br>has posted there since, on 2026-11-14</span></td></tr>
+<tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #163</span><div class="sub">requested by @BurakOztekin</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/163">PR #163</a><span class="cap">feat(training): load training TSVs for ANFIS (Issue #60)</span></td>
+<td class="num">2026-11-20<span class="cap">1 day<br>no post there since</span></td></tr>
+<tr class="grp" id="owed-BurakOztekin"><td colspan="3"><span class="pdot" style="background:var(--s5)"></span><b>Burak Öztekin</b> <span class="sub">@BurakOztekin · owes 1</span></td></tr>
 <tr><td><span class="pill idle">checkbox</span> <span class="ask">confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit`</span><div class="sub">asked by @mertefesensoy</div></td>
 <td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/63">issue #63</a><span class="cap">Training-set builder: one row per distinct device state from...</span></td>
-<td class="num">2026-09-03<span class="cap">78 days<br>no post there since</span></td></tr>
-<tr><td><span class="pill bad">re-review requested</span> <span class="ask">Re-review PR #143: your CHANGES_REQUESTED from 2026-11-16 still stands</span><div class="sub">requested by @bengisucvd</div></td>
-<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/143">PR #143</a><span class="cap">feat(scripts): #61 Part A, the Karnik-Mendel reference, the r...</span></td>
-<td class="num">2026-11-20<span class="cap">0 days<br>no post there since</span></td></tr>
-<tr class="grp" id="owed-BahaJarad"><td colspan="3"><span class="pdot" style="background:var(--s2)"></span><b>Baha Jarad</b> <span class="sub">@BahaJarad · owes 4</span></td></tr>
+<td class="num">2026-09-03<span class="cap">79 days<br>no post there since</span></td></tr>
+<tr class="grp" id="owed-BahaJarad"><td colspan="3"><span class="pdot" style="background:var(--s2)"></span><b>Baha Jarad</b> <span class="sub">@BahaJarad · owes 6</span></td></tr>
 <tr><td><span class="pill idle">checkbox</span> <span class="ask">posts a verdict on this issue: approve, or the defects he finds.</span><div class="sub">asked by @mertefesensoy</div></td>
 <td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/108">issue #108</a><span class="cap">Owner read of PR #55&#x27;s poller.py change: fractional step pars...</span></td>
-<td class="num">2026-10-03<span class="cap">48 days<br>no post there since</span></td></tr>
+<td class="num">2026-10-03<span class="cap">49 days<br>no post there since</span></td></tr>
 <tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #143</span><div class="sub">requested by @bengisucvd</div></td>
 <td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/143">PR #143</a><span class="cap">feat(scripts): #61 Part A, the Karnik-Mendel reference, the r...</span></td>
-<td class="num">2026-11-07<span class="cap">13 days<br>no post there since</span></td></tr>
+<td class="num">2026-11-07<span class="cap">14 days<br>has posted there since, on 2026-11-20</span></td></tr>
 <tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #152</span><div class="sub">requested by @mertefesensoy</div></td>
 <td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/152">PR #152</a><span class="cap">docs(register): #92 rows under Rule 7: NC-009 retired, seven...</span></td>
-<td class="num">2026-11-14<span class="cap">6 days<br>no post there since</span></td></tr>
+<td class="num">2026-11-14<span class="cap">7 days<br>no post there since</span></td></tr>
 <tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #158</span><div class="sub">requested by @mertefesensoy</div></td>
 <td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/158">PR #158</a><span class="cap">fix(scripts): #93 a sweep filed behind the index prints one p...</span></td>
-<td class="num">2026-11-14<span class="cap">6 days<br>no post there since</span></td></tr>
+<td class="num">2026-11-14<span class="cap">7 days<br>no post there since</span></td></tr>
+<tr><td><span class="pill bad">re-review requested</span> <span class="ask">Re-review PR #156: your CHANGES_REQUESTED from 2026-11-16 still stands</span><div class="sub">requested by @mertefesensoy</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/156">PR #156</a><span class="cap">ci(calibration-poll): #104 the daily sweep at a 0.5 h step, w...</span></td>
+<td class="num">2026-11-20<span class="cap">1 day<br>no post there since</span></td></tr>
+<tr><td><span class="pill warn">review requested</span> <span class="ask">Review PR #163</span><div class="sub">requested by @BurakOztekin</div></td>
+<td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/163">PR #163</a><span class="cap">feat(training): load training TSVs for ANFIS (Issue #60)</span></td>
+<td class="num">2026-11-20<span class="cap">1 day<br>no post there since</span></td></tr>
 </table></div></div>
 <h2>Lanes and gates</h2>
 <div class="lede">Every gate and condition is the plan's own wording. ✅ verified against live GitHub or the ADR ledger on main · 🟡 in flight · ❌ not done · ⬜ no machine-checkable source, with a note saying what would make it one. Within a lane the gates come in the plan's order, and the first one not met is marked next. Below them, the lane's items in the plan's order, each with its live state.</div>
@@ -421,9 +435,9 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </span></li>
 </ul>
 <ol class="items">
-<li><span class="ord">1</span><span>🟡</span><span><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/64">#64</a> ADR-015 / ADR-016 ensemble and intervals (PR-A) <span class="sub">@bengisucvd</span><span class="note">in review, PR #155</span></span></li>
+<li><span class="ord">1</span><span>❌</span><span><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/64">#64</a> ADR-015 / ADR-016 ensemble and intervals (PR-A) <span class="sub">@bengisucvd</span><span class="note">ready to finish</span></span></li>
 <li><span class="ord">2</span><span>✅</span><span><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/58">#58</a> Certify the benchmark instruments (PR #79) <span class="sub">@bengisucvd</span><span class="note">closed</span></span></li>
-<li><span class="ord">3</span><span>❌</span><span><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/60">#60</a> ADR-014 trainer: the first archive fit <span class="sub">@BurakOztekin</span><span class="note">ready to finish</span></span></li>
+<li><span class="ord">3</span><span>🟡</span><span><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/60">#60</a> ADR-014 trainer: the first archive fit <span class="sub">@BurakOztekin</span><span class="note">in review, PR #163</span></span></li>
 <li><span class="ord">4</span><span>❌</span><span><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/62">#62</a> ADR-019 ablation table, both modes <span class="sub">@BahaJarad</span><span class="note">ready to start</span></span></li>
 <li><span class="ord">5</span><span>🟡</span><span><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/61">#61</a> Nie-Tan versus Karnik-Mendel, premise gradients <span class="sub">@bengisucvd</span><span class="note">in review, PR #143</span></span></li>
 <li><span class="ord">6</span><span>⬜</span><span>new: The ladder on the fuzzy band <span class="sub">@mertefesensoy, @bengisucvd</span><span class="note">no issue yet. Persistence, shrinkage, rolling band and IT2 band scored on change events on pairs.tsv and rows.tsv.gz; gate L4 (plan §2 lane 2 item 6).</span></span></li>
@@ -434,7 +448,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <ul class="gates">
 <li><span>❌</span><span><b class="mono">L5</b> Phase 3 closed <span class="pill ready">next</span> <span class="sub">0/1</span><span class="note">The phase-3 milestone closed with every item either done or moved to the phase-4 milestone with a reason. Opens: Lane 3 is closed.</span></span></li>
 <li class="cond"><span>❌</span><span>Milestone 1 (Phase 3) closed
-<span class="note">Milestone 1 (Phase 3 · ANFIS results) is open: 9 open and 34 closed issues.</span>
+<span class="note">Milestone 1 (Phase 3 · ANFIS results) is open: 7 open and 35 closed issues.</span>
 </span></li>
 </ul>
 <ol class="items">
@@ -450,22 +464,25 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <div class="lede">Tickets whose stated dependencies are all met, and which therefore cannot be excused by the critical path. Each row is the actual reason it has not closed.</div>
 <div class="card"><div class="scroll"><table>
 <tr><th>Ticket</th><th>Owner</th><th>Where it is</th><th>What is actually blocking it</th></tr>
-<tr class="sev-high"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/125">#125</a><span class="cap">Hardware test: reading versus level on ibm_fez</span></td>
-<td>@mertefesensoy</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/142">PR #142</a> <span class="pill warn">draft</span><div class="sub">+16718/−41 · 87 files</div></td><td><ul class="blockers">
-<li><span class="dot high"></span><span>Still a draft: CI and reviewers will not treat it as ready.</span></li>
-<li><span class="dot high"></span><span>No approving review yet: main&#x27;s ruleset requires one.</span></li>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/125">#125</a><span class="cap">Hardware test: reading versus level on ibm_fez</span></td>
+<td>@mertefesensoy</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/142">PR #142</a> <span class="pill idle">open</span><div class="sub">+17981/−41 · 99 files</div></td><td><ul class="blockers">
+<li><span class="dot critical"></span><span>CHANGES_REQUESTED standing from @BurakOztekin (2026-11-20). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.</span></li>
 </ul></td></tr>
 <tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/122">#122</a><span class="cap">Public archive as a second training-set source (ADR-029)</span></td>
 <td>@BahaJarad</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/150">PR #150</a> <span class="pill idle">open</span><div class="sub">+6000/−11 · 29 files</div></td><td><ul class="blockers">
 <li><span class="dot critical"></span><span>Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.</span></li>
 <li><span class="dot high"></span><span>Its green checks last ran 2026-11-13T19:53 against a main that has moved since; they are not evidence about the merge result.</span></li>
 </ul></td></tr>
+<tr class="sev-high"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/60">#60</a><span class="cap">ADR-014 trainer: the first archive fit</span></td>
+<td>@BurakOztekin</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/163">PR #163</a> <span class="pill idle">open</span><div class="sub">+175/−0 · 3 files</div></td><td><ul class="blockers">
+<li><span class="dot high"></span><span>No approving review yet: main&#x27;s ruleset requires one.</span></li>
+</ul></td></tr>
 <tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/61">#61</a><span class="cap">Nie-Tan versus Karnik-Mendel, premise gradients</span></td>
 <td>@bengisucvd</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/143">PR #143</a> <span class="pill idle">open</span><div class="sub">+5577/−0 · 34 files</div></td><td><ul class="blockers">
-<li><span class="dot critical"></span><span>CHANGES_REQUESTED standing from @BurakOztekin (2026-11-16). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.</span></li>
+<li><span class="dot critical"></span><span>CHANGES_REQUESTED standing from @BurakOztekin (2026-11-20). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.</span></li>
 </ul></td></tr>
 <tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/104">#104</a><span class="cap">Decide the sweep step</span></td>
-<td>@mertefesensoy</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/156">PR #156</a> <span class="pill idle">open</span><div class="sub">+567/−10 · 7 files</div></td><td><ul class="blockers">
+<td>@mertefesensoy</td><td><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/156">PR #156</a> <span class="pill idle">open</span><div class="sub">+2056/−10 · 13 files</div></td><td><ul class="blockers">
 <li><span class="dot critical"></span><span>CHANGES_REQUESTED standing from @BahaJarad (2026-11-16). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.</span></li>
 </ul></td></tr>
 </table></div></div>
@@ -479,27 +496,24 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <div class="lede">A green tick on a CONFLICTING PR is not evidence: ci.yml does not dispatch while a PR is dirty, so those checks describe a main that has already moved.</div>
 <div class="card"><div class="scroll"><table>
 <tr><th>PR</th><th>Author</th><th>Mergeable</th><th>Review</th><th>Checks</th><th>Updated</th></tr>
+<tr class="sev-medium"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/163">#163</a><span class="cap">feat(training): load training TSVs for ANFIS (Issue #60) · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/60">#60</a></span></td>
+<td>@BurakOztekin</td><td><span class="pill ok">clean</span></td><td><span class="pill warn">no review</span></td><td><span class="pill ok">green</span><div class="sub">2026-11-20T22:11</div></td><td class="sub">2026-11-20</td></tr>
 <tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/156">#156</a><span class="cap">ci(calibration-poll): #104 the daily sweep at a 0.5 h step, with · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/104">#104</a></span></td>
-<td>@mertefesensoy</td><td><span class="pill ok">clean</span></td><td><div><span class="pill bad">changes requested</span> @BahaJarad <span class="sub">2026-11-16</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-11-15T05:00</div></td><td class="sub">2026-11-16</td></tr>
-<tr class="sev-medium"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/155">#155</a><span class="cap">feat: #64 PR-A1, member perturbation and seeding, input jitter,  · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/64">#64</a></span></td>
-<td>@mertefesensoy</td><td><span class="pill ok">clean</span></td><td><div><span class="pill ok">approved</span> @BurakOztekin <span class="sub">2026-11-17</span></div><div><span class="pill ok">approved</span> @bengisucvd <span class="sub">2026-11-19</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-11-16T22:04</div></td><td class="sub">2026-11-19</td></tr>
+<td>@mertefesensoy</td><td><span class="pill ok">clean</span></td><td><div><span class="pill bad">changes requested</span> @BahaJarad <span class="sub">2026-11-16</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-11-20T11:17</div></td><td class="sub">2026-11-20</td></tr>
 <tr class="sev-medium"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/152">#152</a><span class="cap">docs(register): #92 rows under Rule 7: NC-009 retired, seven row · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/92">#92</a></span></td>
-<td>@bengisucvd</td><td><span class="pill ok">clean</span></td><td><div><span class="pill ok">approved</span> @mertefesensoy <span class="sub">2026-11-14</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-11-19T21:12</div></td><td class="sub">2026-11-19</td></tr>
-<tr class="sev-medium"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/151">#151</a><span class="cap">docs(register): Rule 7, claims measured from outside the merge g · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/92">#92</a></span></td>
-<td>@bengisucvd</td><td><span class="pill ok">clean</span></td><td><div><span class="pill ok">approved</span> @BurakOztekin <span class="sub">2026-11-16</span></div><div><span class="pill ok">approved</span> @mertefesensoy <span class="sub">2026-11-14</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-11-16T20:55</div></td><td class="sub">2026-11-16</td></tr>
+<td>@bengisucvd</td><td><span class="pill ok">clean</span></td><td><div><span class="pill ok">approved</span> @mertefesensoy <span class="sub">2026-11-14</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-11-20T10:36</div></td><td class="sub">2026-11-20</td></tr>
 <tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/150">#150</a><span class="cap">Issue #122: Public Calibration Archive as a Second Training Set · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/122">#122</a></span></td>
 <td>@BahaJarad</td><td><span class="pill bad">conflicting</span></td><td><div><span class="pill ok">approved</span> @BurakOztekin <span class="sub">2026-11-16</span></div><div><span class="pill ok">approved</span> @mertefesensoy <span class="sub">2026-11-14</span></div></td><td><span class="pill warn">stale</span><div class="sub">2026-11-13T19:53</div></td><td class="sub">2026-11-16</td></tr>
 <tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/143">#143</a><span class="cap">feat(scripts): #61 Part A, the Karnik-Mendel reference, the redu · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/61">#61</a></span></td>
-<td>@bengisucvd</td><td><span class="pill ok">clean</span></td><td><div><span class="pill bad">changes requested</span> @BurakOztekin <span class="sub">2026-11-16</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-11-20T03:18</div></td><td class="sub">2026-11-20</td></tr>
-<tr class="sev-high"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/142">#142</a><span class="cap">feat(scripts): #125 step 1d, the submission script: build, score · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/125">#125</a></span></td>
-<td>@mertefesensoy</td><td><span class="pill ok">clean</span> <span class="pill warn">draft</span></td><td><span class="pill warn">no review</span></td><td><span class="pill ok">green</span><div class="sub">2026-11-09T14:23</div></td><td class="sub">2026-11-09</td></tr>
-<tr class="sev-medium"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/140">#140</a><span class="cap">feat(scripts): #125 step 1b, the offline half of the hardware te · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/125">#125</a></span></td>
-<td>@mertefesensoy</td><td><span class="pill ok">clean</span></td><td><div><span class="pill ok">approved</span> @BurakOztekin <span class="sub">2026-11-16</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-11-16T20:12</div></td><td class="sub">2026-11-16</td></tr>
+<td>@bengisucvd</td><td><span class="pill ok">clean</span></td><td><div><span class="pill bad">changes requested</span> @BurakOztekin <span class="sub">2026-11-20</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-11-20T03:18</div></td><td class="sub">2026-11-20</td></tr>
+<tr class="sev-critical"><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/pull/142">#142</a><span class="cap">feat(scripts): #125 step 1d, the submission script: build, score · for <a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/125">#125</a></span></td>
+<td>@mertefesensoy</td><td><span class="pill ok">clean</span></td><td><div><span class="pill bad">changes requested</span> @BurakOztekin <span class="sub">2026-11-20</span></div></td><td><span class="pill ok">green</span><div class="sub">2026-11-20T11:12</div></td><td class="sub">2026-11-20</td></tr>
 </table></div></div>
 <h2>Day by day</h2>
 <div class="lede">One record per day, written by the routine and diffed against the day before. Every line below is computed from those records, so it cannot drift from what the rest of this page says. There is no burn-up chart: the gates are ordered, not dated, so an even-pace line would draw a pace the plan does not set.</div>
 <div class="card"><div class="scroll"><table>
 <tr><th>Date</th><th>Gates</th><th>Conditions</th><th>Ready</th><th>In review</th><th>Blocked</th><th>What moved</th></tr>
+<tr><td class="num">2026-11-21</td><td class="num">0/5</td><td class="num">0/7</td><td class="num">4</td><td class="num">6</td><td class="num">0</td><td><ul class="blockers"><li><span class="dot medium"></span><span>milestone 2: 18 open and 16 closed (was 16 and 13)</span></li><li><span class="dot medium"></span><span>#60 ADR-014 trainer: the first archive fit: ready to start to in review</span></li><li><span class="dot medium"></span><span>#64 ADR-015 / ADR-016 ensemble and intervals (PR-A): in review to ready to start</span></li><li><span class="dot medium"></span><span>Baha Jarad owes 6 answers (was 4)</span></li><li><span class="dot medium"></span><span>Burak Öztekin owes 1 answer (was 2)</span></li><li><span class="dot medium"></span><span>Mert Efe Şensoy owes 2 answers (was 1)</span></li><li><span class="dot medium"></span><span>main moved to 4f26881c</span></li></ul></td></tr>
 <tr><td class="num">2026-11-20</td><td class="num">0/5</td><td class="num">0/7</td><td class="num">4</td><td class="num">6</td><td class="num">0</td><td><ul class="blockers"><li><span class="dot medium"></span><span>milestone 2: 16 open and 13 closed (was 17 and 12)</span></li><li><span class="dot medium"></span><span>#109 Phase-3 close record: in review to ready to start</span></li><li><span class="dot medium"></span><span>Baha Jarad owes 4 answers (was 6)</span></li><li><span class="dot medium"></span><span>Burak Öztekin owes 2 answers (was 1)</span></li><li><span class="dot medium"></span><span>Bengisu Cıvdı owes 0 answers (was 2)</span></li><li><span class="dot medium"></span><span>main moved to eda10288</span></li></ul></td></tr>
 <tr><td class="num">2026-11-19</td><td class="num">0/5</td><td class="num">0/7</td><td class="num">3</td><td class="num">7</td><td class="num">0</td><td><span class="sub">nothing moved</span></td></tr>
 <tr><td class="num">2026-11-18</td><td class="num">0/5</td><td class="num">0/7</td><td class="num">3</td><td class="num">7</td><td class="num">0</td><td><span class="sub">nothing moved</span></td></tr>
@@ -548,7 +562,7 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 <tr><th>Ticket</th><th>On GitHub</th><th>Why it is parked</th></tr>
 <tr><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/110">#110</a><span class="cap">Deep-learning engine: plan and build the third engine mode (t...</span></td><td class="sub">open · Phase 4 · Design-time predictor</td><td class="sub">The pre-registered rule for deep-model work failed for T1, T2 and readout (NC-085, NC-086); the one remaining target is the chip-level readout series, a small model after #125, not a lane (plan §3).</td></tr>
 <tr><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/65">#65</a><span class="cap">ADR-007: implement the pre-gate and between-gates fuzzificati...</span></td><td class="sub">open · no milestone</td><td class="sub">A phase-4 stretch in the phase-3 plan already; nothing today moves it up (plan §3).</td></tr>
-<tr><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/76">#76</a><span class="cap">Phase 4: promote shot-free diagonal Hellinger to a certified...</span></td><td class="sub">open · no milestone</td><td class="sub">A phase-4 stretch; useful after L4, not before (plan §3).</td></tr>
+<tr><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/76">#76</a><span class="cap">Phase 4: promote shot-free diagonal Hellinger to a certified...</span></td><td class="sub">open · Phase 4 · Design-time predictor</td><td class="sub">A phase-4 stretch; useful after L4, not before (plan §3).</td></tr>
 <tr><td class="num"><a href="https://github.com/SuperconducTED/superconducted-noise-engine/issues/93">#93</a><span class="cap">file_snapshots.sh prescribes a rebuild after a sweep that pip...</span></td><td class="sub">open · Phase 3 · ANFIS results</td><td class="sub">Only if #122&#x27;s ingest needs the rebuild; otherwise parked (plan §2 lane 3, §3).</td></tr>
 </table></div></div>
 <h2>Risks the plan named</h2>
@@ -576,5 +590,5 @@ footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);
 </div>
 </div>
 <footer>
-Generated by <code>generate.py</code> on this dashboard's own branch, which shares no history with main. Static plan model: <code>plan.json</code>. Live state read via <code>gh</code> at 2026-11-20 05:44 UTC.<br>Nothing here is hand-maintained except <code>plan.json</code>, which changes only when the plan, a ticket's stated dependency or an owner changes. Source of truth for the plan itself: <code>docs/roadmap/2026-10-23-phase-4-plan.md</code>, read at <code>951258da</code> on <code>mert/predictability</code>. Phase 3 is recorded on the <code>phase-3-dashboard</code> branch.
+Generated by <code>generate.py</code> on this dashboard's own branch, which shares no history with main. Static plan model: <code>plan.json</code>. Live state read via <code>gh</code> at 2026-11-21 05:45 UTC.<br>Nothing here is hand-maintained except <code>plan.json</code>, which changes only when the plan, a ticket's stated dependency or an owner changes. Source of truth for the plan itself: <code>docs/roadmap/2026-10-23-phase-4-plan.md</code>, read at <code>951258da</code> on <code>mert/predictability</code>. Phase 3 is recorded on the <code>phase-3-dashboard</code> branch.
 </footer></div>

@@ -1,6 +1,6 @@
 # Phase 4: Design-time predictor
 
-_Generated 2026-11-20 05:44 UTC · main at `eda10288` (2026-11-20) · day 20 since 2026-11-01 · milestone 2 due 2027-02-27 (99 days), 16 open and 13 closed_
+_Generated 2026-11-21 05:45 UTC · main at `4f26881c` (2026-11-20) · day 21 since 2026-11-01 · milestone 2 due 2027-02-27 (98 days), 18 open and 16 closed_
 
 _Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, on main. Gates are ordered, not dated (plan §6)._
 
@@ -43,9 +43,9 @@ _Resumes at gate L1, job 1's report, or earlier for whoever is idle on lane 1 (p
   - ⬜ The ladder (persistence, shrinkage, rolling band, IT2 band, scored on change events) with the fuzzy band's row, registered
     - _No ticket yet (lane 2 item 6), so there is nothing on GitHub to read._
 
-1. 🟡 #64 ADR-015 / ADR-016 ensemble and intervals (PR-A) (@bengisucvd): in review, PR #155
+1. ❌ #64 ADR-015 / ADR-016 ensemble and intervals (PR-A) (@bengisucvd): ready to finish
 2. ✅ #58 Certify the benchmark instruments (PR #79) (@bengisucvd): closed
-3. ❌ #60 ADR-014 trainer: the first archive fit (@BurakOztekin): ready to finish
+3. 🟡 #60 ADR-014 trainer: the first archive fit (@BurakOztekin): in review, PR #163
 4. ❌ #62 ADR-019 ablation table, both modes (@BahaJarad): ready to start
 5. 🟡 #61 Nie-Tan versus Karnik-Mendel, premise gradients (@bengisucvd): in review, PR #143
 6. ⬜ new: The ladder on the fuzzy band (@mertefesensoy, @bengisucvd): no issue yet. Persistence, shrinkage, rolling band and IT2 band scored on change events on pairs.tsv and rows.tsv.gz; gate L4 (plan §2 lane 2 item 6).
@@ -56,7 +56,7 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 
 - ❌ **L5** Phase 3 closed: The phase-3 milestone closed with every item either done or moved to the phase-4 milestone with a reason. (0/1) · **next**
   - ❌ Milestone 1 (Phase 3) closed
-    - _Milestone 1 (Phase 3 · ANFIS results) is open: 9 open and 34 closed issues._
+    - _Milestone 1 (Phase 3 · ANFIS results) is open: 7 open and 35 closed issues._
 
 1. ✅ #57 Training contract: ADR-027 accepted (PR #120) (@mertefesensoy): closed
 2. ✅ #84 Close the #57 advisor loop (@mertefesensoy): closed
@@ -72,22 +72,24 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 **Mert Efe Şensoy** (@mertefesensoy)
 
 1. Unstick PR #142 for #125: Hardware test: reading versus level on ibm_fez (QPU side)
-   - Still a draft: CI and reviewers will not treat it as ready.
+   - CHANGES_REQUESTED standing from @BurakOztekin (2026-11-20). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 1. Finish #109: Phase-3 close record
    - The phase-3 close record is its deliverable, with the ADR-025 amendments answered or explicitly carried (plan §2 lane 3).
 1. Unstick PR #156 for #104: Decide the sweep step
    - CHANGES_REQUESTED standing from @BahaJarad (2026-11-16). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
-1. Unstick PR #155 for #64: Author #64's PR-A1 once Bengisu's D1 to D5 are answered
-   - Awaiting merge. Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
+1. Author #64's PR-A1 once Bengisu's D1 to D5 are answered (#64)
+   - Mert authors PR-A, Bengisu owns and approves it; PR-A1 needs no harness (plan §2 lane 2 item 1). Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
 
 **Burak Öztekin** (@BurakOztekin)
 
 1. #125 offline half: selection rules, circuits for both arms, scoring, the dry run against Aer (#125)
    - The dry run gates the pre-registration commit, and job 1 cannot be submitted before that commit (plan §5.1).
-1. Finish #60: ADR-014 trainer: the first archive fit
-   - A fitted model at a pinned ref with the snapshot-boundary split, so ADR-014 moves off Deferred (plan §2 lane 2 item 3). Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
+1. Re-review PR #142 (#125: Hardware test: reading versus level on ibm_fez)
+   - Your CHANGES_REQUESTED from 2026-11-20 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
+1. Unstick PR #163 for #60: ADR-014 trainer: the first archive fit
+   - No approving review yet: main's ruleset requires one. Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
 1. Re-review PR #143 (#61: Nie-Tan versus Karnik-Mendel, premise gradients)
-   - Your CHANGES_REQUESTED from 2026-11-16 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
+   - Your CHANGES_REQUESTED from 2026-11-20 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 
 **Bengisu Cıvdı** (@bengisucvd)
 
@@ -95,10 +97,10 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
    - The pre-registration commit waits on this review (plan §5.1).
 1. Unstick PR #152 for #92: Rule 7 for the NC register
    - Awaiting merge.
-1. Start #64: ADR-015 / ADR-016 ensemble and intervals (PR-A)
+1. Finish #64: ADR-015 / ADR-016 ensemble and intervals (PR-A)
    - Bengisu's D1 to D5, in the gaps of lane 1 (plan §5.1); PR-A is lane 2's first item when it resumes. Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
 1. Unstick PR #143 for #61: Nie-Tan versus Karnik-Mendel, premise gradients
-   - CHANGES_REQUESTED standing from @BurakOztekin (2026-11-16). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix. Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
+   - CHANGES_REQUESTED standing from @BurakOztekin (2026-11-20). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix. Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
 
 **Baha Jarad** (@BahaJarad)
 
@@ -116,38 +118,43 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 _Review requests not yet answered with a review, and unticked checkboxes that start with the person (`- [ ] @login does X`), on every open issue and PR. Oldest first; "or earlier" marks a post edited after it was written, so the wait shown is the shortest it can be._
 
 
-**Mert Efe Şensoy** (@mertefesensoy), 1 owed
+**Mert Efe Şensoy** (@mertefesensoy), 2 owed
 
-- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (48 days); has posted there since, on 2026-11-14
+- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (49 days); has posted there since, on 2026-11-14
+- Review PR #163: requested by @BurakOztekin, since 2026-11-20 (1 day); no post there since
 
-**Burak Öztekin** (@BurakOztekin), 2 owed
+**Burak Öztekin** (@BurakOztekin), 1 owed
 
-- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (78 days); no post there since
-- Re-review PR #143: your CHANGES_REQUESTED from 2026-11-16 still stands: requested by @bengisucvd, since 2026-11-20 (0 days); no post there since
+- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (79 days); no post there since
 
-**Baha Jarad** (@BahaJarad), 4 owed
+**Baha Jarad** (@BahaJarad), 6 owed
 
-- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (48 days); no post there since
-- Review PR #143: requested by @bengisucvd, since 2026-11-07 (13 days); no post there since
-- Review PR #152: requested by @mertefesensoy, since 2026-11-14 (6 days); no post there since
-- Review PR #158: requested by @mertefesensoy, since 2026-11-14 (6 days); no post there since
+- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (49 days); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (14 days); has posted there since, on 2026-11-20
+- Review PR #152: requested by @mertefesensoy, since 2026-11-14 (7 days); no post there since
+- Review PR #158: requested by @mertefesensoy, since 2026-11-14 (7 days); no post there since
+- Re-review PR #156: your CHANGES_REQUESTED from 2026-11-16 still stands: requested by @mertefesensoy, since 2026-11-20 (1 day); no post there since
+- Review PR #163: requested by @BurakOztekin, since 2026-11-20 (1 day); no post there since
 
 ## Not blocked by anything upstream, so what is holding them?
 
 
 **#125: Hardware test: reading versus level on ibm_fez** (@mertefesensoy)
 
-- [high] Still a draft: CI and reviewers will not treat it as ready.
-- [high] No approving review yet: main's ruleset requires one.
+- [critical] CHANGES_REQUESTED standing from @BurakOztekin (2026-11-20). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **#122: Public archive as a second training-set source (ADR-029)** (@BahaJarad)
 
 - [critical] Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 - [high] Its green checks last ran 2026-11-13T19:53 against a main that has moved since; they are not evidence about the merge result.
 
+**#60: ADR-014 trainer: the first archive fit** (@BurakOztekin)
+
+- [high] No approving review yet: main's ruleset requires one.
+
 **#61: Nie-Tan versus Karnik-Mendel, premise gradients** (@bengisucvd)
 
-- [critical] CHANGES_REQUESTED standing from @BurakOztekin (2026-11-16). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+- [critical] CHANGES_REQUESTED standing from @BurakOztekin (2026-11-20). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 **#104: Decide the sweep step** (@mertefesensoy)
 
@@ -161,7 +168,7 @@ Nothing is blocked upstream.
 
 - **#110** Deep-learning engine: plan and build the third engine mode (two-stage NumPy model, conformal band) (open, milestone Phase 4 · Design-time predictor): The pre-registered rule for deep-model work failed for T1, T2 and readout (NC-085, NC-086); the one remaining target is the chip-level readout series, a small model after #125, not a lane (plan §3).
 - **#65** ADR-007: implement the pre-gate and between-gates fuzzification stubs and decide placement on a measurement instead of an Aer default (stretch, starts after M3) (open, no milestone): A phase-4 stretch in the phase-3 plan already; nothing today moves it up (plan §3).
-- **#76** Phase 4: promote shot-free diagonal Hellinger to a certified benchmark metric (open, no milestone): A phase-4 stretch; useful after L4, not before (plan §3).
+- **#76** Phase 4: promote shot-free diagonal Hellinger to a certified benchmark metric (open, milestone Phase 4 · Design-time predictor): A phase-4 stretch; useful after L4, not before (plan §3).
 - **#93** file_snapshots.sh prescribes a rebuild after a sweep that pipeline_health.py says is not owed (open, milestone Phase 3 · ANFIS results): Only if #122's ingest needs the rebuild; otherwise parked (plan §2 lane 3, §3).
 
 ## Day by day
@@ -169,6 +176,7 @@ Nothing is blocked upstream.
 
 | Date | Gates | Conditions | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 2026-11-21 | 0/5 | 0/7 | 4 | 6 | 0 | milestone 2: 18 open and 16 closed (was 16 and 13); #60 ADR-014 trainer: the first archive fit: ready to start to in review; #64 ADR-015 / ADR-016 ensemble and intervals (PR-A): in review to ready to start; Baha Jarad owes 6 answers (was 4); Burak Öztekin owes 1 answer (was 2); Mert Efe Şensoy owes 2 answers (was 1); main moved to 4f26881c |
 | 2026-11-20 | 0/5 | 0/7 | 4 | 6 | 0 | milestone 2: 16 open and 13 closed (was 17 and 12); #109 Phase-3 close record: in review to ready to start; Baha Jarad owes 4 answers (was 6); Burak Öztekin owes 2 answers (was 1); Bengisu Cıvdı owes 0 answers (was 2); main moved to eda10288 |
 | 2026-11-19 | 0/5 | 0/7 | 3 | 7 | 0 | nothing moved |
 | 2026-11-18 | 0/5 | 0/7 | 3 | 7 | 0 | nothing moved |
