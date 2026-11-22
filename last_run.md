@@ -1,10 +1,10 @@
-run-token: 2026-11-21T05:44:44Z-240
-outcome: ok: chore: phase-4 dashboard: state moved (2026-11-21)
+run-token: 2026-11-22T05:46:32Z-1857
+outcome: ok: chore: phase-4 dashboard: state moved (2026-11-22)
 
-**Phase 4: Design-time predictor** · day 21 since 2026-11-01 · milestone 2 due 2027-02-27 (98 days), 18 open and 16 closed.
+**Phase 4: Design-time predictor** · day 22 since 2026-11-01 · milestone 2 due 2027-02-27 (97 days), 18 open and 16 closed.
 **0/5 gates met** (0/7 conditions). Next: L1 (lane 1), L3 (lane 2), L5 (lane 3).
 
-**Since 2026-11-20:** milestone 2: 18 open and 16 closed (was 16 and 13); #60 ADR-014 trainer: the first archive fit: ready to start to in review; #64 ADR-015 / ADR-016 ensemble and intervals (PR-A): in review to ready to start; Baha Jarad owes 6 answers (was 4); Burak Öztekin owes 1 answer (was 2); Mert Efe Şensoy owes 2 answers (was 1); main moved to 4f26881c.
+**Since 2026-11-21:** nothing moved.
 
 **Needs attention**
 - The plan document changed at 410ec927 (2026-11-09) on main, after the 951258da plan.json was quoted from. Re-read it and update plan.json.
@@ -17,7 +17,7 @@ outcome: ok: chore: phase-4 dashboard: state moved (2026-11-21)
 - Baha Jarad: Unstick PR #150 for #122: Public archive as a second training-set source (ADR-029)
 
 **Waiting on an answer**
-- Mert Efe Şensoy: 2, oldest: links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (49 days); has posted there since, on 2026-11-14
-- Burak Öztekin: 1, oldest: confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (79 days); no post there since
+- Mert Efe Şensoy: 2, oldest: links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (50 days); has posted there since, on 2026-11-14
+- Burak Öztekin: 1, oldest: confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (80 days); no post there since
 - Bengisu Cıvdı: nothing owed
-- Baha Jarad: 6, oldest: posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (49 days); no post there since
+- Baha Jarad: 6, oldest: posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (50 days); no post there since
