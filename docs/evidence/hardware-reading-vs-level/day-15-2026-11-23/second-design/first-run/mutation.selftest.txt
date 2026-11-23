@@ -1,0 +1,4 @@
+mutant	file	prediction	outcome	matches	pytest	why
+X00 the routine's module does not parse	scripts/hardware_daily.py	harness error	caught	False	1 error in 0.86s	a collection error is pytest exit 2, not a caught mutant
+1 mutants: 1 caught, 0 survived, 0 harness errors, 1 against the prediction
+SELF-TEST FAILS: a run pytest could not judge is not counted as caught

@@ -1,0 +1,34 @@
+_______ test_a_failed_day_and_a_failed_check_are_outcomes_not_unscored ________
+tmp_path = WindowsPath('C:/Users/senso/AppData/Local/Temp/pytest-of-senso/pytest-2159/test_a_failed_day_and_a_failed0')
+    def test_a_failed_day_and_a_failed_check_are_outcomes_not_unscored(tmp_path: Path) -> None:
+        (last / "failed.json").write_text("{}", encoding="utf-8")
+        (last / "t1-failed.json").write_text("{}", encoding="utf-8")
+        """A failed unseal stays repeatable and visible: the closure does not end the morning."""
+        assert _run(tmp_path, 15, Runner(NOT_READY)) == 1  # no sealed folder: the unseal failed
+FAILED tests/test_hardware_day_15.py::test_day_fifteen_names_the_job_and_the_check_it_could_not_score
+FAILED tests/test_hardware_day_15.py::test_day_fifteen_with_everything_scored_closes_with_two_empty_lists
+FAILED tests/test_hardware_day_15.py::test_a_failed_day_and_a_failed_check_are_outcomes_not_unscored
+FAILED tests/test_hardware_day_15.py::test_the_job_and_the_check_are_listed_separately
+FAILED tests/test_hardware_day_15.py::test_before_day_fifteen_nothing_is_closed[1]
+FAILED tests/test_hardware_day_15.py::test_before_day_fifteen_nothing_is_closed[7]
+FAILED tests/test_hardware_day_15.py::test_before_day_fifteen_nothing_is_closed[14]
+FAILED tests/test_hardware_day_15.py::test_the_run_is_closed_before_the_scores_are_opened
+FAILED tests/test_hardware_day_15.py::test_a_day_fifteen_with_nothing_to_unseal_is_closed_and_is_not_clean
+FAILED tests/test_hardware_day_15.py::test_day_fifteen_run_again_scores_nothing_and_repeats_the_rest
+FAILED tests/test_hardware_day_15.py::test_day_fifteen_run_again_still_fails_while_the_unseal_fails
+FAILED tests/test_hardware_day_15.py::test_day_fifteen_run_again_commits_and_pushes_again
+FAILED tests/test_hardware_day_15.py::test_a_closure_before_day_fifteen_is_an_error_and_nothing_runs[1]
+FAILED tests/test_hardware_day_15.py::test_a_closure_before_day_fifteen_is_an_error_and_nothing_runs[2]
+FAILED tests/test_hardware_day_15.py::test_a_closure_before_day_fifteen_is_an_error_and_nothing_runs[14]
+FAILED tests/test_hardware_day_15.py::test_the_main_score_refuses_a_closed_run_before_any_network
+FAILED tests/test_hardware_day_15.py::test_the_check_score_refuses_a_closed_run_before_any_network
+FAILED tests/test_hardware_day_15.py::test_an_open_run_is_not_refused_as_closed
+FAILED tests/test_hardware_day_15.py::test_the_three_relations_are_refused[parent]
+FAILED tests/test_hardware_day_15.py::test_the_three_relations_are_refused[ancestor]
+FAILED tests/test_hardware_day_15.py::test_the_routine_refuses_a_sealed_folder_that_contains_the_jobs_folder_or_the_clone[contains jobs]
+FAILED tests/test_hardware_day_15.py::test_the_routine_refuses_a_sealed_folder_that_contains_the_jobs_folder_or_the_clone[contains clone]
+FAILED tests/test_hardware_day_15.py::test_the_routine_refuses_a_sealed_folder_that_contains_the_jobs_folder_or_the_clone[contains both]
+FAILED tests/test_hardware_day_15.py::test_both_scorers_and_the_report_refuse_a_sealed_folder_that_contains_the_jobs_folder
+FAILED tests/test_hardware_day_15.py::test_unseal_refuses_to_copy_the_sealed_folder_into_itself[parent]
+FAILED tests/test_hardware_day_15.py::test_unseal_refuses_to_copy_the_sealed_folder_into_itself[same]
+26 failed, 6 passed in 4.11s

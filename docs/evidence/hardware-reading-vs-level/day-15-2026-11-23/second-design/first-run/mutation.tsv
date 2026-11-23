@@ -1,0 +1,35 @@
+mutant	file	prediction	outcome	matches	pytest	why
+S01 a sealed folder that contains the other is accepted	scripts/hardware_submit.py	caught	caught	True	1 failed, 22 passed in 3.02s	the review's second finding; the parent and ancestor cases, and all three entry points
+S02 the equality test is dropped from the first relation	scripts/hardware_submit.py	survived	survived	True	91 passed in 11.79s	equivalent: Path.is_relative_to is true for a path and itself, so equality is implied
+S03 a sealed folder inside the other is accepted	scripts/hardware_submit.py	caught	caught	True	1 failed, 21 passed in 3.52s	the inside case; the second relation does not cover it
+S04 a closed run is not refused	scripts/hardware_submit.py	caught	caught	True	1 failed, 17 passed in 3.75s	both scorers' refusal tests
+S05 the main score does not ask whether the run is closed	scripts/hardware_submit.py	caught	caught	True	1 failed, 17 passed in 3.32s	the test replaces the archive fetch with a function that fails the test when reached
+S06 the marker has another name	scripts/hardware_submit.py	caught	caught	True	1 failed in 2.63s	the tests write and read closed.json by its literal name
+S07 days lists the checks	scripts/hardware_submit.py	caught	caught	True	1 failed, 3 passed in 2.65s	the test with the job scored and its check not
+S08 t1_checks lists the jobs	scripts/hardware_submit.py	caught	caught	True	1 failed, 3 passed in 2.92s	the same test, from the other side
+S09 a failed job counts as unscored	scripts/hardware_submit.py	caught	caught	True	1 failed, 2 passed in 2.48s	the test with failed.json; also the routine's existing tests on failed days
+S10 a failed check counts as unscored	scripts/hardware_submit.py	caught	caught	True	1 failed, 2 passed in 2.83s	the test with t1-failed.json
+S11 the report lists unscored days while the run is open	scripts/hardware_submit.py	caught	caught	True	1 failed, 4 passed in 2.77s	before day 15 the field must be null
+S12 the report gives null once the run is complete	scripts/hardware_submit.py	caught	caught	True	1 failed in 2.71s	day 15's report must carry the two lists
+S13 the days are not sorted	scripts/hardware_submit.py	survived	survived	True	91 passed in 11.85s	equivalent for both callers: the report's calendar and the routine's run days ascend
+T01 the check's score does not ask whether the run is closed	scripts/hardware_t1_check.py	caught	caught	True	1 failed, 18 passed in 3.20s	the test replaces the device with a function that fails the test when reached
+D01 the routine does not check the sealed folder	scripts/hardware_daily.py	caught	caught	True	1 failed, 25 passed in 3.00s	every refused layout, old and new
+D02 the routine checks the jobs folder only	scripts/hardware_daily.py	caught	caught	True	1 failed, 26 passed in 2.98s	the layouts that involve the clone alone
+D03 the routine checks the clone only	scripts/hardware_daily.py	caught	caught	True	1 failed, 25 passed in 3.01s	the layouts that involve the jobs folder alone
+D04 unseal does not refuse a copy into itself	scripts/hardware_daily.py	caught	caught	True	1 failed, 30 passed in 3.21s	the copy recurses or copies a file onto itself, and the folder is no longer as it was
+D05 unseal refuses only the identical folder	scripts/hardware_daily.py	caught	caught	True	1 failed, 30 passed in 3.44s	the parent layout, the review's second finding
+D06 the equality test is dropped from unseal's refusal	scripts/hardware_daily.py	survived	survived	True	91 passed in 11.72s	equivalent, as S02: is_relative_to is true for a path and itself
+D07 a marker before day 15 is not an error	scripts/hardware_daily.py	caught	caught	True	1 failed, 12 passed in 4.72s	a morning before day 15 with the marker must run nothing and exit 1
+D08 the closure looks at thirteen days	scripts/hardware_daily.py	caught	caught	True	1 failed in 2.82s	the unscored day in the tests is the fourteenth
+D09 closed.json lacks the lists	scripts/hardware_daily.py	caught	caught	True	1 failed in 3.51s	the file's content is compared whole
+D10 closed.json names the first day as the closing day	scripts/hardware_daily.py	caught	caught	True	1 failed in 2.90s	the file's content is compared whole
+D11 the morning's record lacks the lists	scripts/hardware_daily.py	caught	caught	True	1 failed in 3.42s	the record is read back on day 15
+D12 every morning records a closure	scripts/hardware_daily.py	caught	caught	True	1 failed, 4 passed in 3.34s	before day 15 the record must not carry the key
+D13 the days to score are chosen by the check's markers	scripts/hardware_daily.py	caught	caught	True	1 failed, 38 passed in 3.50s	the routine's existing tests on which days are scored
+D14 a marker before day 15 exits 0	scripts/hardware_daily.py	caught	caught	True	1 failed, 12 passed in 2.77s	a morning with no job must be seen in the task's last result
+D15 a second day 15 scores the late job	scripts/hardware_daily.py	caught	caught	True	1 failed, 10 passed in 2.69s	the second pass must run the report only
+D16 a second day 15 scores the late check	scripts/hardware_daily.py	caught	caught	True	1 failed, 9 passed in 2.76s	the second pass must run the report only; the test's late day has a check
+D17 a second day 15 writes a new closure	scripts/hardware_daily.py	caught	caught	True	1 failed, 9 passed in 2.58s	the test changes the late day's markers between the passes; the first closure must stand
+D18 the marker is written after the unseal	scripts/hardware_daily.py	caught	caught	True	1 failed, 7 passed in 2.52s	the test that watches unseal must see the marker already on disk
+D19 a second day 15 does not unseal again	scripts/hardware_daily.py	caught	caught	True	1 failed, 9 passed in 2.56s	a failed unseal must be repeatable: the second pass copies the sealed folder
+33 mutants: 30 caught, 3 survived, 0 harness errors, 0 against the prediction

@@ -1070,3 +1070,36 @@ replace the figures of the table above for those four rows, and the table above 
   day 16 does nothing, and the scores stay sealed. That predates today's changes and is not addressed here.
 - **The rule itself is open to objection until the freeze** (Issue #125, comment 7102582590). If it changes to
   "the unseal waits", `closed.json` moves to the day the wait ends and the criteria above are rewritten.
+
+### Results for the second design, 2026-11-23 (laptop, provisional)
+
+Commits: the second design and criterion 49 (`6d9ded33`), its mutation script (`aa4fe26f`), and the script's
+correction (`2700a1ad`). The evidence is in
+`docs/evidence/hardware-reading-vs-level/day-15-2026-11-23/second-design/`. Windows laptop, exact pins,
+`PYTHONPATH=src`. The stages ran one after another, so none shared the machine with another.
+
+Two heads are named below. `2700a1ad` differs from `aa4fe26f` in one file, `mutate_day_15.py`; `scripts/`,
+`tests/` and `src/` are the same objects at both. So what was measured at `aa4fe26f` holds at `2700a1ad` by
+tree identity, not by a second run.
+
+| # | Measured at | Result |
+| --- | --- | --- |
+| 45 | `aa4fe26f` | **Holds.** The 32 tests of `tests/test_hardware_day_15.py`, run against the scripts of `1ec698f8` in a throwaway worktree: 26 fail, 6 pass. The 6 are behaviours that already held there (the same and inside relations, the two sibling cases, and the two day-16 cases). At the head all 32 pass. Output: `old-commit.txt`. |
+| 46 | `2700a1ad` | **Holds, after a correction to the script.** 33 mutants: 30 caught, 3 survived as predicted (S02, S13, D06, each equivalent for the reason its entry gives), no harness error, none against its prediction. Every catch shows failed tests in its pytest summary. The self-test passes: a module that does not parse is reported as a harness error (pytest exit 2), not as caught. Output: `mutation.tsv`, `mutation.selftest.txt`. |
+| 47 | `aa4fe26f` | **Holds.** The rehearsal ran from 20:38 to 21:05 UTC, every stage exiting 0, and `check_rehearsal.py` reads "all checks pass", the same 66 checks. The day-15 report is byte-for-byte the content recorded for `d62e3a60` (`../rehearsal-report-day-15.json`), which equals 2026-11-20's once `closed_unscored` is removed; the interim report's `closed_unscored` is `null`; `closed.json` is in the jobs repository's day-15 commit with two empty lists. The dry run was not re-run: `scripts/hardware_reading_vs_level.py` is unchanged from `1ec698f8`. |
+| 48 | `aa4fe26f` | **Holds.** Clean tree, `superconducted.__file__` inside `C:\t1d\src`: ruff, `ruff format --check`, `check_ids.py` and `mypy --strict` are clean, and `pytest tests/` gives 1774 passed, 2 skipped, in 993 s. That is 32 more than 2026-11-20's 1742 with the same 2 skips. `mutate_day_15.py` at `2700a1ad` passes `ruff check` and `ruff format --check` on its own. Output: `gates.txt`. |
+| 49 | `aa4fe26f` | **Holds.** Day 15 run again after a failed unseal: only `report` runs, the unseal then succeeds, the exit code is 0, and `closed.json` is as the first pass wrote it although the late day gained a `failed.json` in between. While the unseal still fails the second pass exits 1. With `--commit-data --push-data` the second pass adds, commits and pushes again. A morning on day 1, 2 or 14 with the marker runs no step, writes no record and exits 1. Day 16 with the marker runs no step and exits 0. `closed.json` is on disk when `unseal` is called. Mutants D07 and D14 to D19 cover these lines and are all caught. |
+
+**What the script's correction was.** `aa4fe26f` ran pytest with `-x`. With `-x` a collection error counts toward
+the first failure and pytest exits 1, so the rule "caught only when pytest exits 1" let a broken test run pass as
+a catch. The self-test added in that same commit showed it on its first run: X00 came back `caught` with pytest
+reporting "1 error" (`first-run/mutation.selftest.txt`). Measured on the exact pins: a collection error exits 2
+without `-x` and 1 with it. `2700a1ad` drops `-x`. The first run's 33 results were all test failures by their
+summaries (`first-run/mutation.tsv`), so no result changed between the two runs; the rule did.
+
+The table of `d62e3a60` above stays as the record of the first design. Its rows 45 to 48 are superseded by
+this table; its rows 42 to 44 still describe the head, except the three cases of the first design's
+"a morning with the run closed runs no step", which criterion 49 replaces.
+
+Limits, as before: the rehearsal has no unscorable job, so the late-job paths rest on tests with a scripted
+`score` step; nothing ran on the QPU or on a second machine; the desktop reproduction at the final head is owed.
