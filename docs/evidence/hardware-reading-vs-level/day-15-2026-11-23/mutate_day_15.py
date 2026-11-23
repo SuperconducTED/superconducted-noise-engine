@@ -17,6 +17,14 @@ replaced and D14 to D19 added for the second design of the same day (a closed ru
 before their run. `--selftest` runs one extra mutant that breaks collection and passes only when it
 is reported as a harness error. `PYTEST_ADDOPTS` is removed from the environment of every run, so a
 stray value cannot break or bend the judgment.
+
+pytest is run without `-x`. With `-x` a collection error counts toward the first failure and pytest
+exits 1, so a module that does not even parse would be reported as caught. The first version of this
+script passed `-x`, and its own self-test caught that on 2026-11-23: X00 came back `caught` with
+pytest reporting "1 error". All 33 results of that run were test failures by their summaries, but
+the rule was not what this docstring said. Measured on the exact pins: a collection error exits 2
+without `-x` and 1 with it.
+
 Run it in a throwaway checkout: it rewrites source files while it works.
 """
 
@@ -370,7 +378,7 @@ def main() -> int:
 
     env = {**os.environ, "PYTHONPATH": "src", "COLUMNS": "200"}
     env.pop("PYTEST_ADDOPTS", None)
-    command = [args.python, "-m", "pytest", *TESTS, "-q", "-x", "-p", "no:cacheprovider"]
+    command = [args.python, "-m", "pytest", *TESTS, "-q", "-p", "no:cacheprovider"]
     command += ["-o", "addopts="]
 
     baseline = subprocess.run(command, cwd=args.root, env=env, capture_output=True, text=True)
