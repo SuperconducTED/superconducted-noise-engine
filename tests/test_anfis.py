@@ -169,6 +169,26 @@ def test_lse_core_drops_zero_firing_rows_from_fit_and_metrics() -> None:
     assert evaluate_rmse(result.rule_base, data) == pytest.approx(np.zeros(1), abs=1e-12)
 
 
+def test_fit_returns_read_only_metrics_and_standardization() -> None:
+    rule_base = TSKRuleBase(
+        [TSKRule((TriangularMF(-1.0, 0.0, 1.0),), np.array([[0.1, 0.2]]))],
+        input_dim=1,
+        output_dim=1,
+    )
+    data = _data(
+        np.array([[-0.5], [0.0], [0.5], [2.0]]),
+        np.array([[0.15], [0.2], [0.25], [0.9]]),
+    )
+
+    result = HybridANFISTrainer(ridge=0.0).fit(rule_base, data)
+
+    arrays = [result.train_rmse, *result.diagnostics.standardization]
+    assert len(arrays) == 5
+    for stored in arrays:
+        with pytest.raises(ValueError):
+            stored[...] = 0.0
+
+
 def test_lse_core_preserves_coefficient_output_layout_for_multiple_targets() -> None:
     memberships = (GaussianMF(-1.0, 0.8), GaussianMF(1.0, 0.8))
     planted = TSKRuleBase(

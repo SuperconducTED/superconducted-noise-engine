@@ -173,6 +173,60 @@ def test_result_accepts_absent_validation_rmse() -> None:
     assert _result(validation_rmse=None).validation_rmse is None
 
 
+def test_diagnostics_copies_and_freezes_standardization() -> None:
+    mean, scale = np.array([0.0, 1.0]), np.array([2.0, 3.0])
+    diagnostics = _diagnostics(standardization=(mean, scale))
+    mean[0] = np.nan
+    scale[1] = 99.0
+    assert len(diagnostics.standardization) == 2
+    assert np.array_equal(diagnostics.standardization[0], [0.0, 1.0])
+    assert np.array_equal(diagnostics.standardization[1], [2.0, 3.0])
+    for stored in diagnostics.standardization:
+        with pytest.raises(ValueError):
+            stored[0] = 1.0
+
+
+def test_diagnostics_stores_standardization_as_a_tuple() -> None:
+    given = [np.zeros(1), np.ones(1)]
+    diagnostics = _diagnostics(standardization=given)
+    given.append(np.array([np.nan]))
+    assert isinstance(diagnostics.standardization, tuple)
+    assert len(diagnostics.standardization) == 2
+    assert _diagnostics(standardization=()).standardization == ()
+
+
+@pytest.mark.parametrize("field", ["train_rmse", "validation_rmse"])
+def test_result_copies_and_freezes_rmse(field: str) -> None:
+    given = np.array([0.25, 0.5])
+    result = _result(**{field: given})
+    given[0] = np.nan
+    stored = getattr(result, field)
+    assert np.array_equal(stored, [0.25, 0.5])
+    with pytest.raises(ValueError):
+        stored[0] = 1.0
+
+
+def test_result_stores_loss_history_as_a_tuple() -> None:
+    given = [0.5, 0.4]
+    result = _result(loss_history=given)
+    given.append(float("nan"))
+    assert isinstance(result.loss_history, tuple)
+    assert result.loss_history == (0.5, 0.4)
+
+
+def test_result_and_diagnostics_arrays_are_float64() -> None:
+    narrow = np.array([0.5], dtype=np.float32)
+    result = _result(train_rmse=narrow, validation_rmse=narrow)
+    assert result.train_rmse.dtype == np.float64
+    assert result.validation_rmse is not None
+    assert result.validation_rmse.dtype == np.float64
+    assert _diagnostics(standardization=(narrow,)).standardization[0].dtype == np.float64
+    bare = _result(train_rmse=0.5).train_rmse
+    assert isinstance(bare, np.ndarray)
+    assert bare.dtype == np.float64
+    assert bare.shape == ()
+
+
 def test_parameter_count_rejects_negative_components() -> None:
     with pytest.raises(ValueError, match="non-negative"):
         ParameterCount(premise=-1, consequent=2, total=1)
