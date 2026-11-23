@@ -997,3 +997,31 @@ his two files were asked for on PR #142.
 - It does not measure the power lost when the last batch empties; that question is @bengisucvd's, on #125.
 - Criterion 9 itself stays open until the desktop reproduction is repeated at the new head, with a runbook
   pinned to it.
+
+### Results, 2026-11-23 (laptop, provisional)
+
+Head `d62e3a60`: the plan (`50c6aca5`), the code and tests (`c5b9b70f`), the mutation script (`d62e3a60`). The
+evidence is in `docs/evidence/hardware-reading-vs-level/day-15-2026-11-23/`. Windows laptop, exact pins,
+`PYTHONPATH=src`. The desktop reproduction at this head is owed (criterion 9).
+
+| # | Result |
+| --- | --- |
+| 42 | **Holds.** `tests/test_hardware_day_15.py`: the three relations are refused by `refuse_sealed_inside` (same, inside, a parent, an ancestor) and a sibling is accepted, including a sibling whose name starts with the other's. `hardware_daily.main` refuses a sealed folder that contains the jobs folder, the clone, or both, and accepts three siblings. `hardware_submit.py score`, `hardware_submit.py report` and `hardware_t1_check.py score` each exit `EXIT_REFUSED` for a sealed folder that contains the jobs folder, with the archive fetch and the device replaced by functions that fail the test if reached. `unseal` returns `EXIT_REFUSED` for the parent layout and for the identical folder, and the tree on disk is unchanged afterwards. |
+| 43 | **Holds.** Day 15 with job 14 and its check not ready: the routine exits 0 after `score`, `t1 score` and `report`; `closed.json` is `{"closed_on": "2026-11-24", "closed_unscored": {"days": ["2026-11-23"], "t1_checks": ["2026-11-23"]}}` for a run that starts on 2026-11-10; the morning's record carries the same lists; `run_report` on the same folders gives the same lists with `complete: true`. With everything scored both lists are empty. A failed job and a failed check are outcomes, not unscored. The job and the check are listed separately. On days 1, 7 and 14 there is no `closed.json`, the record has no `closed_unscored` key, and the report's field is `null`. `closed.json` is written even when there is no sealed folder to open. |
+| 44 | **Holds.** With `closed.json` present, `hardware_submit.py score` and `hardware_t1_check.py score` exit `EXIT_REFUSED` and say when the run was closed, before the archive fetch or the device is reached. A morning on day 2 or day 15 runs no step and writes no record; day 16 after a real day 15 runs no step, and the late job stays unscored. The existing test of day 15's own steps (`score`, `t1 score`, `report`) is unchanged and passes. |
+| 45 | **Holds.** The 27 tests were run against the scripts of `1ec698f8` in a throwaway worktree: 21 fail and 6 pass. The 6 are behaviours that already held there: the same and inside relations, the two sibling cases, a closed morning on day 16 (outside the run), and day 16 doing nothing. At the head all 27 pass. |
+| 46 | **Holds.** 27 mutants, predictions committed first (`d62e3a60`), run in a throwaway worktree of that commit. 24 are caught, each by a failing test (pytest exit 1). 3 survive, each predicted to: two drop an equality test that `Path.is_relative_to` already implies (S02, D06), and one drops a sort over days that both callers already pass in ascending order (S13). No harness error, none against its prediction. Output: `mutation.tsv`. |
+| 47 | **Holds.** The rehearsal ran at `d62e3a60` from the full clone, 19:42 to 20:04 UTC, every stage exiting 0, and `check_rehearsal.py` reads "all checks pass", the same 66 checks. The day-15 report is `complete: true` with `closed_unscored` two empty lists, and equals 2026-11-20's day-15 report (`merge-2026-11-20/rehearsal-report-day-15.json`) once that one new key is removed. The interim report's `closed_unscored` is `null`. `closed.json` is in the jobs repository's day-15 commit, with `closed_on` 2026-11-16 and two empty lists. `scripts/hardware_reading_vs_level.py` is unchanged from `1ec698f8`, so the dry run of criterion 37 was not re-run; that is a statement about the file, not a measurement. |
+| 48 | **Holds.** At `d62e3a60`, clean tree, `superconducted.__file__` inside `C:\t1d\src`: ruff, `ruff format --check` (169 files) and `check_ids.py` are clean, `mypy --strict` finds no issue in 54 files, and `pytest tests/` gives 1769 passed, 2 skipped, in 775 s. That is 27 more than 2026-11-20's 1742 with the same 2 skips. Output: `gates.txt`. |
+
+Three things the numbers do not say:
+
+- **The rehearsal has no unscorable job.** Its day 15 closes with two empty lists, so it shows the closure is
+  written and published, not that a late job is handled. The late-job path is covered by the tests of
+  criteria 43 and 44, with the `score` step scripted to return `EXIT_NOT_YET`.
+- **The rehearsal shared the machine with the full suite**, which is why it took 22 minutes against 15 on
+  2026-11-20. Its outputs do not depend on the wall clock.
+- **Nothing here ran on the QPU or on a second machine.**
+
+Not done in this section: the pre-registration's two paragraphs; the runbook pinned to the new head; the
+power question on Issue #125.
