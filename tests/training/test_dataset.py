@@ -358,3 +358,52 @@ def test_training_tsv_loads_committed_evidence():
     train, validation = data.time_split(datetime(2026, 9, 1, tzinfo=UTC))
     assert train.n_rows > 0 and validation.n_rows > 0
     assert max(train.timestamps) < min(validation.timestamps)
+
+
+TSV_HEADER = (
+    "mean_T1\tmean_T2\tmean_readout_error\tgamma\tlambda\tlast_update_date\t"
+    "qubit_digest\tweight_uniform\n"
+)
+
+
+def tsv_row(timestamp="2026-09-01T12:00:00+00:00", digest="digest"):
+    return f"100\t80\t0.02\t0.0001\t0.0002\t{timestamp}\t{digest}\t1\n"
+
+
+def test_training_tsv_hour_of_day_reads_its_own_column():
+    # The round-trip fixture has both rows at 12:00 UTC, so its two weightings are equal and it
+    # cannot tell which column was read. The committed evidence can: they differ on every row.
+    evidence = (
+        Path(__file__).resolve().parents[2] / "docs/evidence/training-set/2026-10-17-e5688d2f.tsv"
+    )
+    ref = "e5688d2f6a333e98bb01f1c1d81b694ff69574f5"
+    uniform = load_training_tsv(evidence, archive_ref=ref)
+    hourly = load_training_tsv(evidence, archive_ref=ref, weighting="hour_of_day")
+    assert uniform.n_rows == hourly.n_rows == 797
+    assert np.all(uniform.weights != hourly.weights)
+    np.testing.assert_array_equal(uniform.weights, np.ones(797))
+    np.testing.assert_array_equal(hourly.weights, hour_of_day_weights(hourly.timestamps))
+
+
+def test_training_tsv_rejects_a_header_with_no_rows(tmp_path):
+    path = tmp_path / "data.tsv"
+    path.write_text(TSV_HEADER, encoding="utf-8")
+    with pytest.raises(ValueError, match="no training rows"):
+        load_training_tsv(path, archive_ref="a" * 40)
+
+
+@pytest.mark.parametrize("ref", ["A" * 40, "g" * 40, "a" * 39, "a" * 41])
+def test_training_tsv_rejects_each_malformed_ref(tmp_path, ref):
+    # One fault per case: "HEAD" alone trips the length and the alphabet check together.
+    path = tmp_path / "data.tsv"
+    path.write_text(TSV_HEADER + tsv_row(), encoding="utf-8")
+    with pytest.raises(ValueError, match="full lowercase commit SHA"):
+        load_training_tsv(path, archive_ref=ref)
+
+
+def test_training_tsv_accepts_a_sha256_ref_and_rejects_an_unknown_weighting(tmp_path):
+    path = tmp_path / "data.tsv"
+    path.write_text(TSV_HEADER + tsv_row(), encoding="utf-8")
+    assert load_training_tsv(path, archive_ref="a" * 64).archive_ref == "a" * 64
+    with pytest.raises(ValueError, match="Unknown weighting"):
+        load_training_tsv(path, archive_ref="a" * 40, weighting="bogus")
