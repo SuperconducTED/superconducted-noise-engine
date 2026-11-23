@@ -12,7 +12,11 @@ collected) is `harness error`: the tests did not judge the mutant, so it is not 
 script exits 1. It also exits 1 when an outcome differs from its prediction. The earlier scripts
 here count any non-zero exit as a catch; this one does not (the lesson of the review of PR #143).
 
-The predictions below were written before the first run and are committed before it.
+The predictions below were written before the first run and are committed before it. D07 was
+replaced and D14 to D19 added for the second design of the same day (a closed run's mornings), again
+before their run. `--selftest` runs one extra mutant that breaks collection and passes only when it
+is reported as a harness error. `PYTEST_ADDOPTS` is removed from the environment of every run, so a
+stray value cannot break or bend the judgment.
 Run it in a throwaway checkout: it rewrites source files while it works.
 """
 
@@ -216,12 +220,12 @@ MUTANTS: tuple[Mutant, ...] = (
     ),
     # --- hardware_daily.py: closing the run ------------------------------------------------------
     Mutant(
-        "D07 a morning ignores closed.json",
+        "D07 a marker before day 15 is not an error",
         DAILY,
-        "    if (morning.jobs_dir / CLOSED_NAME).exists():\n",
+        "    if already_closed and number <= N_JOBS:\n",
         "    if False:\n",
         "caught",
-        "a closed run's morning must run no step",
+        "a morning before day 15 with the marker must run nothing and exit 1",
     ),
     Mutant(
         "D08 the closure looks at thirteen days",
@@ -271,6 +275,75 @@ MUTANTS: tuple[Mutant, ...] = (
         "caught",
         "the routine's existing tests on which days are scored",
     ),
+    # --- hardware_daily.py: the second design of 2026-11-23, a closed run's mornings -------------
+    Mutant(
+        "D14 a marker before day 15 exits 0",
+        DAILY,
+        'before the run can be closed: nothing was run")\n        return 1\n',
+        'before the run can be closed: nothing was run")\n        return 0\n',
+        "caught",
+        "a morning with no job must be seen in the task's last result",
+    ),
+    Mutant(
+        "D15 a second day 15 scores the late job",
+        DAILY,
+        "late_jobs = [] if already_closed else days_to_score(morning.jobs_dir, today)",
+        "late_jobs = days_to_score(morning.jobs_dir, today)",
+        "caught",
+        "the second pass must run the report only",
+    ),
+    Mutant(
+        "D16 a second day 15 scores the late check",
+        DAILY,
+        "late_checks = [] if already_closed else t1_to_score(morning.jobs_dir, today)",
+        "late_checks = t1_to_score(morning.jobs_dir, today)",
+        "caught",
+        "the second pass must run the report only; the test's late day has a check",
+    ),
+    Mutant(
+        "D17 a second day 15 writes a new closure",
+        DAILY,
+        "        if already_closed:\n            # The first closure stands",
+        "        if False:\n            # The first closure stands",
+        "caught",
+        "the test changes the late day's markers between the passes; the first closure must stand",
+    ),
+    Mutant(
+        "D18 the marker is written after the unseal",
+        DAILY,
+        '            marker.write_text(json.dumps(closed, indent=2) + "\\n", encoding="utf-8", '
+        'newline="\\n")\n'
+        "        # Amendment 27: the run is over, so the sealed folder joins the data branch.\n"
+        '        steps.append(("unseal", unseal(morning.sealed_dir, morning.jobs_dir)))\n',
+        "            pass\n"
+        "        # Amendment 27: the run is over, so the sealed folder joins the data branch.\n"
+        '        steps.append(("unseal", unseal(morning.sealed_dir, morning.jobs_dir)))\n'
+        "        if not already_closed:\n"
+        '            marker.write_text(json.dumps(closed, indent=2) + "\\n", encoding="utf-8", '
+        'newline="\\n")\n',
+        "caught",
+        "the test that watches unseal must see the marker already on disk",
+    ),
+    Mutant(
+        "D19 a second day 15 does not unseal again",
+        DAILY,
+        '        steps.append(("unseal", unseal(morning.sealed_dir, morning.jobs_dir)))\n',
+        "        if not already_closed:\n"
+        '            steps.append(("unseal", unseal(morning.sealed_dir, morning.jobs_dir)))\n',
+        "caught",
+        "a failed unseal must be repeatable: the second pass copies the sealed folder",
+    ),
+)
+
+# Not one of the mutants: it breaks the module so that pytest cannot collect, to exercise the
+# harness-error path end to end. See --selftest.
+SELFTEST = Mutant(
+    "X00 the routine's module does not parse",
+    DAILY,
+    "def unseal(sealed_dir: Path, jobs_dir: Path) -> int:",
+    "def unseal(sealed_dir: Path, jobs_dir: Path) -> int",
+    "harness error",
+    "a collection error is pytest exit 2, not a caught mutant",
 )
 
 
@@ -287,7 +360,13 @@ def main() -> int:
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--python", required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--selftest",
+        action="store_true",
+        help="run one mutant that breaks collection; pass when it is reported as a harness error",
+    )
     args = parser.parse_args()
+    mutants = (SELFTEST,) if args.selftest else MUTANTS
 
     env = {**os.environ, "PYTHONPATH": "src", "COLUMNS": "200"}
     env.pop("PYTEST_ADDOPTS", None)
@@ -302,7 +381,7 @@ def main() -> int:
     lines = ["mutant\tfile\tprediction\toutcome\tmatches\tpytest\twhy"]
     outcomes: list[str] = []
     against = 0
-    for mutant in MUTANTS:
+    for mutant in mutants:
         target = args.root / mutant.path
         original = target.read_bytes()
         digest = hashlib.sha256(original).hexdigest()
@@ -319,7 +398,7 @@ def main() -> int:
             raise SystemExit(f"{mutant.name}: {mutant.path} was not restored")
         outcome = classify(done.returncode)
         outcomes.append(outcome)
-        matches = outcome == mutant.prediction
+        matches = outcome.split(" (")[0] == mutant.prediction
         against += 0 if matches else 1
         tail = done.stdout.strip().splitlines()[-1].strip("= ") if done.stdout.strip() else ""
         lines.append(
@@ -332,11 +411,18 @@ def main() -> int:
     survived = outcomes.count("survived")
     errors = len(outcomes) - caught - survived
     summary = (
-        f"{len(MUTANTS)} mutants: {caught} caught, {survived} survived, {errors} harness errors, "
+        f"{len(mutants)} mutants: {caught} caught, {survived} survived, {errors} harness errors, "
         f"{against} against the prediction"
     )
     lines.append(summary)
     print(summary)
+    if args.selftest:
+        seen = errors == 1 and outcomes[0].startswith("harness error")
+        verdict = "self-test passes" if seen else "SELF-TEST FAILS"
+        lines.append(f"{verdict}: a run pytest could not judge is not counted as caught")
+        print(lines[-1])
+        args.out.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+        return 0 if seen else 1
     args.out.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     return 1 if against or errors else 0
 
