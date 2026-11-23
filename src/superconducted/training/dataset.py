@@ -81,6 +81,12 @@ def load_training_tsv(
 
     The TSV does not embed its archive commit; callers must obtain it from the
     accompanying evidence record. This function cannot verify that association.
+
+    The rows must be what the builder writes: one cell per header column, in
+    strictly increasing ``last_update_date`` order. The builder sorts by timestamp
+    and raises ``ArchiveTimestampError`` on a tie, so a tied, repeated or misordered
+    row means the file was edited or concatenated, and it is refused rather than
+    loaded as two device states.
     """
     if len(archive_ref) not in (40, 64) or any(
         character not in "0123456789abcdef" for character in archive_ref
@@ -101,6 +107,12 @@ def load_training_tsv(
             raise ValueError(f"TSV missing required columns: {', '.join(sorted(missing))}")
         features, targets, timestamps, provenance, weights = [], [], [], [], []
         for row in reader:
+            # DictReader files surplus cells under the key None and fills missing ones with None.
+            if None in row or None in row.values():
+                raise ValueError(
+                    f"Invalid TSV row at line {reader.line_num}: "
+                    "expected one cell per header column"
+                )
             try:
                 features.append([float(row[name]) for name in feature_names])
                 targets.append([float(row[name]) for name in target_names])
@@ -111,7 +123,7 @@ def load_training_tsv(
                 raise ValueError(f"Invalid TSV row at line {reader.line_num}") from exc
     if not features:
         raise ValueError("TSV has no training rows")
-    return TrainingSet(
+    data = TrainingSet(
         features=np.asarray(features, dtype=np.float64),
         targets=np.asarray(targets, dtype=np.float64),
         timestamps=tuple(timestamps),
@@ -121,6 +133,10 @@ def load_training_tsv(
         archive_ref=archive_ref,
         weights=np.asarray(weights, dtype=np.float64),
     )
+    # Compared after TrainingSet has refused naive timestamps, so every pair is comparable.
+    if any(later <= earlier for earlier, later in pairwise(data.timestamps)):
+        raise ValueError("TSV rows must be in strictly increasing last_update_date order")
+    return data
 
 
 def _git(repo: Path, *args: str) -> bytes:

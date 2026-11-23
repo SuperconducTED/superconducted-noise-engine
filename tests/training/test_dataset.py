@@ -407,3 +407,42 @@ def test_training_tsv_accepts_a_sha256_ref_and_rejects_an_unknown_weighting(tmp_
     assert load_training_tsv(path, archive_ref="a" * 64).archive_ref == "a" * 64
     with pytest.raises(ValueError, match="Unknown weighting"):
         load_training_tsv(path, archive_ref="a" * 40, weighting="bogus")
+
+
+@pytest.mark.parametrize(
+    "header,row",
+    [
+        # One cell too many: csv.DictReader would file it under the key None and drop it.
+        (TSV_HEADER, tsv_row().rstrip("\n") + "\textra\n"),
+        # One cell too few, in a column the loader does not read.
+        (TSV_HEADER.rstrip("\n") + "\tnote\n", tsv_row()),
+    ],
+    ids=["surplus cell", "missing cell"],
+)
+def test_training_tsv_rejects_a_row_without_one_cell_per_column(tmp_path, header, row):
+    path = tmp_path / "data.tsv"
+    path.write_text(header + row, encoding="utf-8")
+    with pytest.raises(ValueError, match="line 2: expected one cell per header column"):
+        load_training_tsv(path, archive_ref="a" * 40)
+
+
+@pytest.mark.parametrize(
+    "second",
+    [
+        tsv_row("2026-09-02T12:00:00+00:00", "other"),  # a tie the builder refuses
+        tsv_row("2026-09-02T12:00:00+00:00", "digest"),  # the same row twice
+        tsv_row("2026-09-01T12:00:00+00:00", "other"),  # an earlier row after a later one
+        tsv_row("2026-09-02T15:00:00+03:00", "other"),  # the same instant in another zone
+    ],
+    ids=["tie", "repeated row", "earlier row", "same instant, other zone"],
+)
+def test_training_tsv_rejects_rows_not_in_increasing_time_order(tmp_path, second):
+    path = tmp_path / "data.tsv"
+    first = tsv_row("2026-09-02T12:00:00+00:00", "digest")
+    path.write_text(TSV_HEADER + first + second, encoding="utf-8")
+    with pytest.raises(ValueError, match="strictly increasing last_update_date"):
+        load_training_tsv(path, archive_ref="a" * 40)
+    path.write_text(
+        TSV_HEADER + first + tsv_row("2026-09-02T12:00:01+00:00", "other"), encoding="utf-8"
+    )
+    assert load_training_tsv(path, archive_ref="a" * 40).n_rows == 2
