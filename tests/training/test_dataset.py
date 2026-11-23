@@ -446,3 +446,18 @@ def test_training_tsv_rejects_rows_not_in_increasing_time_order(tmp_path, second
         TSV_HEADER + first + tsv_row("2026-09-02T12:00:01+00:00", "other"), encoding="utf-8"
     )
     assert load_training_tsv(path, archive_ref="a" * 40).n_rows == 2
+
+
+def test_training_tsv_checks_the_ref_against_a_builder_file_name(tmp_path):
+    # scripts/build_training_set.py names its file <date>-<first eight of the ref>.tsv.
+    named = tmp_path / "2026-10-17-e5688d2f.tsv"
+    named.write_text(TSV_HEADER + tsv_row(), encoding="utf-8")
+    with pytest.raises(ValueError, match="short SHA in the TSV file name"):
+        load_training_tsv(named, archive_ref="f0930b9b54975470a4a87866cbc691f7897295cb")
+    assert load_training_tsv(named, archive_ref="e5688d2f" + "0" * 32).n_rows == 1
+    # Any other name carries no claim, so nothing is checked.
+    other = tmp_path / "training.tsv"
+    other.write_text(TSV_HEADER + tsv_row(), encoding="utf-8")
+    assert (
+        load_training_tsv(other, archive_ref="f0930b9b54975470a4a87866cbc691f7897295cb").n_rows == 1
+    )

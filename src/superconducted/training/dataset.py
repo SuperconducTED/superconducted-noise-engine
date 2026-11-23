@@ -9,6 +9,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import re
 import subprocess
 from collections import Counter
 from collections.abc import Iterable, Iterator
@@ -57,6 +58,8 @@ SPREAD_NAMES: tuple[str, ...] = tuple(
 TARGET_SPREAD_NAMES: tuple[str, ...] = tuple(
     f"gamma_{stat}" for stat in ("std", "p10", "p50", "p90")
 )
+# The name scripts/build_training_set.py gives its TSV: run date, then archive_ref[:8].
+_BUILDER_TSV_NAME = re.compile(r"\d{4}-\d{2}-\d{2}-([0-9a-f]{8})\.tsv")
 
 
 class ArchiveRefError(ValueError):
@@ -80,7 +83,10 @@ def load_training_tsv(
     """Load builder TSV rows in archive units, with the caller's full archive commit SHA.
 
     The TSV does not embed its archive commit; callers must obtain it from the
-    accompanying evidence record. This function cannot verify that association.
+    accompanying evidence record. A file named as the builder names it
+    (``YYYY-MM-DD-<first eight of the ref>.tsv``) must agree with ``archive_ref``;
+    beyond those eight characters, and for any other file name, this function
+    cannot verify the association.
 
     The rows must be what the builder writes: one cell per header column, in
     strictly increasing ``last_update_date`` order. The builder sorts by timestamp
@@ -92,6 +98,11 @@ def load_training_tsv(
         character not in "0123456789abcdef" for character in archive_ref
     ):
         raise ValueError("archive_ref must be a full lowercase commit SHA")
+    named = _BUILDER_TSV_NAME.fullmatch(path.name)
+    if named is not None and not archive_ref.startswith(named.group(1)):
+        raise ValueError(
+            f"archive_ref does not start with {named.group(1)}, the short SHA in the TSV file name"
+        )
     if weighting not in ("uniform", "hour_of_day"):
         raise ValueError("Unknown weighting")
     feature_names = ("mean_T1", "mean_T2", "mean_readout_error")
