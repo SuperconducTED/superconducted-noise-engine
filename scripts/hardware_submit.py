@@ -99,6 +99,8 @@ CONTROLS_SHA = re.compile(r"\*\*Controls SHA-256\*\*:\s*`([0-9a-f]{64})`")
 WAITING = frozenset({"INITIALIZING", "QUEUED", "VALIDATING"})
 EXIT_REFUSED = 2
 EXIT_NOT_YET = 3
+# Written in the jobs folder by the day-15 routine; while it is there nothing is scored.
+CLOSED_NAME = "closed.json"
 
 Archive = Callable[[], Iterable[tuple[str, dict[str, Any]]]]
 
@@ -787,6 +789,37 @@ def run_score(
 # report: the decision rule over every day so far
 
 
+def awaits_score(job_dir: Path) -> bool:
+    """A main job was submitted and has no outcome: neither scored nor recorded as failed."""
+    return (
+        (job_dir / "job_id.txt").exists()
+        and not (job_dir / "operations.json").exists()
+        and not (job_dir / "failed.json").exists()
+    )
+
+
+def check_awaits_score(job_dir: Path) -> bool:
+    """A ``T1`` check was submitted and has no outcome."""
+    return (
+        (job_dir / "t1-job_id.txt").exists()
+        and not (job_dir / "t1-operations.json").exists()
+        and not (job_dir / "t1-failed.json").exists()
+    )
+
+
+def closed_unscored(jobs_dir: Path, days: Iterable[date]) -> dict[str, list[str]]:
+    """The days among ``days`` whose main job, and whose ``T1`` check, have no outcome.
+
+    Read from the jobs folder's own markers, which carry no score, so the routine may write the
+    result beside the jobs and the report may repeat it inside the sealed folder.
+    """
+    folders = [jobs_dir / day.isoformat() for day in sorted(days)]
+    return {
+        "days": [f.name for f in folders if awaits_score(f)],
+        "t1_checks": [f.name for f in folders if check_awaits_score(f)],
+    }
+
+
 def _day_status(job_dir: Path) -> str:
     if (job_dir / "operations.json").exists() or (job_dir / "arm-a.tsv").exists():
         return "scored"
@@ -1345,6 +1378,9 @@ def run_report(
         "interim_note": None
         if complete
         else "interim: not the decision, and it must not stop or extend the run",
+        # Day 15 is final: what the calendar closed without a score is named, not left to be
+        # read off the day list. ``complete`` means the calendar has passed the last day.
+        "closed_unscored": closed_unscored(jobs_dir, calendar) if complete else None,
         "first_day": first_day.isoformat(),
         "last_day": last.isoformat(),
         "days": days,
@@ -1394,11 +1430,34 @@ def _fetch_archive(repo: Path) -> None:
 
 
 def refuse_sealed_inside(sealed_dir: Path, *folders: Path) -> None:
-    """Refuse a sealed folder inside any of ``folders``: a commit of them would publish it."""
+    """Refuse a sealed folder that is, is inside, or contains any of ``folders``.
+
+    Inside one, a commit of that folder would publish the scores. Containing one is as bad on day
+    15: ``unseal`` copies the sealed folder into ``<jobs>/sealed``, which would then be a copy of
+    a folder into itself. One rule for the routine and both scorers.
+    """
     sealed = sealed_dir.resolve()
     for folder in folders:
-        if sealed == folder.resolve() or sealed.is_relative_to(folder.resolve()):
+        other = folder.resolve()
+        if sealed == other or sealed.is_relative_to(other):
             raise RefusedError(f"the sealed folder {sealed_dir} is inside {folder}")
+        if other.is_relative_to(sealed):
+            raise RefusedError(f"the sealed folder {sealed_dir} contains {folder}")
+
+
+def refuse_closed_run(jobs_dir: Path) -> None:
+    """Refuse once the run is closed: day 15 is final, and nothing is scored after it.
+
+    The day-15 routine writes ``closed.json`` in the jobs folder (Issue #125, the lead's decision
+    of 2026-11-23). A job it could not score that morning is a failed day; scoring it later, by
+    the routine or by hand, would be a choice made after the sealed scores were opened.
+    """
+    marker = jobs_dir / CLOSED_NAME
+    if marker.exists():
+        closed_on = _read_json(marker).get("closed_on", "an unrecorded day")
+        raise RefusedError(
+            f"the run was closed on {closed_on} ({marker}): day 15 is final, no job is scored now"
+        )
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -1459,7 +1518,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     try:
         if args.mode == "score":
+            # Both before any network and before the token is read.
             refuse_sealed_inside(args.sealed_dir, args.job_dir.parent, args.repo)
+            refuse_closed_run(args.job_dir.parent)
         if args.mode == "build" and not local:
             # Before any network and before the token is read.
             try:

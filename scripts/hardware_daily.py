@@ -43,14 +43,21 @@ import sys
 import time as clock
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 from scripts.hardware_submit import (
+    CLOSED_NAME,
     EXIT_NOT_YET,
     EXIT_REFUSED,
     N_JOBS,
     SUBMISSION_TIME,
+    RefusedError,
+    awaits_score,
+    check_awaits_score,
+    closed_unscored,
+    refuse_sealed_inside,
 )
 
 __all__ = [
@@ -170,29 +177,13 @@ def _earlier_days(jobs_dir: Path, today: date) -> list[Path]:
     )
 
 
-def _awaits_score(job_dir: Path) -> bool:
-    return (
-        (job_dir / "job_id.txt").exists()
-        and not (job_dir / "operations.json").exists()
-        and not (job_dir / "failed.json").exists()
-    )
-
-
-def _check_awaits_score(job_dir: Path) -> bool:
-    return (
-        (job_dir / "t1-job_id.txt").exists()
-        and not (job_dir / "t1-operations.json").exists()
-        and not (job_dir / "t1-failed.json").exists()
-    )
-
-
 def days_to_score(jobs_dir: Path, today: date) -> list[Path]:
     """Earlier days with a submitted job and no outcome yet, oldest first."""
-    return [p for p in _earlier_days(jobs_dir, today) if _awaits_score(p)]
+    return [p for p in _earlier_days(jobs_dir, today) if awaits_score(p)]
 
 
 def t1_to_score(jobs_dir: Path, today: date) -> list[Path]:
-    return [p for p in _earlier_days(jobs_dir, today) if _check_awaits_score(p)]
+    return [p for p in _earlier_days(jobs_dir, today) if check_awaits_score(p)]
 
 
 def _rehearsal_flags(morning: Morning) -> list[str]:
@@ -240,10 +231,19 @@ def _wait_for_window(
 
 
 def unseal(sealed_dir: Path, jobs_dir: Path) -> int:
-    """Copy the sealed folder into ``jobs_dir / sealed``; 0 when done, 1 when there is nothing."""
+    """Copy the sealed folder into ``jobs_dir / sealed``; 0 when done, 1 when there is nothing.
+
+    ``EXIT_REFUSED`` when the copy would land inside its own source, which ``copytree`` would
+    follow into itself. The entry checks refuse that layout first; this holds without them.
+    """
     if not sealed_dir.is_dir():
         return 1
-    shutil.copytree(sealed_dir, jobs_dir / "sealed", dirs_exist_ok=True)
+    target = jobs_dir / "sealed"
+    source = sealed_dir.resolve()
+    if target.resolve() == source or target.resolve().is_relative_to(source):
+        print(f"refused: {target} is inside the sealed folder {sealed_dir}; nothing copied")
+        return EXIT_REFUSED
+    shutil.copytree(sealed_dir, target, dirs_exist_ok=True)
     return 0
 
 
@@ -262,6 +262,10 @@ def run_morning(
     number = job_number_on(today, morning.first_day)
     if number < 1 or number > N_JOBS + 1:
         print(f"{today} is day {number} of a run of {N_JOBS}: nothing to do")
+        return 0
+    if (morning.jobs_dir / CLOSED_NAME).exists():
+        # Day 15 is final: a closed run is not scored, reported or unsealed again.
+        print(f"{morning.jobs_dir / CLOSED_NAME} is there: the run is closed, nothing to do")
         return 0
     morning.jobs_dir.mkdir(parents=True, exist_ok=True)
     log = morning.jobs_dir / f"routine-{today.isoformat()}.log"
@@ -352,15 +356,27 @@ def run_morning(
         ],
         REPORT_LIMIT_S,
     )
+    closure: dict[str, list[str]] | None = None
     if number == N_JOBS + 1:
-        # Day 15 (amendment 27): the run is over, so the sealed folder joins the data branch.
+        # Day 15 is final (Issue #125, 2026-11-23): what this morning could not score is a
+        # failed day. The run is closed here, by name, before the scores are opened, and both
+        # scorers refuse from now on. The lists come from the jobs folder's own markers.
+        run_days = [morning.first_day + timedelta(days=i) for i in range(N_JOBS)]
+        closure = closed_unscored(morning.jobs_dir, run_days)
+        closed = {"closed_on": today.isoformat(), "closed_unscored": closure}
+        (morning.jobs_dir / CLOSED_NAME).write_text(
+            json.dumps(closed, indent=2) + "\n", encoding="utf-8", newline="\n"
+        )
+        # Amendment 27: the run is over, so the sealed folder joins the data branch.
         steps.append(("unseal", unseal(morning.sealed_dir, morning.jobs_dir)))
-    status = {
+    status: dict[str, Any] = {
         "day": today.isoformat(),
         "job_number": number,
         "started": started.isoformat(),
         "steps": [{"name": name, "exit": code} for name, code in steps],
     }
+    if closure is not None:
+        status["closed_unscored"] = closure
     (morning.jobs_dir / f"routine-{today.isoformat()}.json").write_text(
         json.dumps(status, indent=2) + "\n", encoding="utf-8", newline="\n"
     )
@@ -417,10 +433,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.error("a real morning needs --frozen-at and --prereg")
     if args.push_data and not args.commit_data:
         parser.error("--push-data needs --commit-data")
-    sealed = args.sealed_dir.resolve()
-    for folder in (args.jobs_dir, args.repo):
-        if sealed == folder.resolve() or sealed.is_relative_to(folder.resolve()):
-            parser.error(f"--sealed-dir must be outside {folder}: a commit there would publish it")
+    try:
+        refuse_sealed_inside(args.sealed_dir, args.jobs_dir, args.repo)
+    except RefusedError as exc:
+        parser.error(f"--sealed-dir must be apart from the jobs folder and the clone: {exc}")
 
     morning = Morning(
         first_day=args.first_day,

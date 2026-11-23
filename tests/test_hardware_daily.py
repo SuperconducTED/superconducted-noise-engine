@@ -537,7 +537,7 @@ def test_unseal_says_when_there_is_nothing_and_can_be_run_again(tmp_path: Path) 
     assert daily.unseal(sealed, jobs) == 0
     (sealed / "day2").mkdir()
     (sealed / "day2" / "b.tsv").write_text("b", encoding="utf-8")
-    assert daily.unseal(sealed, jobs) == 0  # a day scored by hand later is added
+    assert daily.unseal(sealed, jobs) == 0  # a second copy adds what the first did not have
     assert (jobs / "sealed" / "day1" / "a.tsv").exists() and (
         jobs / "sealed" / "day2" / "b.tsv"
     ).exists()

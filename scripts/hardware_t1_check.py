@@ -52,6 +52,7 @@ from scripts.hardware_submit import (
     ibm_device,
     pinned_options,
     read_circuits,
+    refuse_closed_run,
     refuse_sealed_inside,
     write_circuits,
 )
@@ -282,8 +283,10 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     try:
         if args.mode == "score":
-            # Before any network: a sealed folder inside either would be committed.
+            # Before any network: a sealed folder inside either would be committed, and a
+            # closed run scores nothing more.
             refuse_sealed_inside(args.sealed_dir, args.job_dir.parent, args.repo)
+            refuse_closed_run(args.job_dir.parent)
         if args.mode == "submit" and not local:
             # Before any network and before the token is read.
             submission = _read_json(args.job_dir / "submission.json")
