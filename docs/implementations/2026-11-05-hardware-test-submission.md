@@ -901,3 +901,99 @@ attempt.
 **Not changed by this section.** NC-021: this branch measures 1,742 at `20e7345d`, a branch tip, not a merge commit.
 The register is re-measured at this PR's merge under Rule 6. Criterion 9 is still open: it is Burak's desktop run,
 against `dry-run-2026-11-16/`, with a runbook dry-run from GitHub before it is posted.
+
+## After Burak's review of `1ec698f8`, 2026-11-23, before the code: day 15 is final, the sealed folder's relations, criterion 9
+
+Appended; nothing above is edited. Written before the code it describes.
+
+### What the review found
+
+@BurakOztekin reviewed `1ec698f8` on his desktop on 2026-11-20 (21:24 UTC) and requested changes for two
+defects, and asked for criterion 9's acceptance to be made clear. Both defects were reproduced on the laptop at
+`1ec698f8` on 2026-11-23, with the `score` step stubbed to return `EXIT_NOT_YET` and the routine and the report
+as the real code:
+
+| Finding | Input | Result at `1ec698f8` |
+| --- | --- | --- |
+| Day 15 closes on an incomplete result | job 14 and its `T1` check not ready on day 15 | the routine exits 0; the unsealed `report.json` says `complete: true` with no interim note; day 14 appears only as `submitted, not scored` in the day list; no field names the unscored job or the unscored check; on day 16 the routine prints "nothing to do" and runs no step |
+| The sealed folder may contain the jobs folder | `--sealed-dir` a parent of `--jobs-dir` | `hardware_daily.main` and `refuse_sealed_inside` both accept it; `unseal` copies the folder into itself (19 nested copies at a recursion limit of 150) |
+
+### Decisions this section implements (the lead, 2026-11-23)
+
+- **Day 15 is final** (option A; Issue #125, comment 7102582590; open to @bengisucvd's objection on power until
+  the freezing commit). A job the day-15 routine cannot score counts as a failed day. It is not scored later and
+  not added by hand. The same holds for the last job's `T1` check. The pre-registration's paragraph goes in
+  under its own amendment number in its own PR; this section does not number it.
+- **Criterion 9 across machines is the MUST MATCH tier of `compare_dry_run.py`**, exit 0. Byte identity is asked
+  only of two runs on one machine. See "Criterion 9" below.
+
+### Design
+
+**1. The sealed folder and the folders it must stay apart from (F1).** `refuse_sealed_inside` refuses three
+relations instead of two: the sealed folder is the other folder, is inside it, or contains it. Inside it, a
+commit would publish the scores (the existing reason). Containing the jobs folder, day 15's `unseal` would copy
+the sealed folder into its own subfolder. `hardware_daily.main` stops keeping its own copy of the check and
+calls `refuse_sealed_inside`, so the routine and both scorers apply one rule. `unseal` also refuses on its own
+when its destination lies inside its source, and returns `EXIT_REFUSED`, so the copy cannot recurse even if a
+caller skips the entry check.
+
+**2. The report names what closed unscored (F2).** `run_report` gains a top-level `closed_unscored`. While the
+run is open it is `null`. Once `complete` is true it is
+`{"days": [...], "t1_checks": [...]}`: the ISO dates of days whose main job was submitted and has no outcome
+(status `submitted, not scored`), and of days whose `T1` check was submitted and has no outcome. Both lists are
+empty when everything was scored. `complete` keeps its meaning: the calendar has passed the last day. The exit
+code of a day-15 morning with an unscorable job stays 0: under the rule this is a defined outcome, not a failure
+of the routine.
+
+**3. The run is closed by a marker, and nothing is scored after it (F2, F3).** On day 15, after the report and
+before `unseal`, the routine writes `closed.json` in the jobs folder:
+`{"closed_on": <day 15's date>, "closed_unscored": {"days": [...], "t1_checks": [...]}}`, computed by the
+routine from the jobs folder's own markers, not read from the sealed report. The morning's `routine-*.json`
+carries the same object. `hardware_submit.py score` and `hardware_t1_check.py score` refuse, before any network,
+when the job's parent folder holds `closed.json`. A morning that starts with `closed.json` present does nothing
+and exits 0, on any day.
+
+This differs from the plan posted on PR #142 earlier the same day (comment 7111701341), which keyed the refusal
+on `jobs/sealed/report.json`. That file exists only if `unseal` succeeded; `closed.json` is written whether or
+not it did, needs no clock, and is one rule for both scorers. It also puts the closure and its unscored list on
+the data branch as a committed statement.
+
+**4. The mutation script counts only real test failures (F4).** The new script counts a mutant as caught only
+when pytest exits 1. Any other non-zero exit is a harness error and fails the script. @BurakOztekin found on
+PR #143 that a script may count a broken test run as a kill; `mutate_merge.py`'s `_classify` here has the same
+shape (any non-zero exit without an assertion is "caught: crash"). The earlier scripts are dated evidence and
+are not edited. Their recorded results are unaffected: of 2026-11-20's 16, 13 are assertions and the 3 crashes
+each carry a pytest summary reading "1 failed".
+
+### Criterion 9, as of 2026-11-23
+
+Criterion 9 asks for criteria 1 to 7 to be reproduced on the desktop. For the dry run (criteria 1 and 10), the
+test across machines is `compare_dry_run.py` exiting 0, which is its MUST MATCH tier: the selection and circuit
+keys of `manifest.json` and the five verdicts under each truth in `criteria.json`. The script's docstring
+already places byte identity in a REPORTED tier that "has not been checked across platforms". @BurakOztekin's
+run is the first such check: MUST MATCH held, and 6 files were byte-identical where the laptop has 8, the
+additional two being `manifest.json` (Python 3.12.3 against 3.12.10) and `criteria.json` (small floating-point
+differences). On the laptop the one file of nine that differs between two runs is `dry-run.log`. No tolerance
+is introduced, because MUST MATCH compares no floats. The size of the float differences is not measured here;
+his two files were asked for on PR #142.
+
+### Acceptance criteria 42 to 48
+
+| # | Criterion |
+| --- | --- |
+| 42 | `refuse_sealed_inside` refuses each of the three relations (same, inside, contains) against the jobs folder and against the clone, at all three entry points (`hardware_daily.main`, `hardware_submit.py score` and `report`, `hardware_t1_check.py score`), and accepts a sibling folder. `unseal` refuses a destination inside its source and copies nothing. |
+| 43 | On day 15 with a job and its `T1` check not ready: the routine exits 0; `closed.json` and the morning's record name that day in `days` and in `t1_checks`; the report, run on the same folders, gives the same two lists with `complete: true`. With everything scored, both lists are empty. Before day 15 the report's `closed_unscored` is `null` and no `closed.json` is written. |
+| 44 | With `closed.json` in the jobs folder, `hardware_submit.py score` and `hardware_t1_check.py score` exit `EXIT_REFUSED` before the device or the archive is touched, and a morning on any day runs no step and exits 0. Without it, day 15's own score steps run as before. |
+| 45 | The two reproductions above, kept as tests, fail at `1ec698f8` and pass at the head. |
+| 46 | Every new line is mutation-checked, with predictions committed before the run. A mutant is caught only by pytest exit 1; a harness error fails the script. Each mutant is caught or shown equivalent, with a reason. |
+| 47 | The rehearsal, re-run at the head with `rehearsal-2026-11-08/`'s days, archive commit and checker: every check that held on 2026-11-20 holds; the day-15 report carries `closed_unscored` with two empty lists; `closed.json` exists in the rehearsal's jobs folder. `scripts/hardware_reading_vs_level.py` is unchanged from `1ec698f8`, so criterion 37's dry run is not re-run; that is stated, not measured. |
+| 48 | ruff, `ruff format --check`, `check_ids.py`, `mypy --strict` and `pytest tests/` pass on the exact head, with the exact pins and `PYTHONPATH=src`, and the run prints a `superconducted.__file__` inside the head's tree. |
+
+### What this does not do
+
+- It does not write the pre-registration's day-15 paragraph or the `reading_at_execution` paragraph (option 1,
+  decided the same day). Those go in their own PR before the freeze.
+- It does not edit the dated mutation scripts of earlier stages, or PR #156's.
+- It does not measure the power lost when the last batch empties; that question is @bengisucvd's, on #125.
+- Criterion 9 itself stays open until the desktop reproduction is repeated at the new head, with a runbook
+  pinned to it.
