@@ -1025,3 +1025,48 @@ Three things the numbers do not say:
 
 Not done in this section: the pre-registration's two paragraphs; the runbook pinned to the new head; the
 power question on Issue #125.
+
+## The same evening, 2026-11-23: a closed run's mornings, second design
+
+Appended; nothing above is edited. Unlike the section above, this one is written after its code: the gap was
+found in a review of `c5b9b70f` before anything was pushed, and the code, the tests and this record were
+written together.
+
+### What was wrong with the first design
+
+Design item 3 above ends: "A morning that starts with `closed.json` present does nothing and exits 0, on any
+day." Two failures hide behind that sentence.
+
+| Case | First design (`c5b9b70f`) | Why it is wrong |
+| --- | --- | --- |
+| Day 15's unseal, commit or push fails, and the morning is run again | the second pass prints "nothing to do" and exits 0 | `closed.json` is written before those steps, so the failed step is never repeated and the task's last result reads clean. This is the shape of the review's first finding: a clean exit over an incomplete result. |
+| `closed.json` is in the jobs folder before day 15 | the morning submits no job and exits 0 | The comment at `ALLOWED` says a morning with no job must be seen by whoever reads the task's last result. |
+
+### Design
+
+With `closed.json` present when a morning starts:
+
+- **Day 15** runs no `score` and no `t1 score` step, because day 15 is final and both scorers would refuse. It
+  still runs the report, the unseal and, if asked, the commit and the push. It does not write a new closure: the
+  first one stands, and the morning's record repeats its lists. Its exit code follows its steps as on any
+  morning, so an unseal that fails again fails the morning again.
+- **Days 1 to 14** run nothing and exit 1. No job is built, because with the marker there it could never be
+  scored.
+- **From day 16** nothing happens and the exit code is 0, as before the marker existed.
+
+### Acceptance criterion 49
+
+| # | Criterion |
+| --- | --- |
+| 49 | With `closed.json` present: a day-15 morning runs `report` and the unseal and no score step, repeats the commit and the push when asked, leaves `closed.json` byte for byte as it was even when the late day's markers have changed since, and exits non-zero while the unseal still fails. A morning on day 1, 2 or 14 runs no step, writes no record and exits 1. A morning on day 16 runs no step and exits 0. `closed.json` is on disk when `unseal` is called. Each new line is mutation-checked under criterion 46's rule, with predictions committed before the run. |
+
+Criteria 45 to 48 are re-measured at the head that carries this section's code; the results below this section
+replace the figures of the table above for those four rows, and the table above stays as the record of
+`d62e3a60`.
+
+### What is still not covered
+
+- **A day 15 that never runs closes nothing.** If the laptop is off that morning, no `closed.json` is written,
+  day 16 does nothing, and the scores stay sealed. That predates today's changes and is not addressed here.
+- **The rule itself is open to objection until the freeze** (Issue #125, comment 7102582590). If it changes to
+  "the unseal waits", `closed.json` moves to the day the wait ends and the criteria above are rewritten.

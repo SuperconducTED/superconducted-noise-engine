@@ -20,6 +20,13 @@ thread.
 only scores and reports, and from day 16 on the routine does nothing, so a task left registered
 cannot extend the run.
 
+**Day 15 is final.** After its report, day 15 writes ``closed.json`` in the jobs folder: the day it
+closed the run, and the days whose job or ``T1`` check it could not score. Those are failed days;
+``hardware_submit.py score`` and ``hardware_t1_check.py score`` refuse while the file is there, so
+nothing is scored later by the routine or by hand. Run again on day 15, the routine scores nothing
+but repeats the report, the unseal and the commit, and keeps the first closure. The file on any
+earlier day is an error: that morning runs nothing and exits 1.
+
 **Sealed.** Scores, raw counts and ``T1`` fits go to ``--sealed-dir``, outside the jobs folder (the
 data branch's worktree) and outside the clone, so nothing a morning commits or logs carries one
 (amendment 27). The jobs folder gets each day's ``operations.json``: that the job ran, when, and
@@ -263,10 +270,13 @@ def run_morning(
     if number < 1 or number > N_JOBS + 1:
         print(f"{today} is day {number} of a run of {N_JOBS}: nothing to do")
         return 0
-    if (morning.jobs_dir / CLOSED_NAME).exists():
-        # Day 15 is final: a closed run is not scored, reported or unsealed again.
-        print(f"{morning.jobs_dir / CLOSED_NAME} is there: the run is closed, nothing to do")
-        return 0
+    marker = morning.jobs_dir / CLOSED_NAME
+    already_closed = marker.exists()
+    if already_closed and number <= N_JOBS:
+        # Only day 15 closes the run. With the marker there both scorers refuse, so a job built
+        # today could never be scored: nothing is built, and the morning is a failure to be seen.
+        print(f"{marker} is there on day {number}, before the run can be closed: nothing was run")
+        return 1
     morning.jobs_dir.mkdir(parents=True, exist_ok=True)
     log = morning.jobs_dir / f"routine-{today.isoformat()}.log"
     submit = [morning.python, str(SCRIPTS / "hardware_submit.py")]
@@ -310,7 +320,12 @@ def run_morning(
                 ],
                 T1_LIMIT_S,
             )
-    for job_dir in days_to_score(morning.jobs_dir, today):
+    # A day-15 morning run again after the closure scores nothing: day 15 is final, and both
+    # scorers would refuse. It still reports, unseals and commits, so that an unseal, a commit or
+    # a push that failed the first time can be repeated and its failure is not hidden.
+    late_jobs = [] if already_closed else days_to_score(morning.jobs_dir, today)
+    late_checks = [] if already_closed else t1_to_score(morning.jobs_dir, today)
+    for job_dir in late_jobs:
         step(
             "score",
             [
@@ -325,7 +340,7 @@ def run_morning(
             ],
             SCORE_LIMIT_S,
         )
-    for job_dir in t1_to_score(morning.jobs_dir, today):
+    for job_dir in late_checks:
         step(
             "t1 score",
             [
@@ -361,12 +376,14 @@ def run_morning(
         # Day 15 is final (Issue #125, 2026-11-23): what this morning could not score is a
         # failed day. The run is closed here, by name, before the scores are opened, and both
         # scorers refuse from now on. The lists come from the jobs folder's own markers.
-        run_days = [morning.first_day + timedelta(days=i) for i in range(N_JOBS)]
-        closure = closed_unscored(morning.jobs_dir, run_days)
-        closed = {"closed_on": today.isoformat(), "closed_unscored": closure}
-        (morning.jobs_dir / CLOSED_NAME).write_text(
-            json.dumps(closed, indent=2) + "\n", encoding="utf-8", newline="\n"
-        )
+        if already_closed:
+            # The first closure stands: a second pass repeats it, it does not write a new one.
+            closure = json.loads(marker.read_text(encoding="utf-8"))["closed_unscored"]
+        else:
+            run_days = [morning.first_day + timedelta(days=i) for i in range(N_JOBS)]
+            closure = closed_unscored(morning.jobs_dir, run_days)
+            closed = {"closed_on": today.isoformat(), "closed_unscored": closure}
+            marker.write_text(json.dumps(closed, indent=2) + "\n", encoding="utf-8", newline="\n")
         # Amendment 27: the run is over, so the sealed folder joins the data branch.
         steps.append(("unseal", unseal(morning.sealed_dir, morning.jobs_dir)))
     status: dict[str, Any] = {

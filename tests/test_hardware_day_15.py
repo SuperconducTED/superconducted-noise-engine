@@ -157,10 +157,26 @@ def test_before_day_fifteen_nothing_is_closed(tmp_path: Path, day: int) -> None:
     assert report["closed_unscored"] is None
 
 
-def test_the_run_is_closed_before_the_scores_are_opened(tmp_path: Path) -> None:
-    """``closed.json`` is written even when there is no sealed folder to open."""
+def test_the_run_is_closed_before_the_scores_are_opened(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``closed.json`` is on disk when ``unseal`` starts, not written after it."""
+    _run_of_fourteen(tmp_path, last_scored=False)
+    seen: list[bool] = []
+    real = daily.unseal
+
+    def watched(sealed_dir: Path, jobs_dir: Path) -> int:
+        seen.append((jobs_dir / "closed.json").exists())
+        return real(sealed_dir, jobs_dir)
+
+    monkeypatch.setattr(daily, "unseal", watched)
+    assert _run(tmp_path, 15, Runner(NOT_READY)) == 0
+    assert seen == [True]
+
+
+def test_a_day_fifteen_with_nothing_to_unseal_is_closed_and_is_not_clean(tmp_path: Path) -> None:
     _day(tmp_path, submit.N_JOBS, "job_id.txt")
-    assert _run(tmp_path, 15, Runner(NOT_READY)) == 1  # the unseal found nothing: not clean
+    assert _run(tmp_path, 15, Runner(NOT_READY)) == 1  # the unseal found nothing
     assert _closed(tmp_path)["closed_unscored"]["days"] == [LAST.isoformat()]
     assert not (tmp_path / "jobs" / "sealed").exists()
 
@@ -168,14 +184,64 @@ def test_the_run_is_closed_before_the_scores_are_opened(tmp_path: Path) -> None:
 # --- criterion 44: nothing is scored after the run is closed ------------------------------------
 
 
-@pytest.mark.parametrize("day", [2, 15, 16])
-def test_a_morning_with_the_run_closed_runs_no_step(tmp_path: Path, day: int) -> None:
+def test_day_fifteen_run_again_scores_nothing_and_repeats_the_rest(tmp_path: Path) -> None:
+    """A failed unseal stays repeatable and visible: the closure does not end the morning."""
+    _day(tmp_path, submit.N_JOBS, "job_id.txt", "t1-job_id.txt")
+    assert _run(tmp_path, 15, Runner(NOT_READY)) == 1  # no sealed folder: the unseal failed
+    first = _closed(tmp_path)
+    assert first["closed_unscored"] == {"days": [LAST.isoformat()], "t1_checks": [LAST.isoformat()]}
+    (tmp_path / "sealed").mkdir()
+    (tmp_path / "sealed" / "report.json").write_text("{}", encoding="utf-8")
+    # The late day's markers change after the closure; a closure computed again would differ.
+    (tmp_path / "jobs" / LAST.isoformat() / "failed.json").write_text("{}", encoding="utf-8")
+    runner = Runner()  # the late check would score now; it must not be asked
+    assert _run(tmp_path, 15, runner) == 0
+    assert runner.names == ["report"]
+    assert (tmp_path / "jobs" / "sealed" / "report.json").exists()
+    assert _closed(tmp_path) == first  # the first closure stands
+    record = json.loads(
+        (tmp_path / "jobs" / f"routine-{DAY_15.isoformat()}.json").read_text("utf-8")
+    )
+    assert [s["name"] for s in record["steps"]] == ["report", "unseal"]
+    assert record["closed_unscored"] == first["closed_unscored"]
+
+
+def test_day_fifteen_run_again_still_fails_while_the_unseal_fails(tmp_path: Path) -> None:
+    """At the first design of 2026-11-23 a second pass printed "nothing to do" and exited 0."""
+    _day(tmp_path, submit.N_JOBS, "job_id.txt")
+    assert _run(tmp_path, 15, Runner(NOT_READY)) == 1
+    runner = Runner()
+    assert _run(tmp_path, 15, runner) == 1
+    assert runner.names == ["report"]
+
+
+def test_day_fifteen_run_again_commits_and_pushes_again(tmp_path: Path) -> None:
     _run_of_fourteen(tmp_path, last_scored=False)
+    assert _run(tmp_path, 15, Runner(NOT_READY), commit_data=True, push_data=True) == 0
+    runner = Runner()
+    assert _run(tmp_path, 15, runner, commit_data=True, push_data=True) == 0
+    assert runner.names == ["report", "git add", "git commit", "git push"]
+
+
+@pytest.mark.parametrize("day", [1, 2, 14])
+def test_a_closure_before_day_fifteen_is_an_error_and_nothing_runs(
+    tmp_path: Path, day: int
+) -> None:
+    """A morning with no job must be seen: the marker would make its job unscorable."""
+    (tmp_path / "jobs").mkdir()
     (tmp_path / "jobs" / "closed.json").write_text('{"closed_on": "2026-11-24"}', encoding="utf-8")
     runner = Runner()
-    assert _run(tmp_path, day, runner) == 0
+    assert _run(tmp_path, day, runner) == 1
     assert runner.names == []
     assert not list((tmp_path / "jobs").glob("routine-*.json"))
+
+
+def test_from_day_sixteen_a_closed_run_is_left_alone(tmp_path: Path) -> None:
+    (tmp_path / "jobs").mkdir()
+    (tmp_path / "jobs" / "closed.json").write_text('{"closed_on": "2026-11-24"}', encoding="utf-8")
+    runner = Runner()
+    assert _run(tmp_path, 16, runner) == 0
+    assert runner.names == []
 
 
 def test_day_sixteen_after_a_real_day_fifteen_scores_nothing(tmp_path: Path) -> None:
