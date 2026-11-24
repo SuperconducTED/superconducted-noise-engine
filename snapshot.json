@@ -1,9 +1,9 @@
 {
-  "generated": "2026-11-23 05:45 UTC",
+  "generated": "2026-11-24 05:44 UTC",
   "main": {
-    "sha": "4f26881c",
-    "date": "2026-11-20",
-    "msg": "Merge pull request #160 from SuperconducTED/mert/nc-021-at-pr-155-merge",
+    "sha": "1869d858",
+    "date": "2026-11-23",
+    "msg": "Merge pull request #162 from SuperconducTED/mert/issue-148-freeze-training-results",
     "adr": {
       "ADR-001": "Accepted",
       "ADR-002": "Accepted",
@@ -81,7 +81,7 @@
         "state": "open",
         "due": "2027-02-27",
         "open": 18,
-        "closed": 16,
+        "closed": 17,
         "url": "https://github.com/SuperconducTED/superconducted-noise-engine/milestone/2"
       }
     },
@@ -140,12 +140,12 @@
           "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "feat(scripts): #125 step 1d, the submission script: build, score, report, the T1 check and the morning routine",
-          "updatedAt": "2026-11-20T21:24:11Z",
+          "updatedAt": "2026-11-23T21:34:59Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/142",
-          "headRefOid": "1ec698f830f3d50cea5129620419673242c40108",
-          "additions": 17981,
+          "headRefOid": "883c061bed48015431f386604d5320580c6834c9",
+          "additions": 19943,
           "deletions": 41,
-          "file_count": 99,
+          "file_count": 100,
           "latest_reviews": [
             {
               "who": "BurakOztekin",
@@ -159,35 +159,35 @@
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-20T11:11"
+              "started": "2026-11-23T21:33"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-20T11:11"
+              "started": "2026-11-23T21:33"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-20T11:11"
+              "started": "2026-11-23T21:33"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-20T11:11"
+              "started": "2026-11-23T21:33"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-20T11:11"
+              "started": "2026-11-23T21:33"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-11-20T11:12"
+              "started": "2026-11-23T21:33"
             }
           ],
-          "checks_newest": "2026-11-20T11:12",
+          "checks_newest": "2026-11-23T21:33",
           "checks_failing": [],
           "checks_stale_vs_main": false
         }
@@ -585,47 +585,47 @@
           "reviewDecision": "REVIEW_REQUIRED",
           "state": "OPEN",
           "title": "feat(training): load training TSVs for ANFIS (Issue #60)",
-          "updatedAt": "2026-11-20T22:21:04Z",
+          "updatedAt": "2026-11-23T13:54:47Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/163",
-          "headRefOid": "9eb5d08424458fa2673f17aa698a2cd3346aa5df",
-          "additions": 175,
+          "headRefOid": "d2f00ba9e25d3a1639dad27476d7371e30ced501",
+          "additions": 619,
           "deletions": 0,
-          "file_count": 3,
+          "file_count": 5,
           "latest_reviews": [],
           "looked_since": [],
           "checks": [
             {
               "name": "test (3.11)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-20T22:10"
+              "started": "2026-11-23T13:54"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-20T22:10"
+              "started": "2026-11-23T13:54"
             },
             {
               "name": "Analyze (actions)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-20T22:10"
+              "started": "2026-11-23T13:54"
             },
             {
               "name": "test (3.12)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-20T22:10"
+              "started": "2026-11-23T13:54"
             },
             {
               "name": "Analyze (python)",
               "conclusion": "SUCCESS",
-              "started": "2026-11-20T22:10"
+              "started": "2026-11-23T13:54"
             },
             {
               "name": "CodeQL",
               "conclusion": "SUCCESS",
-              "started": "2026-11-20T22:11"
+              "started": "2026-11-23T13:55"
             }
           ],
-          "checks_newest": "2026-11-20T22:11",
+          "checks_newest": "2026-11-23T13:55",
           "checks_failing": [],
           "checks_stale_vs_main": false
         }
@@ -1397,7 +1397,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/108"
         },
         "former": false,
-        "days": 51,
+        "days": 52,
         "last_here": "2026-11-14",
         "kind": "checkbox",
         "text": "links the verdict from PR #55's thread so the PR record is complete.",
@@ -1417,8 +1417,8 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/163"
         },
         "former": false,
-        "days": 3,
-        "last_here": "",
+        "days": 4,
+        "last_here": "2026-11-23",
         "kind": "review",
         "text": "Review PR #163",
         "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/163",
@@ -1437,7 +1437,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/63"
         },
         "former": false,
-        "days": 81,
+        "days": 82,
         "last_here": "",
         "kind": "checkbox",
         "text": "confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit`",
@@ -1445,6 +1445,26 @@
         "by": "mertefesensoy",
         "since": "2026-09-03",
         "posted": "2026-09-03",
+        "lower_bound": false,
+        "others": []
+      },
+      {
+        "who": "BurakOztekin",
+        "thread": {
+          "kind": "PR",
+          "number": 164,
+          "title": "docs: NC-021 = 1439 at PR #162's merge (Rule 6)",
+          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/164"
+        },
+        "former": false,
+        "days": 1,
+        "last_here": "",
+        "kind": "review",
+        "text": "Review PR #164",
+        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/164",
+        "by": "mertefesensoy",
+        "since": "2026-11-23",
+        "posted": "2026-11-23",
         "lower_bound": false,
         "others": []
       },
@@ -1457,7 +1477,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/108"
         },
         "former": false,
-        "days": 51,
+        "days": 52,
         "last_here": "",
         "kind": "checkbox",
         "text": "posts a verdict on this issue: approve, or the defects he finds.",
@@ -1477,7 +1497,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/143"
         },
         "former": false,
-        "days": 16,
+        "days": 17,
         "last_here": "2026-11-20",
         "kind": "review",
         "text": "Review PR #143",
@@ -1497,7 +1517,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/152"
         },
         "former": false,
-        "days": 9,
+        "days": 10,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #152",
@@ -1517,7 +1537,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/158"
         },
         "former": false,
-        "days": 9,
+        "days": 10,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #158",
@@ -1537,7 +1557,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/156"
         },
         "former": false,
-        "days": 3,
+        "days": 4,
         "last_here": "2026-11-16",
         "kind": "re-review",
         "text": "Re-review PR #156: your CHANGES_REQUESTED from 2026-11-16 still stands",
@@ -1557,7 +1577,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/163"
         },
         "former": false,
-        "days": 3,
+        "days": 4,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #163",

@@ -1,10 +1,10 @@
-run-token: 2026-11-23T05:45:04Z-88
-outcome: ok: chore: phase-4 dashboard: state moved (2026-11-23)
+run-token: 2026-11-24T05:44:17Z-1354
+outcome: ok: chore: phase-4 dashboard: state moved (2026-11-24)
 
-**Phase 4: Design-time predictor** · day 23 since 2026-11-01 · milestone 2 due 2027-02-27 (96 days), 18 open and 16 closed.
+**Phase 4: Design-time predictor** · day 24 since 2026-11-01 · milestone 2 due 2027-02-27 (95 days), 18 open and 17 closed.
 **0/5 gates met** (0/7 conditions). Next: L1 (lane 1), L3 (lane 2), L5 (lane 3).
 
-**Since 2026-11-22:** nothing moved.
+**Since 2026-11-23:** milestone 2: 18 open and 17 closed (was 18 and 16); Burak Öztekin owes 2 answers (was 1); main moved to 1869d858.
 
 **Needs attention**
 - The plan document changed at 410ec927 (2026-11-09) on main, after the 951258da plan.json was quoted from. Re-read it and update plan.json.
@@ -17,7 +17,7 @@ outcome: ok: chore: phase-4 dashboard: state moved (2026-11-23)
 - Baha Jarad: Unstick PR #150 for #122: Public archive as a second training-set source (ADR-029)
 
 **Waiting on an answer**
-- Mert Efe Şensoy: 2, oldest: links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (51 days); has posted there since, on 2026-11-14
-- Burak Öztekin: 1, oldest: confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (81 days); no post there since
+- Mert Efe Şensoy: 2, oldest: links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (52 days); has posted there since, on 2026-11-14
+- Burak Öztekin: 2, oldest: confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (82 days); no post there since
 - Bengisu Cıvdı: nothing owed
-- Baha Jarad: 6, oldest: posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (51 days); no post there since
+- Baha Jarad: 6, oldest: posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (52 days); no post there since
