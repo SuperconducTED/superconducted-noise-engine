@@ -1,0 +1,19 @@
+mutant	prediction	outcome	matches	pytest
+M01 a header with no rows is accepted	killed	killed	True	1 failed, 21 passed, 16 deselected in 4.57s
+M02 the weight column is always weight_uniform	killed	killed	True	1 failed, 21 passed, 16 deselected in 3.35s
+M03 a repeated header column is accepted	killed	killed	True	1 failed, 21 passed, 16 deselected in 3.00s
+M04 targets read as (lambda, gamma)	killed	killed	True	2 failed, 20 passed, 16 deselected in 3.31s
+M05 features read as (T2, T1, readout)	killed	killed	True	2 failed, 20 passed, 16 deselected in 3.19s
+M06 the ref length is not checked	killed	killed	True	2 failed, 20 passed, 16 deselected in 3.25s
+M07 the ref alphabet is not checked	killed	killed	True	2 failed, 20 passed, 16 deselected in 2.52s
+M08 an unknown weighting is not refused by name	killed	killed	True	1 failed, 21 passed, 16 deselected in 3.11s
+M09 provenance read from the stem column	killed	killed	True	2 failed, 20 passed, 16 deselected in 3.27s
+M10 a 64-character ref is refused	killed	killed	True	1 failed, 21 passed, 16 deselected in 1.97s
+M11 a naive timestamp is stamped UTC instead of refused	killed	killed	True	2 failed, 20 passed, 16 deselected in 2.24s
+M12 a surplus cell is accepted	killed	killed	True	1 failed, 21 passed, 16 deselected in 1.90s
+M13 a missing cell is accepted	killed	killed	True	1 failed, 21 passed, 16 deselected in 1.84s
+M14 tied timestamps are accepted	killed	killed	True	3 failed, 19 passed, 16 deselected in 2.16s
+M15 the row order is not checked	killed	killed	True	4 failed, 18 passed, 16 deselected in 2.57s
+M16 the file name is not checked	killed	killed	True	1 failed, 21 passed, 16 deselected in 1.81s
+M17 the file-name check is inverted	killed	killed	True	5 failed, 17 passed, 16 deselected in 1.87s
+17 mutants: 17 killed, 0 survived, 0 harness errors, 0 against the prediction

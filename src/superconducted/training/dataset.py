@@ -6,8 +6,10 @@ are retained; selection uses (last_update_date, full path), never iteration orde
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import json
+import re
 import subprocess
 from collections import Counter
 from collections.abc import Iterable, Iterator
@@ -40,6 +42,7 @@ __all__ = [
     "dedup_by_qubit_block",
     "hour_of_day_weights",
     "iter_archive",
+    "load_training_tsv",
     "qubit_block_digest",
     "resolve_archive_ref",
 ]
@@ -55,6 +58,8 @@ SPREAD_NAMES: tuple[str, ...] = tuple(
 TARGET_SPREAD_NAMES: tuple[str, ...] = tuple(
     f"gamma_{stat}" for stat in ("std", "p10", "p50", "p90")
 )
+# The name scripts/build_training_set.py gives its TSV: run date, then archive_ref[:8].
+_BUILDER_TSV_NAME = re.compile(r"\d{4}-\d{2}-\d{2}-([0-9a-f]{8})\.tsv")
 
 
 class ArchiveRefError(ValueError):
@@ -67,6 +72,82 @@ class NoUsableRowsError(ValueError):
 
 class ArchiveTimestampError(ValueError):
     """Distinct device states share a row timestamp; the archive is ambiguous."""
+
+
+def load_training_tsv(
+    path: Path,
+    *,
+    archive_ref: str,
+    weighting: Literal["uniform", "hour_of_day"] = "uniform",
+) -> TrainingSet:
+    """Load builder TSV rows in archive units, with the caller's full archive commit SHA.
+
+    The TSV does not embed its archive commit; callers must obtain it from the
+    accompanying evidence record. A file named as the builder names it
+    (``YYYY-MM-DD-<first eight of the ref>.tsv``) must agree with ``archive_ref``;
+    beyond those eight characters, and for any other file name, this function
+    cannot verify the association.
+
+    The rows must be what the builder writes: one cell per header column, in
+    strictly increasing ``last_update_date`` order. The builder sorts by timestamp
+    and raises ``ArchiveTimestampError`` on a tie, so a tied, repeated or misordered
+    row means the file was edited or concatenated, and it is refused rather than
+    loaded as two device states.
+    """
+    if len(archive_ref) not in (40, 64) or any(
+        character not in "0123456789abcdef" for character in archive_ref
+    ):
+        raise ValueError("archive_ref must be a full lowercase commit SHA")
+    named = _BUILDER_TSV_NAME.fullmatch(path.name)
+    if named is not None and not archive_ref.startswith(named.group(1)):
+        raise ValueError(
+            f"archive_ref does not start with {named.group(1)}, the short SHA in the TSV file name"
+        )
+    if weighting not in ("uniform", "hour_of_day"):
+        raise ValueError("Unknown weighting")
+    feature_names = ("mean_T1", "mean_T2", "mean_readout_error")
+    target_names = ("gamma", "lambda")
+    weight_column = f"weight_{weighting}"
+    required = (*feature_names, *target_names, "last_update_date", "qubit_digest", weight_column)
+    with path.open(encoding="utf-8", newline="") as stream:
+        reader = csv.DictReader(stream, delimiter="\t")
+        if reader.fieldnames is None or len(reader.fieldnames) != len(set(reader.fieldnames)):
+            raise ValueError("TSV must have a unique header")
+        missing = set(required) - set(reader.fieldnames)
+        if missing:
+            raise ValueError(f"TSV missing required columns: {', '.join(sorted(missing))}")
+        features, targets, timestamps, provenance, weights = [], [], [], [], []
+        for row in reader:
+            # DictReader files surplus cells under the key None and fills missing ones with None.
+            if None in row or None in row.values():
+                raise ValueError(
+                    f"Invalid TSV row at line {reader.line_num}: "
+                    "expected one cell per header column"
+                )
+            try:
+                features.append([float(row[name]) for name in feature_names])
+                targets.append([float(row[name]) for name in target_names])
+                timestamps.append(datetime.fromisoformat(row["last_update_date"]))
+                provenance.append(row["qubit_digest"])
+                weights.append(float(row[weight_column]))
+            except (TypeError, ValueError) as exc:
+                raise ValueError(f"Invalid TSV row at line {reader.line_num}") from exc
+    if not features:
+        raise ValueError("TSV has no training rows")
+    data = TrainingSet(
+        features=np.asarray(features, dtype=np.float64),
+        targets=np.asarray(targets, dtype=np.float64),
+        timestamps=tuple(timestamps),
+        provenance=tuple(provenance),
+        feature_names=feature_names,
+        target_names=target_names,
+        archive_ref=archive_ref,
+        weights=np.asarray(weights, dtype=np.float64),
+    )
+    # Compared after TrainingSet has refused naive timestamps, so every pair is comparable.
+    if any(later <= earlier for earlier, later in pairwise(data.timestamps)):
+        raise ValueError("TSV rows must be in strictly increasing last_update_date order")
+    return data
 
 
 def _git(repo: Path, *args: str) -> bytes:
