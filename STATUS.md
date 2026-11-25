@@ -1,6 +1,6 @@
 # Phase 4: Design-time predictor
 
-_Generated 2026-11-24 05:44 UTC · main at `1869d858` (2026-11-23) · day 24 since 2026-11-01 · milestone 2 due 2027-02-27 (95 days), 18 open and 17 closed_
+_Generated 2026-11-25 06:56 UTC · main at `1869d858` (2026-11-23) · day 25 since 2026-11-01 · milestone 2 due 2027-02-27 (94 days), 18 open and 17 closed_
 
 _Read against the plan of 2026-10-23 at `951258da` on `mert/predictability`, on main. Gates are ordered, not dated (plan §6)._
 
@@ -76,7 +76,7 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 1. Finish #109: Phase-3 close record
    - The phase-3 close record is its deliverable, with the ADR-025 amendments answered or explicitly carried (plan §2 lane 3).
 1. Unstick PR #156 for #104: Decide the sweep step
-   - CHANGES_REQUESTED standing from @BahaJarad (2026-11-16). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+   - CHANGES_REQUESTED standing from @BahaJarad (2026-11-24). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 1. Author #64's PR-A1 once Bengisu's D1 to D5 are answered (#64)
    - Mert authors PR-A, Bengisu owns and approves it; PR-A1 needs no harness (plan §2 lane 2 item 1). Lane 2 resumes at gate L1 (job 1's report), or earlier if your lane 1 piece is waiting on someone (plan §5.1).
 
@@ -107,7 +107,7 @@ _The lead's closing week, run beside lane 1 (plan §5.1)._
 1. Unstick PR #150 for #122: Public archive as a second training-set source (ADR-029)
    - Conflicts with main: needs a rebase before it can merge, and ci.yml will not re-run until it is clean.
 1. Re-review PR #156 (#104: Decide the sweep step)
-   - Your CHANGES_REQUESTED from 2026-11-16 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
+   - Your CHANGES_REQUESTED from 2026-11-24 is the standing block. main's ruleset does not dismiss it on push, so only you can clear it.
 1. Start #108: Owner read of PR #55's poller change
    - The read, then close (plan §2 lane 3).
 1. Start #62: ADR-019 ablation table, both modes
@@ -120,22 +120,20 @@ _Review requests not yet answered with a review, and unticked checkboxes that st
 
 **Mert Efe Şensoy** (@mertefesensoy), 2 owed
 
-- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (52 days); has posted there since, on 2026-11-14
-- Review PR #163: requested by @BurakOztekin, since 2026-11-20 (4 days); has posted there since, on 2026-11-23
+- links the verdict from PR #55's thread so the PR record is complete. (issue #108): own checklist, since 2026-10-03 (53 days); has posted there since, on 2026-11-14
+- Review PR #163: requested by @BurakOztekin, since 2026-11-20 (5 days); has posted there since, on 2026-11-23
 
-**Burak Öztekin** (@BurakOztekin), 2 owed
+**Burak Öztekin** (@BurakOztekin), 1 owed
 
-- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (82 days); no post there since
-- Review PR #164: requested by @mertefesensoy, since 2026-11-23 (1 day); no post there since
+- confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit` (issue #63): asked by @mertefesensoy, since 2026-09-03 (83 days); no post there since
 
-**Baha Jarad** (@BahaJarad), 6 owed
+**Baha Jarad** (@BahaJarad), 5 owed
 
-- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (52 days); no post there since
-- Review PR #143: requested by @bengisucvd, since 2026-11-07 (17 days); has posted there since, on 2026-11-20
-- Review PR #152: requested by @mertefesensoy, since 2026-11-14 (10 days); no post there since
-- Review PR #158: requested by @mertefesensoy, since 2026-11-14 (10 days); no post there since
-- Re-review PR #156: your CHANGES_REQUESTED from 2026-11-16 still stands: requested by @mertefesensoy, since 2026-11-20 (4 days); no post there since
-- Review PR #163: requested by @BurakOztekin, since 2026-11-20 (4 days); no post there since
+- posts a verdict on this issue: approve, or the defects he finds. (issue #108): asked by @mertefesensoy, since 2026-10-03 (53 days); no post there since
+- Review PR #143: requested by @bengisucvd, since 2026-11-07 (18 days); has posted there since, on 2026-11-20
+- Review PR #152: requested by @mertefesensoy, since 2026-11-14 (11 days); no post there since
+- Review PR #158: requested by @mertefesensoy, since 2026-11-14 (11 days); no post there since
+- Review PR #163: requested by @BurakOztekin, since 2026-11-20 (5 days); no post there since
 
 ## Not blocked by anything upstream, so what is holding them?
 
@@ -159,7 +157,7 @@ _Review requests not yet answered with a review, and unticked checkboxes that st
 
 **#104: Decide the sweep step** (@mertefesensoy)
 
-- [critical] CHANGES_REQUESTED standing from @BahaJarad (2026-11-16). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
+- [critical] CHANGES_REQUESTED standing from @BahaJarad (2026-11-24). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix.
 
 ## Blocked upstream
 
@@ -177,6 +175,7 @@ Nothing is blocked upstream.
 
 | Date | Gates | Conditions | Ready | In review | Blocked | What moved |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 2026-11-25 | 0/5 | 0/7 | 4 | 6 | 0 | Baha Jarad owes 5 answers (was 6); Burak Öztekin owes 1 answer (was 2) |
 | 2026-11-24 | 0/5 | 0/7 | 4 | 6 | 0 | milestone 2: 18 open and 17 closed (was 18 and 16); Burak Öztekin owes 2 answers (was 1); main moved to 1869d858 |
 | 2026-11-23 | 0/5 | 0/7 | 4 | 6 | 0 | nothing moved |
 | 2026-11-22 | 0/5 | 0/7 | 4 | 6 | 0 | nothing moved |

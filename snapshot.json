@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-24 05:44 UTC",
+  "generated": "2026-11-25 06:56 UTC",
   "main": {
     "sha": "1869d858",
     "date": "2026-11-23",
@@ -140,7 +140,7 @@
           "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "feat(scripts): #125 step 1d, the submission script: build, score, report, the T1 check and the morning routine",
-          "updatedAt": "2026-11-23T21:34:59Z",
+          "updatedAt": "2026-11-24T16:56:09Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/142",
           "headRefOid": "883c061bed48015431f386604d5320580c6834c9",
           "additions": 19943,
@@ -1060,7 +1060,7 @@
           "reviewDecision": "CHANGES_REQUESTED",
           "state": "OPEN",
           "title": "ci(calibration-poll): #104 the daily sweep at a 0.5 h step, with a pre-registered test (option B)",
-          "updatedAt": "2026-11-20T18:31:43Z",
+          "updatedAt": "2026-11-24T16:24:09Z",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/156",
           "headRefOid": "72da61a636a9e1a83de362fbb0206addf173ebce",
           "additions": 2056,
@@ -1070,8 +1070,8 @@
             {
               "who": "BahaJarad",
               "state": "CHANGES_REQUESTED",
-              "at": "2026-11-16",
-              "last_activity": "2026-11-16"
+              "at": "2026-11-24",
+              "last_activity": "2026-11-24"
             }
           ],
           "looked_since": [],
@@ -1119,7 +1119,7 @@
       "blockers": [
         {
           "severity": "critical",
-          "text": "CHANGES_REQUESTED standing from @BahaJarad (2026-11-16). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
+          "text": "CHANGES_REQUESTED standing from @BahaJarad (2026-11-24). Stale reviews are not dismissed on push, so it needs an explicit re-review, not just a fix."
         }
       ],
       "declared_unblocks": [],
@@ -1397,7 +1397,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/108"
         },
         "former": false,
-        "days": 52,
+        "days": 53,
         "last_here": "2026-11-14",
         "kind": "checkbox",
         "text": "links the verdict from PR #55's thread so the PR record is complete.",
@@ -1417,7 +1417,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/163"
         },
         "former": false,
-        "days": 4,
+        "days": 5,
         "last_here": "2026-11-23",
         "kind": "review",
         "text": "Review PR #163",
@@ -1437,7 +1437,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/63"
         },
         "former": false,
-        "days": 82,
+        "days": 83,
         "last_here": "",
         "kind": "checkbox",
         "text": "confirms the `TrainingSet` is consumable by `HybridANFISTrainer.fit`",
@@ -1445,26 +1445,6 @@
         "by": "mertefesensoy",
         "since": "2026-09-03",
         "posted": "2026-09-03",
-        "lower_bound": false,
-        "others": []
-      },
-      {
-        "who": "BurakOztekin",
-        "thread": {
-          "kind": "PR",
-          "number": 164,
-          "title": "docs: NC-021 = 1439 at PR #162's merge (Rule 6)",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/164"
-        },
-        "former": false,
-        "days": 1,
-        "last_here": "",
-        "kind": "review",
-        "text": "Review PR #164",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/164",
-        "by": "mertefesensoy",
-        "since": "2026-11-23",
-        "posted": "2026-11-23",
         "lower_bound": false,
         "others": []
       },
@@ -1477,7 +1457,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/issues/108"
         },
         "former": false,
-        "days": 52,
+        "days": 53,
         "last_here": "",
         "kind": "checkbox",
         "text": "posts a verdict on this issue: approve, or the defects he finds.",
@@ -1497,7 +1477,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/143"
         },
         "former": false,
-        "days": 17,
+        "days": 18,
         "last_here": "2026-11-20",
         "kind": "review",
         "text": "Review PR #143",
@@ -1517,7 +1497,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/152"
         },
         "former": false,
-        "days": 10,
+        "days": 11,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #152",
@@ -1537,7 +1517,7 @@
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/158"
         },
         "former": false,
-        "days": 10,
+        "days": 11,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #158",
@@ -1552,32 +1532,12 @@
         "who": "BahaJarad",
         "thread": {
           "kind": "PR",
-          "number": 156,
-          "title": "ci(calibration-poll): #104 the daily sweep at a 0.5 h step, with a pre-registered test (option B)",
-          "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/156"
-        },
-        "former": false,
-        "days": 4,
-        "last_here": "2026-11-16",
-        "kind": "re-review",
-        "text": "Re-review PR #156: your CHANGES_REQUESTED from 2026-11-16 still stands",
-        "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/156",
-        "by": "mertefesensoy",
-        "since": "2026-11-20",
-        "posted": "2026-11-20",
-        "lower_bound": false,
-        "others": []
-      },
-      {
-        "who": "BahaJarad",
-        "thread": {
-          "kind": "PR",
           "number": 163,
           "title": "feat(training): load training TSVs for ANFIS (Issue #60)",
           "url": "https://github.com/SuperconducTED/superconducted-noise-engine/pull/163"
         },
         "former": false,
-        "days": 4,
+        "days": 5,
         "last_here": "",
         "kind": "review",
         "text": "Review PR #163",
