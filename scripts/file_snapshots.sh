@@ -76,6 +76,10 @@ git worktree add -B "$DATA_BRANCH" "$DATA_WORKTREE" "$DATA_REMOTE/$DATA_BRANCH"
 cd "$DATA_WORKTREE"
 
 added=0
+# Documents a sweep files behind the newest indexed row, and the newest indexed
+# date they were compared against (Issue #93): reported once, after the loop.
+behind=0
+behind_max=""
 
 # The ledger is keyed by POLL time (unlike snapshots, which are keyed by
 # payload time) because it records polling events, including the ones that
@@ -127,15 +131,23 @@ for f in "$STAGING_DIR/$BACKEND"/*.json; do
       # A historical sweep (IS_BACKFILL=1) files documents older than rows the
       # hourly poller already appended, so the index stops being chronological
       # and `is_new_state` marks a long-known state as this row's first
-      # sighting. The metrics engine derives first sightings from timestamps
-      # rather than trusting this column precisely so that costs nothing, but
-      # the column itself is now wrong and anything else reading the index has
-      # to know. Say so once per row instead of leaving it silent.
+      # sighting. That is expected, and nothing is owed: readers derive first
+      # sightings from `last_update_date`, as the metrics engine does, and
+      # ADR-025's 2026-11-15 amendment limits `--rebuild` to a digest-definition
+      # change or a malformed index (Issue #93). So a sweep counts these rows and
+      # says so once, after the loop; it used to print a ::warning:: per row
+      # telling the operator to dispatch a rebuild. A live poll fetches the
+      # current document, which cannot predate one already indexed unless
+      # something upstream is wrong, so there it stays a ::warning::.
       index_max=$(awk -F '\t' 'NR > 1 && $2 > max { max = $2 } END { print max }' "$state_index")
       if [ -n "$index_max" ] && [[ "$last_update_date" < "$index_max" ]]; then
-        echo "::warning::$stem predates the newest indexed document ($index_max); its" \
-             "is_new_state is decided against later rows. Dispatch Calibration Pipeline" \
-             "Health with backfill=true rebuild=true to restore the column's chronology."
+        if [ "$IS_BACKFILL" = "1" ]; then
+          behind=$((behind + 1))
+          if [[ "$index_max" > "$behind_max" ]]; then behind_max=$index_max; fi
+        else
+          echo "::warning::$stem predates the newest indexed document ($index_max) on a live" \
+               "poll, which should not happen; check what the endpoint served. Nothing to rebuild."
+        fi
       fi
       printf '%s\t%s\t%s\t%s\n' "$base" "$last_update_date" "$qubit_digest" "$is_new_state" >> "$state_index"
     fi
@@ -200,6 +212,18 @@ for f in "$STAGING_DIR/$BACKEND"/*.json; do
   printf '%s\t%s\t%s\t%s\n' "$POLL_TIME" "$BACKEND" "$stem" "$decision" >> "$ledger"
   echo "$stem: $decision"
 done
+
+if [ "$behind" -gt 0 ]; then
+  noun=documents
+  pronoun=their
+  if [ "$behind" -eq 1 ]; then
+    noun=document
+    pronoun=its
+  fi
+  echo "$behind $noun filed behind the newest indexed row ($behind_max); $pronoun" \
+       "is_new_state is decided against later rows. Readers derive first sightings from" \
+       "last_update_date (ADR-025, 2026-11-15 amendment), so nothing is owed."
+fi
 
 git add snapshots/ ledger/ collisions/ health/
 if git diff --cached --quiet; then

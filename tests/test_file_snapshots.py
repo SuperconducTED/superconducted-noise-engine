@@ -487,3 +487,64 @@ class TestFileSnapshots:
         assert result.returncode == 1
         assert "missing" in result.stdout + result.stderr
         assert not any(p.startswith("ledger/") for p in _tree(sandbox["origin"]))
+
+    def _file_after_a_newer_live_poll(
+        self, sandbox: dict[str, Path], payloads: dict[str, bytes], *, backfill: bool
+    ) -> subprocess.CompletedProcess[str]:
+        """File D from a live poll, then ``payloads`` from a second run, as a daily sweep does."""
+        live = _stage(sandbox["tmp"], "live", {STEM_D: _fresh(STEM_D)})
+        result = _run(sandbox, live, sandbox["tmp"] / "wt1")
+        assert result.returncode == 0, result.stdout + result.stderr
+        # A fresh runner starts without the worktree; emulate that.
+        _git(
+            "worktree", "remove", "--force", (sandbox["tmp"] / "wt1").as_posix(), cwd=sandbox["src"]
+        )
+        staging = _stage(sandbox["tmp"], "second", payloads)
+        result = _run(
+            sandbox, staging, sandbox["tmp"] / "wt2", "2026-09-02T04:41:00Z", backfill=backfill
+        )
+        assert result.returncode == 0, result.stdout + result.stderr
+        return result
+
+    def test_a_sweep_behind_the_index_prints_one_line_and_owes_no_rebuild(
+        self, sandbox: dict[str, Path]
+    ) -> None:
+        """Issue #93: a sweep's older documents are expected, so no warning and no rebuild.
+
+        Every document the daily sweep recovers is one the hourly poll missed, so it
+        is older than the newest indexed row. The script used to print a
+        ``::warning::`` per document telling the operator to dispatch
+        ``backfill=true rebuild=true``; ADR-025's 2026-11-15 amendment limits
+        ``--rebuild`` to a digest-definition change or a malformed index.
+        """
+        older = "20260629T065221000000Z"
+        result = self._file_after_a_newer_live_poll(
+            sandbox, {STEM_C: _historical(STEM_C), older: _historical(older)}, backfill=True
+        )
+        lines = result.stdout.splitlines()
+        assert not [line for line in lines if line.startswith("::warning::")]
+        assert "rebuild" not in result.stdout
+        summary = [line for line in lines if "filed behind the newest indexed row" in line]
+        assert summary == [
+            "2 documents filed behind the newest indexed row (2026-07-01T06:52:21.000000Z); their"
+            " is_new_state is decided against later rows. Readers derive first sightings from"
+            " last_update_date (ADR-025, 2026-11-15 amendment), so nothing is owed."
+        ]
+        # Only the message changes: what is filed and indexed is as before.
+        index = _state_index(sandbox["origin"])
+        assert [row[0] for row in index] == [f"{STEM_D}.json", f"{older}.json", f"{STEM_C}.json"]
+        assert [row[3] for row in index] == ["1", "0", "0"]
+
+    def test_a_live_poll_behind_the_index_still_warns_without_a_rebuild(
+        self, sandbox: dict[str, Path]
+    ) -> None:
+        """Issue #93: a live poll filing an older document is an anomaly, so it still warns."""
+        result = self._file_after_a_newer_live_poll(
+            sandbox, {STEM_C: _fresh(STEM_C)}, backfill=False
+        )
+        warnings = [line for line in result.stdout.splitlines() if line.startswith("::warning::")]
+        assert len(warnings) == 1
+        assert STEM_C in warnings[0]
+        assert "live poll" in warnings[0]
+        assert "rebuild=true" not in warnings[0]
+        assert "filed behind the newest indexed row" not in result.stdout
