@@ -18,7 +18,6 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 import pytest
-
 from scripts.fuzzy_band_members import (
     TARGET_NAMES,
     TargetBand,
@@ -28,6 +27,7 @@ from scripts.fuzzy_band_members import (
     snapshot_from_document,
     target_band,
 )
+
 from superconducted.calibration.features import (
     ArchiveUnitFeatureExtractor,
     BasicCalibrationVectorizer,
@@ -40,8 +40,7 @@ from superconducted.fuzzy.tsk import TSKRule, TSKRuleBase
 from superconducted.integration.aer_factory import FuzzyNoiseModelEnsemble
 from superconducted.integration.perturbation import InputVectorPerturbation
 from superconducted.interfaces import Defuzzifier
-from superconducted.training import HybridANFISTrainer, TrainingSet
-from superconducted.training import anfis
+from superconducted.training import HybridANFISTrainer, TrainingSet, anfis
 from superconducted.types import CalibrationSnapshot
 
 FIXTURE = (
@@ -74,9 +73,7 @@ def _archive_x(snapshot: CalibrationSnapshot) -> npt.NDArray[np.float64]:
     return np.asarray(ArchiveUnitFeatureExtractor().extract(snapshot), dtype=np.float64)
 
 
-def _fitted(
-    snapshot: CalibrationSnapshot, *, interval: bool
-) -> tuple[TSKRuleBase, Defuzzifier]:
+def _fitted(snapshot: CalibrationSnapshot, *, interval: bool) -> tuple[TSKRuleBase, Defuzzifier]:
     """A rule base fitted by ``HybridANFISTrainer`` around the fixture's own vector.
 
     Two memberships per feature at 0.8x and 1.2x the fixture's value (archive units, the
@@ -245,7 +242,9 @@ def test_a_vanishing_jitter_reproduces_the_trainers_point(
     x = _archive_x(snapshot)
     point = ProbabilityClip().squash(anfis._predict(rule_base, x[None, :])[0])
     si_point = ProbabilityClip().squash(
-        anfis._predict(rule_base, np.asarray(BasicCalibrationVectorizer().extract(snapshot))[None, :])[0]
+        anfis._predict(
+            rule_base, np.asarray(BasicCalibrationVectorizer().extract(snapshot))[None, :]
+        )[0]
     )
 
     assert not np.allclose(point, si_point, rtol=1e-3), "SI and archive units must be told apart"
@@ -277,11 +276,19 @@ def test_a_centre_in_other_units_is_refused_by_the_engine(
 def test_a_backfilled_document_builds_the_same_members(
     fitted_t1: tuple[TSKRuleBase, Defuzzifier],
 ) -> None:
+    """The trimmed fixture has no ``configuration`` section at all, so the live one is a stand-in.
+
+    The 2026-11-25 probe built both kinds from real ``ibm_fez`` archive documents (live
+    ``20260801T001902``, backfilled ``20260806T000534``); this pins that the section cannot move
+    a member.
+    """
     rule_base, defuzzifier = fitted_t1
     live = _document()
-    assert live.get("configuration") is not None, "the fixture must be a live document"
+    assert "configuration" not in live, "the fixture changed; revisit this stand-in"
+    live["configuration"] = {"backend_name": "ibm_fez", "n_qubits": 156}
     backfilled = copy.deepcopy(live)
     backfilled["configuration"] = None
+    assert snapshot_from_document(live, source="live").configuration is not None
 
     def members(document: dict[str, Any]) -> npt.NDArray[np.float64]:
         return member_targets(
@@ -298,12 +305,16 @@ def test_a_backfilled_document_builds_the_same_members(
     assert np.array_equal(members(live), members(backfilled))
 
 
-def test_snapshot_from_document_keeps_the_raw_sections(snapshot: CalibrationSnapshot) -> None:
+def test_snapshot_from_document_keeps_the_raw_sections() -> None:
     document = _document()
+    document["configuration"] = {"backend_name": "ibm_fez", "n_qubits": 156}
+    document["target"] = {"num_qubits": 156}
+    snapshot = snapshot_from_document(document, source="sections")
     assert snapshot.properties == document["properties"]
     assert snapshot.configuration == document["configuration"]
-    assert snapshot.target == document.get("target")
+    assert snapshot.target == document["target"]
     assert snapshot.backend == document["backend"]
+    assert snapshot.timestamp == datetime(2026, 5, 13, 12, 13, 22, tzinfo=UTC)
 
 
 def test_snapshot_from_document_applies_the_parsers_validation() -> None:
@@ -346,12 +357,11 @@ def test_the_table_separates_what_the_band_could_confuse() -> None:
     """A control: without these differences the edge test above could not fail."""
     lin_lo, lin_hi = np.quantile(TABLE, [0.10, 0.90], axis=0, method="linear")
     hi_lo, hi_hi = np.quantile(TABLE, [0.10, 0.90], axis=0, method="higher")
+    assert not np.array_equal(lin_hi, hi_hi)
     assert not np.array_equal(lin_lo, hi_lo)
     assert not np.array_equal(lin_lo, lin_hi)
     assert lin_lo[0] != lin_lo[1]
-    assert not np.array_equal(
-        np.quantile(TABLE, 0.10, axis=0), np.quantile(TABLE, 0.20, axis=0)
-    )
+    assert not np.array_equal(np.quantile(TABLE, 0.10, axis=0), np.quantile(TABLE, 0.20, axis=0))
 
 
 def test_band_counts_members_at_either_clip_bound() -> None:
@@ -377,6 +387,7 @@ def test_band_arrays_are_read_only_copies() -> None:
         (TABLE[:, :1], 0.10, "linear", r"\(n_members, 2\)"),
         (np.vstack([TABLE, [[np.nan, 0.5]]]), 0.10, "linear", "finite"),
         (np.vstack([TABLE, [[-0.01, 0.5]]]), 0.10, "linear", r"\[0, 1\]"),
+        (np.vstack([TABLE, [[-0.01, 0.5]]]), 0.10, "higher", "members must lie"),
         (np.vstack([TABLE, [[0.5, 1.01]]]), 0.10, "linear", r"\[0, 1\]"),
         (TABLE, -0.1, "linear", "alpha"),
         (TABLE, 0.5, "linear", "alpha"),
@@ -389,6 +400,7 @@ def test_band_arrays_are_read_only_copies() -> None:
         "one-column",
         "nan",
         "below-zero",
+        "below-zero-off-the-edge",
         "above-one",
         "alpha-negative",
         "alpha-half",
