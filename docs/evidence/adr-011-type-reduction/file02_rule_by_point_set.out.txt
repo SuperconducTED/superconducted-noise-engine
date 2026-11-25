@@ -1,0 +1,40 @@
+point set  output        n      BMM  Nie-Tan  winner
+lattice    gamma       216   0.0388   0.0292  Nie-Tan
+lattice    lambda      216   0.0346   0.0295  Nie-Tan
+uniform    gamma     16000   0.1202   0.0396  Nie-Tan
+uniform    lambda    16000   0.0820   0.0368  Nie-Tan
+survey     gamma      7800   0.0940   0.0340  Nie-Tan
+survey     lambda     7800   0.0498   0.0322  Nie-Tan
+all        gamma     24016   0.1107   0.0378  Nie-Tan
+all        lambda    24016   0.0720   0.0349  Nie-Tan
+
+What each pool holds: every grid; unit-spread's single output in both the gamma and
+the lambda pool (File 02's rule, which decides); anchored outputs in their own.
+Anchored rows only, no unit-spread (a description; File 02's rule above decides):
+point set  output        n      BMM  Nie-Tan  lower
+lattice    gamma       108   0.0670   0.0265  Nie-Tan
+lattice    lambda      108   0.0362   0.0268  Nie-Tan
+uniform    gamma      8000   0.1537   0.0460  Nie-Tan
+uniform    lambda     8000   0.0768   0.0415  Nie-Tan
+survey     gamma      3900   0.1036   0.0359  Nie-Tan
+survey     lambda     3900   0.0359   0.0325  Nie-Tan
+all        gamma     12008   0.1370   0.0422  Nie-Tan
+all        lambda    12008   0.0614   0.0371  Nie-Tan
+
+survey rows 975, distinct: 521
+grid   convention   output   NT closer  BMM closer   tie
+0.1    anchored     gamma          734         241     0
+0.1    anchored     lambda         518         457     0
+0.1    unit-spread  unit           739         236     0
+0.3    anchored     gamma          793         182     0
+0.3    anchored     lambda         596         379     0
+0.3    unit-spread  unit           880          95     0
+0.6    anchored     gamma          963          12     0
+0.6    anchored     lambda         752         223     0
+0.6    unit-spread  unit           961          14     0
+g59    anchored     gamma          691         284     0
+g59    anchored     lambda         231         744     0
+g59    unit-spread  unit           682         293     0
+
+G59 anchored lambda, survey: |y_BMM - y_NT| max 1.508e-05
+G59 anchored lambda, survey: band width median 6.104e-05
