@@ -1103,3 +1103,48 @@ this table; its rows 42 to 44 still describe the head, except the three cases of
 
 Limits, as before: the rehearsal has no unscorable job, so the late-job paths rest on tests with a scripted
 `score` step; nothing ran on the QPU or on a second machine; the desktop reproduction at the final head is owed.
+
+## 2026-11-25, before the code: a submit that dies before its job id is written (F6)
+
+Appended; nothing above is edited. Found in the rehearsal of the runbook pinned to `883c061b`, step 11, second
+pass (2026-11-24): day 1's `build` step exited `3221225477` (0xC0000005, an access violation) after 23 minutes.
+The folder held `submission.json` and no `job_id.txt`, and that `submission.json` has no `t_submit`, so the
+process died inside `device.submit` (in a rehearsal, the local Aer run). The cause of the crash is not known and
+it was seen once. What it showed is a gap in the record, which this section closes.
+
+### What was wrong
+
+| Where | At `883c061b` | Why it is wrong |
+| --- | --- | --- |
+| `run_build` | `submission.json` is written before `device.submit`, `job_id.txt` after it | Correct order (criterion of 2026-11-05), but a crash between the two leaves a folder that says "a submit was attempted" and no id. On the device a job tagged `issue-125-job-NN` may exist, run and be paid for. |
+| `_day_status` | such a folder reads `"empty"` | the same word as a day with no folder at all; the report hides that a submit was attempted |
+| `closed_unscored` | lists only days with `job_id.txt` | day 15 closes the run without naming the day, and the report says `complete: true` |
+| `hardware_t1_check.py run_submit` | `t1-sealed.json` before the submit, `t1-job_id.txt` after | the same gap for a `T1` check |
+
+### Design
+
+- `submit_unconfirmed(job_dir)`: `submission.json` exists and `job_id.txt` does not.
+  `check_submit_unconfirmed(job_dir)`: `t1-sealed.json` exists and `t1-job_id.txt` does not. Both read markers
+  only, never a score.
+- `_day_status` returns `"submit unconfirmed"` for such a day. Order: scored, failed, missed, submitted not
+  scored, submit unconfirmed, empty.
+- `closed_unscored` lists such a day under `days` and such a check under `t1_checks`, beside the ones that have
+  an id and no outcome. Its keys do not change, so `closed.json`, the report and the routine's record keep their
+  shape; the day list says which of the two a day is.
+- No retry and no device query: the morning that crashed already exits non-zero, and looking a job up by its tag
+  is the operator's step (the runbook says so). The scorers still score only days with an id.
+
+### Acceptance criteria 50 to 53
+
+| # | Criterion |
+| --- | --- |
+| 50 | A day folder with `submission.json` and no `job_id.txt` reads `"submit unconfirmed"` in the report; with `job_id.txt` too it reads `"submitted, not scored"`; with `missed.json` too it reads `"missed"`; an empty folder reads `"empty"`. |
+| 51 | `closed_unscored` lists that day under `days`, and a check with `t1-sealed.json` and no `t1-job_id.txt` under `t1_checks`; a scored day and a scored check whose folders also hold `submission.json` and `t1-sealed.json` are not listed. A day-15 morning writes them into `closed.json`. |
+| 52 | End to end: a `build` whose device raises inside `submit` leaves `submission.json` and no `job_id.txt`, and the report then reads `"submit unconfirmed"` for that day; a `T1` `submit` whose device raises leaves `t1-sealed.json` and no `t1-job_id.txt`, and `closed_unscored` lists the check. |
+| 53 | The tests for criteria 50 to 52 fail at `883c061b` where they test new behaviour; every new line is mutation-checked with predictions committed before the run; criteria 45 to 48 are re-measured at the new head (gates, full suite, rehearsal). |
+
+### What this does not do
+
+- It does not explain the crash. Whether it recurs is checked by re-running step 11 alone, on an otherwise idle
+  machine (on 2026-11-25 an Android emulator held most of the laptop's memory during a suite run that timed out).
+- A native crash ends the process, so no code in this script can run after it; the record is all that can carry it.
