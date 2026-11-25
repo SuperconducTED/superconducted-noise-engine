@@ -1,0 +1,11 @@
+baseline: 40 passed in 4.96s
+mutant	prediction	outcome	matches	failing tests
+S00 control: the module does not import	harness error (pytest exit 2)	harness error (pytest exit 4)	False	-
+U01 the report never says 'submit unconfirmed'	killed	killed	True	test_a_day_reads_what_its_folder_holds[no-id], test_a_submit_that_dies_leaves_a_day_the_report_calls_unconfirmed, test_the_closure_names_a_day_and_a_check_whose_ids_were_never_written
+U02 the closure leaves out an unconfirmed day	killed	killed	True	test_a_submit_that_dies_leaves_a_day_the_report_calls_unconfirmed, test_the_closure_names_a_day_and_a_check_whose_ids_were_never_written
+U03 the closure leaves out an unconfirmed check	killed	killed	True	test_a_check_whose_submit_dies_is_named_by_the_closure, test_the_closure_names_a_day_and_a_check_whose_ids_were_never_written
+U04 a day is unconfirmed whenever it has submission.json	killed	killed	True	test_scored_days_that_keep_their_submission_files_are_not_listed
+U05 a check is unconfirmed whenever it has t1-sealed.json	killed	killed	True	test_scored_days_that_keep_their_submission_files_are_not_listed
+U06 keyed on sealed.json instead of submission.json	killed	killed	True	test_a_day_reads_what_its_folder_holds[no-id], test_the_closure_names_a_day_and_a_check_whose_ids_were_never_written
+U07 unconfirmed tested before 'submitted, not scored'	survived	survived	True	-
+7 mutants and 1 control: 6 killed, 1 survived, 0 harness errors among the mutants; control harness error (pytest exit 4); 1 against the prediction
