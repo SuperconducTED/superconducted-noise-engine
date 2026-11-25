@@ -807,16 +807,37 @@ def check_awaits_score(job_dir: Path) -> bool:
     )
 
 
+def submit_unconfirmed(job_dir: Path) -> bool:
+    """A main job's submit began and its id was never written (F6, 2026-11-25).
+
+    ``run_build`` writes ``submission.json`` before ``device.submit`` and ``job_id.txt`` after it,
+    so a process that dies inside the submit leaves the first file and not the second. A job
+    tagged ``issue-125-job-NN`` may then exist on the device; only the operator can look it up.
+    """
+    return (job_dir / "submission.json").exists() and not (job_dir / "job_id.txt").exists()
+
+
+def check_submit_unconfirmed(job_dir: Path) -> bool:
+    """A ``T1`` check's submit began and its id was never written: ``t1-sealed.json`` alone."""
+    return (job_dir / "t1-sealed.json").exists() and not (job_dir / "t1-job_id.txt").exists()
+
+
 def closed_unscored(jobs_dir: Path, days: Iterable[date]) -> dict[str, list[str]]:
     """The days among ``days`` whose main job, and whose ``T1`` check, have no outcome.
+
+    A day is listed when its job has an id and no outcome, and also when its submit began and no
+    id was ever written (:func:`submit_unconfirmed`): either way the run closes without that
+    day's score. The report's day list says which of the two it is. The same holds for checks.
 
     Read from the jobs folder's own markers, which carry no score, so the routine may write the
     result beside the jobs and the report may repeat it inside the sealed folder.
     """
     folders = [jobs_dir / day.isoformat() for day in sorted(days)]
     return {
-        "days": [f.name for f in folders if awaits_score(f)],
-        "t1_checks": [f.name for f in folders if check_awaits_score(f)],
+        "days": [f.name for f in folders if awaits_score(f) or submit_unconfirmed(f)],
+        "t1_checks": [
+            f.name for f in folders if check_awaits_score(f) or check_submit_unconfirmed(f)
+        ],
     }
 
 
@@ -829,6 +850,8 @@ def _day_status(job_dir: Path) -> str:
         return "missed"
     if (job_dir / "job_id.txt").exists():
         return "submitted, not scored"
+    if submit_unconfirmed(job_dir):
+        return "submit unconfirmed"
     return "empty"
 
 
