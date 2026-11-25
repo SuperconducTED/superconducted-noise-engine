@@ -387,3 +387,56 @@ def test_unseal_refuses_to_copy_the_sealed_folder_into_itself(tmp_path: Path, la
     before = sorted(p.relative_to(tmp_path).as_posix() for p in tmp_path.rglob("*"))
     assert daily.unseal(sealed, jobs) == daily.EXIT_REFUSED
     assert sorted(p.relative_to(tmp_path).as_posix() for p in tmp_path.rglob("*")) == before
+
+
+# --- criteria 50 and 51 (F6, 2026-11-25): a submit that died before its job id was written ------
+
+
+@pytest.mark.parametrize(
+    ("names", "status"),
+    [
+        (("submission.json",), "submit unconfirmed"),
+        (("submission.json", "job_id.txt"), "submitted, not scored"),
+        (("submission.json", "missed.json"), "missed"),
+        ((), "empty"),
+    ],
+    ids=["no-id", "with-id", "missed", "empty-folder"],
+)
+def test_a_day_reads_what_its_folder_holds(
+    tmp_path: Path, names: tuple[str, ...], status: str
+) -> None:
+    """At `883c061b` the first case read "empty", the word for a day with no folder at all."""
+    _day(tmp_path, 1, *names)
+    (tmp_path / "sealed").mkdir()
+    report = _report(tmp_path, FIRST + timedelta(days=1))
+    assert report["days"][0] == {"date": FIRST.isoformat(), "status": status}
+
+
+def test_the_closure_names_a_day_and_a_check_whose_ids_were_never_written(tmp_path: Path) -> None:
+    """At `883c061b` day 15 closed this run with two empty lists."""
+    _run_of_fourteen(tmp_path, last_scored=True)
+    seventh = tmp_path / "jobs" / (FIRST + timedelta(days=6)).isoformat()
+    for name in ("job_id.txt", "operations.json"):
+        (seventh / name).unlink()
+    (seventh / "submission.json").write_text("{}", encoding="utf-8")
+    (seventh / "t1-sealed.json").write_text("{}", encoding="utf-8")
+    runner = Runner()
+    assert _run(tmp_path, 15, runner) == 0
+    assert runner.names == ["report"]  # nothing has an id to score
+    unscored = {"days": [seventh.name], "t1_checks": [seventh.name]}
+    assert _closed(tmp_path)["closed_unscored"] == unscored
+    report = _report(tmp_path, DAY_15)
+    assert report["closed_unscored"] == unscored
+    assert report["days"][6] == {"date": seventh.name, "status": "submit unconfirmed"}
+
+
+def test_scored_days_that_keep_their_submission_files_are_not_listed(tmp_path: Path) -> None:
+    """A guard for the predicate: `submission.json` stays in every folder after its id is written."""
+    _run_of_fourteen(tmp_path, last_scored=True)
+    folders = [p for p in (tmp_path / "jobs").iterdir() if p.is_dir()]
+    assert len(folders) == submit.N_JOBS
+    for folder in folders:
+        (folder / "submission.json").write_text("{}", encoding="utf-8")
+        if (folder / "t1-job_id.txt").exists():
+            (folder / "t1-sealed.json").write_text("{}", encoding="utf-8")
+    assert _report(tmp_path, DAY_15)["closed_unscored"] == {"days": [], "t1_checks": []}

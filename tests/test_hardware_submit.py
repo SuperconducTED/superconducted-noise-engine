@@ -447,6 +447,36 @@ def test_everything_is_written_before_submission_and_the_id_right_after(
     assert submission["options"]["execution"]["rep_delay"] == 500e-6
 
 
+def test_a_submit_that_dies_leaves_a_day_the_report_calls_unconfirmed(
+    tmp_path: Path,
+    controls_file: Path,
+    live_doc: dict[str, Any],
+    archive_docs: list[tuple[str, dict[str, Any]]],
+) -> None:
+    """Criterion 52 (F6). The rehearsal of 2026-11-24 died this way, in the local Aer run."""
+
+    class Dying(ScriptedDevice):
+        def submit(
+            self,
+            circuits: Sequence[QuantumCircuit],
+            shots: Sequence[int],
+            options: Mapping[str, Any],
+        ) -> str:
+            raise RuntimeError("the process died inside submit")
+
+    with pytest.raises(RuntimeError, match="died inside submit"):
+        _build(tmp_path, controls_file, Dying(live_doc), archive_docs)
+    job_dir = tmp_path / "jobs" / f"{T_S:%Y-%m-%d}"
+    assert (job_dir / "submission.json").exists()
+    assert not (job_dir / "job_id.txt").exists()
+    assert "t_submit" not in json.loads((job_dir / "submission.json").read_text(encoding="utf-8"))
+    assert hs._day_status(job_dir) == "submit unconfirmed"
+    assert hs.closed_unscored(tmp_path / "jobs", [T_S.date()]) == {
+        "days": [job_dir.name],
+        "t1_checks": [],
+    }
+
+
 def test_reading_comes_from_the_live_document_and_its_hash_is_recorded(
     tmp_path: Path,
     controls_file: Path,

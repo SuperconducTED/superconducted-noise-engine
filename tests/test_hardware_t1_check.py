@@ -313,6 +313,29 @@ def test_the_seal_is_on_disk_when_the_job_is_submitted(
     assert present == [True, True]
 
 
+def test_a_check_whose_submit_dies_is_named_by_the_closure(
+    tmp_path: Path, live_doc: dict[str, Any], stub_library: list[Mapping[int, Sequence[float]]]
+) -> None:
+    """Criterion 52 (F6): the check's own gap between `t1-sealed.json` and `t1-job_id.txt`."""
+    job_dir = _job_folder(tmp_path)
+
+    class Dying(StubDevice):
+        def submit(
+            self,
+            circuits: Sequence[QuantumCircuit],
+            shots: Sequence[int],
+            options: Mapping[str, Any],
+        ) -> str:
+            raise RuntimeError("the process died inside submit")
+
+    with pytest.raises(RuntimeError, match="died inside submit"):
+        _submit(job_dir, Dying(live_doc))
+    assert (job_dir / "t1-sealed.json").exists()
+    assert not (job_dir / "t1-job_id.txt").exists()
+    day = datetime.strptime(job_dir.name, "%Y-%m-%d").date()
+    assert hs.closed_unscored(job_dir.parent, [day])["t1_checks"] == [job_dir.name]
+
+
 # --- score --------------------------------------------------------------------------------------
 
 
