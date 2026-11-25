@@ -55,17 +55,21 @@ on:
 
 # Sweep parameters, kept here as configuration rather than buried in the step.
 #   Window  48 h  trailing, so a skipped sweep is absorbed by the next one. The
-#           overlap does NOT improve per-instant recall: shifting a 1 h grid by
+#           overlap does NOT improve per-instant recall: shifting the grid by
 #           24 h realigns it on the same instants.
-#   Step    1 h   48 IBM calls per sweep, inside the 73-call run already
-#           demonstrated in #50's probe. NC-031 measured 1 h recall at 87.9%
-#           (29 of 33), so a sweep is not a perfect substitute for polling. The
-#           finer 0.5 h grid stays available through workflow_dispatch for
-#           post-outage recovery, which is what the input description advises.
+#   Step    0.5 h 96 historical IBM calls plus one current fetch per sweep
+#           (#104, 2026-11-15; 1 h before). Over 2026-09-30..11-11 no document
+#           that lived 1 h or more was missed, and every miss lived under 1 h
+#           (NC-100). A step s always samples a document that lives s or
+#           longer; at 1 h, 44 of the 789 documents that lived 0.5 h or more
+#           were missed (NC-101), and #104's P1 tests that 0.5 h misses none.
+#           CAPTURE_STEP_HOURS in calibration-health.yml must stay strictly
+#           finer (tests/test_capture_record.py). A post-outage recovery still
+#           goes through workflow_dispatch, as the input description advises.
 env:
   SWEEP_CRON: '41 4 * * *'
   SWEEP_WINDOW_HOURS: '48'
-  SWEEP_STEP_HOURS: '1'
+  SWEEP_STEP_HOURS: '0.5'
   # Must equal calibration-health.yml's value, which carries the derivation;
   # NC-053 is the source of truth and a test pins the two files together. It
   # lives here as well because this workflow is the one that can still speak

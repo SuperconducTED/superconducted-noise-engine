@@ -1,0 +1,82 @@
+calibration-data d08263a97a7524f49f9fe2841584188aa408d443  health/capture.tsv
+  blob 7613927f29cdb873523239187b48e34656b03e93; sha256 53f4e6b09efc1dc2e4af864827cfdbdd4ddfdaf9fa792d931927cdb54256bfb9; 120184 bytes
+
+record
+  rows 1684; document rows 1684; documents 1684
+  documents listed on more than one row: 0
+  no_documents rows: 0
+  status: {'MISSED': 413, 'archived_not_served': 52, 'captured': 1219}
+  step_hours: {'0.25': 1684}
+  capture runs (distinct run_id): 38
+  recorded days 42, 2026-09-30 to 2026-11-11; missing: 2026-11-01
+  document rows whose stamp date differs from their day: 0
+
+selected documents stamped 2026-09-30 to 2026-11-11: 1684
+
+week       recorded days   held / exist   capture
+2026-W40   5 (2026-09-30..2026-10-04)    154 /  179   86.0%
+2026-W41   7 (2026-10-05..2026-10-11)    200 /  247   81.0%
+2026-W42   7 (2026-10-12..2026-10-18)    198 /  241   82.2%
+2026-W43   7 (2026-10-19..2026-10-25)    195 /  262   74.4%
+2026-W44   6 (2026-10-26..2026-10-31)    191 /  275   69.5%
+2026-W45   7 (2026-11-02..2026-11-08)    254 /  370   68.6%
+2026-W46   3 (2026-11-09..2026-11-11)     79 /  110   71.8%
+total      1271 / 1684   capture 75.5%; missed 413
+
+lifetimes known for 1682 of 1684 documents (2 unknown: successor on a missing day, or none)
+lifetime          held   missed
+under 0.25 h       190      166
+0.25 to 0.5 h      334      203
+0.5 to 1 h         495       44
+1 to 2 h           231        0
+2 to 6 h            17        0
+6 h or more          2        0
+missed lifetimes: median 0.286 h, longest 0.914 h
+lived 1.0 h or more: 250 documents, 0 missed
+lived 0.5 h or more: 789 documents, 44 missed
+lived 0.25 h or more: 1326 documents, 247 missed
+P1: missed among documents with a known lifetime of 0.5 h or more: 44 of 789
+  20261003T134352000000Z  lifetime 0.713 h
+  20261006T072729000000Z  lifetime 0.631 h
+  20261007T060859000000Z  lifetime 0.791 h
+  20261008T022816000000Z  lifetime 0.519 h
+  20261008T072211000000Z  lifetime 0.744 h
+  20261008T163731000000Z  lifetime 0.596 h
+  20261010T074828000000Z  lifetime 0.606 h
+  20261011T221841000000Z  lifetime 0.615 h
+  20261012T081847000000Z  lifetime 0.622 h
+  20261012T135648000000Z  lifetime 0.509 h
+  20261014T064303000000Z  lifetime 0.512 h
+  20261016T140723000000Z  lifetime 0.560 h
+  20261016T150247000000Z  lifetime 0.541 h
+  20261016T205956000000Z  lifetime 0.637 h
+  20261017T030544000000Z  lifetime 0.531 h
+  20261018T021618000000Z  lifetime 0.609 h
+  20261019T114620000000Z  lifetime 0.726 h
+  20261019T164737000000Z  lifetime 0.517 h
+  20261020T084228000000Z  lifetime 0.646 h
+  20261020T124057000000Z  lifetime 0.544 h
+  20261020T132801000000Z  lifetime 0.532 h
+  20261020T154739000000Z  lifetime 0.605 h
+  20261020T162847000000Z  lifetime 0.603 h
+  20261021T133030000000Z  lifetime 0.914 h
+  20261022T053101000000Z  lifetime 0.585 h
+  20261024T092926000000Z  lifetime 0.668 h
+  20261024T122225000000Z  lifetime 0.758 h
+  20261027T145251000000Z  lifetime 0.661 h
+  20261028T161829000000Z  lifetime 0.535 h
+  20261029T031934000000Z  lifetime 0.527 h
+  20261030T174531000000Z  lifetime 0.544 h
+  20261030T193944000000Z  lifetime 0.566 h
+  20261031T083516000000Z  lifetime 0.749 h
+  20261102T182009000000Z  lifetime 0.726 h
+  20261103T154806000000Z  lifetime 0.549 h
+  20261104T084125000000Z  lifetime 0.733 h
+  20261105T132709000000Z  lifetime 0.637 h
+  20261105T222410000000Z  lifetime 0.512 h
+  20261106T023036000000Z  lifetime 0.576 h
+  20261106T193143000000Z  lifetime 0.526 h
+  20261107T051135000000Z  lifetime 0.637 h
+  20261107T192314000000Z  lifetime 0.646 h
+  20261108T010514000000Z  lifetime 0.777 h
+  20261109T225345000000Z  lifetime 0.848 h
