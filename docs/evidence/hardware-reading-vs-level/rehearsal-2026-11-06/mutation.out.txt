@@ -1,0 +1,152 @@
+start 23:02:34
+caught   HEAD check                             FAILED tests/test_hardware_submit.py::test_guard_refuses_another_commit - Fai...
+caught   clean tree check                       FAILED tests/test_hardware_submit.py::test_guard_refuses_a_dirty_tree[tracked]
+caught   Frozen status check                    FAILED tests/test_hardware_submit.py::test_guard_refuses_the_real_drafts_status_line
+caught   status check reads the word only       FAILED tests/test_hardware_submit.py::test_guard_passes_only_on_the_frozen_commit
+caught   hash named check                       FAILED tests/test_hardware_submit.py::test_guard_refuses_a_pre_registration_without_the_ha
+caught   hash equals check                      FAILED tests/test_hardware_submit.py::test_guard_refuses_other_controls - Fai...
+caught   both arguments needed                  FAILED tests/test_hardware_submit.py::test_guard_needs_both_arguments[None-prereg0]
+caught   guard runs in main                     FAILED tests/test_hardware_submit.py::test_a_refused_guard_stops_main_before_the_network_o
+caught   second job refused                     FAILED tests/test_hardware_submit.py::test_a_second_job_for_one_day_is_refused
+caught   window close refused                   FAILED tests/test_hardware_submit.py::test_after_the_window_the_day_is_recorded_as_missed
+caught   window open refused                    FAILED tests/test_hardware_submit.py::test_before_the_window_nothing_happens
+caught   missed day recorded                    FAILED tests/test_hardware_submit.py::test_after_the_window_the_day_is_recorded_as_missed
+caught   window checked again at submission     FAILED tests/test_hardware_submit.py::test_a_build_that_ends_after_the_window_closed_is_mi
+caught   rehearsal keeps its execution time     FAILED tests/test_hardware_submit.py::test_a_rehearsal_job_keeps_its_own_execution_time
+caught   registers joined in the circuit's order FAILED tests/test_hardware_submit.py::test_counts_join_a_circuits_registers_with_the_lowes
+caught   no register refused                    FAILED tests/test_hardware_submit.py::test_a_circuit_with_no_register_is_refused
+caught   rep_delay range checked                FAILED tests/test_hardware_submit.py::test_rep_delay_outside_the_live_range_is_refused[all
+caught   rep_delay checked before capture       FAILED tests/test_hardware_submit.py::test_a_rep_delay_the_device_refuses_stops_before_the
+caught   decoupling off                         FAILED tests/test_hardware_submit.py::test_pinned_options_are_the_decided_ones_and_the_sam
+caught   gate twirling off                      FAILED tests/test_hardware_submit.py::test_pinned_options_are_the_decided_ones_and_the_sam
+caught   init_qubits on                         FAILED tests/test_hardware_submit.py::test_pinned_options_are_the_decided_ones_and_the_sam
+caught   rep_delay is 500 us                    FAILED tests/test_hardware_submit.py::test_pinned_options_are_the_decided_ones_and_the_sam
+caught   job 1 is Arm A only                    FAILED tests/test_hardware_submit.py::test_job_one_is_arm_a_only_and_later_jobs_send_both_
+caught   arm B shots                            FAILED tests/test_hardware_submit.py::test_job_one_is_arm_a_only_and_later_jobs_send_both_
+caught   live reading used                      FAILED tests/test_hardware_submit.py::test_reading_comes_from_the_live_document_and_its_ha
+caught   sealed before submit                   FAILED tests/test_hardware_submit.py::test_job_one_is_arm_a_only_and_later_jobs_send_both_
+caught   job id written                         FAILED tests/test_hardware_submit.py::test_everything_is_written_before_submission_and_the
+caught   sealed hash checked                    FAILED tests/test_hardware_submit.py::test_score_refuses_a_sealed_file_changed_after_submi
+caught   queued left alone                      FAILED tests/test_hardware_submit.py::test_a_queued_job_is_left_alone_until_the_next_submi
+caught   still queued cancelled                 FAILED tests/test_hardware_submit.py::test_a_job_still_queued_at_the_next_submission_is_ca
+caught   running not cancelled                  FAILED tests/test_hardware_submit.py::test_a_running_job_is_never_cancelled
+caught   failed day recorded                    FAILED tests/test_hardware_submit.py::test_a_failed_job_is_an_empty_day_with_no_re_run[ERR
+caught   shot count checked                     FAILED tests/test_hardware_submit.py::test_score_refuses_counts_of_the_wrong_size
+caught   archive past t_execute                 FAILED tests/test_hardware_submit.py::test_score_waits_for_the_archive_to_pass_the_executi
+caught   control added                          FAILED tests/test_hardware_submit.py::test_score_adds_the_control_from_the_archive_and_sco
+caught   cross-check failure tolerated          FAILED tests/test_hardware_submit.py::test_an_unscored_cross_check_failing_does_not_cost_t
+caught   each circuit's own register            FAILED tests/test_hardware_submit.py::test_counts_come_from_each_circuits_own_register
+caught   token needed                           FAILED tests/test_hardware_submit.py::test_an_env_file_without_a_token_is_refused
+caught   span reaches the bootstrap             FAILED tests/test_hardware_submit.py::test_the_report_hands_the_bootstrap_the_whole_calend
+caught   span widens the axis                   FAILED tests/test_hardware_submit.py::test_a_span_reaching_empty_days_changes_the_block_dr
+caught   three day blocks                       FAILED tests/test_hardware_submit.py::test_the_report_hands_the_bootstrap_the_whole_calend
+caught   fourteen days                          FAILED tests/test_hardware_submit.py::test_report_passes_when_level_is_clearly_closer_on_e
+caught   nominal is 80 percent                  FAILED tests/test_hardware_submit.py::test_a4_reads_the_widened_coverage_against_the_nomin
+caught   a calendar within a block has no interval FAILED tests/test_hardware_submit.py::test_a_calendar_no_longer_than_a_block_has_no_interv
+caught   the block itself is within             FAILED tests/test_hardware_submit.py::test_a_calendar_no_longer_than_a_block_has_no_interv
+caught   interval lower end decides             FAILED tests/test_hardware_submit.py::test_report_names_the_staleness_finding
+caught   A1 and A2 draw differently             FAILED tests/test_hardware_submit.py::test_the_report_hands_the_bootstrap_the_whole_calend
+caught   A2 compares the execution reading      FAILED tests/test_hardware_submit.py::test_report_fails_s1_when_the_execution_reading_is_a
+caught   A3 is strict and positive              FAILED tests/test_hardware_submit.py::test_a3_needs_level_ahead_of_both_readings_on_the_co
+caught   A3 covers both readings                FAILED tests/test_hardware_submit.py::test_a3_needs_level_ahead_of_both_readings_on_the_co
+caught   A3 reads the controls                  FAILED tests/test_hardware_submit.py::test_a3_needs_level_ahead_of_both_readings_on_the_co
+caught   A4 reads the widened coverage          FAILED tests/test_hardware_submit.py::test_a4_passes_on_the_widening_when_the_nominal_alon
+caught   A4 leaves out rows with no band        FAILED tests/test_hardware_submit.py::test_a4_ignores_rows_with_no_band_and_reports_nomina
+caught   A1 to A3 pair the rows                 FAILED tests/test_hardware_submit.py::test_unusable_predictors_are_left_out_of_the_compari
+caught   S1 needs every condition               FAILED tests/test_hardware_submit.py::test_report_fails_s1_when_the_execution_reading_is_a
+caught   S1 fails on a tie                      FAILED tests/test_hardware_submit.py::test_report_fails_s1_when_the_execution_reading_is_a
+caught   staleness named                        FAILED tests/test_hardware_submit.py::test_report_names_the_staleness_finding
+caught   band ranks by midpoint                 FAILED tests/test_hardware_submit.py::test_arm_b_ranks_the_band_by_its_midpoint_and_report
+caught   missing band end not a prediction      FAILED tests/test_hardware_submit.py::test_arm_b_treats_a_missing_band_end_as_no_predictio
+caught   one predictor meets both               FAILED tests/test_hardware_submit.py::test_arm_b_two_readings_of_level_or_band_can_differ
+caught   each condition by either               FAILED tests/test_hardware_submit.py::test_arm_b_fails_both_readings_when_neither_predicto
+caught   B1 at least as well                    FAILED tests/test_hardware_submit.py::test_arm_b_two_readings_of_level_or_band_can_differ
+caught   B2 at least as often                   FAILED tests/test_hardware_submit.py::test_arm_b_two_readings_of_level_or_band_can_differ
+caught   declared first day                     FAILED tests/test_hardware_submit.py::test_the_report_hands_the_bootstrap_the_whole_calend
+caught   outside folders refused                FAILED tests/test_hardware_submit.py::test_report_refuses_a_job_folder_outside_the_runs_da
+caught   complete only after day 14             FAILED tests/test_hardware_submit.py::test_day_fourteen_is_still_interim_and_the_next_is_n
+caught   axis stops at today                    FAILED tests/test_hardware_submit.py::test_report_keeps_missed_failed_and_absent_days_on_t
+caught   empty day kept                         FAILED tests/test_hardware_submit.py::test_report_keeps_missed_failed_and_absent_days_on_t
+caught   failed before missed                   ERROR tests/test_hardware_submit.py
+caught   missed named                           ERROR tests/test_hardware_submit.py
+caught   Arm A rows read                        FAILED tests/test_hardware_submit.py::test_report_passes_when_level_is_clearly_closer_on_e
+caught   Arm B jobs read                        FAILED tests/test_hardware_submit.py::test_the_arm_b_scores_of_a_job_folder_reach_the_repo
+caught   refused exits cleanly                  FAILED tests/test_hardware_submit.py::test_report_command_exits_refused_without_a_tracebac
+caught   rehearsal runs circuits alone          FAILED tests/test_hardware_submit.py::test_every_local_run_gets_exactly_one_circuit
+
+74 mutants, 0 survivors: []
+submit exit 0
+submit end 23:42:39
+caught   the run's calendar                     FAILED tests/test_hardware_daily.py::test_job_numbers_follow_the_calendar - a...
+caught   before the run nothing                 FAILED tests/test_hardware_daily.py::test_outside_the_run_nothing_happens_at_all[0]
+caught   after the run nothing                  FAILED tests/test_hardware_daily.py::test_outside_the_run_nothing_happens_at_all[16]
+caught   day 15 submits nothing                 FAILED tests/test_hardware_daily.py::test_day_fifteen_scores_and_reports_but_submits_nothi
+caught   check on first and last only           FAILED tests/test_hardware_daily.py::test_only_the_first_and_last_jobs_have_a_check[2-Fals
+caught   no check after a refused build         FAILED tests/test_hardware_daily.py::test_a_check_is_not_submitted_when_the_main_job_was_r
+caught   today is never scored                  FAILED tests/test_hardware_daily.py::test_every_earlier_day_with_no_outcome_is_scored_olde
+SURVIVED only day folders are scored            NO TEST NAMED: 44 passed in 9.51s
+caught   a scored day is not scored again       FAILED tests/test_hardware_daily.py::test_every_earlier_day_with_no_outcome_is_scored_olde
+caught   a failed day is not scored again       FAILED tests/test_hardware_daily.py::test_every_earlier_day_with_no_outcome_is_scored_olde
+caught   an empty day is not scored             FAILED tests/test_hardware_daily.py::test_every_earlier_day_with_no_outcome_is_scored_olde
+caught   a fitted check is not refitted         FAILED tests/test_hardware_daily.py::test_the_check_is_scored_on_a_later_morning
+caught   a failed check is not refitted         FAILED tests/test_hardware_daily.py::test_the_check_is_scored_on_a_later_morning
+caught   a refused build is a failure           FAILED tests/test_hardware_daily.py::test_a_refused_build_costs_no_scores_and_is_reported_
+caught   not ready to score is no failure       FAILED tests/test_hardware_daily.py::test_a_job_not_ready_to_score_is_not_a_failure
+caught   the exit reports failures              FAILED tests/test_hardware_daily.py::test_a_refused_build_costs_no_scores_and_is_reported_
+caught   the time limit is applied              FAILED tests/test_hardware_daily.py::test_a_step_past_its_limit_is_killed - a...
+caught   the limit reports itself               FAILED tests/test_hardware_daily.py::test_a_step_past_its_limit_is_killed - a...
+caught   the step's children die too            FAILED tests/test_hardware_daily.py::test_a_steps_child_dies_with_it - assert...
+PATTERN NOT FOUND ONCE (0): output goes to the log
+caught   each step appends                      FAILED tests/test_hardware_daily.py::test_each_step_adds_to_the_same_log - As...
+caught   waits for the window                   FAILED tests/test_hardware_daily.py::test_a_task_firing_a_moment_early_waits_for_the_windo
+caught   does not wait long                     FAILED tests/test_hardware_daily.py::test_a_task_firing_a_moment_early_waits_for_the_windo
+SURVIVED a rehearsal never waits                NO TEST NAMED: 44 passed in 9.30s
+caught   the freeze flags reach build           FAILED tests/test_hardware_daily.py::test_a_rehearsal_passes_its_clock_and_skips_the_freez
+caught   nothing committed unless asked         FAILED tests/test_hardware_daily.py::test_day_one_submits_the_main_job_then_the_check_then
+caught   nothing pushed unless asked            FAILED tests/test_hardware_daily.py::test_committing_does_not_push_unless_asked
+caught   a real morning needs the freeze        FAILED tests/test_hardware_daily.py::test_a_real_morning_needs_the_frozen_commit
+caught   a rehearsal comes whole                FAILED tests/test_hardware_daily.py::test_a_partial_rehearsal_is_refused - At...
+caught   pushing needs committing               FAILED tests/test_hardware_daily.py::test_pushing_needs_committing - Failed: ...
+caught   the machine stays awake                FAILED tests/test_hardware_daily.py::test_the_morning_holds_the_machine_awake_before_anyth
+caught   the awake flags                        FAILED tests/test_hardware_daily.py::test_the_morning_holds_the_machine_awake_before_anyth
+caught   the first delay                        FAILED tests/test_hardware_t1_check.py::test_delays_cover_three_of_the_qubits_own_t1[7e-06
+caught   the delay span                         FAILED tests/test_hardware_t1_check.py::test_delays_cover_three_of_the_qubits_own_t1[7e-06
+caught   eight delays                           FAILED tests/test_hardware_t1_check.py::test_delays_cover_three_of_the_qubits_own_t1[7e-06
+caught   1024 shots                             FAILED tests/test_hardware_t1_check.py::test_shots_and_delays_are_the_designs
+caught   a bad expectation refused              FAILED tests/test_hardware_t1_check.py::test_delays_refuse_an_expectation_with_no_usable_s
+caught   first and last jobs only               FAILED tests/test_hardware_t1_check.py::test_no_other_job_has_a_check[2] - Fa...
+caught   needs a main job                       FAILED tests/test_hardware_t1_check.py::test_a_day_whose_main_job_never_left_has_no_check
+caught   a real check needs a real job          FAILED tests/test_hardware_t1_check.py::test_a_real_check_refuses_a_rehearsals_folder
+caught   submitted once                         FAILED tests/test_hardware_t1_check.py::test_the_check_is_submitted_once - Fa...
+caught   rep_delay checked                      FAILED tests/test_hardware_t1_check.py::test_a_rep_delay_outside_the_live_range_refuses_th
+caught   circuits validated                     FAILED tests/test_hardware_t1_check.py::test_circuits_are_validated_and_sealed_before_anyt
+caught   the delays come from level             FAILED tests/test_hardware_t1_check.py::test_the_first_and_last_jobs_submit_the_check[1]
+caught   the circuits are sealed                FAILED tests/test_hardware_t1_check.py::test_the_first_and_last_jobs_submit_the_check[1]
+caught   the seal is written first              FAILED tests/test_hardware_t1_check.py::test_the_seal_is_on_disk_when_the_job_is_submitted
+caught   the job id is written                  FAILED tests/test_hardware_t1_check.py::test_the_first_and_last_jobs_submit_the_check[1]
+caught   the pinned options                     FAILED tests/test_hardware_t1_check.py::test_the_first_and_last_jobs_submit_the_check[1]
+caught   score needs a check                    FAILED tests/test_hardware_t1_check.py::test_score_refuses_a_folder_with_no_check
+caught   the seal's hash checked                FAILED tests/test_hardware_t1_check.py::test_circuits_changed_after_the_seal_are_refused
+caught   not yet is left alone                  FAILED tests/test_hardware_t1_check.py::test_a_check_still_on_its_way_is_left_alone[RUNNIN
+caught   queued is left alone                   FAILED tests/test_hardware_t1_check.py::test_a_check_still_on_its_way_is_left_alone[QUEUED
+caught   failure recorded                       FAILED tests/test_hardware_t1_check.py::test_a_failed_check_is_recorded_and_costs_nothing_
+caught   shots checked                          FAILED tests/test_hardware_t1_check.py::test_a_result_with_the_wrong_shot_count_is_refused
+caught   raw counts first                       FAILED tests/test_hardware_t1_check.py::test_a_finished_check_writes_each_qubits_fit_besid
+SURVIVED the fit's qubits named                 NO TEST NAMED: 35 passed, 1 deselected in 5.91s
+caught   the guard runs for a real check        FAILED tests/test_hardware_t1_check.py::test_the_guard_runs_before_the_token_is_read
+caught   the check reads the frozen hash        FAILED tests/test_hardware_t1_check.py::test_the_guard_runs_before_the_token_is_read
+caught   reading beside the fit                 FAILED tests/test_hardware_t1_check.py::test_a_finished_check_writes_each_qubits_fit_besid
+caught   the median is the median               FAILED tests/test_hardware_t1_check.py::test_a_finished_check_writes_each_qubits_fit_besid
+
+60 mutants, 4 survivors: ['only day folders are scored', 'output goes to the log (pattern)', 'a rehearsal never waits', "the fit's qubits named"]
+routine exit 1
+end 23:49:15
+?? docs/evidence/hardware-reading-vs-level/rehearsal-2026-11-06/
+
+--- re-run at 3f062d4f: the four flagged at 9745583e, and the one new mutant
+
+caught   a commit without the pre-registration  FAILED tests/test_hardware_submit.py::test_guard_refuses_a_commit_without_the_pre_registra
+caught   only day folders are scored            FAILED tests/test_hardware_daily.py::test_only_day_folders_are_scored - Asser...
+caught   output goes to the log                 FAILED tests/test_hardware_daily.py::test_a_step_past_its_limit_is_killed - A...
+caught   a rehearsal never waits                FAILED tests/test_hardware_daily.py::test_a_rehearsal_never_waits_for_the_window
+caught   the fit's qubits named                 FAILED tests/test_hardware_t1_check.py::test_a_fit_that_lost_a_qubit_is_refused

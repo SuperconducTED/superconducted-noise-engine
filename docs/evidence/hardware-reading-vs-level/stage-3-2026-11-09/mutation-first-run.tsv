@@ -1,0 +1,43 @@
+mutant	file	prediction	outcome	matches	seconds	pytest
+H01 no interval at three days	scripts/hardware_submit.py	caught	caught: assertion	True	12.5	1 failed, 15 passed in 7.15s
+H02 empty-points guard dropped	scripts/hardware_submit.py	equivalent: with no points every day's sum(x^2) is 0, and the next guard returns None	survived	True	12.4	56 passed in 8.10s
+H03 numerator without x	scripts/hardware_submit.py	caught	caught: assertion	True	12.7	1 failed, 13 passed in 8.06s
+H04 denominator without the square	scripts/hardware_submit.py	caught	caught: assertion	True	11.3	1 failed, 13 passed in 6.62s
+H05 undefined-c guard dropped	scripts/hardware_submit.py	caught	caught: timeout	True	120.0	
+H06 floor instead of ceil blocks	scripts/hardware_submit.py	caught	caught: assertion	True	10.9	1 failed, 12 passed in 6.55s
+H07 two-day blocks	scripts/hardware_submit.py	caught	caught: assertion	True	10.4	1 failed, 12 passed in 6.01s
+H08 blocks not circular	scripts/hardware_submit.py	caught	caught: crash	True	10.8	1 failed, 12 passed in 6.14s
+H09 empty draw not redrawn	scripts/hardware_submit.py	caught	caught: assertion	True	11.4	1 failed, 16 passed, 1 warning in 7.35s
+H10 80% instead of 90%	scripts/hardware_submit.py	caught	caught: assertion	True	10.8	1 failed, 12 passed in 6.39s
+H11 ends swapped	scripts/hardware_submit.py	caught	caught: assertion	True	11.1	1 failed, 12 passed in 6.68s
+H12 another seed	scripts/hardware_submit.py	caught	caught: assertion	True	11.2	1 failed, 12 passed in 6.77s
+H13 starts miss the last day	scripts/hardware_submit.py	caught	caught: assertion	True	10.8	1 failed, 12 passed in 6.60s
+H14 two seed words	scripts/hardware_submit.py	caught	caught: crash	True	12.1	1 failed, 35 passed in 7.52s
+H15 A1's seed for c	scripts/hardware_submit.py	caught	survived	False	12.8	56 passed in 8.28s
+H16 every point on the first day	scripts/hardware_submit.py	caught	caught: assertion	True	12.7	1 failed, 53 passed in 8.45s
+H17 block length reported wrong	scripts/hardware_submit.py	caught	caught: assertion	True	12.4	1 failed, 53 passed in 7.72s
+H18 x and y swapped for c	scripts/hardware_submit.py	caught	caught: assertion	True	12.7	1 failed, 35 passed in 8.13s
+H19 third row's old words	scripts/hardware_submit.py	caught	caught: assertion	True	13.5	1 failed, 54 passed in 8.82s
+H20 last row's old key in the table	scripts/hardware_submit.py	caught	caught: crash	True	13.6	1 failed, 33 passed in 8.80s
+H21 last row's old key in the chain	scripts/hardware_submit.py	caught	caught: crash	True	12.0	1 failed, 33 passed in 7.48s
+P01 no extra candidates	scripts/hardware_test_predictors.py	caught	caught: assertion	True	5.8	1 failed, 54 passed in 1.60s
+P02 marked dropped before the median	scripts/hardware_test_predictors.py	caught	caught: assertion	True	5.4	1 failed, 54 passed in 1.51s
+P03 no stop at k	scripts/hardware_test_predictors.py	caught	caught: assertion	True	5.6	1 failed, 54 passed in 1.67s
+P04 test inverted	scripts/hardware_test_predictors.py	caught	caught: assertion	True	5.6	1 failed, 53 passed in 1.79s
+P05 skipped not recorded	scripts/hardware_test_predictors.py	caught	caught: assertion	True	5.7	1 failed, 54 passed in 1.52s
+P06 skipped returned empty	scripts/hardware_test_predictors.py	caught	caught: assertion	True	6.8	1 failed, 54 passed in 2.19s
+P07 always a configuration	scripts/hardware_test_predictors.py	caught	caught: crash	True	9.1	1 failed, 55 passed in 4.25s
+P08 never a configuration	scripts/hardware_test_predictors.py	caught	caught: assertion	True	9.5	1 failed, 62 passed in 4.92s
+P09 the stand-in target has no measure	scripts/hardware_test_predictors.py	caught	caught: crash	True	9.8	1 failed, 55 passed in 4.50s
+P10 the stand-in target misses the last qubit	scripts/hardware_test_predictors.py	caught	caught: assertion	True	8.4	1 failed, 55 passed in 4.22s
+P11 the stand-in target has one qubit too many	scripts/hardware_test_predictors.py	equivalent: the extra index is in every gate of the stand-in and has no gate entry, so it is never marked	survived	True	9.0	83 passed in 4.69s
+P12 nothing ever marked	scripts/hardware_test_predictors.py	caught	caught: assertion	True	9.5	1 failed, 55 passed in 5.09s
+P13 no guard for no file	scripts/hardware_test_predictors.py	caught	caught: crash	True	8.9	1 failed, 60 passed in 4.54s
+P14 path filter dropped	scripts/hardware_test_predictors.py	equivalent: the listing is given the exact path, and archive paths end in .json	survived	True	8.3	83 passed in 4.66s
+P15 one-file check dropped	scripts/hardware_test_predictors.py	caught	caught: crash	True	7.9	1 failed, 61 passed in 4.21s
+P16 whole archive listed again	scripts/hardware_test_predictors.py	equivalent: the path filter keeps the one file; only slower on the real archive	survived	True	8.6	83 passed in 4.81s
+P17 time not recorded	scripts/hardware_test_predictors.py	caught	caught: assertion	True	9.2	1 failed, 55 passed in 4.65s
+P18 configuration flag recorded wrong	scripts/hardware_test_predictors.py	caught	caught: assertion	True	8.7	1 failed, 55 passed in 4.25s
+P19 the last collected file	scripts/hardware_test_predictors.py	equivalent: collect already drops every file after --at, so the last file is the latest at or before it	caught: crash	False	8.8	1 failed, 60 passed in 4.50s
+P20 marked set not passed	scripts/hardware_test_predictors.py	caught	caught: assertion	True	8.8	1 failed, 55 passed in 4.32s
+P21 skipped not nested	scripts/hardware_test_predictors.py	caught	caught: assertion	True	8.3	1 failed, 55 passed in 4.04s

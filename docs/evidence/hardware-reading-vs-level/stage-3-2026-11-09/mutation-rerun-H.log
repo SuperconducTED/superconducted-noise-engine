@@ -1,0 +1,23 @@
+H01 no interval at three days	caught: assertion	caught
+H02 empty-points guard dropped	survived	equivalent: with no points every day's sum(x^2) is 0, and the next guard returns None
+H03 numerator without x	caught: assertion	caught
+H04 denominator without the square	caught: assertion	caught
+H05 undefined-c guard dropped	caught: timeout	caught
+H06 floor instead of ceil blocks	caught: assertion	caught
+H07 two-day blocks	caught: assertion	caught
+H08 blocks not circular	caught: crash	caught
+H09 empty draw not redrawn	caught: assertion	caught
+H10 80% instead of 90%	caught: assertion	caught
+H11 ends swapped	caught: assertion	caught
+H12 another seed	caught: assertion	caught
+H13 starts miss the last day	caught: assertion	caught
+H14 two seed words	caught: crash	caught
+H15 A1's seed for c	caught: assertion	caught
+H16 every point on the first day	caught: assertion	caught
+H17 block length reported wrong	caught: assertion	caught
+H18 x and y swapped for c	caught: assertion	caught
+H19 third row's old words	caught: assertion	caught
+H20 last row's old key in the table	caught: crash	caught
+H21 last row's old key in the chain	caught: crash	caught
+21 mutants: 20 caught, 1 survived, 0 against the prediction
+exit=0

@@ -1,0 +1,17 @@
+mutant	file	prediction	outcome	matches	seconds	pytest
+B01 layouts start at 1	scripts/hardware_submit.py	caught	caught: assertion	True	13.6	1 failed, 9 passed, 119 deselected in 11.63s
+B02 covered start at 1	scripts/hardware_submit.py	caught	caught: assertion	True	13.2	1 failed, 9 passed, 119 deselected in 11.66s
+B03 refusal negated	scripts/hardware_submit.py	caught	caught: crash	True	13.5	1 failed, 5 passed, 119 deselected in 11.77s
+B04 refusal dropped	scripts/hardware_submit.py	caught	caught: crash	True	13.3	1 failed, 11 passed, 119 deselected in 11.55s
+B05 refusal does not name the day	scripts/hardware_submit.py	caught	caught: assertion	True	13.0	1 failed, 11 passed, 119 deselected in 11.35s
+B06 layouts count the covered	scripts/hardware_submit.py	caught	caught: assertion	True	13.2	1 failed, 9 passed, 119 deselected in 11.71s
+B07 covered count the layouts	scripts/hardware_submit.py	caught	caught: assertion	True	12.8	1 failed, 9 passed, 119 deselected in 11.25s
+B08 layouts keep the last job only	scripts/hardware_submit.py	caught	caught: assertion	True	13.5	1 failed, 9 passed, 119 deselected in 11.85s
+B09 covered keep the last job only	scripts/hardware_submit.py	caught	caught: assertion	True	12.8	1 failed, 9 passed, 119 deselected in 11.25s
+B10 layouts field reports covered	scripts/hardware_submit.py	caught	caught: assertion	True	12.9	1 failed, 9 passed, 119 deselected in 11.21s
+B11 covered field reports layouts	scripts/hardware_submit.py	caught	caught: assertion	True	13.1	1 failed, 9 passed, 119 deselected in 11.31s
+B12 share of layouts over layouts	scripts/hardware_submit.py	caught	caught: assertion	True	12.8	1 failed, 9 passed, 119 deselected in 11.30s
+B13 share zero without a band	scripts/hardware_submit.py	caught	caught: assertion	True	13.3	1 failed, 10 passed, 119 deselected in 11.82s
+B14 share without the guard	scripts/hardware_submit.py	caught	caught: crash	True	13.2	1 failed, 4 passed, 119 deselected in 11.70s
+B15 share always None	scripts/hardware_submit.py	caught	caught: assertion	True	13.4	1 failed, 9 passed, 119 deselected in 11.75s
+B16 share guarded on covered	scripts/hardware_submit.py	caught	caught: assertion	True	13.1	1 failed, 12 passed, 119 deselected in 11.59s

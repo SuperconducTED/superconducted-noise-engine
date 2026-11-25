@@ -1,0 +1,14 @@
+head aa4fe26fee959bee78deac457e5e3408a3f49ff7, tree: [0] changed
+import from C:\t1d\src\superconducted\__init__.py
+All checks passed!
+GATE ruff check exit 0
+169 files already formatted
+GATE ruff format exit 0
+Success: no issues found in 54 source files
+GATE mypy exit 0
+No duplicate or colliding ADR / NC identifiers.
+GATE check_ids exit 0
+tests\training\test_types.py ..........................                  [100%]
+
+================= 1774 passed, 2 skipped in 992.53s (0:16:32) =================
+GATE pytest exit 0

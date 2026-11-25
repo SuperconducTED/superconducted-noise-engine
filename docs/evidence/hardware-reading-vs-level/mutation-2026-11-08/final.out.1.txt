@@ -1,0 +1,363 @@
+00:27:35 start at 2514b260 from 999acee9: 598 mutants {'report': 472, 'score': 56, 't1': 31, 'daily': 39}; 58 new lines with no mutant; shard 1 of 2: 299 mutants, run in C:\t\mut2
+00:27:35 no mutant  scripts/hardware_submit.py:763: }
+00:27:35 no mutant  scripts/hardware_submit.py:799: def _block3_sensitivity(
+00:27:35 no mutant  scripts/hardware_submit.py:816: def _arm_b_report(
+00:27:35 no mutant  scripts/hardware_submit.py:818: ) -> dict[str, Any]:
+00:27:35 no mutant  scripts/hardware_submit.py:862: i
+00:27:35 no mutant  scripts/hardware_submit.py:863: for i in range(len(measured))
+00:27:35 no mutant  scripts/hardware_submit.py:865: ]
+00:27:35 no mutant  scripts/hardware_submit.py:869: )
+00:27:35 no mutant  scripts/hardware_submit.py:872: )
+00:27:35 no mutant  scripts/hardware_submit.py:884: "descriptive": {
+00:27:35 no mutant  scripts/hardware_submit.py:889: },
+00:27:35 no mutant  scripts/hardware_submit.py:890: }
+00:27:35 no mutant  scripts/hardware_submit.py:902: )
+00:27:35 no mutant  scripts/hardware_submit.py:906: )
+00:27:35 no mutant  scripts/hardware_submit.py:913: def level_minus_other(rows: Sequence[Mapping[str, Any]], other: str) -> list[tuple[float, date]]:
+00:27:35 no mutant  scripts/hardware_submit.py:926: def batch_means_test(
+00:27:35 no mutant  scripts/hardware_submit.py:928: ) -> dict[str, Any]:
+00:27:35 no mutant  scripts/hardware_submit.py:972: def fit_log_t1_ratio(points: Sequence[tuple[float, int, int]], level: QubitSource) -> float | None:
+00:27:35 no mutant  scripts/hardware_submit.py:990: def slope_and_spread(points: Sequence[tuple[float, float]]) -> dict[str, Any]:
+00:27:35 no mutant  scripts/hardware_submit.py:1004: def _source(state: Mapping[str, Any], name: str, qubit: int) -> QubitSource | None:
+00:27:35 no mutant  scripts/hardware_submit.py:1009: def no_information_coverage(
+00:27:35 no mutant  scripts/hardware_submit.py:1011: ) -> tuple[list[float], list[float]]:
+00:27:35 no mutant  scripts/hardware_submit.py:1040: try:
+00:27:35 no mutant  scripts/hardware_submit.py:1044: )
+00:27:35 no mutant  scripts/hardware_submit.py:1045: except UnusableSourceError:
+00:27:35 no mutant  scripts/hardware_submit.py:1060: "A1, A2 and A3 pass": (
+00:27:35 no mutant  scripts/hardware_submit.py:1064: ),
+00:27:35 no mutant  scripts/hardware_submit.py:1065: "A1 and A2 pass, A3 fails": (
+00:27:35 no mutant  scripts/hardware_submit.py:1068: ),
+00:27:35 no mutant  scripts/hardware_submit.py:1069: "A2's mean D at or above zero": (
+00:27:35 no mutant  scripts/hardware_submit.py:1072: ),
+00:27:35 no mutant  scripts/hardware_submit.py:1073: "A1 passes, A2 does not": (
+00:27:35 no mutant  scripts/hardware_submit.py:1076: ),
+00:27:35 no mutant  scripts/hardware_submit.py:1077: "A1 and A2 both fail, both mean D below zero": (
+00:27:35 no mutant  scripts/hardware_submit.py:1079: ),
+00:27:35 no mutant  scripts/hardware_submit.py:1081: }
+00:27:35 no mutant  scripts/hardware_submit.py:1086: "S1 and Arm B pass": (
+00:27:35 no mutant  scripts/hardware_submit.py:1089: ),
+00:27:35 no mutant  scripts/hardware_submit.py:1090: "S1 passes, Arm B does not": (
+00:27:35 no mutant  scripts/hardware_submit.py:1093: ),
+00:27:35 no mutant  scripts/hardware_submit.py:1096: }
+00:27:35 no mutant  scripts/hardware_submit.py:1099: def s1_reading(
+00:27:35 no mutant  scripts/hardware_submit.py:1101: ) -> tuple[str, str]:
+00:27:35 no mutant  scripts/hardware_submit.py:1124: def arm_b_reading(*, s1_passes: bool, inconclusive: bool, passes: bool) -> tuple[str, str]:
+00:27:35 no mutant  scripts/hardware_submit.py:1139: def run_report(
+00:27:35 no mutant  scripts/hardware_submit.py:1141: ) -> dict[str, Any]:
+00:27:35 no mutant  scripts/hardware_submit.py:1191: def condition(other: str, seed: int) -> dict[str, Any]:
+00:27:35 no mutant  scripts/hardware_submit.py:1202: }
+00:27:35 no mutant  scripts/hardware_submit.py:1209: )
+00:27:35 no mutant  scripts/hardware_submit.py:1239: }
+00:27:35 no mutant  scripts/hardware_submit.py:1253: )
+00:27:35 no mutant  scripts/hardware_submit.py:1262: )
+00:27:35 no mutant  scripts/hardware_submit.py:1312: def refuse_sealed_inside(sealed_dir: Path, *folders: Path) -> None:
+00:27:35 no mutant  scripts/hardware_t1_check.py:177: def run_score(*, job_dir: Path, device: T1Device, sealed_dir: Path | None = None) -> int:
+00:27:35 no mutant  scripts/hardware_t1_check.py:244: {
+00:27:35 no mutant  scripts/hardware_t1_check.py:250: },
+00:27:35 no mutant  scripts/hardware_t1_check.py:251: )
+00:27:35 no mutant  scripts/hardware_daily.py:242: def unseal(sealed_dir: Path, jobs_dir: Path) -> int:
+00:27:44 baseline report: exit 0; ========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================= 110 passed in 6.74s =========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+00:28:11 baseline score: exit 0; ========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================= 14 passed in 24.81s =========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+00:28:17 baseline t1: exit 0; ==================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================== 40 passed, 2 skipped in 3.59s ====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+00:28:29 baseline daily: exit 0; ========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================= 59 passed in 10.14s =========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+00:28:34 caught     2/598 scripts/hardware_submit.py:63 delete: line removed [crash] test_no_information_coverage_matches_a_direct_computation
+00:28:41 caught     4/598 scripts/hardware_submit.py:664 delete: line removed [crash] test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout
+00:28:51 caught     6/598 scripts/hardware_submit.py:726 operator: is -> is not [crash] test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout
+00:28:59 caught     8/598 scripts/hardware_submit.py:727 delete: statement removed [crash] test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout
+00:29:33 caught    10/598 scripts/hardware_submit.py:727 constant: True -> False [crash] test_score_adds_the_control_from_the_archive_and_scores_both_arms
+00:29:43 caught    12/598 scripts/hardware_submit.py:728 operator: / -> * [crash] test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout
+00:29:53 caught    14/598 scripts/hardware_submit.py:740 operator: / -> * [crash] test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout
+00:30:02 caught    16/598 scripts/hardware_submit.py:744 operator: / -> * [crash] test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout
+00:30:10 caught    18/598 scripts/hardware_submit.py:756 operator: / -> * [crash] test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout
+00:30:31 caught    20/598 scripts/hardware_submit.py:758 delete: line removed [crash] test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout
+00:30:55 caught    22/598 scripts/hardware_submit.py:760 delete: line removed [assert] test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout
+00:31:19 caught    24/598 scripts/hardware_submit.py:762 delete: line removed [crash] test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout
+00:31:42 caught    26/598 scripts/hardware_submit.py:764 delete: statement removed [crash] test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout
+00:32:06 caught    28/598 scripts/hardware_submit.py:765 delete: statement removed [crash] test_a_scored_day_leaves_no_score_in_the_jobs_folder_or_on_stdout
+00:32:13 caught    30/598 scripts/hardware_submit.py:774 operator: / -> * [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:32:19 caught    32/598 scripts/hardware_submit.py:774 operator: / -> * [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:32:27 caught    34/598 scripts/hardware_submit.py:807 delete: test negated [assert] test_the_report_hands_the_bootstrap_the_whole_calendar_in_three_day_blocks
+00:32:39 caught    36/598 scripts/hardware_submit.py:807 operator: or -> and [assert] test_a_calendar_no_longer_than_a_block_has_no_sensitivity_interval[2-False]
+00:32:44 caught    38/598 scripts/hardware_submit.py:807 operator: - -> + [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:32:52 caught    40/598 scripts/hardware_submit.py:807 operator: + -> - [assert] test_the_report_hands_the_bootstrap_the_whole_calendar_in_three_day_blocks
+00:33:00 caught    42/598 scripts/hardware_submit.py:807 operator: <= -> < [assert] test_a_calendar_no_longer_than_a_block_has_no_sensitivity_interval[2-False]
+00:33:08 caught    44/598 scripts/hardware_submit.py:808 constant: False -> True [assert] test_a_calendar_no_longer_than_a_block_has_no_sensitivity_interval[2-False]
+00:33:17 caught    46/598 scripts/hardware_submit.py:813 operator: < -> <= [assert] test_the_sensitivity_is_below_zero_only_when_its_upper_end_is[0.0-False]
+00:33:22 caught    48/598 scripts/hardware_submit.py:828 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:33:28 caught    50/598 scripts/hardware_submit.py:832 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:33:36 caught    52/598 scripts/hardware_submit.py:833 delete: loop removed [assert] test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures
+00:33:43 caught    54/598 scripts/hardware_submit.py:834 operator: - -> + [crash] test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures
+00:33:52 caught    56/598 scripts/hardware_submit.py:834 constant: 1 -> 2 [crash] test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures
+00:34:00 caught    58/598 scripts/hardware_submit.py:837 delete: statement removed [crash] test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures
+00:34:08 caught    60/598 scripts/hardware_submit.py:838 delete: test negated [assert] test_a_near_tie_is_a_best_to_second_gap_under_two_standard_errors[measured0-1]
+00:34:16 caught    62/598 scripts/hardware_submit.py:838 constant: 1 -> 2 [assert] test_a_near_tie_is_a_best_to_second_gap_under_two_standard_errors[measured0-1]
+00:34:24 caught    64/598 scripts/hardware_submit.py:839 constant: 0 -> 1 [assert] test_a_near_tie_is_a_best_to_second_gap_under_two_standard_errors[measured1-0]
+00:34:32 caught    66/598 scripts/hardware_submit.py:839 constant: 1 -> 2 [crash] test_a_near_tie_is_a_best_to_second_gap_under_two_standard_errors[measured0-1]
+00:34:42 SURVIVED  68/598 scripts/hardware_submit.py:840 constant: 1.0 -> 1.01 [] 
+00:34:50 caught    70/598 scripts/hardware_submit.py:841 operator: < -> <= [assert] test_a_near_tie_is_a_best_to_second_gap_under_two_standard_errors[measured1-0]
+00:34:58 caught    72/598 scripts/hardware_submit.py:841 operator: * -> / [assert] test_a_near_tie_is_a_best_to_second_gap_under_two_standard_errors[measured1-0]
+00:35:06 caught    74/598 scripts/hardware_submit.py:859 delete: statement removed [assert] test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures
+00:35:14 caught    76/598 scripts/hardware_submit.py:860 delete: statement removed [assert] test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures
+00:35:23 caught    78/598 scripts/hardware_submit.py:861 delete: statement removed [crash] test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures
+00:35:31 caught    80/598 scripts/hardware_submit.py:864 operator: is not -> is [assert] test_arm_b_decides_on_the_paired_spearman_difference_only
+00:35:39 caught    82/598 scripts/hardware_submit.py:864 operator: is not -> is [assert] test_arm_b_decides_on_the_paired_spearman_difference_only
+00:35:47 caught    84/598 scripts/hardware_submit.py:866 operator: >= -> > [assert] test_a_job_one_folder_with_arm_b_scores_is_refused
+00:35:54 caught    86/598 scripts/hardware_submit.py:867 delete: statement removed [crash] test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures
+00:36:03 caught    88/598 scripts/hardware_submit.py:870 delete: statement removed [crash] test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures
+00:36:10 caught    90/598 scripts/hardware_submit.py:873 delete: test negated [assert] test_arm_b_decides_on_the_paired_spearman_difference_only
+00:36:18 caught    92/598 scripts/hardware_submit.py:874 delete: statement removed [assert] test_arm_b_decides_on_the_paired_spearman_difference_only
+00:36:23 caught    94/598 scripts/hardware_submit.py:875 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:36:29 caught    96/598 scripts/hardware_submit.py:876 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:36:37 caught    98/598 scripts/hardware_submit.py:876 operator: or -> and [assert] test_arm_b_passes_with_a_varying_level_advantage_and_ten_jobs
+00:36:45 caught   100/598 scripts/hardware_submit.py:878 delete: line removed [crash] test_a_job_with_one_undefined_correlation_is_not_completed
+00:36:53 caught   102/598 scripts/hardware_submit.py:880 delete: line removed [crash] test_a_job_with_one_undefined_correlation_is_not_completed
+00:36:59 caught   104/598 scripts/hardware_submit.py:882 delete: line removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:37:07 caught   106/598 scripts/hardware_submit.py:883 operator: not dropped [assert] test_arm_b_passes_with_a_varying_level_advantage_and_ten_jobs
+00:37:14 caught   108/598 scripts/hardware_submit.py:885 delete: line removed [crash] test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures
+00:37:22 caught   110/598 scripts/hardware_submit.py:887 delete: line removed [crash] test_arm_b_ranks_the_band_by_its_midpoint_for_the_descriptive_figures
+00:37:27 caught   112/598 scripts/hardware_submit.py:898 delete: statement removed [crash] test_the_critical_values_are_scipys
+00:37:32 caught   114/598 scripts/hardware_submit.py:898 constant: 2.9199855803537242 -> 2.9491854361572614 [assert] test_the_critical_values_are_scipys
+00:37:37 caught   116/598 scripts/hardware_submit.py:898 constant: 2.3533634348018233 -> 2.3768970691498414 [assert] test_the_critical_values_are_scipys
+00:37:43 caught   118/598 scripts/hardware_submit.py:899 constant: 1.2815515655446004 -> 1.2943670812000463 [assert] test_the_critical_values_are_scipys
+00:37:48 caught   120/598 scripts/hardware_submit.py:901 delete: line removed [assert] test_the_batches_are_the_pre_registrations
+00:37:52 caught   122/598 scripts/hardware_submit.py:903 delete: statement removed [crash] tests/test_hardware_submit.py
+00:37:57 caught   124/598 scripts/hardware_submit.py:903 constant: 1 -> 2 [assert] test_the_batches_are_the_pre_registrations
+00:38:03 caught   126/598 scripts/hardware_submit.py:905 delete: line removed [assert] test_the_batches_are_the_pre_registrations
+00:38:08 caught   128/598 scripts/hardware_submit.py:907 delete: statement removed [crash] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:38:14 caught   130/598 scripts/hardware_submit.py:908 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:38:19 caught   132/598 scripts/hardware_submit.py:909 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:38:25 caught   134/598 scripts/hardware_submit.py:910 delete: statement removed [crash] test_the_t1_fit_recovers_a_planted_ratio
+00:38:31 caught   136/598 scripts/hardware_submit.py:910 constant: 3.0 -> 3.0300000000000002 [assert] test_the_fit_grid_is_amendment_30s
+00:38:37 caught   138/598 scripts/hardware_submit.py:918 delete: statement removed [crash] test_d_is_level_minus_other_so_negative_favours_level
+00:38:42 caught   140/598 scripts/hardware_submit.py:920 delete: statement removed [crash] test_d_is_level_minus_other_so_negative_favours_level
+00:38:48 caught   142/598 scripts/hardware_submit.py:921 operator: and -> or [crash] test_d_is_level_minus_other_so_negative_favours_level
+00:38:54 caught   144/598 scripts/hardware_submit.py:922 operator: - -> + [assert] test_d_is_level_minus_other_so_negative_favours_level
+00:38:59 caught   146/598 scripts/hardware_submit.py:927 delete: line removed [crash] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:39:05 caught   148/598 scripts/hardware_submit.py:937 delete: statement removed [crash] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:39:11 caught   150/598 scripts/hardware_submit.py:938 delete: statement removed [crash] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:39:17 caught   152/598 scripts/hardware_submit.py:938 operator: * -> / [crash] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:39:23 caught   154/598 scripts/hardware_submit.py:940 delete: test negated [crash] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:39:29 caught   156/598 scripts/hardware_submit.py:941 delete: statement removed [crash] test_an_item_outside_every_batch_is_refused
+00:39:36 caught   158/598 scripts/hardware_submit.py:943 delete: statement removed [assert] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:39:44 caught   160/598 scripts/hardware_submit.py:944 delete: statement removed [crash] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:39:55 SURVIVED 162/598 scripts/hardware_submit.py:944 constant: True -> False [] 
+00:40:01 caught   164/598 scripts/hardware_submit.py:945 operator: is not -> is [assert] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:40:06 caught   166/598 scripts/hardware_submit.py:947 delete: statement removed [crash] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:40:12 caught   168/598 scripts/hardware_submit.py:949 delete: line removed [crash] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:40:18 caught   170/598 scripts/hardware_submit.py:951 delete: line removed [assert] test_an_inconclusive_result_carries_no_statistic
+00:40:25 caught   172/598 scripts/hardware_submit.py:953 delete: line removed [assert] test_an_inconclusive_result_carries_no_statistic
+00:40:30 caught   174/598 scripts/hardware_submit.py:954 constant: False -> True [assert] test_an_inconclusive_result_carries_no_statistic
+00:40:36 caught   176/598 scripts/hardware_submit.py:955 operator: < -> <= [assert] test_one_empty_batch_is_dropped_and_two_make_it_inconclusive
+00:40:42 caught   178/598 scripts/hardware_submit.py:956 constant: False -> True [assert] test_one_empty_batch_is_dropped_and_two_make_it_inconclusive
+00:40:48 caught   180/598 scripts/hardware_submit.py:958 operator: < -> <= [assert] test_one_empty_batch_is_dropped_and_two_make_it_inconclusive
+00:40:55 caught   182/598 scripts/hardware_submit.py:960 delete: statement removed [crash] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:41:01 caught   184/598 scripts/hardware_submit.py:961 delete: statement removed [crash] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:41:07 caught   186/598 scripts/hardware_submit.py:961 constant: 2 -> 3 [crash] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:41:13 caught   188/598 scripts/hardware_submit.py:961 operator: - -> + [assert] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:41:20 caught   190/598 scripts/hardware_submit.py:962 delete: statement removed [assert] test_a_decided_result_names_its_mean_and_is_not_sd_zero
+00:41:27 caught   192/598 scripts/hardware_submit.py:963 operator: == -> != [assert] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:41:33 caught   194/598 scripts/hardware_submit.py:964 constant: True -> False [assert] test_equal_batch_means_fail_because_sd_is_zero
+00:41:42 caught   196/598 scripts/hardware_submit.py:966 delete: statement removed [crash] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:41:48 caught   198/598 scripts/hardware_submit.py:966 operator: / -> * [assert] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:41:58 caught   200/598 scripts/hardware_submit.py:967 operator: - -> + [crash] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:42:04 caught   202/598 scripts/hardware_submit.py:968 delete: statement removed [assert] test_batch_means_match_a_direct_computation_with_unequal_rows
+00:42:09 caught   204/598 scripts/hardware_submit.py:968 operator: > -> >= [assert] test_a_t_equal_to_the_critical_value_does_not_pass[1]
+00:42:15 caught   206/598 scripts/hardware_submit.py:978 delete: test negated [assert] test_the_t1_fit_recovers_a_planted_ratio
+00:42:20 caught   208/598 scripts/hardware_submit.py:978 operator: or -> and [assert] test_the_t1_fit_needs_points_and_a_usable_level
+00:42:25 caught   210/598 scripts/hardware_submit.py:979 delete: statement removed [assert] test_the_t1_fit_needs_points_and_a_usable_level
+00:42:32 caught   212/598 scripts/hardware_submit.py:980 constant: 0 -> 1 [assert] test_the_t1_fit_recovers_a_planted_ratio
+00:42:38 caught   214/598 scripts/hardware_submit.py:981 constant: 1 -> 2 [assert] test_the_t1_fit_recovers_a_planted_ratio
+00:42:44 caught   216/598 scripts/hardware_submit.py:982 constant: 2 -> 3 [crash] test_the_t1_fit_recovers_a_planted_ratio
+00:42:50 caught   218/598 scripts/hardware_submit.py:983 operator: * -> / [assert] test_the_t1_fit_recovers_a_planted_ratio
+00:42:55 caught   220/598 scripts/hardware_submit.py:984 operator: / -> * [assert] test_the_t1_fit_recovers_a_planted_ratio
+00:43:01 caught   222/598 scripts/hardware_submit.py:985 constant: 1.0 -> 1.01 [assert] test_the_t1_fit_recovers_a_planted_ratio
+00:43:06 caught   224/598 scripts/hardware_submit.py:985 operator: * -> / [assert] test_the_t1_fit_recovers_a_planted_ratio
+00:43:12 caught   226/598 scripts/hardware_submit.py:985 operator: * -> / [assert] test_the_t1_fit_recovers_a_planted_ratio
+00:43:19 caught   228/598 scripts/hardware_submit.py:985 operator: - -> + [assert] test_the_t1_fit_recovers_a_planted_ratio
+00:43:30 SURVIVED 230/598 scripts/hardware_submit.py:985 constant: 1.0 -> 1.01 [] 
+00:43:40 SURVIVED 232/598 scripts/hardware_submit.py:985 constant: 1e-9 -> 1.01e-09 [] 
+00:43:45 caught   234/598 scripts/hardware_submit.py:986 operator: * -> / [assert] test_the_t1_fit_recovers_a_planted_ratio
+00:43:51 caught   236/598 scripts/hardware_submit.py:986 operator: - -> + [assert] test_the_t1_fit_recovers_a_planted_ratio
+00:43:56 caught   238/598 scripts/hardware_submit.py:986 constant: 1 -> 2 [crash] test_the_t1_fit_recovers_a_planted_ratio
+00:44:02 caught   240/598 scripts/hardware_submit.py:992 delete: test negated [assert] test_c_and_s_res_recover_a_planted_slope_and_spread
+00:44:13 SURVIVED 242/598 scripts/hardware_submit.py:993 delete: statement removed [] 
+00:44:20 caught   244/598 scripts/hardware_submit.py:994 delete: statement removed [crash] test_c_and_s_res_recover_a_planted_slope_and_spread
+00:44:25 caught   246/598 scripts/hardware_submit.py:995 delete: statement removed [crash] test_c_and_s_res_recover_a_planted_slope_and_spread
+00:44:32 caught   248/598 scripts/hardware_submit.py:996 delete: statement removed [crash] test_c_and_s_res_recover_a_planted_slope_and_spread
+00:44:38 caught   250/598 scripts/hardware_submit.py:997 delete: test negated [assert] test_c_and_s_res_recover_a_planted_slope_and_spread
+00:44:44 caught   252/598 scripts/hardware_submit.py:998 delete: statement removed [assert] test_c_is_undefined_without_disagreement
+00:44:51 caught   254/598 scripts/hardware_submit.py:999 operator: * -> / [assert] test_c_and_s_res_recover_a_planted_slope_and_spread
+00:44:58 caught   256/598 scripts/hardware_submit.py:1000 delete: statement removed [crash] test_c_and_s_res_recover_a_planted_slope_and_spread
+00:45:04 caught   258/598 scripts/hardware_submit.py:1000 operator: * -> / [assert] test_c_and_s_res_recover_a_planted_slope_and_spread
+00:45:11 caught   260/598 scripts/hardware_submit.py:1000 constant: 90 -> 91 [assert] test_s_res_is_the_ten_to_ninety_spread_over_twice_z90
+00:45:17 caught   262/598 scripts/hardware_submit.py:1001 operator: - -> + [assert] test_c_and_s_res_recover_a_planted_slope_and_spread
+00:45:23 caught   264/598 scripts/hardware_submit.py:1001 constant: 2.0 -> 2.02 [assert] test_s_res_is_the_ten_to_ninety_spread_over_twice_z90
+00:45:30 caught   266/598 scripts/hardware_submit.py:1005 delete: statement removed [crash] test_no_information_coverage_matches_a_direct_computation
+00:45:35 caught   268/598 scripts/hardware_submit.py:1006 operator: is -> is not [assert] test_no_information_coverage_matches_a_direct_computation
+00:45:42 caught   270/598 scripts/hardware_submit.py:1019 delete: statement removed [crash] test_no_information_coverage_matches_a_direct_computation
+00:45:48 caught   272/598 scripts/hardware_submit.py:1021 delete: statement removed [crash] test_no_information_coverage_matches_a_direct_computation
+00:45:54 caught   274/598 scripts/hardware_submit.py:1022 operator: is not -> is [assert] test_no_information_coverage_matches_a_direct_computation
+00:45:59 caught   276/598 scripts/hardware_submit.py:1023 delete: statement removed [assert] test_no_information_coverage_matches_a_direct_computation
+00:46:05 caught   278/598 scripts/hardware_submit.py:1025 delete: statement removed [crash] test_no_information_coverage_matches_a_direct_computation
+00:46:12 caught   280/598 scripts/hardware_submit.py:1027 delete: statement removed [assert] test_a_row_whose_band_cannot_be_moved_gives_no_value_and_the_rest_keep_theirs
+00:46:18 caught   282/598 scripts/hardware_submit.py:1029 delete: test negated [assert] test_no_information_coverage_matches_a_direct_computation
+00:46:24 caught   284/598 scripts/hardware_submit.py:1029 operator: or -> and [crash] test_a_qubit_with_a_band_end_missing_gives_no_value_and_stays_a_neighbour[band_lo]
+00:46:30 caught   286/598 scripts/hardware_submit.py:1029 operator: or -> and [crash] test_a_qubit_with_a_band_end_missing_gives_no_value_and_stays_a_neighbour[band_lo]
+00:46:36 caught   288/598 scripts/hardware_submit.py:1030 delete: statement removed [crash] test_a_qubit_with_a_band_end_missing_gives_no_value_and_stays_a_neighbour[band_lo]
+00:46:42 caught   290/598 scripts/hardware_submit.py:1031 operator: != -> == [assert] test_no_information_coverage_matches_a_direct_computation
+00:46:48 caught   292/598 scripts/hardware_submit.py:1032 operator: not dropped [assert] test_no_information_coverage_matches_a_direct_computation
+00:46:55 caught   294/598 scripts/hardware_submit.py:1034 delete: statement removed [crash] test_no_information_coverage_matches_a_direct_computation
+00:47:01 caught   296/598 scripts/hardware_submit.py:1036 delete: statement removed [crash] test_no_information_coverage_matches_a_direct_computation
+00:47:06 caught   298/598 scripts/hardware_submit.py:1036 constant: 0 -> 1 [assert] test_no_information_coverage_matches_a_direct_computation
+00:47:12 caught   300/598 scripts/hardware_submit.py:1037 constant: 0 -> 1 [assert] test_no_information_coverage_matches_a_direct_computation
+00:47:18 caught   302/598 scripts/hardware_submit.py:1039 delete: statement removed [crash] test_no_information_coverage_matches_a_direct_computation
+00:47:24 caught   304/598 scripts/hardware_submit.py:1041 delete: statement removed [crash] test_no_information_coverage_matches_a_direct_computation
+00:47:30 caught   306/598 scripts/hardware_submit.py:1043 delete: line removed [crash] test_no_information_coverage_matches_a_direct_computation
+00:47:36 caught   308/598 scripts/hardware_submit.py:1047 delete: statement removed [assert] test_no_information_coverage_matches_a_direct_computation
+00:47:42 caught   310/598 scripts/hardware_submit.py:1048 delete: statement removed [assert] test_no_information_coverage_matches_a_direct_computation
+00:47:50 caught   312/598 scripts/hardware_submit.py:1048 constant: 0 -> 1 [assert] test_no_information_coverage_matches_a_direct_computation
+00:47:58 caught   314/598 scripts/hardware_submit.py:1048 operator: <= -> < [assert] test_the_moved_band_includes_its_ends[0.5-0.5]
+00:48:04 caught   316/598 scripts/hardware_submit.py:1049 delete: statement removed [assert] test_no_information_coverage_matches_a_direct_computation
+00:48:09 caught   318/598 scripts/hardware_submit.py:1049 constant: 0 -> 1 [assert] test_no_information_coverage_matches_a_direct_computation
+00:48:15 caught   320/598 scripts/hardware_submit.py:1049 operator: <= -> < [assert] test_the_moved_band_includes_its_ends[0.0-1.0]
+00:48:21 caught   322/598 scripts/hardware_submit.py:1049 constant: 1 -> 2 [crash] test_no_information_coverage_matches_a_direct_computation
+00:48:27 caught   324/598 scripts/hardware_submit.py:1050 delete: test negated [assert] test_no_information_coverage_matches_a_direct_computation
+00:48:33 caught   326/598 scripts/hardware_submit.py:1051 constant: 0 -> 1 [assert] test_no_information_coverage_matches_a_direct_computation_on_an_uneven_day
+00:48:39 caught   328/598 scripts/hardware_submit.py:1052 delete: statement removed [assert] test_no_information_coverage_matches_a_direct_computation
+00:48:45 caught   330/598 scripts/hardware_submit.py:1052 operator: / -> * [assert] test_no_information_coverage_matches_a_direct_computation
+00:48:52 caught   332/598 scripts/hardware_submit.py:1058 delete: statement removed [crash] 
+00:48:57 caught   334/598 scripts/hardware_submit.py:1061 delete: line removed [assert] test_the_readings_are_amendment_29s_words
+00:49:03 caught   336/598 scripts/hardware_submit.py:1063 delete: line removed [assert] test_the_readings_are_amendment_29s_words
+00:49:10 caught   338/598 scripts/hardware_submit.py:1067 delete: line removed [assert] test_the_readings_are_amendment_29s_words
+00:49:18 caught   340/598 scripts/hardware_submit.py:1071 delete: line removed [assert] test_the_readings_are_amendment_29s_words
+00:49:24 caught   342/598 scripts/hardware_submit.py:1075 delete: line removed [assert] test_the_readings_are_amendment_29s_words
+00:49:29 caught   344/598 scripts/hardware_submit.py:1080 delete: line removed [crash] 
+00:49:35 caught   346/598 scripts/hardware_submit.py:1085 delete: line removed [crash] 
+00:49:42 caught   348/598 scripts/hardware_submit.py:1088 delete: line removed [assert] test_the_readings_are_amendment_29s_words
+00:49:49 caught   350/598 scripts/hardware_submit.py:1092 delete: line removed [assert] test_the_readings_are_amendment_29s_words
+00:49:55 caught   352/598 scripts/hardware_submit.py:1095 delete: line removed [crash] 
+00:50:01 caught   354/598 scripts/hardware_submit.py:1107 delete: test negated [crash] 
+00:50:08 caught   356/598 scripts/hardware_submit.py:1109 delete: test negated [crash] 
+00:50:13 caught   358/598 scripts/hardware_submit.py:1109 operator: and -> or [crash] 
+00:50:18 caught   360/598 scripts/hardware_submit.py:1111 delete: test negated [crash] 
+00:50:24 caught   362/598 scripts/hardware_submit.py:1112 delete: statement removed [crash] 
+00:50:28 caught   364/598 scripts/hardware_submit.py:1113 operator: is not -> is [crash] 
+00:50:34 caught   366/598 scripts/hardware_submit.py:1113 operator: >= -> > [crash] 
+00:50:41 caught   368/598 scripts/hardware_submit.py:1115 delete: test negated [crash] 
+00:50:46 caught   370/598 scripts/hardware_submit.py:1117 delete: test negated [crash] 
+00:50:51 caught   372/598 scripts/hardware_submit.py:1117 operator: and -> or [crash] 
+00:50:56 caught   374/598 scripts/hardware_submit.py:1118 delete: statement removed [crash] 
+00:51:02 caught   376/598 scripts/hardware_submit.py:1120 delete: statement removed [crash] 
+00:51:07 caught   378/598 scripts/hardware_submit.py:1126 delete: test negated [crash] 
+00:51:13 caught   380/598 scripts/hardware_submit.py:1128 delete: test negated [crash] 
+00:51:18 caught   382/598 scripts/hardware_submit.py:1129 delete: statement removed [crash] 
+00:51:24 caught   384/598 scripts/hardware_submit.py:1131 delete: statement removed [crash] 
+00:51:29 caught   386/598 scripts/hardware_submit.py:1133 delete: statement removed [crash] 
+00:51:35 caught   388/598 scripts/hardware_submit.py:1135 delete: statement removed [crash] 
+00:51:40 caught   390/598 scripts/hardware_submit.py:1140 delete: line removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:51:48 caught   392/598 scripts/hardware_submit.py:1174 operator: is -> is not [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:51:57 caught   394/598 scripts/hardware_submit.py:1178 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:52:04 caught   396/598 scripts/hardware_submit.py:1180 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:52:13 caught   398/598 scripts/hardware_submit.py:1184 delete: statement removed [assert] test_the_arm_b_scores_of_a_job_folder_reach_the_report
+00:52:22 caught   400/598 scripts/hardware_submit.py:1185 delete: test negated [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:52:28 caught   402/598 scripts/hardware_submit.py:1185 operator: / -> * [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:52:34 caught   404/598 scripts/hardware_submit.py:1186 operator: / -> * [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:52:44 SURVIVED 406/598 scripts/hardware_submit.py:1189 constant: 2 -> 3 [] 
+00:52:52 caught   408/598 scripts/hardware_submit.py:1193 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:52:59 caught   410/598 scripts/hardware_submit.py:1194 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:53:05 caught   412/598 scripts/hardware_submit.py:1195 delete: statement removed [crash] test_a_run_with_no_control_rows_does_not_meet_a3
+00:53:15 caught   414/598 scripts/hardware_submit.py:1197 delete: line removed [crash] test_report_passes_when_level_is_clearly_closer_on_every_day
+00:53:24 caught   416/598 scripts/hardware_submit.py:1199 delete: line removed [crash] test_a_run_with_no_control_rows_does_not_meet_a3
+00:53:35 caught   418/598 scripts/hardware_submit.py:1201 delete: line removed [assert] test_the_report_hands_the_bootstrap_the_whole_calendar_in_three_day_blocks
+00:53:45 caught   420/598 scripts/hardware_submit.py:1204 constant: 0 -> 1 [assert] test_the_report_hands_the_bootstrap_the_whole_calendar_in_three_day_blocks
+00:53:58 caught   422/598 scripts/hardware_submit.py:1205 constant: 1 -> 2 [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:54:07 caught   424/598 scripts/hardware_submit.py:1207 operator: is not -> is [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:54:20 caught   426/598 scripts/hardware_submit.py:1207 operator: < -> <= [assert] test_a3_needs_the_control_mean_strictly_below_zero
+00:54:27 caught   428/598 scripts/hardware_submit.py:1210 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:54:38 caught   430/598 scripts/hardware_submit.py:1211 operator: < -> <= [assert] test_s1_needs_ten_completed_days[10-True]
+00:54:54 caught   432/598 scripts/hardware_submit.py:1211 operator: or -> and [assert] test_s1_is_inconclusive_when_a1_is_although_every_day_completed
+00:55:03 caught   434/598 scripts/hardware_submit.py:1221 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:55:14 SURVIVED 436/598 scripts/hardware_submit.py:1221 constant: 0 -> 1 [] 
+00:55:24 caught   438/598 scripts/hardware_submit.py:1221 operator: >= -> > [assert] test_a4_reports_the_widened_coverage_and_decides_nothing[8]
+00:55:30 caught   440/598 scripts/hardware_submit.py:1222 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:55:38 caught   442/598 scripts/hardware_submit.py:1224 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:55:45 caught   444/598 scripts/hardware_submit.py:1226 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:55:51 caught   446/598 scripts/hardware_submit.py:1227 delete: statement removed [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:55:58 caught   448/598 scripts/hardware_submit.py:1229 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:56:07 caught   450/598 scripts/hardware_submit.py:1230 constant: False -> True [assert] test_report_passes_when_level_is_clearly_closer_on_every_day
+00:56:13 caught   452/598 scripts/hardware_submit.py:1232 delete: line removed [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:56:20 caught   454/598 scripts/hardware_submit.py:1234 delete: line removed [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:56:28 caught   456/598 scripts/hardware_submit.py:1236 delete: line removed [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:56:35 caught   458/598 scripts/hardware_submit.py:1238 delete: line removed [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:56:41 caught   460/598 scripts/hardware_submit.py:1242 delete: loop removed [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:56:48 caught   462/598 scripts/hardware_submit.py:1244 delete: loop removed [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:56:54 caught   464/598 scripts/hardware_submit.py:1245 operator: == -> != [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:57:04 SURVIVED 466/598 scripts/hardware_submit.py:1245 operator: > -> >= [] 
+00:57:10 caught   468/598 scripts/hardware_submit.py:1246 delete: statement removed [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:57:15 caught   470/598 scripts/hardware_submit.py:1248 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:57:21 caught   472/598 scripts/hardware_submit.py:1249 operator: is -> is not [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:57:31 caught   474/598 scripts/hardware_submit.py:1249 operator: is -> is not [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:57:38 caught   476/598 scripts/hardware_submit.py:1249 operator: not dropped [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:57:45 caught   478/598 scripts/hardware_submit.py:1251 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:57:52 caught   480/598 scripts/hardware_submit.py:1254 delete: test negated [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:57:58 caught   482/598 scripts/hardware_submit.py:1255 delete: statement removed [assert] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:58:06 caught   484/598 scripts/hardware_submit.py:1257 delete: statement removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:58:13 caught   486/598 scripts/hardware_submit.py:1259 delete: line removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:58:22 caught   488/598 scripts/hardware_submit.py:1260 delete: line removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:58:32 caught   490/598 scripts/hardware_submit.py:1273 delete: line removed [crash] test_report_passes_when_level_is_clearly_closer_on_every_day
+00:58:40 caught   492/598 scripts/hardware_submit.py:1279 delete: line removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:58:54 caught   494/598 scripts/hardware_submit.py:1282 delete: line removed [crash] test_the_arm_b_scores_of_a_job_folder_reach_the_report
+00:59:02 caught   496/598 scripts/hardware_submit.py:1284 delete: line removed [crash] test_the_report_computes_the_descriptive_figures_from_sealed_forecasts
+00:59:27 caught   498/598 scripts/hardware_submit.py:1314 delete: statement removed [crash] test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network
+00:59:54 caught   500/598 scripts/hardware_submit.py:1316 delete: test negated [assert] test_report_command_writes_the_file_and_marks_it_interim
+01:00:18 caught   502/598 scripts/hardware_submit.py:1316 operator: or -> and [crash] test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network
+01:00:56 caught   504/598 scripts/hardware_submit.py:1333 delete: statement removed [crash] test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network
+01:01:31 caught   506/598 scripts/hardware_submit.py:1338 delete: statement removed [crash] test_score_and_report_need_a_sealed_folder[report]
+01:01:55 caught   508/598 scripts/hardware_submit.py:1353 delete: statement removed [assert] test_report_refuses_a_sealed_folder_inside_the_jobs_folder[.]
+01:02:16 caught   510/598 scripts/hardware_submit.py:1356 delete: line removed [crash] test_report_command_writes_the_file_and_marks_it_interim
+01:02:38 caught   512/598 scripts/hardware_submit.py:1357 operator: or -> and [assert] test_report_command_writes_the_file_and_marks_it_interim
+01:03:01 caught   514/598 scripts/hardware_submit.py:1363 delete: statement removed [crash] test_report_makes_a_sealed_folder_that_is_not_there_yet
+01:03:24 caught   516/598 scripts/hardware_submit.py:1363 constant: True -> False [crash] test_report_command_writes_the_file_and_marks_it_interim
+01:03:46 caught   518/598 scripts/hardware_submit.py:1364 operator: / -> * [crash] test_report_command_writes_the_file_and_marks_it_interim
+01:04:09 caught   520/598 scripts/hardware_submit.py:1366 operator: / -> * [crash] test_report_command_writes_the_file_and_marks_it_interim
+01:04:29 caught   522/598 scripts/hardware_submit.py:1377 operator: == -> != [crash] test_score_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network
+01:04:47 caught   524/598 scripts/hardware_submit.py:1415 delete: line removed [assert] test_the_score_command_hands_its_sealed_folder_to_the_scoring
+01:05:05 caught   526/598 scripts/hardware_submit.py:1417 delete: line removed [assert] test_the_score_command_hands_its_sealed_folder_to_the_scoring
+01:05:24 caught   528/598 scripts/hardware_submit.py:1419 delete: line removed [assert] test_the_score_command_hands_its_sealed_folder_to_the_scoring
+01:05:29 caught   530/598 scripts/hardware_t1_check.py:206 delete: statement removed [crash] test_a_finished_check_writes_each_qubits_fit_beside_its_readings
+01:05:35 caught   532/598 scripts/hardware_t1_check.py:206 operator: / -> * [crash] test_the_token_reaches_no_file_the_check_writes
+01:05:41 caught   534/598 scripts/hardware_t1_check.py:207 constant: True -> False [crash] test_the_token_reaches_no_file_the_check_writes
+01:05:47 caught   536/598 scripts/hardware_t1_check.py:208 delete: statement removed [crash] test_a_finished_check_writes_each_qubits_fit_beside_its_readings
+01:05:53 caught   538/598 scripts/hardware_t1_check.py:225 delete: line removed [crash] test_a_finished_check_writes_each_qubits_fit_beside_its_readings
+01:05:59 caught   540/598 scripts/hardware_t1_check.py:239 delete: statement removed [crash] test_a_finished_check_writes_each_qubits_fit_beside_its_readings
+01:06:05 caught   542/598 scripts/hardware_t1_check.py:241 delete: statement removed [assert] test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder
+01:06:12 caught   544/598 scripts/hardware_t1_check.py:241 operator: + -> - [assert] test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder
+01:06:18 caught   546/598 scripts/hardware_t1_check.py:242 delete: statement removed [crash] test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder
+01:06:24 caught   548/598 scripts/hardware_t1_check.py:243 operator: / -> * [crash] test_a_finished_check_writes_each_qubits_fit_beside_its_readings
+01:06:30 caught   550/598 scripts/hardware_t1_check.py:246 delete: line removed [crash] test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder
+01:06:35 caught   552/598 scripts/hardware_t1_check.py:248 delete: line removed [assert] test_a_fitted_check_leaves_no_count_or_fit_in_the_jobs_folder
+01:06:41 caught   554/598 scripts/hardware_t1_check.py:271 delete: statement removed [crash] test_the_token_reaches_no_file_the_check_writes
+01:06:47 caught   556/598 scripts/hardware_t1_check.py:284 delete: test negated [crash] test_the_guard_runs_before_the_token_is_read
+01:06:53 caught   558/598 scripts/hardware_t1_check.py:286 delete: statement removed [assert] test_the_check_refuses_a_sealed_folder_inside_the_jobs_folder_before_the_network
+01:06:57 caught   560/598 scripts/hardware_daily.py:39 delete: statement removed [crash] test_day_fifteen_scores_and_reports_but_submits_nothing
+01:07:01 caught   562/598 scripts/hardware_daily.py:176 delete: line removed [assert] test_every_earlier_day_with_no_outcome_is_scored_oldest_first
+01:07:04 caught   564/598 scripts/hardware_daily.py:176 operator: not dropped [assert] test_a_morning_submits_first_so_the_capture_stays_on_time
+01:07:07 caught   566/598 scripts/hardware_daily.py:184 delete: line removed [assert] test_the_check_is_scored_on_a_later_morning
+01:07:11 caught   568/598 scripts/hardware_daily.py:184 operator: not dropped [assert] test_the_check_is_scored_on_a_later_morning
+01:07:14 caught   570/598 scripts/hardware_daily.py:244 delete: test negated [assert] test_day_fifteen_scores_and_reports_but_submits_nothing
+01:07:18 caught   572/598 scripts/hardware_daily.py:245 delete: statement removed [crash] test_day_fifteen_without_a_sealed_folder_is_not_a_clean_morning
+01:07:21 caught   574/598 scripts/hardware_daily.py:246 delete: statement removed [crash] test_day_fifteen_unseals_after_the_report_and_before_the_commit
+01:07:33 caught   576/598 scripts/hardware_daily.py:246 constant: True -> False [crash] test_unseal_says_when_there_is_nothing_and_can_be_run_again
+01:07:37 caught   578/598 scripts/hardware_daily.py:247 constant: 0 -> 1 [assert] test_day_fifteen_scores_and_reports_but_submits_nothing
+01:07:49 caught   580/598 scripts/hardware_daily.py:318 delete: line removed [assert] test_every_score_and_the_report_get_the_sealed_folder
+01:08:02 caught   582/598 scripts/hardware_daily.py:333 delete: line removed [assert] test_every_score_and_the_report_get_the_sealed_folder
+01:08:14 caught   584/598 scripts/hardware_daily.py:351 delete: line removed [crash] test_every_score_and_the_report_get_the_sealed_folder
+01:08:18 caught   586/598 scripts/hardware_daily.py:355 operator: == -> != [assert] test_day_one_submits_the_main_job_then_the_check_then_reports
+01:08:21 caught   588/598 scripts/hardware_daily.py:355 constant: 1 -> 2 [assert] test_day_fifteen_unseals_after_the_report_and_before_the_commit
+01:08:33 caught   590/598 scripts/hardware_daily.py:401 delete: statement removed [crash] test_the_morning_holds_the_machine_awake_before_anything_else
+01:08:45 caught   592/598 scripts/hardware_daily.py:420 delete: statement removed [crash] test_the_morning_holds_the_machine_awake_before_anything_else
+01:08:56 caught   594/598 scripts/hardware_daily.py:422 delete: test negated [crash] test_the_morning_holds_the_machine_awake_before_anything_else
+01:09:09 caught   596/598 scripts/hardware_daily.py:422 operator: or -> and [assert] test_a_sealed_folder_inside_the_jobs_folder_or_the_clone_is_refused[jobs/sealed]
+01:09:20 caught   598/598 scripts/hardware_daily.py:435 delete: line removed [crash] test_the_morning_holds_the_machine_awake_before_anything_else
+01:09:20 RUN END: 299 of 299 mutants run, 8 survived, 0 timed out, 154 caught by a crash rather than an assertion

@@ -1,0 +1,29 @@
+Run at ea646d3d on the exact pins, Windows laptop, 2026-11-07, before ruff format reflowed the script. Provisional.
+13:54:08 start: 25 mutants, all patterns found once
+13:54:55 baseline exit 0
+13:55:06 caught   sx signal dropped
+13:55:17 caught   x signal dropped
+13:55:40 caught   any gate carries the signal
+13:55:58 caught   two-qubit entries read too
+13:56:08 caught   target signal dropped
+13:56:19 caught   threshold lowered
+13:56:31 caught   threshold strict
+13:56:43 caught   null counts as a signal
+13:56:53 caught   every parameter read
+13:57:04 caught   measure dropped from the target check
+13:57:25 caught   x dropped from the target check
+13:57:40 caught   sx dropped from the target check
+13:58:17 caught   build_job ignores the marker
+13:59:01 caught   the dry run reads the marker
+13:59:41 caught   build_job's guard removed
+14:00:15 caught   Arm B keeps a dead qubit
+14:00:37 caught   run_build ignores the marker
+14:01:00 caught   dead rows stay candidates
+14:01:33 caught   frozen set may be selected
+14:02:08 caught   dead control still runs
+14:02:39 caught   selection logs the frozen set
+14:03:15 caught   left-out log empty
+14:04:01 caught   not-operational log empty
+14:04:26 caught   build_job gets the frozen set
+14:04:58 caught   no control rows meets A3
+14:04:58 RUN END: 25 mutants, 0 survived, 0 timed out

@@ -1,0 +1,67 @@
+criterion 2: build at a past instant matches the dry run on the same inputs
+pass  discriminating  [148, 132, 155, 10, 39, 147, 35, 44]
+pass  controls  [48, 112, 54, 105]
+pass  slots  12 qubits
+pass  layouts  [[85, 77, 86], [15, 14, 19], [128, 127, 129], [67, 57, 66], [135, 134, 139], [1, 0, 2]]
+pass  the archive commit is named  5828b4a29fab
+pass  the controls hash matches  
+criterion 3: the cycle over three days, the middle one absent
+  days: [{'date': '2026-11-02', 'status': 'scored'}, {'date': '2026-11-03', 'status': 'empty'}, {'date': '2026-11-04', 'status': 'scored'}]
+pass  first day declared  2026-11-02
+pass  three days on the axis  ['scored', 'empty', 'scored']
+pass  the middle day is empty  empty
+pass  the report is marked interim  
+  rows: {'discriminating': 112, 'control': 56}  reading: S1 fails: reading_at_execution is at least as good as level
+pass  the three-day calendar gives no interval  
+  A1: {'rows': 112, 'mean_difference': -0.15405437022877408, 'interval': None, 'passes': False}
+  A2: {'rows': 112, 'mean_difference': -0.007968724158625, 'interval': None, 'passes': False}
+  A3: False  A4: {'nominal': 0.8, 'coverage': 0.11607142857142858, 'coverage_widened': 0.125, 'passes': False}
+  B: {'jobs': 1, 'mean_spearman': {'reading': 1.0, 'level': 0.8285714285714287, 'band': 0.7714285714285715}, 'best_pick_hits': {'reading': 1, 'level': 1, 'band': 1}, 'one_predictor_meets_both': False, 'each_condition_by_either': False}
+pass  no folder for the middle day  ['2026-11-02', '2026-11-04']
+pass  day 1: job number and arms  
+pass  day 3: job number and arms  
+pass  day 1 was scored the next morning  
+pass  day 1 has no Arm B  
+pass  day 3 was scored the morning after  
+pass  day 3 has Arm B  
+pass  the routine wrote no job on the missing day  
+pass  rows from both days reach the report  {'discriminating': 112, 'control': 56}
+pass  day 1 keeps its own execution time  2026-11-02T05:45:00+00:00
+pass  day 1 rows: 12 qubits on 7 slots  84
+pass  the execution reading was filled in  
+the T1 check through the routine
+pass  day 1 submitted the check  
+pass  day 3 has no check  
+pass  the check names its library version  
+  Q21   fitted    22.9 us, se   5.7%, built from    23.0 us,  0.1 se away, good
+pass  Q21 fit agrees with the simulator's T1  
+  Q103  fitted    22.9 us, se   4.4%, built from    23.0 us,  0.1 se away, good
+pass  Q103 fit agrees with the simulator's T1  
+  Q148  fitted     6.2 us, se  10.5%, built from     5.9 us,  0.4 se away, bad
+pass  Q148 fit agrees with the simulator's T1  
+  Q69   fitted    65.3 us, se   2.9%, built from    66.3 us,  0.5 se away, good
+pass  Q69 fit agrees with the simulator's T1  
+  Q51   fitted    91.0 us, se   8.0%, built from    92.4 us,  0.2 se away, good
+pass  Q51 fit agrees with the simulator's T1  
+  Q120  fitted   223.6 us, se   7.6%, built from   206.1 us,  1.0 se away, good
+pass  Q120 fit agrees with the simulator's T1  
+  Q30   fitted   220.4 us, se   7.1%, built from   210.0 us,  0.7 se away, good
+pass  Q30 fit agrees with the simulator's T1  
+  Q23   fitted   312.2 us, se   7.4%, built from   272.0 us,  1.7 se away, good
+pass  Q23 fit agrees with the simulator's T1  
+criterion 4: a later snapshot as the live document
+pass  day 1: the manifest names the saved document's hash  
+pass  day 1: the saved document is the live one  2026-11-02T20:18:36+00:00
+pass  day 1: reading comes from the live document  [21, 103, 148, 69, 51, 120, 30, 23]
+  day 1: t_s 2026-11-02T03:45:00+00:00, live document stamped 2026-11-02T20:18:36+00:00
+  predictors columns: []
+pass  day 1: the live state is new, so reading and the execution reading differ  60 of 84 rows
+pass  day 3: the manifest names the saved document's hash  
+pass  day 3: the saved document is the live one  2026-11-04T11:29:36+00:00
+pass  day 3: reading comes from the live document  [21, 50, 148, 117, 141, 134, 65, 116]
+  day 3: t_s 2026-11-04T03:45:00+00:00, live document stamped 2026-11-04T11:29:36+00:00
+  predictors columns: []
+pass  day 3: the live state is new, so reading and the execution reading differ  66 of 84 rows
+pass  A1 and A2 are different comparisons here  (-0.15405437022877408, -0.007968724158625)
+
+all checks pass

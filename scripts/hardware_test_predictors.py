@@ -14,7 +14,8 @@ For each qubit and each of ``T1``, ``T2``, ``readout_error``, ``prob_meas0_prep1
   log(reading) - log(level)`` and ``n_window_distinct`` (distinct values inside the window).
 
 ``--mode controls`` freezes the four control qubits once, at the freezing ref, before any job
-(proposal D of the #125 pre-registration). ``--mode submission`` then takes that file, keeps its
+(proposal D of the #125 pre-registration), skipping a candidate that amendment 20's test marks in
+the newest archived file (amendment 37). ``--mode submission`` then takes that file, keeps its
 qubits out of the discriminating stratum, and selects the eight discriminating qubits by sign
 (proposals A and B). ``--mode execution`` emits only ``reading`` as of a later time: the
 ``reading_at_execution`` control of the design. Units are SI seconds for ``T1`` and ``T2`` and
@@ -460,17 +461,77 @@ def freeze_controls(
     *,
     k: int,
     min_window_distinct: int = MIN_WINDOW_DISTINCT,
+    not_operational: Iterable[int] = (),
 ) -> dict[str, Any]:
     """Proposal D: the ``k`` controls, chosen before any discriminating selection.
 
-    The only exclusion is the discriminating stratum's window floor; ``propose_controls`` keeps
-    its own whole-archive floor underneath. No reading enters: ``rows`` supply only the window
-    counts, so the caller passes rows built without a live document.
+    The discriminating stratum's window floor excludes a qubit before the ranking;
+    ``propose_controls`` keeps its own whole-archive floor underneath. A qubit in
+    ``not_operational`` (amendment 37) is skipped after it: the next in the same order takes its
+    place, so the median and the order are those without it, and the test can only remove a
+    qubit. No reading enters: ``rows`` supply only the window counts, so the caller passes rows
+    built without a live document.
     """
     below = _below_window_floor(rows, min_window_distinct)
+    marked = set(not_operational)
+    controls: list[dict[str, Any]] = []
+    skipped: list[int] = []
+    for candidate in propose_controls(collected, k=k + len(marked), exclude=set(below)):
+        if len(controls) == k:
+            break
+        if candidate["qubit"] in marked:
+            skipped.append(candidate["qubit"])
+        else:
+            controls.append(candidate)
+    return {"below_window_floor": below, "controls": controls, "skipped": skipped}
+
+
+def not_operational_in(doc: dict[str, Any]) -> tuple[bool, list[int]]:
+    """Amendment 37: amendment 20's test on one archived document, at the freeze.
+
+    Returns whether the document has a ``configuration`` and the qubits ``not_operational_qubits``
+    (PR #140's, amendment 20) marks in it: an ``x`` or ``sx`` ``gate_error`` of at least 1, or a
+    qubit absent from the target's ``x``, ``sx`` or ``measure``. The target is the document's own
+    when it has a configuration; without one it is a target holding every qubit, so only the
+    ``gate_error`` rule can fire. Reads the device's status, never a result.
+    """
+    # Imported here: PR #140's script imports this one at load, so a module-level import would
+    # be circular, and the other modes need neither Qiskit nor that script.
+    from qiskit.circuit import Measure
+    from qiskit.circuit.library import SXGate, XGate
+    from qiskit.transpiler import Target
+
+    from scripts.hardware_reading_vs_level import archived_backend, not_operational_qubits
+
+    has_configuration = isinstance(doc.get("configuration"), dict)
+    if has_configuration:
+        target = archived_backend(doc).target
+    else:
+        n_qubits = len(doc["properties"]["qubits"])
+        target = Target(num_qubits=n_qubits)
+        for instruction in (XGate(), SXGate(), Measure()):
+            target.add_instruction(instruction, {(q,): None for q in range(n_qubits)})
+    return has_configuration, not_operational_qubits(doc["properties"], target)
+
+
+def _not_operational_at_freeze(repo: Path, sha: str, record: FileRecord | None) -> dict[str, Any]:
+    """``not_operational_in`` on ``record``'s document, read again by its path at ``sha``.
+
+    ``record`` is the newest archived file at or before the freezing instant, the one ``reading``
+    comes from (``_latest_file``).
+    """
+    if record is None:
+        return {"file": None, "time": None, "has_configuration": False, "qubits": []}
+    listed = iter_archive(repo, sha, prefix=record.path)
+    found = [doc for path, doc in listed if path == record.path]
+    if len(found) != 1:
+        raise ValueError(f"{record.path} is not one file at {sha}")
+    has_configuration, qubits = not_operational_in(found[0])
     return {
-        "below_window_floor": below,
-        "controls": propose_controls(collected, k=k, exclude=set(below)),
+        "file": record.path,
+        "time": record.time.isoformat(),
+        "has_configuration": has_configuration,
+        "qubits": qubits,
     }
 
 
@@ -739,7 +800,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
         elif args.mode == "controls":
             rows = predictor_rows(collected, at=at, live=None, window_days=args.window_days)
-            frozen = freeze_controls(collected, rows, k=args.propose_controls)
+            marked = _not_operational_at_freeze(args.repo, sha, _latest_file(collected.files, at))
+            frozen = freeze_controls(
+                collected, rows, k=args.propose_controls, not_operational=marked["qubits"]
+            )
+            frozen["not_operational_at_freeze"] = {**marked, "skipped": frozen.pop("skipped")}
             if len(frozen["controls"]) != args.propose_controls:
                 print(
                     f"error: requested {args.propose_controls} controls but only "
