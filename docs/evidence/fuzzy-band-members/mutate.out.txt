@@ -1,0 +1,18 @@
+baseline: 27 passed in 0.43s
+mutant	prediction	outcome	matches	failing tests
+S00 control: the module does not import	harness error (pytest exit 2)	harness error (pytest exit 2)	True	-
+M01 the upper edge at 1 - 2 alpha	killed	killed	True	test_band_edges_are_numpys_quantiles_per_component[linear]
+M02 members read as (lambda, gamma)	killed	killed	True	test_a_vanishing_jitter_reproduces_the_trainers_point, test_member_targets_are_the_members_own_crisp_params
+M03 the band's columns swapped	killed	killed	True	test_band_arrays_are_read_only_copies, test_band_counts_members_at_either_clip_bound, test_band_edges_are_numpys_quantiles_per_component[higher], test_band_edges_are_numpys_quantiles_per_component[linear]
+M04 the quantile method ignored	killed	killed	True	test_band_edges_are_numpys_quantiles_per_component[higher], test_band_refuses_what_it_cannot_describe[method-unknown]
+M05 members at 1 not counted	killed	killed	True	test_band_counts_members_at_either_clip_bound
+M06 members at 0 not counted	killed	killed	True	test_band_counts_members_at_either_clip_bound
+M07 the engine reads SI seconds	killed	killed	True	test_a_centre_in_other_units_is_refused_by_the_engine, test_a_vanishing_jitter_reproduces_the_trainers_point, test_identity_member_matches_the_trainers_prediction[it2], test_identity_member_matches_the_trainers_prediction[t1]
+M08 no perturbation	killed	killed	True	test_member_targets_are_the_members_own_crisp_params, test_one_seed_gives_one_ensemble_even_when_reused
+M09 the caller's seed sequence used as is	killed	killed	True	test_one_seed_gives_one_ensemble_even_when_reused
+M10 a rule base with three outputs accepted	killed	killed	True	test_a_rule_base_without_two_outputs_is_refused
+M11 the parser's validation skipped	killed	killed	True	test_snapshot_from_document_applies_the_parsers_validation
+M12 members outside [0, 1] accepted	killed	killed	True	test_band_refuses_what_it_cannot_describe[below-zero-off-the-edge]
+M13 the band's alpha check dropped	killed	killed	True	test_band_refuses_what_it_cannot_describe[alpha-negative]
+M14 the finite check dropped	survived	survived	True	-
+14 mutants and 1 control: 13 killed, 1 survived, 0 harness errors among the mutants; control harness error (pytest exit 2); 0 against the prediction
